@@ -3,8 +3,6 @@ import platform from "@/platform";
 
 type NotificationListener = (notification: Notification) => void;
 
-const notificationService = new NotificationService();
-
 const createDismissedNotification = (id: string): Notification => {
   return {
     id,
@@ -113,5 +111,6 @@ const NotificationService = class {
     return Array.from(this.notifications.values());
   };
 };
+const notificationService = new NotificationService();
 
 export { notificationService };

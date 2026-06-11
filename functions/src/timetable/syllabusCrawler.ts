@@ -101,6 +101,21 @@ const assertFetchableUrl = async (rawUrl: string): Promise<URL> => {
   url.hash = "";
   return url;
 };
+
+const upsertTimetableSyllabusSource = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
+  await requireAdmin(uid);
+
+  const db = await getDb();
+  const now = await serverTimestamp();
+  const seedUrl = getStringValue(request.data?.seedUrl);
+  const sourceId = getStringValue(request.data?.sourceId) || createHashId(seedUrl);
+  if (!seedUrl) throw new HttpsError("invalid-argument", "seedUrl is required.");
+
+  await assertFetchableUrl(seedUrl);
+  await db.doc(`timetableSyllabusSources/${sourceId}`).set({ seedUrl, institutionName: getStringValue(request.data?.institutionName), facultyName: getStringValue(request.data?.facultyName), departmentName: getStringValue(request.data?.departmentName), maxPages: clampMaxPages(request.data?.maxPages), enabled: request.data?.enabled !== false, updatedAt: now, createdAt: now }, { merge: true });
+  return { ok: true, sourceId };
+});
+
 const fetchText = async (url: URL): Promise<{ text: string; contentType: string; }> => {
   const response = await fetch(url, { headers: { Accept: "text/html,application/xhtml+xml", "User-Agent": USER_AGENT }, redirect: "follow", signal: AbortSignal.timeout(15_000) });
   const contentType = response.headers.get("content-type") ?? "";
@@ -276,19 +291,6 @@ const crawlTimetableSyllabusUrl = onCall({ region: REGION, timeoutSeconds: 300, 
   const source: CrawlSource = { sourceId: null, seedUrl: getStringValue(request.data?.seedUrl), institutionName: getStringValue(request.data?.institutionName), facultyName: getStringValue(request.data?.facultyName), departmentName: getStringValue(request.data?.departmentName), maxPages: clampMaxPages(request.data?.maxPages) };
   if (!source.seedUrl) throw new HttpsError("invalid-argument", "seedUrl is required.");
   return await crawlSyllabusSource(source, uid);
-});
-const upsertTimetableSyllabusSource = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
-  await requireAdmin(uid);
-
-  const db = await getDb();
-  const now = await serverTimestamp();
-  const seedUrl = getStringValue(request.data?.seedUrl);
-  const sourceId = getStringValue(request.data?.sourceId) || createHashId(seedUrl);
-  if (!seedUrl) throw new HttpsError("invalid-argument", "seedUrl is required.");
-
-  await assertFetchableUrl(seedUrl);
-  await db.doc(`timetableSyllabusSources/${sourceId}`).set({ seedUrl, institutionName: getStringValue(request.data?.institutionName), facultyName: getStringValue(request.data?.facultyName), departmentName: getStringValue(request.data?.departmentName), maxPages: clampMaxPages(request.data?.maxPages), enabled: request.data?.enabled !== false, updatedAt: now, createdAt: now }, { merge: true });
-  return { ok: true, sourceId };
 });
 const runTimetableSyllabusCatalogCrawl = onSchedule({ schedule: "every 24 hours", timeZone: "Asia/Tokyo", region: REGION, timeoutSeconds: 540, memory: "1GiB" }, async () => { const db = await getDb();
   const snapshot = await db.collection("timetableSyllabusSources").where("enabled", "==", true).limit(20).get();

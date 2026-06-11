@@ -31,6 +31,22 @@ const removeStorageItemPair = (key: string, legacyKey: string): void => {
   localStorage.removeItem(key);
   localStorage.removeItem(legacyKey);
 };
+const readTokenExpiry = (): number | null => { try { const raw = readMigratedStorageItem(LOCAL_TOKEN_EXPIRY_KEY, LEGACY_LOCAL_TOKEN_EXPIRY_KEY);
+  if (!raw) return null;
+
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : null;
+} catch {
+  return null;
+}
+};
+const clearToken = (): void => { try { removeStorageItemPair(LOCAL_TOKEN_KEY, LEGACY_LOCAL_TOKEN_KEY);
+  removeStorageItemPair(LOCAL_TOKEN_EXPIRY_KEY, LEGACY_LOCAL_TOKEN_EXPIRY_KEY);
+  cachedToken = null;
+} catch {
+  // ignore
+}
+};
 const readToken = (): string | null => { if (cachedToken) return cachedToken;
 
   try {
@@ -66,22 +82,6 @@ const writeToken = (token: string | null): void => { cachedToken = token;
   } catch {
     // ignore
   }
-};
-const readTokenExpiry = (): number | null => { try { const raw = readMigratedStorageItem(LOCAL_TOKEN_EXPIRY_KEY, LEGACY_LOCAL_TOKEN_EXPIRY_KEY);
-  if (!raw) return null;
-
-  const value = Number(raw);
-  return Number.isFinite(value) ? value : null;
-} catch {
-  return null;
-}
-};
-const clearToken = (): void => { try { removeStorageItemPair(LOCAL_TOKEN_KEY, LEGACY_LOCAL_TOKEN_KEY);
-  removeStorageItemPair(LOCAL_TOKEN_EXPIRY_KEY, LEGACY_LOCAL_TOKEN_EXPIRY_KEY);
-  cachedToken = null;
-} catch {
-  // ignore
-}
 };
 const readRefreshToken = (): string | null => { try { if (!shouldStoreLocalRefreshToken()) { removeStorageItemPair(LOCAL_REFRESH_TOKEN_KEY, LEGACY_LOCAL_REFRESH_TOKEN_KEY);
   return null;

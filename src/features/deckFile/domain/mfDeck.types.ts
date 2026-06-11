@@ -38,32 +38,9 @@ type MfDeckCardV1 = { id: string;
   layoutRows?: unknown;
   flags?: MfDeckCardFlagsV1;
 };
-type MfDeckArchiveV1 = { manifest: MfDeckManifestV1;
-  cardsJson: MfDeckCardsJsonV1;
-  mediaManifest?: MfDeckMediaManifestV1;
-  media?: Record<string, Uint8Array>;
-};
-type MfDeckValidationResult = | { ok: true;
-  value: MfDeckArchiveV1;
-  issues: MfDeckIssue[];
-}
-  | {
-    ok: false;
-    issues: MfDeckIssue[];
-  };
 
 const MF_DECK_FORMAT = "sivflow.deck" as const;
 const MF_DECK_VERSION = 1 as const;
-const MF_DECK_MANIFEST_PATH = "manifest.json" as const;
-const MF_DECK_CARDS_PATH = "cards.json" as const;
-const MF_DECK_MEDIA_DIRECTORY = "media/" as const;
-const MF_DECK_MEDIA_MANIFEST_PATH = "media/manifest.json" as const;
-const MF_DECK_FILE_EXTENSION = ".mfdeck" as const;
-const MF_DECK_MIME_TYPE = "application/vnd.sivflow.deck+zip" as const;
-const MF_DECK_MEDIA_URI_PREFIX = "mfdeck://media/" as const;
-const MF_DECK_MAX_CARDS = 50000 as const;
-const MF_DECK_MAX_BLOCKS_PER_FACE = 1000 as const;
-const MF_DECK_MAX_MEDIA_ENTRIES = 5000 as const;
 
 type MfDeckMediaManifestV1 = { format: "sivflow.deck.media";
   version: typeof MF_DECK_VERSION;
@@ -93,6 +70,30 @@ type MfDeckCardsJsonV1 = { format: "sivflow.deck.cards";
   version: typeof MF_DECK_VERSION;
   cards: MfDeckCardV1[];
 };
+type MfDeckArchiveV1 = { manifest: MfDeckManifestV1;
+  cardsJson: MfDeckCardsJsonV1;
+  mediaManifest?: MfDeckMediaManifestV1;
+  media?: Record<string, Uint8Array>;
+};
+type MfDeckValidationResult = | { ok: true;
+  value: MfDeckArchiveV1;
+  issues: MfDeckIssue[];
+}
+  | {
+    ok: false;
+    issues: MfDeckIssue[];
+  };
+
+const MF_DECK_MANIFEST_PATH = "manifest.json" as const;
+const MF_DECK_CARDS_PATH = "cards.json" as const;
+const MF_DECK_MEDIA_DIRECTORY = "media/" as const;
+const MF_DECK_MEDIA_MANIFEST_PATH = "media/manifest.json" as const;
+const MF_DECK_FILE_EXTENSION = ".mfdeck" as const;
+const MF_DECK_MIME_TYPE = "application/vnd.sivflow.deck+zip" as const;
+const MF_DECK_MEDIA_URI_PREFIX = "mfdeck://media/" as const;
+const MF_DECK_MAX_CARDS = 50000 as const;
+const MF_DECK_MAX_BLOCKS_PER_FACE = 1000 as const;
+const MF_DECK_MAX_MEDIA_ENTRIES = 5000 as const;
 
 class MfDeckValidationError extends Error { readonly issues: MfDeckIssue[];
 

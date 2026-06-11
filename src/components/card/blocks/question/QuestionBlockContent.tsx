@@ -98,58 +98,6 @@ const QuestionField = (props: QuestionFieldProps) => {
     />
   );
 };
-const QuestionBlockContent = (props: QuestionBlockContentProps) => { if (props.mode === "view") { const answerDisplayMode = props.answerDisplayMode ?? "tap_to_reveal";
-    const viewResetKey = buildViewResetKey({
-      questionTitle: props.questionTitle,
-      questionAnswer: props.questionAnswer,
-      answerDisplayMode,
-    });
-
-    return (
-      <QuestionBlockViewContent
-        key={viewResetKey}
-        questionTitle={props.questionTitle}
-        questionAnswer={props.questionAnswer}
-        answerDisplayMode={answerDisplayMode}
-        containerProps={props.containerProps}
-        zoom={props.zoom}
-      />
-    );
-  }
-
-  return (
-    <QuestionBlockLayout
-      containerRef={props.containerRef}
-      containerProps={{
-        ...props.containerProps,
-        onFocus: props.onContainerFocus,
-        onBlur: props.onContainerBlur,
-        "data-block-type": "question",
-        "data-block-id": props.blockId,
-      }}
-      questionContent={
-        <QuestionField
-          mode="edit"
-          value={props.questionTitle ?? ""}
-          onChange={props.onChangeQuestionTitle}
-          className={QUESTION_BLOCK_TITLE_TEXT_CLASS}
-          placeholder="疑問・質問を入力..."
-          zoom={props.zoom}
-        />
-      }
-      answerContent={
-        <QuestionField
-          mode="edit"
-          value={props.questionAnswer ?? ""}
-          onChange={props.onChangeQuestionAnswer}
-          className={QUESTION_BLOCK_ANSWER_TEXT_CLASS}
-          placeholder="答え・メモを入力..."
-          zoom={props.zoom}
-        />
-      }
-    />
-  );
-};
 const QuestionBlockViewContent = ({
   questionTitle,
   questionAnswer,
@@ -226,6 +174,58 @@ const QuestionBlockViewContent = ({
             タップして表示
           </span>
         ) : undefined
+      }
+    />
+  );
+};
+const QuestionBlockContent = (props: QuestionBlockContentProps) => { if (props.mode === "view") { const answerDisplayMode = props.answerDisplayMode ?? "tap_to_reveal";
+    const viewResetKey = buildViewResetKey({
+      questionTitle: props.questionTitle,
+      questionAnswer: props.questionAnswer,
+      answerDisplayMode,
+    });
+
+    return (
+      <QuestionBlockViewContent
+        key={viewResetKey}
+        questionTitle={props.questionTitle}
+        questionAnswer={props.questionAnswer}
+        answerDisplayMode={answerDisplayMode}
+        containerProps={props.containerProps}
+        zoom={props.zoom}
+      />
+    );
+  }
+
+  return (
+    <QuestionBlockLayout
+      containerRef={props.containerRef}
+      containerProps={{
+        ...props.containerProps,
+        onFocus: props.onContainerFocus,
+        onBlur: props.onContainerBlur,
+        "data-block-type": "question",
+        "data-block-id": props.blockId,
+      }}
+      questionContent={
+        <QuestionField
+          mode="edit"
+          value={props.questionTitle ?? ""}
+          onChange={props.onChangeQuestionTitle}
+          className={QUESTION_BLOCK_TITLE_TEXT_CLASS}
+          placeholder="疑問・質問を入力..."
+          zoom={props.zoom}
+        />
+      }
+      answerContent={
+        <QuestionField
+          mode="edit"
+          value={props.questionAnswer ?? ""}
+          onChange={props.onChangeQuestionAnswer}
+          className={QUESTION_BLOCK_ANSWER_TEXT_CLASS}
+          placeholder="答え・メモを入力..."
+          zoom={props.zoom}
+        />
       }
     />
   );

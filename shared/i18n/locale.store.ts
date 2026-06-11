@@ -50,9 +50,10 @@ const migrateLegacyLocaleStorage = (): void => {
   }
 };
 const readStoredLocale = (): Locale | null => readStoredLocaleByKey(SIVFLOW_LOCALE_STORAGE_KEY) ?? readStoredLocaleByKey(LEGACY_LOCALE_STORAGE_KEY);
-migrateLegacyLocaleStorage();
 
 const useLocaleStore = create<LocaleState>()(persist((set) => ({ locale: readStoredLocale() ?? "ja", setLocale: (locale) => set({ locale }), }), { name: SIVFLOW_LOCALE_STORAGE_KEY, },),);
+
+migrateLegacyLocaleStorage();
 
 export { readStoredLocale, useLocaleStore };
 export type { Locale };

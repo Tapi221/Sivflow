@@ -79,19 +79,6 @@ const putImageBlob = async (blob: Blob, options: PutImageBlobOptions): Promise<I
     mime: blob.type || "application/octet-stream",
   };
 };
-const getImageBlob = async (id: string, options?: BlobScopeOptions): Promise<Blob | null> => { const scopedId = makeScopedId(id, options);
-  const scoped = await getStoredImageFile(scopedId);
-  if (scoped?.blob) return scoped.blob;
-
-  const legacy = await getStoredImageFile(id);
-  if (!legacy?.blob) return null;
-
-  if (scopedId !== id) {
-    await putScopedImageBlob(scopedId, legacy.blob);
-    await deleteImageBlob(id);
-  }
-  return legacy.blob;
-};
 const deleteImageBlob = async (id: string, options?: BlobScopeOptions): Promise<void> => { const db = await openImageFileDb();
   const scopedId = makeScopedId(id, options);
   await new Promise<void>((resolve, reject) => {
@@ -107,6 +94,19 @@ const deleteImageBlob = async (id: string, options?: BlobScopeOptions): Promise<
     tx.onabort = () =>
       reject(tx.error ?? new Error("Image blob delete aborted"));
   });
+};
+const getImageBlob = async (id: string, options?: BlobScopeOptions): Promise<Blob | null> => { const scopedId = makeScopedId(id, options);
+  const scoped = await getStoredImageFile(scopedId);
+  if (scoped?.blob) return scoped.blob;
+
+  const legacy = await getStoredImageFile(id);
+  if (!legacy?.blob) return null;
+
+  if (scopedId !== id) {
+    await putScopedImageBlob(scopedId, legacy.blob);
+    await deleteImageBlob(id);
+  }
+  return legacy.blob;
 };
 const deleteImageBlobsByUser = async (userId: string): Promise<void> => { const prefix = `${userId.trim()}:`;
   if (!userId.trim()) return;

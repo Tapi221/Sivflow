@@ -82,195 +82,111 @@ const getEditorColorMarks = (editor: PlateEditor, nodeType: string): string[] =>
   return Array.from(usedColors);
 };
 
-const FontColorToolbarButton = ({ children, nodeType, tooltip }: { nodeType: string;
-  tooltip?: string;
-} & DropdownMenuProps) => {
-  const editor = useEditorRef();
-
-  const selectionDefined = useEditorSelector(
-    (editor) => !!editor.selection,
-    [],
-  );
-
-  const color = useEditorSelector(
-    (editor) => editor.api.mark(nodeType) as string,
-    [nodeType],
-  );
-
-  const [selectedColor, setSelectedColor] = React.useState<string>();
-  const [updatedColor, setUpdatedColor] = React.useState<string>();
-  const [open, setOpen] = React.useState(false);
-  const [colorsQueue, setColorsQueue] = React.useState<string[]>([]);
-
-  const recordColorUsage = React.useCallback((color: string) => {
-    const normalized = normalizeColor(color);
-
-    if (!isValidHexColor(normalized)) return;
-
-    setColorsQueue((prev) => {
-      const filtered = prev
-        .filter((c) => c !== normalized)
-        .filter(
-          (c) => !DEFAULT_COLORS.some((dc) => normalizeColor(dc.value) === c),
-        );
-
-      return [normalized, ...filtered].slice(0, 30);
-    });
-  }, []);
-
-  const appendColors = React.useCallback((colors: string[]) => {
-    setColorsQueue((prev) => {
-      const normalized = colors.map(normalizeColor).filter(isValidHexColor);
-      const existingSet = new Set(prev);
-      const newColors = normalized
-        .filter((c) => !existingSet.has(c))
-        .filter(
-          (c) => !DEFAULT_COLORS.some((dc) => normalizeColor(dc.value) === c),
-        );
-
-      return [...newColors, ...prev].slice(0, 30);
-    });
-  }, []);
-
-  const onToggle = React.useCallback(
-    (value = !open) => {
-      setOpen(value);
-
-      if (value) {
-        const colorUsed = getEditorColorMarks(editor, nodeType);
-        appendColors(colorUsed);
-
-        if (selectedColor) {
-          recordColorUsage(normalizeColor(selectedColor));
-        }
-      }
-      if (!value) {
-        setUpdatedColor(undefined);
-
-        if (editor.selection) {
-          setTimeout(() => {
-            editor.tf.focus();
-          }, 100);
-        }
-      }
-    },
-    [open, editor, nodeType, appendColors, selectedColor, recordColorUsage],
-  );
-
-  const updateColor = React.useCallback(
-    (value: string) => {
-      if (editor.selection) {
-        setSelectedColor(value);
-        setUpdatedColor(value);
-
-        editor.tf.select(editor.selection);
-        editor.tf.addMarks({ [nodeType]: value });
-      }
-    },
-    [editor, nodeType],
-  );
-
-  const updateColorAndClose = React.useCallback(
-    (value: string) => {
-      updateColor(value);
-      onToggle();
-    },
-    [onToggle, updateColor],
-  );
-
-  const clearColor = React.useCallback(() => {
-    if (editor.selection) {
-      editor.tf.select(editor.selection);
-      editor.tf.removeMarks(nodeType);
-      onToggle();
-    }
-  }, [editor, onToggle, nodeType]);
-
-  React.useEffect(() => {
-    if (selectionDefined) {
-
-      setSelectedColor(color);
-    }
-  }, [color, selectionDefined]);
+const ColorInput = ({
+  children,
+  className,
+  value = "#000000",
+  ...props
+}: React.ComponentProps<"input"> & { className?: string; }) => {
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
 
   return (
-    <DropdownMenu modal onOpenChange={onToggle} open={open}>
-      <DropdownMenuTrigger asChild>
-        <ToolbarButton pressed={open} tooltip={tooltip}>
-          {children}
-        </ToolbarButton>
-      </DropdownMenuTrigger>
+    <div className={cn("flex flex-col items-center", className)}>
+      {React.Children.map(children, (child) => {
+        if (!child) return child;
 
-      <DropdownMenuContent align="start">
-        <ColorPicker
-          clearColor={clearColor}
-          color={selectedColor || color}
-          colors={DEFAULT_COLORS}
-          colorsQueue={colorsQueue}
-          customColors={DEFAULT_CUSTOM_COLORS}
-          recordColorUsage={recordColorUsage}
-          updateColor={updateColorAndClose}
-          updateCustomColor={updateColor}
-          updatedColor={updatedColor}
-        />
-      </DropdownMenuContent>
-    </DropdownMenu>
+        return React.cloneElement(
+          child as React.ReactElement<{
+            onClick: () => void;
+          }>,
+          {
+            onClick: () => inputRef.current?.click(),
+          },
+        );
+      })}
+      <input
+        {...props}
+        className="size-0 overflow-hidden border-0 p-0"
+        ref={useComposedRef(props.ref, inputRef)}
+        type="color"
+        value={value}
+      />
+    </div>
   );
 };
-const PureColorPicker = ({
+const ColorDropdownMenuItem = ({
   className,
-  clearColor,
-  color,
-  colors,
-  colorsQueue,
-  customColors,
-  recordColorUsage,
+  isBrightColor,
+  isSelected,
+  name,
   updateColor,
-  updateCustomColor,
-  updatedColor,
+  value,
   ...props
-}: React.ComponentProps<"div"> & {
-  colors: TColor[];
-  colorsQueue: string[];
-  customColors: TColor[];
-  clearColor: () => void;
-  recordColorUsage: (color: string) => void;
+}: {
+  isBrightColor: boolean;
+  isSelected: boolean;
+  value: string;
   updateColor: (color: string) => void;
-  updateCustomColor: (color: string) => void;
-  color?: string;
-  updatedColor?: string;
-}) => {
-  return (
-    <div className={cn("flex flex-col", className)} {...props}>
-      <ToolbarMenuGroup label="Custom Colors">
-        <ColorCustom
-          className="px-2"
-          color={color}
-          colors={colors}
-          colorsQueue={colorsQueue}
-          customColors={customColors}
-          recordColorUsage={recordColorUsage}
-          updateColor={updateColor}
-          updateCustomColor={updateCustomColor}
-          updatedColor={updatedColor}
-        />
-      </ToolbarMenuGroup>
-      <ToolbarMenuGroup label="Default Colors">
-        <ColorDropdownMenuItems
-          className="px-2"
-          color={color}
-          colors={colors}
-          updateColor={updateColor}
-        />
-      </ToolbarMenuGroup>
-      {color && (
-        <ToolbarMenuGroup>
-          <DropdownMenuItem className="p-2" onClick={clearColor}>
-            <EraserIcon />
-            <span>Clear</span>
-          </DropdownMenuItem>
-        </ToolbarMenuGroup>
+  name?: string;
+} & DropdownMenuItemProps) => {
+  const content = (
+    <DropdownMenuItem
+      className={cn(
+        buttonVariants({
+          size: "icon",
+          variant: "outline",
+        }),
+        "my-1 flex size-6 items-center justify-center rounded-full border border-muted border-solid p-0 transition-all hover:scale-125",
+        !isBrightColor && "border-transparent text-white",
+        className,
       )}
+      style={{ backgroundColor: value }}
+      onSelect={(e) => {
+        e.preventDefault();
+        updateColor(value);
+      }}
+      {...props}
+    >
+      {isSelected ? <CheckIcon className="!size-3" strokeWidth={3} /> : null}
+    </DropdownMenuItem>
+  );
+
+  return name ? (
+    <Tooltip>
+      <TooltipTrigger>{content}</TooltipTrigger>
+      <TooltipContent className="mb-1 capitalize">{name}</TooltipContent>
+    </Tooltip>
+  ) : (
+    content
+  );
+};
+const ColorDropdownMenuItems = ({ className, color, colors, updateColor, ...props }: { colors: TColor[];
+  updateColor: (color: string) => void;
+  color?: string;
+} & React.ComponentProps<"div">) => {
+  return (
+    <div
+      className={cn(
+        "grid grid-cols-[repeat(10,1fr)] place-items-center gap-x-1",
+        className,
+      )}
+      {...props}
+    >
+      <TooltipProvider>
+        {colors.map(({ isBrightColor, name, value }) => (
+          <ColorDropdownMenuItem
+            name={name}
+            key={name ?? value}
+            value={value}
+            isBrightColor={isBrightColor}
+            isSelected={
+              !!color && normalizeColor(color) === normalizeColor(value)
+            }
+            updateColor={updateColor}
+          />
+        ))}
+        {props.children}
+      </TooltipProvider>
     </div>
   );
 };
@@ -413,111 +329,60 @@ const ColorCustom = ({
     </div>
   );
 };
-const ColorInput = ({
-  children,
+const PureColorPicker = ({
   className,
-  value = "#000000",
-  ...props
-}: React.ComponentProps<"input"> & { className?: string; }) => {
-  const inputRef = React.useRef<HTMLInputElement | null>(null);
-
-  return (
-    <div className={cn("flex flex-col items-center", className)}>
-      {React.Children.map(children, (child) => {
-        if (!child) return child;
-
-        return React.cloneElement(
-          child as React.ReactElement<{
-            onClick: () => void;
-          }>,
-          {
-            onClick: () => inputRef.current?.click(),
-          },
-        );
-      })}
-      <input
-        {...props}
-        className="size-0 overflow-hidden border-0 p-0"
-        ref={useComposedRef(props.ref, inputRef)}
-        type="color"
-        value={value}
-      />
-    </div>
-  );
-};
-const ColorDropdownMenuItem = ({
-  className,
-  isBrightColor,
-  isSelected,
-  name,
+  clearColor,
+  color,
+  colors,
+  colorsQueue,
+  customColors,
+  recordColorUsage,
   updateColor,
-  value,
+  updateCustomColor,
+  updatedColor,
   ...props
-}: {
-  isBrightColor: boolean;
-  isSelected: boolean;
-  value: string;
+}: React.ComponentProps<"div"> & {
+  colors: TColor[];
+  colorsQueue: string[];
+  customColors: TColor[];
+  clearColor: () => void;
+  recordColorUsage: (color: string) => void;
   updateColor: (color: string) => void;
-  name?: string;
-} & DropdownMenuItemProps) => {
-  const content = (
-    <DropdownMenuItem
-      className={cn(
-        buttonVariants({
-          size: "icon",
-          variant: "outline",
-        }),
-        "my-1 flex size-6 items-center justify-center rounded-full border border-muted border-solid p-0 transition-all hover:scale-125",
-        !isBrightColor && "border-transparent text-white",
-        className,
-      )}
-      style={{ backgroundColor: value }}
-      onSelect={(e) => {
-        e.preventDefault();
-        updateColor(value);
-      }}
-      {...props}
-    >
-      {isSelected ? <CheckIcon className="!size-3" strokeWidth={3} /> : null}
-    </DropdownMenuItem>
-  );
-
-  return name ? (
-    <Tooltip>
-      <TooltipTrigger>{content}</TooltipTrigger>
-      <TooltipContent className="mb-1 capitalize">{name}</TooltipContent>
-    </Tooltip>
-  ) : (
-    content
-  );
-};
-const ColorDropdownMenuItems = ({ className, color, colors, updateColor, ...props }: { colors: TColor[];
-  updateColor: (color: string) => void;
+  updateCustomColor: (color: string) => void;
   color?: string;
-} & React.ComponentProps<"div">) => {
+  updatedColor?: string;
+}) => {
   return (
-    <div
-      className={cn(
-        "grid grid-cols-[repeat(10,1fr)] place-items-center gap-x-1",
-        className,
+    <div className={cn("flex flex-col", className)} {...props}>
+      <ToolbarMenuGroup label="Custom Colors">
+        <ColorCustom
+          className="px-2"
+          color={color}
+          colors={colors}
+          colorsQueue={colorsQueue}
+          customColors={customColors}
+          recordColorUsage={recordColorUsage}
+          updateColor={updateColor}
+          updateCustomColor={updateCustomColor}
+          updatedColor={updatedColor}
+        />
+      </ToolbarMenuGroup>
+      <ToolbarMenuGroup label="Default Colors">
+        <ColorDropdownMenuItems
+          className="px-2"
+          color={color}
+          colors={colors}
+          updateColor={updateColor}
+        />
+      </ToolbarMenuGroup>
+      {color && (
+        <ToolbarMenuGroup>
+          <DropdownMenuItem className="p-2" onClick={clearColor}>
+            <EraserIcon />
+            <span>Clear</span>
+          </DropdownMenuItem>
+        </ToolbarMenuGroup>
       )}
-      {...props}
-    >
-      <TooltipProvider>
-        {colors.map(({ isBrightColor, name, value }) => (
-          <ColorDropdownMenuItem
-            name={name}
-            key={name ?? value}
-            value={value}
-            isBrightColor={isBrightColor}
-            isSelected={
-              !!color && normalizeColor(color) === normalizeColor(value)
-            }
-            updateColor={updateColor}
-          />
-        ))}
-        {props.children}
-      </TooltipProvider>
     </div>
   );
 };
@@ -531,4 +396,141 @@ const ColorPicker = React.memo(
     prev.customColors === next.customColors &&
     prev.updatedColor === next.updatedColor,
 );
+
+const FontColorToolbarButton = ({ children, nodeType, tooltip }: { nodeType: string;
+  tooltip?: string;
+} & DropdownMenuProps) => {
+  const editor = useEditorRef();
+
+  const selectionDefined = useEditorSelector(
+    (editor) => !!editor.selection,
+    [],
+  );
+
+  const color = useEditorSelector(
+    (editor) => editor.api.mark(nodeType) as string,
+    [nodeType],
+  );
+
+  const [selectedColor, setSelectedColor] = React.useState<string>();
+  const [updatedColor, setUpdatedColor] = React.useState<string>();
+  const [open, setOpen] = React.useState(false);
+  const [colorsQueue, setColorsQueue] = React.useState<string[]>([]);
+
+  const recordColorUsage = React.useCallback((color: string) => {
+    const normalized = normalizeColor(color);
+
+    if (!isValidHexColor(normalized)) return;
+
+    setColorsQueue((prev) => {
+      const filtered = prev
+        .filter((c) => c !== normalized)
+        .filter(
+          (c) => !DEFAULT_COLORS.some((dc) => normalizeColor(dc.value) === c),
+        );
+
+      return [normalized, ...filtered].slice(0, 30);
+    });
+  }, []);
+
+  const appendColors = React.useCallback((colors: string[]) => {
+    setColorsQueue((prev) => {
+      const normalized = colors.map(normalizeColor).filter(isValidHexColor);
+      const existingSet = new Set(prev);
+      const newColors = normalized
+        .filter((c) => !existingSet.has(c))
+        .filter(
+          (c) => !DEFAULT_COLORS.some((dc) => normalizeColor(dc.value) === c),
+        );
+
+      return [...newColors, ...prev].slice(0, 30);
+    });
+  }, []);
+
+  const onToggle = React.useCallback(
+    (value = !open) => {
+      setOpen(value);
+
+      if (value) {
+        const colorUsed = getEditorColorMarks(editor, nodeType);
+        appendColors(colorUsed);
+
+        if (selectedColor) {
+          recordColorUsage(normalizeColor(selectedColor));
+        }
+      }
+      if (!value) {
+        setUpdatedColor(undefined);
+
+        if (editor.selection) {
+          setTimeout(() => {
+            editor.tf.focus();
+          }, 100);
+        }
+      }
+    },
+    [open, editor, nodeType, appendColors, selectedColor, recordColorUsage],
+  );
+
+  const updateColor = React.useCallback(
+    (value: string) => {
+      if (editor.selection) {
+        setSelectedColor(value);
+        setUpdatedColor(value);
+
+        editor.tf.select(editor.selection);
+        editor.tf.addMarks({ [nodeType]: value });
+      }
+    },
+    [editor, nodeType],
+  );
+
+  const updateColorAndClose = React.useCallback(
+    (value: string) => {
+      updateColor(value);
+      onToggle();
+    },
+    [onToggle, updateColor],
+  );
+
+  const clearColor = React.useCallback(() => {
+    if (editor.selection) {
+      editor.tf.select(editor.selection);
+      editor.tf.removeMarks(nodeType);
+      onToggle();
+    }
+  }, [editor, onToggle, nodeType]);
+
+  React.useEffect(() => {
+    if (selectionDefined) {
+
+      setSelectedColor(color);
+    }
+  }, [color, selectionDefined]);
+
+  return (
+    <DropdownMenu modal onOpenChange={onToggle} open={open}>
+      <DropdownMenuTrigger asChild>
+        <ToolbarButton pressed={open} tooltip={tooltip}>
+          {children}
+        </ToolbarButton>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent align="start">
+        <ColorPicker
+          clearColor={clearColor}
+          color={selectedColor || color}
+          colors={DEFAULT_COLORS}
+          colorsQueue={colorsQueue}
+          customColors={DEFAULT_CUSTOM_COLORS}
+          recordColorUsage={recordColorUsage}
+          updateColor={updateColorAndClose}
+          updateCustomColor={updateColor}
+          updatedColor={updatedColor}
+        />
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
 export { FontColorToolbarButton, ColorDropdownMenuItems, DEFAULT_COLORS };

@@ -10,16 +10,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { insertBlock, insertInlineElement } from "@/components/editor/transforms";
 import { ToolbarButton, ToolbarMenuGroup } from "./toolbar";
 
-type Group = {
-  group: string;
-  items: Item[];
-};
 type Item = {
   icon: React.ReactNode;
   value: string;
   onSelect: (editor: PlateEditor, value: string) => void;
   focusEditor?: boolean;
   label?: string;
+};
+type Group = {
+  group: string;
+  items: Item[];
 };
 
 const groups: Group[] = [

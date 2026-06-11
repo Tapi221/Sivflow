@@ -245,7 +245,6 @@ const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDay
   if (isWeekAffectedByDayKeyChange(previous.week, previous.scrollHoverDayKey, next.scrollHoverDayKey)) return false;
   return true;
 });
-CalendarMonthWeekRow.displayName = "CalendarMonthWeekRow";
 
 const GridCalendarMonthDesktop = ({ today, selectedDate, weekStartDay, visibleEvents, monthWeeks, monthRowHeight, maxVisibleEventCount, topSpacerHeight, bottomSpacerHeight, scrollHoverDayKey, showEventTimeLabel = true, monthScrollContainerRef, onSelectDate, onMoveCalendarEvent }: GridCalendarMonthDesktopProps) => {
   const dayCellRefs = useRef(new Map<string, HTMLDivElement>());
@@ -420,5 +419,6 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, weekStartDay, visibleEv
   );
 };
 
+CalendarMonthWeekRow.displayName = "CalendarMonthWeekRow";
 GridCalendarMonthDesktop.displayName = "GridCalendarMonthDesktop";
 export { GridCalendarMonthDesktop };

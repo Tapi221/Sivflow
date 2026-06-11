@@ -19,7 +19,19 @@ import { suggestionPlugin } from "@/components/editor/plugins/suggestion-kit";
 import { BlockSuggestionCard, isResolvedSuggestion } from "./block-suggestion";
 import { Comment, CommentCreateForm } from "./comment";
 
-const BlockDiscussion: RenderNodeWrapper<AnyPluginConfig> = (_props) => (props) => <BlockCommentContent {...props} />;
+const BlockComment = ({ discussion, isLast }: { discussion: TDiscussion; isLast: boolean; }) => {
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+
+  return (
+    <>
+      <div className="p-4">
+        {discussion.comments.map((comment, index) => <Comment key={comment.id ?? index} comment={comment} discussionLength={discussion.comments.length} documentContent={discussion?.documentContent} editingId={editingId} index={index} setEditingId={setEditingId} showDocumentContent />)}
+        <CommentCreateForm discussionId={discussion.id} />
+      </div>
+      {!isLast && <div className="h-px w-full bg-muted" />}
+    </>
+  );
+};
 const BlockCommentContent = ({ children, element }: PlateElementProps) => {
   const editor = useEditorRef();
   const commentsApi = editor.getApi(CommentPlugin).comment;
@@ -84,18 +96,6 @@ const BlockCommentContent = ({ children, element }: PlateElementProps) => {
     </div>
   );
 };
-const BlockComment = ({ discussion, isLast }: { discussion: TDiscussion; isLast: boolean; }) => {
-  const [editingId, setEditingId] = React.useState<string | null>(null);
-
-  return (
-    <>
-      <div className="p-4">
-        {discussion.comments.map((comment, index) => <Comment key={comment.id ?? index} comment={comment} discussionLength={discussion.comments.length} documentContent={discussion?.documentContent} editingId={editingId} index={index} setEditingId={setEditingId} showDocumentContent />)}
-        <CommentCreateForm discussionId={discussion.id} />
-      </div>
-      {!isLast && <div className="h-px w-full bg-muted" />}
-    </>
-  );
-};
+const BlockDiscussion: RenderNodeWrapper<AnyPluginConfig> = (_props) => (props) => <BlockCommentContent {...props} />;
 
 export { BlockDiscussion };

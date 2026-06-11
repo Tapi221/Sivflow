@@ -47,10 +47,6 @@ const CarvePanelBase = ({ children, className }: CarvePanelProps) => {
 
 CarvePanelViewportBase.displayName = "CarvePanelViewportBase";
 const CarvePanelViewport = memo(CarvePanelViewportBase);
-CarvePanelViewport.displayName = "CarvePanelViewport";
-CarvePanelBase.displayName = "CarvePanelBase";
-const CarvePanel = memo(CarvePanelBase);
-CarvePanel.displayName = "CarvePanel";
 
 const CarvePanelShell = ({ children, toolbar = null, overlay = null, leftPanel = null, isLeftPanelCollapsed = false, reserveToolbar = false, reserveLeftPanel = false, viewportRef, className, bodyClassName, viewportClassName }: CarvePanelShellProps) => {
   const toolbarNode = toolbar ?? (reserveToolbar ? <div aria-hidden="true" className={CARVE_PANEL_TOOLBAR_SPACER_CLASS} /> : null);
@@ -72,4 +68,8 @@ const CarvePanelShell = ({ children, toolbar = null, overlay = null, leftPanel =
   );
 };
 
+CarvePanelViewport.displayName = "CarvePanelViewport";
+CarvePanelBase.displayName = "CarvePanelBase";
+const CarvePanel = memo(CarvePanelBase);
+CarvePanel.displayName = "CarvePanel";
 export { CarvePanel, CarvePanelShell, CarvePanelViewport };

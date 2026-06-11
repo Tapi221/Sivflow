@@ -9,12 +9,6 @@ import { RangeApi } from "platejs";
 import { useEditorRef, usePluginOption } from "platejs/react";
 import { cn } from "@/lib/utils";
 
-const CursorOverlay = () => { const { cursors } = useCursorOverlay();
-
-  return cursors.map((cursor) => (
-    <Cursor key={cursor.id} {...cursor} />
-  ));
-};
 const Cursor = ({
   id,
   caretPosition,
@@ -68,6 +62,12 @@ const Cursor = ({
       )}
     </>
   );
+};
+const CursorOverlay = () => { const { cursors } = useCursorOverlay();
+
+  return cursors.map((cursor) => (
+    <Cursor key={cursor.id} {...cursor} />
+  ));
 };
 
 export { CursorOverlay };

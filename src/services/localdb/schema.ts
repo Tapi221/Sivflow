@@ -1,9 +1,3 @@
-type SchemaTarget = {
-  version: (versionNumber: number) => {
-    stores: (schema: typeof currentStores) => unknown;
-  };
-};
-
 const currentStores = {
   folders:
     "id, userId, parentFolderId, updatedAt, cloudSyncEnabled, isDeleted, [userId+updatedAt], [userId+isDeleted]",
@@ -40,6 +34,12 @@ const currentStores = {
   tags_v2: null,
   tags_v3: null,
 } as const;
+
+type SchemaTarget = {
+  version: (versionNumber: number) => {
+    stores: (schema: typeof currentStores) => unknown;
+  };
+};
 
 const defineSchema = (db: SchemaTarget): void => { db.version(34).stores(currentStores);
 };

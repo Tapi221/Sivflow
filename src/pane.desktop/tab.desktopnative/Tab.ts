@@ -1,6 +1,10 @@
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 
 /**
+ * サイドバーのセクション定義
+ */
+type WorkspaceSidebarSection = | "home" | "review" | "library" | "schedule" | "settings";
+/**
  * 全タブ共通ベース
  */
 type WorkspaceTabBase = {
@@ -8,10 +12,6 @@ type WorkspaceTabBase = {
   isClosable: boolean;
   sectionKey: WorkspaceSidebarSection;
 };
-/**
- * サイドバーのセクション定義
- */
-type WorkspaceSidebarSection = | "home" | "review" | "library" | "schedule" | "settings";
 type WorkspaceRouteSection = Exclude<WorkspaceSidebarSection, "library">;
 /**
  * ルートタブID（固定ページ）

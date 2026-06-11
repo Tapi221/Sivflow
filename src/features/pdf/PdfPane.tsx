@@ -17,6 +17,10 @@ import type { PdfPageWindowMetric } from "./pdfPageWindow";
 import type { PdfDocumentSource } from "./pdfDocumentSource";
 import "./PdfPane.css";
 
+type PdfViewerStateChangePersistence = "immediate" | "deferred" | "none";
+type PdfViewerStateChangeOptions = {
+  persistence?: PdfViewerStateChangePersistence;
+};
 type PdfPaneProps = {
   source: PdfDocumentSource | null;
   className?: string;
@@ -30,10 +34,6 @@ type PdfPaneProps = {
   };
   onLoadError?: (error: unknown) => void;
   onViewerStateChange?: (viewerState: PdfViewerState, options?: PdfViewerStateChangeOptions) => Promise<void> | void;
-};
-type PdfViewerStateChangePersistence = "immediate" | "deferred" | "none";
-type PdfViewerStateChangeOptions = {
-  persistence?: PdfViewerStateChangePersistence;
 };
 type PdfDocumentProxy = Awaited<ReturnType<typeof pdfjsLib.getDocument>["promise"]>;
 type PdfViewerInstance = InstanceType<typeof PDFViewer>;

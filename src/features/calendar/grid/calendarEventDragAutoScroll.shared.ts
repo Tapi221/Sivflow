@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useRef } from "react";
 
+type CalendarEventDragPointerSnapshot = { pointerId: number;
+  buttons: number;
+  clientX: number;
+  clientY: number;
+};
 type CalendarEventDragRepeatActionStep<TDirection extends string> = (direction: TDirection, snapshot: CalendarEventDragPointerSnapshot) => boolean | void;
 type CalendarEventDragRepeatActionOptions<TDirection extends string> = {
   repeatIntervalMs: number;
@@ -11,11 +16,6 @@ type CalendarEventDragRepeatActionControls = {
   update: (snapshot: CalendarEventDragPointerSnapshot) => void;
   stop: (pointerId?: number) => void;
   getSnapshot: () => CalendarEventDragPointerSnapshot | null;
-};
-type CalendarEventDragPointerSnapshot = { pointerId: number;
-  buttons: number;
-  clientX: number;
-  clientY: number;
 };
 
 const PRIMARY_BUTTONS_MASK = 1;

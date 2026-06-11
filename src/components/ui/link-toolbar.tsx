@@ -21,6 +21,42 @@ const inputVariants = cva(
   "flex h-[28px] w-full rounded-md border-none bg-transparent px-1.5 py-1 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-transparent md:text-sm",
 );
 
+const LinkOpenButton = () => {
+  const editor = useEditorRef();
+  const selection = useEditorSelection();
+
+  const attributes = React.useMemo(
+    () => {
+      const entry = editor.api.node<TLinkElement>({
+        match: { type: editor.getType(KEYS.link) },
+      });
+      if (!entry) {
+        return {};
+      }
+      const [element] = entry;
+      return getLinkAttributes(editor, element);
+    },
+
+    [editor, selection],
+  );
+
+  return (
+    <a
+      {...attributes}
+      className={buttonVariants({
+        size: "sm",
+        variant: "ghost",
+      })}
+      onMouseOver={(e) => {
+        e.stopPropagation();
+      }}
+      aria-label="Open link in a new tab"
+      target="_blank"
+    >
+      <ExternalLink width={18} />
+    </a>
+  );
+};
 const LinkFloatingToolbar = ({ state }: { state?: LinkFloatingToolbarState;
 }) => {
   const activeCommentId = usePluginOption({ key: KEYS.comment }, "activeId");
@@ -146,42 +182,6 @@ const LinkFloatingToolbar = ({ state }: { state?: LinkFloatingToolbarState;
         {editContent}
       </div>
     </>
-  );
-};
-const LinkOpenButton = () => {
-  const editor = useEditorRef();
-  const selection = useEditorSelection();
-
-  const attributes = React.useMemo(
-    () => {
-      const entry = editor.api.node<TLinkElement>({
-        match: { type: editor.getType(KEYS.link) },
-      });
-      if (!entry) {
-        return {};
-      }
-      const [element] = entry;
-      return getLinkAttributes(editor, element);
-    },
-
-    [editor, selection],
-  );
-
-  return (
-    <a
-      {...attributes}
-      className={buttonVariants({
-        size: "sm",
-        variant: "ghost",
-      })}
-      onMouseOver={(e) => {
-        e.stopPropagation();
-      }}
-      aria-label="Open link in a new tab"
-      target="_blank"
-    >
-      <ExternalLink width={18} />
-    </a>
   );
 };
 

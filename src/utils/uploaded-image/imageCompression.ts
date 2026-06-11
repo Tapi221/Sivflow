@@ -53,14 +53,6 @@ const compressAndConvertToBase64Internal = (file: File, maxWidth: number = 1920,
     reader.readAsDataURL(file);
   });
 };
-/**
- * 画像を圧縮して Blob に変換（推奨）
- * Base64 を経由するが、最終的に Blob を返すため安全
- */
-const compressImageToBlob = async (file: File, maxWidth: number = 1920, maxHeight: number = 1920, quality: number = 0.8): Promise<Blob> => { const base64 = await compressAndConvertToBase64Internal(file, maxWidth, maxHeight, quality);
-  const response = await fetch(base64);
-  return response.blob();
-};
 
 /**
  * @deprecated 後方互換性のため残すが、compressImageToBlob を使用すること
@@ -69,6 +61,14 @@ const compressImageToBlob = async (file: File, maxWidth: number = 1920, maxHeigh
  */
 const compressAndConvertToBase64 = compressAndConvertToBase64Internal;
 
+/**
+ * 画像を圧縮して Blob に変換（推奨）
+ * Base64 を経由するが、最終的に Blob を返すため安全
+ */
+const compressImageToBlob = async (file: File, maxWidth: number = 1920, maxHeight: number = 1920, quality: number = 0.8): Promise<Blob> => { const base64 = await compressAndConvertToBase64Internal(file, maxWidth, maxHeight, quality);
+  const response = await fetch(base64);
+  return response.blob();
+};
 /**
  * @deprecated uploadImageAsBase64 は非推奨。compressImageToBlob を使用すること
  */

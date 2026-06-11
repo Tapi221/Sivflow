@@ -1,11 +1,12 @@
-type RuntimeKind = (typeof RUNTIME_KINDS)[keyof typeof RUNTIME_KINDS];
-
 const RUNTIME_KINDS = {
   web: "web",
   desktop: "desktop",
   ios: "ios",
   android: "android",
 } as const;
+
+type RuntimeKind = (typeof RUNTIME_KINDS)[keyof typeof RUNTIME_KINDS];
+
 const RUNTIME_RELOAD_KEYS = {
   chunk: "__hard_reload_once__",
   vitePreload: "__vite_preload_reload__",

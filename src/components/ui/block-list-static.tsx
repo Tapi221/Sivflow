@@ -5,45 +5,6 @@ import { isOrderedList } from "@platejs/list";
 import { CheckIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const config: Record<
-  string,
-  {
-    Li: React.FC<SlateRenderElementProps>;
-    Marker: React.FC<SlateRenderElementProps>;
-  }
-> = {
-  todo: {
-    Li: TodoLiStatic,
-    Marker: TodoMarkerStatic,
-  },
-};
-
-const BlockListStatic: RenderStaticNodeWrapper = (props) => { if (!props.element.listStyleType) return;
-  if (!isOrderedList(props.element)) return;
-
-  return (props) => <List {...props} />;
-};
-const List = (props: SlateRenderElementProps) => {
-  const { indent, listStart, listStyleType } = props.element as TListElement & {
-    indent?: number;
-  };
-  const { Li, Marker } = config[listStyleType] ?? {};
-  const List = isOrderedList(props.element) ? "ol" : "ul";
-
-  // Apply margin-left for indent (24px per level) for DOCX export compatibility
-  const marginLeft = indent ? `${indent * 24}px` : undefined;
-
-  return (
-    <List
-      className="relative m-0 p-0"
-      style={{ listStyleType, marginLeft }}
-      start={listStart}
-    >
-      {Marker && <Marker {...props} />}
-      {Li ? <Li {...props} /> : <li>{props.children}</li>}
-    </List>
-  );
-};
 const TodoMarkerStatic = (props: SlateRenderElementProps) => {
   const checked = props.element.checked as boolean;
 
@@ -76,6 +37,46 @@ const TodoLiStatic = (props: SlateRenderElementProps) => {
       {props.children}
     </li>
   );
+};
+
+const config: Record<
+  string,
+  {
+    Li: React.FC<SlateRenderElementProps>;
+    Marker: React.FC<SlateRenderElementProps>;
+  }
+> = {
+  todo: {
+    Li: TodoLiStatic,
+    Marker: TodoMarkerStatic,
+  },
+};
+
+const List = (props: SlateRenderElementProps) => {
+  const { indent, listStart, listStyleType } = props.element as TListElement & {
+    indent?: number;
+  };
+  const { Li, Marker } = config[listStyleType] ?? {};
+  const List = isOrderedList(props.element) ? "ol" : "ul";
+
+  // Apply margin-left for indent (24px per level) for DOCX export compatibility
+  const marginLeft = indent ? `${indent * 24}px` : undefined;
+
+  return (
+    <List
+      className="relative m-0 p-0"
+      style={{ listStyleType, marginLeft }}
+      start={listStart}
+    >
+      {Marker && <Marker {...props} />}
+      {Li ? <Li {...props} /> : <li>{props.children}</li>}
+    </List>
+  );
+};
+const BlockListStatic: RenderStaticNodeWrapper = (props) => { if (!props.element.listStyleType) return;
+  if (!isOrderedList(props.element)) return;
+
+  return (props) => <List {...props} />;
 };
 
 export { BlockListStatic };
