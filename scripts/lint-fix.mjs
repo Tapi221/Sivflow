@@ -7,6 +7,7 @@ const REPOSITORY_ROOT = path.resolve(SCRIPT_DIR, "..");
 const NODE_SCRIPT_PATHS = {
   fixImportSpacing: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-import-spacing.mjs"),
   fixImportPaths: path.resolve(REPOSITORY_ROOT, "scripts/fix-src-import-paths.mjs"),
+  fixTypeOnlyImports: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-type-only-imports.mjs"),
   lintEslintJa: path.resolve(REPOSITORY_ROOT, "scripts/lint-eslint-ja.mjs"),
   verifyConstArrowFunctions: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-const-arrow-functions.mjs"),
   verifyImportSpacing: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-import-spacing.mjs"),
@@ -14,6 +15,7 @@ const NODE_SCRIPT_PATHS = {
   verifyNoSymbols: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-no-symbols.mjs"),
   verifyPdfZoomConstants: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-pdf-zoom-constants.mjs"),
   verifySourceConventions: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-source-conventions.mjs"),
+  verifyTypeOnlyImports: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-type-only-imports.mjs"),
 };
 
 const runNodeScript = (scriptPath, args = []) => {
@@ -31,15 +33,17 @@ const runNodeScript = (scriptPath, args = []) => {
 };
 
 const runSourceConventionFixes = () => {
+  const typeOnlyImportStatus = runNodeScript(NODE_SCRIPT_PATHS.fixTypeOnlyImports);
   const importSpacingStatus = runNodeScript(NODE_SCRIPT_PATHS.fixImportSpacing);
   const importPathStatus = runNodeScript(NODE_SCRIPT_PATHS.fixImportPaths);
 
-  return importSpacingStatus !== 0 ? importSpacingStatus : importPathStatus;
+  return [typeOnlyImportStatus, importSpacingStatus, importPathStatus].find((status) => status !== 0) ?? 0;
 };
 
 const runSourceConventionVerification = () => {
   const statuses = [
     runNodeScript(NODE_SCRIPT_PATHS.verifyNoSymbols),
+    runNodeScript(NODE_SCRIPT_PATHS.verifyTypeOnlyImports),
     runNodeScript(NODE_SCRIPT_PATHS.verifyImportSpacing),
     runNodeScript(NODE_SCRIPT_PATHS.verifySourceConventions),
     runNodeScript(NODE_SCRIPT_PATHS.verifyConstArrowFunctions),
