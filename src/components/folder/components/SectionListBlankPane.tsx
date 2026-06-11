@@ -1,6 +1,8 @@
 import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
+
+
 interface SectionListBlankPaneProps {
   className?: string;
   contentClassName?: string;
@@ -11,7 +13,11 @@ interface SectionListBlankPaneProps {
   children?: ReactNode;
 }
 
+
+
 const SECTION_LIST_PANE_LEFT_VAR = "--sivflow-section-list-pane-left";
+
+
 
 const buildSidebarWidthFallback = (sidebarWidth: number): string => {
   const normalizedWidth = Number.isFinite(sidebarWidth)
@@ -20,6 +26,8 @@ const buildSidebarWidthFallback = (sidebarWidth: number): string => {
 
   return `${normalizedWidth}px`;
 };
+
+
 
 const SectionListBlankPane = ({
   className,
@@ -64,5 +72,7 @@ const SectionListBlankPane = ({
     </div>
   );
 };
+
+
 
 export { SectionListBlankPane };

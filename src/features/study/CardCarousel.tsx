@@ -57,4 +57,5 @@ const CardCarousel = ({ cards, mode, sessionCurrentIndex, onResult, onToggleUnce
 };
 
 export { CardCarousel };
+
 export type { CardCarouselProps };

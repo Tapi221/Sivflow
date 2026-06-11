@@ -6,13 +6,19 @@ import Schedule from "@/routes/Schedule";
 import { getDevRouteElements } from "./DevRoutes";
 import { ProtectedRoute } from "./ProtectedRoute";
 
+
+
 const Settings = lazy(() => import("@/routes/SettingScreen"));
 const Trash = lazy(() => import("@web-renderer/routes/Trash"));
 const REDIRECT_TO_SCHEDULE_ROUTES = ["calendar/*", "CardEdit/*", "CardSetView/*", "CardView/*", "study/*", "library/*", "statistics/*"] as const;
 
+
+
 const withRouteFallback = (element: ReactNode) => {
   return <Suspense fallback={null}>{element}</Suspense>;
 };
+
+
 
 const DefaultRedirect = () => {
   return <Navigate to="/schedule" replace />;
@@ -20,5 +26,7 @@ const DefaultRedirect = () => {
 const AppRoutes = () => {
   return (<Routes> <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}> <Route index element={<DefaultRedirect />} /> <Route path="schedule" element={withRouteFallback(<Schedule />)} /> <Route path="settings" element={withRouteFallback(<Settings />)} /> <Route path="trash" element={withRouteFallback(<Trash />)} /> {REDIRECT_TO_SCHEDULE_ROUTES.map((path) => <Route key={path} path={path} element={<DefaultRedirect />} />)} {getDevRouteElements()} </Route> <Route path="*" element={<Navigate to="/schedule" replace />} /> </Routes>);
 };
+
+
 
 export { AppRoutes };

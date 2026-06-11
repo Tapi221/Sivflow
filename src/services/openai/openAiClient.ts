@@ -2,6 +2,8 @@ import { generateTextLocally } from "./localTextGenerator";
 import type { OpenAiSettings } from "./openAiSettings";
 import { DEFAULT_OPEN_AI_SETTINGS, loadOpenAiSettings } from "./openAiSettings";
 
+
+
 type GenerateTextOptions = { prompt: string;
   systemPrompt?: string;
   settings?: OpenAiSettings;
@@ -22,7 +24,11 @@ type OpenAiResponsesApiResponse = {
   output?: ResponseMessage[];
 };
 
+
+
 const OPEN_AI_RESPONSES_API_URL = "https://api.openai.com/v1/responses";
+
+
 
 const extractText = (response: OpenAiResponsesApiResponse): string => {
   if (typeof response.output_text === "string") {
@@ -108,5 +114,9 @@ const testOpenAiConnection = async (settings = loadOpenAiSettings()) => {
   });
 };
 
+
+
 export { generateTextWithOpenAi, testOpenAiConnection };
+
+
 export type { GenerateTextOptions, GenerateTextResult };
