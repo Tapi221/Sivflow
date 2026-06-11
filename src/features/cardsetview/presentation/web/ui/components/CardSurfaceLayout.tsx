@@ -19,5 +19,5 @@ export const CardSurfaceLayout = ({ cardLayoutMode, questionNode, answerNode, fl
     return <div className={cn("grid min-w-0 grid-cols-1 items-start gap-4", className)}>{questionNode}{answerNode}</div>;
   }
 
-  return <>{flipNode ?? questionNode}</>;
+  return flipNode ?? questionNode;
 };
