@@ -23,9 +23,25 @@ import type { IosCalendarEvent } from "./iosCalendar.types";
 
 import 文同士の間に空行を入れない。
 
-import、型定義、定数、helper 関数、component 本体、memo / displayName / export の各ブロック間は、空行1行だけにする。空行なし、または空行2行以上は禁止する。
+同じブロック内の top-level 文同士にも空行を入れない。型定義同士、定数同士、helper 関数同士、component 同士、memo / displayName / export 同士は連続して記述する。
 
-`npm run lint`、`npm run lint:fix`、`npm run fix:source-conventions` は、source 規約の空行を自動で正規化する。自動整形 script が import 間だけを直してブロック間の余分な空行を残す状態は禁止する。
+import、型定義、定数、helper 関数、component 本体、memo / displayName / export の各ブロック間だけ、空行1行を入れる。ブロック間の空行なし、または空行2行以上は禁止する。
+
+```ts
+import { value } from "./value";
+import type { Value } from "./value.types";
+
+type LocalValue = Value;
+type LocalValueId = string;
+
+const LOCAL_VALUE_PREFIX = "local";
+const LOCAL_VALUE_LIMIT = 100;
+
+const createLocalValueId = (id: string) => `${LOCAL_VALUE_PREFIX}:${id}`;
+const isLocalValueId = (id: string) => id.startsWith(`${LOCAL_VALUE_PREFIX}:`);
+```
+
+`npm run lint`、`npm run lint:fix`、`npm run fix:source-conventions` は、source 規約の空行を自動で正規化する。自動整形 script が import 間だけを直して、同じブロック内またはブロック間の余分な空行を残す状態は禁止する。
 
 import 間の空行検査と自動修正は、import 文直前の空白・改行も対象に含める。AST の `getFullStart()` だけを基準にして import 前の空行を取り逃がす実装は禁止する。
 
