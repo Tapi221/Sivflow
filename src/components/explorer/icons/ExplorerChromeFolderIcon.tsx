@@ -24,28 +24,28 @@ export const ExplorerChromeFolderIcon = ({
   >
     <path
       d={FOLDER_TAB_PATH}
-      fill="var(--explorer-chrome-folder-fill, #f3ead6)"
-      stroke="var(--explorer-chrome-folder-stroke, #8b8a84)"
+      fill="var(--explorer-chrome-folder-fill, transparent)"
+      stroke="var(--explorer-chrome-folder-stroke, currentColor)"
       strokeWidth="1.45"
       strokeLinejoin="round"
     />
     <path
       d={FOLDER_BODY_PATH}
-      fill="var(--explorer-chrome-folder-fill, #ead3a6)"
-      stroke="var(--explorer-chrome-folder-stroke, #8b8a84)"
+      fill="var(--explorer-chrome-folder-fill, transparent)"
+      stroke="var(--explorer-chrome-folder-stroke, currentColor)"
       strokeWidth="1.45"
       strokeLinejoin="round"
     />
     <path
       d="M4.7 10.1H14.2"
-      stroke="var(--explorer-chrome-folder-highlight, #fbfaf6)"
+      stroke="var(--explorer-chrome-folder-highlight, transparent)"
       strokeWidth="1.45"
       strokeLinecap="round"
       opacity="0.88"
     />
     <path
       d="M4.7 12.8H11.8"
-      stroke="var(--explorer-chrome-folder-highlight, #fbfaf6)"
+      stroke="var(--explorer-chrome-folder-highlight, transparent)"
       strokeWidth="1.45"
       strokeLinecap="round"
       opacity="0.72"
