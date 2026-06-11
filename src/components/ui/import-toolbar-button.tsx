@@ -4,8 +4,6 @@ import * as React from 'react';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
-import { importDocx } from '@platejs/docx-io';
-
 import { MarkdownPlugin } from '@platejs/markdown';
 
 import { ArrowUpToLineIcon } from 'lucide-react';
@@ -20,13 +18,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 
 import { ToolbarButton } from './toolbar';
 
-
-
 type ImportType = 'html' | 'markdown';
 
-
-
-export function ImportToolbarButton(props: DropdownMenuProps) { const editor = useEditorRef();
+export function ImportToolbarButton(props: DropdownMenuProps) {
+  const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
 
   const getFileNodes = (text: string, type: ImportType) => {
@@ -74,6 +69,7 @@ export function ImportToolbarButton(props: DropdownMenuProps) { const editor = u
     accept: ['.docx'],
     multiple: false,
     onFilesSelected: async ({ plainFiles }) => {
+      const { importDocx } = await import('@platejs/docx-io');
       const arrayBuffer = await plainFiles[0].arrayBuffer();
       const result = await importDocx(editor, arrayBuffer);
 
