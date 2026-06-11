@@ -7,6 +7,8 @@ import { getNormalizedGridOffsetRows, getNormalizedRowOffset, getRowOffsetStyle,
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
 
+
+
 type BlockListRowMeta = { index: number;
   rowOffsetRows: number;
   rowOffsetPx: number;
@@ -29,6 +31,8 @@ interface BlockListProps {
   ) => HTMLAttributes<HTMLDivElement> | undefined;
   renderBlock: (block: CardBlock, meta: BlockListRowMeta) => ReactNode;
 }
+
+
 
 const BlockList = ({ blocks, className, rowClassName, getRowRef, getRowContainerProps, renderBlock }: BlockListProps) => {
   return (<div className={cn("w-full max-w-full", className)}> {blocks.map((block, index) => {
@@ -101,5 +105,9 @@ const BlockList = ({ blocks, className, rowClassName, getRowRef, getRowContainer
   );
 };
 
+
+
 export { BlockList };
+
+
 export type { BlockListRowMeta };

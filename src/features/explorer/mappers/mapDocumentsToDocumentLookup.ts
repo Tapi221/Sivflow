@@ -1,5 +1,7 @@
 import type { DocumentItem } from "@/types";
 
+
+
 const mapDocumentsToDocumentLookup = (documents: DocumentItem[]) => {
   const map = new Map<string, DocumentItem>();
 
@@ -13,5 +15,7 @@ const mapDocumentsToDocumentLookup = (documents: DocumentItem[]) => {
 
   return map;
 };
+
+
 
 export { mapDocumentsToDocumentLookup };

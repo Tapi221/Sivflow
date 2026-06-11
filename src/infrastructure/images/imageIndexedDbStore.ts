@@ -2,6 +2,8 @@ import { getLocalDb } from "@/infrastructure/localdb/client";
 import type { UploadedImage } from "@/types";
 import { assertImageInvariant } from "@/utils/imageAssertions";
 
+
+
 const saveImageToIndexedDb = async (image: UploadedImage): Promise<void> => {
   assertImageInvariant(image);
 
@@ -24,5 +26,7 @@ const getImageFromIndexedDb = async (imageId: string): Promise<UploadedImage | n
     throw error;
   }
 };
+
+
 
 export { saveImageToIndexedDb, getImageFromIndexedDb };
