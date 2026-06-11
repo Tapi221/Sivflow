@@ -2,6 +2,8 @@ import { getDocumentKindLabel, isDocumentUploadReady, toDocumentLike } from "@/a
 import type { QueueItem } from "@/application/usecases/persistentOfflineQueueModels";
 import { getLocalDb } from "@/infrastructure/localdb/client";
 
+
+
 const handleQueuedDocumentUploadFailure = async (item: QueueItem): Promise<void> => { try { const localDb = await getLocalDb();
   const existingDoc = await localDb.documents.get(item.id);
   if (!existingDoc) {
@@ -47,5 +49,7 @@ const handleQueuedDocumentUploadFailure = async (item: QueueItem): Promise<void>
   );
 }
 };
+
+
 
 export { handleQueuedDocumentUploadFailure };

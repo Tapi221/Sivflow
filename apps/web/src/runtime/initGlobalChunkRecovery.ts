@@ -3,7 +3,11 @@ import { isChunkLoadError, toErrorText } from "./runtimeErrorUtils";
 import { logRuntimeFault } from "./logRuntimeFault";
 import { hardReloadOnce } from "./reloadGuard";
 
+
+
 let started = false;
+
+
 
 const initGlobalChunkRecovery = () => { if (started || typeof window === "undefined") return;
   started = true;
@@ -50,5 +54,7 @@ const initGlobalChunkRecovery = () => { if (started || typeof window === "undefi
     hardReloadOnce(RUNTIME_RELOAD_KEYS.vitePreload);
   });
 };
+
+
 
 export { initGlobalChunkRecovery };

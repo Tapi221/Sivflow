@@ -5,6 +5,8 @@ import { httpsCallable } from "firebase/functions";
 import { functionsClient, requireFirestoreDb } from "@/infrastructure/firebase/client";
 import { storageStatsDocPathSegments } from "@/infrastructure/firebase/firestore/paths";
 
+
+
 type RebuildStorageStatsResponse = {
   userId?: string;
   quotaBytes?: number;
@@ -13,8 +15,12 @@ type RebuildStorageStatsResponse = {
   schemaVersion?: number;
 };
 
+
+
 const CLOUD_STORAGE_STATS_SCHEMA_VERSION = 1;
 const DEFAULT_CLOUD_STORAGE_QUOTA_BYTES = 500 * 1024 * 1024;
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -100,5 +106,7 @@ const rebuildCloudStorageStats = async (userId: string): Promise<CloudStorageSta
     lastRebuiltAt: new Date(),
   });
 };
+
+
 
 export { CLOUD_STORAGE_STATS_SCHEMA_VERSION, DEFAULT_CLOUD_STORAGE_QUOTA_BYTES, isCloudStorageStatsOutdated, subscribeToCloudStorageStats, rebuildCloudStorageStats };

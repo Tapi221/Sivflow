@@ -10,6 +10,8 @@ import { buildCardSetViewZoomPreferenceScopeKey, getCardSetViewZoomPreference, s
 import type { CardSetViewZoomPreferenceScope } from "@/services/cardSetViewZoomPreferences";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 interface UseCardSetViewZoomOptions {
   deviceScope: string;
   cardSetId: string | null;
@@ -28,7 +30,11 @@ type LegacyZoomMigrationHint = Pick<
   "displayMode" | "interactionMode" | "cardLayoutMode"
 >;
 
+
+
 const DEFAULT_SOURCE_KEY = "__cardsetview_zoom_default__";
+
+
 
 const clampZoomPercent = (value: number) => clampZoomPercentRange(value);
 const computeDynamicMaxZoomPercent = () => 100;
@@ -330,5 +336,7 @@ const useCardSetViewZoom = ({ deviceScope, cardSetId, viewportRef, displayMode, 
     maxPresentationWidthPx,
   };
 };
+
+
 
 export { clampZoomPercent, computeDynamicMaxZoomPercent, useCardSetViewZoom };

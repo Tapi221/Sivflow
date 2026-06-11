@@ -5,6 +5,8 @@ import { auth } from "@/infrastructure/firebase/client";
 import { getLocalDb } from "@/infrastructure/localdb/client";
 import type { UploadedImage } from "@/types";
 
+
+
 const handleQueuedAssetUploadSuccess = async (item: QueueItem, updatedImage: UploadedImage): Promise<void> => { const localDb = await getLocalDb();
   const existingAsset = toAssetLikeRecord(
     await localDb.images.get(updatedImage.id),
@@ -41,5 +43,7 @@ const handleQueuedAssetUploadSuccess = async (item: QueueItem, updatedImage: Upl
     });
   }
 };
+
+
 
 export { handleQueuedAssetUploadSuccess };

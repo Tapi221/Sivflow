@@ -3,7 +3,11 @@ import { toErrorText } from "./runtimeErrorUtils";
 import { logRuntimeFault } from "./logRuntimeFault";
 import { hardReloadOnce } from "./reloadGuard";
 
+
+
 let started = false;
+
+
 
 const applyWaitingWorker = (registration: ServiceWorkerRegistration) => {
   registration.waiting?.postMessage({ type: "SKIP_WAITING" });
@@ -87,5 +91,7 @@ window.addEventListener("load", () => {
     });
 });
 };
+
+
 
 export { initServiceWorkerLifecycle };

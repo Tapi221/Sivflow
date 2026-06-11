@@ -4,6 +4,8 @@ import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { getLocalDb } from "@/services/localDB";
 import type { Folder } from "@/types/domain/folder";
 
+
+
 const normalizeFolderId = (value: string | null | undefined) => {
   if (typeof value !== "string") {
     return null;
@@ -45,5 +47,7 @@ const useFolderLineage = (folderId: string | null) => { const { currentUser } = 
 
   return folders ?? [];
 };
+
+
 
 export { useFolderLineage };

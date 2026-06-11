@@ -2,6 +2,8 @@ import { isStorageRecord } from "@/domain/shared/storage/storageRecordUtils";
 import { readCardStorageFiniteNumberField, readCardStorageStringField } from "./cardStorageFieldReaders";
 import { sanitizeCardStorageLayout } from "./cardStorageLayoutTransforms";
 
+
+
 const sanitizeCardStorageImageRef = (imageValue: unknown) => { if (!isStorageRecord(imageValue)) return imageValue;
 
   const assetId =
@@ -28,5 +30,7 @@ const sanitizeCardStorageImageRef = (imageValue: unknown) => { if (!isStorageRec
     naturalH: readCardStorageFiniteNumberField(imageValue, "naturalH"),
   };
 };
+
+
 
 export { sanitizeCardStorageImageRef };

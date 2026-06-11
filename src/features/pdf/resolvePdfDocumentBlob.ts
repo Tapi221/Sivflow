@@ -4,10 +4,16 @@ import { auth } from "@/services/firebase";
 import { getDocumentBlob, saveDocumentBlob } from "@/services/documentFileStore";
 import type { DocumentItem } from "@/types";
 
+
+
 type PdfDocumentBlobFields = Pick<DocumentItem, "id" | "localFileId" | "userId" | "googleDriveFileId" | "googleDriveWebContentLink" | "googleDriveWebViewLink" | "storagePath">;
+
+
 
 const GOOGLE_DRIVE_STORAGE_PATH_PREFIX = "google-drive://";
 const GOOGLE_DRIVE_FILE_PATH_PATTERN = /\/file\/d\/([^/]+)/;
+
+
 
 const getUniqueValues = (values: Array<string | null | undefined>): string[] => {
   return [...new Set(values.map((value) => value?.trim()).filter((value): value is string => Boolean(value)))];
@@ -80,5 +86,7 @@ const resolvePdfDocumentBlob = async (document: PdfDocumentBlobFields, currentUs
 
   return downloadedBlob;
 };
+
+
 
 export { findLocalPdfBlob, resolvePdfDocumentBlob };

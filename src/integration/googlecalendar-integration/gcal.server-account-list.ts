@@ -4,6 +4,8 @@ import { auth, functionsClient } from "@/services/firebase";
 import { buildTokenExpiry, readStoredAccounts, writeStoredAccounts } from "./gcal.multi-storage";
 import type { StoredGoogleAccount } from "./gcal.multi-storage";
 
+
+
 type ServerStoredGoogleCalendarAccount = { accountId: string;
   email: string | null;
   name: string | null;
@@ -13,7 +15,11 @@ type ListGoogleCalendarAccountsOutput = {
   accounts: ServerStoredGoogleCalendarAccount[];
 };
 
+
+
 const listGoogleCalendarAccountsCallable = httpsCallable<undefined, ListGoogleCalendarAccountsOutput>(functionsClient, "listGoogleCalendarAccounts");
+
+
 
 const waitForCallableAuth = async (): Promise<void> => {
   await auth.authStateReady();
@@ -67,5 +73,9 @@ const hydrateServerStoredGoogleCalendarAccounts = async (): Promise<number> => {
   return hydratedAccounts.length;
 };
 
+
+
 export { listServerStoredGoogleCalendarAccounts, hydrateServerStoredGoogleCalendarAccounts };
+
+
 export type { ServerStoredGoogleCalendarAccount };

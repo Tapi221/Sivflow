@@ -5,6 +5,8 @@ import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import type { SyncSettings } from "@/types";
 import { DEFAULT_SYNC_SETTINGS } from "@/types";
 
+
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 const normalizeSyncSettings = (value: unknown): SyncSettings => {
@@ -68,5 +70,7 @@ const useSyncSettings = () => { const { currentUser } = useAuthSession();
 
   return { settings, loading, updateSettings, reloadSettings: loadSettings };
 };
+
+
 
 export { useSyncSettings };

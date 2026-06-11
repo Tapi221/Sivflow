@@ -5,6 +5,8 @@ import { isOrderedList } from "@platejs/list";
 import { CheckIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+
+
 const config: Record<
   string,
   {
@@ -17,6 +19,8 @@ const config: Record<
     Marker: TodoMarkerStatic,
   },
 };
+
+
 
 const TodoMarkerStatic = (props: SlateRenderElementProps) => {
   const checked = props.element.checked as boolean;
@@ -77,5 +81,7 @@ const BlockListStatic: RenderStaticNodeWrapper = (props) => { if (!props.element
 
   return (props) => <List {...props} />;
 };
+
+
 
 export { BlockListStatic };

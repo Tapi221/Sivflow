@@ -9,6 +9,8 @@
 
 const MAX_INTERVAL_DAYS = 90;
 
+
+
 /**
  * 忘却曲線に基づく記憶保持確率（定着度）を計算します。
  *
@@ -63,5 +65,7 @@ const calculateResistanceScore = (intervalDays: number): number => { const I = M
 
   return Math.min(100, Math.round(score));
 };
+
+
 
 export { calculateRetentionProbability, calculateResistanceScore };
