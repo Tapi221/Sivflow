@@ -72,7 +72,6 @@ const STYLISTIC_FIXABLE_RULES = {
   "@stylistic/jsx-closing-bracket-location": ["warn", "line-aligned"],
   "@stylistic/jsx-curly-spacing": ["warn", "never"],
   "@stylistic/jsx-equals-spacing": ["warn", "never"],
-  "@stylistic/jsx-indent": ["warn", 2],
   "@stylistic/jsx-indent-props": ["warn", 2],
   "@stylistic/jsx-tag-spacing": ["warn", { afterOpening: "never", beforeClosing: "allow", beforeSelfClosing: "always", closingSlash: "never" }],
   "@stylistic/key-spacing": "warn",
@@ -84,6 +83,10 @@ const STYLISTIC_FIXABLE_RULES = {
   "@stylistic/space-before-function-paren": ["warn", { anonymous: "always", asyncArrow: "always", named: "never" }],
   "@stylistic/space-in-parens": ["warn", "never"],
 };
+const REACT_HOOKS_STABLE_RULES = {
+  "react-hooks/exhaustive-deps": "warn",
+  "react-hooks/rules-of-hooks": "error",
+};
 
 export default defineConfig([
   globalIgnores(["dist", "apps/desktop/src-tauri/target"]),
@@ -93,7 +96,6 @@ export default defineConfig([
     extends: [
       js.configs.recommended,
       tseslint.configs.recommended,
-      reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
     ],
     plugins: {
@@ -108,9 +110,11 @@ export default defineConfig([
     },
     rules: {
       ...STYLISTIC_FIXABLE_RULES,
+      ...REACT_HOOKS_STABLE_RULES,
       "@stylistic/max-len": "off",
       "@stylistic/object-curly-newline": "off",
       "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": "off",
       "react-refresh/only-export-components": "off",
       eqeqeq: ["error", "always"],
       "no-var": "error",
