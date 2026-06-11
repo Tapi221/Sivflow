@@ -3,14 +3,10 @@ import type { MfDeckCardV1, MfDeckIssue } from "@/features/deckFile/domain/mfDec
 
 
 
-
-
 export const MF_CARD_FORMAT = "sivflow.card" as const;
 export const MF_CARD_VERSION = 1 as const;
 export const MF_CARD_FILE_EXTENSION = ".mfcard" as const;
 export const MF_CARD_MIME_TYPE = "application/vnd.sivflow.card+json" as const;
-
-
 
 
 
@@ -37,8 +33,6 @@ export type MfCardValidationResult = | { ok: true;
     ok: false;
     issues: MfCardIssue[];
   };
-
-
 
 
 

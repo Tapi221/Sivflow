@@ -12,16 +12,12 @@ import type { CardBlock } from "@/types/domain/card";
 
 
 
-
-
 interface SideData {
   blocks: CardBlock[];
   text: string;
   audios: FlashcardMediaLike[];
   code: { code?: string; language?: string; } | null;
 }
-
-
 
 
 

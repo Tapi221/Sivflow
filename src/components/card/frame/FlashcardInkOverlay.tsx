@@ -5,8 +5,6 @@ import type { InkHistoryState, InkLayerHandle } from "@/components/ink/inkLayer.
 
 
 
-
-
 interface FlashcardInkOverlayProps {
   extraHeaderRight?: React.ReactNode;
   extraFooter?: React.ReactNode;
@@ -25,8 +23,6 @@ interface FlashcardInkOverlayProps {
   setPreviewInkTool: React.Dispatch<React.SetStateAction<InkEditTool | null>>;
   setPreviewInkHistory: React.Dispatch<React.SetStateAction<InkHistoryState>>;
 }
-
-
 
 
 

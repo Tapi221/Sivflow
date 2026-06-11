@@ -4,8 +4,6 @@ import { sanitizeForLog } from "@/utils/logSanitizer";
 
 
 
-
-
 export const createQuarantineOrphanedCardsUseCase = () => { const checkDataIntegrityUseCase = createCheckDataIntegrityUseCase();
 
   const execute = async (): Promise<number> => {

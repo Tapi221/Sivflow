@@ -5,8 +5,6 @@ import type { GoogleCalendarListItem } from "./gcalSync.types";
 
 
 
-
-
 export const silentReconnect = async (accountId: string): Promise<{ accessToken: string;
   calendars: GoogleCalendarListItem[];
 } | null> => {

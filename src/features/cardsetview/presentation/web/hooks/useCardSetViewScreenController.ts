@@ -22,14 +22,10 @@ import { useCardSetViewZoomInput } from "./useCardSetViewZoomInput";
 
 
 
-
-
 type ScrollAnchorFace = "question" | "answer";
 type UseCardSetViewScreenControllerParams = {
   cardSetId?: string | null;
 };
-
-
 
 
 

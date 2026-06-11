@@ -11,8 +11,6 @@ import { useToast } from "@web-renderer/contexts/ToastContext";
 
 
 
-
-
 type XlsxImportCompletedPayload = {
   cardSetId: string;
   cardSetName: string;
@@ -32,14 +30,10 @@ type XlsxImportDialogProps = {
 
 
 
-
-
 const emptyState = {
   file: null as File | null,
   result: null as ImportParseResult | null,
 };
-
-
 
 
 
@@ -435,11 +429,7 @@ const XlsxImportDialog = ({
 
 
 
-
-
 export { XlsxImportDialog };
-
-
 
 
 

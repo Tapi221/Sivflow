@@ -5,8 +5,6 @@ import { type Card, type CardSet, type DocumentItem, type Folder, type SelectedE
 
 
 
-
-
 interface UseTreeViewDerivedStateParams {
   folders: Folder[];
   cards: Card[];
@@ -27,15 +25,11 @@ type FolderStats = {
 
 
 
-
-
 const EMPTY_FOLDER_STATS: FolderStats = {
   dueCount: 0,
   unlearnedCount: 0,
   lastReviewedAt: null,
 };
-
-
 
 
 

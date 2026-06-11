@@ -3,8 +3,6 @@ import { getPresentationTargetFromWindow, type PresentationTarget } from "./getP
 
 
 
-
-
 const bindMediaQueryChange = (
   mediaQueryList: MediaQueryList,
   handler: () => void,

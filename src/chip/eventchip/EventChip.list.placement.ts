@@ -5,8 +5,6 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 
 
 
-
-
 export type CalendarListPlacementDay = { date: Date;
   dateKey: string;
   events: GoogleCalendarEvent[];
@@ -23,8 +21,6 @@ export type CalendarListVirtualRange = { start: number;
 
 
 
-
-
 export const LIST_DAY_SECTION_MIN_HEIGHT_PX = 430;
 export const LIST_DAY_GAP_PX = 8;
 export const LIST_EMPTY_DAY_HEIGHT_PX = 38;
@@ -34,8 +30,6 @@ export const LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX = eventChipDesign.list.allDayRowHe
 export const LIST_ALL_DAY_EVENT_CHIP_HEIGHT_PX = eventChipDesign.list.allDayChipHeightPx;
 export const LIST_EVENT_ROW_GAP_PX = 6;
 export const LIST_VIRTUAL_OVERSCAN_PX = 6000;
-
-
 
 
 

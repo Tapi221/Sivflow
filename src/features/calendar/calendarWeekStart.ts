@@ -2,11 +2,7 @@ import type { CalendarWeekStartDay } from "./calendar.types";
 
 
 
-
-
 type CalendarWeekStartsOn = 0 | 1;
-
-
 
 
 

@@ -4,8 +4,6 @@ import { assertImageInvariant } from "@/utils/imageAssertions";
 
 
 
-
-
 interface PersistentOfflineQueueProcessingDeps {
   uploadItem: (item: QueueItem) => Promise<UploadedImage>;
   shouldSkipItem: (item: QueueItem) => Promise<boolean>;
@@ -18,8 +16,6 @@ interface PersistentOfflineQueueProcessingDeps {
   incrementRetryCount: (id: string) => Promise<void>;
   yieldToUi?: () => Promise<void>;
 }
-
-
 
 
 

@@ -3,13 +3,9 @@ import { toDateKey } from "./calendarKey";
 
 
 
-
-
 export type CalendarSelection = { selectedKey: string;
   todayKey: string;
 };
-
-
 
 
 

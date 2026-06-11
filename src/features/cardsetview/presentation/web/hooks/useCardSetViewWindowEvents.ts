@@ -4,14 +4,10 @@ import { subscribeCardSetViewWindowEvent } from "@/features/cardsetview/presenta
 
 
 
-
-
 interface UseCardSetViewWindowEventsOptions {
   handleToggleViewMode: () => void;
   createAndFocusCard: () => Promise<boolean>;
 }
-
-
 
 
 

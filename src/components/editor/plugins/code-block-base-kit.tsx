@@ -4,7 +4,5 @@ import { CodeBlockElementStatic, CodeLineElementStatic, CodeSyntaxLeafStatic, } 
 
 
 
-
-
 const lowlight = createLowlight(all);
 export const BaseCodeBlockKit = [BaseCodeBlockPlugin.configure({ node: { component: CodeBlockElementStatic }, options: { lowlight }, }), BaseCodeLinePlugin.withComponent(CodeLineElementStatic), BaseCodeSyntaxPlugin.withComponent(CodeSyntaxLeafStatic),];

@@ -11,8 +11,6 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
-
-
 type Side = "question" | "answer";
 export type CardEditorPaneReadonlySurfaceProps = Readonly<{ card: Card;
   isFlipped: boolean;
@@ -24,8 +22,6 @@ export type CardEditorPaneReadonlySurfaceProps = Readonly<{ card: Card;
   zoomScale: number;
   fitScale?: number;
 }>;
-
-
 
 
 

@@ -15,8 +15,6 @@ import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize.utils";
 
 
 
-
-
 type ResolvedEditableImageStatus = "pending" | "uploading" | "ready" | "failed";
 type ImageRecordLike =
   | {
@@ -78,15 +76,11 @@ type MediaUploaderProps = ImageMediaUploaderProps | AudioMediaUploaderProps;
 
 
 
-
-
 const IMAGE_BLOCK_INSET_PX = 4;
 const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
   CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
 const EMPTY_IMAGE_URLS: UploadedImage[] = [];
 const EMPTY_AUDIO_URLS: string[] = [];
-
-
 
 
 
@@ -169,8 +163,6 @@ const getRetryFileName = (assetId: string, mime: string): string => {
 
   return `${assetId}.jpg`;
 };
-
-
 
 
 
@@ -758,8 +750,6 @@ const MediaUploader = (props: MediaUploaderProps) => {
     </div>
   );
 };
-
-
 
 
 

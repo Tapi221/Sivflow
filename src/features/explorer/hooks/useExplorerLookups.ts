@@ -6,16 +6,12 @@ import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
 
 
-
-
 type Params = {
   folders: Folder[];
   cards: Card[];
   documents: DocumentItem[];
   selectedItem: SelectedExplorerItem;
 };
-
-
 
 
 

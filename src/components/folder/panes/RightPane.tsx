@@ -6,8 +6,6 @@ import { CardPane } from "./CardPane";
 
 
 
-
-
 type RightPaneProps = {
   selectedItem: SelectedExplorerItem;
   selectedCardId: string | null;
@@ -25,8 +23,6 @@ type RightPaneProps = {
   };
   folderSelectionNonce: number;
 };
-
-
 
 
 

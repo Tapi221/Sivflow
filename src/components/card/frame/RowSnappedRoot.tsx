@@ -4,16 +4,12 @@ import type { CssVars } from "@/types/style";
 
 
 
-
-
 type RowSnappedRootProps = {
   rowPx: number;
   className?: string;
   style?: React.CSSProperties;
   children: React.ReactNode;
 };
-
-
 
 
 
@@ -44,8 +40,6 @@ const RowSnappedRoot = ({
     </RowSnap>
   );
 };
-
-
 
 
 

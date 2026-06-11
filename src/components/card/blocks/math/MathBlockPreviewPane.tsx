@@ -5,8 +5,6 @@ import { cn } from "@/lib/utils";
 
 
 
-
-
 type MathBlockPreviewPaneProps = {
   latex: string;
   displayMode?: "block" | "inline";
@@ -17,8 +15,6 @@ type MathBlockPreviewPaneProps = {
   className?: string;
   zoom?: number;
 };
-
-
 
 
 

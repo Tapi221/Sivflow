@@ -5,8 +5,6 @@ import { normalizeLayoutRows } from "@/domain/card/extraRows";
 
 
 
-
-
 type Side = "question" | "answer";
 type UseLayoutRowsControllerParams<
   TDraft extends { layoutRows: number; } | null,
@@ -17,8 +15,6 @@ type UseLayoutRowsControllerParams<
   normalizedSelectedCardId: string | null;
   isEditing: boolean;
 };
-
-
 
 
 

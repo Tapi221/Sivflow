@@ -13,8 +13,6 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
-
-
 type Side = "question" | "answer";
 export type ViewCardFaceSceneProps = Readonly<{ card: Card;
   side: Side;
@@ -35,8 +33,6 @@ export type ViewCardFaceSceneProps = Readonly<{ card: Card;
 
 
 
-
-
 const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   id: card.id,
   cardId: card.cardId,
@@ -50,8 +46,6 @@ const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   inkQuestion: card.front.ink ?? null,
   inkAnswer: card.back.ink ?? null,
 });
-
-
 
 
 

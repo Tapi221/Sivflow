@@ -3,8 +3,6 @@ import { cn } from "@/lib/utils";
 
 
 
-
-
 const Table = React.forwardRef<
   HTMLTableElement,
   React.TableHTMLAttributes<HTMLTableElement>
@@ -96,8 +94,6 @@ const TableCaption = React.forwardRef<
     {...props}
   />
 ));
-
-
 
 
 

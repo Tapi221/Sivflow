@@ -3,8 +3,6 @@ import { cn } from "@/lib/utils";
 
 
 
-
-
 export type TimePercentageToggleValue = "time" | "percentage";
 type TimePercentageToggleOption = {
   value: TimePercentageToggleValue;
@@ -14,8 +12,6 @@ type ToggleTimePercentageProps = {
   value: TimePercentageToggleValue;
   className?: string;
 };
-
-
 
 
 
@@ -29,8 +25,6 @@ const TIME_PERCENTAGE_TOGGLE_OPTIONS: readonly TimePercentageToggleOption[] = [
     label: "割合",
   },
 ];
-
-
 
 
 
@@ -63,8 +57,6 @@ const ToggleTimePercentageComponent = ({ value, className }: ToggleTimePercentag
     </div>
   );
 };
-
-
 
 
 

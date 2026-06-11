@@ -2,8 +2,6 @@ import * as XLSX from "xlsx";
 
 
 
-
-
 const TEMPLATE_FILE_NAME = "flashcard-import-template.xlsx";
 const SHEET_NAME = "blocks";
 const HEADER_ROW = [
@@ -43,8 +41,6 @@ const SAMPLE_ROWS = [
   ["card-002", "front", "1", "markdown", "# 見出し", "", "", "カードB", ""],
   ["card-002", "back", "1", "math", "\\int_0^1 x^2 dx", "", "", "カードB", ""],
 ];
-
-
 
 
 

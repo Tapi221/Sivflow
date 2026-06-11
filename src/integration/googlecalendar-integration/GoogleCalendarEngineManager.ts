@@ -5,8 +5,6 @@ import type { GCalForceSyncOptions, GCalWritableEventDeleteInput, GCalWritableEv
 
 
 
-
-
 type EngineContext = {
   accessToken: string;
   selectedCalendarIds: Set<string>;
@@ -21,8 +19,6 @@ type WatchRegistrationResult = {
   action: "add" | "remove";
   calendarId: string;
 };
-
-
 
 
 

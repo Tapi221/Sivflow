@@ -12,8 +12,6 @@ import { toDateOrNull, toMillis } from "@/utils/toMillis";
 
 
 
-
-
 type KeyPath = string | readonly string[];
 type Predicate<T> = (value: T) => boolean;
 type ObjectRecord = Record<string, unknown>;
@@ -37,8 +35,6 @@ type RegisteredInMemoryTable = {
 
 
 
-
-
 const SYNCABLE_TABLES = new Set(["cards", "folders", "cardSets", "documents", CURRENT_TAG_STORE, "images", "userSettings", "projectMaps"] as const);
 const ENTITY_BY_TABLE: Record<string, QueueEntity> = {
   cards: "card",
@@ -51,8 +47,6 @@ const ENTITY_BY_TABLE: Record<string, QueueEntity> = {
   projectMaps: "projectMap",
 };
 const DELETE_CAPABLE_ENTITIES = new Set<DeleteEntity>(["card", "folder", "cardSet", "document", "tag", "asset", "projectMap"]);
-
-
 
 
 

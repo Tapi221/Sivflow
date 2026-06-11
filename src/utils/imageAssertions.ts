@@ -3,9 +3,9 @@ import { isBase64DataUrl, isBlobUrl, isStorageUrl } from "@/types/core/branded";
 
 
 
-
-
 type ImageUrlField = "remoteUrl" | "localUrl" | "thumbnailUrl";
+
+
 
 
 

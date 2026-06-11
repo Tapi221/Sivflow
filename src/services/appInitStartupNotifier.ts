@@ -3,8 +3,6 @@ import { notificationService } from "./NotificationService";
 
 
 
-
-
 export const notifyLocalDbFallbackMode = (args: { recoveryGuideUrl: string;
 }): void => {
   notificationService.warning(

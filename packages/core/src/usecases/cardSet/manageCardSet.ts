@@ -30,8 +30,6 @@ export type CardSetCommandRepository<TCardSet extends CardSetCommandEntity = Car
 
 
 
-
-
 const isDeletedEntity = (entity: { isDeleted?: boolean; is_deleted?: boolean; }) => {
   return Boolean(entity.isDeleted ?? entity.is_deleted);
 };

@@ -5,8 +5,6 @@ import { useCards } from "@/components/card/hooks/useCards";
 
 
 
-
-
 interface UseFlashcardInkOptions {
   cardId: string | null;
   effectiveIsFlipped: boolean;
@@ -25,8 +23,6 @@ export interface FlashcardInkResult { previewInkRef: React.RefObject<InkLayerHan
   shouldMountInkLayer: boolean;
   handleInkDocumentChange: (side: "question" | "answer", nextDocument: InkDocument) => void;
 }
-
-
 
 
 

@@ -6,8 +6,6 @@ import { type CardDisplayMode, type CardSet, DEFAULT_CARD_DISPLAY_MODE, normaliz
 
 
 
-
-
 type RawCardSetRecord = CardSet & {
   isDeleted?: boolean;
   defaultDisplayMode?: CardDisplayMode | unknown;
@@ -15,8 +13,6 @@ type RawCardSetRecord = CardSet & {
 type CardSetUpdateCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   updateItem: (table: "cardSets", id: string, changes: Record<string, unknown>) => Promise<number>;
 };
-
-
 
 
 

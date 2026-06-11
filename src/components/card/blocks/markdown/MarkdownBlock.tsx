@@ -6,8 +6,6 @@ import { NotebookPen } from "@/ui/icons";
 
 
 
-
-
 interface MarkdownBlockProps {
   markdown: string;
   onChange: (markdown: string) => void;
@@ -33,8 +31,6 @@ interface MarkdownBlockProps {
 
 
 
-
-
 const areMarkdownBlockPropsEqual = (
   prev: MarkdownBlockProps,
   next: MarkdownBlockProps,
@@ -47,8 +43,6 @@ const areMarkdownBlockPropsEqual = (
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&
   prev.zoom === next.zoom;
-
-
 
 
 
@@ -107,8 +101,6 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
     </BlockWrapper>
   );
 };
-
-
 
 
 

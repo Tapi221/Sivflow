@@ -5,8 +5,6 @@ import { cn } from "@/lib/utils";
 
 
 
-
-
 type DivDataAttributes = {
   [key: `data-${string}`]: string | number | boolean | undefined;
 };
@@ -25,14 +23,10 @@ type QuestionBlockLayoutProps = {
 
 
 
-
-
 const scaleSpacePx = (basePx: number, zoom?: number) => {
   const resolvedZoom = normalizeCardSetViewZoom(zoom);
   return `${Number((basePx * resolvedZoom).toFixed(3))}px`;
 };
-
-
 
 
 

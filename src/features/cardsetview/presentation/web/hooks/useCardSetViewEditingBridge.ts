@@ -4,8 +4,6 @@ import { dispatchCardSetViewWindowEvent } from "@/features/cardsetview/presentat
 
 
 
-
-
 export const useCardSetViewEditingBridge = (isGlobalEditing: boolean) => { useEffect(() => { if (typeof window === "undefined") { return;
     }
 

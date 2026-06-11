@@ -4,8 +4,6 @@ import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLIC
 
 
 
-
-
 export type DocumentContextMenuActionId = "rename" | "delete";
 export type DocumentContextMenuAction = { id: DocumentContextMenuActionId;
   label: string;
@@ -21,8 +19,6 @@ type DocumentContextMenuProps = {
   noDragStyle: CSSProperties;
   panelId?: RightClickPanelId;
 };
-
-
 
 
 
@@ -44,8 +40,6 @@ const DOCUMENT_CONTEXT_MENU_STYLE = `
   background: #fef2f2;
 }
 `;
-
-
 
 
 
@@ -84,8 +78,6 @@ const DocumentContextMenuBase = ({
     </>
   );
 };
-
-
 
 
 

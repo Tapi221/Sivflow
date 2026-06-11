@@ -37,6 +37,8 @@ import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
 
 
+
+
 /**
  * gcal.multi-storage.ts
  *
@@ -94,6 +96,8 @@ const pendingLegacyDesktopRefreshTokens = new Map<string, string>();
 
 
 
+
+
 // ─────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────
@@ -111,6 +115,8 @@ export type StoredGoogleAccount = { /** メールアドレス or ランダムUUI
 export type StoredGoogleAccountProfile = { name?: string | null;
   photoUrl?: string | null;
 };
+
+
 
 
 

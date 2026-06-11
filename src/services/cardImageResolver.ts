@@ -7,8 +7,6 @@ import type { AssetRecord, ResolvableImageRef, UploadedImage } from "@/types";
 
 
 
-
-
 type ImageRecordLike =
   | {
     remoteUrlCache?: string | null;
@@ -24,8 +22,6 @@ type ImageRecordLike =
 type ImageUpdateCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   updateItem: (table: "images", id: string, changes: Record<string, unknown>) => Promise<number>;
 };
-
-
 
 
 
@@ -83,14 +79,10 @@ const getResolvedStatusFromRecord = (record: ImageRecordLike): "pending" | "uplo
 
 
 
-
-
 export type ResolvedCardImage = ResolvableImageRef & { url: string | null;
   source: "local_blob" | "cache" | "storage" | "none";
   status: "pending" | "uploading" | "ready" | "failed";
 };
-
-
 
 
 

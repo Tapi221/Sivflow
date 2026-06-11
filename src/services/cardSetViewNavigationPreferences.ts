@@ -17,13 +17,9 @@ type CardSetViewNavigationPreferencesStore = {
 
 
 
-
-
 const CARD_SET_VIEW_NAVIGATION_PREFERENCES_STORAGE_KEY = "sivflow:cardsetview-navigation-preferences:v1";
 const LEGACY_CARD_SET_VIEW_NAVIGATION_PREFERENCES_STORAGE_KEY = "flashcard-master:cardsetview-navigation-preferences:v1";
 const NO_CARD_SET_SCOPE_KEY = "__no_card_set__";
-
-
 
 
 

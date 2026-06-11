@@ -7,8 +7,6 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
-
-
 type DropPlacement = "before" | "after";
 type DragState = {
   draggedCardId: string;
@@ -75,8 +73,6 @@ type CardReorderDragPayload = {
 
 
 
-
-
 const CARD_SET_VIEW_PAGER_PADDING_INLINE = 0;
 const CARD_SET_VIEW_PAGER_PADDING_BLOCK = "50vh";
 const CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS = 0;
@@ -85,8 +81,6 @@ const CARD_REORDER_DRAG_MIME_TYPE = "application/x-sivflow-card-reorder";
 const CARD_REORDER_HANDLE_LABEL = "カードを並び替え";
 const CARD_REORDER_HANDLE_CLASS_NAME = "absolute left-[-44px] top-4 z-20 flex h-9 w-7 items-center justify-center rounded-full border border-[rgba(0,0,0,0.06)] bg-[rgba(255,255,255,0.88)] text-[#8b96a3] opacity-0 shadow-[0_10px_30px_rgba(15,23,42,0.10)] backdrop-blur-xl transition-[opacity,background-color,color,transform] duration-150 ease-out cursor-grab active:cursor-grabbing group-hover/card-reorder:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#cfd6df] hover:bg-white hover:text-[#3f4853] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
 const CARD_REORDER_HANDLE_ICON_CLASS_NAME = "text-[18px] leading-none";
-
-
 
 
 
@@ -167,8 +161,6 @@ const buildEmptyStateShellStyle = ({ currentDisplayMode, effectiveCardWidthPx }:
     maxWidth: "100%",
   };
 };
-
-
 
 
 

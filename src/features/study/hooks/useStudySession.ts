@@ -10,8 +10,6 @@ import type { Card, CardPatch, CardSet, SubjectiveScoreValue, UserSettings } fro
 
 
 
-
-
 export type StudySessionRating = PracticeFilterRating;
 export type StudySessionResult = { cardId: string;
   rating: StudySessionRating;
@@ -53,16 +51,12 @@ type Params = {
 
 
 
-
-
 const SCORE_TO_RATING: Record<SubjectiveScoreValue, StudySessionRating> = {
   0: "forgot",
   1: "vague",
   2: "remembered",
   3: "easy",
 };
-
-
 
 
 

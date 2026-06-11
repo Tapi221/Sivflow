@@ -2,8 +2,6 @@ import type { Card } from "@/types";
 
 
 
-
-
 type CardIndexMap = Map<string, number>;
 type ResolveCurrentIndexBaseArgs = {
   pendingFocusIndex: number | null;
@@ -16,8 +14,6 @@ type ResolveCardsForPagerArgs = {
   selectedCard: Card | null;
   cardIndexById: CardIndexMap;
 };
-
-
 
 
 

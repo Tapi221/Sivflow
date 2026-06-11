@@ -5,8 +5,6 @@ import { useCallback, useState } from "react";
 
 
 
-
-
 export interface FlashcardMediaState { isImageModalOpen: boolean;
   isImagePopupOpen: boolean;
   isAudioPopupOpen: boolean;
@@ -19,8 +17,6 @@ export interface FlashcardMediaState { isImageModalOpen: boolean;
   /** いずれかのモーダルが開いており flip をブロックすべき状態か */
   isModalBlockingFlip: boolean;
 }
-
-
 
 
 

@@ -3,11 +3,7 @@ import type { TagColorKey } from "./tag.types";
 
 
 
-
-
 const TAG_COLOR_KEY_SET = new Set<string>(TAG_COLOR_KEYS);
-
-
 
 
 

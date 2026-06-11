@@ -5,11 +5,7 @@ import { listServerStoredGoogleCalendarAccounts } from "./gcal.server-accounts";
 
 
 
-
-
 type ServerStoredGoogleCalendarAccount = Awaited<ReturnType<typeof listServerStoredGoogleCalendarAccounts>>[number];
-
-
 
 
 

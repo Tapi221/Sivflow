@@ -12,11 +12,7 @@ export interface ScaleRenderingStrategy { readonly mode: ScaleRenderingMode;
 
 
 
-
-
 const SCALE_EPSILON = 0.0001;
-
-
 
 
 

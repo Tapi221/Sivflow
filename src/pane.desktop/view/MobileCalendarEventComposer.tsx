@@ -7,8 +7,6 @@ import { cn } from "@/lib/utils";
 
 
 
-
-
 type MobileCalendarWritableCalendarOption = { key: string; accountId: string; calendarId: string; label: string; accountLabel: string; calendarLabel: string; color: string; projectId?: string; isSelected: boolean; };
 type MobileCalendarEventFormState = { title: string; location: string; isAllDay: boolean; startDate: string; startTime: string; endDate: string; endTime: string; calendarKey: string; description: string; };
 type MobileEventDates = { startsAt: Date; endsAt: Date; isAllDay: boolean; };
@@ -30,8 +28,6 @@ type MobileCalendarEventComposerProps = {
 
 
 
-
-
 const MOBILE_EVENT_COMPOSER_DEFAULT_START_HOUR = 9;
 const MOBILE_EVENT_COMPOSER_DEFAULT_DURATION_HOURS = 1;
 const MOBILE_EVENT_COMPOSER_FALLBACK_CALENDAR_COLOR = "#34c759";
@@ -44,8 +40,6 @@ const MOBILE_EVENT_TIME_WHEEL_HOURS = Array.from({ length: 24 }, (_, hour) => ho
 const MOBILE_EVENT_TIME_WHEEL_MINUTES = Array.from({ length: 60 }, (_, minute) => minute);
 const EMPTY_GOOGLE_ACCOUNTS: GoogleAccountDisplay[] = [];
 const EMPTY_PROJECT_CALENDAR_LINKS: ProjectCalendarLink[] = [];
-
-
 
 
 
@@ -142,6 +136,8 @@ const createShiftedMonthParts = (year: number, month: number, offset: number): {
   return { year: shiftedDate.getFullYear(), month: shiftedDate.getMonth() + 1 };
 };
 const isDateInMonth = (date: Date, year: number, month: number): boolean => date.getFullYear() === year && date.getMonth() === month - 1;
+
+
 
 
 
@@ -853,8 +849,6 @@ const MobileCalendarEventComposer = ({
     </>
   );
 };
-
-
 
 
 

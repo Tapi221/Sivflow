@@ -4,8 +4,6 @@ import { readXlsxImportRows } from "@/features/import/infra/xlsx/readXlsxImportR
 
 
 
-
-
 export const parseXlsxImport = async (fileBuffer: ArrayBuffer,): Promise<ImportParseResult> => { const readResult = readXlsxImportRows(fileBuffer);
 
   if ("issues" in readResult) {

@@ -7,8 +7,6 @@ import type { AssetRecord, AssetRemoteStatus, Card, CardBlock, CardFace, Uploade
 
 
 
-
-
 type ImageRecordLike = Partial<AssetRecord> &
   Partial<UploadedImage> &
   Record<string, unknown>;
@@ -46,13 +44,9 @@ type MigrateLegacyImagesToAssetsParams = {
 
 
 
-
-
 const MIGRATION_VERSION = "v2";
 const MIGRATION_STORAGE_KEY_PREFIX = "legacy-image-asset-migration";
 const inFlightTouchMigrations = new Set<string>();
-
-
 
 
 

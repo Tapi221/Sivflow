@@ -12,16 +12,12 @@ import { useToast } from "@web-renderer/contexts/ToastContext";
 
 
 
-
-
 interface UseFolderDocumentUploadParams {
   actionFolderId: string | null;
   getNextOrderIndex: (folderId: string | null) => number;
   setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>;
 }
 type LegacyEntityFields = { blobUrl?: string | null; };
-
-
 
 
 

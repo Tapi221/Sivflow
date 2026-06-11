@@ -8,11 +8,7 @@ import type { Card } from "@/types";
 
 
 
-
-
 const DRAFT_KEY_PREFIX = "card-editor-draft-";
-
-
 
 
 

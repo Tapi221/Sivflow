@@ -4,8 +4,6 @@ import "./LoadingSpinner.css";
 
 
 
-
-
 type LoadingSpinnerProps = {
   className?: string;
   iconClassName?: string;
@@ -14,12 +12,8 @@ type LoadingSpinnerProps = {
 
 
 
-
-
 const DEFAULT_LOADING_LABEL = "読み込み中";
 const DEFAULT_LOADING_ICON_CLASS_NAME = "h-5 w-5";
-
-
 
 
 
@@ -36,11 +30,7 @@ const LoadingSpinner = ({ className, iconClassName, label = DEFAULT_LOADING_LABE
 
 
 
-
-
 export { LoadingSpinner };
-
-
 
 
 

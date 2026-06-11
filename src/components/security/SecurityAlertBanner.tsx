@@ -4,8 +4,6 @@ import { AlertTriangle, X } from "@/ui/icons";
 
 
 
-
-
 export const SecurityAlertBanner: React.FC = () => { const { securityState, dismissSecurityAlert } = useSecurity();
 
   // アラートがない、かつロックも2FA要求もない場合は表示しない

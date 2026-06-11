@@ -3,8 +3,6 @@ const TYPING_TARGET_ROLES = new Set(["textbox", "combobox", "searchbox"]);
 
 
 
-
-
 const isHTMLElement = (target: EventTarget | null): target is HTMLElement => target instanceof HTMLElement;
 export const isTypingTarget = (target: EventTarget | null) => { if (!isHTMLElement(target)) return false;
   if (target.closest("[data-prevent-hotkeys=\"true\"]")) return true;

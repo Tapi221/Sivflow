@@ -16,8 +16,6 @@ import { useCalendarTimetable } from "./useCalendarTimetable";
 
 
 
-
-
 type TimetableSlot = { dayIndex: CalendarTimetableWeekdayIndex; periodId: string; };
 type CalendarTimetableDensity = "default" | "compact";
 type CalendarTimetableViewProps = { weekDate: Date; weekStartDay?: CalendarWeekStartDay; density?: CalendarTimetableDensity; className?: string; addRequestToken?: number; };
@@ -26,8 +24,6 @@ type CalendarTimetableSettingsPanelProps = { periods: CalendarTimetablePeriod[];
 type CalendarTimetableGridStyle = CSSProperties & { "--calendar-timetable-day-count": CalendarTimetableVisibleDayCount; };
 type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 type StratisOptionalIconProps = { names: readonly string[]; className?: string; };
-
-
 
 
 
@@ -41,8 +37,6 @@ const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] a
 const DEFAULT_COURSE_COLOR_KEY: CalendarTimetableColorKey = "blue";
 const DEFAULT_TIMETABLE_ADD_REQUEST_TOKEN = 0;
 const EMPTY_SLOT_LIST: CalendarTimetableSlot[] = [];
-
-
 
 
 
@@ -61,8 +55,6 @@ const getTimetableGridTemplateColumns = (density: CalendarTimetableDensity): str
 const createTimetableGridStyle = (density: CalendarTimetableDensity, visibleDayCount: CalendarTimetableVisibleDayCount): CalendarTimetableGridStyle => ({ gridTemplateColumns: getTimetableGridTemplateColumns(density), "--calendar-timetable-day-count": visibleDayCount });
 const isSameTimetableSlot = (left: CalendarTimetableSlot, right: CalendarTimetableSlot): boolean => left.dayIndex === right.dayIndex && left.periodId === right.periodId;
 const createEditorSlots = (course: CalendarTimetableCourse | null, initialSlot: CalendarTimetableSlot | null): CalendarTimetableSlot[] => course?.slots ?? (initialSlot ? [initialSlot] : EMPTY_SLOT_LIST);
-
-
 
 
 
@@ -286,8 +278,6 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
     </div>
   );
 };
-
-
 
 
 

@@ -5,8 +5,6 @@ import { CircleHelp, Star, Tag } from "@/ui/icons";
 
 
 
-
-
 interface CardCornerActionsProps {
   onHelp?: () => void;
   onStar?: () => void;
@@ -17,8 +15,6 @@ interface CardCornerActionsProps {
   visualScale?: number;
   iconPx?: number;
 }
-
-
 
 
 
@@ -34,8 +30,6 @@ const resolveSafeIconPx = (value?: number) => {
   if (value <= 0) return null;
   return value;
 };
-
-
 
 
 
@@ -163,8 +157,6 @@ const CardCornerActions = ({
     </div>
   );
 };
-
-
 
 
 

@@ -41,6 +41,8 @@ import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 
 
 
+
+
 /** queries.ts が必要とする LocalDB プロパティの最小インターフェース */
 type QueryDb = Dexie & {
   readonly cards: Table;
@@ -52,8 +54,6 @@ type MutableDocumentBlobFields = {
   localUrl?: string | null;
   blobUrl?: string | null;
 };
-
-
 
 
 

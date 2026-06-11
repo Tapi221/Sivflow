@@ -4,8 +4,6 @@ import { RowSnappedRoot } from "@/components/card/frame/RowSnappedRoot";
 
 
 
-
-
 type CodeBlockFrameProps = {
   variant?: "viewer" | "editor";
   languageLabel?: string;
@@ -15,8 +13,6 @@ type CodeBlockFrameProps = {
   headerRight?: React.ReactNode;
   children: React.ReactNode;
 };
-
-
 
 
 

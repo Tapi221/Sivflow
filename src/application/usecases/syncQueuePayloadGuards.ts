@@ -6,14 +6,10 @@ import type { UserSettings } from "@/types/domain/user";
 
 
 
-
-
 export type UpsertEntity = keyof SyncPayloadByEntity;
 export type DeleteEntity = Extract<SyncEntity, "card" | "folder" | "cardSet" | "document" | "tag" | "asset" | "projectMap">;
 export type UpsertQueueItem<TEntity extends UpsertEntity> = Extract<SyncQueueItem, { entity: TEntity; operationType: "create" | "update"; }>;
 type DateLike = Date | { toDate?: () => Date; } | null | undefined;
-
-
 
 
 

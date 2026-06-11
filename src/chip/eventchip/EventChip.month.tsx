@@ -7,8 +7,6 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 
 
 
-
-
 type CalendarEventChipMonthProps = {
   event: GoogleCalendarEvent;
   showTimeLabel?: boolean;
@@ -23,13 +21,9 @@ type CalendarEventChipMonthStyle = CSSProperties & {
 
 
 
-
-
 const CHIP_BASE_CLASS_NAME = "flex w-full min-w-0 items-center overflow-hidden text-left shadow-none";
 const CHIP_TITLE_CLASS_NAME = "min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold leading-none tracking-[-0.01em]";
 const CHIP_TIME_CLASS_NAME = "ml-1 shrink-0 overflow-hidden whitespace-nowrap font-semibold leading-none tabular-nums opacity-80";
-
-
 
 
 
@@ -63,8 +57,6 @@ const getTimeLabel = (event: GoogleCalendarEvent): string => {
 
 
 
-
-
 const CalendarEventChipMonth = ({ event, showTimeLabel = true, tooltipDisabled = false }: CalendarEventChipMonthProps) => {
   const tokens = generateColorTokens(event.accentColor);
   const titleLabel = event.title || "Untitled";
@@ -80,8 +72,6 @@ const CalendarEventChipMonth = ({ event, showTimeLabel = true, tooltipDisabled =
     </HoverMonthEventTooltip>
   );
 };
-
-
 
 
 
