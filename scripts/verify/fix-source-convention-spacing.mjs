@@ -146,7 +146,7 @@ const collectSpacingReplacements = (source, sourceFile) => sourceFile.statements
   if (previousCategory === category) return [];
 
   const start = previousStatement.getEnd();
-  const end = statement.getFullStart();
+  const end = statement.getStart(sourceFile);
   if (start > end) return [];
   if (/\S/.test(source.slice(start, end))) return [];
 
