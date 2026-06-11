@@ -83,4 +83,4 @@ export const WEEKDAY_HOUR_LABEL_PADDING_RIGHT = "0.625rem";
 export const WEEKDAY_HOUR_LABEL_FONT_SIZE = "11px";
 
 // misc layout
-export const WEEKDAY_EVENT_CHIP_PADDING_X = 
+export const WEEKDAY_EVENT_CHIP_PADDING_X = 2;

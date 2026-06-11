@@ -198,4 +198,4 @@ export const useGoogleCalendarLayer = () => { useServerStoredGoogleAccountBootst
 
 
 
-export type { GoogleAccountEntr
+export type { GoogleAccountEntry };

@@ -49,3 +49,4 @@ export const resolveCardUsesSurfaceScale = (spec: CardRenderSpec) => { return sp
 export const resolveCardUsesStretchWidth = (spec: CardRenderSpec) => { return spec.surfaceMode === "fluid";
 };
 export const resolveCardDisablesFrameScale = (spec: CardRenderSpec) => { return spec.surfaceMode === "fluid";
+};

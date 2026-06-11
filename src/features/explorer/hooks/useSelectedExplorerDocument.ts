@@ -28,3 +28,4 @@ export const useSelectedExplorerDocument = (documentId: string | null) => { cons
     document: document ?? null,
     loading: Boolean(documentId) && document === undefined,
   };
+};

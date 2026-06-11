@@ -80,3 +80,4 @@ class FeatureFlagService {
 const featureFlags = new FeatureFlagService();
 export const flags = { isEnabled: (name: LegacyFlagName): boolean => { return featureFlags.getFlag(LEGACY_FEATURE_FLAG_MAP[name]);
   },
+};

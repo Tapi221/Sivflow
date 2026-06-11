@@ -91,3 +91,4 @@ export const normalizeReviewLogs = ( rawLogs: unknown, ): NormalizedReviewLog[] 
       };
     })
     .filter((value): value is NormalizedReviewLog => value !== null);
+};

@@ -193,3 +193,4 @@ export const useCardSetViewSelectionState = ({ initialIndex, targetCardId, devic
     handleToggleViewMode,
     handlePagerIndexChange,
   };
+};

@@ -31,3 +31,4 @@ export const FadeSkeleton = ({ ariaLabel = "読み込み中", className, itemCla
       })}
     </div>
   );
+};

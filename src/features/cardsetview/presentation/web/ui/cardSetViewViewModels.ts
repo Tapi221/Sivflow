@@ -57,3 +57,4 @@ export const buildWidthControl = ({ isDesktop, isGlobalEditing, activePaneWidthP
     },
     onReset: resetActivePaneWidth,
   };
+};

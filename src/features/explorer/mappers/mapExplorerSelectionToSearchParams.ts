@@ -36,3 +36,4 @@ export const mapExplorerSelectionToSearchParams = ({ isHomeOnlyMode, isSectionLi
   }
 
   return next;
+};

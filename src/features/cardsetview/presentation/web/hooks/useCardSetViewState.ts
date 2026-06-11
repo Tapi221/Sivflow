@@ -66,3 +66,4 @@ export const useCardSetViewState = ({ initialIndex, targetCardId, cardSetId, car
     handleToggleViewMode: viewState.handleToggleViewMode,
     handlePagerIndexChange: viewState.handlePagerIndexChange,
   };
+};

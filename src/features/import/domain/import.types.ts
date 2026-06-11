@@ -106,4 +106,4 @@ export { IMPORT_BLOCK_TYPES, IMPORT_SHEET_NAME, IMPORT_SIDES, formatImportCellLa
 
 
 
-export type { ImportBlock, ImportBlockType, ImportCard, ImportColumnKey, ImportIssue, ImportIssueCode, ImportIssueLevel, ImportParseResult, ImportPayload, ImportSheetName, ImportSide, ParsedImport
+export type { ImportBlock, ImportBlockType, ImportCard, ImportColumnKey, ImportIssue, ImportIssueCode, ImportIssueLevel, ImportParseResult, ImportPayload, ImportSheetName, ImportSide, ParsedImportRow };
