@@ -47,7 +47,7 @@ export interface PlatformOauthApi { start(authorizeUrl: string): Promise<void>;
   cancel(): Promise<void>;
   takePendingCallback(): Promise<DesktopOauthCallbackPayload | null>;
   exchangeIdToken(idToken: string): Promise<unknown>;
-  storeRefreshToken(input: { accountId: string; refreshToken: string }): Promise<void>;
+  storeRefreshToken(input: { accountId: string; refreshToken: string; }): Promise<void>;
   readRefreshToken(accountId: string): Promise<string | null>;
   deleteRefreshToken(accountId: string): Promise<void>;
   onCallback(handler: DesktopOauthCallbackHandler): () => void;
@@ -75,6 +75,8 @@ declare global {
     desktop?: DesktopBridgeApi;
   }
 }
+
+
 
 
 

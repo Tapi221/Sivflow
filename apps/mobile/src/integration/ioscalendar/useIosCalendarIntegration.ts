@@ -6,11 +6,15 @@ import type { IosCalendarConnectionStatus, IosCalendarEvent, IosCalendarListItem
 
 
 
+
+
 type LoadEventsInput = {
   calendarIds: string[];
   calendars: IosCalendarListItem[];
   range: IosCalendarRange | null;
 };
+
+
 
 
 
@@ -22,6 +26,8 @@ const IOS_CALENDAR_DELETE_ERROR = "iOSカレンダー予定の削除に失敗し
 
 
 
+
+
 const normalizeRange = (range: IosCalendarRange): IosCalendarRange => range.rangeStart <= range.rangeEnd
   ? range
   : {
@@ -30,7 +36,7 @@ const normalizeRange = (range: IosCalendarRange): IosCalendarRange => range.rang
   };
 const isSameRange = (a: IosCalendarRange | null, b: IosCalendarRange): boolean => a?.rangeStart.getTime() === b.rangeStart.getTime() && a.rangeEnd.getTime() === b.rangeEnd.getTime();
 const getDefaultSelectedCalendarIds = (calendars: IosCalendarListItem[]): string[] => calendars.filter((calendar) => calendar.selected).map((calendar) => calendar.id);
-const getConnectionStatus = ({ error, isEnabled, permissionStatus, supported }: { error: string | null; isEnabled: boolean; permissionStatus: IosCalendarPermissionStatus; supported: boolean }): IosCalendarConnectionStatus => {
+const getConnectionStatus = ({ error, isEnabled, permissionStatus, supported }: { error: string | null; isEnabled: boolean; permissionStatus: IosCalendarPermissionStatus; supported: boolean; }): IosCalendarConnectionStatus => {
   if (!supported) return "unsupported";
   if (permissionStatus !== "granted" || !isEnabled) return "needsPermission";
   if (error) return "error";

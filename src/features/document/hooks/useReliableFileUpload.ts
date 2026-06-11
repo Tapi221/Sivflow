@@ -10,6 +10,8 @@ import { generateSafeStoragePath } from "@/utils/fileUtils";
 
 
 
+
+
 interface UploadResult {
   url: string;
   storagePath: string | null;
@@ -39,6 +41,8 @@ type UploadValidationRule = {
   maxFileSize: number;
   defaultMimeType?: string;
 };
+
+
 
 
 
@@ -92,9 +96,11 @@ const UPLOAD_VALIDATION_RULES: Record<UploadKind, UploadValidationRule> = {
 
 
 
+
+
 const isContextObject = (
   value: UploadMetadata["context"] | undefined,
-): value is Extract<UploadMetadata["context"], { type: string }> =>
+): value is Extract<UploadMetadata["context"], { type: string; }> =>
   typeof value === "object" && value !== null && "type" in value;
 const toUploadKind = (value: string): UploadKind => {
   if (value === "card_audio" || value === "pdf") return value;
@@ -137,9 +143,9 @@ const getSafeErrorMessage = (error: unknown, fallback: string): string => {
     typeof error === "object" &&
     error !== null &&
     "message" in error &&
-    typeof (error as { message?: unknown }).message === "string"
+    typeof (error as { message?: unknown; }).message === "string"
   ) {
-    return (error as { message: string }).message;
+    return (error as { message: string; }).message;
   }
   return fallback;
 };

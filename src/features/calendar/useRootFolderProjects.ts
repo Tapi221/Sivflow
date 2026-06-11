@@ -8,6 +8,8 @@ import type { AppCalendarItem } from "./scheduleScreen.types";
 
 
 
+
+
 export type CreateRootFolderProjectInput = { label: string;
   color?: string;
   checked?: boolean;
@@ -28,9 +30,13 @@ type StoredLegacyProject = Partial<AppCalendarItem>;
 
 
 
+
+
 const LEGACY_APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
 const PROJECT_VISIBILITY_STORAGE_KEY = "flashcard-master:schedule:root-folder-project-visibility";
 const EMPTY_COLLECTION: never[] = [];
+
+
 
 
 
@@ -42,7 +48,7 @@ const readTrimmedString = (value: unknown): string | null => {
   return trimmed ? trimmed : null;
 };
 const getFolderProjectLabel = (folder: FolderTreeNode): string => {
-  const record = folder as { folderName?: unknown; folder_name?: unknown; name?: unknown };
+  const record = folder as { folderName?: unknown; folder_name?: unknown; name?: unknown; };
   return readTrimmedString(record.folderName) ?? readTrimmedString(record.folder_name) ?? readTrimmedString(record.name) ?? UNTITLED_PROJECT_NAME;
 };
 const createLegacyFallbackProjectId = (label: string, index: number): string => `legacy-app-project:${index}:${normalizeRootFolderProjectLabel(label)}`;

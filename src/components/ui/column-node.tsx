@@ -36,59 +36,59 @@ import { cn } from '@/lib/utils';
 
 
 
-export const ColumnElement = withHOC( ResizableProvider, function ColumnElement(props: PlateElementProps<TColumnElement>) { const { width } = props.element;
-    const readOnly = useReadOnly();
-    const isSelectionAreaVisible = usePluginOption(
-      BlockSelectionPlugin,
-      'isSelectionAreaVisible'
-    );
+export const ColumnElement = withHOC(ResizableProvider, function ColumnElement(props: PlateElementProps<TColumnElement>) { const { width } = props.element;
+  const readOnly = useReadOnly();
+  const isSelectionAreaVisible = usePluginOption(
+    BlockSelectionPlugin,
+    'isSelectionAreaVisible'
+  );
 
-    const { isDragging, nodeRef, previewRef, handleRef } = useDraggable({
-      element: props.element,
-      orientation: 'horizontal',
-      type: 'column',
-      canDropNode: ({ dragEntry, dropEntry }) =>
-        PathApi.equals(
-          PathApi.parent(dragEntry[1]),
-          PathApi.parent(dropEntry[1])
-        ),
-    });
+  const { isDragging, nodeRef, previewRef, handleRef } = useDraggable({
+    element: props.element,
+    orientation: 'horizontal',
+    type: 'column',
+    canDropNode: ({ dragEntry, dropEntry }) =>
+      PathApi.equals(
+        PathApi.parent(dragEntry[1]),
+        PathApi.parent(dropEntry[1])
+      ),
+  });
 
-    return (
-      <div className="group/column relative" style={{ width: width ?? '100%' }}>
-        {!readOnly && !isSelectionAreaVisible && (
-          <div
-            ref={handleRef}
-            className={cn(
-              '-translate-x-1/2 -translate-y-1/2 absolute top-2 left-1/2 z-50',
-              'pointer-events-auto flex items-center',
-              'opacity-0 transition-opacity group-hover/column:opacity-100'
-            )}
-          >
-            <ColumnDragHandle />
-          </div>
-        )}
-
-        <PlateElement
-          {...props}
-          ref={useComposedRef(props.ref, previewRef, nodeRef)}
-          className="h-full px-2 pt-2 group-first/column:pl-0 group-last/column:pr-0"
+  return (
+    <div className="group/column relative" style={{ width: width ?? '100%' }}>
+      {!readOnly && !isSelectionAreaVisible && (
+        <div
+          ref={handleRef}
+          className={cn(
+            '-translate-x-1/2 -translate-y-1/2 absolute top-2 left-1/2 z-50',
+            'pointer-events-auto flex items-center',
+            'opacity-0 transition-opacity group-hover/column:opacity-100'
+          )}
         >
-          <div
-            className={cn(
-              'relative h-full border border-transparent p-1.5',
-              !readOnly && 'rounded-lg border-border border-dashed',
-              isDragging && 'opacity-50'
-            )}
-          >
-            {props.children}
+          <ColumnDragHandle />
+        </div>
+      )}
 
-            {!readOnly && !isSelectionAreaVisible && <DropLine />}
-          </div>
-        </PlateElement>
-      </div>
-    );
-  }
+      <PlateElement
+        {...props}
+        ref={useComposedRef(props.ref, previewRef, nodeRef)}
+        className="h-full px-2 pt-2 group-first/column:pl-0 group-last/column:pr-0"
+      >
+        <div
+          className={cn(
+            'relative h-full border border-transparent p-1.5',
+            !readOnly && 'rounded-lg border-border border-dashed',
+            isDragging && 'opacity-50'
+          )}
+        >
+          {props.children}
+
+          {!readOnly && !isSelectionAreaVisible && <DropLine />}
+        </div>
+      </PlateElement>
+    </div>
+  );
+}
 );
 
 function DropLine() {
@@ -102,9 +102,9 @@ function DropLine() {
         'slate-dropLine',
         'absolute bg-brand/50',
         dropLine === 'left' &&
-          'group-first/column:-left-1 inset-y-0 left-[-10.5px] w-1',
+        'group-first/column:-left-1 inset-y-0 left-[-10.5px] w-1',
         dropLine === 'right' &&
-          'group-last/column:-right-1 inset-y-0 right-[-11px] w-1'
+        'group-last/column:-right-1 inset-y-0 right-[-11px] w-1'
       )}
     />
   );
@@ -304,5 +304,5 @@ const ColumnDragHandle = React.memo(function ColumnDragHandle() {
 
 
 
-export function ColumnGroupElement(props: PlateElementProps) { return ( <PlateElement className="mb-2" {...props}> <ColumnFloatingToolbar> <div className="flex size-full rounded">{props.children}</div> </ColumnFloatingToolbar> </PlateElement> );
+export function ColumnGroupElement(props: PlateElementProps) { return (<PlateElement className="mb-2" {...props}> <ColumnFloatingToolbar> <div className="flex size-full rounded">{props.children}</div> </ColumnFloatingToolbar> </PlateElement>);
 }

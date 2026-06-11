@@ -3,6 +3,8 @@ import * as Popover from "@radix-ui/react-popover";
 
 
 
+
+
 export type MultiOption = { value: string;
   label: string;
 };
@@ -12,6 +14,8 @@ type Props = {
   options: readonly MultiOption[];
   placeholder?: string;
 };
+
+
 
 
 
@@ -139,11 +143,10 @@ export const MultiSelectDropdown = ({ value, onChange, options, placeholder = "S
                     border border-[#cfd3dc]
                     transition
 
-                    ${
-              isSelected
-                ? "bg-[#25272d] border-[#25272d]"
-                : "bg-white"
-              }
+                    ${isSelected
+                      ? "bg-[#25272d] border-[#25272d]"
+                      : "bg-white"
+                    }
                   `}
                 />
               </button>

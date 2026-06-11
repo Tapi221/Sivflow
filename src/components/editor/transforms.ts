@@ -115,7 +115,7 @@ const insertBlockMap: Record<
 
 
 
-export const insertBlock = ( editor: PlateEditor, type: string, options: InsertBlockOptions = {} ) => { const { upsert = false } = options;
+export const insertBlock = (editor: PlateEditor, type: string, options: InsertBlockOptions = {}) => { const { upsert = false } = options;
 
   editor.tf.withoutNormalizing(() => {
     const block = editor.api.block();
@@ -202,7 +202,10 @@ const setBlockMap: Record<
 
 
 
-export const setBlockType = ( editor: PlateEditor, type: string, { at }: { at?: Path } = {} ) => { editor.tf.withoutNormalizing(() => { if (type === KEYS.blockquote) { const target = at ?? editor.selection;
+export const setBlockType = (editor: PlateEditor, type: string, { at }: { at?: Path; } = {}) => {
+  editor.tf.withoutNormalizing(() => {
+    if (type === KEYS.blockquote) {
+      const target = at ?? editor.selection;
 
       if (!target || editor.api.some({ at: target, match: { type } })) {
         return;

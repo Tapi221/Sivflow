@@ -7,6 +7,8 @@ import { sanitizeForLog } from "@/utils/logSanitizer";
 
 
 
+
+
 type RebuildTableByType = {
   card: "cards";
   folder: "folders";
@@ -32,6 +34,8 @@ type RebuildFailure = {
 
 
 
+
+
 const REBUILD_TABLE_BY_TYPE: RebuildTableByType = {
   card: "cards",
   folder: "folders",
@@ -44,6 +48,8 @@ const REBUILD_TABLE_BY_TYPE: RebuildTableByType = {
 
 
 
+
+
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
 };
@@ -52,7 +58,7 @@ const isRebuildSupportedType = (type: string): type is RebuildSupportedType => {
 };
 const normalizeRebuildRecord = (
   userId: string,
-  change: { type?: string; id?: string; data?: unknown },
+  change: { type?: string; id?: string; data?: unknown; },
 ): Record<string, unknown> => {
   const data = {
     ...(isRecord(change.data) ? change.data : {}),

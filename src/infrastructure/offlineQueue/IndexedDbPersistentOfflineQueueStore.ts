@@ -4,12 +4,14 @@ import { warnOncePerSession } from "@/infrastructure/localdb/runtimeState";
 
 
 
+
+
 export class IndexedDbPersistentOfflineQueueStore { private readonly dbName: string;
   private readonly storeName: string;
   private idbUnavailable = false;
   private readonly memoryQueue = new Map<string, QueueItem>();
 
-  constructor(options?: { dbName?: string; storeName?: string }) {
+  constructor(options?: { dbName?: string; storeName?: string; }) {
     this.dbName = options?.dbName ?? "offline_upload_queue";
     this.storeName = options?.storeName ?? "pending_uploads";
   }

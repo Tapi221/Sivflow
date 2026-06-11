@@ -10,7 +10,7 @@ import type * as DialogModule from "@/components/ui/dialog";
 import { layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
 
 vi.mock("@/components/card/frame/CardFrame", () => ({
-  CardFrame: ({ children, heightPx }: { children: React.ReactNode; heightPx?: number }) => (
+  CardFrame: ({ children, heightPx }: { children: React.ReactNode; heightPx?: number; }) => (
     <div data-testid="mock-card-frame" data-height={heightPx ?? ""}>
       {children}
     </div>
@@ -26,8 +26,8 @@ vi.mock("@/components/card/overlays/ReferencePopup", () => ({
 } satisfies Partial<Record<keyof typeof ReferencePopupModule, unknown>>));
 
 vi.mock("@/components/ui/dialog", () => ({
-  Dialog: ({ children }: { children: React.ReactNode }) => children,
-  DialogContent: ({ children }: { children: React.ReactNode }) => children,
+  Dialog: ({ children }: { children: React.ReactNode; }) => children,
+  DialogContent: ({ children }: { children: React.ReactNode; }) => children,
 } satisfies Partial<Record<keyof typeof DialogModule, unknown>>));
 
 describe("Flashcard の layoutRows による高さ制御", () => {

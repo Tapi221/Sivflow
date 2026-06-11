@@ -6,6 +6,8 @@ import { Type } from "@/ui/icons";
 
 
 
+
+
 interface TextBlockProps {
   content: string;
   onChange: (content: string) => void;
@@ -30,6 +32,8 @@ interface TextBlockProps {
 
 
 
+
+
 const areTextBlockPropsEqual = (prev: TextBlockProps, next: TextBlockProps) =>
   prev.content === next.content &&
   prev.dragEnabled === next.dragEnabled &&
@@ -42,6 +46,8 @@ const areTextBlockPropsEqual = (prev: TextBlockProps, next: TextBlockProps) =>
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&
   prev.zoom === next.zoom;
+
+
 
 
 
@@ -101,6 +107,8 @@ const TextBlockInner = ({
     </BlockWrapper>
   );
 };
+
+
 
 
 

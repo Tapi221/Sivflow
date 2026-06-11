@@ -16,6 +16,8 @@ import "./sidebar.layered-directory.css";
 
 
 
+
+
 type SidebarTranslationKey =
   | "sidebarHome"
   | "sidebarLibrary"
@@ -37,6 +39,8 @@ type SidebarProps = {
   onToggleLeftPanel?: () => void;
   onOpenSettings?: () => void;
 };
+
+
 
 
 
@@ -77,7 +81,9 @@ const mainNavItems: SidebarNavItem[] = [
 
 
 
-const SidebarNavLink = ({ item, disabled }: { item: SidebarNavItem; disabled?: boolean }) => {
+
+
+const SidebarNavLink = ({ item, disabled }: { item: SidebarNavItem; disabled?: boolean; }) => {
   const t = useT();
   const folderTagMode = useFolderTagModeStore((state) => state.folderTagMode);
   const setFolderTagMode = useFolderTagModeStore((state) => state.setFolderTagMode);
@@ -189,6 +195,8 @@ const Sidebar = ({ isLeftPanelCollapsed = false, onToggleLeftPanel, onOpenSettin
     </aside>
   );
 };
+
+
 
 
 

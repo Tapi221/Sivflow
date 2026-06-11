@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef } from "react";
 
 
 
+
+
 type CalendarEventDragRepeatActionStep<TDirection extends string> = (direction: TDirection, snapshot: CalendarEventDragPointerSnapshot) => boolean | void;
 type CalendarEventDragRepeatActionOptions<TDirection extends string> = {
   repeatIntervalMs: number;
@@ -22,7 +24,11 @@ export type CalendarEventDragPointerSnapshot = { pointerId: number;
 
 
 
+
+
 const PRIMARY_BUTTONS_MASK = 1;
+
+
 
 
 
@@ -127,6 +133,8 @@ const useCalendarEventDragRepeatAction = <TDirection extends string>({ repeatInt
 
   return { begin, update, stop, getSnapshot };
 };
+
+
 
 
 

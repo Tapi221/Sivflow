@@ -3,6 +3,8 @@ import type { Card, CardSet, Folder } from "@/types";
 
 
 
+
+
 export type CardSetDashboardRow = { id: string;
   title: string;
   description: string;
@@ -20,11 +22,13 @@ type BuildCardSetDashboardRowsParams = {
   cardSets: CardSet[];
   cards: Card[];
   folders: Folder[];
-  tagById: ReadonlyMap<string, { name: string }>;
+  tagById: ReadonlyMap<string, { name: string; }>;
 };
 type CardWithLegacyCardSetId = Card & {
   card_set_id?: string | null;
 };
+
+
 
 
 
@@ -73,7 +77,7 @@ const resolveCategoryLabel = (
 };
 const resolveDisplayTags = (
   cardSet: CardSet,
-  tagById: ReadonlyMap<string, { name: string }>,
+  tagById: ReadonlyMap<string, { name: string; }>,
 ): string[] => {
   const explicitTags = (Array.isArray(cardSet.tags) ? cardSet.tags : [])
     .map((tagIdOrName) => tagById.get(tagIdOrName)?.name ?? tagIdOrName)

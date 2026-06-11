@@ -12,20 +12,24 @@ import { useToast } from "@web-renderer/contexts/ToastContext";
 
 
 
+
+
 interface UseFolderDocumentUploadParams {
   actionFolderId: string | null;
   getNextOrderIndex: (folderId: string | null) => number;
   setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>;
 }
-type LegacyEntityFields = { blobUrl?: string | null };
+type LegacyEntityFields = { blobUrl?: string | null; };
+
+
 
 
 
 const withLegacyFields = <T extends object>(value: T): T & LegacyEntityFields => value as T & LegacyEntityFields;
 const getErrorMessage = (error: unknown, fallback: string): string => {
   if (error instanceof Error && error.message) return error.message;
-  if (typeof error === "object" && error !== null && "message" in error && typeof (error as { message?: unknown }).message === "string") {
-    return (error as { message: string }).message;
+  if (typeof error === "object" && error !== null && "message" in error && typeof (error as { message?: unknown; }).message === "string") {
+    return (error as { message: string; }).message;
   }
   return fallback;
 };

@@ -5,9 +5,11 @@ import { normalizeLayoutRows } from "@/domain/card/extraRows";
 
 
 
+
+
 type Side = "question" | "answer";
 type UseLayoutRowsControllerParams<
-  TDraft extends { layoutRows: number } | null,
+  TDraft extends { layoutRows: number; } | null,
 > = {
   draft: TDraft;
   setDraft: Dispatch<SetStateAction<TDraft>>;
@@ -18,7 +20,10 @@ type UseLayoutRowsControllerParams<
 
 
 
-export const useLayoutRowsController = < TDraft extends { layoutRows: number } | null, >({ draft, setDraft, defaultLayoutRows, normalizedSelectedCardId, isEditing, }: UseLayoutRowsControllerParams<TDraft>) => { const rowsRafRef = useRef<number | null>(null);
+
+
+export const useLayoutRowsController = <TDraft extends { layoutRows: number; } | null,>({ draft, setDraft, defaultLayoutRows, normalizedSelectedCardId, isEditing, }: UseLayoutRowsControllerParams<TDraft>) => {
+  const rowsRafRef = useRef<number | null>(null);
   const pendingRowsRef = useRef<number | null>(null);
   const layoutRowsRef = useRef<number>(defaultLayoutRows);
   const allowAutoMinHeightSyncRef = useRef(false);

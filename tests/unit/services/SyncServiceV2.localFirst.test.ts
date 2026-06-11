@@ -5,7 +5,7 @@ import { SyncServiceV2 } from "@/services/SyncServiceV2";
 import type { LocalDBLike, SyncableEntityTable } from "@/services/localdb";
 import type { SyncQueueItem } from "@/types/domain/sync";
 
-type Row = Record<string, unknown> & { id: string; userId?: string };
+type Row = Record<string, unknown> & { id: string; userId?: string; };
 
 const makeTable = (rows: Row[] = []) => {
   const data = new Map(rows.map((row) => [row.id, { ...row }]));
@@ -52,7 +52,7 @@ const makeLocalDb = (initial: Partial<Record<SyncableEntityTable, Row[]>> = {}) 
   };
   const syncQueue: SyncQueueItem[] = [];
   const conflicts: unknown[] = [];
-  const upserts: Array<{ table: string; data: unknown; skipSync?: boolean }> = [];
+  const upserts: Array<{ table: string; data: unknown; skipSync?: boolean; }> = [];
   const queuedUpserts: unknown[] = [];
   const queuedDeletes: unknown[] = [];
 
@@ -143,7 +143,7 @@ const makeTelemetry = () =>
     startTransaction: vi.fn(() => ({ end: vi.fn() })),
   }) as never;
 
-const makeService = ({ cloud, localDB, queue }: { cloud: ICloudSyncAdapter; localDB: LocalDBLike; queue: IQueueManager }) =>
+const makeService = ({ cloud, localDB, queue }: { cloud: ICloudSyncAdapter; localDB: LocalDBLike; queue: IQueueManager; }) =>
   new SyncServiceV2("user-1", localDB, queue, makeNetwork(), new DiffEngine(), cloud, makeTelemetry());
 
 describe("SyncServiceV2 local-first sync", () => {

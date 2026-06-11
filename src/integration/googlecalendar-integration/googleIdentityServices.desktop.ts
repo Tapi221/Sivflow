@@ -14,6 +14,8 @@ let _gisLoaded = false;
 
 
 
+
+
 const loadGisScript = (): Promise<void> => {
   return new Promise((resolve, reject) => {
     if (_gisLoaded || (typeof window !== "undefined" && window.google?.accounts)) {
@@ -89,7 +91,7 @@ export const requestWebAccessTokenViaGis = async ({ clientId, scope, silent = fa
         resolve(response.access_token);
       },
       error_callback: (error) => {
-        reject(new Error((error as { message?: string }).message ?? "GIS token request failed"));
+        reject(new Error((error as { message?: string; }).message ?? "GIS token request failed"));
       },
     });
 

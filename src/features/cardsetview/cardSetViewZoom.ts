@@ -4,6 +4,8 @@ import { CARD_VIEW_DEFAULT_ZOOM_PERCENT, CARD_VIEW_MIN_ZOOM_PERCENT, CARD_VIEW_Z
 
 
 
+
+
 const sanitizePositiveNumber = (value: number, fallback: number) => {
   return typeof value === "number" && Number.isFinite(value) && value > 0
     ? value
@@ -13,9 +15,9 @@ const roundDownToStep = (value: number, step: number) => {
   const safeStep = sanitizePositiveNumber(step, CARD_VIEW_ZOOM_STEP_PERCENT);
   return Math.floor(value / safeStep) * safeStep;
 };
-export const zoomPercentToFactor = (zoomPercent: number) => { return ( sanitizePositiveNumber(zoomPercent, CARD_VIEW_DEFAULT_ZOOM_PERCENT) / 100 );
+export const zoomPercentToFactor = (zoomPercent: number) => { return (sanitizePositiveNumber(zoomPercent, CARD_VIEW_DEFAULT_ZOOM_PERCENT) / 100);
 };
-export const zoomPercentToFixedCardWidthPx = (zoomPercent: number) => { return Math.max( 1, Math.round(CANONICAL_CARD_WIDTH * zoomPercentToFactor(zoomPercent)), );
+export const zoomPercentToFixedCardWidthPx = (zoomPercent: number) => { return Math.max(1, Math.round(CANONICAL_CARD_WIDTH * zoomPercentToFactor(zoomPercent)),);
 };
 export const computeDynamicMaxZoomPercent = ({ availableWidthPx, baseCardWidthPx = CANONICAL_CARD_WIDTH, stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT, }: { availableWidthPx: number;
   baseCardWidthPx?: number;
@@ -83,8 +85,12 @@ export const normalizeZoomPercent = ({ value, minZoomPercent, maxZoomPercent, st
 
 
 
+
+
 export { CARD_VIEW_DEFAULT_ZOOM_PERCENT, CARD_VIEW_MIN_ZOOM_PERCENT };
 export { CARD_VIEW_ZOOM_STEP_PERCENT };
+
+
 
 
 

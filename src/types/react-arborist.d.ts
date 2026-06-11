@@ -25,8 +25,8 @@ declare module "react-arborist" {
     indent?: number;
     openByDefault?: boolean;
     selection?: string;
-    onSelect?: (nodes: Array<{ id: string; data: T }>) => void;
-    onActivate?: (node: { id: string; data: T }) => void;
+    onSelect?: (nodes: Array<{ id: string; data: T; }>) => void;
+    onActivate?: (node: { id: string; data: T; }) => void;
     className?: string;
   };
 

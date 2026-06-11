@@ -9,6 +9,8 @@ import type { TagRecord } from "@/services/localdb/types";
 
 
 
+
+
 export type TagCategory = string;
 export type Tag = TagRecord;
 type CardTagFields = {
@@ -23,8 +25,12 @@ type LocalDbInstance = Awaited<ReturnType<typeof getLocalDb>>;
 
 
 
+
+
 export const DEFAULT_TAG_COLOR_KEYS: TagColorKey[] = [...TAG_COLOR_KEYS];
 const MAX_PATH_DEPTH = 12;
+
+
 
 
 
@@ -35,7 +41,7 @@ const genId = (): string => {
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 };
 const genCategoryId = (): string => `cat_${genId()}`;
-const parseTagPath = (pathStr: string): string[] | { error: string } => {
+const parseTagPath = (pathStr: string): string[] | { error: string; } => {
   const segments = pathStr
     .split("/")
     .map((s) => s.trim())
@@ -54,7 +60,7 @@ const asStringArray = (value: unknown): string[] => {
 };
 const getCardTagIds = (card: Pick<CardTagFields, "tagIds">): string[] =>
   asStringArray(card.tagIds);
-export const resolveCardTagNames = ( tagIds: unknown, tagById: ReadonlyMap<string, Pick<TagRecord, "name">>, ): string[] => { const ids = asStringArray(tagIds);
+export const resolveCardTagNames = (tagIds: unknown, tagById: ReadonlyMap<string, Pick<TagRecord, "name">>,): string[] => { const ids = asStringArray(tagIds);
   if (ids.length === 0) return [];
   return ids.map((id) => tagById.get(id)?.name ?? "").filter((name) => name);
 };
@@ -271,7 +277,7 @@ export const useTags = () => { const { currentUser } = useAuthSession();
   const setTagParent = async (
     tagId: string,
     parentId: string | null,
-  ): Promise<void | { error: string }> => {
+  ): Promise<void | { error: string; }> => {
     if (!currentUser) return { error: "ログイン状態を確認してください。" };
 
     const tag = tagById.get(tagId);
@@ -419,7 +425,7 @@ export const useTags = () => { const { currentUser } = useAuthSession();
 
   const ensurePathExists = async (
     fullPath: string,
-  ): Promise<{ leafTagId: string } | { error: string }> => {
+  ): Promise<{ leafTagId: string; } | { error: string; }> => {
     if (!currentUser) return { error: "ログイン状態を確認してください。" };
 
     const parsed = parseTagPath(fullPath);
@@ -487,7 +493,7 @@ export const useTags = () => { const { currentUser } = useAuthSession();
   const moveSelectedTagToPath = async (
     tagId: string,
     parentPath: string,
-  ): Promise<void | { error: string }> => {
+  ): Promise<void | { error: string; }> => {
     if (!currentUser) return { error: "ログイン状態を確認してください。" };
 
     const trimmed = parentPath.trim();
@@ -595,7 +601,7 @@ export const useTags = () => { const { currentUser } = useAuthSession();
   const renameTag = async (
     tagId: string,
     newName: string,
-  ): Promise<void | { error: string }> => {
+  ): Promise<void | { error: string; }> => {
     if (!currentUser) return { error: "ログイン状態を確認してください。" };
 
     const tag = tagById.get(tagId);
@@ -630,7 +636,7 @@ export const useTags = () => { const { currentUser } = useAuthSession();
   const mergeTags = async (
     fromTagId: string,
     intoTagId: string,
-  ): Promise<{ updatedCards: number } | { error: string }> => {
+  ): Promise<{ updatedCards: number; } | { error: string; }> => {
     if (!currentUser) return { error: "ログイン状態を確認してください。" };
     if (fromTagId === intoTagId) {
       return { error: "統合元と統合先が同じです。" };
@@ -810,7 +816,7 @@ export const useTags = () => { const { currentUser } = useAuthSession();
       const collectChildren = (parentId: string) => {
         for (const folder of allFolders) {
           if (
-            (folder as { parentFolderId?: string }).parentFolderId === parentId
+            (folder as { parentFolderId?: string; }).parentFolderId === parentId
           ) {
             targetFolderIds.add(folder.id);
             collectChildren(folder.id);
@@ -882,7 +888,7 @@ export const useTags = () => { const { currentUser } = useAuthSession();
       const collectChildren = (parentId: string) => {
         for (const folder of allFolders) {
           if (
-            (folder as { parentFolderId?: string }).parentFolderId === parentId
+            (folder as { parentFolderId?: string; }).parentFolderId === parentId
           ) {
             targetFolderIds.add(folder.id);
             collectChildren(folder.id);

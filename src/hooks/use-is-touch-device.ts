@@ -10,8 +10,8 @@ export const useIsTouchDevice = () => { const [isTouchDevice, setIsTouchDevice] 
     const onResize = () => {
       setIsTouchDevice(
         'ontouchstart' in window ||
-          navigator.maxTouchPoints > 0 ||
-          navigator.maxTouchPoints > 0
+        navigator.maxTouchPoints > 0 ||
+        navigator.maxTouchPoints > 0
       );
     };
 

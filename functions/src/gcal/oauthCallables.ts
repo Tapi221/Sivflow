@@ -7,6 +7,8 @@ import { classifyGoogleTokenEndpointFailure, type GoogleOAuthServerErrorReason }
 
 
 
+
+
 type StoredGoogleCalendarAccount = {
   email: string;
   name: string | null;
@@ -23,6 +25,8 @@ type GoogleOAuthProfile = {
 
 
 
+
+
 const GOOGLE_OAUTH_CLIENT_ID = defineSecret("GOOGLE_OAUTH_CLIENT_ID");
 const GOOGLE_OAUTH_CLIENT_SECRET = defineSecret("GOOGLE_OAUTH_CLIENT_SECRET");
 const GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY = defineSecret("GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY");
@@ -34,7 +38,9 @@ const REQUIRED_GOOGLE_SCOPES = ["https://www.googleapis.com/auth/calendar.events
 
 
 
-const requireUid = (request: { auth?: { uid?: string } }) => {
+
+
+const requireUid = (request: { auth?: { uid?: string; }; }) => {
   const uid = request.auth?.uid;
   if (!uid) throw new HttpsError("unauthenticated", "Authentication required.");
   return uid;
@@ -44,8 +50,8 @@ const getErrorSummary = (error: unknown): Record<string, unknown> => {
   return { type: typeof error };
 };
 const isHttpsError = (error: unknown): error is HttpsError => error instanceof HttpsError;
-const classifiedPrecondition = (message: string, details: { reason: GoogleOAuthServerErrorReason; reconnectRequired: boolean; userAction?: "reconnect_google_account"; adminAction?: string }): HttpsError => new HttpsError("failed-precondition", message, details);
-const safeSecretValue = (secret: { value: () => string }, name: string, reason: "server_oauth_configuration" | "token_encryption_key_invalid"): string => {
+const classifiedPrecondition = (message: string, details: { reason: GoogleOAuthServerErrorReason; reconnectRequired: boolean; userAction?: "reconnect_google_account"; adminAction?: string; }): HttpsError => new HttpsError("failed-precondition", message, details);
+const safeSecretValue = (secret: { value: () => string; }, name: string, reason: "server_oauth_configuration" | "token_encryption_key_invalid"): string => {
   try {
     const value = secret.value();
     if (!value) throw new Error(`${name} is empty`);
@@ -168,6 +174,8 @@ const getStoredAccessToken = async (uid: string, accountId: string) => {
 
 
 
+
+
 export const connectGoogleCalendarAccount = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => { const uid = requireUid(request);
   const code = typeof request.data?.code === "string" ? request.data.code : "";
   const codeVerifier = typeof request.data?.codeVerifier === "string" ? request.data.codeVerifier : "";
@@ -193,10 +201,12 @@ export const refreshGoogleCalendarAccessToken = onCall({ region: REGION, secrets
 export const getGoogleCalendarAccessToken = refreshGoogleCalendarAccessToken;
 export const listGoogleCalendarAccounts = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
   const snapshot = await (await getDb()).collection(`users/${uid}/googleCalendarAccounts`).get();
-  return { accounts: snapshot.docs.map((doc) => {
-    const data = doc.data() as Partial<StoredGoogleCalendarAccount>;
-    return { accountId: doc.id, email: typeof data.email === "string" ? data.email : null, name: typeof data.name === "string" ? data.name : null, photoUrl: getExistingAccountPhotoUrl(data) };
-  }) };
+  return {
+    accounts: snapshot.docs.map((doc) => {
+      const data = doc.data() as Partial<StoredGoogleCalendarAccount>;
+      return { accountId: doc.id, email: typeof data.email === "string" ? data.email : null, name: typeof data.name === "string" ? data.name : null, photoUrl: getExistingAccountPhotoUrl(data) };
+    })
+  };
 });
 export const disconnectGoogleCalendarAccount = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
   const accountId = typeof request.data?.accountId === "string" ? request.data.accountId : "";
@@ -207,6 +217,8 @@ export const disconnectGoogleCalendarAccount = onCall({ region: REGION }, async 
 export const createGoogleCalendarCustomToken = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
   return { customToken: await (await getAdminAuth()).createCustomToken(uid) };
 });
+
+
 
 
 

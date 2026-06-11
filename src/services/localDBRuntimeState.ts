@@ -18,6 +18,8 @@ export interface LocalDBTelemetrySnapshot { localdb_mode: LocalDBMode;
 
 
 
+
+
 const RESET_FAILED_REASON_KEY = "sivflow.localdb.resetFailedReason";
 const LEGACY_RESET_FAILED_REASON_KEY = "flashcard.localdb.resetFailedReason";
 const listeners = new Set<(status: LocalDBRuntimeStatus) => void>();
@@ -40,6 +42,8 @@ let currentStatus: LocalDBRuntimeStatus = {
   })(),
   updatedAt: Date.now(),
 };
+
+
 
 
 
@@ -71,13 +75,13 @@ const toShortReason = (value: string | null): string => {
 };
 export const getLocalDBRuntimeStatus = () => { return { ...currentStatus };
 };
-export const subscribeLocalDBRuntimeStatus = ( listener: (status: LocalDBRuntimeStatus) => void, ): (() => void) => { listeners.add(listener);
+export const subscribeLocalDBRuntimeStatus = (listener: (status: LocalDBRuntimeStatus) => void,): (() => void) => { listeners.add(listener);
   listener(getLocalDBRuntimeStatus());
   return () => {
     listeners.delete(listener);
   };
 };
-export const updateLocalDBRuntimeStatus = ( next: Partial<LocalDBRuntimeStatus>, ) => { currentStatus = { ...currentStatus, ...next, updatedAt: Date.now(), };
+export const updateLocalDBRuntimeStatus = (next: Partial<LocalDBRuntimeStatus>,) => { currentStatus = { ...currentStatus, ...next, updatedAt: Date.now(), };
   listeners.forEach((listener) => {
     try {
       listener(getLocalDBRuntimeStatus());
@@ -87,7 +91,7 @@ export const updateLocalDBRuntimeStatus = ( next: Partial<LocalDBRuntimeStatus>,
   });
   return getLocalDBRuntimeStatus();
 };
-export const warnOncePerSession = ( key: string, message: string, error?: unknown, ) => { if (warnedKeys.has(key)) return;
+export const warnOncePerSession = (key: string, message: string, error?: unknown,) => { if (warnedKeys.has(key)) return;
   warnedKeys.add(key);
   if (error !== undefined) {
     console.warn(message, error);

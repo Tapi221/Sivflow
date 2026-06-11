@@ -9,7 +9,11 @@ import { useServerStoredGoogleAccountBootstrap } from "@/integration/googlecalen
 
 
 
+
+
 const RECURRENCE_REFRESH_FUTURE_DAYS = 366;
+
+
 
 
 
@@ -27,7 +31,7 @@ const addDays = (date: Date, days: number): Date => {
   next.setDate(next.getDate() + days);
   return next;
 };
-const buildRefreshRange = (event: Pick<GoogleCalendarEvent, "startsAt" | "endsAt" | "recurrenceRule"> | { startsAt?: Date; endsAt?: Date; recurrenceRule?: GoogleCalendarEvent["recurrenceRule"] }) => {
+const buildRefreshRange = (event: Pick<GoogleCalendarEvent, "startsAt" | "endsAt" | "recurrenceRule"> | { startsAt?: Date; endsAt?: Date; recurrenceRule?: GoogleCalendarEvent["recurrenceRule"]; }) => {
   const { startsAt, endsAt, recurrenceRule } = event;
   if (!startsAt || !endsAt) return null;
 
@@ -195,6 +199,8 @@ export const useGoogleCalendarLayer = () => { useServerStoredGoogleAccountBootst
     connect: addAccount,
   };
 };
+
+
 
 
 

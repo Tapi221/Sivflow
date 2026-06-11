@@ -13,7 +13,7 @@ type CalendarDndViewMode = "week" | "month";
 
 type CalendarDndPageDirection = "previous" | "next";
 
-type SampleEventDefinition = { id: string; title: string; startsAt: Date; endsAt: Date; isAllDay?: boolean; accentColor: string };
+type SampleEventDefinition = { id: string; title: string; startsAt: Date; endsAt: Date; isAllDay?: boolean; accentColor: string; };
 
 type CalendarEventUndoSnapshot = {
   event: GoogleCalendarEvent;
@@ -36,7 +36,7 @@ const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS = "border-transparent bg-white shadow-n
 const IOS_CALENDAR_MONTH_SURFACE_CLASS = "border-transparent bg-[rgba(255,255,255,0.92)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
 const WEEKDAY_DRAG_PAGE_EDGE_WIDTH_PX = 72;
 const WEEKDAY_DRAG_PAGE_REPEAT_INTERVAL_MS = 700;
-const VIEW_MODE_OPTIONS: readonly { value: CalendarDndViewMode; label: string }[] = [
+const VIEW_MODE_OPTIONS: readonly { value: CalendarDndViewMode; label: string; }[] = [
   { value: "week", label: "週表示" },
   { value: "month", label: "月表示" },
 ];

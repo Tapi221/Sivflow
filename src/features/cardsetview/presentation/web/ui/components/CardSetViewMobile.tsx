@@ -8,6 +8,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 interface CardSetViewMobileProps {
   cardsForPager: Card[];
   selectedCardId: string | null;
@@ -31,9 +33,13 @@ interface CardSetViewMobileEmptyStateProps {
 
 
 
+
+
 const MOBILE_CARD_PAGER_PADDING_INLINE_PX = 0;
 const MOBILE_CARD_PAGER_PADDING_BLOCK = "22px";
 const MOBILE_CARD_PAGER_NATURAL_INDEX_COMMIT_DELAY_MS = 80;
+
+
 
 
 
@@ -50,6 +56,8 @@ const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   inkQuestion: card.front.ink ?? null,
   inkAnswer: card.back.ink ?? null,
 });
+
+
 
 
 

@@ -28,7 +28,7 @@ const headingVariants = cva(
 
 
 
-export const HeadingElement = ({ variant = 'h1', ...props }: PlateElementProps & VariantProps<typeof headingVariants>) => { return ( <PlateElement as={variant!} className={headingVariants({ variant })} {...props}> {props.children} </PlateElement> );
+export const HeadingElement = ({ variant = 'h1', ...props }: PlateElementProps & VariantProps<typeof headingVariants>) => { return (<PlateElement as={variant!} className={headingVariants({ variant })} {...props}> {props.children} </PlateElement>);
 };
 
 export const H1Element = (props: PlateElementProps) => { return <HeadingElement variant="h1" {...props} />;

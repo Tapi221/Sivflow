@@ -3,10 +3,12 @@ import type { LocalDB } from "./LocalDB";
 
 
 
+
+
 const getEntityId = (obj: unknown): string | undefined => {
   if (typeof obj !== "object" || obj === null || !("id" in obj))
     return undefined;
-  const id = (obj as { id: unknown }).id;
+  const id = (obj as { id: unknown; }).id;
   return typeof id === "string"
     ? id
     : typeof id === "number"

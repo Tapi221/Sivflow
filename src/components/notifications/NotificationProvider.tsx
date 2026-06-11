@@ -37,13 +37,18 @@ import type { Notification } from "@/types/notification";
 
 
 
+
+
+
+
 /**
  * 通知プロバイダー
  *
  * グローバル通知管理を提供する
  * レベル別の表示制御を行う
  */
-export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children, }) => { const [notifications, setNotifications] = useState<Notification[]>([]);
+export const NotificationProvider: React.FC<{ children: React.ReactNode; }> = ({ children, }) => {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   useEffect(() => {
     // 通知サービスを購読

@@ -4,6 +4,8 @@ import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
 
 
 
+
+
 export type CardRelation = { id: string;
   userId: string;
   fromCardId?: string;
@@ -60,10 +62,10 @@ export interface QueryableCollection<T extends object, TKey = string> { equals(v
   first(): Promise<T | undefined>;
   count(): Promise<number>;
   delete(): Promise<number>;
-  modify(changes: Partial<T> | ((item: T, ctx?: { value: T; primKey: TKey }) => boolean | void)): Promise<number>;
+  modify(changes: Partial<T> | ((item: T, ctx?: { value: T; primKey: TKey; }) => boolean | void)): Promise<number>;
   sortBy(field: keyof T | string): Promise<T[]>;
   primaryKeys(): Promise<TKey[]>;
-  each(callback: (item: T, cursor?: { primaryKey: TKey }) => void | Promise<void>): Promise<void>;
+  each(callback: (item: T, cursor?: { primaryKey: TKey; }) => void | Promise<void>): Promise<void>;
 }
 export interface QueryableWhereClause<T extends object, TKey = string> { equals(value: unknown): QueryableCollection<T, TKey>;
   above(value: unknown): QueryableCollection<T, TKey>;
@@ -74,7 +76,7 @@ export interface QueryableWhereClause<T extends object, TKey = string> { equals(
   startsWith(prefix: string): QueryableCollection<T, TKey>;
   anyOf(values: readonly unknown[]): QueryableCollection<T, TKey>;
 }
-export type QueryableWhereFunction<T extends object, TKey = string> = { (criteria: { [key: string]: unknown }): QueryableCollection<T, TKey>;
+export type QueryableWhereFunction<T extends object, TKey = string> = { (criteria: { [key: string]: unknown; }): QueryableCollection<T, TKey>;
   (index: QueryableKeyPath): QueryableWhereClause<T, TKey>;
   equals(value: unknown): QueryableCollection<T, TKey>;
 };
@@ -82,7 +84,7 @@ export interface QueryableTable<T extends object, TKey = string> { count(): Prom
   get(key: unknown): Promise<T | undefined>;
   put(record: T): Promise<unknown>;
   add(record: T): Promise<unknown>;
-  update(key: unknown, changes: Partial<T> | Record<string, unknown> | ((item: T, ctx?: { value: T; primKey: TKey }) => boolean | void)): Promise<number>;
+  update(key: unknown, changes: Partial<T> | Record<string, unknown> | ((item: T, ctx?: { value: T; primKey: TKey; }) => boolean | void)): Promise<number>;
   delete(key: unknown): Promise<void>;
   clear(): Promise<void>;
   toArray(): Promise<T[]>;

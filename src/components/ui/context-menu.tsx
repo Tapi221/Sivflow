@@ -1,23 +1,27 @@
-import * as React from "react"
-import * as ContextMenuPrimitive from "@radix-ui/react-context-menu"
-import { Check, ChevronRight, Circle } from "lucide-react"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import * as ContextMenuPrimitive from "@radix-ui/react-context-menu";
+import { Check, ChevronRight, Circle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 
 
-const ContextMenu = ContextMenuPrimitive.Root
-const ContextMenuTrigger = ContextMenuPrimitive.Trigger
-const ContextMenuGroup = ContextMenuPrimitive.Group
-const ContextMenuPortal = ContextMenuPrimitive.Portal
-const ContextMenuSub = ContextMenuPrimitive.Sub
-const ContextMenuRadioGroup = ContextMenuPrimitive.RadioGroup
+
+
+const ContextMenu = ContextMenuPrimitive.Root;
+const ContextMenuTrigger = ContextMenuPrimitive.Trigger;
+const ContextMenuGroup = ContextMenuPrimitive.Group;
+const ContextMenuPortal = ContextMenuPrimitive.Portal;
+const ContextMenuSub = ContextMenuPrimitive.Sub;
+const ContextMenuRadioGroup = ContextMenuPrimitive.RadioGroup;
+
+
 
 
 
 const ContextMenuSubTrigger = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.SubTrigger>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.SubTrigger> & {
-    inset?: boolean
+    inset?: boolean;
   }
 >(({ className, inset, children, ...props }, ref) => (
   <ContextMenuPrimitive.SubTrigger
@@ -32,7 +36,7 @@ const ContextMenuSubTrigger = React.forwardRef<
     {children}
     <ChevronRight className="ml-auto h-4 w-4" />
   </ContextMenuPrimitive.SubTrigger>
-))
+));
 const ContextMenuSubContent = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.SubContent>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.SubContent>
@@ -45,7 +49,7 @@ const ContextMenuSubContent = React.forwardRef<
     )}
     {...props}
   />
-))
+));
 const ContextMenuContent = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Content>
@@ -60,11 +64,11 @@ const ContextMenuContent = React.forwardRef<
       {...props}
     />
   </ContextMenuPrimitive.Portal>
-))
+));
 const ContextMenuItem = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Item> & {
-    inset?: boolean
+    inset?: boolean;
   }
 >(({ className, inset, ...props }, ref) => (
   <ContextMenuPrimitive.Item
@@ -76,7 +80,7 @@ const ContextMenuItem = React.forwardRef<
     )}
     {...props}
   />
-))
+));
 const ContextMenuCheckboxItem = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.CheckboxItem>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.CheckboxItem>
@@ -97,7 +101,7 @@ const ContextMenuCheckboxItem = React.forwardRef<
     </span>
     {children}
   </ContextMenuPrimitive.CheckboxItem>
-))
+));
 const ContextMenuRadioItem = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.RadioItem>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.RadioItem>
@@ -117,11 +121,11 @@ const ContextMenuRadioItem = React.forwardRef<
     </span>
     {children}
   </ContextMenuPrimitive.RadioItem>
-))
+));
 const ContextMenuLabel = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Label>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Label> & {
-    inset?: boolean
+    inset?: boolean;
   }
 >(({ className, inset, ...props }, ref) => (
   <ContextMenuPrimitive.Label
@@ -133,7 +137,7 @@ const ContextMenuLabel = React.forwardRef<
     )}
     {...props}
   />
-))
+));
 const ContextMenuSeparator = React.forwardRef<
   React.ElementRef<typeof ContextMenuPrimitive.Separator>,
   React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Separator>
@@ -143,7 +147,7 @@ const ContextMenuSeparator = React.forwardRef<
     className={cn("-mx-1 my-1 h-px bg-border", className)}
     {...props}
   />
-))
+));
 const ContextMenuShortcut = ({
   className,
   ...props
@@ -156,35 +160,21 @@ const ContextMenuShortcut = ({
       )}
       {...props}
     />
-  )
-}
+  );
+};
 
 
 
-ContextMenuSubTrigger.displayName = ContextMenuPrimitive.SubTrigger.displayName
-ContextMenuSubContent.displayName = ContextMenuPrimitive.SubContent.displayName
-ContextMenuContent.displayName = ContextMenuPrimitive.Content.displayName
-ContextMenuItem.displayName = ContextMenuPrimitive.Item.displayName
+
+
+ContextMenuSubTrigger.displayName = ContextMenuPrimitive.SubTrigger.displayName;
+ContextMenuSubContent.displayName = ContextMenuPrimitive.SubContent.displayName;
+ContextMenuContent.displayName = ContextMenuPrimitive.Content.displayName;
+ContextMenuItem.displayName = ContextMenuPrimitive.Item.displayName;
 ContextMenuCheckboxItem.displayName =
-  ContextMenuPrimitive.CheckboxItem.displayName
-ContextMenuRadioItem.displayName = ContextMenuPrimitive.RadioItem.displayName
-ContextMenuLabel.displayName = ContextMenuPrimitive.Label.displayName
-ContextMenuSeparator.displayName = ContextMenuPrimitive.Separator.displayName
-ContextMenuShortcut.displayName = "ContextMenuShortcut"
-export {
-  ContextMenu,
-  ContextMenuTrigger,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuCheckboxItem,
-  ContextMenuRadioItem,
-  ContextMenuLabel,
-  ContextMenuSeparator,
-  ContextMenuShortcut,
-  ContextMenuGroup,
-  ContextMenuPortal,
-  ContextMenuSub,
-  ContextMenuSubContent,
-  ContextMenuSubTrigger,
-  ContextMenuRadioGroup,
-}
+  ContextMenuPrimitive.CheckboxItem.displayName;
+ContextMenuRadioItem.displayName = ContextMenuPrimitive.RadioItem.displayName;
+ContextMenuLabel.displayName = ContextMenuPrimitive.Label.displayName;
+ContextMenuSeparator.displayName = ContextMenuPrimitive.Separator.displayName;
+ContextMenuShortcut.displayName = "ContextMenuShortcut";
+export { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuCheckboxItem, ContextMenuRadioItem, ContextMenuLabel, ContextMenuSeparator, ContextMenuShortcut, ContextMenuGroup, ContextMenuPortal, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuRadioGroup, };

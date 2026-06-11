@@ -2,6 +2,8 @@ import { Timestamp } from "firebase/firestore";
 
 
 
+
+
 export interface BaseEntity { [key: string]: unknown;
   id: string;
   userId: string;
@@ -24,14 +26,14 @@ export type ReferenceBlockData = { url: string;
 };
 export interface BlockConfig { id: string;
   type:
-    | "text"
-    | "code"
-    | "image"
-    | "audio"
-    | "reference"
-    | "math"
-    | "markdown"
-    | "question";
+  | "text"
+  | "code"
+  | "image"
+  | "audio"
+  | "reference"
+  | "math"
+  | "markdown"
+  | "question";
   label: string;
   isVisible: boolean;
   orderIndex: number;

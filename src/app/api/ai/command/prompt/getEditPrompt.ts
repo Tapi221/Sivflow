@@ -7,6 +7,8 @@ import { buildEditTableMultiCellPrompt } from './getEditTablePrompt';
 
 
 
+
+
 function buildEditMultiBlockPrompt(editor: SlateEditor, messages: ChatMessage[]) {
   const selectingMarkdown = getMarkdownWithSelection(editor);
 
@@ -201,7 +203,7 @@ function buildEditSelectionPrompt(editor: SlateEditor, messages: ChatMessage[]) 
     `,
   });
 }
-export function getEditPrompt(editor: SlateEditor, { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[] }): [string, 'table' | 'multi-block' | 'selection'] {
+export function getEditPrompt(editor: SlateEditor, { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[]; }): [string, 'table' | 'multi-block' | 'selection'] {
   if (!isSelecting) throw new Error('Edit tool is only available when selecting');
 
   if (isSelectionInTable(editor) && !isSingleCellSelection(editor)) {

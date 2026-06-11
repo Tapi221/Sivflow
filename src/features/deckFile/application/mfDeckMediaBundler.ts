@@ -4,6 +4,8 @@ import type { CardBlock } from "@/types";
 
 
 
+
+
 export type MfDeckMediaBundle = { media: Record<string, Uint8Array>;
   mediaManifest?: MfDeckMediaManifestV1;
   issues: MfDeckIssue[];
@@ -18,10 +20,12 @@ type MediaCandidate = {
   blockId?: string;
 };
 type BundleMediaInCardsParams<
-  TCard extends { id?: string; front?: unknown; back?: unknown },
+  TCard extends { id?: string; front?: unknown; back?: unknown; },
 > = {
   cards: TCard[];
 };
+
+
 
 
 
@@ -142,7 +146,7 @@ const collectFaceAttachmentCandidates = (input: {
   });
 };
 const collectCandidates = <
-  TCard extends { id?: string; front?: unknown; back?: unknown },
+  TCard extends { id?: string; front?: unknown; back?: unknown; },
 >(
   cards: TCard[],
 ): MediaCandidate[] => {
@@ -203,7 +207,7 @@ const hashString = (value: string): string => {
   }
   return (hash >>> 0).toString(16).padStart(8, "0");
 };
-export const bundleMediaInMfDeckCards = async < TCard extends { id?: string; front?: unknown; back?: unknown },
+export const bundleMediaInMfDeckCards = async <TCard extends { id?: string; front?: unknown; back?: unknown; },
 >({
   cards,
 }: BundleMediaInCardsParams<TCard>): Promise<MfDeckMediaBundle> => {

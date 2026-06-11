@@ -9,7 +9,11 @@ import type { LocalDBLike } from "./localDB";
 
 
 
-type SyncableRecord = Record<string, unknown> & { id?: string; isDeleted?: boolean };
+
+
+type SyncableRecord = Record<string, unknown> & { id?: string; isDeleted?: boolean; };
+
+
 
 
 
@@ -28,7 +32,11 @@ const DEFAULT_FOLDER_NAME = "インポート済みカード";
 
 
 
+
+
 type SyncableTableName = (typeof FULL_RESYNC_TABLES)[number];
+
+
 
 
 
@@ -42,6 +50,8 @@ const SYNC_ENTITY_BY_TABLE: Record<SyncableTableName, SyncTask["entity"]> = {
   images: "asset",
 };
 const DELETE_CAPABLE_SYNC_ENTITIES = new Set<SyncTask["entity"]>(["folder", "cardSet", "card", "document", "tag", "asset"]);
+
+
 
 
 
@@ -60,7 +70,7 @@ const getRecordId = (record: unknown): string | null => {
   return typeof record.id === "string" && record.id.trim().length > 0 ? record.id : null;
 };
 const isDeletedRecord = (record: unknown): boolean => isRecord(record) && record.isDeleted === true;
-const normalizeFullResyncRecord = (userId: string, change: { type?: string; id?: string; data?: unknown }) => {
+const normalizeFullResyncRecord = (userId: string, change: { type?: string; id?: string; data?: unknown; }) => {
   const data = { ...((isRecord(change.data) ? change.data : {}) as Record<string, unknown>) };
 
   if (!data.id && change.id) {
@@ -117,7 +127,7 @@ const collectCardsNeedingRepair = (cards: Card[], activeCardSetIds: Set<string>)
     return cardSetId.length === 0 || !activeCardSetIds.has(cardSetId);
   });
 };
-const shouldRepairCardSets = (changes: Array<{ type?: unknown }>) => {
+const shouldRepairCardSets = (changes: Array<{ type?: unknown; }>) => {
   return changes.some((change) => change.type === "card" || change.type === "cardSet" || change.type === "folder");
 };
 const preserveLocalOnlyFields = (type: string, localData: unknown, merged: unknown) => {
@@ -152,7 +162,7 @@ const getCurrentDeviceId = () => {
     return null;
   }
 };
-const applyLocalCardSyncMetadata = (record: unknown, { syncedAt, syncState }: { syncedAt: Date; syncState: Card["syncState"] }) => {
+const applyLocalCardSyncMetadata = (record: unknown, { syncedAt, syncState }: { syncedAt: Date; syncState: Card["syncState"]; }) => {
   if (!isRecord(record)) return record;
 
   record.lastSyncedAt = syncedAt;
@@ -346,7 +356,7 @@ export class SyncServiceV2 implements ISyncService { private queueManager: IQueu
     }
   }
 
-  async getQueueStatus(): Promise<{ pending: number; isSyncing: boolean }> {
+  async getQueueStatus(): Promise<{ pending: number; isSyncing: boolean; }> {
     const pending = await this.queueManager.getQueueDepth();
     return { pending, isSyncing: this.isSyncing };
   }
@@ -415,7 +425,7 @@ export class SyncServiceV2 implements ISyncService { private queueManager: IQueu
     await this.sync("user_initiated");
   }
 
-  async processQueue(): Promise<{ processed: number; errors: SyncProcessingError[] }> {
+  async processQueue(): Promise<{ processed: number; errors: SyncProcessingError[]; }> {
     const tasks = await this.queueManager.peekBatch({ maxSize: 100, concurrency: 1, timeoutMs: 30000 });
     const errors: SyncProcessingError[] = [];
 
@@ -508,7 +518,7 @@ export class SyncServiceV2 implements ISyncService { private queueManager: IQueu
   }
 
   private async getQueuedReplicaTargetKeys(): Promise<Set<string>> {
-    const queueReadable = this.localDB as LocalDBLike & { getQueuedItemsOldestFirst?: () => Promise<SyncQueueItem[]> };
+    const queueReadable = this.localDB as LocalDBLike & { getQueuedItemsOldestFirst?: () => Promise<SyncQueueItem[]>; };
     if (typeof queueReadable.getQueuedItemsOldestFirst !== "function") return new Set();
     const queuedItems = await queueReadable.getQueuedItemsOldestFirst();
     return new Set(queuedItems.filter((item) => item.status !== "completed").map((item) => `${item.entity}:${item.targetId ?? getPayloadId(item.payload) ?? ""}`));

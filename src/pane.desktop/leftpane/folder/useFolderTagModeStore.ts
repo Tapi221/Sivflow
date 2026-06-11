@@ -2,11 +2,15 @@ import { create } from "zustand";
 
 
 
+
+
 export type FolderTagMode = "folder" | "tag";
 type FolderTagModeState = {
   folderTagMode: FolderTagMode;
   setFolderTagMode: (mode: FolderTagMode) => void;
 };
+
+
 
 
 

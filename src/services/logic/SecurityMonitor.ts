@@ -7,6 +7,8 @@ import type { SecurityEventType, SecurityLog, SecurityMetadata } from "@/types/d
 
 
 
+
+
 interface SecurityAlert {
   id: string;
   type: string;
@@ -21,6 +23,10 @@ export interface SecurityState { isLocked: boolean;
   requires2FA: boolean;
   alerts: SecurityAlert[];
 }
+
+
+
+
 
 
 

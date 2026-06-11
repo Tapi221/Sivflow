@@ -8,6 +8,8 @@ import type { GCalForceSyncOptions, GCalSyncState, GoogleCalendarEvent, GoogleCa
 
 
 
+
+
 type EventsAction =
   | {
     type: "upsert";
@@ -27,6 +29,8 @@ type EventsAction =
   | {
     type: "clear";
   };
+
+
 
 
 
@@ -70,7 +74,7 @@ const reduceEvents = (
       return state;
   }
 };
-export const useGoogleCalendarIntegration = ({ authInstance = auth, }: UseGoogleCalendarIntegrationOptions = {}) => { const [accessToken, setAccessToken] = useState<string | null>(() => readToken(), );
+export const useGoogleCalendarIntegration = ({ authInstance = auth, }: UseGoogleCalendarIntegrationOptions = {}) => { const [accessToken, setAccessToken] = useState<string | null>(() => readToken(),);
 
   const [accountEmail, setAccountEmail] = useState<string | null>(() =>
     readEmail(),

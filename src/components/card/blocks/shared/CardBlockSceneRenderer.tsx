@@ -22,10 +22,12 @@ import type { CardBlock } from "@/types/domain/card";
 
 
 
+
+
 export type CardBlockLayoutReplaceBlock = MarkdownReplaceBlock;
 export type ViewerProps = Readonly<{ questionDisplayMode: "always" | "tap_to_reveal";
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
-  toMediaUrl: (item: string | { url?: string | null; remoteUrl?: string | null; localUrl?: string | null } | null | undefined) => string | null;
+  toMediaUrl: (item: string | { url?: string | null; remoteUrl?: string | null; localUrl?: string | null; } | null | undefined) => string | null;
   displayMode: "fixed" | "fluid";
   zoom: number;
 }>;
@@ -50,8 +52,8 @@ export type EditorProps = Readonly<{ onUpdateBlock: (id: string, updates: Partia
   zoom?: number;
 }>;
 type CardBlockSceneRendererProps =
-  | Readonly<{ mode: "edit"; block: CardBlock; meta: BlockListRowMeta; editorProps: EditorProps }>
-  | Readonly<{ mode: "view"; block: CardBlock; meta: BlockListRowMeta; viewerProps: ViewerProps }>;
+  | Readonly<{ mode: "edit"; block: CardBlock; meta: BlockListRowMeta; editorProps: EditorProps; }>
+  | Readonly<{ mode: "view"; block: CardBlock; meta: BlockListRowMeta; viewerProps: ViewerProps; }>;
 type SharedShellProps = Readonly<{
   mode: "edit" | "view";
   className?: string;
@@ -81,6 +83,8 @@ type SceneProps = Readonly<{
 
 
 
+
+
 const NOOP = () => {};
 const SUPPORTED_LANGUAGES = [
   { value: "javascript", label: "JavaScript" },
@@ -103,6 +107,8 @@ const MAX_MATH_LATEX_LENGTH = 10000;
 
 
 
+
+
 const renderGridOffsetSpacer = (gridOffsetPx: number) => gridOffsetPx > 0 ? <div aria-hidden className="pointer-events-none" style={{ height: `${gridOffsetPx}px` }} /> : null;
 const renderEditorShellProps = (editorProps?: EditorProps) => ({
   accentColor: editorProps?.accentColor,
@@ -120,6 +126,8 @@ const renderEditorShellProps = (editorProps?: EditorProps) => ({
 
 
 
+
+
 const SharedBlockShell = ({ mode, className, contentClassName, label, icon, accentColor, isBlockSelected, onDelete, onDuplicate, onMoveUp, onMoveDown, onMoveDragStart, onMoveDragEnd, canMoveUp, canMoveDown, dragHandleClassName, children }: SharedShellProps) => {
   if (mode === "view") {
     return <BlockWrapper mode="viewer" visualMode="viewer" showOverlay={false} showDelete={false} showDuplicate={false} showDragHandle={false} dragEnabled={false} onDelete={NOOP} onDuplicate={NOOP} className={className} contentClassName={contentClassName}>{children}</BlockWrapper>;
@@ -127,7 +135,7 @@ const SharedBlockShell = ({ mode, className, contentClassName, label, icon, acce
 
   return <BlockWrapper onDelete={onDelete ?? NOOP} onDuplicate={onDuplicate ?? NOOP} className={className} contentClassName={contentClassName} label={label} icon={icon} accentColor={accentColor} isBlockSelected={isBlockSelected} canMoveUp={Boolean(canMoveUp)} canMoveDown={Boolean(canMoveDown)} onMoveUp={onMoveUp} onMoveDown={onMoveDown} onMoveDragStart={onMoveDragStart} onMoveDragEnd={onMoveDragEnd} dragHandleClassName={dragHandleClassName} visualMode="viewer">{children}</BlockWrapper>;
 };
-const CodeLanguageSelector = ({ value, onChange }: Readonly<{ value: string; onChange: (next: string) => void }>) => {
+const CodeLanguageSelector = ({ value, onChange }: Readonly<{ value: string; onChange: (next: string) => void; }>) => {
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger className="h-5 w-auto min-w-0 min-h-0 rounded-md px-1.5 py-0 bg-zinc-900/5 border-none shadow-none text-[10px] font-bold text-zinc-500 tracking-wider uppercase hover:text-zinc-700 hover:bg-zinc-900/10 focus:ring-0 gap-1">

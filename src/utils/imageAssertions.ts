@@ -3,7 +3,13 @@ import { isBase64DataUrl, isBlobUrl, isStorageUrl } from "@/types/core/branded";
 
 
 
+
+
 type ImageUrlField = "remoteUrl" | "localUrl" | "thumbnailUrl";
+
+
+
+
 
 
 
@@ -41,7 +47,7 @@ type ImageUrlField = "remoteUrl" | "localUrl" | "thumbnailUrl";
  * 画像ドメインの不変条件違反を示すエラー
  * このエラーが発生した場合、設計上の重大な問題がある
  */
-export class ImageInvariantViolation extends Error { constructor( message: string, public readonly imageId?: string, ) { super(`[ImageInvariant] ${message}`);
+export class ImageInvariantViolation extends Error { constructor(message: string, public readonly imageId?: string,) { super(`[ImageInvariant] ${message}`);
     this.name = "ImageInvariantViolation";
   }
 }

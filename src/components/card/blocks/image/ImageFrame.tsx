@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type ImageTransform = {
   scale: number;
   x: number;
@@ -30,13 +32,17 @@ type ImageFrameProps = {
   onImageClick?: () => void;
   onTransformChange?: (next: ImageTransform) => void;
   onTransformCommit?: (next: ImageTransform) => void;
-  onNaturalSize?: (size: { naturalW: number; naturalH: number }) => void;
+  onNaturalSize?: (size: { naturalW: number; naturalH: number; }) => void;
   onError?: () => void;
 };
 
 
 
+
+
 const DRAG_START_THRESHOLD_PX = 6;
+
+
 
 
 
@@ -50,6 +56,8 @@ const inferBaseWidthFromLegacyScale = (
   const safeLegacyScale = clamp(Number(legacyScale ?? 1), 0.2, 1);
   return safeReferenceWidth * safeLegacyScale;
 };
+
+
 
 
 
@@ -88,15 +96,15 @@ export const ImageFrame = ({ src, alt, className, imgClassName, displayMode = "f
 
   const resolvedReferenceWidthPx =
     typeof fixedReferenceFrameWidthPx === "number" &&
-    Number.isFinite(fixedReferenceFrameWidthPx) &&
-    fixedReferenceFrameWidthPx > 0
+      Number.isFinite(fixedReferenceFrameWidthPx) &&
+      fixedReferenceFrameWidthPx > 0
       ? fixedReferenceFrameWidthPx
       : frameW;
 
   const resolvedBaseWidthPx =
     typeof layoutBaseWidthPx === "number" &&
-    Number.isFinite(layoutBaseWidthPx) &&
-    layoutBaseWidthPx > 0
+      Number.isFinite(layoutBaseWidthPx) &&
+      layoutBaseWidthPx > 0
       ? layoutBaseWidthPx
       : inferBaseWidthFromLegacyScale(
         resolvedReferenceWidthPx,
@@ -116,8 +124,8 @@ export const ImageFrame = ({ src, alt, className, imgClassName, displayMode = "f
 
   const resolvedAvailableWidthPx =
     typeof fluidAvailableWidthPx === "number" &&
-    Number.isFinite(fluidAvailableWidthPx) &&
-    fluidAvailableWidthPx > 0
+      Number.isFinite(fluidAvailableWidthPx) &&
+      fluidAvailableWidthPx > 0
       ? fluidAvailableWidthPx
       : measuredFrameWidthPx;
 

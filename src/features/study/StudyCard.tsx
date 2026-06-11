@@ -8,6 +8,8 @@ import { toIsoStringOrNull } from "@/utils/toMillis";
 
 
 
+
+
 type FlashcardCardLike = ComponentProps<typeof Flashcard>["card"];
 type StudyPhase = "timing" | "answer";
 type PracticeScore = "ok" | "anxious";
@@ -47,7 +49,9 @@ type Keyable = {
   uid?: string;
   createdAt?: unknown;
 };
-type InnerProps = Omit<StudyCardProps, "card"> & { card: Card };
+type InnerProps = Omit<StudyCardProps, "card"> & { card: Card; };
+
+
 
 
 
@@ -67,6 +71,8 @@ const getCardKey = (card: Card): string => {
 
   return direct && direct.length > 0 ? direct : "card";
 };
+
+
 
 
 
@@ -378,7 +384,7 @@ const StudyCardInner = ({
 
   const handleEdit = onEdit ? () => onEdit(card) : undefined;
 
-  const reviewCount = (card as unknown as { reviewCount?: unknown })
+  const reviewCount = (card as unknown as { reviewCount?: unknown; })
     .reviewCount;
   const showReviewCount = typeof reviewCount === "number" && reviewCount >= 0;
 
@@ -386,43 +392,43 @@ const StudyCardInner = ({
     <div className="reviewStudyCard mx-auto flex w-full max-w-[520px] flex-col gap-6">
       <div className="reviewCardViewport">
         <Flashcard
-            card={flashcardCard}
-            isFlipped={studyPhase === "answer"}
-            onFlip={handleFlip}
-            extraHeaderLeft={
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 min-h-0 w-8 min-w-0 rounded-full bg-slate-50 text-primary-600 hover:bg-primary-50 hover:text-primary-700 md:h-9 md:w-9"
-              >
-                <Volume2 className="h-4 w-4 md:h-5 md:w-5" />
-              </Button>
-            }
-            extraHeaderRight={
-              <div className="pointer-events-none mb-2 flex flex-col items-end">
-                {showReviewCount && (
-                  <Badge
-                    variant="outline"
-                    className="whitespace-nowrap bg-slate-50/50 text-[10px] font-bold tabular-nums text-slate-400 backdrop-blur-sm border-slate-200"
-                  >
-                    {reviewCount + 1}回目の復習
-                  </Badge>
-                )}
+          card={flashcardCard}
+          isFlipped={studyPhase === "answer"}
+          onFlip={handleFlip}
+          extraHeaderLeft={
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-8 min-h-0 w-8 min-w-0 rounded-full bg-slate-50 text-primary-600 hover:bg-primary-50 hover:text-primary-700 md:h-9 md:w-9"
+            >
+              <Volume2 className="h-4 w-4 md:h-5 md:w-5" />
+            </Button>
+          }
+          extraHeaderRight={
+            <div className="pointer-events-none mb-2 flex flex-col items-end">
+              {showReviewCount && (
+                <Badge
+                  variant="outline"
+                  className="whitespace-nowrap bg-slate-50/50 text-[10px] font-bold tabular-nums text-slate-400 backdrop-blur-sm border-slate-200"
+                >
+                  {reviewCount + 1}回目の復習
+                </Badge>
+              )}
+            </div>
+          }
+          extraFooter={
+            studyPhase === "timing" && (
+              <div className="text-center">
+                <p className="animate-pulse text-sm text-slate-400">
+                  カードをクリックまたはスワイプして解答を表示
+                </p>
               </div>
-            }
-            extraFooter={
-              studyPhase === "timing" && (
-                <div className="text-center">
-                  <p className="animate-pulse text-sm text-slate-400">
-                    カードをクリックまたはスワイプして解答を表示
-                  </p>
-                </div>
-              )
-            }
-            onToggleUncertainty={handleToggleUncertainty}
-            onToggleBookmark={handleToggleBookmark}
-            onEdit={handleEdit}
-          />
+            )
+          }
+          onToggleUncertainty={handleToggleUncertainty}
+          onToggleBookmark={handleToggleBookmark}
+          onEdit={handleEdit}
+        />
       </div>
 
       {studyPhase === "answer" &&
@@ -430,6 +436,8 @@ const StudyCardInner = ({
     </div>
   );
 };
+
+
 
 
 

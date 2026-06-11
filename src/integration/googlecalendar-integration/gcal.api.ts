@@ -4,7 +4,11 @@ import { createGoogleApiError } from "@/integration/google-integration/googleApi
 
 
 
+
+
 const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
+
+
 
 
 
@@ -99,7 +103,7 @@ const toGoogleCalendarListItem = (calendar: GoogleCalendarApiCalendarResponse): 
   backgroundColor: "#4f7cff",
   selected: true,
 });
-const toGoogleCalendarEvent = ({ raw, accountId, calendarId, accentColor, projectId }: { raw: GCalRawIncrementalEvent; accountId?: string; calendarId: string; accentColor: string; projectId?: string }): GoogleCalendarEvent | null => {
+const toGoogleCalendarEvent = ({ raw, accountId, calendarId, accentColor, projectId }: { raw: GCalRawIncrementalEvent; accountId?: string; calendarId: string; accentColor: string; projectId?: string; }): GoogleCalendarEvent | null => {
   if (!raw.id) return null;
   if (raw.status === "cancelled") return null;
 
@@ -200,7 +204,7 @@ export const fetchCalendarList = async (accessToken: string): Promise<GoogleCale
     throw error;
   }
 };
-export const createGoogleCalendar = async ({ accessToken, summary, description }: { accessToken: string; summary: string; description?: string }): Promise<GoogleCalendarListItem> => {
+export const createGoogleCalendar = async ({ accessToken, summary, description }: { accessToken: string; summary: string; description?: string; }): Promise<GoogleCalendarListItem> => {
   const trimmedSummary = summary.trim();
   if (!trimmedSummary) throw new Error("Google Calendar name is required");
 
@@ -281,7 +285,7 @@ export const fetchEventsForCalendar = async ({ accessToken, accountId, calendarI
     throw error;
   }
 };
-export const createGoogleCalendarEvent = async ({ accessToken, accountId, accentColor, event }: { accessToken: string; accountId?: string; accentColor: string; event: GCalWritableEventInput }): Promise<GoogleCalendarEvent> => {
+export const createGoogleCalendarEvent = async ({ accessToken, accountId, accentColor, event }: { accessToken: string; accountId?: string; accentColor: string; event: GCalWritableEventInput; }): Promise<GoogleCalendarEvent> => {
   const raw = await postJson<GCalRawIncrementalEvent>(
     accessToken,
     `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodeURIComponent(event.calendarId)}/events`,
@@ -293,7 +297,7 @@ export const createGoogleCalendarEvent = async ({ accessToken, accountId, accent
   if (!created) throw new Error("Google Calendar event creation response was invalid");
   return created;
 };
-export const updateGoogleCalendarEvent = async ({ accessToken, accountId, accentColor, event }: { accessToken: string; accountId?: string; accentColor: string; event: GCalWritableEventUpdateInput }): Promise<GoogleCalendarEvent> => {
+export const updateGoogleCalendarEvent = async ({ accessToken, accountId, accentColor, event }: { accessToken: string; accountId?: string; accentColor: string; event: GCalWritableEventUpdateInput; }): Promise<GoogleCalendarEvent> => {
   const raw = await patchJson<GCalRawIncrementalEvent>(
     accessToken,
     `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodeURIComponent(event.calendarId)}/events/${encodeURIComponent(event.eventId)}`,
@@ -305,6 +309,6 @@ export const updateGoogleCalendarEvent = async ({ accessToken, accountId, accent
   if (!updated) throw new Error("Google Calendar event update response was invalid");
   return updated;
 };
-export const deleteGoogleCalendarEvent = async ({ accessToken, event }: { accessToken: string; event: GCalWritableEventDeleteInput }): Promise<void> => {
+export const deleteGoogleCalendarEvent = async ({ accessToken, event }: { accessToken: string; event: GCalWritableEventDeleteInput; }): Promise<void> => {
   await deleteJson(accessToken, `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodeURIComponent(event.calendarId)}/events/${encodeURIComponent(event.eventId)}`, "Google Calendar event deletion failed");
 };

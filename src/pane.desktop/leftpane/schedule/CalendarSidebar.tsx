@@ -13,17 +13,21 @@ import { useT } from "@shared/i18n/useT";
 
 
 
-type CalendarContextMenuState = { accountId: string; calendarId: string; color: string; x: number; y: number };
-type CalendarColorPickerTarget = { accountId: string; calendarId: string };
+
+
+type CalendarContextMenuState = { accountId: string; calendarId: string; color: string; x: number; y: number; };
+type CalendarColorPickerTarget = { accountId: string; calendarId: string; };
 type ContextMenuTriggerEvent = ReactMouseEvent<HTMLElement>;
-type MatchingGoogleCalendarTarget = { account: GoogleAccountDisplay; calendar: GoogleCalendarListItem };
-type ProjectLinksContextMenuState = { project: AppCalendarItem; links: ProjectCalendarLink[]; matchingGoogleCalendars: MatchingGoogleCalendarTarget[]; x: number; y: number };
-type CalendarSidebarContentProps = CalendarSidebarProps & { className?: string };
-type AppProjectsSectionProps = { projects: AppCalendarItem[]; isAdding: boolean; onAddProject: (projectName: string) => void; onToggleProject: (projectId: string) => void; onOpenProjectLinksContextMenu: (event: ContextMenuTriggerEvent, project: AppCalendarItem) => void; onAddingChange: (isAdding: boolean) => void };
-type GoogleCalendarSourceRowProps = { account: GoogleAccountDisplay; calendar: GoogleCalendarListItem; color: string; onToggleCalendar: (calendarId: string) => void; onOpenCalendarContextMenu: (event: ContextMenuTriggerEvent, account: GoogleAccountDisplay, calendar: GoogleCalendarListItem) => void };
-type GoogleAccountSectionProps = { account: GoogleAccountDisplay; projectCalendarLinks: ProjectCalendarLink[]; googleCalendarColorOverrides: GoogleCalendarColorOverrideMap; onToggleCalendar: (calendarId: string) => void; onOpenCalendarContextMenu: (event: ContextMenuTriggerEvent, account: GoogleAccountDisplay, calendar: GoogleCalendarListItem) => void; onReconnect: () => void };
-type GoogleAccountsSectionProps = { accounts: GoogleAccountDisplay[]; isConnecting: boolean; projectCalendarLinks: ProjectCalendarLink[]; googleCalendarColorOverrides: GoogleCalendarColorOverrideMap; onAddCalendar: () => void; onToggleCalendar: (accountId: string, calendarId: string) => void; onOpenCalendarContextMenu: (event: ContextMenuTriggerEvent, account: GoogleAccountDisplay, calendar: GoogleCalendarListItem) => void; onReconnectAccount: (accountId: string) => void };
-type IconProps = { className?: string };
+type MatchingGoogleCalendarTarget = { account: GoogleAccountDisplay; calendar: GoogleCalendarListItem; };
+type ProjectLinksContextMenuState = { project: AppCalendarItem; links: ProjectCalendarLink[]; matchingGoogleCalendars: MatchingGoogleCalendarTarget[]; x: number; y: number; };
+type CalendarSidebarContentProps = CalendarSidebarProps & { className?: string; };
+type AppProjectsSectionProps = { projects: AppCalendarItem[]; isAdding: boolean; onAddProject: (projectName: string) => void; onToggleProject: (projectId: string) => void; onOpenProjectLinksContextMenu: (event: ContextMenuTriggerEvent, project: AppCalendarItem) => void; onAddingChange: (isAdding: boolean) => void; };
+type GoogleCalendarSourceRowProps = { account: GoogleAccountDisplay; calendar: GoogleCalendarListItem; color: string; onToggleCalendar: (calendarId: string) => void; onOpenCalendarContextMenu: (event: ContextMenuTriggerEvent, account: GoogleAccountDisplay, calendar: GoogleCalendarListItem) => void; };
+type GoogleAccountSectionProps = { account: GoogleAccountDisplay; projectCalendarLinks: ProjectCalendarLink[]; googleCalendarColorOverrides: GoogleCalendarColorOverrideMap; onToggleCalendar: (calendarId: string) => void; onOpenCalendarContextMenu: (event: ContextMenuTriggerEvent, account: GoogleAccountDisplay, calendar: GoogleCalendarListItem) => void; onReconnect: () => void; };
+type GoogleAccountsSectionProps = { accounts: GoogleAccountDisplay[]; isConnecting: boolean; projectCalendarLinks: ProjectCalendarLink[]; googleCalendarColorOverrides: GoogleCalendarColorOverrideMap; onAddCalendar: () => void; onToggleCalendar: (accountId: string, calendarId: string) => void; onOpenCalendarContextMenu: (event: ContextMenuTriggerEvent, account: GoogleAccountDisplay, calendar: GoogleCalendarListItem) => void; onReconnectAccount: (accountId: string) => void; };
+type IconProps = { className?: string; };
+
+
 
 
 
@@ -35,6 +39,8 @@ const CONNECTING_GOOGLE_CALENDAR_LABEL = "接続中...";
 const DEFAULT_CALENDAR_COLOR = "#74798b";
 const GOOGLE_CALENDAR_SECTION_LABEL = "Google Calendar";
 const PROJECT_LINKED_GOOGLE_CALENDARS_LABEL = "プロジェクトに追加したカレンダー";
+
+
 
 
 
@@ -79,6 +85,8 @@ const createGoogleCalendarActionLabel = (account: GoogleAccountDisplay, accountC
 
 
 
+
+
 const IconChevronRight = ({ className }: IconProps) => <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 const IconPlus = ({ className }: IconProps) => <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>;
 const GoogleCalendarHeadingSvg = () => <svg aria-hidden="true" className="block h-4 w-[118px] text-[#111111]" viewBox="0 0 118 16" fill="none" xmlns="http://www.w3.org/2000/svg"><text x="0" y="13" fill="currentColor" fontFamily="var(--app-font-family-sidebar)" fontSize="13" fontWeight="700" letterSpacing="0" textRendering="geometricPrecision">{GOOGLE_CALENDAR_SECTION_LABEL}</text></svg>;
@@ -87,7 +95,7 @@ const GoogleCalendarSourceRow = ({ account, calendar, color, onToggleCalendar, o
     <SelectableGoogleSourceRow id={calendar.id} label={calendar.summary} checked={account.selectedCalendarIds.has(calendar.id)} color={color} onToggle={onToggleCalendar} />
   </div>
 );
-const ProjectLinkedGoogleCalendarRow = ({ accountId, calendar, color }: { accountId: string; calendar: GoogleCalendarListItem; color: string }) => (
+const ProjectLinkedGoogleCalendarRow = ({ accountId, calendar, color }: { accountId: string; calendar: GoogleCalendarListItem; color: string; }) => (
   <div className={cn(GOOGLE_SOURCE_ROW_CLASS_NAME, "text-[#6d7380]")} title={getGoogleCalendarName(calendar)} data-calendar-account-id={accountId}>
     <span className="flex h-5 w-5 shrink-0 items-center justify-center" aria-hidden="true">
       <span className="h-2.5 w-2.5 rounded-full border border-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)]" style={{ backgroundColor: color }} />
@@ -95,7 +103,7 @@ const ProjectLinkedGoogleCalendarRow = ({ accountId, calendar, color }: { accoun
     <span className="truncate text-[12px] font-medium text-[#8c9099]">{calendar.summary}</span>
   </div>
 );
-const ProjectLinkedGoogleCalendarsSection = ({ account, calendars, googleCalendarColorOverrides }: { account: GoogleAccountDisplay; calendars: GoogleCalendarListItem[]; googleCalendarColorOverrides: GoogleCalendarColorOverrideMap }) => {
+const ProjectLinkedGoogleCalendarsSection = ({ account, calendars, googleCalendarColorOverrides }: { account: GoogleAccountDisplay; calendars: GoogleCalendarListItem[]; googleCalendarColorOverrides: GoogleCalendarColorOverrideMap; }) => {
   const [isOpen, setIsOpen] = useState(false);
   if (calendars.length === 0) return null;
 
@@ -271,6 +279,8 @@ const CalendarSidebarContent = ({ appProjects, projectCalendarLinks, googleCalen
   );
 };
 const CalendarSidebar = (props: CalendarSidebarProps) => <SidebarLayeredDirectory calendarContent={<CalendarSidebarContent {...props} className="px-0 pt-2" />} />;
+
+
 
 
 

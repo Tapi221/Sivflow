@@ -7,6 +7,8 @@ import { type SlateEditor, KEYS, RangeApi } from 'platejs';
 
 
 
+
+
 export type StructuredPromptSections = { context?: string;
   examples?: string[] | string;
   history?: string;
@@ -22,8 +24,12 @@ export type StructuredPromptSections = { context?: string;
 
 
 
+
+
 const SELECTION_START = '<Selection>';
 const SELECTION_END = '</Selection>';
+
+
 
 
 
@@ -37,11 +43,11 @@ export const inlineTag = (tag: string, content?: string | null) => { if (!conten
 };
 export const sections = (sections: (boolean | string | null | undefined)[]) => sections.filter(Boolean).join('\n\n');
 export const list = (items: string[] | undefined) => items ? items.filter(Boolean).map((item) => `- ${item}`).join('\n') : '';
-export const buildStructuredPrompt = ({ context, examples, history, instruction, outputFormatting, prefilledResponse, rules, task, taskContext, thinking, tone, }: StructuredPromptSections) => { const formattedExamples = Array.isArray(examples) ? examples .map((example) => { const indentedContent = example .split('\n') .map((line) => (line ? ` ${line}` : '')) .join('\n');
+export const buildStructuredPrompt = ({ context, examples, history, instruction, outputFormatting, prefilledResponse, rules, task, taskContext, thinking, tone, }: StructuredPromptSections) => { const formattedExamples = Array.isArray(examples) ? examples.map((example) => { const indentedContent = example.split('\n').map((line) => (line ? ` ${line}` : '')).join('\n');
 
-          return ['  <example>', indentedContent, '  </example>'].join('\n');
-        })
-        .join('\n')
+    return ['  <example>', indentedContent, '  </example>'].join('\n');
+  })
+    .join('\n')
     : examples;
 
   return sections([
@@ -49,21 +55,21 @@ export const buildStructuredPrompt = ({ context, examples, history, instruction,
     tone,
     task && tag('task', task),
     instruction &&
-      dedent`
+    dedent`
         Here is the user's instruction (this is what you need to respond to):
         ${tag('instruction', instruction)}
       `,
     context &&
-      dedent`
+    dedent`
         Here is the context you should reference when answering the user:
         ${tag('context', context)}
       `,
     rules && tag('rules', rules),
     formattedExamples &&
-      'Here are some examples of how to respond in a standard interaction:\n' +
-        tag('examples', formattedExamples),
+    'Here are some examples of how to respond in a standard interaction:\n' +
+    tag('examples', formattedExamples),
     history &&
-      dedent`
+    dedent`
         Here is the conversation history (between the user and you) prior to the current instruction:
         ${tag('history', history)}
       `,
@@ -72,9 +78,10 @@ export const buildStructuredPrompt = ({ context, examples, history, instruction,
     (prefilledResponse ?? null) !== null && tag('prefilledResponse', prefilledResponse ?? ''),
   ]);
 };
-export const getTextFromMessage = (message: UIMessage): string => { return message.parts .filter((part) => part.type === 'text') .map((part) => part.text) .join('');
+export const getTextFromMessage = (message: UIMessage): string => { return message.parts.filter((part) => part.type === 'text').map((part) => part.text).join('');
 };
-export const formatTextFromMessages = (messages: ChatMessage[], options?: { limit?: number }): string => { if (!messages || messages.length <= 1) return '';
+export const formatTextFromMessages = (messages: ChatMessage[], options?: { limit?: number; }): string => {
+  if (!messages || messages.length <= 1) return '';
 
   const historyMessages = options?.limit ? messages.slice(-options.limit) : messages;
 

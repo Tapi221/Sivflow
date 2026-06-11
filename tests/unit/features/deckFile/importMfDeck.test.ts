@@ -102,7 +102,7 @@ describe("importMfDeckArchive", () => {
     );
     const updateCardSet = vi.fn(async () => {});
     const createCard = vi.fn(
-      async (cardData: Partial<Card> & { cardSetId?: string }) =>
+      async (cardData: Partial<Card> & { cardSetId?: string; }) =>
         ({ id: "created-card", ...cardData }) as Card,
     );
     const ensureTagByName = vi.fn(async (name: string) => `tag-${name}`);
@@ -144,7 +144,7 @@ describe("importMfDeckArchive", () => {
 
     const restoredImage = (
       createdFrontBlock as unknown as {
-        images?: Array<{ localUrl?: string }>;
+        images?: Array<{ localUrl?: string; }>;
       }
     )?.images?.[0];
     expect(restoredImage?.localUrl).toBe("data:image/png;base64,iVBORw==");

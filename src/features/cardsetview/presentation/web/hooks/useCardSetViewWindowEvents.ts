@@ -4,6 +4,8 @@ import { subscribeCardSetViewWindowEvent } from "@/features/cardsetview/presenta
 
 
 
+
+
 interface UseCardSetViewWindowEventsOptions {
   handleToggleViewMode: () => void;
   createAndFocusCard: () => Promise<boolean>;
@@ -11,8 +13,10 @@ interface UseCardSetViewWindowEventsOptions {
 
 
 
-export const useCardSetViewWindowEvents = ({ handleToggleViewMode, createAndFocusCard, }: UseCardSetViewWindowEventsOptions) => { useEffect(() => { return subscribeCardSetViewWindowEvent( CARD_SET_VIEW_EVENTS.toggleEditingRequest, () => { handleToggleViewMode();
-      },
+
+
+export const useCardSetViewWindowEvents = ({ handleToggleViewMode, createAndFocusCard, }: UseCardSetViewWindowEventsOptions) => { useEffect(() => { return subscribeCardSetViewWindowEvent(CARD_SET_VIEW_EVENTS.toggleEditingRequest, () => { handleToggleViewMode();
+    },
     );
   }, [handleToggleViewMode]);
 

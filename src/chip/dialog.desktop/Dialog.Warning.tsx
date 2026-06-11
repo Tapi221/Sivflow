@@ -4,10 +4,16 @@ import type { Notification } from "@/types/notification";
 
 
 
+
+
 interface WarningDialogProps {
   notification: Notification;
   onDismiss: () => void;
 }
+
+
+
+
 
 
 
@@ -113,11 +119,10 @@ export const WarningDialog: React.FC<WarningDialogProps> = ({ notification, onDi
                     onDismiss();
                   }
                 }}
-                className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
-                  action.primary
-                    ? "bg-yellow-500 text-white hover:bg-yellow-600"
-                    : "bg-slate-100 text-slate-900 hover:bg-slate-200"
-                }`}
+                className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${action.primary
+                  ? "bg-yellow-500 text-white hover:bg-yellow-600"
+                  : "bg-slate-100 text-slate-900 hover:bg-slate-200"
+                  }`}
               >
                 {action.label}
               </button>

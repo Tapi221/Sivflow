@@ -4,7 +4,11 @@ type AssetQueueProcessor = {
 
 
 
+
+
 const AUTO_PROCESS_LISTENER_KEY = "__flashcardPersistentQueueAutoProcessListenersBound";
+
+
 
 
 
@@ -23,7 +27,7 @@ const triggerAssetQueueProcessing = (
     });
   });
 };
-export const bindPersistentQueueAutoProcessing = ( persistentQueue: AssetQueueProcessor, ): void => { if (typeof window === "undefined" || typeof document === "undefined") { return;
+export const bindPersistentQueueAutoProcessing = (persistentQueue: AssetQueueProcessor,): void => { if (typeof window === "undefined" || typeof document === "undefined") { return;
   }
 
   const target = window as Window & {

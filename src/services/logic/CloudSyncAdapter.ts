@@ -5,6 +5,8 @@ import type { CloudDeviceStatus, ICloudSyncAdapter, SyncChange } from "@/service
 
 
 
+
+
 const getDeviceMetadataPath = (userId: string, deviceId: string) => {
   return `sync_metadata/${userId}/devices/${deviceId}`;
 };
@@ -19,12 +21,12 @@ export class CloudSyncAdapter implements ICloudSyncAdapter { private readonly us
 
   pullDiff = async (
     since: number,
-  ): Promise<{ changes: SyncChange[]; serverTime: number }> =>
+  ): Promise<{ changes: SyncChange[]; serverTime: number; }> =>
     pullCloudSyncDiff(this.userId, since);
 
   pushBatch = async (
     changes: SyncChange[],
-  ): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown }> =>
+  ): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown; }> =>
     pushCloudSyncBatch(this.userId, changes);
 
   pullFull = async (entityIds: string[]): Promise<SyncChange[]> =>

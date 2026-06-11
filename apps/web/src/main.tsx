@@ -1,4 +1,4 @@
- 
+
 import "@/styles/index.css";
 import "@/services/localDB";
 import "@/../apps/web/src/runtime/disableNativeTitleTooltips";
@@ -13,10 +13,12 @@ import { renderGoogleOAuthCallback } from "@/integration/google-integration/goog
 
 
 
+
+
 type AppBootstrapState =
-  | { status: "loading" }
-  | { status: "ready"; App: ComponentType }
-  | { status: "failed"; message: string };
+  | { status: "loading"; }
+  | { status: "ready"; App: ComponentType; }
+  | { status: "failed"; message: string; };
 type StartupFailureScreenProps = {
   message: string;
 };
@@ -29,6 +31,8 @@ declare global {
     __sivflowReactRootStore?: SivflowReactRootStore;
   }
 }
+
+
 
 
 
@@ -95,6 +99,8 @@ const STARTUP_LOGO_STYLE = `
 
 
 
+
+
 const getStartupFailureMessage = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
 
@@ -151,6 +157,8 @@ const getSivflowReactRoot = (): Root => {
 
   return root;
 };
+
+
 
 
 
@@ -260,6 +268,8 @@ const AppBootstrap = () => {
   const LoadedApp = state.App;
   return <LoadedApp />;
 };
+
+
 
 
 

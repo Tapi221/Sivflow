@@ -6,12 +6,14 @@ import type { Folder } from "@/types";
 
 
 
+
+
 const isDatabaseClosedError = (error: unknown) => {
   if (!error || typeof error !== "object") {
     return false;
   }
 
-  const candidate = error as { name?: unknown; message?: unknown };
+  const candidate = error as { name?: unknown; message?: unknown; };
 
   return (
     candidate.name === "DatabaseClosedError" ||

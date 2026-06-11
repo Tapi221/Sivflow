@@ -1388,7 +1388,7 @@ export const useChat = () => { const editor = useEditorRef();
 
   React.useEffect(() => {
     editor.setOption(AIChatPlugin, 'chat', chat as any);
-     
+
   }, [chat.status, chat.messages, chat.error, _abortFakeStream]);
 
   return chat;
@@ -1630,7 +1630,7 @@ const createTableCellChunks = (editor: PlateEditor) => {
 
   if (selectedCells.length > 0) {
     cellIds = selectedCells
-      .map((cell: { id?: string }) => cell.id)
+      .map((cell: { id?: string; }) => cell.id)
       .filter(Boolean);
   } else {
     // Try to find table cells in current selection
@@ -1638,12 +1638,12 @@ const createTableCellChunks = (editor: PlateEditor) => {
       editor.api.nodes({
         at: editor.selection ?? undefined,
         match: (n) =>
-          (n as { type?: string }).type === KEYS.td ||
-          (n as { type?: string }).type === KEYS.th,
+          (n as { type?: string; }).type === KEYS.td ||
+          (n as { type?: string; }).type === KEYS.th,
       })
     );
     cellIds = cells
-      .map(([node]) => (node as { id?: string }).id)
+      .map(([node]) => (node as { id?: string; }).id)
       .filter(Boolean) as string[];
   }
 

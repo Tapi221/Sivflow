@@ -5,6 +5,8 @@ import { getCalendarIntensity, getStreakFromLogs, getTodayDescription, getWeekDa
 
 
 
+
+
 const isDeletedCard = (card: CalendarCardLike) => {
   return Boolean(
     card.isDeleted ??
@@ -87,7 +89,7 @@ export const buildCardsByDate = ({ cards, cardSets, folders, foldersLoading, aut
 
   return grouped;
 };
-export const buildTodaySummary = ( cardsByDate: CalendarCardsByDate, ): CalendarSummaryViewModel => { const todayKey = toDateKey(new Date());
+export const buildTodaySummary = (cardsByDate: CalendarCardsByDate,): CalendarSummaryViewModel => { const todayKey = toDateKey(new Date());
   const todayDueCount = (cardsByDate[todayKey] ?? []).length;
 
   return {
@@ -96,7 +98,7 @@ export const buildTodaySummary = ( cardsByDate: CalendarCardsByDate, ): Calendar
     isTodaySelected: false,
   };
 };
-export const buildStreak = ( remoteLogs: CalendarStudyLogLike[], localLogs: CalendarStudyLogLike[], ) => { return getStreakFromLogs([...remoteLogs, ...localLogs]);
+export const buildStreak = (remoteLogs: CalendarStudyLogLike[], localLogs: CalendarStudyLogLike[],) => { return getStreakFromLogs([...remoteLogs, ...localLogs]);
 };
 export const buildCalendarGridViewModel = ({ currentDate, selectedDate, cardsByDate, weekStartDay, }: { currentDate: Date;
   selectedDate: Date;

@@ -7,6 +7,8 @@ import { ChevronRight } from "@/ui/icons";
 
 
 
+
+
 type WorkspaceBreadcrumbsProps = {
   className?: string;
   isLeftPanelCollapsed?: boolean;
@@ -14,6 +16,8 @@ type WorkspaceBreadcrumbsProps = {
 type NoDragStyle = CSSProperties & {
   WebkitAppRegion?: "no-drag";
 };
+
+
 
 
 
@@ -31,6 +35,8 @@ const WORKSPACE_BREADCRUMB_SEPARATOR_CLASS_NAME = "h-3 w-3 shrink-0 text-[#7d7b7
 
 
 
+
+
 const getBreadcrumbLabel = (crumb: BreadcrumbCrumb): string => {
   const label = crumb.label.trim();
   return label.length > 0 ? label : "無題";
@@ -38,6 +44,8 @@ const getBreadcrumbLabel = (crumb: BreadcrumbCrumb): string => {
 const getBreadcrumbKey = (crumb: BreadcrumbCrumb, index: number): string => {
   return `${index}:${crumb.to ?? ""}:${crumb.folderId ?? ""}:${crumb.label}`;
 };
+
+
 
 
 
@@ -105,7 +113,11 @@ const WorkspaceBreadcrumbs = ({ className, isLeftPanelCollapsed = false }: Works
 
 
 
+
+
 export { WorkspaceBreadcrumbs };
+
+
 
 
 

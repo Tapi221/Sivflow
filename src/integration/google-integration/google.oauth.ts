@@ -7,6 +7,8 @@ import { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, isGoo
 
 
 
+
+
 export type GoogleCalendarAccess = { accessToken: string;
   accountEmail: string | null;
   accountName: string | null;
@@ -41,6 +43,8 @@ type GoogleOAuthCallbackLike = {
 
 
 
+
+
 const GOOGLE_SIGN_IN_SCOPE_PARAM = "openid email profile";
 const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
 const GOOGLE_CALENDAR_READONLY_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
@@ -66,9 +70,11 @@ let pendingGoogleCalendarServerCodeVerifier: string | null = null;
 
 
 
+
+
 const createGoogleCalendarReconnectRequiredError = (): Error => {
   const error = new Error("Google 連携の再認可が必要です");
-  (error as Error & { code?: string }).code = GOOGLE_CALENDAR_RECONNECT_REQUIRED_CODE;
+  (error as Error & { code?: string; }).code = GOOGLE_CALENDAR_RECONNECT_REQUIRED_CODE;
   return error;
 };
 const parseGrantedScopes = (scope: string | undefined | null): Set<string> => new Set((scope ?? "").split(/\s+/).map((value) => value.trim()).filter(Boolean));
@@ -80,10 +86,10 @@ const assertRequiredGoogleScopes = (scope: string | undefined | null): void => {
 const fetchGoogleTokenInfoScope = async (accessToken: string): Promise<string | null> => {
   const response = await fetch(`${GOOGLE_OAUTH_TOKENINFO_ENDPOINT}?${new URLSearchParams({ access_token: accessToken })}`);
   if (!response.ok) throw new Error(GOOGLE_SCOPE_RECONNECT_MESSAGE);
-  const json = (await response.json()) as { scope?: string };
+  const json = (await response.json()) as { scope?: string; };
   return json.scope ?? null;
 };
-const validateGrantedGoogleScopes = async ({ accessToken, scope, allowTokenInfoFallback }: { accessToken: string; scope?: string | null; allowTokenInfoFallback: boolean }): Promise<void> => {
+const validateGrantedGoogleScopes = async ({ accessToken, scope, allowTokenInfoFallback }: { accessToken: string; scope?: string | null; allowTokenInfoFallback: boolean; }): Promise<void> => {
   if (scope) {
     assertRequiredGoogleScopes(scope);
     return;
@@ -157,7 +163,7 @@ const waitForDesktopCode = (state: string, redirectUri: string): Promise<string>
     callback();
   };
 
-  const handleCallbackUrl = ({ rawUrl, callbackState, callbackCode, callbackError, errorDescription }: { rawUrl: string; callbackState?: string | null; callbackCode?: string | null; callbackError?: string | null; errorDescription?: string | null }): void => {
+  const handleCallbackUrl = ({ rawUrl, callbackState, callbackCode, callbackError, errorDescription }: { rawUrl: string; callbackState?: string | null; callbackCode?: string | null; callbackError?: string | null; errorDescription?: string | null; }): void => {
     let url: URL;
     try {
       url = new URL(rawUrl);
@@ -243,7 +249,7 @@ const waitForWebCode = (state: string, redirectUri: string): Promise<string> => 
     callback();
   };
 
-  const handleCallbackUrl = ({ rawUrl, callbackState, callbackCode, callbackError, errorDescription }: { rawUrl: string; callbackState?: string | null; callbackCode?: string | null; callbackError?: string | null; errorDescription?: string | null }): void => {
+  const handleCallbackUrl = ({ rawUrl, callbackState, callbackCode, callbackError, errorDescription }: { rawUrl: string; callbackState?: string | null; callbackCode?: string | null; callbackError?: string | null; errorDescription?: string | null; }): void => {
     let url: URL;
     try {
       url = new URL(rawUrl);
@@ -315,10 +321,10 @@ const waitForWebCode = (state: string, redirectUri: string): Promise<string> => 
 const fetchGoogleUserInfo = async (accessToken: string) => {
   const response = await fetch(GOOGLE_USERINFO_ENDPOINT, { headers: { Authorization: `Bearer ${accessToken}` } });
   if (!response.ok) throw new Error(`Failed to fetch Google profile (${response.status})`);
-  const json = (await response.json()) as { email?: string; name?: string; picture?: string };
+  const json = (await response.json()) as { email?: string; name?: string; picture?: string; };
   return { accountEmail: json.email ?? null, accountName: json.name ?? null, accountPhotoUrl: json.picture ?? null };
 };
-const requestGoogleOAuthServerCode = async ({ accessType, includeGrantedScopes, loginHint, prompt, scope }: { accessType?: "offline"; includeGrantedScopes?: boolean; loginHint?: string; prompt?: string; scope: string }): Promise<GoogleOAuthServerCode> => {
+const requestGoogleOAuthServerCode = async ({ accessType, includeGrantedScopes, loginHint, prompt, scope }: { accessType?: "offline"; includeGrantedScopes?: boolean; loginHint?: string; prompt?: string; scope: string; }): Promise<GoogleOAuthServerCode> => {
   if (typeof window === "undefined") throw new Error("Google OAuth is not available");
   const clientId = getGoogleOAuthClientId();
   const redirectUri = isDesktopLikeRuntime() ? getDesktopRedirectUri() : window.location.origin;
@@ -348,7 +354,11 @@ export const consumeGoogleCalendarServerCodeVerifier = (): string | null => { co
 
 
 
+
+
 export const consumeGoogleConnectedServiceServerCodeVerifier = consumeGoogleCalendarServerCodeVerifier;
+
+
 
 
 
@@ -371,17 +381,24 @@ export const requestCalendarAccessToken = async (auth: Auth, silent = false): Pr
 
 
 
+
+
 export const requestConnectedServiceAccessToken = requestCalendarAccessToken;
 
 
 
-export const refreshCalendarAccessToken = async ({ refreshToken }: { refreshToken: string }): Promise<GoogleCalendarAccess> => { const clientId = getGoogleOAuthClientId();
+
+
+export const refreshCalendarAccessToken = async ({ refreshToken }: { refreshToken: string; }): Promise<GoogleCalendarAccess> => {
+  const clientId = getGoogleOAuthClientId();
   const response = await fetch(GOOGLE_OAUTH_TOKEN_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_id: clientId, refresh_token: refreshToken, grant_type: "refresh_token" }) });
-  const json = (await response.json()) as { access_token?: string; expires_in?: number; refresh_token?: string; scope?: string; id_token?: string; error?: string; error_description?: string };
+  const json = (await response.json()) as { access_token?: string; expires_in?: number; refresh_token?: string; scope?: string; id_token?: string; error?: string; error_description?: string; };
   if (!response.ok || !json.access_token) throw new Error(json.error_description ?? json.error ?? "Google token refresh failed");
   await validateGrantedGoogleScopes({ accessToken: json.access_token, scope: json.scope, allowTokenInfoFallback: true });
   return { accessToken: json.access_token, refreshToken: json.refresh_token, expiresInSeconds: json.expires_in, ...getGoogleProfileFromIdToken(json.id_token) };
 };
+
+
 
 
 

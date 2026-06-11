@@ -5,6 +5,8 @@ import StudyCard from "@/features/study/StudyCard";
 
 
 
+
+
 export const StudyReviewDesktop = ({ cards, sessionCurrentIndex, onResult, onToggleUncertainty, onToggleBookmark, onEdit, showHard, showEasy, }: StudyReviewProps) => { const [flipTrigger, setFlipTrigger] = useState(0);
 
   useEffect(() => {
@@ -18,7 +20,7 @@ export const StudyReviewDesktop = ({ cards, sessionCurrentIndex, onResult, onTog
         activeIndex={sessionCurrentIndex}
         onActiveIndexChange={() => {}}
         onFlip={() => setFlipTrigger((current) => current + 1)}
-        getKey={(card) => (card as { id?: string }).id ?? ""}
+        getKey={(card) => (card as { id?: string; }).id ?? ""}
         renderCard={(card, _idx, isActive) => (
           <StudyCard
             mode="review"

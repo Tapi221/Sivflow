@@ -6,6 +6,8 @@ import { usePresentationTarget } from "@/platform/presentation/usePresentationTa
 
 
 
+
+
 const STUDY_REVIEW_COMPONENTS = {
   desktop: StudyReviewDesktop,
   mobile: StudyReviewMobile,
@@ -13,6 +15,8 @@ const STUDY_REVIEW_COMPONENTS = {
   PresentationTarget,
   (props: StudyReviewProps) => React.JSX.Element
 >;
+
+
 
 
 

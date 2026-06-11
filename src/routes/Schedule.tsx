@@ -5,8 +5,12 @@ import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/us
 
 
 
+
+
 const MOBILE_SCHEDULE_MEDIA_QUERY = "(max-width: 767px)";
 const MobileScheduleScreen = lazy(() => import("@/pane.desktop/view/ScheduleScreen.mobile").then(({ ScheduleScreen }) => ({ default: ScheduleScreen })));
+
+
 
 
 
@@ -33,6 +37,8 @@ const useIsMobileSchedule = () => {
 
 
 
+
+
 const Calendar = () => {
   const isMobile = useIsMobileSchedule();
   const activeSectionKey = useWorkspaceTabsStore((state) => state.tabs.find((tab) => tab.id === state.activeTabId)?.sectionKey ?? null);
@@ -50,6 +56,8 @@ const Calendar = () => {
     </div>
   );
 };
+
+
 
 
 

@@ -1,6 +1,8 @@
- 
+
 import type { CardBlock } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
+
+
 
 
 
@@ -16,6 +18,8 @@ export const MF_DECK_MEDIA_URI_PREFIX = "mfdeck://media/" as const;
 export const MF_DECK_MAX_CARDS = 50000 as const;
 export const MF_DECK_MAX_BLOCKS_PER_FACE = 1000 as const;
 export const MF_DECK_MAX_MEDIA_ENTRIES = 5000 as const;
+
+
 
 
 
@@ -90,13 +94,15 @@ export type MfDeckArchiveV1 = { manifest: MfDeckManifestV1;
   media?: Record<string, Uint8Array>;
 };
 export type MfDeckValidationResult = | { ok: true;
-      value: MfDeckArchiveV1;
-      issues: MfDeckIssue[];
-    }
+  value: MfDeckArchiveV1;
+  issues: MfDeckIssue[];
+}
   | {
-      ok: false;
-      issues: MfDeckIssue[];
-    };
+    ok: false;
+    issues: MfDeckIssue[];
+  };
+
+
 
 
 

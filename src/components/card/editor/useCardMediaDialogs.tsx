@@ -9,6 +9,8 @@ import { sanitizeReferences } from "./cardEditorUtils";
 
 
 
+
+
 type Side = "question" | "answer";
 type UseCardMediaDialogsParams = {
   getSideAttachments: (side: Side) => CardFaceAttachments;
@@ -22,6 +24,8 @@ type StratisComponentIconProps = {
 
 
 
+
+
 const normalizeAttachments = (attachments: CardFaceAttachments | null | undefined): CardFaceAttachments => ({
   images: attachments?.images ?? [],
   audios: attachments?.audios ?? [],
@@ -30,7 +34,11 @@ const normalizeAttachments = (attachments: CardFaceAttachments | null | undefine
 
 
 
+
+
 const StratisComponentIcon = ({ icon: Icon, className }: StratisComponentIconProps) => <Icon aria-hidden="true" focusable="false" className={className} />;
+
+
 
 
 

@@ -5,6 +5,8 @@ import type { Note, NoteBlockContent } from '@/types';
 
 
 
+
+
 type NoteDocumentEditorProps = {
   note: Note;
   onChange: (changes: Pick<Note, 'content' | 'contentText' | 'contentVersion' | 'editor'>) => void | Promise<void>;
@@ -25,9 +27,13 @@ type PlateChangePayload = unknown[] | {
 
 
 
+
+
 const EMPTY_NOTE_TITLE_LABEL = '無題';
 const NOTE_SAVE_DEBOUNCE_MS = 500;
 const NOTE_CONTENT_VERSION = 2;
+
+
 
 
 
@@ -59,6 +65,8 @@ const getChangeValue = (change: PlateChangePayload): unknown[] | null => {
   if (isRecord(change) && Array.isArray(change.value)) return change.value;
   return null;
 };
+
+
 
 
 
@@ -108,6 +116,8 @@ const NoteDocumentEditor = ({ note, onChange }: NoteDocumentEditorProps) => {
     </div>
   );
 };
+
+
 
 
 

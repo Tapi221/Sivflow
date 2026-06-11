@@ -19,7 +19,7 @@ vi.mock("firebase/functions", () => ({
 import { diagnoseGoogleOAuthReconnectCause, toUserTransparentAutoRecoveryError } from "@/integration/google-integration/google.server-oauth";
 
 const callableError = (reason: string, code = "functions/failed-precondition") => {
-  const error = new Error("callable failed") as Error & { code?: string; details?: unknown };
+  const error = new Error("callable failed") as Error & { code?: string; details?: unknown; };
   error.code = code;
   error.details = { reason };
   return error;
@@ -39,7 +39,7 @@ describe("Google Calendar server OAuth callable errors", () => {
 
     expect(diagnosis.reconnectRequired).toBe(false);
     expect(userError.message).toContain("Firebase Functions secrets");
-    expect((userError as Error & { code?: string }).code).toBe("server-oauth-configuration-error");
+    expect((userError as Error & { code?: string; }).code).toBe("server-oauth-configuration-error");
   });
 
   it("does not tell users to reconnect when stored tokens cannot be decrypted", () => {
@@ -48,7 +48,7 @@ describe("Google Calendar server OAuth callable errors", () => {
 
     expect(diagnosis.reconnectRequired).toBe(false);
     expect(userError.message).toContain("復号できません");
-    expect((userError as Error & { code?: string }).code).toBe("server-stored-token-decrypt-error");
+    expect((userError as Error & { code?: string; }).code).toBe("server-stored-token-decrypt-error");
   });
 
   it("treats insufficient Calendar or Tasks scope as reconnect-required", () => {
@@ -58,6 +58,6 @@ describe("Google Calendar server OAuth callable errors", () => {
     expect(diagnosis.reconnectRequired).toBe(true);
     expect(diagnosis.action).toContain("Calendar と Tasks");
     expect(userError.message).toContain("権限が不足");
-    expect((userError as Error & { code?: string }).code).toBe("google-scope-insufficient");
+    expect((userError as Error & { code?: string; }).code).toBe("google-scope-insufficient");
   });
 });

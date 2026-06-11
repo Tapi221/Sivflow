@@ -4,6 +4,8 @@ import { deleteDocumentBlob } from "@/services/documentFileStore";
 
 
 
+
+
 type DocumentRecord = {
   id?: string;
   localFileId?: string;
@@ -24,7 +26,9 @@ type DocumentsTable = {
     first(): Promise<DocumentRecord | undefined>;
   };
 };
-export type DocDbCtx = { documents: DocumentsTable; userId?: string };
+export type DocDbCtx = { documents: DocumentsTable; userId?: string; };
+
+
 
 
 
@@ -45,7 +49,7 @@ const canDeleteDocumentBlob = async (
     .first();
   return !sharedRef;
 };
-export const cleanupBeforeDocumentUpdate = async ( db: DocDbCtx, id: string, changes: unknown, ) => { const docChanges = changes as DocumentUpdateChanges;
+export const cleanupBeforeDocumentUpdate = async (db: DocDbCtx, id: string, changes: unknown,) => { const docChanges = changes as DocumentUpdateChanges;
   const hasLocalFileIdChange = Object.prototype.hasOwnProperty.call(
     docChanges,
     "localFileId",
@@ -136,7 +140,7 @@ export const cleanupBeforeDocumentDelete = async (db: DocDbCtx, id: string) => {
     console.warn("[LocalDB] deleteItem documents blob cleanup failed", err);
   }
 };
-export const cleanupBeforeDocumentSoftDelete = async ( db: DocDbCtx, id: string, ) => { try { const existingDoc = await db.documents.get(id);
+export const cleanupBeforeDocumentSoftDelete = async (db: DocDbCtx, id: string,) => { try { const existingDoc = await db.documents.get(id);
     safeRevokeBlobUrl(
       existingDoc?.blobUrl ?? existingDoc?.localUrl ?? null,
       `documents.softDelete:${id}`,

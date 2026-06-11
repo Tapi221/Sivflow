@@ -9,6 +9,8 @@ import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "
 
 
 
+
+
 interface SectionListColumnPaneProps {
   className?: string;
   sidebarWidth: number;
@@ -79,10 +81,14 @@ type ExternalPathSelectionSnapshot = {
 
 
 
+
+
 const EXPLORER_COLUMN_PATH_CHANGE_EVENT =
   "sivflow:explorer-column-path-change";
 const EXPLORER_COLUMN_PATH_NAVIGATE_EVENT =
   "sivflow:explorer-column-path-navigate";
+
+
 
 
 
@@ -95,7 +101,7 @@ const getFolderLabel = (folder: FolderLike): string => {
 const getCardSetFolderId = (cardSet: CardSet): string | null => {
   return (
     cardSet.folderId ??
-    (cardSet as unknown as { folder_id?: string | null }).folder_id ??
+    (cardSet as unknown as { folder_id?: string | null; }).folder_id ??
     null
   );
 };
@@ -106,7 +112,7 @@ const getCardSetLabel = (cardSet: CardSet): string => {
 const getDocumentFolderId = (document: DocumentItem): string | null => {
   return (
     document.folderId ??
-    (document as unknown as { folder_id?: string | null }).folder_id ??
+    (document as unknown as { folder_id?: string | null; }).folder_id ??
     null
   );
 };
@@ -116,7 +122,7 @@ const getDocumentLabel = (document: DocumentItem): string => {
 const getCardCardSetId = (card: Card): string | null => {
   return (
     card.cardSetId ??
-    (card as unknown as { card_set_id?: string | null }).card_set_id ??
+    (card as unknown as { card_set_id?: string | null; }).card_set_id ??
     null
   );
 };
@@ -134,8 +140,8 @@ const getCardFolderId = (
   cardSetById: Map<string, CardSet>,
 ): string | null => {
   const directFolderId =
-    (card as unknown as { folderId?: string | null }).folderId ??
-    (card as unknown as { folder_id?: string | null }).folder_id ??
+    (card as unknown as { folderId?: string | null; }).folderId ??
+    (card as unknown as { folder_id?: string | null; }).folder_id ??
     null;
   if (directFolderId) return directFolderId;
 
@@ -147,8 +153,8 @@ const getCardLabel = (card: Card): string => {
   if (title) return title;
 
   const questionNumber =
-    (card as unknown as { questionNumber?: string | null }).questionNumber ??
-    (card as unknown as { question_number?: string | null }).question_number ??
+    (card as unknown as { questionNumber?: string | null; }).questionNumber ??
+    (card as unknown as { question_number?: string | null; }).question_number ??
     null;
 
   return questionNumber?.trim() || "無題のカード";
@@ -207,6 +213,8 @@ const getSelectedItemKey = (item: SelectedExplorerItem): string => {
   if (!item) return "__none__";
   return "id" in item ? `${item.type}:${item.id}` : item.type;
 };
+
+
 
 
 
@@ -493,6 +501,8 @@ const SectionListColumnPane = ({
     </SectionListBlankPane>
   );
 };
+
+
 
 
 

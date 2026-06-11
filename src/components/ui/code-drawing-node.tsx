@@ -71,7 +71,7 @@ function createDebouncedCodeDrawingRenderer(
   );
 }
 
-function useCodeDrawingElement({ element }: { element: TCodeDrawingElement }) {
+function useCodeDrawingElement({ element }: { element: TCodeDrawingElement; }) {
   const editor = useEditorRef();
   const readOnly = useReadOnly();
   const [loading, setLoading] = React.useState(false);
@@ -110,7 +110,7 @@ function useCodeDrawingElement({ element }: { element: TCodeDrawingElement }) {
 
 
 
-export function CodeDrawingElement( props: PlateElementProps<TCodeDrawingElement> ) { const { children } = props;
+export function CodeDrawingElement(props: PlateElementProps<TCodeDrawingElement>) { const { children } = props;
   const isMobile = useIsMobile();
   const editor = useEditorRef();
   const readOnly = useReadOnly();
@@ -193,17 +193,17 @@ export function CodeDrawingElement( props: PlateElementProps<TCodeDrawingElement
     <PlateElement {...props}>
       <div contentEditable={false}>
         <CodeDrawingPreview
-            code={code}
-            drawingType={drawingType}
-            drawingMode={drawingMode}
-            image={image}
-            loading={loading}
-            onCodeChange={handleCodeChange}
-            onDrawingTypeChange={handleDrawingTypeChange}
-            onDrawingModeChange={handleDrawingModeChange}
-            readOnly={readOnly}
-            isMobile={isMobile}
-          />
+          code={code}
+          drawingType={drawingType}
+          drawingMode={drawingMode}
+          image={image}
+          loading={loading}
+          onCodeChange={handleCodeChange}
+          onDrawingTypeChange={handleDrawingTypeChange}
+          onDrawingModeChange={handleDrawingModeChange}
+          readOnly={readOnly}
+          isMobile={isMobile}
+        />
       </div>
       {children}
     </PlateElement>
@@ -375,9 +375,8 @@ function CodeDrawingToolbar({
           onOpenChange={setLanguageSelectOpen}
         >
           <SelectTrigger
-            className={`h-8 w-[120px] border-0 bg-muted/50 text-xs shadow-none ${
-              isMobile ? '' : 'transition-colors hover:bg-zinc-200'
-            }`}
+            className={`h-8 w-[120px] border-0 bg-muted/50 text-xs shadow-none ${isMobile ? '' : 'transition-colors hover:bg-zinc-200'
+              }`}
           >
             <SelectValue />
           </SelectTrigger>
@@ -399,9 +398,8 @@ function CodeDrawingToolbar({
           onOpenChange={setViewModeSelectOpen}
         >
           <SelectTrigger
-            className={`h-8 w-[80px] border-0 bg-muted/50 text-xs shadow-none ${
-              isMobile ? '' : 'transition-colors hover:bg-zinc-200'
-            }`}
+            className={`h-8 w-[80px] border-0 bg-muted/50 text-xs shadow-none ${isMobile ? '' : 'transition-colors hover:bg-zinc-200'
+              }`}
           >
             <SelectValue />
           </SelectTrigger>
@@ -459,11 +457,9 @@ function CodeDrawingTextarea({
 
   return (
     <div
-      className={`${
-        isCodeOnlyMode ? 'w-full' : 'min-w-0 flex-1'
-      } flex flex-col ${isCodeOnlyMode && !isMobile ? 'relative' : ''} ${
-        showBorder && !isMobile ? 'border-r' : ''
-      }`}
+      className={`${isCodeOnlyMode ? 'w-full' : 'min-w-0 flex-1'
+        } flex flex-col ${isCodeOnlyMode && !isMobile ? 'relative' : ''} ${showBorder && !isMobile ? 'border-r' : ''
+        }`}
     >
       {toolbar && isCodeOnlyMode && (
         <div
@@ -525,9 +521,8 @@ function CodeDrawingPreviewArea({
 
   return (
     <div
-      className={`flex min-w-0 flex-1 flex-col ${isMobile ? '' : 'relative'} ${
-        showBorder && isMobile ? 'border-b' : ''
-      }`}
+      className={`flex min-w-0 flex-1 flex-col ${isMobile ? '' : 'relative'} ${showBorder && isMobile ? 'border-b' : ''
+        }`}
     >
       {toolbar && (
         <div

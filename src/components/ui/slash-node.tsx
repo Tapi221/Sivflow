@@ -209,7 +209,7 @@ const groups: Group[] = [
 
 
 
-export function SlashInputElement( props: PlateElementProps<TComboboxInputElement> ) { const { editor, element } = props;
+export function SlashInputElement(props: PlateElementProps<TComboboxInputElement>) { const { editor, element } = props;
 
   return (
     <PlateElement {...props} as="span">

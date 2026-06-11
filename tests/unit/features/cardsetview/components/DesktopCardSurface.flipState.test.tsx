@@ -52,12 +52,12 @@ describe("DesktopCardSurface の flip 状態", () => {
 
     const activeCall = flashcardPropsSpy.mock.calls.at(-1)?.[0] as
       | {
-          isFlipped?: boolean;
-          previewMode?: boolean;
-          displayMode?: string;
-          showInkLayer?: boolean;
-          inkEditingEnabled?: boolean;
-        }
+        isFlipped?: boolean;
+        previewMode?: boolean;
+        displayMode?: string;
+        showInkLayer?: boolean;
+        inkEditingEnabled?: boolean;
+      }
       | undefined;
     expect(activeCall?.isFlipped).toBe(true);
     expect(activeCall?.previewMode).toBe(false);
@@ -69,11 +69,11 @@ describe("DesktopCardSurface の flip 状態", () => {
 
     const inactiveCall = flashcardPropsSpy.mock.calls.at(-1)?.[0] as
       | {
-          isFlipped?: boolean;
-          previewMode?: boolean;
-          showInkLayer?: boolean;
-          inkEditingEnabled?: boolean;
-        }
+        isFlipped?: boolean;
+        previewMode?: boolean;
+        showInkLayer?: boolean;
+        inkEditingEnabled?: boolean;
+      }
       | undefined;
     expect(inactiveCall?.isFlipped).toBe(true);
     expect(inactiveCall?.previewMode).toBe(true);
@@ -105,10 +105,10 @@ describe("DesktopCardSurface の flip 状態", () => {
 
     const call = flashcardPropsSpy.mock.calls.at(-1)?.[0] as
       | {
-          displayMode?: string;
-          showInkLayer?: boolean;
-          inkEditingEnabled?: boolean;
-        }
+        displayMode?: string;
+        showInkLayer?: boolean;
+        inkEditingEnabled?: boolean;
+      }
       | undefined;
 
     expect(call?.displayMode).toBe("fluid");

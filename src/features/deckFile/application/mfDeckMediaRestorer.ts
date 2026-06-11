@@ -4,6 +4,8 @@ import type { CardBlock } from "@/types";
 
 
 
+
+
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 };
@@ -33,8 +35,8 @@ const bytesToBase64 = (bytes: Uint8Array): string => {
 };
 const buildMediaLookup = (
   mediaManifest?: MfDeckMediaManifestV1,
-): Map<string, { mimeType: string }> => {
-  const lookup = new Map<string, { mimeType: string }>();
+): Map<string, { mimeType: string; }> => {
+  const lookup = new Map<string, { mimeType: string; }>();
 
   for (const entry of mediaManifest?.media ?? []) {
     lookup.set(entry.path, { mimeType: entry.mimeType });
@@ -52,7 +54,7 @@ const restoreRecordUrl = (input: {
   record: Record<string, unknown>;
   key: string;
   media?: Record<string, Uint8Array>;
-  mediaLookup: Map<string, { mimeType: string }>;
+  mediaLookup: Map<string, { mimeType: string; }>;
   issues: MfDeckIssue[];
   cardId?: string;
   blockId?: string;
@@ -97,7 +99,7 @@ const restoreRecordUrl = (input: {
 const restoreRecordMediaUrls = (input: {
   record: Record<string, unknown>;
   media?: Record<string, Uint8Array>;
-  mediaLookup: Map<string, { mimeType: string }>;
+  mediaLookup: Map<string, { mimeType: string; }>;
   issues: MfDeckIssue[];
   cardId?: string;
   blockId?: string;
@@ -109,7 +111,7 @@ const restoreRecordMediaUrls = (input: {
 const restoreBlockMedia = (input: {
   block: CardBlock;
   media?: Record<string, Uint8Array>;
-  mediaLookup: Map<string, { mimeType: string }>;
+  mediaLookup: Map<string, { mimeType: string; }>;
   issues: MfDeckIssue[];
   cardId?: string;
 }): void => {

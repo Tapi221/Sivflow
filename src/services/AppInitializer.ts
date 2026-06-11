@@ -34,6 +34,10 @@ import { warnOncePerSession } from "./localDBRuntimeState";
 
 
 
+
+
+
+
 // NOTE: 初期化時のユーザー向け INFO 通知は UI 上で邪魔になるため表示しない。
 
 /**
@@ -60,7 +64,7 @@ export class AppInitializer { private static initialized = false;
    */
   static async initialize(
     userId: string,
-  ): Promise<{ degraded: boolean; reason?: string; skippedFailures?: number }> {
+  ): Promise<{ degraded: boolean; reason?: string; skippedFailures?: number; }> {
     // 二重実行防止
     if (this.initialized) return { degraded: false };
     if (this.initPromise) return this.initPromise;
@@ -71,7 +75,7 @@ export class AppInitializer { private static initialized = false;
 
   private static async doInitialize(
     userId: string,
-  ): Promise<{ degraded: boolean; reason?: string; skippedFailures?: number }> {
+  ): Promise<{ degraded: boolean; reason?: string; skippedFailures?: number; }> {
     console.log(`[アプリ初期化:${userId}] 初期化を開始しています...`);
     let degraded = false;
     let degradedReason: string | undefined;

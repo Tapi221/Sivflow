@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils';
 
 
 
+
+
 export function TableElementStatic({ children, ...props }: SlateElementProps<TTableElement>) { const { disableMarginLeft } = props.editor.getOptions(BaseTablePlugin);
   const marginLeft = disableMarginLeft ? 0 : props.element.marginLeft;
 
@@ -27,7 +29,7 @@ export function TableElementStatic({ children, ...props }: SlateElementProps<TTa
     </SlateElement>
   );
 }
-export function TableRowElementStatic(props: SlateElementProps) { return ( <SlateElement {...props} as="tr" className="h-full"> {props.children} </SlateElement> );
+export function TableRowElementStatic(props: SlateElementProps) { return (<SlateElement {...props} as="tr" className="h-full"> {props.children} </SlateElement>);
 }
 export function TableCellElementStatic({ isHeader, ...props }: SlateElementProps<TTableCellElement> & { isHeader?: boolean;
 }) {
@@ -48,12 +50,12 @@ export function TableCellElementStatic({ isHeader, ...props }: SlateElementProps
         'before:size-full',
         "before:absolute before:box-border before:select-none before:content-['']",
         borders &&
-          cn(
-            borders.bottom?.size && 'before:border-b before:border-b-border',
-            borders.right?.size && 'before:border-r before:border-r-border',
-            borders.left?.size && 'before:border-l before:border-l-border',
-            borders.top?.size && 'before:border-t before:border-t-border'
-          )
+        cn(
+          borders.bottom?.size && 'before:border-b before:border-b-border',
+          borders.right?.size && 'before:border-r before:border-r-border',
+          borders.left?.size && 'before:border-l before:border-l-border',
+          borders.top?.size && 'before:border-t before:border-t-border'
+        )
       )}
       style={
         {
@@ -77,5 +79,5 @@ export function TableCellElementStatic({ isHeader, ...props }: SlateElementProps
     </SlateElement>
   );
 }
-export function TableCellHeaderElementStatic( props: SlateElementProps<TTableCellElement> ) { return <TableCellElementStatic {...props} isHeader />;
+export function TableCellHeaderElementStatic(props: SlateElementProps<TTableCellElement>) { return <TableCellElementStatic {...props} isHeader />;
 }

@@ -4,6 +4,8 @@ import { requireFirestoreDb } from "@/services/firebase";
 
 
 
+
+
 export type WatchChannel = { channelId: string;
   resourceId: string;
   calendarId: string;
@@ -18,9 +20,13 @@ type GoogleWatchResponse = {
 
 
 
+
+
 const GCAL_API_BASE = "https://www.googleapis.com/calendar/v3";
 const WATCH_TTL_MS = 6 * 24 * 60 * 60 * 1000;
 const RENEWAL_THRESHOLD_MS = 24 * 60 * 60 * 1000;
+
+
 
 
 

@@ -236,7 +236,7 @@ function Draggable(props: PlateElementProps) {
     useDraggable({
       element,
       onDropHandler: (_, { dragItem }) => {
-        const id = (dragItem as { id: string[] | string }).id;
+        const id = (dragItem as { id: string[] | string; }).id;
 
         if (blockSelectionApi) {
           blockSelectionApi.add(id);
@@ -262,14 +262,14 @@ function Draggable(props: PlateElementProps) {
     if (!isDragging) {
       resetPreview();
     }
-     
+
   }, [isDragging]);
 
   React.useEffect(() => {
     if (isAboutToDrag) {
       previewRef.current?.classList.remove('opacity-0');
     }
-     
+
   }, [isAboutToDrag]);
 
   const [dragButtonTop, setDragButtonTop] = React.useState(0);

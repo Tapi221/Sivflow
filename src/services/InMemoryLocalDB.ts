@@ -12,6 +12,8 @@ import { toDateOrNull, toMillis } from "@/utils/toMillis";
 
 
 
+
+
 type KeyPath = string | readonly string[];
 type Predicate<T> = (value: T) => boolean;
 type ObjectRecord = Record<string, unknown>;
@@ -26,12 +28,14 @@ type TimestampLikeObject = {
 };
 type ModifyCallback<T extends object, TKey> = (
   item: T,
-  ctx?: { value: T; primKey: TKey },
+  ctx?: { value: T; primKey: TKey; },
 ) => boolean | void;
 type RegisteredInMemoryTable = {
   readonly name: string;
   readonly clear: () => Promise<void>;
 };
+
+
 
 
 
@@ -47,6 +51,8 @@ const ENTITY_BY_TABLE: Record<string, QueueEntity> = {
   projectMaps: "projectMap",
 };
 const DELETE_CAPABLE_ENTITIES = new Set<DeleteEntity>(["card", "folder", "cardSet", "document", "tag", "asset", "projectMap"]);
+
+
 
 
 
@@ -204,7 +210,7 @@ class InMemoryCollection<T extends object, TKey = string> {
     });
   };
 
-  private readonly resolveEntries = (): Array<{ key: string; value: T }> => {
+  private readonly resolveEntries = (): Array<{ key: string; value: T; }> => {
     let entries = this.tableRef.entries();
 
     if (this.predicates.length > 0) {
@@ -345,7 +351,7 @@ class InMemoryCollection<T extends object, TKey = string> {
     return this.resolveEntries().map(({ key }) => this.tableRef.deserializeSerializedKey(key));
   };
 
-  public readonly each = async (callback: (item: T, cursor?: { primaryKey: TKey }) => void | Promise<void>): Promise<void> => {
+  public readonly each = async (callback: (item: T, cursor?: { primaryKey: TKey; }) => void | Promise<void>): Promise<void> => {
     for (const { key, value } of this.resolveEntries()) {
       await callback(ensureObject(value), {
         primaryKey: this.tableRef.deserializeSerializedKey(key),
@@ -435,7 +441,7 @@ class InMemoryTable<T extends object, TKey = string> {
     }
   };
 
-  public readonly entries = (): Array<{ key: string; value: T }> => Array.from(this.rows.entries()).map(([key, value]) => ({ key, value }));
+  public readonly entries = (): Array<{ key: string; value: T; }> => Array.from(this.rows.entries()).map(([key, value]) => ({ key, value }));
   public readonly deleteBySerializedKey = (serializedKey: string): void => {
     this.rows.delete(serializedKey);
   };
@@ -498,8 +504,8 @@ class InMemoryTable<T extends object, TKey = string> {
   public readonly toArray = async (): Promise<T[]> => Array.from(this.rows.values()).map((value) => ensureObject(value));
 
   public where(index: KeyPath): InMemoryWhereClause<T, TKey>;
-  public where(criteria: { [key: string]: unknown }): InMemoryCollection<T, TKey>;
-  public where(input: KeyPath | { [key: string]: unknown }): InMemoryWhereClause<T, TKey> | InMemoryCollection<T, TKey> {
+  public where(criteria: { [key: string]: unknown; }): InMemoryCollection<T, TKey>;
+  public where(input: KeyPath | { [key: string]: unknown; }): InMemoryWhereClause<T, TKey> | InMemoryCollection<T, TKey> {
     if (typeof input === "string" || Array.isArray(input)) {
       return new InMemoryWhereClause(new InMemoryCollection<T, TKey>(this, [], parseIndexKeys(input), null, false, null));
     }
@@ -615,13 +621,13 @@ export class InMemoryLocalDB { public readonly name: string;
     setTimeout(() => this.syncTrigger?.(), 0);
   };
 
-  public readonly queueUpsertSync = async <TEntity extends UpsertEntity>({ entity, operationType, payload, priority = "high" }: { entity: TEntity; operationType: "create" | "update"; payload: SyncPayloadByEntity[TEntity]; priority?: SyncPriority }): Promise<void> => {
+  public readonly queueUpsertSync = async <TEntity extends UpsertEntity>({ entity, operationType, payload, priority = "high" }: { entity: TEntity; operationType: "create" | "update"; payload: SyncPayloadByEntity[TEntity]; priority?: SyncPriority; }): Promise<void> => {
     const item = createUpsertQueueItem({ entity, operationType, payload, priority });
     await this.syncQueue.put(item);
     this.emitSyncTrigger();
   };
 
-  public readonly queueDeleteSync = async <TEntity extends DeleteEntity>({ entity, id, userId, priority = "high" }: { entity: TEntity; id: string; userId: string; priority?: SyncPriority }): Promise<void> => {
+  public readonly queueDeleteSync = async <TEntity extends DeleteEntity>({ entity, id, userId, priority = "high" }: { entity: TEntity; id: string; userId: string; priority?: SyncPriority; }): Promise<void> => {
     const item = createDeleteQueueItem({ entity, id, userId, priority });
     await this.syncQueue.put(item);
     this.emitSyncTrigger();

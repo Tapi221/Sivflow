@@ -6,6 +6,8 @@ import { commonGenerateRules } from './common';
 
 
 
+
+
 function buildGenerateFreeformPrompt(messages: ChatMessage[]) {
   return buildStructuredPrompt({
     examples: [
@@ -134,7 +136,7 @@ function buildGenerateContextPrompt(editor: SlateEditor, messages: ChatMessage[]
     `,
   });
 }
-export function getGeneratePrompt(editor: SlateEditor, { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[] }) {
+export function getGeneratePrompt(editor: SlateEditor, { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[]; }) {
   if (!isSelecting) {
     return buildGenerateFreeformPrompt(messages);
   }

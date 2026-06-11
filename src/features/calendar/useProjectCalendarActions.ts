@@ -7,7 +7,9 @@ import { clearLegacyStoredAppProjects, normalizeRootFolderProjectLabel, readLega
 
 
 
-type CreateGoogleProjectCalendarLinkInput = { project: AppCalendarItem; accountId: string; calendar: GoogleCalendarListItem; color: string; createdByApp: boolean };
+
+
+type CreateGoogleProjectCalendarLinkInput = { project: AppCalendarItem; accountId: string; calendar: GoogleCalendarListItem; color: string; createdByApp: boolean; };
 type UseProjectCalendarActionsInput = {
   googleAccounts: GoogleAccountDisplay[];
   reconnectGoogleAccount: (accountId: string) => void | Promise<void>;
@@ -29,7 +31,11 @@ type UseProjectCalendarActionsResult = {
 
 
 
+
+
 const GOOGLE_CALENDAR_COLOR_OVERRIDES_STORAGE_KEY = "flashcard-master:schedule:google-calendar-color-overrides";
+
+
 
 
 
@@ -172,6 +178,8 @@ const useProjectCalendarActions = ({ googleAccounts, reconnectGoogleAccount, tog
     handleChangeGoogleCalendarColor,
   };
 };
+
+
 
 
 

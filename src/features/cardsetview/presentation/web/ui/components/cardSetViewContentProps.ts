@@ -2,6 +2,8 @@ import type { useCardSetViewScreenController } from "@/features/cardsetview/pres
 
 
 
-export type CardSetViewScreenController = ReturnType< typeof useCardSetViewScreenController >;
+
+
+export type CardSetViewScreenController = ReturnType<typeof useCardSetViewScreenController>;
 export interface CardSetViewContentProps { controller: CardSetViewScreenController;
 }

@@ -4,12 +4,16 @@ type BuildImportMetaEnv = ImportMeta["env"] & {
 
 
 
+
+
 const env = import.meta.env as BuildImportMetaEnv;
 const BUILD_VERSION = env.VITE_BUILD_VERSION ?? import.meta.env.MODE;
 
 
 
-export const logRuntimeFault = ( kind: string, detail: Record<string, unknown>, ) => { if (typeof window === "undefined") return;
+
+
+export const logRuntimeFault = (kind: string, detail: Record<string, unknown>,) => { if (typeof window === "undefined") return;
 
   const payload = {
     kind,

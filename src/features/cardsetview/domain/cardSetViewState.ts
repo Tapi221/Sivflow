@@ -2,6 +2,8 @@ import type { Card } from "@/types";
 
 
 
+
+
 type CardIndexMap = Map<string, number>;
 type ResolveCurrentIndexBaseArgs = {
   pendingFocusIndex: number | null;
@@ -17,6 +19,8 @@ type ResolveCardsForPagerArgs = {
 
 
 
+
+
 export const createCardSetViewSourceKey = (cardSetId: string | null) => { return `${cardSetId ?? ""}`;
 };
 export const resolveCardIndexById = ({ cardId, cardIndexById, }: { cardId: string | null;
@@ -29,7 +33,7 @@ export const resolveCardIndexById = ({ cardId, cardIndexById, }: { cardId: strin
   const found = cardIndexById.get(cardId);
   return typeof found === "number" ? found : null;
 };
-export const resolveCurrentIndexBase = ({ pendingFocusIndex, currentIndex, targetResolvedIndex, initialIndex, }: ResolveCurrentIndexBaseArgs) => { return ( pendingFocusIndex ?? currentIndex ?? targetResolvedIndex ?? initialIndex );
+export const resolveCurrentIndexBase = ({ pendingFocusIndex, currentIndex, targetResolvedIndex, initialIndex, }: ResolveCurrentIndexBaseArgs) => { return (pendingFocusIndex ?? currentIndex ?? targetResolvedIndex ?? initialIndex);
 };
 export const clampCardIndex = (index: number, cardCount: number) => { if (cardCount <= 0) { return 0;
   }

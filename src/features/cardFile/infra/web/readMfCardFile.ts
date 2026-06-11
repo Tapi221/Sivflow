@@ -3,7 +3,11 @@ import { decodeMfCardFile } from "./mfCardJsonCodec";
 
 
 
+
+
 const MAX_MF_CARD_FILE_BYTES = 4 * 1024 * 1024;
+
+
 
 
 
@@ -12,6 +16,8 @@ export type LoadMfCardFileResult = { file: File;
   issues: MfCardIssue[];
   suggestedCardSetName: string;
 };
+
+
 
 
 
@@ -33,7 +39,7 @@ export const buildMfCardImportCardSetName = ({ fileName, title, }: { fileName: s
 
   return `${baseName} ${dateLabel}`;
 };
-export const readMfCardFile = async ( file: File, ): Promise<LoadMfCardFileResult> => { const issues: MfCardIssue[] = [];
+export const readMfCardFile = async (file: File,): Promise<LoadMfCardFileResult> => { const issues: MfCardIssue[] = [];
 
   if (!file.name.toLowerCase().endsWith(MF_CARD_FILE_EXTENSION)) {
     throw new MfCardValidationError("mfcard ファイルではありません。", [

@@ -3,6 +3,8 @@ import { DEFAULT_OPEN_AI_SETTINGS, loadOpenAiSettings, type OpenAiSettings } fro
 
 
 
+
+
 export type GenerateTextOptions = { prompt: string;
   systemPrompt?: string;
   settings?: OpenAiSettings;
@@ -25,7 +27,11 @@ type OpenAiResponsesApiResponse = {
 
 
 
+
+
 const OPEN_AI_RESPONSES_API_URL = "https://api.openai.com/v1/responses";
+
+
 
 
 
@@ -77,12 +83,12 @@ export const generateTextWithOpenAi = async ({ prompt, systemPrompt, settings = 
   if (!response.ok) {
     const message =
       typeof json === "object" &&
-      json !== null &&
-      "error" in json &&
-      typeof json.error === "object" &&
-      json.error !== null &&
-      "message" in json.error &&
-      typeof json.error.message === "string"
+        json !== null &&
+        "error" in json &&
+        typeof json.error === "object" &&
+        json.error !== null &&
+        "message" in json.error &&
+        typeof json.error.message === "string"
         ? json.error.message
         : `OpenAI API request failed: ${response.status}`;
 

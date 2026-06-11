@@ -19,6 +19,8 @@ import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 
 
 
+
+
 declare global {
   interface GlobalThis {
     __ALLOW_LOCAL_DB_CONSTRUCTION?: boolean;
@@ -33,6 +35,8 @@ type SyncableTableName = "cards" | "folders" | "cardSets" | "documents" | typeof
 
 
 
+
+
 const syncableTables: readonly SyncableTableName[] = ["cards", "folders", "cardSets", "documents", CURRENT_TAG_STORE, "userSettings", "images", "projectMaps"];
 const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
   cards: "card",
@@ -44,6 +48,8 @@ const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
   images: "asset",
   projectMaps: "projectMap",
 };
+
+
 
 
 
@@ -63,7 +69,7 @@ const toTimestamp = (value: unknown): number => {
     return Number.isFinite(parsed) ? parsed : 0;
   }
   if (value && typeof value === "object") {
-    const timestamp = value as { toMillis?: () => number; toDate?: () => Date; seconds?: number; _seconds?: number };
+    const timestamp = value as { toMillis?: () => number; toDate?: () => Date; seconds?: number; _seconds?: number; };
     if (typeof timestamp.toMillis === "function") return timestamp.toMillis();
     if (typeof timestamp.toDate === "function") return timestamp.toDate().getTime();
     if (typeof timestamp.seconds === "number") return timestamp.seconds * 1000;
@@ -297,7 +303,7 @@ export class LocalDB extends Dexie { users!: Dexie.Table<User, string>;
     return histories.sort(compareSyncHistoryNewestFirst).slice(0, limit);
   }
 
-  async getSyncStatsSince(timestamp: number): Promise<{ histories: SyncHistory[]; errors: SyncError[] }> {
+  async getSyncStatsSince(timestamp: number): Promise<{ histories: SyncHistory[]; errors: SyncError[]; }> {
     const histories = (await this.syncHistory.toArray()).filter((history) => history.startedAt >= timestamp);
     const errors = await this.syncErrors.toArray();
     return { histories, errors };
@@ -355,12 +361,12 @@ export class LocalDB extends Dexie { users!: Dexie.Table<User, string>;
     return this.images.update(id, changes);
   }
 
-  async queueUpsertSync<TEntity extends UpsertEntity>({ entity, operationType, payload, priority = "high" }: { entity: TEntity; operationType: "create" | "update"; payload: SyncPayloadByEntity[TEntity]; priority?: SyncPriority }): Promise<void> {
+  async queueUpsertSync<TEntity extends UpsertEntity>({ entity, operationType, payload, priority = "high" }: { entity: TEntity; operationType: "create" | "update"; payload: SyncPayloadByEntity[TEntity]; priority?: SyncPriority; }): Promise<void> {
     await this.syncQueue.put(createUpsertQueueItem({ entity, operationType, payload, priority }));
     this.emitSyncTrigger();
   }
 
-  async queueDeleteSync({ entity, targetId, priority = "high" }: { entity: DeleteEntity; targetId: string; priority?: SyncPriority }): Promise<void> {
+  async queueDeleteSync({ entity, targetId, priority = "high" }: { entity: DeleteEntity; targetId: string; priority?: SyncPriority; }): Promise<void> {
     await this.syncQueue.put(createDeleteQueueItem({ entity, targetId, priority }));
     this.emitSyncTrigger();
   }
@@ -411,7 +417,11 @@ export class LocalDB extends Dexie { users!: Dexie.Table<User, string>;
 
 
 
+
+
 export type { CardRelation, LocalDBInstance, LocalDBLike, LocalDBTableMap, ProjectMap, SyncableEntityTable, TagRecord } from "./types";
+
+
 
 
 

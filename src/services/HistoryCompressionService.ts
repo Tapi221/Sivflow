@@ -3,6 +3,8 @@ import { StorageStateManager } from "./StorageStateManager";
 
 
 
+
+
 interface CompressedHistory {
   id: string;
   userId: string;
@@ -20,6 +22,8 @@ type HistoryEvent = {
   oldLevel?: number;
   interval?: number;
 };
+
+
 
 
 
@@ -143,7 +147,7 @@ export class HistoryCompressionService { public readonly compress = async (userI
       const avgInterval =
         intervals.length > 0
           ? intervals.reduce((sum, interval) => sum + interval, 0) /
-            intervals.length
+          intervals.length
           : 0;
 
       compressed.push({

@@ -2,9 +2,11 @@ import type { GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/
 
 
 
+
+
 export type GoogleCalendarEventsState = Map<string, Map<string, GoogleCalendarEvent>>;
-export type GoogleCalendarEventsAction = | { type: "UPSERT"; accountId: string; event: GoogleCalendarEvent }
-  | { type: "DELETE"; accountId: string; eventId: string }
+export type GoogleCalendarEventsAction = | { type: "UPSERT"; accountId: string; event: GoogleCalendarEvent; }
+  | { type: "DELETE"; accountId: string; eventId: string; }
   | {
     type: "REPLACE_RANGE";
     accountId: string;
@@ -18,7 +20,9 @@ export type GoogleCalendarEventsAction = | { type: "UPSERT"; accountId: string; 
     accountId: string;
     calendars: GoogleCalendarListItem[];
   }
-  | { type: "CLEAR_ACCOUNT"; accountId: string };
+  | { type: "CLEAR_ACCOUNT"; accountId: string; };
+
+
 
 
 
@@ -27,7 +31,7 @@ const overlapsRange = (
   rangeStart: Date,
   rangeEnd: Date,
 ) => event.startsAt < rangeEnd && event.endsAt > rangeStart;
-export const reduceGoogleCalendarEvents = ( state: GoogleCalendarEventsState, action: GoogleCalendarEventsAction, ): GoogleCalendarEventsState => { switch (action.type) { case "UPSERT": { const next = new Map(state);
+export const reduceGoogleCalendarEvents = (state: GoogleCalendarEventsState, action: GoogleCalendarEventsAction,): GoogleCalendarEventsState => { switch (action.type) { case "UPSERT": { const next = new Map(state);
       const bucket = new Map(next.get(action.accountId) ?? []);
 
       bucket.set(action.event.id, action.event);
@@ -118,7 +122,7 @@ export const reduceGoogleCalendarEvents = ( state: GoogleCalendarEventsState, ac
       return state;
   }
 };
-export const selectVisibleGoogleCalendarEvents = ( accounts: Array<{ id: string; selectedCalendarIds: Set<string> }>,
+export const selectVisibleGoogleCalendarEvents = (accounts: Array<{ id: string; selectedCalendarIds: Set<string>; }>,
   eventsState: GoogleCalendarEventsState,
 ): GoogleCalendarEvent[] => {
   const selectedByAccount = new Map(
@@ -140,7 +144,8 @@ export const selectVisibleGoogleCalendarEvents = ( accounts: Array<{ id: string;
 
   return all;
 };
-export const selectCombinedSelectedCalendarIds = ( accounts: Array<{ selectedCalendarIds: Set<string> }>, ): Set<string> => { const set = new Set<string>();
+export const selectCombinedSelectedCalendarIds = (accounts: Array<{ selectedCalendarIds: Set<string>; }>,): Set<string> => {
+  const set = new Set<string>();
 
   for (const account of accounts) {
     for (const id of account.selectedCalendarIds) {

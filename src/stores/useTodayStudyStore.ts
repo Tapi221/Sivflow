@@ -10,6 +10,8 @@ import { persist } from "zustand/middleware";
 
 
 
+
+
 export type RatingKey = "forgot" | "vague" | "remembered" | "easy";
 type TodayStudyState = {
   dateKey: string;
@@ -35,6 +37,8 @@ type TodayStudyActions = {
 
 
 
+
+
 const emptyRatings = (): Record<RatingKey, number> => ({
   forgot: 0,
   vague: 0,
@@ -50,7 +54,11 @@ const localDateKey = (): string => {
 
 
 
+
+
 export type TodayStudyStore = TodayStudyState & TodayStudyActions;
+
+
 
 
 
@@ -64,51 +72,53 @@ const initialState = (userId = "anon"): TodayStudyState => ({
 
 
 
-export const useTodayStudyStore = create<TodayStudyStore>()( persist( (set, get) => ({ ...initialState(), hydrate: (userId: string) => { const s = get();
-        const today = localDateKey();
-        if (s.dateKey !== today || s.userId !== userId) {
-          set(initialState(userId));
-        }
-      },
 
-      resetIfNewDay: (userId?: string) => {
-        const s = get();
-        const today = localDateKey();
-        const uid = userId ?? s.userId;
-        if (s.dateKey !== today || (userId && s.userId !== userId)) {
-          set(initialState(uid));
-        }
-      },
 
-      addRating: (key: RatingKey, delta = 1) =>
-        set((s) => ({
-          ratings: { ...s.ratings, [key]: (s.ratings[key] ?? 0) + delta },
-        })),
+export const useTodayStudyStore = create<TodayStudyStore>()(persist((set, get) => ({ ...initialState(), hydrate: (userId: string) => { const s = get();
+    const today = localDateKey();
+    if (s.dateKey !== today || s.userId !== userId) {
+      set(initialState(userId));
+    }
+  },
 
-      markForExtra: (cardId: string) =>
-        set((s) => {
-          if (s.extraQueue.includes(cardId)) return s;
-          return { extraQueue: [...s.extraQueue, cardId] };
-        }),
+  resetIfNewDay: (userId?: string) => {
+    const s = get();
+    const today = localDateKey();
+    const uid = userId ?? s.userId;
+    if (s.dateKey !== today || (userId && s.userId !== userId)) {
+      set(initialState(uid));
+    }
+  },
 
-      markExtraDone: (cardId: string) =>
-        set((s) => ({
-          extraQueue: s.extraQueue.filter((id) => id !== cardId),
-          extraDone: s.extraDone.includes(cardId)
-            ? s.extraDone
-            : [...s.extraDone, cardId],
-        })),
+  addRating: (key: RatingKey, delta = 1) =>
+    set((s) => ({
+      ratings: { ...s.ratings, [key]: (s.ratings[key] ?? 0) + delta },
+    })),
+
+  markForExtra: (cardId: string) =>
+    set((s) => {
+      if (s.extraQueue.includes(cardId)) return s;
+      return { extraQueue: [...s.extraQueue, cardId] };
     }),
-    {
-      name: "manifolmia-today-study",
-      // アクション関数は除外して状態のみ永続化
-      partialize: (s) => ({
-        dateKey: s.dateKey,
-        userId: s.userId,
-        ratings: s.ratings,
-        extraQueue: s.extraQueue,
-        extraDone: s.extraDone,
-      }),
-    },
-  ),
+
+  markExtraDone: (cardId: string) =>
+    set((s) => ({
+      extraQueue: s.extraQueue.filter((id) => id !== cardId),
+      extraDone: s.extraDone.includes(cardId)
+        ? s.extraDone
+        : [...s.extraDone, cardId],
+    })),
+}),
+  {
+    name: "manifolmia-today-study",
+    // アクション関数は除外して状態のみ永続化
+    partialize: (s) => ({
+      dateKey: s.dateKey,
+      userId: s.userId,
+      ratings: s.ratings,
+      extraQueue: s.extraQueue,
+      extraDone: s.extraDone,
+    }),
+  },
+),
 );

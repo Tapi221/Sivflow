@@ -11,7 +11,7 @@ vi.mock("react-router-dom", async () => {
 
   return {
     ...actual,
-    Outlet: ({ context }: { context?: { isLeftPanelCollapsed?: boolean } }) => <div data-is-left-panel-collapsed={String(context?.isLeftPanelCollapsed ?? false)} data-testid="app-outlet" />,
+    Outlet: ({ context }: { context?: { isLeftPanelCollapsed?: boolean; }; }) => <div data-is-left-panel-collapsed={String(context?.isLeftPanelCollapsed ?? false)} data-testid="app-outlet" />,
   };
 });
 
@@ -32,11 +32,11 @@ vi.mock("@/layout/hooks/useResetWorkspaceScroll.desktop", () => ({
 }));
 
 vi.mock("@/layout/WorkspaceShell", () => ({
-  WorkspaceShell: ({ children }: { children: ReactNode }) => <main data-testid="workspace-shell">{children}</main>,
+  WorkspaceShell: ({ children }: { children: ReactNode; }) => <main data-testid="workspace-shell">{children}</main>,
 }));
 
 vi.mock("@/pane.desktop/leftpane/Sidebar.desktop", () => ({
-  Sidebar: ({ isLeftPanelCollapsed = false, onToggleLeftPanel }: { isLeftPanelCollapsed?: boolean; onToggleLeftPanel?: () => void }) => (
+  Sidebar: ({ isLeftPanelCollapsed = false, onToggleLeftPanel }: { isLeftPanelCollapsed?: boolean; onToggleLeftPanel?: () => void; }) => (
     <aside aria-label="Sidebar" data-is-left-panel-collapsed={String(isLeftPanelCollapsed)} data-testid="desktop-sidebar">
       <button type="button" onClick={onToggleLeftPanel} aria-label={isLeftPanelCollapsed ? "サイドバーを開く" : "サイドバーを閉じる"}>
         {isLeftPanelCollapsed ? "開く" : "閉じる"}

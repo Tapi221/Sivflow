@@ -6,6 +6,8 @@ import type { CardSet } from "@/types/domain/cardSet";
 
 
 
+
+
 interface UseCardSetViewActionsOptions {
   cardSetId: string | null;
   cardSetById: ReadonlyMap<string, Pick<CardSet, "id" | "folderId">>;
@@ -13,7 +15,7 @@ interface UseCardSetViewActionsOptions {
   selectedCard: Card | null;
   currentCard: Card | null;
   createCard: (
-    cardData: Partial<Card> & { cardSetId: string },
+    cardData: Partial<Card> & { cardSetId: string; },
   ) => Promise<unknown>;
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
   toastError: (msg: string) => void;
@@ -21,6 +23,8 @@ interface UseCardSetViewActionsOptions {
   setPendingFocusCardId: (cardId: string | null) => void;
   clearFlippedCards: () => void;
 }
+
+
 
 
 

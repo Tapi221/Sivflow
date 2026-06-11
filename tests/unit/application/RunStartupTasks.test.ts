@@ -5,7 +5,7 @@ type IntegrityReport = {
   checkedAt: string;
   totalCards: number;
   totalFolders: number;
-  issues: Array<{ code: string }>;
+  issues: Array<{ code: string; }>;
   isHealthy: boolean;
 };
 
@@ -19,7 +19,7 @@ const state = vi.hoisted(() => {
       issues: [],
       isHealthy: true,
     } as IntegrityReport,
-    migrateLegacyImagesToAssets: vi.fn(async (_params: { userId: string }) => ({
+    migrateLegacyImagesToAssets: vi.fn(async (_params: { userId: string; }) => ({
       scannedCards: 0,
       scannedImages: 0,
     })),

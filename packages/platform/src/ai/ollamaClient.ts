@@ -2,6 +2,8 @@ import { getLocalAiSettings } from "./localAiSettings";
 
 
 
+
+
 export type GenerateOllamaAnswerInput = { question: string;
   model?: string;
 };
@@ -17,7 +19,11 @@ export type TestOllamaConnectionResult = { ok: boolean;
 
 
 
+
+
 const OLLAMA_REQUEST_TIMEOUT_MS = 60_000;
+
+
 
 
 
@@ -49,7 +55,7 @@ const parseOllamaTagsResponse = (value: unknown): string[] => {
 
   return value.models.map((model) => isRecord(model) ? getString(model.name) : null).filter((name): name is string => Boolean(name));
 };
-const createAbortSignal = (): { signal: AbortSignal; cancel: () => void } => {
+const createAbortSignal = (): { signal: AbortSignal; cancel: () => void; } => {
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), OLLAMA_REQUEST_TIMEOUT_MS);
 

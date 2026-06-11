@@ -3,7 +3,7 @@ import { buildImportCardSetName, importCardsFromPayload } from "@/features/impor
 import type { ImportPayload } from "@/features/import/domain/import.types";
 import type { Card, CardSet } from "@/types";
 
-type CreateCardInput = Partial<Card> & { cardSetId?: string };
+type CreateCardInput = Partial<Card> & { cardSetId?: string; };
 
 describe("buildImportCardSetName", () => {
   it("xlsx 拡張子を除いた名前をベースにする", () => {

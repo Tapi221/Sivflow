@@ -12,6 +12,8 @@ import { toMillis } from "@/utils/toMillis";
 
 
 
+
+
 type UseCardsReadOptions = {
   enabled?: boolean;
 };
@@ -24,7 +26,9 @@ type CardsReadSnapshot = {
 
 
 
-const buildCardsReadKey = ({ enabled, userId, folderId, cardSetId }: { enabled: boolean; userId: string | null; folderId?: string; cardSetId?: string }) => {
+
+
+const buildCardsReadKey = ({ enabled, userId, folderId, cardSetId }: { enabled: boolean; userId: string | null; folderId?: string; cardSetId?: string; }) => {
   return JSON.stringify([enabled, userId, folderId ?? null, cardSetId ?? null]);
 };
 const isCardDeleted = (
@@ -36,15 +40,15 @@ const isCardDeleted = (
   },
 ) => {
   const deletedAt =
-    (card as unknown as { deletedAt?: unknown; deleted_at?: unknown })
+    (card as unknown as { deletedAt?: unknown; deleted_at?: unknown; })
       .deletedAt ??
-    (card as unknown as { deletedAt?: unknown; deleted_at?: unknown })
+    (card as unknown as { deletedAt?: unknown; deleted_at?: unknown; })
       .deleted_at;
 
   return Boolean(
     card.isDeleted ??
     card.is_deleted ??
-    (card as unknown as { deleted?: boolean }).deleted ??
+    (card as unknown as { deleted?: boolean; }).deleted ??
     deletedAt,
   );
 };
@@ -99,7 +103,7 @@ const hasMatchingCardSetId = (rawCard: unknown, cardSetId: string): boolean => {
     return false;
   }
 
-  const record = rawCard as { cardSetId?: unknown; card_set_id?: unknown };
+  const record = rawCard as { cardSetId?: unknown; card_set_id?: unknown; };
   return normalizeCardSetId(record.cardSetId) === cardSetId || normalizeCardSetId(record.card_set_id) === cardSetId;
 };
 const readRawCardsByCardSetId = async (db: LocalDbInstance, cardSetId: string): Promise<unknown[]> => {
@@ -134,7 +138,7 @@ const resolveVisibleCards = ({
     .map((rawCard) => normalizeCard(rawCard))
     .filter(
       (card) =>
-        !isCardDeleted(card as Partial<Card> & { is_deleted?: boolean }),
+        !isCardDeleted(card as Partial<Card> & { is_deleted?: boolean; }),
     );
 
   if (cardSetId) {
@@ -147,7 +151,7 @@ const resolveVisibleCards = ({
 
   return normalized;
 };
-export const useCardsRead = ( folderId?: string, cardSetId?: string, options?: UseCardsReadOptions, ) => { const { search } = useLocation();
+export const useCardsRead = (folderId?: string, cardSetId?: string, options?: UseCardsReadOptions,) => { const { search } = useLocation();
   const userId = useEffectiveLocalUserId();
   const isActiveWorkspaceCardSetSelected = useWorkspaceTabsStore((state) => {
     const activeTab = state.tabs.find((tab) => tab.id === state.activeTabId);
@@ -251,6 +255,8 @@ export const useCardsRead = ( folderId?: string, cardSetId?: string, options?: U
     error,
   };
 };
+
+
 
 
 

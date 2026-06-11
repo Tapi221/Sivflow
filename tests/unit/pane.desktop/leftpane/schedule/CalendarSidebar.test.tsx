@@ -8,7 +8,7 @@ import { CalendarSidebar } from "@/pane.desktop/leftpane/schedule/CalendarSideba
 
 type WorkspaceTabsState = {
   activeTabId: string | null;
-  tabs: { id: string; sectionKey?: string }[];
+  tabs: { id: string; sectionKey?: string; }[];
 };
 
 const workspaceTabsState: WorkspaceTabsState = {
@@ -17,8 +17,8 @@ const workspaceTabsState: WorkspaceTabsState = {
 };
 
 vi.mock("@/chip/icons/icons.schedule", () => ({
-  CalendarIcon: ({ className }: { className?: string }) => <svg data-testid="my-projects-calendar-icon" className={className} aria-label="calendar icon" />,
-  GoogleIcon: ({ className, label }: { className?: string; label?: string }) => <svg data-testid="google-icon" className={className} aria-label={label ?? "Google"} />,
+  CalendarIcon: ({ className }: { className?: string; }) => <svg data-testid="my-projects-calendar-icon" className={className} aria-label="calendar icon" />,
+  GoogleIcon: ({ className, label }: { className?: string; label?: string; }) => <svg data-testid="google-icon" className={className} aria-label={label ?? "Google"} />,
 }));
 
 vi.mock("@/chip/rightclickpanel.desktop/CalendarListMenu.desktop", () => ({
@@ -43,7 +43,7 @@ vi.mock("@/chip/rightclickpanel.desktop/rightClickPanel.utils", () => ({
 
 vi.mock("@/features/calendar/panel/SelectableGoogleSourceRow", () => ({
   GOOGLE_SOURCE_ROW_CLASS_NAME: "google-source-row",
-  SelectableGoogleSourceRow: ({ label }: { label: string }) => label,
+  SelectableGoogleSourceRow: ({ label }: { label: string; }) => label,
 }));
 
 vi.mock("@/pane.desktop/leftpane/Sidebar.LayeredDirectory", () => ({

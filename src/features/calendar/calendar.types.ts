@@ -1,10 +1,10 @@
 export type CalendarWeekStartDay = "sunday" | "monday";
 export type CalendarTimestampLike = | Date | string | number | { toDate?: () => Date;
-    seconds?: number;
-    nanoseconds?: number;
-    _seconds?: number;
-    _nanoseconds?: number;
-  }
+  seconds?: number;
+  nanoseconds?: number;
+  _seconds?: number;
+  _nanoseconds?: number;
+}
   | null
   | undefined;
 export type CalendarFolderLike = { id?: string;
@@ -46,7 +46,7 @@ export type CalendarStudyLogLike = { id?: string;
   createdAt?: CalendarTimestampLike;
 };
 export type CalendarDateKey = string;
-export type CalendarCardsByDate = Record< CalendarDateKey, CalendarDisplayCard[] >;
+export type CalendarCardsByDate = Record<CalendarDateKey, CalendarDisplayCard[]>;
 export type CalendarResistanceLegendItem = { label: string;
   min: number;
   max: number;

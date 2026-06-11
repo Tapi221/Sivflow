@@ -5,6 +5,8 @@ import type { Card, CardBlock, CardSet } from "@/types";
 
 
 
+
+
 const toEpoch = (value: unknown): number => {
   if (value instanceof Date) return value.getTime();
 
@@ -12,9 +14,9 @@ const toEpoch = (value: unknown): number => {
     value &&
     typeof value === "object" &&
     "toDate" in value &&
-    typeof (value as { toDate: () => Date }).toDate === "function"
+    typeof (value as { toDate: () => Date; }).toDate === "function"
   ) {
-    return (value as { toDate: () => Date }).toDate().getTime();
+    return (value as { toDate: () => Date; }).toDate().getTime();
   }
 
   if (typeof value === "string" || typeof value === "number") {

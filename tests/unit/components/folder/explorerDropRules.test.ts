@@ -3,7 +3,7 @@ import { shouldDisableExplorerDrop } from "@/components/folder/components/views/
 
 type TestNode = {
   id: string;
-  data?: { kind?: "folder" | "cardSet" | "card" | "document" };
+  data?: { kind?: "folder" | "cardSet" | "card" | "document"; };
   parent?: TestNode | null;
 };
 

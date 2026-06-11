@@ -2,9 +2,13 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 export type CardLayoutMode = "stack" | "flip" | "split";
 export type SplitFallbackCardLayoutMode = "stack" | "flip";
 export type CardSetInteractionMode = "view" | "edit";
+
+
 
 
 
@@ -13,14 +17,16 @@ export const DEFAULT_SPLIT_FALLBACK_CARD_LAYOUT_MODE: SplitFallbackCardLayoutMod
 
 
 
-export const resolveDefaultCardLayoutMode = ( _interactionMode: CardSetInteractionMode, ): CardLayoutMode => { return DEFAULT_CARD_LAYOUT_MODE;
+
+
+export const resolveDefaultCardLayoutMode = (_interactionMode: CardSetInteractionMode,): CardLayoutMode => { return DEFAULT_CARD_LAYOUT_MODE;
 };
 export const normalizeCardLayoutMode = (value: unknown): CardLayoutMode => { if (value === "stack" || value === "split") { return value;
   }
 
   return "flip";
 };
-export const normalizeSplitFallbackCardLayoutMode = ( value: unknown, ): SplitFallbackCardLayoutMode => { return value === "stack" ? "stack" : "flip";
+export const normalizeSplitFallbackCardLayoutMode = (value: unknown,): SplitFallbackCardLayoutMode => { return value === "stack" ? "stack" : "flip";
 };
 export const buildCardLayoutPreferenceScopeKey = ({ deviceScope, cardSetId, displayMode, interactionMode, }: { deviceScope: string;
   cardSetId: string | null | undefined;
@@ -34,6 +40,8 @@ export const buildCardLayoutPreferenceScopeKey = ({ deviceScope, cardSetId, disp
     interactionMode,
   ].join("::");
 };
+
+
 
 
 

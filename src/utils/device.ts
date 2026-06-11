@@ -2,6 +2,8 @@ import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 
 
 
+
+
 const DEVICE_LABELS = {
   server: "Server",
   webBrowser: "Web Browser",
@@ -29,6 +31,8 @@ const DEVICE_USER_AGENT_PATTERNS = {
   firefox: /Firefox/i,
 } as const;
 const DEVICE_STANDALONE_MEDIA_QUERY = "(display-mode: standalone)";
+
+
 
 
 
@@ -91,7 +95,7 @@ export const getOrCreateDeviceId = () => { if (typeof window === "undefined") re
 export const getDeviceName = () => { if (typeof window === "undefined") return DEVICE_LABELS.server;
 
   const userAgent = navigator.userAgent;
-  const nav = navigator as Navigator & { standalone?: boolean };
+  const nav = navigator as Navigator & { standalone?: boolean; };
   const isStandalone =
     window.matchMedia(DEVICE_STANDALONE_MEDIA_QUERY).matches || nav.standalone;
 

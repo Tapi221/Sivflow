@@ -66,7 +66,7 @@ describe("useExplorerDerivedData", () => {
     const baseCards = [buildCard("card-1", "set-1", "legacy-folder", 7)];
     const folders = [buildFolder("folder-a"), buildFolder("folder-b")];
     const { result, rerender } = renderHook(
-      ({ cardSets }: { cardSets: CardSet[] }) =>
+      ({ cardSets }: { cardSets: CardSet[]; }) =>
         useExplorerDerivedData({
           treeFolders: folders,
           treeCards: baseCards,
@@ -103,7 +103,7 @@ describe("useExplorerDerivedData", () => {
       buildCardSet("set-2", "folder-b"),
     ];
     const { result, rerender } = renderHook(
-      ({ cards }: { cards: Card[] }) =>
+      ({ cards }: { cards: Card[]; }) =>
         useExplorerDerivedData({
           treeFolders: folders,
           treeCards: cards,

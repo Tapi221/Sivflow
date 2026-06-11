@@ -18,6 +18,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 interface FlashcardProps {
   card: FlashcardCardLike | null | undefined;
   isFlipped?: boolean;
@@ -53,6 +55,8 @@ interface FlashcardProps {
   contentZoom?: number;
   headerIconVisualScale?: number;
 }
+
+
 
 
 
@@ -112,6 +116,8 @@ const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
     prev.headerIconVisualScale === next.headerIconVisualScale
   );
 };
+
+
 
 
 
@@ -226,8 +232,8 @@ const FlashcardInner = ({
   const isCardClickable = !previewMode;
   const resolvedContentZoom =
     typeof contentZoom === "number" &&
-    Number.isFinite(contentZoom) &&
-    contentZoom > 0
+      Number.isFinite(contentZoom) &&
+      contentZoom > 0
       ? contentZoom
       : 1;
 
@@ -274,7 +280,7 @@ const FlashcardInner = ({
             cardShellClassName,
             isCardClickable && "cursor-pointer",
             !isFixedDisplay &&
-              "rounded-none md:rounded-none border-none bg-transparent shadow-none",
+            "rounded-none md:rounded-none border-none bg-transparent shadow-none",
           )}
           onPointerDownCapture={handlePointerDownCapture}
           onPointerMoveCapture={handlePointerMoveCapture}
@@ -347,9 +353,13 @@ const FlashcardInner = ({
 
 
 
+
+
 const Flashcard = React.memo(FlashcardInner, areFlashcardPropsEqual);
 Flashcard.displayName = "Flashcard";
 export { Flashcard };
+
+
 
 
 

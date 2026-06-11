@@ -42,8 +42,8 @@ const suggestionPlugin = toTPlatePlugin<SuggestionConfig>(BaseSuggestionPlugin, 
       const blockTarget = markTarget
         ? null
         : getDiscussionBlockClickTarget({
-            target: event.target,
-          });
+          target: event.target,
+        });
 
       if (!markTarget && !blockTarget) {
         setOption('activeId', null);

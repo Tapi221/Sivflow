@@ -12,6 +12,8 @@ import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
 
 
+
+
 export type GoogleAccountEntry = { id: string;
   email: string | null;
   name: string | null;
@@ -34,9 +36,9 @@ export type GoogleAccountTokenUpdate = { accountId: string;
   expiresInSeconds?: number | null;
 };
 type AccountsAction =
-  | { type: "ADD"; account: GoogleAccountEntry }
-  | { type: "REMOVE"; id: string }
-  | { type: "SET_CONNECTING"; id: string; value: boolean }
+  | { type: "ADD"; account: GoogleAccountEntry; }
+  | { type: "REMOVE"; id: string; }
+  | { type: "SET_CONNECTING"; id: string; value: boolean; }
   | {
     type: "SET_TOKEN";
     id: string;
@@ -45,17 +47,17 @@ type AccountsAction =
     accountName?: string | null;
     accountPhotoUrl?: string | null;
   }
-  | { type: "SET_CALENDARS"; id: string; calendars: GoogleCalendarListItem[] }
-  | { type: "SET_CALENDAR_IDS"; id: string; ids: string[] }
-  | { type: "TOGGLE_CALENDAR"; id: string; calendarId: string }
-  | { type: "SET_SYNC_STATE"; id: string; syncState: GCalSyncState }
-  | { type: "SET_LAST_SYNCED_AT"; id: string; at: Date }
-  | { type: "NEEDS_RECONNECT"; id: string; error?: string | null }
-  | { type: "SET_ERROR"; id: string; error: string | null };
+  | { type: "SET_CALENDARS"; id: string; calendars: GoogleCalendarListItem[]; }
+  | { type: "SET_CALENDAR_IDS"; id: string; ids: string[]; }
+  | { type: "TOGGLE_CALENDAR"; id: string; calendarId: string; }
+  | { type: "SET_SYNC_STATE"; id: string; syncState: GCalSyncState; }
+  | { type: "SET_LAST_SYNCED_AT"; id: string; at: Date; }
+  | { type: "NEEDS_RECONNECT"; id: string; error?: string | null; }
+  | { type: "SET_ERROR"; id: string; error: string | null; };
 type EventsState = Map<string, Map<string, GoogleCalendarEvent>>;
 type EventsAction =
-  | { type: "UPSERT"; accountId: string; event: GoogleCalendarEvent }
-  | { type: "DELETE"; accountId: string; eventId: string }
+  | { type: "UPSERT"; accountId: string; event: GoogleCalendarEvent; }
+  | { type: "DELETE"; accountId: string; eventId: string; }
   | {
     type: "REPLACE_RANGE";
     accountId: string;
@@ -69,7 +71,7 @@ type EventsAction =
     accountId: string;
     calendars: GoogleCalendarListItem[];
   }
-  | { type: "CLEAR_ACCOUNT"; accountId: string };
+  | { type: "CLEAR_ACCOUNT"; accountId: string; };
 type GoogleOAuthCooldownReason = GoogleOAuthCallableErrorReason | "auto_recovery_pending" | "internal";
 type GoogleOAuthCooldownEntry = {
   reason: GoogleOAuthCooldownReason;
@@ -79,10 +81,14 @@ type GoogleOAuthCooldownEntry = {
 
 
 
+
+
 const useServerStoredTokens = isServerStoredGoogleOAuthEnabled();
 const useDesktopSecureRefreshTokens = isDesktopLikeRuntime() && !useServerStoredTokens;
 const CALENDAR_LIST_FOCUS_REFRESH_THROTTLE_MS = 10_000;
 export const GOOGLE_OAUTH_DETERMINISTIC_ERROR_COOLDOWN_MS = 60_000;
+
+
 
 
 
@@ -115,12 +121,12 @@ const resolveSelectedCalendarIds = (
 };
 const getErrorStatus = (error: unknown): number | undefined => {
   if (!(error instanceof Error)) return undefined;
-  return (error as Error & { status?: number }).status;
+  return (error as Error & { status?: number; }).status;
 };
 const isUnauthorizedError = (error: unknown): boolean => getErrorStatus(error) === 401;
 const getGoogleReason = (error: unknown): string | undefined => {
   if (!(error instanceof Error)) return undefined;
-  return (error as Error & { googleReason?: string }).googleReason;
+  return (error as Error & { googleReason?: string; }).googleReason;
 };
 const isGooglePermissionError = (error: unknown): boolean => {
   const status = getErrorStatus(error);
@@ -133,11 +139,11 @@ const isGooglePermissionError = (error: unknown): boolean => {
 };
 const getErrorCode = (error: unknown): string | undefined => {
   if (!(error instanceof Error)) return undefined;
-  return (error as Error & { code?: string }).code;
+  return (error as Error & { code?: string; }).code;
 };
 const normalizeErrorCode = (code: string | undefined): string | undefined =>
   code?.replace(/^functions\//, "");
-export const getGoogleOAuthErrorReason = (error: unknown): GoogleOAuthCallableErrorReason | undefined => { const wrappedReason = error instanceof Error ? (error as Error & { googleOAuthReason?: GoogleOAuthCallableErrorReason }).googleOAuthReason : undefined;
+export const getGoogleOAuthErrorReason = (error: unknown): GoogleOAuthCallableErrorReason | undefined => { const wrappedReason = error instanceof Error ? (error as Error & { googleOAuthReason?: GoogleOAuthCallableErrorReason; }).googleOAuthReason : undefined;
 
   return wrappedReason ?? getGoogleOAuthCallableErrorReason(error);
 };
@@ -182,10 +188,10 @@ export const toGoogleCalendarAuthErrorMessage = (error: unknown): string => { co
 };
 export const shouldCooldownGoogleOAuthError = (error: unknown): boolean => isGoogleOAuthDeterministicErrorReason(getGoogleOAuthErrorReason(error)) || normalizeErrorCode(getErrorCode(error)) === "auto-recovery-pending" || normalizeErrorCode(getErrorCode(error)) === "internal";
 export const createGoogleOAuthCooldownError = (entry: GoogleOAuthCooldownEntry): Error => { const error = new Error(entry.message);
-  (error as Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason }).code = "google-oauth-deterministic-cooldown";
+  (error as Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason; }).code = "google-oauth-deterministic-cooldown";
 
   if (entry.reason !== "auto_recovery_pending" && entry.reason !== "internal") {
-    (error as Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason }).googleOAuthReason = entry.reason;
+    (error as Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason; }).googleOAuthReason = entry.reason;
   }
 
   return error;
@@ -291,17 +297,17 @@ const reduceAccounts = (
             ...account,
             syncState: action.syncState,
             connectionStatus:
-                action.syncState === "needsReconnect"
-                  ? "needsReconnect"
-                  : action.syncState === "error"
-                    ? "error"
-                    : account.accessToken
-                      ? "connected"
-                      : account.connectionStatus,
+              action.syncState === "needsReconnect"
+                ? "needsReconnect"
+                : action.syncState === "error"
+                  ? "error"
+                  : account.accessToken
+                    ? "connected"
+                    : account.connectionStatus,
             error:
-                action.syncState === "idle" && account.connectionStatus === "error"
-                  ? null
-                  : account.error,
+              action.syncState === "idle" && account.connectionStatus === "error"
+                ? null
+                : account.error,
           }
           : account,
       );
@@ -331,9 +337,9 @@ const reduceAccounts = (
             ...account,
             error: action.error,
             connectionStatus:
-                action.error && account.syncState !== "needsReconnect"
-                  ? "error"
-                  : account.connectionStatus,
+              action.error && account.syncState !== "needsReconnect"
+                ? "error"
+                : account.connectionStatus,
           }
           : account,
       );
@@ -463,7 +469,7 @@ const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => {
     error: canReconnect ? null : "Google Calendar の再連携が必要です",
   };
 };
-export const useMultiAccountGoogleCalendar = () => { const [accounts, dispatchAccounts] = useReducer( reduceAccounts, undefined, () => readStoredAccounts().map(storedToEntry), );
+export const useMultiAccountGoogleCalendar = () => { const [accounts, dispatchAccounts] = useReducer(reduceAccounts, undefined, () => readStoredAccounts().map(storedToEntry),);
   const [eventsState, dispatchEvents] = useReducer(
     reduceEvents,
     new Map() as EventsState,

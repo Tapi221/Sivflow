@@ -42,7 +42,7 @@ describe("CalendarYearView", () => {
     expect((scroller as HTMLElement).scrollTop).toBe(0);
 
     let latestRange = onRenderedRangeChange.mock.calls.at(-1)?.[0] as
-      | { start: Date; end: Date }
+      | { start: Date; end: Date; }
       | undefined;
 
     expect(latestRange?.start.getFullYear()).toBe(2026);
@@ -58,7 +58,7 @@ describe("CalendarYearView", () => {
     });
 
     latestRange = onRenderedRangeChange.mock.calls.at(-1)?.[0] as
-      | { start: Date; end: Date }
+      | { start: Date; end: Date; }
       | undefined;
 
     expect(latestRange?.start.getFullYear()).toBe(2026);

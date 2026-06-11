@@ -3,6 +3,8 @@ import type { DocumentItem } from "@/types";
 
 
 
+
+
 type BlobScopeOptions = {
   userId?: string | null;
 };
@@ -16,6 +18,8 @@ type SaveDocumentWithBlobParams = {
   document: DocumentItem;
   blob: Blob;
 };
+
+
 
 
 
@@ -42,7 +46,7 @@ export const saveDocumentWithBlob = async ({ db, document, blob, }: SaveDocument
     await db.documents.put(document);
   });
 };
-export const saveDocumentBlob = async ( id: string, blob: Blob, options?: BlobScopeOptions, ): Promise<void> => { const db = await getLocalDb(options?.userId ?? undefined);
+export const saveDocumentBlob = async (id: string, blob: Blob, options?: BlobScopeOptions,): Promise<void> => { const db = await getLocalDb(options?.userId ?? undefined);
 
   await getDocumentFilesTable(db).put({
     id,
@@ -50,15 +54,15 @@ export const saveDocumentBlob = async ( id: string, blob: Blob, options?: BlobSc
     updatedAt: Date.now(),
   });
 };
-export const getDocumentBlob = async ( id: string, options?: BlobScopeOptions, ): Promise<Blob | null> => { const db = await getLocalDb(options?.userId ?? undefined);
+export const getDocumentBlob = async (id: string, options?: BlobScopeOptions,): Promise<Blob | null> => { const db = await getLocalDb(options?.userId ?? undefined);
   const stored = await getDocumentFilesTable(db).get(id);
 
   return stored?.blob ?? null;
 };
-export const deleteDocumentBlob = async ( id: string, options?: BlobScopeOptions, ): Promise<void> => { const db = await getLocalDb(options?.userId ?? undefined);
+export const deleteDocumentBlob = async (id: string, options?: BlobScopeOptions,): Promise<void> => { const db = await getLocalDb(options?.userId ?? undefined);
   await getDocumentFilesTable(db).delete(id);
 };
-export const deleteDocumentBlobsByUser = async ( userId: string, ): Promise<void> => { if (!userId) return;
+export const deleteDocumentBlobsByUser = async (userId: string,): Promise<void> => { if (!userId) return;
 
   const db = await getLocalDb(userId);
   await getDocumentFilesTable(db).clear();

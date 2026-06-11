@@ -13,6 +13,8 @@ import type { WorkspaceSidebarSection, WorkspaceTab } from "./Tab";
 
 
 
+
+
 type TabsBarVariant = "workspace" | "titlebar";
 type TabsBarProps = {
   variant?: TabsBarVariant;
@@ -22,13 +24,15 @@ type TabsBarProps = {
 type AppRegionStyle = CSSProperties & {
   WebkitAppRegion?: "drag" | "no-drag";
 };
-type TabIconComponent = ComponentType<{ className?: string }>;
+type TabIconComponent = ComponentType<{ className?: string; }>;
 type TabContextMenuState = {
   tabId: WorkspaceTab["id"];
   x: number;
   y: number;
 };
 type TabContextMenuTriggerEvent = ReactMouseEvent<HTMLElement> | ReactPointerEvent<HTMLElement>;
+
+
 
 
 
@@ -94,6 +98,8 @@ const SIDEBAR_ROUTE_TAB_ICONS = {
 
 
 
+
+
 const resolveTabsSurfaceStyle = (isTitlebar: boolean): CSSProperties => ({
   background: isTitlebar ? "var(--app-titlebar-bg, var(--app-sidebar-bg))" : "var(--app-sidebar-bg)",
 });
@@ -133,7 +139,7 @@ const resolveTabSlotLayoutStyle = (tab: WorkspaceTab, interactiveStyle: AppRegio
 
   return style;
 };
-const clampContextMenuPosition = (clientX: number, clientY: number): { x: number; y: number } => {
+const clampContextMenuPosition = (clientX: number, clientY: number): { x: number; y: number; } => {
   const maxX = Math.max(WORKSPACE_TAB_CONTEXT_MENU_MARGIN, window.innerWidth - WORKSPACE_TAB_CONTEXT_MENU_WIDTH - WORKSPACE_TAB_CONTEXT_MENU_MARGIN);
   const maxY = Math.max(WORKSPACE_TAB_CONTEXT_MENU_MARGIN, window.innerHeight - WORKSPACE_TAB_CONTEXT_MENU_HEIGHT - WORKSPACE_TAB_CONTEXT_MENU_MARGIN);
 
@@ -152,6 +158,8 @@ const resolveTabIcon = (tab: WorkspaceTab): TabIconComponent => {
 
   return FileText;
 };
+
+
 
 
 
@@ -427,6 +435,8 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
     </>
   );
 };
+
+
 
 
 

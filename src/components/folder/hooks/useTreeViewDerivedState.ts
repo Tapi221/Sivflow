@@ -5,6 +5,8 @@ import { type Card, type CardSet, type DocumentItem, type Folder, type SelectedE
 
 
 
+
+
 interface UseTreeViewDerivedStateParams {
   folders: Folder[];
   cards: Card[];
@@ -25,6 +27,8 @@ type FolderStats = {
 
 
 
+
+
 const EMPTY_FOLDER_STATS: FolderStats = {
   dueCount: 0,
   unlearnedCount: 0,
@@ -33,25 +37,27 @@ const EMPTY_FOLDER_STATS: FolderStats = {
 
 
 
+
+
 const createEmptyFolderStats = (): FolderStats => ({
   dueCount: 0,
   unlearnedCount: 0,
   lastReviewedAt: null,
 });
-export const useTreeViewDerivedState = ({ folders, cards, cardSets = [], documents, selectedFolderId, selectedItem, selectedCardId, selectedDocumentId, autoCarryOver = true, isMobile, }: UseTreeViewDerivedStateParams) => { const getFolderPath = useCallback( (folderId: string | null): string => { if (!folderId) return "";
+export const useTreeViewDerivedState = ({ folders, cards, cardSets = [], documents, selectedFolderId, selectedItem, selectedCardId, selectedDocumentId, autoCarryOver = true, isMobile, }: UseTreeViewDerivedStateParams) => { const getFolderPath = useCallback((folderId: string | null): string => { if (!folderId) return "";
 
-      const path: string[] = [];
-      let currentFolder = folders.find((folder) => folder.id === folderId);
+    const path: string[] = [];
+    let currentFolder = folders.find((folder) => folder.id === folderId);
 
-      while (currentFolder) {
-        path.unshift(currentFolder.folderName);
+    while (currentFolder) {
+      path.unshift(currentFolder.folderName);
 
-        const parentFolderId = currentFolder.parentFolderId;
-        currentFolder = folders.find((folder) => folder.id === parentFolderId);
-      }
+      const parentFolderId = currentFolder.parentFolderId;
+      currentFolder = folders.find((folder) => folder.id === parentFolderId);
+    }
 
-      return path.join(" / ");
-    },
+    return path.join(" / ");
+  },
     [folders],
   );
 

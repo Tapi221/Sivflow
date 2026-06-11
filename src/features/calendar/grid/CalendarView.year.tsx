@@ -12,6 +12,8 @@ import { useDateFnsLocale, useT } from "@shared/i18n/useT";
 
 
 
+
+
 export type CalendarYearEventPriority = { group: number;
   index: number;
 };
@@ -64,6 +66,8 @@ type YearVirtualWindow = {
 
 
 
+
+
 const YEAR_MONTH_GRID_DAY_COUNT = 42;
 const YEAR_INITIAL_RENDERED_FUTURE_YEARS = 3;
 const YEAR_EXTEND_YEARS = 1;
@@ -76,6 +80,8 @@ const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
 const EMPTY_YEAR_EVENTS: GoogleCalendarEvent[] = [];
 const DEFAULT_YEAR_EVENT_PRIORITY: CalendarYearEventPriority = { group: Number.MAX_SAFE_INTEGER, index: Number.MAX_SAFE_INTEGER };
 const DEFAULT_YEAR_EVENT_DISPLAY: CalendarYearEventDisplay = { priority: DEFAULT_YEAR_EVENT_PRIORITY };
+
+
 
 
 
@@ -203,6 +209,8 @@ const getDayButtonStyle = (day: CalendarYearDay, selected: boolean): CSSProperti
     transition: "none",
   };
 };
+
+
 
 
 
@@ -522,6 +530,8 @@ const CalendarYearViewComponent = ({
     </div>
   );
 };
+
+
 
 
 

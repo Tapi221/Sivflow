@@ -8,12 +8,16 @@ import type { CodeBlockData } from "@/types/core/code-block";
 
 
 
+
+
 interface CodeBlockEditorProps {
   value?: CodeBlockData;
   onChange: (value: CodeBlockData) => void;
   className?: string;
   zoom?: number;
 }
+
+
 
 
 
@@ -71,7 +75,9 @@ const pushRecentLang = (lang: string) => {
 
 
 
-export const CodeBlockEditor = ({ value, onChange, className, zoom, }: CodeBlockEditorProps) => { const [recentLangs, setRecentLangs] = useState<string[]>(() => getRecentLangs(), );
+
+
+export const CodeBlockEditor = ({ value, onChange, className, zoom, }: CodeBlockEditorProps) => { const [recentLangs, setRecentLangs] = useState<string[]>(() => getRecentLangs(),);
 
   const code = value?.code ?? "";
   const normalizedLanguage = normalizeEditorLanguage(

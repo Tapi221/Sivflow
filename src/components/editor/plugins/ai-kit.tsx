@@ -35,8 +35,8 @@ export const aiChatPlugin = AIChatPlugin.extend({ options: { chatOptions: { api:
           editor.getTransforms(BaseAIPlugin).ai.beginPreview({
             originalBlocks:
               startInEmptyParagraph &&
-              startBlock &&
-              ElementApi.isElement(startBlock)
+                startBlock &&
+                ElementApi.isElement(startBlock)
                 ? [cloneDeep(startBlock)]
                 : [],
           });
@@ -88,4 +88,4 @@ export const aiChatPlugin = AIChatPlugin.extend({ options: { chatOptions: { api:
   },
 });
 
-export const AIKit = [ ...CursorOverlayKit, ...MarkdownKit, AIPlugin.withComponent(AILeaf), aiChatPlugin, ];
+export const AIKit = [...CursorOverlayKit, ...MarkdownKit, AIPlugin.withComponent(AILeaf), aiChatPlugin,];

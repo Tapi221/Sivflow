@@ -2,6 +2,8 @@ import type { TextStreamPart, ToolSet } from 'ai';
 
 
 
+
+
 const DEFAULT_DELAY_IN_MS = 10;
 const NEST_BLOCK_DELAY_IN_MS = 100;
 const BOLD_PATTERN = /\*\*.*?\*\*/;
@@ -45,6 +47,10 @@ const DIGIT_PATTERN = /^[0-9]$/;
 
 
 
+
+
+
+
 /**
  * Transform chunks like [**,bold,**] to [**bold**] make the md deserializer
  * happy.
@@ -52,52 +58,52 @@ const DIGIT_PATTERN = /^[0-9]$/;
  * @experimental
  */
 export const markdownJoinerTransform = <TOOLS extends ToolSet>() => () => { const joiner = new MarkdownJoiner();
-    let lastTextDeltaId: string | undefined;
-    let textStreamEnded = false;
+  let lastTextDeltaId: string | undefined;
+  let textStreamEnded = false;
 
-    return new TransformStream<TextStreamPart<TOOLS>, TextStreamPart<TOOLS>>({
-      async flush(controller) {
-        // Only flush if we haven't seen text-end yet
-        if (!textStreamEnded) {
-          const remaining = joiner.flush();
-          if (remaining && lastTextDeltaId) {
-            controller.enqueue({
-              id: lastTextDeltaId,
-              text: remaining,
-              type: 'text-delta',
-            } as TextStreamPart<TOOLS>);
-          }
+  return new TransformStream<TextStreamPart<TOOLS>, TextStreamPart<TOOLS>>({
+    async flush(controller) {
+      // Only flush if we haven't seen text-end yet
+      if (!textStreamEnded) {
+        const remaining = joiner.flush();
+        if (remaining && lastTextDeltaId) {
+          controller.enqueue({
+            id: lastTextDeltaId,
+            text: remaining,
+            type: 'text-delta',
+          } as TextStreamPart<TOOLS>);
         }
-      },
-      async transform(chunk, controller) {
-        if (chunk.type === 'text-delta') {
-          lastTextDeltaId = chunk.id;
-          const processedText = joiner.processText(chunk.text);
-          if (processedText) {
-            controller.enqueue({
-              ...chunk,
-              text: processedText,
-            });
-            await delay(joiner.delayInMs);
-          }
-        } else if (chunk.type === 'text-end') {
-          // Flush any remaining buffer before text-end
-          const remaining = joiner.flush();
-          if (remaining && lastTextDeltaId) {
-            controller.enqueue({
-              id: lastTextDeltaId,
-              text: remaining,
-              type: 'text-delta',
-            } as TextStreamPart<TOOLS>);
-          }
-          textStreamEnded = true;
-          controller.enqueue(chunk);
-        } else {
-          controller.enqueue(chunk);
+      }
+    },
+    async transform(chunk, controller) {
+      if (chunk.type === 'text-delta') {
+        lastTextDeltaId = chunk.id;
+        const processedText = joiner.processText(chunk.text);
+        if (processedText) {
+          controller.enqueue({
+            ...chunk,
+            text: processedText,
+          });
+          await delay(joiner.delayInMs);
         }
-      },
-    });
-  };
+      } else if (chunk.type === 'text-end') {
+        // Flush any remaining buffer before text-end
+        const remaining = joiner.flush();
+        if (remaining && lastTextDeltaId) {
+          controller.enqueue({
+            id: lastTextDeltaId,
+            text: remaining,
+            type: 'text-delta',
+          } as TextStreamPart<TOOLS>);
+        }
+        textStreamEnded = true;
+        controller.enqueue(chunk);
+      } else {
+        controller.enqueue(chunk);
+      }
+    },
+  });
+};
 export class MarkdownJoiner { delayInMs = DEFAULT_DELAY_IN_MS;
 
   private buffer = '';

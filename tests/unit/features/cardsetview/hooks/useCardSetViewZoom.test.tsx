@@ -29,9 +29,9 @@ describe("useCardSetViewZoom", () => {
     );
     return raw
       ? (JSON.parse(raw) as {
-          version: number;
-          byScope: Record<string, number>;
-        })
+        version: number;
+        byScope: Record<string, number>;
+      })
       : null;
   };
 
@@ -135,7 +135,7 @@ describe("useCardSetViewZoom", () => {
     const viewportRef = createViewportRef(1400);
 
     const { result, rerender } = renderHook(
-      ({ interactionMode }: { interactionMode: "view" | "edit" }) =>
+      ({ interactionMode }: { interactionMode: "view" | "edit"; }) =>
         useCardSetViewZoom({
           deviceScope: "desktop",
           cardSetId: "card-set-parity",

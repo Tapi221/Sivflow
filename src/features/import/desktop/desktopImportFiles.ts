@@ -2,6 +2,8 @@ import { IMPORT_FILE_MIME_TYPES } from "@/features/import/domain/importFileKind"
 
 
 
+
+
 export type DesktopImportFileOpenPayload = { paths: string[];
 };
 export type DesktopImportFileReadResult = { path: string;
@@ -9,6 +11,8 @@ export type DesktopImportFileReadResult = { path: string;
   size: number;
   data: ArrayBuffer | Uint8Array | number[];
 };
+
+
 
 
 
@@ -49,9 +53,9 @@ const normalizeDesktopFileData = (
 
   throw new Error("Unsupported desktop import file payload");
 };
-export const canUseDesktopImportFiles = (): boolean => { return Boolean( typeof window !== "undefined" && window.desktop?.files?.readImportFile && window.desktop.files.onImportFileOpen, );
+export const canUseDesktopImportFiles = (): boolean => { return Boolean(typeof window !== "undefined" && window.desktop?.files?.readImportFile && window.desktop.files.onImportFileOpen,);
 };
-export const subscribeDesktopImportFileOpen = ( handler: (payload: DesktopImportFileOpenPayload) => void | Promise<void>, ): (() => void) => { if (!canUseDesktopImportFiles()) { return () => {};
+export const subscribeDesktopImportFileOpen = (handler: (payload: DesktopImportFileOpenPayload) => void | Promise<void>,): (() => void) => { if (!canUseDesktopImportFiles()) { return () => {};
   }
 
   const filesApi = window.desktop?.files;
@@ -63,7 +67,7 @@ export const subscribeDesktopImportFileOpen = ( handler: (payload: DesktopImport
     void handler(payload);
   });
 };
-export const readDesktopImportFile = async ( filePath: string, ): Promise<File> => { if (!canUseDesktopImportFiles()) { throw new Error("Desktop import file bridge is unavailable");
+export const readDesktopImportFile = async (filePath: string,): Promise<File> => { if (!canUseDesktopImportFiles()) { throw new Error("Desktop import file bridge is unavailable");
   }
 
   const filesApi = window.desktop?.files;
@@ -78,13 +82,13 @@ export const readDesktopImportFile = async ( filePath: string, ): Promise<File> 
     type: getImportFileMimeType(result.name),
   });
 };
-export const selectDesktopImportFiles = async (): Promise<File[]> => { if ( !canUseDesktopImportFiles() || !window.desktop?.files?.selectImportFiles ) { return [];
+export const selectDesktopImportFiles = async (): Promise<File[]> => { if (!canUseDesktopImportFiles() || !window.desktop?.files?.selectImportFiles) { return [];
   }
 
   const paths = await window.desktop.files.selectImportFiles();
   return readDesktopImportFiles(paths);
 };
-export const readDesktopImportFiles = async ( filePaths: readonly string[], ): Promise<File[]> => { const uniquePaths = Array.from( new Set(filePaths.map((filePath) => filePath.trim()).filter(Boolean)), );
+export const readDesktopImportFiles = async (filePaths: readonly string[],): Promise<File[]> => { const uniquePaths = Array.from(new Set(filePaths.map((filePath) => filePath.trim()).filter(Boolean)),);
 
   const files: File[] = [];
 

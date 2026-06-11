@@ -5,12 +5,14 @@ import type { Card, CardSet } from "@/types";
 
 
 
-export type CreateCardSet = ( name: string, targetFolderId?: string | null, opts?: { description?: string;
-    id?: string;
-    orderIndex?: number;
-  },
+
+
+export type CreateCardSet = (name: string, targetFolderId?: string | null, opts?: { description?: string;
+  id?: string;
+  orderIndex?: number;
+},
 ) => Promise<CardSet>;
-export type CreateCard = ( cardData: Partial<Card> & { cardSetId?: string }, ) => Promise<Card>;
+export type CreateCard = (cardData: Partial<Card> & { cardSetId?: string; },) => Promise<Card>;
 export type ImportDestinationMode = "new" | "existing";
 export type LoadXlsxImportFileResult = { file: File;
   result: ImportParseResult;
@@ -38,6 +40,8 @@ export type ExecuteXlsxImportResult = | ExecuteXlsxImportFailure | ExecuteXlsxIm
 
 
 
+
+
 const resolveImportDestination = ({
   destinationMode,
   newCardSetName,
@@ -45,7 +49,7 @@ const resolveImportDestination = ({
 }: Pick<
   ExecuteXlsxImportParams,
   "destinationMode" | "newCardSetName" | "selectedExistingCardSet"
->): ExecuteXlsxImportFailure | { ok: true; value: ImportDestination } => {
+>): ExecuteXlsxImportFailure | { ok: true; value: ImportDestination; } => {
   if (destinationMode === "new") {
     const cardSetName = newCardSetName.trim();
 
@@ -81,7 +85,7 @@ const resolveImportDestination = ({
     },
   };
 };
-export const loadXlsxImportFile = async ( file: File, ): Promise<LoadXlsxImportFileResult> => { const fileBuffer = await file.arrayBuffer();
+export const loadXlsxImportFile = async (file: File,): Promise<LoadXlsxImportFileResult> => { const fileBuffer = await file.arrayBuffer();
   const result = await parseXlsxImport(fileBuffer);
 
   return {

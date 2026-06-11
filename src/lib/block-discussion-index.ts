@@ -42,14 +42,14 @@ type BuildBlockDiscussionIndexOptions = {
   getCommentId: (node: TCommentText) => string | undefined;
   getSuggestionData: (node: TElement | TSuggestionText) =>
     | {
-        createdAt: Date | number | string;
-        id: string;
-        isLineBreak?: boolean;
-        newProperties?: Record<string, unknown>;
-        properties?: Record<string, unknown>;
-        type: 'insert' | 'remove' | 'update';
-        userId: string;
-      }
+      createdAt: Date | number | string;
+      id: string;
+      isLineBreak?: boolean;
+      newProperties?: Record<string, unknown>;
+      properties?: Record<string, unknown>;
+      type: 'insert' | 'remove' | 'update';
+      userId: string;
+    }
     | undefined;
   getSuggestionDataList: (node: TSuggestionText) => Array<{
     id: string;
@@ -191,11 +191,11 @@ const getInlineSuggestionElementText = (node: TElement) => {
 
   if (
     node.type === KEYS.inlineEquation &&
-    typeof (node as TElement & { texExpression?: unknown }).texExpression ===
-      'string' &&
-    (node as TElement & { texExpression: string }).texExpression.length > 0
+    typeof (node as TElement & { texExpression?: unknown; }).texExpression ===
+    'string' &&
+    (node as TElement & { texExpression: string; }).texExpression.length > 0
   ) {
-    return (node as TElement & { texExpression: string }).texExpression;
+    return (node as TElement & { texExpression: string; }).texExpression;
   }
 
   const nodeText = NodeApi.string(node);

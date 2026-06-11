@@ -3,10 +3,12 @@ import type { NetworkStatus, SyncContextSource } from "@/types/domain/telemetry"
 
 
 
+
+
 export type { SyncEntity };
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = JsonPrimitive | JsonObject | JsonArray;
-export type JsonObject = { [key: string]: JsonValue };
+export type JsonObject = { [key: string]: JsonValue; };
 export type JsonArray = JsonValue[];
 export type SyncTaskType = "upload" | "download";
 export type SyncPriority = "critical" | "high" | "medium" | "low";
@@ -65,10 +67,10 @@ export interface IDiffEngine { calculateDiff(local: unknown, remote: unknown): u
   ): boolean;
 }
 export type SyncChange = Record<string, unknown>;
-export interface ICloudSyncAdapter { pullDiff( since: number, ): Promise<{ changes: SyncChange[]; serverTime: number }>;
+export interface ICloudSyncAdapter { pullDiff(since: number,): Promise<{ changes: SyncChange[]; serverTime: number; }>;
   pushBatch(
     changes: SyncChange[],
-  ): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown }>;
+  ): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown; }>;
   pullFull(entityIds: string[]): Promise<unknown[]>;
   getDeviceStatus(deviceId: string): Promise<CloudDeviceStatus>;
   revokeDevice(deviceId: string): Promise<void>;
@@ -107,7 +109,7 @@ export interface SecurityState { isLocked: boolean;
 export interface ISyncService { synchronize(onProgress?: (msg: string) => void): Promise<SyncResult>;
   sync(source: SyncContextSource): Promise<void>;
   performStartupSync(): Promise<void>;
-  getQueueStatus(): Promise<{ pending: number; isSyncing: boolean }>;
+  getQueueStatus(): Promise<{ pending: number; isSyncing: boolean; }>;
   forceFullResync(): Promise<void>;
   removeDevice(deviceId: string): Promise<void>;
   updateDeviceName(deviceId: string, newName: string): Promise<void>;
@@ -116,7 +118,7 @@ export interface ISyncService { synchronize(onProgress?: (msg: string) => void):
   getUnresolvedConflicts(): Promise<SyncConflict[]>;
   loadSettings(): Promise<UserSettingsSnapshot>;
   performFullSync(): Promise<void>;
-  processQueue(): Promise<{ processed: number; errors: SyncProcessingError[] }>;
+  processQueue(): Promise<{ processed: number; errors: SyncProcessingError[]; }>;
   monitorSecurity(callback: (state: SecurityState) => void): () => void;
   dismissSecurityAlert(alertId: string): Promise<void>;
 }

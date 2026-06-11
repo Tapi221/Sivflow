@@ -5,10 +5,12 @@ import { consumeGoogleCalendarServerCodeVerifier, type GoogleCalendarAccess } fr
 
 
 
-type GoogleOAuthReconnectDiagnosis = { cause: string; reconnectRequired: boolean; action: string };
+
+
+type GoogleOAuthReconnectDiagnosis = { cause: string; reconnectRequired: boolean; action: string; };
 export type GoogleOAuthCallableErrorReason = "invalid_grant" | "server_oauth_configuration" | "token_encryption_key_invalid" | "stored_refresh_token_decrypt_failed" | "stored_refresh_token_missing" | "insufficient_google_scope" | "token_endpoint_failed";
-type CallableErrorDetails = { reason?: GoogleOAuthCallableErrorReason; reconnectRequired?: boolean; userAction?: string; adminAction?: string };
-type GoogleOAuthReasonedError = Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason };
+type CallableErrorDetails = { reason?: GoogleOAuthCallableErrorReason; reconnectRequired?: boolean; userAction?: string; adminAction?: string; };
+type GoogleOAuthReasonedError = Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason; };
 type ServerGoogleCalendarAccess = GoogleCalendarAccess & {
   accessToken: string;
   accountEmail: string | null;
@@ -29,6 +31,8 @@ type GetGoogleCalendarAccessTokenInput = {
 type DisconnectGoogleCalendarAccountInput = {
   accountId: string;
 };
+
+
 
 
 
@@ -54,15 +58,17 @@ const getGoogleCalendarAccessTokenCallable =
     "getGoogleCalendarAccessToken",
   );
 const disconnectGoogleCalendarAccountCallable =
-  httpsCallable<DisconnectGoogleCalendarAccountInput, { ok: boolean }>(
+  httpsCallable<DisconnectGoogleCalendarAccountInput, { ok: boolean; }>(
     functionsClient,
     "disconnectGoogleCalendarAccount",
   );
 
 
 
+
+
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
-const normalizeCallableErrorCode = (error: unknown): string | undefined => error instanceof Error ? (error as Error & { code?: string }).code?.replace(/^functions\//, "") : undefined;
+const normalizeCallableErrorCode = (error: unknown): string | undefined => error instanceof Error ? (error as Error & { code?: string; }).code?.replace(/^functions\//, "") : undefined;
 const toErrorMessage = (error: unknown): string => error instanceof Error ? error.message : String(error);
 const isOAuthClientConfigurationError = (error: unknown): boolean => {
   const normalizedMessage = toErrorMessage(error).toLowerCase();
@@ -157,7 +163,7 @@ export const isServerStoredGoogleOAuthEnabled = (): boolean => { if (isDesktopLi
     import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "true"
   );
 };
-export const exchangeGoogleCalendarCode = async ( input: ExchangeGoogleCalendarCodeInput, ): Promise<ServerGoogleCalendarAccess> => { try { await waitForCallableAuth();
+export const exchangeGoogleCalendarCode = async (input: ExchangeGoogleCalendarCodeInput,): Promise<ServerGoogleCalendarAccess> => { try { await waitForCallableAuth();
 
     const result = await exchangeGoogleCalendarCodeCallable({
       ...input,
@@ -174,11 +180,15 @@ export const exchangeGoogleCalendarCode = async ( input: ExchangeGoogleCalendarC
 
 
 
+
+
 export const exchangeGoogleConnectedServiceCode = exchangeGoogleCalendarCode;
 
 
 
-export const getServerStoredGoogleCalendarAccessToken = async ( input: GetGoogleCalendarAccessTokenInput, ): Promise<ServerGoogleCalendarAccess> => { try { await waitForCallableAuth();
+
+
+export const getServerStoredGoogleCalendarAccessToken = async (input: GetGoogleCalendarAccessTokenInput,): Promise<ServerGoogleCalendarAccess> => { try { await waitForCallableAuth();
     return await getGoogleCalendarAccessTokenWithRetry(input);
   } catch (error) {
     throw toUserTransparentAutoRecoveryError(error);
@@ -187,10 +197,14 @@ export const getServerStoredGoogleCalendarAccessToken = async ( input: GetGoogle
 
 
 
+
+
 export const getServerStoredGoogleConnectedServiceAccessToken = getServerStoredGoogleCalendarAccessToken;
 
 
 
-export const disconnectServerStoredGoogleCalendarAccount = async ( input: DisconnectGoogleCalendarAccountInput, ): Promise<void> => { await waitForCallableAuth();
+
+
+export const disconnectServerStoredGoogleCalendarAccount = async (input: DisconnectGoogleCalendarAccountInput,): Promise<void> => { await waitForCallableAuth();
   await disconnectGoogleCalendarAccountCallable(input);
 };

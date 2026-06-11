@@ -5,6 +5,8 @@ import type { MenuAction } from "./menuActions";
 
 
 
+
+
 interface BuildFolderMenuActionsParams {
   onCreateSubfolder?: () => void;
   onCreateCardSet?: () => void;
@@ -45,6 +47,8 @@ interface BuildExplorerCreateMenuActionsParams {
 
 
 
+
+
 export const buildRenameDeleteMenuActions = ({ renameLabel = "名前を変更", deleteLabel = "削除", onRename, onDelete, }: BuildRenameDeleteMenuActionsParams): MenuAction[] => { const actions: MenuAction[] = [];
 
   if (onRename) {
@@ -69,14 +73,14 @@ export const buildRenameDeleteMenuActions = ({ renameLabel = "名前を変更", 
   return actions;
 };
 export const buildEntityRenameDeleteMenuActions = ({ id, name, type, beforeRename, closeMenu, setEditingId, setEditingName, canRename = true, onDelete, renameLabel = "名前を変更", deleteLabel = "削除", }: BuildEntityRenameDeleteMenuActionsParams): MenuAction[] => buildRenameDeleteMenuActions({ renameLabel, deleteLabel, onRename: canRename ? () => { beginInlineRename({ id, name, closeMenu, setEditingId, setEditingName, beforeStart: beforeRename, });
-      }
-      : undefined,
-    onDelete: onDelete
-      ? () => {
-        onDelete(id, type);
-      }
-      : undefined,
-  });
+  }
+    : undefined,
+  onDelete: onDelete
+    ? () => {
+      onDelete(id, type);
+    }
+    : undefined,
+});
 
 /**
  * フォルダ用コンテキストメニューのアクション定義をビルド
@@ -135,9 +139,9 @@ export const buildFolderMenuActions = ({ onCreateSubfolder, onCreateCardSet, onR
 /**
  * 追加ボタン（＋）メニューのアクション定義をビルド
  */
-export const buildExplorerCreateMenuActions = ({ canCreateCardSet = false, canCreateCard = false, canAddDocuments = false, canBulkImport = false, onCreateRootFolder, onCreateCardSet, onCreateCard, onAddDocument, onBulkImport, }: BuildExplorerCreateMenuActionsParams): MenuAction[] => { const actions: MenuAction[] = [ { id: "create-root-folder", label: "新規プロジェクト", icon: <CreateFolderIcon />, onSelect: () => { void onCreateRootFolder?.();
-      },
+export const buildExplorerCreateMenuActions = ({ canCreateCardSet = false, canCreateCard = false, canAddDocuments = false, canBulkImport = false, onCreateRootFolder, onCreateCardSet, onCreateCard, onAddDocument, onBulkImport, }: BuildExplorerCreateMenuActionsParams): MenuAction[] => { const actions: MenuAction[] = [{ id: "create-root-folder", label: "新規プロジェクト", icon: <CreateFolderIcon />, onSelect: () => { void onCreateRootFolder?.();
     },
+  },
   ];
 
   if (canCreateCardSet) {

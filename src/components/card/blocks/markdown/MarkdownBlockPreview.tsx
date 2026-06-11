@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 interface MarkdownBlockViewProps {
   md: string;
   align?: "left" | "center";
@@ -26,6 +28,8 @@ interface MarkdownBlockPreviewSurfaceProps extends MarkdownBlockPreviewProps {
 
 
 
+
+
 const MarkdownBlockPreviewSurface: React.FC<
   MarkdownBlockPreviewSurfaceProps
 > = ({
@@ -37,23 +41,23 @@ const MarkdownBlockPreviewSurface: React.FC<
   style,
   zoom,
 }) => {
-  return (
-    <BlockSurface ruled={true} className="flex-1">
-      <div
-        className="markdownBlockSurface w-full max-w-full bg-transparent overflow-visible"
-        style={style}
-      >
-        <div className={cn("w-full max-w-full px-0 py-0", contentClassName)}>
-          <MarkdownBlockDisplay
-            markdown={markdown}
-            className={className}
-            bleedX={bleedX}
-            zoom={zoom}
-          />
+    return (
+      <BlockSurface ruled={true} className="flex-1">
+        <div
+          className="markdownBlockSurface w-full max-w-full bg-transparent overflow-visible"
+          style={style}
+        >
+          <div className={cn("w-full max-w-full px-0 py-0", contentClassName)}>
+            <MarkdownBlockDisplay
+              markdown={markdown}
+              className={className}
+              bleedX={bleedX}
+              zoom={zoom}
+            />
+          </div>
         </div>
-      </div>
-    </BlockSurface>
-  );
-};
+      </BlockSurface>
+    );
+  };
 export const MarkdownBlockView: React.FC<MarkdownBlockViewProps> = ({ md, ...rest }) => { return <MarkdownBlockPreviewSurface markdown={md} {...rest} />;
 };

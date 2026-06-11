@@ -34,7 +34,7 @@ const createDesktopBridgeStub = () => ({
 
 describe("platform/index", () => {
   it("デスクトップブリッジが利用できない場合は Web プラットフォームを使用する", async () => {
-    const win = window as Window & { desktop?: unknown };
+    const win = window as Window & { desktop?: unknown; };
     delete win.desktop;
 
     vi.resetModules();

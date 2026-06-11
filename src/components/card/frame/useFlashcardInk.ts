@@ -5,6 +5,8 @@ import { useCards } from "@/components/card/hooks/useCards";
 
 
 
+
+
 interface UseFlashcardInkOptions {
   cardId: string | null;
   effectiveIsFlipped: boolean;
@@ -26,7 +28,9 @@ export interface FlashcardInkResult { previewInkRef: React.RefObject<InkLayerHan
 
 
 
-const readFontsReady = () => (document as Document & { fonts?: { ready?: Promise<unknown> } }).fonts?.ready;
+
+
+const readFontsReady = () => (document as Document & { fonts?: { ready?: Promise<unknown>; }; }).fonts?.ready;
 const waitForImages = async (root: HTMLDivElement) => {
   const images = Array.from(root.querySelectorAll("img")).filter((img) => !img.complete);
   await Promise.allSettled(images.map((img) => new Promise<void>((resolve) => {
@@ -44,7 +48,7 @@ export const useFlashcardInk = ({ cardId, effectiveIsFlipped, showInkLayer, inkE
   const [previewInkTool, setPreviewInkTool] = useState<InkEditTool | null>(null);
   const [previewInkHistory, setPreviewInkHistory] = useState<InkHistoryState>({ canUndo: false, canRedo: false, strokeCount: 0 });
   const [layoutStable, setLayoutStable] = useState(false);
-  const pendingInkRef = useRef<{ side: "question" | "answer"; doc: InkDocument } | null>(null);
+  const pendingInkRef = useRef<{ side: "question" | "answer"; doc: InkDocument; } | null>(null);
   const inkSaveTimerRef = useRef<number | null>(null);
   const inkEditingEnabledRef = useRef(inkEditingEnabled);
 

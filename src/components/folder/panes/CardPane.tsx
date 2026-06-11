@@ -3,6 +3,8 @@ import { CardQuestionLinksPanel } from "./CardQuestionLinksPanel";
 
 
 
+
+
 interface CardPaneProps {
   selectedCardId: string | null;
   onCardUpdated: () => void;
@@ -10,5 +12,7 @@ interface CardPaneProps {
 
 
 
-export const CardPane = ({ selectedCardId, onCardUpdated }: CardPaneProps) => { return ( <div className="relative h-full min-h-0 w-full overflow-hidden"> <CardEditorPane selectedCardId={selectedCardId} onCardUpdated={onCardUpdated} /> <CardQuestionLinksPanel selectedCardId={selectedCardId} /> </div> );
+
+
+export const CardPane = ({ selectedCardId, onCardUpdated }: CardPaneProps) => { return (<div className="relative h-full min-h-0 w-full overflow-hidden"> <CardEditorPane selectedCardId={selectedCardId} onCardUpdated={onCardUpdated} /> <CardQuestionLinksPanel selectedCardId={selectedCardId} /> </div>);
 };

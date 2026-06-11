@@ -5,6 +5,8 @@ import { emitHoverTooltipOpen, subscribeHoverTooltipOpen } from "./hoverTooltipE
 
 
 
+
+
 type TooltipSide = "top" | "bottom";
 type TooltipPosition = {
   x: number;
@@ -30,6 +32,8 @@ type HoverMonthEventTooltipProps = {
 
 
 
+
+
 const TOOLTIP_SURFACE_CLASS_NAME = "relative flex w-fit max-w-[220px] flex-col overflow-visible rounded-[10px] border border-[#dceefa]/80 bg-[#f8fcff]/95 px-2.5 py-1.5 text-[#48616f] shadow-[0_8px_18px_rgba(92,128,154,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] backdrop-blur-xl";
 const TOOLTIP_TITLE_ROW_CLASS_NAME = "flex min-w-0 items-center gap-1.5";
 const TOOLTIP_ACCENT_DOT_CLASS_NAME = "h-1.5 w-1.5 shrink-0 rounded-full";
@@ -38,6 +42,8 @@ const TOOLTIP_ARROW_CLASS_NAME = "absolute h-2 w-2 rotate-45 border-[#dceefa]/80
 const TOOLTIP_VIEWPORT_MARGIN = 12;
 const TOOLTIP_BOUNDARY_GAP = 8;
 const TOOLTIP_ARROW_MARGIN = 12;
+
+
 
 
 
@@ -136,6 +142,8 @@ const getArrowClassName = (side: TooltipSide) => {
 
   return "bottom-[-3px] -translate-x-1/2 border-b border-r";
 };
+
+
 
 
 
@@ -286,6 +294,8 @@ const HoverMonthEventTooltip = ({
     </>
   );
 };
+
+
 
 
 

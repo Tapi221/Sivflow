@@ -13,6 +13,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   id: card.id,
   cardId: card.cardId,
@@ -26,6 +28,8 @@ const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   inkQuestion: card.front.ink ?? null,
   inkAnswer: card.back.ink ?? null,
 });
+
+
 
 
 
@@ -49,6 +53,8 @@ export type PreparedViewCardFaceSceneProps = Readonly<{ card: Card;
 
 
 
+
+
 export const PreparedViewCardFaceScene = ({ card, sharedDerived, sideDerived, displayMode, fixedScale, fixedHeightPx = null, contentZoom, headerIconVisualScale, previewMode, showInkLayer, drawMode = false, inkEditingEnabled, fillHeight = false, onFlip, onToggleUncertainty, onToggleBookmark, }: PreparedViewCardFaceSceneProps) => { const contentRef = React.useRef<HTMLDivElement | null>(null);
 
   const flashcardCard = React.useMemo<FlashcardCardLike>(
@@ -62,9 +68,9 @@ export const PreparedViewCardFaceScene = ({ card, sharedDerived, sideDerived, di
   const shouldEnableInkEditing = Boolean(allowInkEditing && isFixedDisplay);
   const resolvedFixedHeightPx =
     isFixedDisplay &&
-    typeof fixedHeightPx === "number" &&
-    Number.isFinite(fixedHeightPx) &&
-    fixedHeightPx > 0
+      typeof fixedHeightPx === "number" &&
+      Number.isFinite(fixedHeightPx) &&
+      fixedHeightPx > 0
       ? fixedHeightPx
       : null;
 

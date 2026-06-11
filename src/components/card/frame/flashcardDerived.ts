@@ -43,6 +43,10 @@ import type { CardBlock } from "@/types/domain/card";
 
 
 
+
+
+
+
 // ---------------------------------------------------------------------------
 // Scalar field normalizers
 // ---------------------------------------------------------------------------
@@ -61,11 +65,11 @@ export const resolveAnswerText = (card: FlashcardCardLike) => { if (Array.isArra
   }
   return card.answer_text ?? card.answerText ?? "";
 };
-export const resolveQuestionImages = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.blocks)) { return card.front.blocks .filter((block) => block.type === "image") .flatMap((block) => block.images ?? []);
+export const resolveQuestionImages = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.blocks)) { return card.front.blocks.filter((block) => block.type === "image").flatMap((block) => block.images ?? []);
   }
   return card.question_images ?? card.questionImages ?? [];
 };
-export const resolveAnswerImages = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.blocks)) { return card.back.blocks .filter((block) => block.type === "image") .flatMap((block) => block.images ?? []);
+export const resolveAnswerImages = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.blocks)) { return card.back.blocks.filter((block) => block.type === "image").flatMap((block) => block.images ?? []);
   }
   return card.answer_images ?? card.answerImages ?? [];
 };
@@ -77,11 +81,11 @@ export const resolveAnswerAttachmentImages = (card: FlashcardCardLike) => { if (
   }
   return card.answer_images ?? card.answerImages ?? [];
 };
-export const resolveQuestionAudios = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.blocks)) { return card.front.blocks .filter((block) => block.type === "audio") .flatMap((block) => block.audios ?? []);
+export const resolveQuestionAudios = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.blocks)) { return card.front.blocks.filter((block) => block.type === "audio").flatMap((block) => block.audios ?? []);
   }
   return card.question_audios ?? card.questionAudios ?? [];
 };
-export const resolveAnswerAudios = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.blocks)) { return card.back.blocks .filter((block) => block.type === "audio") .flatMap((block) => block.audios ?? []);
+export const resolveAnswerAudios = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.blocks)) { return card.back.blocks.filter((block) => block.type === "audio").flatMap((block) => block.audios ?? []);
   }
   return card.answer_audios ?? card.answerAudios ?? [];
 };
@@ -108,7 +112,7 @@ export const resolveAnswerCode = (card: FlashcardCardLike) => { if (Array.isArra
 // Layout rows
 // ---------------------------------------------------------------------------
 
-export const resolveLayoutRows = (card: FlashcardCardLike) => { const legacyQ = normalizeExtraRows( card.questionExtraRows ?? card.question_extra_rows ?? 0, );
+export const resolveLayoutRows = (card: FlashcardCardLike) => { const legacyQ = normalizeExtraRows(card.questionExtraRows ?? card.question_extra_rows ?? 0,);
   const legacyA = normalizeExtraRows(
     card.answerExtraRows ?? card.answer_extra_rows ?? 0,
   );
@@ -125,12 +129,12 @@ const toMediaUrl = (m: FlashcardMediaLike) => {
   if (typeof m === "string") return m;
   return m.remoteUrl ?? m.localUrl ?? m.url ?? null;
 };
-export const resolveImageUrls = (images: FlashcardMediaLike[]) => { return images .map((img) => toMediaUrl(img as FlashcardMediaLike)) .filter((u): u is string => Boolean(u));
+export const resolveImageUrls = (images: FlashcardMediaLike[]) => { return images.map((img) => toMediaUrl(img as FlashcardMediaLike)).filter((u): u is string => Boolean(u));
 };
 export const resolveAudioUrls = (audios: FlashcardMediaLike[]) => { return audios.map(toMediaUrl).filter((u): u is string => Boolean(u));
 };
 const extractReferences = (block: CardBlock) => {
-  const maybeBlock = block as CardBlock & { references?: unknown };
+  const maybeBlock = block as CardBlock & { references?: unknown; };
   const refs = maybeBlock.references;
   return Array.isArray(refs) ? (refs as ReferenceBlockData[]) : [];
 };
@@ -140,7 +144,7 @@ export const resolveReferences = (blocks: CardBlock[]) => { const refs: Referenc
   });
   return refs.filter((r) => r.url);
 };
-export const resolveQuestionAttachmentReferences = ( card: FlashcardCardLike, ) => { return (card.front?.attachments?.references ?? []).filter((r) => r.url);
+export const resolveQuestionAttachmentReferences = (card: FlashcardCardLike,) => { return (card.front?.attachments?.references ?? []).filter((r) => r.url);
 };
 export const resolveAnswerAttachmentReferences = (card: FlashcardCardLike) => { return (card.back?.attachments?.references ?? []).filter((r) => r.url);
 };

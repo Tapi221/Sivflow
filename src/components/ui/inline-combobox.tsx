@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils';
 
 
 type FilterFn = (
-  item: { value: string; group?: string; keywords?: string[]; label?: string },
+  item: { value: string; group?: string; keywords?: string[]; label?: string; },
   search: string
 ) => boolean;
 

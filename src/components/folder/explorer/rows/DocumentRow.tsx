@@ -8,13 +8,17 @@ import { SidebarEntityRow } from "./SidebarEntityRow";
 
 
 
+
+
 type ExplorerItemType = "folder" | "cardSet" | "card" | "document";
 interface RenameTarget { id: string; type: ExplorerItemType; }
 type TreeNode = {
   rawId: string;
   name: string;
 };
-interface DocumentRowProps { treeNode: TreeNode & { kind: "document" }; style: React.CSSProperties; depth: number; isSelected: boolean; editingId: string | null; editingName: string; renameCancelledRef: React.MutableRefObject<boolean>; editInputRef: React.MutableRefObject<HTMLInputElement | null>; setEditingId: React.Dispatch<React.SetStateAction<string | null>>; setEditingName: React.Dispatch<React.SetStateAction<string>>; openRowMenuId: string | null; setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>; onItemSelect: (item: { type: "card" | "cardSet" | "document"; id: string }) => void; canRename: boolean; canDelete: boolean; handleDelete: (id: string, type: ExplorerItemType) => void; handleRenameConfirm: (target?: RenameTarget) => Promise<void>; setRowRef: (id: string, node: HTMLElement | null) => void; }
+interface DocumentRowProps { treeNode: TreeNode & { kind: "document"; }; style: React.CSSProperties; depth: number; isSelected: boolean; editingId: string | null; editingName: string; renameCancelledRef: React.MutableRefObject<boolean>; editInputRef: React.MutableRefObject<HTMLInputElement | null>; setEditingId: React.Dispatch<React.SetStateAction<string | null>>; setEditingName: React.Dispatch<React.SetStateAction<string>>; openRowMenuId: string | null; setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>; onItemSelect: (item: { type: "card" | "cardSet" | "document"; id: string; }) => void; canRename: boolean; canDelete: boolean; handleDelete: (id: string, type: ExplorerItemType) => void; handleRenameConfirm: (target?: RenameTarget) => Promise<void>; setRowRef: (id: string, node: HTMLElement | null) => void; }
+
+
 
 
 

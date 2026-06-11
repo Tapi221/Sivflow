@@ -15,7 +15,13 @@ export const MONTH_VISIBLE_EVENT_COUNT_MAX = 20;
 
 
 
+
+
 export const createInitialMonthOffsetRange = () => ({ startOffset: -INITIAL_MONTH_BUFFER, endOffset: INITIAL_MONTH_BUFFER, });
+
+
+
+
 
 
 
@@ -66,4 +72,4 @@ export const WEEKDAY_SURFACE_LEFT_INSET_PX = 16;
 
 //
 export const MIN_EVENT_DISPLAY_HEIGHT_PX = 48; // min-h-12 に対応
-export const MIN_LAYOUT_MINUTES = Math.ceil( (MIN_EVENT_DISPLAY_HEIGHT_PX / DEFAULT_HOUR_ROW_HEIGHT) * 60, );
+export const MIN_LAYOUT_MINUTES = Math.ceil((MIN_EVENT_DISPLAY_HEIGHT_PX / DEFAULT_HOUR_ROW_HEIGHT) * 60,);

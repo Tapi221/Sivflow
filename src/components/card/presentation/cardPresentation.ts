@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 export type CardPresentationContext = { inPager: boolean;
   isCurrentCard: boolean;
   isEditing: boolean;
@@ -18,6 +20,8 @@ export type CardPresentationContextInput = Partial<Pick<CardPresentationContext,
 
 
 
+
+
 export const resolveCardPresentationState = (context: CardPresentationContext): CardPresentationState => { const isActiveCard = context.isStandaloneEditor || context.isCurrentCard;
   const isInteractiveCard = isActiveCard || context.hasFocusWithin;
 
@@ -28,11 +32,11 @@ export const resolveCardPresentationState = (context: CardPresentationContext): 
     showActiveChrome: context.inPager && isActiveCard,
   };
 };
-export const buildCardShellClassName = (state: CardPresentationState, className?: string) => cn( CARD_SHELL_COMMON_CLASS_NAME, state.showActiveChrome && "card-shell--active", state.showEditingOutline && "card-shell--editing", className, );
-export const buildCardChromeClassName = ( state: CardPresentationState, options?: { hoverable?: boolean;
-    plain?: boolean;
-    className?: string;
-  },
+export const buildCardShellClassName = (state: CardPresentationState, className?: string) => cn(CARD_SHELL_COMMON_CLASS_NAME, state.showActiveChrome && "card-shell--active", state.showEditingOutline && "card-shell--editing", className,);
+export const buildCardChromeClassName = (state: CardPresentationState, options?: { hoverable?: boolean;
+  plain?: boolean;
+  className?: string;
+},
 ) =>
   cn(
     "card-active-chrome",

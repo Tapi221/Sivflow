@@ -62,17 +62,17 @@ vi.mock("framer-motion", () => ({
 }));
 
 vi.mock("@/components/card/frame/Flashcard", () => ({
-  Flashcard: ({ card }: { card?: { id?: string } | null }) => (
+  Flashcard: ({ card }: { card?: { id?: string; } | null; }) => (
     <div data-testid="flashcard" data-card-id={card?.id ?? ""} />
   ),
 }));
 
 vi.mock("@/components/card/frame/MobileScalableCard", () => ({
-  MobileScalableCard: ({ children }: { children: React.ReactNode }) => children,
+  MobileScalableCard: ({ children }: { children: React.ReactNode; }) => children,
 }));
 
 vi.mock("@/features/study/StudyCard", () => ({
-  default: ({ card }: { card?: { id?: string } | null }) => (
+  default: ({ card }: { card?: { id?: string; } | null; }) => (
     <div data-testid="study-card" data-card-id={card?.id ?? ""} />
   ),
 }));

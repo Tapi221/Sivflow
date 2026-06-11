@@ -1,6 +1,8 @@
- 
+
 import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useState } from "react";
+
+
 
 
 
@@ -21,11 +23,16 @@ interface ToastContextType {
 
 
 
+
+
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 
 
-export const ToastProvider = ({ children }: { children: ReactNode }) => { const [toasts, setToasts] = useState<Toast[]>([]);
+
+
+export const ToastProvider = ({ children }: { children: ReactNode; }) => {
+  const [toasts, setToasts] = useState<Toast[]>([]);
 
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
@@ -85,6 +92,8 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => { const 
     </ToastContext.Provider>
   );
 };
+
+
 
 
 

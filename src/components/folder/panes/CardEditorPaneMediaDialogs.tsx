@@ -9,6 +9,8 @@ import type { CardFaceAttachmentAudio } from "@/types/domain/card";
 
 
 
+
+
 type Side = "question" | "answer";
 type DialogAudioItem = string | CardFaceAttachmentAudio;
 interface MediaDialogProps {
@@ -32,6 +34,8 @@ interface CardEditorPaneMediaDialogsProps {
   getReferenceItems: (side: Side) => ReferenceBlockData[];
   setReferenceItems: (side: Side, next: ReferenceBlockData[]) => void;
 }
+
+
 
 
 
@@ -59,6 +63,8 @@ const areMediaDialogsPropsEqual = (
   if (prevClosed && nextClosed) return true;
   return false;
 };
+
+
 
 
 
@@ -147,5 +153,7 @@ const CardEditorPaneMediaDialogsInner = ({
 
 
 
-export const CardEditorPaneMediaDialogs = memo( CardEditorPaneMediaDialogsInner, areMediaDialogsPropsEqual, );
+
+
+export const CardEditorPaneMediaDialogs = memo(CardEditorPaneMediaDialogsInner, areMediaDialogsPropsEqual,);
 CardEditorPaneMediaDialogs.displayName = "CardEditorPaneMediaDialogs";

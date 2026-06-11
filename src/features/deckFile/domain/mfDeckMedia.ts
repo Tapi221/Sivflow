@@ -2,6 +2,8 @@ import { MF_DECK_MEDIA_DIRECTORY, MF_DECK_MEDIA_URI_PREFIX, type MfDeckMediaEntr
 
 
 
+
+
 const EXTENSION_BY_MIME_TYPE: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",
@@ -17,6 +19,8 @@ const EXTENSION_BY_MIME_TYPE: Record<string, string> = {
   "audio/webm": "webm",
 };
 const INVALID_FILENAME_CHARACTERS = new Set(["\\", "/", ":", "*", "?", "\"", "<", ">", "|"]);
+
+
 
 
 
@@ -71,16 +75,20 @@ const stripLeadingDots = (value: string): string => {
 
 
 
+
+
 export const MF_DECK_MAX_MEDIA_ENTRY_BYTES = 32 * 1024 * 1024;
 export const MF_DECK_MAX_MEDIA_TOTAL_BYTES = 96 * 1024 * 1024;
 
 
 
-export const isMfDeckMediaPath = (value: string): boolean => { return ( value.startsWith(MF_DECK_MEDIA_DIRECTORY) && !value.endsWith("/") && !value.startsWith("/") && !value.includes("..") && !value.includes("\\") );
+
+
+export const isMfDeckMediaPath = (value: string): boolean => { return (value.startsWith(MF_DECK_MEDIA_DIRECTORY) && !value.endsWith("/") && !value.startsWith("/") && !value.includes("..") && !value.includes("\\"));
 };
 export const toMfDeckMediaUri = (path: string): string => { return `${MF_DECK_MEDIA_URI_PREFIX}${path}`;
 };
-export const isMfDeckMediaUri = (value: unknown): value is string => { return ( typeof value === "string" && value.startsWith(MF_DECK_MEDIA_URI_PREFIX) );
+export const isMfDeckMediaUri = (value: unknown): value is string => { return (typeof value === "string" && value.startsWith(MF_DECK_MEDIA_URI_PREFIX));
 };
 export const pathFromMfDeckMediaUri = (value: string): string | null => { if (!isMfDeckMediaUri(value)) return null;
 
@@ -106,7 +114,7 @@ export const inferMfDeckMediaExtension = (input: { mimeType: string;
 
   return "bin";
 };
-export const sanitizeMfDeckMediaName = (value: string): string => { const sanitized = collapseRepeatedUnderscores( replaceWhitespaceWithUnderscore( replaceInvalidFileNameCharacters(replaceControlCharacters(value.trim())), ), ).slice(0, 80);
+export const sanitizeMfDeckMediaName = (value: string): string => { const sanitized = collapseRepeatedUnderscores(replaceWhitespaceWithUnderscore(replaceInvalidFileNameCharacters(replaceControlCharacters(value.trim())),),).slice(0, 80);
 
   return sanitized || "media";
 };
@@ -129,4 +137,4 @@ export const buildMfDeckMediaPath = (input: { index: number;
 
   return `${MF_DECK_MEDIA_DIRECTORY}${directory}/${paddedIndex}-${name}.${cleanExtension}`;
 };
-export const buildMfDeckMediaManifest = ( mediaEntries: MfDeckMediaEntryV1[], ) => ({ format: "sivflow.deck.media" as const, version: 1 as const, media: mediaEntries, });
+export const buildMfDeckMediaManifest = (mediaEntries: MfDeckMediaEntryV1[],) => ({ format: "sivflow.deck.media" as const, version: 1 as const, media: mediaEntries, });
