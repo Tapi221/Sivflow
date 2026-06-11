@@ -6,6 +6,8 @@ import { SlateElement } from "platejs/static";
 import { cn } from "@/lib/utils";
 import { inlineSuggestionVariants } from "@/lib/suggestion";
 
+
+
 const DateElementStatic = (props: SlateElementProps<TDateElement>) => {
   const { element } = props;
 
@@ -27,5 +29,7 @@ const DateElementStatic = (props: SlateElementProps<TDateElement>) => {
     </SlateElement>
   );
 };
+
+
 
 export { DateElementStatic };
