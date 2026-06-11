@@ -1,6 +1,8 @@
 import { cropCanvasToBlob } from "@/features/selection-capture/canvasSelectionCapture";
 import type { SelectionCaptureArea, SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
 
+
+
 const getCanvasRectRelativeToTarget = (target: HTMLElement, canvas: HTMLCanvasElement): SelectionCaptureRect => {
   const targetRect = target.getBoundingClientRect();
   const canvasRect = canvas.getBoundingClientRect();
@@ -49,5 +51,7 @@ const capturePdfViewerAreaToBlob = async (target: HTMLElement, area: SelectionCa
 
   return cropCanvasToBlob(candidate.canvas, candidate.sourceRect);
 };
+
+
 
 export { capturePdfViewerAreaToBlob };

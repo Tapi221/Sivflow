@@ -6,6 +6,8 @@ import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
 import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 type CardFaceSceneProps = Readonly<{ displayMode: CardDisplayMode;
   fixedScale?: number;
   contentZoom: number;
@@ -35,6 +37,8 @@ type CardFaceSceneProps = Readonly<{ displayMode: CardDisplayMode;
   onResizeStart?: () => void;
   onResizeEnd?: () => void;
 }>;
+
+
 
 const CardFaceScene = ({ displayMode, fixedScale, contentZoom, contentProps, actionsTopLeft, actionsTopRight, overlay, topAttachment, contentWrapperRef, frameClassName, role, tabIndex, onClick, onKeyDown, onPointerDownCapture, onPointerMoveCapture, onPointerUpCapture, onPointerCancelCapture, resizable = false, showResizeHandle = false, resizeStepPx, heightPx = null, lockHeight = false, fillHeight = false, onHeightChange, onMinHeightChange, onResizeStart, onResizeEnd }: CardFaceSceneProps) => {
   const isFluidDisplay = displayMode === "fluid";
@@ -109,5 +113,9 @@ const CardFaceScene = ({ displayMode, fixedScale, contentZoom, contentProps, act
   );
 };
 
+
+
 export { CardFaceScene };
+
+
 export type { CardFaceSceneProps };

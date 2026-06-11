@@ -5,12 +5,16 @@ import { useViewerSceneProps } from "@/components/card/blocks/shared/useViewerSc
 import type { CardBlock } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 interface BlockRendererProps {
   blocks?: CardBlock[];
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
   displayMode?: CardDisplayMode;
   zoom?: number;
 }
+
+
 
 const BlockRenderer = ({ blocks, onGalleryFullscreenChange, displayMode = "fixed", zoom = 1 }: BlockRendererProps) => {
   const viewerProps = useViewerSceneProps({ onGalleryFullscreenChange, displayMode, zoom });
@@ -32,5 +36,7 @@ const BlockRenderer = ({ blocks, onGalleryFullscreenChange, displayMode = "fixed
     />
   );
 };
+
+
 
 export { BlockRenderer };
