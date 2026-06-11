@@ -1,11 +1,8 @@
-import { useLayoutEffect } from "react";
+import { type RefObject, useLayoutEffect } from "react";
 
-type Params = {
-  pathname: string;
-  mainRef: React.RefObject<HTMLElement | null>;
-};
+type WorkspaceScrollRef = RefObject<HTMLElement | null>;
 
-const resetWorkspaceScrollPosition = (mainRef: React.RefObject<HTMLElement | null>) => {
+const resetWorkspaceScrollPosition = (mainRef: WorkspaceScrollRef) => {
   const containers = document.querySelectorAll<HTMLElement>(
     ".app-layout, .app-layout__content, .app-layout__main",
   );
@@ -15,9 +12,11 @@ const resetWorkspaceScrollPosition = (mainRef: React.RefObject<HTMLElement | nul
     element.scrollLeft = 0;
   });
 
-  if (mainRef.current) {
-    mainRef.current.scrollTop = 0;
-    mainRef.current.scrollLeft = 0;
+  const mainElement = mainRef.current;
+
+  if (mainElement) {
+    mainElement.scrollTop = 0;
+    mainElement.scrollLeft = 0;
   }
 
   window.scrollTo({
@@ -30,10 +29,10 @@ const resetWorkspaceScrollPosition = (mainRef: React.RefObject<HTMLElement | nul
   document.body.scrollTop = 0;
 };
 
-export const useResetWorkspaceScrollDesktop = ({
-  pathname,
-  mainRef,
-}: Params) => {
+export const useResetWorkspaceScrollDesktop = (
+  mainRef: WorkspaceScrollRef,
+  pathname: string,
+) => {
   useLayoutEffect(() => {
     resetWorkspaceScrollPosition(mainRef);
 
@@ -44,5 +43,5 @@ export const useResetWorkspaceScrollDesktop = ({
     return () => {
       window.cancelAnimationFrame(animationFrameId);
     };
-  }, [pathname, mainRef]);
+  }, [mainRef, pathname]);
 };
