@@ -128,11 +128,8 @@ const isComponentVariableStatement = (statement) => statement.declarationList.de
   return containsJsx(declaration.initializer);
 });
 
-const isTypeOnlyExportDeclaration = (statement) => ts.isExportDeclaration(statement) && statement.isTypeOnly;
-
 const getStatementOrderCategory = (statement) => {
   if (isImportStatement(statement)) return "import";
-  if (isTypeOnlyExportDeclaration(statement)) return "type";
   if (ts.isExportDeclaration(statement) || ts.isExportAssignment(statement)) return "postComponent";
   if (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement) || ts.isModuleDeclaration(statement)) return "type";
   if (isDisplayNameAssignment(statement)) return "postComponent";
