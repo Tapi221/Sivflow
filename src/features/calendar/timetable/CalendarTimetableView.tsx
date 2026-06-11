@@ -3,6 +3,7 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { ja } from "date-fns/locale";
+import { Check, Plus, Settings } from "lucide-react";
 import type { CalendarTimetableColorKey, CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTimetablePeriod, CalendarTimetableSlot, CalendarTimetableVisibleDayCount, CalendarTimetableWeekdayIndex } from "@core/domain/calendar/timetable/timetable.types";
 import { getTagColorStyle } from "@/chip/tag/tag.style";
 import { TAG_COLOR_KEYS } from "@/chip/tag/tag.constants";
@@ -14,17 +15,11 @@ import { CalendarTimetableSyllabusCatalogPanel } from "./CalendarTimetableSyllab
 import { normalizeVisibleDayCount } from "./calendarTimetable.storage";
 import { useCalendarTimetable } from "./useCalendarTimetable";
 
-
-
-
-
-
-
 type TimetableSlot = { dayIndex: CalendarTimetableWeekdayIndex; periodId: string };
 
 type CalendarTimetableDensity = "default" | "compact";
 
-type CalendarTimetableViewProps = { weekDate: Date; weekStartDay?: CalendarWeekStartDay; density?: CalendarTimetableDensity; className?: string };
+type CalendarTimetableViewProps = { weekDate: Date; weekStartDay?: CalendarWeekStartDay; density?: CalendarTimetableDensity; className?: string; addRequestToken?: number };
 
 type CalendarTimetableCourseEditorProps = { course: CalendarTimetableCourse | null; semesterId: string; initialSlot: CalendarTimetableSlot | null; periods: CalendarTimetablePeriod[]; visibleDayCount: CalendarTimetableVisibleDayCount; onSave: (draft: CalendarTimetableCourseDraft) => Promise<void>; onDelete: (courseId: string) => Promise<void>; onClose: () => void };
 
@@ -32,23 +27,12 @@ type CalendarTimetableSettingsPanelProps = { periods: CalendarTimetablePeriod[];
 
 type CalendarTimetableGridStyle = CSSProperties & { "--calendar-timetable-day-count": CalendarTimetableVisibleDayCount };
 
-
-
-
-
-
-
 const TIMETABLE_GRID_TEMPLATE_COLUMNS = "56px repeat(var(--calendar-timetable-day-count), 112px)";
 const TIMETABLE_COMPACT_GRID_TEMPLATE_COLUMNS = "34px repeat(var(--calendar-timetable-day-count), minmax(0, 1fr))";
 const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] as const;
 const DEFAULT_COURSE_COLOR_KEY: CalendarTimetableColorKey = "blue";
+const DEFAULT_TIMETABLE_ADD_REQUEST_TOKEN = 0;
 const EMPTY_SLOT_LIST: CalendarTimetableSlot[] = [];
-
-
-
-
-
-
 
 const createTimetableSlotKey = ({ dayIndex, periodId }: TimetableSlot): string => `${dayIndex}:${periodId}`;
 
@@ -56,7 +40,7 @@ const buildTimetableWeekDays = (weekDate: Date, weekStartDay: CalendarWeekStartD
 
 const getTimetableEntryDayIndex = (date: Date): CalendarTimetableWeekdayIndex => ((date.getDay() + 6) % 7) as CalendarTimetableWeekdayIndex;
 
-const createTimetableCourseSlotMap = (courses: CalendarTimetableCourse[]) => {
+const createTimetableCourseSlotMap = (courses: CalendarTimetableCourse[]): Map<string, CalendarTimetableCourse> => {
   const map = new Map<string, CalendarTimetableCourse>();
   courses.forEach((course) => course.slots.forEach((slot) => map.set(createTimetableSlotKey(slot), course)));
   return map;
@@ -73,12 +57,6 @@ const createTimetableGridStyle = (density: CalendarTimetableDensity, visibleDayC
 const isSameTimetableSlot = (left: CalendarTimetableSlot, right: CalendarTimetableSlot): boolean => left.dayIndex === right.dayIndex && left.periodId === right.periodId;
 
 const createEditorSlots = (course: CalendarTimetableCourse | null, initialSlot: CalendarTimetableSlot | null): CalendarTimetableSlot[] => course?.slots ?? (initialSlot ? [initialSlot] : EMPTY_SLOT_LIST);
-
-
-
-
-
-
 
 const CalendarTimetableSettingsPanel = ({ periods, visibleDayCount, onChangeVisibleDayCount, onAddPeriod, onUpdatePeriod, onDeletePeriod, onClose }: CalendarTimetableSettingsPanelProps) => {
   return (
@@ -182,7 +160,7 @@ const CalendarTimetableCourseEditor = ({ course, semesterId, initialSlot, period
                 {periods.map((period) => <div key={period.id} className="contents"><div className="flex items-center justify-end pr-2 text-[12px] font-bold text-[#6e6e73]">{period.label}</div>{TIMETABLE_DAY_LABELS.slice(0, visibleDayCount).map((_, dayIndex) => {
                   const slot = { dayIndex: dayIndex as CalendarTimetableWeekdayIndex, periodId: period.id };
                   const selected = slots.some((currentSlot) => isSameTimetableSlot(currentSlot, slot));
-                  return <button key={`${dayIndex}-${period.id}`} type="button" className={cn("h-9 rounded-[10px] border text-[12px] font-bold", selected ? "border-[#007aff] bg-[#e8f2ff] text-[#007aff]" : "border-[#e5e5ea] bg-white text-[#c7c7cc]")} onClick={() => toggleSlot(slot)}>{selected ? "✓" : ""}</button>;
+                  return <button key={`${dayIndex}-${period.id}`} type="button" className={cn("flex h-9 items-center justify-center rounded-[10px] border text-[12px] font-bold", selected ? "border-[#007aff] bg-[#e8f2ff] text-[#007aff]" : "border-[#e5e5ea] bg-white text-[#c7c7cc]")} onClick={() => toggleSlot(slot)}>{selected ? <Check className="h-4 w-4" aria-hidden="true" /> : null}</button>;
                 })}</div>)}
               </div>
             </>
@@ -197,7 +175,7 @@ const CalendarTimetableCourseEditor = ({ course, semesterId, initialSlot, period
   );
 };
 
-const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY, density = "default", className }: CalendarTimetableViewProps) => {
+const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY, density = "default", className, addRequestToken = DEFAULT_TIMETABLE_ADD_REQUEST_TOKEN }: CalendarTimetableViewProps) => {
   const today = new Date();
   const { courses, institutions, periods, settings, syllabusCourses, isLoading, saveCourse, deleteCourse, updateVisibleDayCount, addPeriod, updatePeriod, deletePeriod, saveSyllabusCourse, addCourseFromSyllabus, searchSyllabusCourses } = useCalendarTimetable();
   const visibleDayCount = settings?.visibleDayCount ?? 5;
@@ -210,15 +188,25 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
   const courseSlotMap = useMemo(() => createTimetableCourseSlotMap(courses), [courses]);
   const [editingCourse, setEditingCourse] = useState<CalendarTimetableCourse | null>(null);
   const [editingSlot, setEditingSlot] = useState<CalendarTimetableSlot | null>(null);
+  const [isCourseEditorOpen, setIsCourseEditorOpen] = useState(false);
+  const [handledAddRequestToken, setHandledAddRequestToken] = useState(addRequestToken);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSyllabusCatalogOpen, setIsSyllabusCatalogOpen] = useState(false);
 
   const handleOpenCourseEditor = useCallback((course: CalendarTimetableCourse | null, slot: CalendarTimetableSlot) => {
     setEditingCourse(course);
     setEditingSlot(slot);
+    setIsCourseEditorOpen(true);
+  }, []);
+
+  const handleOpenBlankCourseEditor = useCallback(() => {
+    setEditingCourse(null);
+    setEditingSlot(null);
+    setIsCourseEditorOpen(true);
   }, []);
 
   const handleCloseCourseEditor = useCallback(() => {
+    setIsCourseEditorOpen(false);
     setEditingCourse(null);
     setEditingSlot(null);
   }, []);
@@ -227,6 +215,12 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
   const handleCloseSettings = useCallback(() => setIsSettingsOpen(false), []);
   const handleOpenSyllabusCatalog = useCallback(() => setIsSyllabusCatalogOpen(true), []);
   const handleCloseSyllabusCatalog = useCallback(() => setIsSyllabusCatalogOpen(false), []);
+
+  useEffect(() => {
+    if (addRequestToken === handledAddRequestToken) return;
+    setHandledAddRequestToken(addRequestToken);
+    handleOpenBlankCourseEditor();
+  }, [addRequestToken, handleOpenBlankCourseEditor, handledAddRequestToken]);
 
   return (
     <div className={cn("flex h-full min-h-0 min-w-0 flex-col bg-white text-[#1c1c1e]", className)}>
@@ -239,7 +233,7 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <button type="button" className={cn("rounded-full border border-[#e5e5ea] bg-white font-bold text-[#007aff] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "h-8 px-3 text-[12px]" : "h-9 px-4 text-[13px]")} onClick={handleOpenSyllabusCatalog}>授業DB</button>
-          <button type="button" aria-label="時間割設定" className={cn("flex items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[#6e6e73] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "h-8 w-8 text-[14px]" : "h-9 w-9 text-[15px]")} onClick={handleOpenSettings}>⚙︎</button>
+          <button type="button" aria-label="時間割設定" className={cn("flex items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[#6e6e73] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "h-8 w-8" : "h-9 w-9")} onClick={handleOpenSettings}><Settings className={cn(isCompact ? "h-3.5 w-3.5" : "h-4 w-4")} aria-hidden="true" /></button>
         </div>
       </div>
 
@@ -268,7 +262,7 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
                 const entry = courseSlotMap.get(createTimetableSlotKey(slot)) ?? null;
                 return (
                   <button key={`${day.toISOString()}-${period.id}`} type="button" aria-label={`${format(day, "M月d日 EEEE", { locale: ja })} ${period.label}限`} className={cn("relative min-w-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "min-h-[48px] rounded-[14px]" : "min-h-[52px] rounded-[18px]", entry ? (isCompact ? "border px-1.5 py-1" : "border px-2.5 py-1") : "border border-dashed border-[#dadde3] bg-[rgba(255,255,255,0.62)] text-[#a1a1aa] hover:border-[#c7c7cc] hover:bg-[#fafafa]")} style={entry ? getTimetableEntryStyle(entry.colorKey) : undefined} onClick={() => handleOpenCourseEditor(entry, slot)}>
-                    {entry ? <span className={cn("flex h-full flex-col items-center justify-center text-center", isCompact ? "min-h-[36px]" : "min-h-[40px]")}><span className={cn("max-w-full truncate font-semibold leading-snug tracking-[-0.01em] text-inherit", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.title}</span><span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-80", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.room || entry.teacher}</span>{entry.memo ? <span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-60", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.memo}</span> : null}</span> : <span className="flex h-full items-center justify-center text-center text-[18px] font-light leading-none">＋</span>}
+                    {entry ? <span className={cn("flex h-full flex-col items-center justify-center text-center", isCompact ? "min-h-[36px]" : "min-h-[40px]")}><span className={cn("max-w-full truncate font-semibold leading-snug tracking-[-0.01em] text-inherit", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.title}</span><span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-80", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.room || entry.teacher}</span>{entry.memo ? <span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-60", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.memo}</span> : null}</span> : <span className="flex h-full items-center justify-center text-center"><Plus className="h-5 w-5" aria-hidden="true" /></span>}
                   </button>
                 );
               })}
@@ -276,18 +270,12 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
           ))}
         </div>
       </div>
-      {editingSlot ? <CalendarTimetableCourseEditor course={editingCourse} semesterId={activeSemesterId} initialSlot={editingSlot} periods={periods} visibleDayCount={visibleDayCount} onSave={saveCourse} onDelete={deleteCourse} onClose={handleCloseCourseEditor} /> : null}
+      {isCourseEditorOpen ? <CalendarTimetableCourseEditor course={editingCourse} semesterId={activeSemesterId} initialSlot={editingSlot} periods={periods} visibleDayCount={visibleDayCount} onSave={saveCourse} onDelete={deleteCourse} onClose={handleCloseCourseEditor} /> : null}
       {isSettingsOpen ? <CalendarTimetableSettingsPanel periods={periods} visibleDayCount={visibleDayCount} onChangeVisibleDayCount={updateVisibleDayCount} onAddPeriod={addPeriod} onUpdatePeriod={updatePeriod} onDeletePeriod={deletePeriod} onClose={handleCloseSettings} /> : null}
       {isSyllabusCatalogOpen ? <CalendarTimetableSyllabusCatalogPanel activeSemesterId={activeSemesterId} institutions={institutions} periods={periods} syllabusCourses={syllabusCourses} onSearch={searchSyllabusCourses} onSaveSyllabusCourse={saveSyllabusCourse} onAddCourseFromSyllabus={addCourseFromSyllabus} onClose={handleCloseSyllabusCatalog} /> : null}
     </div>
   );
 };
-
-
-
-
-
-
 
 const CalendarTimetableView = memo(CalendarTimetableViewComponent);
 
