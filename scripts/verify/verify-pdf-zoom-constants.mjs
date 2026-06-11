@@ -48,6 +48,15 @@ const findFirstViolation = (source, rule) => {
   };
 };
 
+const isSharedConstantDefined = (source, constantName) => new RegExp(`\\bconst\\s+${constantName}\\s*=`).test(source);
+
+const isSharedConstantExported = (source, constantName) => {
+  const directExportPattern = new RegExp(`export\\s+const\\s+${constantName}\\s*=`);
+  const namedExportPattern = new RegExp(`export\\s*\\{[^}]*\\b${constantName}\\b[^}]*\\}`);
+
+  return directExportPattern.test(source) || namedExportPattern.test(source);
+};
+
 const pdfPaneSource = readFileSync(PDF_PANE_PATH, "utf8");
 const pdfZoomConstantsSource = readFileSync(PDF_ZOOM_CONSTANTS_PATH, "utf8");
 
@@ -59,9 +68,12 @@ const violations = FORBIDDEN_LOCAL_DEFINITIONS.flatMap((rule) => {
 });
 
 for (const constantName of REQUIRED_SHARED_CONSTANTS) {
-  const pattern = new RegExp(`export\\s+const\\s+${constantName}\\b`);
-  if (!pattern.test(pdfZoomConstantsSource)) {
-    violations.push(`src/features/pdf/pdfZoom.constants.ts:1 Missing shared PDF zoom constant: ${constantName}.`);
+  if (!isSharedConstantDefined(pdfZoomConstantsSource, constantName)) {
+    violations.push(`src/features/pdf/pdfZoom.constants.ts:1 Missing shared PDF zoom constant definition: ${constantName}.`);
+  }
+
+  if (!isSharedConstantExported(pdfZoomConstantsSource, constantName)) {
+    violations.push(`src/features/pdf/pdfZoom.constants.ts:1 Missing shared PDF zoom constant export: ${constantName}.`);
   }
 }
 
