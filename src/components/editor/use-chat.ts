@@ -34,7 +34,7 @@ type MessageDataPart = { toolName: ToolName;
   comment?: TComment;
   table?: TTableCellUpdate;
 };
-type ChatMessage = UIMessage<{}, MessageDataPart>;
+type ChatMessage = UIMessage<object, MessageDataPart>;
 type Chat = UseChatHelpers<ChatMessage>;
 
 const delay = faker.number.int({ max: 20, min: 5 });

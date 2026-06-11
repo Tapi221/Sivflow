@@ -1030,7 +1030,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         </button>
         <span className="pdf-pane__toolbar-separator" aria-hidden="true" />
         <button className={PDF_TOOLBAR_BUTTON_CLASS_NAME} type="button" onClick={toggleBookmark} disabled={!isReady} aria-pressed={toolbarState.isBookmarked} aria-label={toolbarState.isBookmarked ? "ブックマークを解除" : "ブックマークを追加"}>
-          <StratisOptionalIcon names={STRATIS_BOOKMARK_ICON_NAMES} active={toolbarState.isBookmarked} className={cn("h-4 w-4", toolbarState.isBookmarked ? "fill-current" : "fill-none")} />
+          {StratisBookmarkIcon ? <StratisBookmarkIcon className={cn("h-4 w-4", toolbarState.isBookmarked ? "fill-current" : "fill-none")} aria-hidden="true" focusable="false" /> : <StratisFallbackBookmarkIcon className={cn("h-4 w-4", toolbarState.isBookmarked ? "fill-current" : "fill-none")} active={toolbarState.isBookmarked} />}
         </button>
         <button className={PDF_TOOLBAR_BUTTON_CLASS_NAME} type="button" onClick={goBackInHistory} disabled={!isReady || (viewerState?.history?.length ?? 0) < 2}>
           戻る

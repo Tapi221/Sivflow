@@ -125,7 +125,7 @@ const MobileViewModeDropdown = ({ value, onChange, options }: MobileViewModeDrop
             return (
               <button key={option.value} type="button" role="menuitemradio" aria-checked={isActive} className={cn("flex w-full items-center justify-between px-4 py-2.5 text-left text-[14px] font-semibold tracking-[-0.02em] transition hover:bg-[#f7f7f7]", isActive ? "text-[#1c1c1e]" : "text-[#6e6e73]")} onClick={() => handleSelect(option.value)}>
                 <span>{option.label}</span>
-                {isActive ? <StratisOptionalIcon names={STRATIS_CHECK_ICON_NAMES} className="h-3 w-3 text-[#8e8e93]" /> : null}
+                {isActive && StratisCheckIcon ? <StratisCheckIcon className="h-3 w-3 text-[#8e8e93]" aria-hidden="true" focusable="false" /> : null}
               </button>
             );
           })}
@@ -227,7 +227,7 @@ const ScheduleScreen = (_props: ScheduleScreenProps) => {
     return <CarvePanel className={MOBILE_SCHEDULE_PANEL_CLASS}>{renderViewHeader(MOBILE_SCHEDULE_HEADER_CLASS)}<div className={cn(MOBILE_SCHEDULE_SURFACE_CLASS, IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={mainCalendarEvents} calendarGridStyle={calendarGridStyle} onScroll={handleCalendarScroll} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} /></div></CarvePanel>;
   };
 
-  return <div ref={contentViewportRef} className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-white text-[#1c1c1e]"><style>{MOBILE_SCHEDULE_STYLE}</style><MobileCalendarSidebar isOpen={isSidebarOpen} onClose={handleCloseSidebar} /><MobileCalendarEventComposer isOpen={isEventComposerOpen} selectedDate={selectedDate} accounts={googleAccountsWithColorOverridesForSidebar} projectCalendarLinks={projectCalendarLinks} onClose={handleCloseEventComposer} onAddCalendar={addGoogleCalendar} onCreateEvent={createGoogleCalendarEvent} /><button type="button" className={MOBILE_ADD_EVENT_BUTTON_CLASS} onClick={handleAddScheduleItem} aria-label="新規予定を追加"><StratisOptionalIcon names={STRATIS_PLUS_ICON_NAMES} className="h-7 w-7" /></button><main className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white p-0">{renderCalendarContent()}</main></div>;
+  return <div ref={contentViewportRef} className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-white text-[#1c1c1e]"><style>{MOBILE_SCHEDULE_STYLE}</style><MobileCalendarSidebar isOpen={isSidebarOpen} onClose={handleCloseSidebar} /><MobileCalendarEventComposer isOpen={isEventComposerOpen} selectedDate={selectedDate} accounts={googleAccountsWithColorOverridesForSidebar} projectCalendarLinks={projectCalendarLinks} onClose={handleCloseEventComposer} onAddCalendar={addGoogleCalendar} onCreateEvent={createGoogleCalendarEvent} /><button type="button" className={MOBILE_ADD_EVENT_BUTTON_CLASS} onClick={handleAddScheduleItem} aria-label="新規予定を追加">{StratisPlusIcon ? <StratisPlusIcon className="h-7 w-7" aria-hidden="true" focusable="false" /> : null}</button><main className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white p-0">{renderCalendarContent()}</main></div>;
 };
 
 export { ScheduleScreen };
