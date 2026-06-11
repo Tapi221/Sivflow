@@ -3,7 +3,11 @@ import { TableCellElementStatic, TableCellHeaderElementStatic, TableElementStati
 
 
 
+
+
 const BaseTableKit = [BaseTablePlugin.withComponent(TableElementStatic), BaseTableRowPlugin.withComponent(TableRowElementStatic), BaseTableCellPlugin.withComponent(TableCellElementStatic), BaseTableCellHeaderPlugin.withComponent(TableCellHeaderElementStatic)];
+
+
 
 
 

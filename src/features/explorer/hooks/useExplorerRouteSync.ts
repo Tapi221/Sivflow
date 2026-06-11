@@ -7,6 +7,8 @@ import type { SelectedExplorerItem } from "@/types";
 
 
 
+
+
 type Params = {
   route: FoldersRouteAdapter;
   isHomeOnlyMode: boolean;
@@ -15,6 +17,8 @@ type Params = {
   selectedItem: SelectedExplorerItem;
   applyRouteState: (next: ExplorerRouteState) => void;
 };
+
+
 
 
 
@@ -151,6 +155,8 @@ const useExplorerRouteSync = ({ route, isHomeOnlyMode, isSectionListMode, select
     selectedItem,
   ]);
 };
+
+
 
 
 

@@ -5,6 +5,8 @@ import { observeElementRect } from "./elementRectObserver";
 
 
 
+
+
 interface ScaleToFitFrameProps { children: React.ReactNode;
   className?: string;
   baseWidth?: number;
@@ -21,7 +23,11 @@ interface ScaleToFitFrameProps { children: React.ReactNode;
 
 
 
+
+
 const CONTENT_HEIGHT_EPSILON_PX = 2;
+
+
 
 
 
@@ -40,6 +46,8 @@ const resolveLogicalHeight = ({
 
   return Math.max(0, visualHeight / safeMeasurementScale);
 };
+
+
 
 
 
@@ -264,7 +272,11 @@ const ScaleToFitFrame = ({ children, className, baseWidth = 480, scaleMultiplier
 
 
 
+
+
 export { ScaleToFitFrame };
+
+
 
 
 export type { ScaleToFitFrameProps };

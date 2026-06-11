@@ -6,6 +6,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 interface UseCardSetViewCardLayoutModeOptions {
   deviceScope: string;
   cardSetId: string | null;
@@ -17,6 +19,8 @@ type CardLayoutModeOverrideState = {
   scopeKey: string;
   mode: CardLayoutMode;
 } | null;
+
+
 
 
 
@@ -76,6 +80,8 @@ const useCardSetViewCardLayoutMode = ({ deviceScope, cardSetId, displayMode, int
     setCurrentCardLayoutMode,
   };
 };
+
+
 
 
 

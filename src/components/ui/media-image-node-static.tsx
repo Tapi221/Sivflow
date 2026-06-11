@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 const ImageElementStatic = (props: SlateElementProps<TImageElement & TCaptionProps & TResizableProps>) => {
   const { align = "center", caption, url, width } = props.element;
 
@@ -39,6 +41,8 @@ const ImageElementStatic = (props: SlateElementProps<TImageElement & TCaptionPro
     </SlateElement>
   );
 };
+
+
 
 
 

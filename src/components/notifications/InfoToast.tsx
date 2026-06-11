@@ -4,10 +4,14 @@ import { Info } from "@/ui/icons";
 
 
 
+
+
 type InfoToastProps = {
   notification: Notification;
   onDismiss: () => void;
 };
+
+
 
 
 
@@ -79,6 +83,8 @@ const InfoToast = ({ notification, onDismiss }: InfoToastProps) => {
     </div>
   );
 };
+
+
 
 
 

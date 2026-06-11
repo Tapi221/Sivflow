@@ -13,6 +13,8 @@ import { resolvePdfDocumentSourceUrl } from "./resolvePdfDocumentSourceUrl";
 
 
 
+
+
 type LocalPdfSourceState = {
   documentId: string;
   isResolved: boolean;
@@ -32,6 +34,8 @@ type PdfSourceResolutionWaiter = <T,>(promise: Promise<T>) => Promise<T>;
 
 
 
+
+
 const PDF_SOURCE_RESOLUTION_TIMEOUT_MS = 15_000;
 const PDF_VIEWER_STATE_SAVE_DEBOUNCE_MS = 800;
 const PDF_VIEWER_STATE_SAVE_RETRY_DELAY_MS = 1_000;
@@ -39,6 +43,8 @@ const PDF_SOURCE_TIMEOUT_ERROR_MESSAGE = "PDFデータの取得がタイムア�
 const PDF_SOURCE_MISSING_ERROR_MESSAGE = "表示できるPDFデータが見つかりません。PDFを再インポートしてください。";
 const PDF_DOCUMENT_PANE_CLASS_NAME = "flex h-full min-h-0 w-full min-w-0 flex-1";
 const PDF_DOCUMENT_STATUS_CLASS_NAME = "flex h-full min-h-0 w-full min-w-0 flex-1 items-center justify-center bg-[var(--carvepanel-surface)] px-6 text-center text-[13px] leading-6 text-[#6d6d6d]";
+
+
 
 
 
@@ -96,6 +102,8 @@ const resolvePreferredPdfBlob = async (document: DocumentItem, currentUserId: st
   if (localBlob) return localBlob;
   return null;
 };
+
+
 
 
 
@@ -275,6 +283,8 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
 
   return <PdfPane source={source} className={paneClassName} viewerState={document.viewerState ?? null} onLoadError={handlePdfLoadError} onViewerStateChange={handleViewerStateChange} />;
 };
+
+
 
 
 

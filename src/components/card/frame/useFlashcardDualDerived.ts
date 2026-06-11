@@ -7,12 +7,16 @@ import { resolveAnswerAttachmentAudios, resolveAnswerAttachmentImages, resolveAn
 
 
 
+
+
 const EMPTY_MEDIA_ITEMS: FlashcardMediaLike[] = [];
 const EMPTY_IMAGE_URLS: string[] = [];
 const EMPTY_AUDIO_URLS: string[] = [];
 const EMPTY_REFERENCES: ReturnType<typeof resolveQuestionAttachmentReferences> =
   [];
 const EMPTY_BLOCKS: ReturnType<typeof resolveSideBlocks> = [];
+
+
 
 
 
@@ -124,6 +128,8 @@ const useFlashcardDualDerived = (cardData: FlashcardCardLike | null | undefined)
     };
   }, [cardData]);
 };
+
+
 
 
 

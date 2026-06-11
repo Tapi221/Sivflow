@@ -5,6 +5,8 @@ import { assertDeletePayload, assertUpsertPayload } from "./syncQueuePayloadGuar
 
 
 
+
+
 const normalizeForStableHash = (value: unknown): unknown => {
   if (value instanceof Date) {
     return { $date: value.toISOString() };
@@ -182,6 +184,8 @@ const createQueueItemFromSyncTask = (task: SyncTask): SyncQueueItem => {
     nextRetryAt: createdAt,
   } as SyncQueueItem;
 };
+
+
 
 
 

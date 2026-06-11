@@ -8,12 +8,16 @@ import { normalizeEditorLanguage } from "./codeBlockLanguage";
 
 
 
+
+
 interface CodeBlockEditorProps {
   value?: CodeBlockData;
   onChange: (value: CodeBlockData) => void;
   className?: string;
   zoom?: number;
 }
+
+
 
 
 
@@ -68,6 +72,8 @@ const pushRecentLang = (lang: string) => {
     // noop
   }
 };
+
+
 
 
 
@@ -187,6 +193,8 @@ const CodeBlockEditor = ({ value, onChange, className, zoom }: CodeBlockEditorPr
     />
   );
 };
+
+
 
 
 

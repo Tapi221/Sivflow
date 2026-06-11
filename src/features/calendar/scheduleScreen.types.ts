@@ -5,6 +5,8 @@ import type { CalendarViewMode, CalendarViewModeSelection } from "./calendar.typ
 
 
 
+
+
 type CalendarProvider = "local" | "google" | "appleEventKit" | "appleCalDav";
 type ProjectCalendarSyncDirection = "importOnly" | "exportOnly" | "twoWay";
 type GoogleCalendarColorOverrideMap = Record<string, string>;

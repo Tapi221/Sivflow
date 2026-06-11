@@ -4,6 +4,8 @@ import { AlertTriangle, Database, X } from "@/ui/icons";
 
 
 
+
+
 const LocalDBStatusBanner = () => {
   const [status, setStatus] = useState(getLocalDBRuntimeStatus());
 
@@ -61,6 +63,8 @@ const LocalDBStatusBanner = () => {
     </div>
   );
 };
+
+
 
 
 

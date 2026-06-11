@@ -2,6 +2,8 @@ import type { GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/
 
 
 
+
+
 type GoogleCalendarEventsState = Map<string, Map<string, GoogleCalendarEvent>>;
 type GoogleCalendarEventsAction = | { type: "UPSERT"; accountId: string; event: GoogleCalendarEvent; }
   | { type: "DELETE"; accountId: string; eventId: string; }
@@ -19,6 +21,8 @@ type GoogleCalendarEventsAction = | { type: "UPSERT"; accountId: string; event: 
     calendars: GoogleCalendarListItem[];
   }
   | { type: "CLEAR_ACCOUNT"; accountId: string; };
+
+
 
 
 
@@ -156,7 +160,11 @@ const selectCombinedSelectedCalendarIds = (accounts: Array<{ selectedCalendarIds
 
 
 
+
+
 export { reduceGoogleCalendarEvents, selectVisibleGoogleCalendarEvents, selectCombinedSelectedCalendarIds };
+
+
 
 
 export type { GoogleCalendarEventsState, GoogleCalendarEventsAction };

@@ -7,6 +7,8 @@ import { useCardSetViewSelectionState } from "./useCardSetViewSelectionState";
 
 
 
+
+
 interface UseCardSetViewViewStateOptions {
   initialIndex: number;
   targetCardId: string | null;
@@ -16,6 +18,8 @@ interface UseCardSetViewViewStateOptions {
   selectedCardSet: CardSet | null;
   deviceScope: string;
 }
+
+
 
 
 
@@ -44,6 +48,8 @@ const useCardSetViewViewState = ({ initialIndex, targetCardId, cardSetId, sorted
     ...cardLayoutModeState,
   };
 };
+
+
 
 
 

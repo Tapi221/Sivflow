@@ -5,6 +5,8 @@ import { clampPaneWidthPx } from "@/components/card/frame/cardPane.constants";
 
 
 
+
+
 type PaneWidthMap<T> = {
   view: T;
   edit: T;
@@ -35,7 +37,11 @@ interface UseCardPaneWidthStateOptions {
 
 
 
+
+
 const DEFAULT_INITIAL_VIEWPORT_WIDTH_PX = 1024;
+
+
 
 
 
@@ -276,6 +282,8 @@ const useCardPaneWidthState = ({ isEditMode, preferredWidths, defaultWidths, min
     resetActivePaneWidth,
   };
 };
+
+
 
 
 

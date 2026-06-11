@@ -5,6 +5,8 @@ import { RightClickPanelSurface } from "./rightClickPanelCommon";
 
 
 
+
+
 type CalendarListMenuAction = { id: "add-project" | "change-color";
   label: string;
   disabled?: boolean;
@@ -21,6 +23,8 @@ type CalendarListMenuProps = {
 
 
 
+
+
 const CALENDAR_LIST_MENU_PANEL_ID = "calendar-list-context-menu";
 const CALENDAR_LIST_MENU_LABELS = [
   "プロジェクトに追加",
@@ -29,6 +33,8 @@ const CALENDAR_LIST_MENU_LABELS = [
 const CALENDAR_LIST_MENU_WIDTH = resolveRightClickPanelTextWidth(CALENDAR_LIST_MENU_LABELS);
 const CALENDAR_LIST_MENU_HEIGHT = CALENDAR_LIST_MENU_LABELS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
 const CALENDAR_LIST_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
+
+
 
 
 
@@ -51,7 +57,11 @@ const CalendarListMenu = ({ x, y, actions, menuRef, noDragStyle, panelId = CALEN
 
 
 
+
+
 export { CALENDAR_LIST_MENU_PANEL_ID, CALENDAR_LIST_MENU_WIDTH, CALENDAR_LIST_MENU_HEIGHT, CALENDAR_LIST_MENU_MARGIN, CalendarListMenu };
+
+
 
 
 export type { CalendarListMenuAction };

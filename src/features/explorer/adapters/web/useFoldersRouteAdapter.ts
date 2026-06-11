@@ -7,6 +7,8 @@ import { getLastSelectedFolderId, setLastSelectedFolderId } from "./explorerStor
 
 
 
+
+
 type FoldersRouteAdapter = { routeKey: string;
   isDesktop: boolean;
   readRouteState: () => ExplorerRouteState;
@@ -15,6 +17,8 @@ type FoldersRouteAdapter = { routeKey: string;
 
   getBaseSearchParams: () => URLSearchParams;
 };
+
+
 
 
 
@@ -101,7 +105,11 @@ const useFoldersRouteAdapter = (): FoldersRouteAdapter => {
 
 
 
+
+
 export { useFoldersRouteAdapter };
+
+
 
 
 export type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";

@@ -4,6 +4,8 @@ import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 
 
 
+
+
 type EditorDraft = { title: string;
   tags: string[];
   isDraft: boolean;
@@ -16,7 +18,11 @@ type EditorDraft = { title: string;
 
 
 
+
+
 const NEW_SENTINEL = "__new__" as const;
+
+
 
 
 
@@ -101,7 +107,11 @@ const shouldAutoOpenEditorForCard = (card: unknown) => {
 
 
 
+
+
 export { makeEmptyCardFaceAttachments, normalizeSelectedCardId, makeNewDraft, sanitizeReferences, normalizeOrderIndex, shouldAutoOpenEditorForCard };
+
+
 
 
 export type { EditorDraft };

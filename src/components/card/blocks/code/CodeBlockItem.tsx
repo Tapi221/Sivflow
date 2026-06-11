@@ -7,6 +7,8 @@ import { CodeBlockEditor } from "./CodeBlockEditor";
 
 
 
+
+
 interface CodeBlockItemProps {
   data: CodeBlockData;
   onChange: (data: CodeBlockData) => void;
@@ -29,6 +31,8 @@ interface CodeBlockItemProps {
 
 
 
+
+
 const areCodeBlockItemPropsEqual = (
   prev: CodeBlockItemProps,
   next: CodeBlockItemProps,
@@ -42,6 +46,8 @@ const areCodeBlockItemPropsEqual = (
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&
   prev.zoom === next.zoom;
+
+
 
 
 
@@ -96,6 +102,8 @@ const CodeBlockItemInner = ({
     </BlockWrapper>
   );
 };
+
+
 
 
 

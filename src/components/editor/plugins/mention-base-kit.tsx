@@ -3,7 +3,11 @@ import { MentionElementStatic } from "@/components/ui/mention-node-static";
 
 
 
+
+
 const BaseMentionKit = [BaseMentionPlugin.withComponent(MentionElementStatic)];
+
+
 
 
 

@@ -3,11 +3,15 @@ import type { CardSyncStatus } from "./cardSyncStatus";
 
 
 
+
+
 type UseCardSyncStatusReporterOptions = Readonly<{
   status: CardSyncStatus;
   onSyncStatusChange?: ((status: CardSyncStatus | null) => void) | null;
   isEnabled?: boolean;
 }>;
+
+
 
 
 
@@ -36,6 +40,8 @@ const useCardSyncStatusReporter = ({ status, onSyncStatusChange = null, isEnable
     return () => onSyncStatusChange(null);
   }, [onSyncStatusChange]);
 };
+
+
 
 
 

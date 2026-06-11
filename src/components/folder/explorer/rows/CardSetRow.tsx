@@ -8,6 +8,8 @@ import { SidebarEntityRow } from "./SidebarEntityRow";
 
 
 
+
+
 type TreeNode = {
   rawId: string;
   name: string;
@@ -44,6 +46,8 @@ interface CardSetRowProps {
   }) => Promise<void>;
   setRowRef: (id: string, node: HTMLElement | null) => void;
 }
+
+
 
 
 
@@ -213,6 +217,8 @@ const CardSetRow = ({ treeNode, style, depth, isOpen, isSelected, toggle, editin
     />
   );
 };
+
+
 
 
 

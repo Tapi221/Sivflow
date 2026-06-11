@@ -6,6 +6,8 @@ import { commonGenerateRules } from "./common";
 
 
 
+
+
 const buildGenerateFreeformPrompt = (messages: ChatMessage[]) => {
   return buildStructuredPrompt({
     examples: [
@@ -141,6 +143,8 @@ const getGeneratePrompt = (editor: SlateEditor, { isSelecting, messages }: { isS
 
   return buildGenerateContextPrompt(editor, messages);
 };
+
+
 
 
 

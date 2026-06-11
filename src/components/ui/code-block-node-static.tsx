@@ -5,6 +5,8 @@ import { SlateElement, SlateLeaf } from "platejs/static";
 
 
 
+
+
 // Syntax highlighting color map for common token types
 const syntaxColors: Record<string, string> = {
   "hljs-addition": "#22863a",
@@ -43,11 +45,15 @@ const syntaxColors: Record<string, string> = {
 
 
 
+
+
 // Convert regular spaces to non-breaking spaces to preserve indentation in Word
 const preserveSpaces = (text: string): string => {
   // Replace regular spaces with non-breaking spaces
   return text.replace(/ /g, "\u00A0");
 };
+
+
 
 
 
@@ -114,6 +120,8 @@ const CodeSyntaxLeafDocx = (props: SlateLeafProps) => {
     </span>
   );
 };
+
+
 
 
 

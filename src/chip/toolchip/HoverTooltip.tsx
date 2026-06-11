@@ -7,6 +7,8 @@ import { TOOLTIP_PRESET_CLASS_NAMES } from "./tooltip.size.desktop";
 
 
 
+
+
 type TooltipSide = "top" | "right" | "bottom" | "left";
 type TooltipAlign = "center" | "start" | "end";
 type TooltipPosition = {
@@ -29,9 +31,13 @@ type HoverTooltipProps = {
 
 
 
+
+
 const HOVER_CAPABLE_MEDIA_QUERY = "(hover: hover) and (pointer: fine)";
 const TOOLTIP_ARROW_BORDER_CLASS_NAME = "border-[rgba(0,0,0,0.12)]";
 const TOOLTIP_ARROW_SURFACE_CLASS_NAME = "absolute -z-10 rotate-45 rounded-[2px]";
+
+
 
 
 
@@ -165,6 +171,8 @@ const getArrowClassName = (side: TooltipSide, align: TooltipAlign) => {
 
 
 
+
+
 const HoverTooltip = ({ label, children, side = "top", align = "center", offset = 8, className, tooltipClassName, arrowClassName, size, preset, disabled = false }: HoverTooltipProps) => {
   const anchorRef = useRef<HTMLDivElement | null>(null);
   const [canUseHoverTooltip, setCanUseHoverTooltip] = useState(getCanUseHoverTooltip);
@@ -283,6 +291,8 @@ const HoverTooltip = ({ label, children, side = "top", align = "center", offset 
     </>
   );
 };
+
+
 
 
 

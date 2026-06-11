@@ -3,6 +3,8 @@ import { AnimatedCheckboxBase } from "./AnimatedCheckboxBase";
 
 
 
+
+
 type AnimatedOutlineCheckboxProps = Omit<
   AnimatedCheckboxBaseProps,
   "shape" | "variant" | "indeterminate"
@@ -10,9 +12,13 @@ type AnimatedOutlineCheckboxProps = Omit<
 
 
 
+
+
 const AnimatedOutlineCheckbox = (props: AnimatedOutlineCheckboxProps) => {
   return <AnimatedCheckboxBase {...props} shape="square" variant="outline" />;
 };
+
+
 
 
 

@@ -9,6 +9,8 @@ import { makeNewDraft, normalizeSelectedCardId, shouldAutoOpenEditorForCard } fr
 
 
 
+
+
 type UseCardEditorSessionParams = {
   selectedCardId: string | null;
   selectedCardSnapshot?: Card | null;
@@ -39,6 +41,8 @@ type FlushDraftOptions = {
   exitEditing?: boolean;
   showSuccessToast?: boolean;
 };
+
+
 
 
 
@@ -709,6 +713,8 @@ const useCardEditorSession = ({ selectedCardId, selectedCardSnapshot = null, res
     panelCard,
   };
 };
+
+
 
 
 

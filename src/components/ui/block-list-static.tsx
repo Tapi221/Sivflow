@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 const config: Record<
   string,
   {
@@ -19,6 +21,8 @@ const config: Record<
     Marker: TodoMarkerStatic,
   },
 };
+
+
 
 
 
@@ -82,6 +86,8 @@ const BlockListStatic: RenderStaticNodeWrapper = (props) => {
 
   return (props) => <List {...props} />;
 };
+
+
 
 
 

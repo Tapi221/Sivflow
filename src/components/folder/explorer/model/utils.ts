@@ -5,6 +5,8 @@ import { toMillis } from "@/utils/toMillis";
 
 
 
+
+
 type FolderTreeNode = { id?: string;
   folderId?: string;
   parentFolderId?: string | null;
@@ -25,12 +27,16 @@ type FolderTreeNode = { id?: string;
 
 
 
+
+
 const ROOT_FOLDER_ID = "";
 const DEFAULT_NEW_PROJECT_NAME = "新規プロジェクト";
 const DEFAULT_NEW_FOLDER_NAME = "新規フォルダ";
 const DEFAULT_NEW_CARD_SET_NAME = "新規カードセット";
 const UNTITLED_PROJECT_NAME = "無題のプロジェクト";
 const UNTITLED_FOLDER_NAME = "無題のフォルダ";
+
+
 
 
 
@@ -63,8 +69,12 @@ const extractPdfFiles = (fileList: FileList | null): File[] => {
 
 
 
+
+
 export { hasOpenModalDialog };
 export { ROOT_FOLDER_ID, DEFAULT_NEW_PROJECT_NAME, DEFAULT_NEW_FOLDER_NAME, DEFAULT_NEW_CARD_SET_NAME, UNTITLED_PROJECT_NAME, UNTITLED_FOLDER_NAME, getFolderId, getParentFolderId, normalizeFolderId, isSameFolder, getEntityTime, createOptimisticId, createDocumentId, buildStoragePath, isTextInputTarget, isFileDragEvent, extractPdfFiles };
+
+
 
 
 export type { Card, DocumentItem };

@@ -6,6 +6,8 @@ import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 
 
 
+
+
 interface SecurityContextType {
   securityState: SecurityState;
   dismissSecurityAlert: (alertId: string) => Promise<void>;
@@ -13,6 +15,8 @@ interface SecurityContextType {
 interface SecurityProviderProps {
   children: ReactNode;
 }
+
+
 
 
 
@@ -28,9 +32,13 @@ const SecurityContext = createContext<SecurityContextType>({
 
 
 
+
+
 const useSecurity = () => {
   return useContext(SecurityContext);
 };
+
+
 
 
 
@@ -91,6 +99,8 @@ const SecurityProvider = ({ children }: SecurityProviderProps) => {
     </SecurityContext.Provider>
   );
 };
+
+
 
 
 

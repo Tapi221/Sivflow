@@ -3,7 +3,11 @@ import { cloneInkDocument, createEmptyInkDocument, normalizeInkDocument } from "
 
 
 
+
+
 const INK_STORAGE_PREFIX = "ink:";
+
+
 
 
 
@@ -71,6 +75,8 @@ const resolveInkDocument = (cardId: string | null | undefined, side: InkSide, ca
 
   return cloneInkDocument(resolved);
 };
+
+
 
 
 

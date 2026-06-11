@@ -6,6 +6,8 @@ import type { InkHistoryState, InkLayerHandle } from "@/components/ink/inkLayer.
 
 
 
+
+
 interface UseFlashcardInkOptions {
   cardId: string | null;
   effectiveIsFlipped: boolean;
@@ -24,6 +26,8 @@ interface FlashcardInkResult { previewInkRef: React.RefObject<InkLayerHandle | n
   shouldMountInkLayer: boolean;
   handleInkDocumentChange: (side: "question" | "answer", nextDocument: InkDocument) => void;
 }
+
+
 
 
 
@@ -152,7 +156,11 @@ const useFlashcardInk = ({ cardId, effectiveIsFlipped, showInkLayer, inkEditingE
 
 
 
+
+
 export { useFlashcardInk };
+
+
 
 
 export type { FlashcardInkResult };

@@ -4,6 +4,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 type WidthControlViewModel = { modeLabel: string;
   value: number;
   min: number;
@@ -15,6 +17,8 @@ type WidthControlViewModel = { modeLabel: string;
   onStepUp: () => void;
   onReset: () => void;
 };
+
+
 
 
 
@@ -62,7 +66,11 @@ const buildWidthControl = ({ isDesktop, isGlobalEditing, activePaneWidthPx, acti
 
 
 
+
+
 export { resolveDisplayModeLabels, buildWidthControl };
+
+
 
 
 export type { WidthControlViewModel };

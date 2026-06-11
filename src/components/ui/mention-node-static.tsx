@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 const MentionElementStatic = (props: SlateElementProps<TMentionElement> & { prefix?: string;
 }) => {
   const { prefix } = props;
@@ -35,6 +37,8 @@ const MentionElementStatic = (props: SlateElementProps<TMentionElement> & { pref
     </SlateElement>
   );
 };
+
+
 
 
 

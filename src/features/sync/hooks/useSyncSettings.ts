@@ -7,6 +7,8 @@ import { DEFAULT_SYNC_SETTINGS } from "@/types";
 
 
 
+
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 const normalizeSyncSettings = (value: unknown): SyncSettings => {
@@ -71,6 +73,8 @@ const useSyncSettings = () => {
 
   return { settings, loading, updateSettings, reloadSettings: loadSettings };
 };
+
+
 
 
 

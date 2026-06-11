@@ -4,11 +4,15 @@ import { normalizeExtraRows } from "@/domain/card/extraRows";
 
 
 
+
+
 type CardLike = Partial<Record<string, unknown>>;
 type CardFaceSide = "question" | "answer";
 type ResolveCardShapeOptions = {
   emptyInkAsNull?: boolean;
 };
+
+
 
 
 
@@ -76,6 +80,8 @@ const resolveExtraRowsFromCardData = (value: CardLike, side: CardFaceSide) => {
 const normalizeCardFolderId = (value: unknown): string => {
   return typeof value === "string" ? value.trim() : "";
 };
+
+
 
 
 

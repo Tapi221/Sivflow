@@ -3,7 +3,11 @@ import { ColumnElementStatic, ColumnGroupElementStatic } from "@/components/ui/c
 
 
 
+
+
 const BaseColumnKit = [BaseColumnPlugin.withComponent(ColumnGroupElementStatic), BaseColumnItemPlugin.withComponent(ColumnElementStatic)];
+
+
 
 
 

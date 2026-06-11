@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 const TableElementStatic = ({ children, ...props }: SlateElementProps<TTableElement>) => {
   const { disableMarginLeft } = props.editor.getOptions(BaseTablePlugin);
   const marginLeft = disableMarginLeft ? 0 : props.element.marginLeft;
@@ -82,6 +84,8 @@ const TableCellElementStatic = ({ isHeader, ...props }: SlateElementProps<TTable
 const TableCellHeaderElementStatic = (props: SlateElementProps<TTableCellElement>) => {
   return <TableCellElementStatic {...props} isHeader />;
 };
+
+
 
 
 

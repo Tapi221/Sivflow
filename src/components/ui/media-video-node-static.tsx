@@ -6,6 +6,8 @@ import { SlateElement } from "platejs/static";
 
 
 
+
+
 const VideoElementStatic = (props: SlateElementProps<TVideoElement & TCaptionElement & TResizableProps>) => {
   const { align = "center", caption, url, width } = props.element;
 
@@ -28,6 +30,8 @@ const VideoElementStatic = (props: SlateElementProps<TVideoElement & TCaptionEle
     </SlateElement>
   );
 };
+
+
 
 
 

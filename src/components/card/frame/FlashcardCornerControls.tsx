@@ -8,6 +8,8 @@ import type { FlashcardCardLike, FlashcardMediaLike } from "./flashcard.types";
 
 
 
+
+
 interface FlashcardCornerControlsProps {
   card: FlashcardCardLike;
   hasUncertainty: boolean;
@@ -26,6 +28,8 @@ interface FlashcardCornerControlsProps {
 interface FlashcardCornerControlsResult { actionsTopLeft: React.ReactNode[] | undefined;
   actionsTopRight: React.ReactNode[] | undefined;
 }
+
+
 
 
 
@@ -227,7 +231,11 @@ const useFlashcardCornerControls = ({ card, hasUncertainty, isBookmarked, active
 
 
 
+
+
 export { useFlashcardCornerControls };
+
+
 
 
 export type { FlashcardCornerControlsResult };

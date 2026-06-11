@@ -4,6 +4,8 @@ import { getLocalDb } from "@/services/localDB";
 
 
 
+
+
 const useSelectedExplorerDocument = (documentId: string | null) => {
   const { currentUser } = useAuthSession();
 
@@ -30,6 +32,8 @@ const useSelectedExplorerDocument = (documentId: string | null) => {
     loading: Boolean(documentId) && document === undefined,
   };
 };
+
+
 
 
 

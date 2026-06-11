@@ -8,6 +8,8 @@ import { recognizeSelectionCaptureText } from "@/features/selection-capture/sele
 
 
 
+
+
 type PdfSelectionCaptureTargetRef = {
   readonly current: HTMLElement | null;
 };
@@ -25,7 +27,11 @@ type UsePdfSelectionCaptureResult = {
 
 
 
+
+
 const PDF_SELECTION_CAPTURE_MESSAGE_TIMEOUT_MS = 1800;
+
+
 
 
 
@@ -85,7 +91,11 @@ const usePdfSelectionCapture = ({ targetRef, selectionCaptureSide, sourceUnavail
 
 
 
+
+
 export { usePdfSelectionCapture };
+
+
 
 
 export type { UsePdfSelectionCaptureParams, UsePdfSelectionCaptureResult };

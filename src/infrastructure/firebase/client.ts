@@ -11,6 +11,8 @@ import { getStorage } from "firebase/storage";
 
 
 
+
+
 type FirebaseClientState = {
   app: FirebaseApp | null;
   auth: Auth | null;
@@ -18,6 +20,8 @@ type FirebaseClientState = {
   functionsClient: Functions | null;
   firestoreDb: Firestore | null;
 };
+
+
 
 
 
@@ -46,6 +50,8 @@ const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
 const db: Firestore | null = firebaseClientState.firestoreDb;
 const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
 const firebaseClientState = initializeFirebaseClient();
+
+
 
 
 
@@ -168,6 +174,8 @@ const debugFirebase = (): void => {
 if (import.meta.env.DEV) {
   debugFirebase();
 }
+
+
 
 
 

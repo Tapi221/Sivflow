@@ -5,7 +5,11 @@ import { toDateKey } from "./calendarKey";
 
 
 
+
+
 type CalendarEventMap = Map<string, GoogleCalendarEvent[]>;
+
+
 
 
 
@@ -34,7 +38,11 @@ const useCalendarEventMap = (visibleEvents: GoogleCalendarEvent[]): CalendarEven
 
 
 
+
+
 export { useCalendarEventMap };
+
+
 
 
 export type { CalendarEventMap };

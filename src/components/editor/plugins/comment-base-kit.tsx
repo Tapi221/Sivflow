@@ -3,7 +3,11 @@ import { CommentLeafStatic } from "@/components/ui/comment-node-static";
 
 
 
+
+
 const BaseCommentKit = [BaseCommentPlugin.withComponent(CommentLeafStatic)];
+
+
 
 
 

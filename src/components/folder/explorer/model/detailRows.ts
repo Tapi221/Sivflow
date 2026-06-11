@@ -5,6 +5,8 @@ import { getEntityTime, getFolderId, getParentFolderId, normalizeFolderId } from
 
 
 
+
+
 type ExplorerDetailRowKind = "folder" | "cardSet" | "card" | "document";
 type ExplorerDetailLocalSyncState = | "pending" | "synced" | "error" | "conflict";
 type ExplorerDetailRow = { key: string;
@@ -49,7 +51,11 @@ type LegacyEntityFields = {
 
 
 
+
+
 const EXPLORER_ROOT_PATH_SEGMENTS = ["ホーム", "エクスプローラー"];
+
+
 
 
 
@@ -398,7 +404,11 @@ const buildExplorerDetailRows = ({ folders, cards, cardSets, documents, currentF
 
 
 
+
+
 export { buildExplorerDetailRows };
+
+
 
 
 export type { ExplorerDetailRowKind, ExplorerDetailLocalSyncState, ExplorerDetailRow };

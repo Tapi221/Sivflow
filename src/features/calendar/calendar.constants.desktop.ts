@@ -36,7 +36,11 @@ const MIN_LAYOUT_MINUTES = Math.ceil((MIN_EVENT_DISPLAY_HEIGHT_PX / DEFAULT_HOUR
 
 
 
+
+
 const createInitialMonthOffsetRange = () => ({ startOffset: -INITIAL_MONTH_BUFFER, endOffset: INITIAL_MONTH_BUFFER });
+
+
 
 
 

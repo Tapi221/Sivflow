@@ -3,7 +3,11 @@ import { clampCardCarouselIndex } from "@/features/review/domain/cardCarouselInd
 
 
 
+
+
 type CardCarouselScrollBehavior = ScrollBehavior | "instant";
+
+
 
 
 
@@ -139,6 +143,8 @@ const useCardCarousel3DWebBridge = ({ activeIndex, itemCount, itemSpan, scrollDe
     updateStageHeight,
   };
 };
+
+
 
 
 

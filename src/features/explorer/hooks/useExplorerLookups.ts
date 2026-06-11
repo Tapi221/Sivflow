@@ -6,12 +6,16 @@ import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
 
 
+
+
 type Params = {
   folders: Folder[];
   cards: Card[];
   documents: DocumentItem[];
   selectedItem: SelectedExplorerItem;
 };
+
+
 
 
 
@@ -40,6 +44,8 @@ const useExplorerLookups = ({ folders, cards, documents, selectedItem }: Params)
     ...selectedState,
   };
 };
+
+
 
 
 
