@@ -79,6 +79,8 @@ const normalizeImportBlankLines = (source) => {
 
 const isImportStatement = (statement) => ts.isImportDeclaration(statement) || ts.isImportEqualsDeclaration(statement);
 
+const isExportStatement = (statement) => ts.isExportDeclaration(statement) || ts.isExportAssignment(statement);
+
 const isDirectiveStatement = (statement) => ts.isExpressionStatement(statement) && ts.isStringLiteral(statement.expression);
 
 const isIdentifierNamed = (expression, name) => ts.isIdentifier(expression) && expression.text === name;
@@ -138,7 +140,7 @@ const isComponentVariableStatement = (statement) => statement.declarationList.de
 
 const getStatementOrderCategory = (statement) => {
   if (isImportStatement(statement)) return "import";
-  if (ts.isExportDeclaration(statement) || ts.isExportAssignment(statement)) return "postComponent";
+  if (isExportStatement(statement)) return "postComponent";
   if (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement) || ts.isModuleDeclaration(statement)) return "type";
   if (isDisplayNameAssignment(statement)) return "postComponent";
   if (ts.isClassDeclaration(statement)) return statement.name && isPascalCaseName(statement.name.text) && containsJsx(statement) ? "component" : "helper";
@@ -289,6 +291,8 @@ const getTopLevelSpacingText = (filePath, source, previousStatement, statement) 
   if (isImportStatement(previousStatement) && isImportStatement(statement)) return newline;
   if (!shouldFixBlockSpacing(filePath)) return null;
   if (isDirectiveStatement(previousStatement) || isDirectiveStatement(statement)) return null;
+  if (isExportStatement(previousStatement) && isExportStatement(statement)) return newline;
+  if (isExportStatement(statement)) return `${newline}${newline}`;
 
   const previousCategory = getStatementOrderCategory(previousStatement);
   const category = getStatementOrderCategory(statement);
