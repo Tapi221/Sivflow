@@ -5,8 +5,6 @@ type LocalAiSettings = { enabled: boolean;
   model: string;
 };
 
-
-
 const LOCAL_AI_SETTINGS_STORAGE_KEY = "sivflow.localAiSettings.v1";
 const DEFAULT_LOCAL_AI_SETTINGS: LocalAiSettings = {
   enabled: true,
@@ -14,8 +12,6 @@ const DEFAULT_LOCAL_AI_SETTINGS: LocalAiSettings = {
   baseUrl: "http://127.0.0.1:11434",
   model: "llama3.2:3b",
 };
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 const normalizeBaseUrl = (value: unknown): string => {
@@ -65,9 +61,5 @@ const setLocalAiSettings = (settings: LocalAiSettings): LocalAiSettings => {
   return nextSettings;
 };
 
-
-
 export { getDefaultLocalAiSettings, getLocalAiSettings, setLocalAiSettings };
-
-
 export type { LocalAiProvider, LocalAiSettings };

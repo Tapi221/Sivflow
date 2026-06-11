@@ -8,10 +8,6 @@ import type { Card, CardPatch, CardSet, SubjectiveScoreValue, UserSettings } fro
 import { normalizeMemoryStability } from "@/utils/reviewUtils";
 import type { PracticeFilterRating } from "./usePracticeMode";
 
-
-
-
-
 type StudySessionRating = PracticeFilterRating;
 type StudySessionResult = { cardId: string;
   rating: StudySessionRating;
@@ -51,20 +47,12 @@ type Params = {
   createLevelHistoryMutation: MutationLike<Record<string, unknown>>;
 };
 
-
-
-
-
 const SCORE_TO_RATING: Record<SubjectiveScoreValue, StudySessionRating> = {
   0: "forgot",
   1: "vague",
   2: "remembered",
   3: "easy",
 };
-
-
-
-
 
 const createSessionId = () => {
   if (
@@ -227,13 +215,5 @@ const useStudySession = ({ studyCards, cardSets = [], updateCard, currentUser, s
   };
 };
 
-
-
-
-
 export { useStudySession };
-
-
-
-
 export type { StudySessionRating, StudySessionResult };

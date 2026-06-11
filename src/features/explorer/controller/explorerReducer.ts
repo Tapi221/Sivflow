@@ -5,10 +5,6 @@ import type { SelectedExplorerItem } from "@/types";
 import type { ExplorerAction } from "./explorerActionTypes";
 import { resetBreadcrumbContext } from "./explorerState";
 
-
-
-
-
 const shouldClearSelectionFolder = (item: SelectedExplorerItem) =>
   item?.type === "gallery" ||
   item?.type === "calendar" ||
@@ -191,9 +187,5 @@ const explorerReducer = (state: ExplorerControllerState, action: ExplorerAction)
       return state;
   }
 };
-
-
-
-
 
 export { explorerReducer };

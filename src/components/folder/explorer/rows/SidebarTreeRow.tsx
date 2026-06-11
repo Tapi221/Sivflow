@@ -5,10 +5,6 @@ import type { MenuAction } from "@/components/folder/components/menus/menuAction
 import { useContextMenuAnchor } from "@/components/folder/components/menus/useContextMenuAnchor";
 import { cn } from "@/lib/utils";
 
-
-
-
-
 interface SidebarTreeRowProps {
   menuOpen: boolean;
   onMenuOpenChange: (open: boolean) => void;
@@ -23,10 +19,6 @@ interface SidebarTreeRowProps {
   onContextMenuSelect?: () => void;
   children: React.ReactNode;
 }
-
-
-
-
 
 const SidebarTreeRow = ({ menuOpen, onMenuOpenChange, menuActions = [], hasContextMenu = false, contextMenuVariant = "default", isEditing = false, isDimmed = false, isDraggingOver = false, style, className, onContextMenuSelect, children }: SidebarTreeRowProps) => {
   const { anchorPoint, handleContextMenu, resetAnchor } = useContextMenuAnchor();
@@ -142,9 +134,5 @@ const SidebarTreeRow = ({ menuOpen, onMenuOpenChange, menuActions = [], hasConte
     </div>
   );
 };
-
-
-
-
 
 export { SidebarTreeRow };

@@ -1,10 +1,6 @@
 const MF_DECK_FILE_EXTENSION = ".mfdeck";
 const CARD_SET_SUFFIX_PATTERN = /\s*セット$/u;
 
-
-
-
-
 const stripMfDeckExtension = (value: string) => {
   return value.replace(/\.mfdeck$/iu, "").trim();
 };
@@ -19,9 +15,5 @@ const formatCardSetFileDisplayName = (rawName: string | null | undefined) => {
 
   return `${baseName}${MF_DECK_FILE_EXTENSION}`;
 };
-
-
-
-
 
 export { stripMfDeckExtension, stripCardSetDisplaySuffix, formatCardSetFileDisplayName };

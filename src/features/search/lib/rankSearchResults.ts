@@ -1,10 +1,6 @@
 import type { SearchItem } from "@/features/search/model/search.types";
 import { toMillis } from "@/utils/toMillis";
 
-
-
-
-
 type RankSearchResultsParams = {
   items: SearchItem[];
   query: string;
@@ -15,10 +11,6 @@ type RankedSearchItem = {
   score: number;
   timestampMillis: number;
 };
-
-
-
-
 
 const normalizeText = (value: string) => {
   return value.normalize("NFKC").trim().toLocaleLowerCase("ja-JP");
@@ -202,9 +194,5 @@ const rankSearchResults = ({ items, query, limit = 24 }: RankSearchResultsParams
     .slice(0, limit)
     .map(({ item }) => item);
 };
-
-
-
-
 
 export { rankSearchResults };

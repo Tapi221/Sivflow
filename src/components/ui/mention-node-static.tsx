@@ -6,10 +6,6 @@ import { SlateElement } from "platejs/static";
 import { inlineSuggestionVariants } from "@/lib/suggestion";
 import { cn } from "@/lib/utils";
 
-
-
-
-
 const MentionElementStatic = (props: SlateElementProps<TMentionElement> & { prefix?: string;
 }) => {
   const { prefix } = props;
@@ -37,9 +33,5 @@ const MentionElementStatic = (props: SlateElementProps<TMentionElement> & { pref
     </SlateElement>
   );
 };
-
-
-
-
 
 export { MentionElementStatic };

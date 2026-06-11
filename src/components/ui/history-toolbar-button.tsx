@@ -1,14 +1,9 @@
 "use client";
 
 import * as React from "react";
-
 import { Redo2Icon, Undo2Icon } from "lucide-react";
-
 import { useEditorRef, useEditorSelector } from "platejs/react";
-
 import { ToolbarButton } from "./toolbar";
-
-
 
 const RedoToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => {
   const editor = useEditorRef();
@@ -29,7 +24,6 @@ const RedoToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) =>
     </ToolbarButton>
   );
 };
-
 const UndoToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => {
   const editor = useEditorRef();
   const disabled = useEditorSelector(
@@ -49,7 +43,5 @@ const UndoToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) =>
     </ToolbarButton>
   );
 };
-
-
 
 export { RedoToolbarButton, UndoToolbarButton };
