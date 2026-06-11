@@ -1,5 +1,5 @@
 import { PDFViewer } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
-import { PDF_TRACKPAD_ZOOM_SENSITIVITY, PDF_ZOOM_MAX_SCALE, PDF_ZOOM_MIN_SCALE, PDF_ZOOM_STEP } from "./pdfZoom.constants";
+import { PDF_TRACKPAD_ZOOM_SENSITIVITY, PDF_ZOOM_MAX_SCALE, PDF_ZOOM_MIN_SCALE, PDF_ZOOM_SCALE_EPSILON, PDF_ZOOM_STEP } from "./pdfZoom.constants";
 import { computeNextScaleFromWheel, resolveTrackpadDeltaYForScaleRatio } from "./pdfZoom.utils";
 
 type PatchedPdfViewerConstructor = typeof PDFViewer & {
@@ -91,7 +91,7 @@ const handlePdfWheelZoomCapture = (event: WheelEvent): void => {
 
   const currentScale = getPdfZoomScale(pdfViewer);
   const nextScale = computeNextScaleFromWheel({ currentScale, deltaY: getNormalizedPdfWheelDeltaY(event, container), zoomStep: PDF_ZOOM_STEP, minScale: PDF_ZOOM_MIN_SCALE, maxScale: PDF_ZOOM_MAX_SCALE });
-  if (nextScale === null || Math.abs(nextScale - currentScale) < 0.001) return;
+  if (nextScale === null || Math.abs(nextScale - currentScale) < PDF_ZOOM_SCALE_EPSILON) return;
 
   const deltaY = resolveTrackpadDeltaYForScaleRatio({ scaleRatio: nextScale / currentScale, sensitivity: PDF_TRACKPAD_ZOOM_SENSITIVITY });
   if (deltaY === null) return;
