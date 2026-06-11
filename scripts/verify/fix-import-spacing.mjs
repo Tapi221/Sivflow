@@ -153,6 +153,98 @@ const getStatementOrderCategory = (statement) => {
   return "helper";
 };
 
+const getStatementDeclarationNames = (statement) => {
+  if (ts.isVariableStatement(statement)) return getVariableStatementNames(statement);
+  if ((ts.isClassDeclaration(statement) || ts.isFunctionDeclaration(statement) || ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement)) && statement.name) return [statement.name.text];
+  if (ts.isModuleDeclaration(statement) && ts.isIdentifier(statement.name)) return [statement.name.text];
+
+  return [];
+};
+
+const getExportModifier = (statement) => ts.canHaveModifiers(statement) ? ts.getModifiers(statement)?.find((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword) ?? null : null;
+
+const hasDefaultModifier = (statement) => ts.canHaveModifiers(statement) && Boolean(ts.getModifiers(statement)?.some((modifier) => modifier.kind === ts.SyntaxKind.DefaultKeyword));
+
+const isTypeExportModifierStatement = (statement) => ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement);
+
+const getUniqueNames = (names) => [...new Set(names)];
+
+const getExportModifierRemoval = (source, sourceFile, statement) => {
+  const exportModifier = getExportModifier(statement);
+  if (!exportModifier) return null;
+
+  const start = exportModifier.getStart(sourceFile);
+  const end = source[exportModifier.getEnd()] === " " ? exportModifier.getEnd() + 1 : exportModifier.getEnd();
+  return { end, start, text: "" };
+};
+
+const getExportDeclarationRemoval = (sourceFile, statement) => ({ end: statement.getEnd(), start: statement.getStart(sourceFile), text: "" });
+
+const getStatementText = (source, sourceFile, statement) => source.slice(statement.getStart(sourceFile), statement.getEnd()).trim();
+
+const collectExportConventionReplacements = (source, sourceFile) => {
+  const replacements = [];
+  const valueExportTexts = [];
+  const typeExportTexts = [];
+  const valueNames = [];
+  const typeNames = [];
+
+  for (const statement of sourceFile.statements) {
+    if (ts.isExportDeclaration(statement)) {
+      const exportText = getStatementText(source, sourceFile, statement);
+      if (statement.isTypeOnly) {
+        typeExportTexts.push(exportText);
+      } else {
+        valueExportTexts.push(exportText);
+      }
+      replacements.push(getExportDeclarationRemoval(sourceFile, statement));
+      continue;
+    }
+
+    if (ts.isExportAssignment(statement)) continue;
+    if (!getExportModifier(statement)) continue;
+    if (hasDefaultModifier(statement)) continue;
+
+    const names = getStatementDeclarationNames(statement);
+    if (names.length === 0) continue;
+
+    const removal = getExportModifierRemoval(source, sourceFile, statement);
+    if (!removal) continue;
+
+    replacements.push(removal);
+    if (isTypeExportModifierStatement(statement)) {
+      typeNames.push(...names);
+    } else {
+      valueNames.push(...names);
+    }
+  }
+
+  return { replacements, typeExportTexts, typeNames: getUniqueNames(typeNames), valueExportTexts, valueNames: getUniqueNames(valueNames) };
+};
+
+const buildExportConventionBlock = ({ typeExportTexts, typeNames, valueExportTexts, valueNames }, newline) => {
+  const exportLines = [];
+  exportLines.push(...valueExportTexts);
+  if (valueNames.length > 0) exportLines.push(`export { ${valueNames.join(", ")} };`);
+  exportLines.push(...typeExportTexts);
+  if (typeNames.length > 0) exportLines.push(`export type { ${typeNames.join(", ")} };`);
+
+  return exportLines.length === 0 ? "" : `${newline}${newline}${exportLines.join(newline)}`;
+};
+
+const applyExportConventionFix = (filePath, source) => {
+  if (!shouldFixBlockSpacing(filePath)) return source;
+
+  const sourceFile = createSourceFile(filePath, source);
+  const newline = getNewline(source);
+  const exportConvention = collectExportConventionReplacements(source, sourceFile);
+  if (exportConvention.replacements.length === 0 && exportConvention.typeNames.length === 0 && exportConvention.valueNames.length === 0) return source;
+
+  const sourceWithoutMovedExports = applyNonOverlappingReplacements(source, exportConvention.replacements).trimEnd();
+  const exportBlock = buildExportConventionBlock(exportConvention, newline);
+  return `${sourceWithoutMovedExports}${exportBlock}${newline}`;
+};
+
 const getLeadingWhitespaceText = (source, sourceFile, previousStatement, statement) => source.slice(previousStatement.getEnd(), statement.getStart(sourceFile));
 
 const isCommentOnlyTrivia = (leadingWhitespace) => {
@@ -234,7 +326,8 @@ const applyTopLevelSpacingFix = (filePath, source) => {
 
 const applySourceConventionFix = (filePath, source) => {
   const importNormalizedSource = normalizeImportBlankLines(source);
-  const topLevelNormalizedSource = applyTopLevelSpacingFix(filePath, importNormalizedSource);
+  const exportNormalizedSource = applyExportConventionFix(filePath, importNormalizedSource);
+  const topLevelNormalizedSource = applyTopLevelSpacingFix(filePath, exportNormalizedSource);
 
   return normalizeImportBlankLines(collapseRepeatedBlankLines(topLevelNormalizedSource));
 };
