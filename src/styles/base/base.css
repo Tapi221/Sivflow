@@ -1,7 +1,6 @@
 @layer base {
   :root {
     --app-top-inset: 0px;
-    --app-bg: #f7f5f1;
     --app-bg-dot: rgba(148, 163, 184, 0.18);
     --app-bg-dot-size: 0.75px;
     --app-bg-dot-gap: 14px;
@@ -44,14 +43,8 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: geometricPrecision;
-    background-color: var(--app-bg);
-    background-image: radial-gradient(
-      circle at var(--app-bg-dot-size) var(--app-bg-dot-size),
-      var(--app-bg-dot) var(--app-bg-dot-size),
-      transparent var(--app-bg-dot-size)
-    );
-    background-size: var(--app-bg-dot-gap) var(--app-bg-dot-gap);
-    background-position: 0 0;
+    background-color: #ffffff;
+    background-image: none;
   }
 
   [data-card-text-selectable="true"],
@@ -117,7 +110,7 @@
   }
 
   .workspace-surface--dotted {
-    background-color: var(--app-bg);
+    background-color: #ffffff;
     background-image: radial-gradient(
       circle at var(--app-bg-dot-size) var(--app-bg-dot-size),
       var(--app-bg-dot) var(--app-bg-dot-size),
