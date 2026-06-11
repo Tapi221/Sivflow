@@ -104,17 +104,7 @@ const isPdfPerformanceStandaloneRoute = (): boolean => {
   return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "::1";
 };
 
-if (!renderGoogleOAuthCallback()) {
-  createRoot(document.getElementById("root")!).render(
-    <StrictMode>
-      <ErrorBoundary>
-        <AppBootstrap />
-      </ErrorBoundary>
-    </StrictMode>,
-  );
-}
-
-function StartupLogoMark() {
+const StartupLogoMark = () => {
   return (
     <svg className="sivflow-startup-logo h-[236px] w-[236px] overflow-visible" xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Sivflow logo">
       <defs>
@@ -149,18 +139,18 @@ function StartupLogoMark() {
       </g>
     </svg>
   );
-}
+};
 
-function StartupLoadingScreen() {
+const StartupLoadingScreen = () => {
   return (
     <main className="grid min-h-dvh w-full place-items-center bg-white">
       <style>{STARTUP_LOGO_STYLE}</style>
       <StartupLogoMark />
     </main>
   );
-}
+};
 
-function StartupFailureScreen({ message }: StartupFailureScreenProps) {
+const StartupFailureScreen = ({ message }: StartupFailureScreenProps) => {
   return (
     <main className="flex min-h-dvh w-full items-center justify-center bg-white px-6 text-slate-900">
       <section className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -170,9 +160,9 @@ function StartupFailureScreen({ message }: StartupFailureScreenProps) {
       </section>
     </main>
   );
-}
+};
 
-function AppBootstrap() {
+const AppBootstrap = () => {
   const [state, setState] = useState<AppBootstrapState>({ status: "loading" });
 
   useEffect(() => {
@@ -222,4 +212,14 @@ function AppBootstrap() {
 
   const LoadedApp = state.App;
   return <LoadedApp />;
+};
+
+if (!renderGoogleOAuthCallback()) {
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <ErrorBoundary>
+        <AppBootstrap />
+      </ErrorBoundary>
+    </StrictMode>,
+  );
 }
