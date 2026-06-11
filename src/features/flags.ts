@@ -2,15 +2,11 @@ import type { FeatureFlags, LegacyFlagName } from "@platform/feature-flags/featu
 import { DEFAULT_FEATURE_FLAGS, LEGACY_FEATURE_FLAG_MAP } from "@platform/feature-flags/featureFlags.constants";
 import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 
-
-
 const flags = { isEnabled: (name: LegacyFlagName): boolean => {
   return featureFlags.getFlag(LEGACY_FEATURE_FLAG_MAP[name]);
 },
 };
 const featureFlags = new FeatureFlagService();
-
-
 
 class FeatureFlagService {
   private flags: FeatureFlags = { ...DEFAULT_FEATURE_FLAGS };
@@ -83,7 +79,5 @@ class FeatureFlagService {
     return { ...this.flags };
   };
 }
-
-
 
 export { flags };

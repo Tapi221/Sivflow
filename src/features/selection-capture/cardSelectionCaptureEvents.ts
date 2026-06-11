@@ -1,7 +1,5 @@
 import type { SelectionCaptureArea, SelectionCaptureRect } from "./selectionCapture.types";
 
-
-
 type CardSelectionCaptureSide = "question" | "answer";
 type CardSelectionCaptureTaskResult = string | void;
 type CardSelectionCaptureEventPayload = { readonly blob: Blob;
@@ -18,11 +16,7 @@ type DispatchedCardSelectionCaptureEvent = { handled: boolean;
   tasks: Promise<CardSelectionCaptureTaskResult>[];
 };
 
-
-
 const CARD_SELECTION_CAPTURE_EVENT = "sivflow:card-selection-capture";
-
-
 
 const dispatchCardSelectionCaptureEvent = (payload: CardSelectionCaptureEventPayload): DispatchedCardSelectionCaptureEvent => {
   const tasks: Promise<CardSelectionCaptureTaskResult>[] = [];
@@ -50,9 +44,5 @@ const dispatchCardSelectionCaptureEvent = (payload: CardSelectionCaptureEventPay
   };
 };
 
-
-
 export { CARD_SELECTION_CAPTURE_EVENT, dispatchCardSelectionCaptureEvent };
-
-
 export type { CardSelectionCaptureSide, CardSelectionCaptureTaskResult, CardSelectionCaptureEventPayload, CardSelectionCaptureEventDetail, DispatchedCardSelectionCaptureEvent };
