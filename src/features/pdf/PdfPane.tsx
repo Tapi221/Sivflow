@@ -709,6 +709,16 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       clearPdfZoomPreview(container, viewerElement);
     };
 
+    const clearScrollRenderingMode = () => {
+      isScrollActive = false;
+      container.classList.remove(PDF_SCROLLING_CLASS_NAME);
+      viewerElement.classList.remove(PDF_SCROLLING_CLASS_NAME);
+    };
+
+    const isZoomScrollAnchorUpdate = () => {
+      return Boolean(pendingZoom || activeZoomPreview || activeZoomCommit || zoomFrame !== null || zoomCommitTimer !== null);
+    };
+
     const finishActiveZoomCommitIfRendered = () => {
       const zoomCommit = activeZoomCommit;
       if (!zoomCommit) return;
@@ -724,6 +734,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     };
 
     const beginActiveZoomCommit = (): void => {
+      clearScrollRenderingMode();
       const snapshotElement = createPdfZoomSnapshot(container, viewerElement);
       const pageNumbers = getPdfVisiblePageSet(pdfViewer, container, viewerElement);
       activeZoomCommit = { pageNumbers };
@@ -763,6 +774,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
 
         clearActiveZoomPreview();
         clearZoomCommitTimer();
+        clearScrollRenderingMode();
         isApplyingFitScaleRef.current = true;
         applyPdfViewerScaleValueWithAnchor(pdfViewer, container, "page-width", undefined, undefined, () => updateVisiblePageWindow());
       });
@@ -783,12 +795,14 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       }
 
       activeZoomPreview = zoomPreview;
+      clearScrollRenderingMode();
       applyPdfZoomLivePreview(container, viewerElement, zoomPreview);
       setToolbarState((current) => ({ ...current, scale: zoomPreview.scale }));
       scheduleZoomCommit();
     };
 
     const requestZoom = (scale: number, clientX?: number, clientY?: number) => {
+      clearScrollRenderingMode();
       pendingZoom = { scale: clampPdfViewerScale(scale), clientX, clientY };
       if (zoomFrame !== null) return;
       zoomFrame = window.requestAnimationFrame(flushPendingZoomPreview);
@@ -796,6 +810,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
 
     const requestFitWidth = () => {
       if (isCancelled || !loadedPdfDocument || activeZoomCommit) return;
+      clearScrollRenderingMode();
       clearZoomCommitTimer();
       const snapshotElement = createPdfZoomSnapshot(container, viewerElement);
       const pageNumbers = getPdfVisiblePageSet(pdfViewer, container, viewerElement);
@@ -816,13 +831,13 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       recordPdfPerformanceMark(`${performanceTraceName}.scrollActive`, { debugOnly: true });
     };
 
-    const clearScrollRenderingMode = () => {
-      isScrollActive = false;
-      container.classList.remove(PDF_SCROLLING_CLASS_NAME);
-      viewerElement.classList.remove(PDF_SCROLLING_CLASS_NAME);
-    };
-
     const handleScroll = () => {
+      if (isZoomScrollAnchorUpdate()) {
+        clearScrollRenderingMode();
+        updateVisiblePageWindow();
+        return;
+      }
+
       activateScrollRenderingMode();
       updateVisiblePageWindow();
     };
