@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { isCloudStorageStatsOutdated, rebuildCloudStorageStats, subscribeToCloudStorageStats } from "@/services/cloudStorageStatsService";
 import type { CloudStorageStats } from "@/types";
 
+
+
 type UseCloudStorageStatsResult = {
   stats: CloudStorageStats | null;
   loading: boolean;
@@ -9,6 +11,8 @@ type UseCloudStorageStatsResult = {
   rebuilding: boolean;
   refresh: () => Promise<void>;
 };
+
+
 
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error && error.message.trim().length > 0) {
@@ -122,5 +126,7 @@ const useCloudStorageStats = (userId: string | null | undefined): UseCloudStorag
     refresh,
   };
 };
+
+
 
 export { useCloudStorageStats };

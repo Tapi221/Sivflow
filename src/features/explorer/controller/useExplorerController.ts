@@ -5,9 +5,13 @@ import type { SelectedExplorerItem } from "@/types";
 import { explorerReducer } from "./explorerReducer";
 import { createInitialExplorerState } from "./explorerState";
 
+
+
 type UseExplorerControllerParams = {
   initialRouteState: ExplorerRouteState;
 };
+
+
 
 const useExplorerController = ({ initialRouteState }: UseExplorerControllerParams) => {
   const [state, dispatch] = useReducer(explorerReducer, initialRouteState, createInitialExplorerState);
@@ -63,5 +67,7 @@ const useExplorerController = ({ initialRouteState }: UseExplorerControllerParam
     [state, actions],
   );
 };
+
+
 
 export { useExplorerController };

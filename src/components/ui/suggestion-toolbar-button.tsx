@@ -1,10 +1,15 @@
 "use client";
 
 import * as React from "react";
+
 import { SuggestionPlugin } from "@platejs/suggestion/react";
+
 import { PencilLineIcon } from "lucide-react";
+
 import { useEditorPlugin, usePluginOption } from "platejs/react";
+
 import { cn } from "@/lib/utils";
+
 import { ToolbarButton } from "./toolbar";
 
 const SuggestionToolbarButton = () => {

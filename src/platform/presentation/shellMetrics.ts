@@ -1,6 +1,10 @@
 import type { PresentationTarget } from "./getPresentationTarget";
 
+
+
 const APP_DESKTOP_TOP_INSET_PX = 44;
+
+
 
 const getAppTopInsetPx = ({ presentationTarget }: { presentationTarget: PresentationTarget;
 }): number => {
@@ -10,5 +14,7 @@ const getAppTopInsetPx = ({ presentationTarget }: { presentationTarget: Presenta
 
   return 0;
 };
+
+
 
 export { APP_DESKTOP_TOP_INSET_PX, getAppTopInsetPx };

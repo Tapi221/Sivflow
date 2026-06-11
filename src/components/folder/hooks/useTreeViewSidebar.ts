@@ -3,6 +3,8 @@ import { WEB_STORAGE_KEYS } from "@platform/storage/webStorageKeys.constants";
 import type { PointerEvent as ReactPointerEvent } from "react";
 import { useTreeViewSidebarHotkey } from "@/features/hotkey/useTreeViewSidebarHotkey";
 
+
+
 const TREE_VIEW_SIDEBAR_TOGGLE_EVENT = "sivflow:treeview-sidebar-toggle";
 const SIDEBAR_WIDTH_LIMITS = {
   min: 260,
@@ -10,6 +12,8 @@ const SIDEBAR_WIDTH_LIMITS = {
   default: 292,
 } as const;
 const SECTION_LIST_PANE_LEFT_VAR = "--sivflow-section-list-pane-left";
+
+
 
 const clampSidebarWidth = (width: number) =>
   Math.min(Math.max(width, SIDEBAR_WIDTH_LIMITS.min), SIDEBAR_WIDTH_LIMITS.max);
@@ -293,5 +297,7 @@ const useTreeViewSidebar = () => {
     startResizing,
   };
 };
+
+
 
 export { TREE_VIEW_SIDEBAR_TOGGLE_EVENT, useTreeViewSidebar };

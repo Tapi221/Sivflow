@@ -1,11 +1,17 @@
 "use client";
 
 import * as React from "react";
+
 import { useCalloutEmojiPicker } from "@platejs/callout/react";
+
 import { useEmojiDropdownMenuState } from "@platejs/emoji/react";
+
 import { PlateElement } from "platejs/react";
+
 import { cn } from "@/lib/utils";
+
 import { Button } from "./button";
+
 import { EmojiPicker, EmojiPopover } from "./emoji-toolbar-button";
 
 const CalloutElement = ({ attributes, children, className, ...props }: React.ComponentProps<typeof PlateElement>) => {

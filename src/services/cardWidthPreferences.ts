@@ -1,5 +1,7 @@
 import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 
+
+
 type CardWidthPaneMode = "view" | "edit";
 interface CardWidthEntry {
   view?: number;
@@ -9,6 +11,8 @@ interface CardWidthPreferencesStore {
   version: 1;
   byCardSet: Record<string, CardWidthEntry>;
 }
+
+
 
 const createEmptyStore = (): CardWidthPreferencesStore => ({
   version: 1,
@@ -86,5 +90,9 @@ const setCardSetWidthPreference = (cardSetId: string, mode: CardWidthPaneMode, w
   writeStore(store);
 };
 
+
+
 export { getCardSetWidthPreference, setCardSetWidthPreference };
+
+
 export type { CardWidthPaneMode };
