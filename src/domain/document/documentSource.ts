@@ -10,9 +10,13 @@ type SyncableDocumentRecord = DocumentSourceFields & {
   isDeleted?: unknown;
 };
 
+
+
 const GOOGLE_DRIVE_STORAGE_PATH_PREFIX = "google-drive://";
 const LOCAL_BLOB_URL_PREFIX = "blob:";
 const GOOGLE_DRIVE_FILE_PATH_PATTERN = /\/file\/d\/([^/]+)/;
+
+
 
 const getTrimmedString = (value: unknown): string | null => {
   if (typeof value !== "string") return null;
@@ -56,5 +60,7 @@ const shouldSyncDocumentRecord = (record: SyncableDocumentRecord): boolean => {
   if (record.isDeleted === true) return true;
   return hasRemoteRecoverableDocumentSource(record);
 };
+
+
 
 export { hasRemoteRecoverableDocumentSource, resolveDocumentGoogleDriveFileId, shouldSyncDocumentRecord };

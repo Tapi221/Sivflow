@@ -1,9 +1,13 @@
 type ImportFileKind = "xlsx" | "mfdeck" | "mfcard" | "unknown";
 type PortableImportFileKind = "mfdeck" | "mfcard";
 
+
+
 const IMPORT_FILE_MIME_TYPES = { mfdeck: "application/vnd.sivflow.deck+zip", mfcard: "application/vnd.sivflow.card+json", xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" } as const satisfies Record<Exclude<ImportFileKind, "unknown">, string>;
 const IMPORT_FILE_EXTENSIONS = { mfdeck: ".mfdeck", mfcard: ".mfcard", xlsx: ".xlsx" } as const satisfies Record<Exclude<ImportFileKind, "unknown">, string>;
 const IMPORT_FILE_LABELS = { mfdeck: "MFDeck", mfcard: "MFCard", xlsx: "XLSX", unknown: "不明な形式" } as const satisfies Record<ImportFileKind, string>;
+
+
 
 const normalizeFileName = (value: string | undefined): string => {
   return (value ?? "").trim().toLowerCase();
@@ -54,5 +58,9 @@ const getPortableImportFiles = (files: FileList | File[]): File[] => {
   return Array.from(files).filter(isPortableImportFile);
 };
 
+
+
 export { IMPORT_FILE_MIME_TYPES, IMPORT_FILE_EXTENSIONS, IMPORT_FILE_LABELS, detectImportFileKind, isSupportedImportFileKind, isPortableImportFileKind, isPortableImportFile, getSupportedImportFiles, getPortableImportFiles };
+
+
 export type { ImportFileKind, PortableImportFileKind };
