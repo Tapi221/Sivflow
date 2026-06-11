@@ -8,9 +8,6 @@ type WorkspaceTabBase = {
   isClosable: boolean;
   sectionKey: WorkspaceSidebarSection;
 };
-
-const WORKSPACE_DEFAULT_EXPLORER_TAB_ID = "explorer:default" as const;
-
 /**
  * サイドバーのセクション定義
  */
@@ -72,6 +69,7 @@ type WorkspaceTab = | WorkspaceRouteTab | WorkspaceExplorerTab | WorkspaceDocume
  */
 type WorkspaceEntityTab = Exclude<WorkspaceTab, WorkspaceExplorerTab | WorkspaceRouteTab>;
 
+const WORKSPACE_DEFAULT_EXPLORER_TAB_ID = "explorer:default" as const;
 /**
  * ルートタブ定義
  */

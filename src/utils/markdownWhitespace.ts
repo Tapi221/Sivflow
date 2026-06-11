@@ -15,11 +15,9 @@ type InlineCodeRange = {
   start: number;
   end: number;
 };
-
-const MARKDOWN_TAB_SIZE_VALUES = [2, 4, 8] as const;
-
 type MarkdownTabSize = 2 | 4 | 8;
 
+const MARKDOWN_TAB_SIZE_VALUES = [2, 4, 8] as const;
 const NBSP_REGEX = /\u00A0/g;
 const HTML_BLOCK_TAGS = [
   "address",

@@ -20,6 +20,10 @@ type ImageRecordLike =
 type ImageUpdateCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   updateItem: (table: "images", id: string, changes: Record<string, unknown>) => Promise<number>;
 };
+type ResolvedCardImage = ResolvableImageRef & { url: string | null;
+  source: "local_blob" | "cache" | "storage" | "none";
+  status: "pending" | "uploading" | "ready" | "failed";
+};
 
 const isNonEmptyString = (value: unknown): value is string => typeof value === "string" && value.trim().length > 0;
 const getRemoteUrlFromRecord = (record: ImageRecordLike): string | null => {
@@ -72,12 +76,6 @@ const getResolvedStatusFromRecord = (record: ImageRecordLike): "pending" | "uplo
 
   return "pending";
 };
-
-type ResolvedCardImage = ResolvableImageRef & { url: string | null;
-  source: "local_blob" | "cache" | "storage" | "none";
-  status: "pending" | "uploading" | "ready" | "failed";
-};
-
 const resolveImageAssetId = (image: ResolvableImageRef): string | null => {
   for (const value of [image.assetId, image.id, image.localFileId]) {
     if (isNonEmptyString(value)) {

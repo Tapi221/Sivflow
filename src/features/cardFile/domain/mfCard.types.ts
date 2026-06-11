@@ -1,12 +1,20 @@
-
 import type { MfDeckCardV1, MfDeckIssue } from "@/features/deckFile/domain/mfDeck.types";
+
+type MfCardIssue = MfDeckIssue;
+type MfCardValidationResult = | { ok: true;
+  value: MfCardFileV1;
+  issues: MfCardIssue[];
+}
+  | {
+    ok: false;
+    issues: MfCardIssue[];
+  };
 
 const MF_CARD_FORMAT = "sivflow.card" as const;
 const MF_CARD_VERSION = 1 as const;
 const MF_CARD_FILE_EXTENSION = ".mfcard" as const;
 const MF_CARD_MIME_TYPE = "application/vnd.sivflow.card+json" as const;
 
-type MfCardIssue = MfDeckIssue;
 type MfCardFileV1 = { format: typeof MF_CARD_FORMAT;
   version: typeof MF_CARD_VERSION;
   exportedAt: string;
@@ -21,14 +29,6 @@ type MfCardFileV1 = { format: typeof MF_CARD_FORMAT;
     reviewProgressIncluded: boolean;
   };
 };
-type MfCardValidationResult = | { ok: true;
-  value: MfCardFileV1;
-  issues: MfCardIssue[];
-}
-  | {
-    ok: false;
-    issues: MfCardIssue[];
-  };
 
 class MfCardValidationError extends Error { readonly issues: MfCardIssue[];
 

@@ -17,12 +17,6 @@ type CardWorkspaceCaptureTarget = {
   element: HTMLElement;
   area: number;
 };
-
-const WORKSPACE_SURFACE_CLASS_NAMES: Record<CardWorkspaceSurfaceVariant, string> = {
-  plain: "workspace-surface--plain",
-  dotted: "workspace-surface--dotted",
-};
-
 type CardWorkspaceWidthControlProps = { modeLabel: string;
   value: number;
   min: number;
@@ -52,6 +46,11 @@ type CardWorkspaceShellProps = { children: ReactNode;
   metaPanel?: ReactNode;
   metaPanelContainerClassName?: string;
   selectionCaptureEnabled?: boolean;
+};
+
+const WORKSPACE_SURFACE_CLASS_NAMES: Record<CardWorkspaceSurfaceVariant, string> = {
+  plain: "workspace-surface--plain",
+  dotted: "workspace-surface--dotted",
 };
 
 const setExternalRef = (ref: Ref<HTMLDivElement> | undefined, node: HTMLDivElement | null): void => {

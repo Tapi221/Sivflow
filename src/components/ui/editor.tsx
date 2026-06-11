@@ -72,12 +72,10 @@ type EditorProps = PlateContentProps & VariantProps<typeof editorVariants>;
 const Editor = ({ className, disabled, focused, variant, ref, ...props }: EditorProps & { ref?: React.RefObject<HTMLDivElement | null>; }) => {
   return <PlateContent ref={ref} className={cn(editorVariants({ disabled, focused, variant }), className)} disabled={disabled} disableDefaultStyles {...props} />;
 };
-
-Editor.displayName = "Editor";
-
 const EditorView = ({ className, variant, ...props }: PlateViewProps & VariantProps<typeof editorVariants>) => { return <PlateView {...props} className={cn(editorVariants({ variant }), className)} />;
 };
 
+Editor.displayName = "Editor";
 EditorView.displayName = "EditorView";
 export { EditorContainer, Editor, EditorView };
 export type { EditorProps };

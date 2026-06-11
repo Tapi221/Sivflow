@@ -13,6 +13,8 @@ import { Comment, CommentCreateForm, formatCommentDate } from "./comment";
 import { BLOCK_SUGGESTION_TOKEN } from "@/lib/block-discussion-index";
 import type { ResolvedSuggestion } from "@/lib/block-discussion-index";
 
+const isResolvedSuggestion = (suggestion: ResolvedSuggestion | TDiscussion): suggestion is ResolvedSuggestion => "suggestionId" in suggestion;
+
 const BlockSuggestionCard = ({ idx, isLast, suggestion }: { idx: number;
   isLast: boolean;
   suggestion: ResolvedSuggestion;
@@ -189,7 +191,5 @@ const BlockSuggestionCard = ({ idx, isLast, suggestion }: { idx: number;
     </div>
   );
 };
-
-const isResolvedSuggestion = (suggestion: ResolvedSuggestion | TDiscussion): suggestion is ResolvedSuggestion => "suggestionId" in suggestion;
 
 export { BlockSuggestionCard, isResolvedSuggestion };
