@@ -72,6 +72,32 @@ import 間の空行検査と自動修正は、import 文直前の空白・改行
 
 `verify:*` は検査だけを行い、ファイルを書き換える処理は `fix:*` にだけ置く。
 
+## nullish fallback
+
+`null` と `undefined` のどちらかを全面禁止しない。
+
+値が欠落している場合だけ代替値を使う処理では、`||` ではなく `??` を使う。`||` は `false`、`0`、`""` も代替値へ置き換えるため、値の欠落判定には使わない。
+
+```ts
+// NG
+const page = inputPage || 1;
+const title = inputTitle || "Untitled";
+const enabled = inputEnabled || true;
+
+// OK
+const page = inputPage ?? 1;
+const title = inputTitle ?? "Untitled";
+const enabled = inputEnabled ?? true;
+```
+
+`false`、`0`、`""` を欠落扱いしたい場合は、`||` に任せず、意図が分かる条件式や helper 関数で明示する。
+
+```ts
+const title = inputTitle.trim() === "" ? "Untitled" : inputTitle;
+```
+
+`npm run verify:nullish-fallback` は、`||` の右辺が string / number / boolean / object / array literal で、値を返す文脈にあるものだけを検出する。boolean 合成の `isReady || isLoading` のような式は対象にしない。`npm run verify:source-conventions` はこの検査を含めて実行する。
+
 ## export
 
 実装ファイルでは、原則として宣言時 export を使わない。値・型はローカルに定義し、ファイル末尾でまとめて export する。
