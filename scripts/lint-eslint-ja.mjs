@@ -6,6 +6,11 @@ const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPOSITORY_ROOT = path.resolve(SCRIPT_DIR, "..");
 const ESLINT_BIN_PATH = path.resolve(REPOSITORY_ROOT, "node_modules/eslint/bin/eslint.js");
 const ESLINT_COMMAND_ARGS = [ESLINT_BIN_PATH, ".", ...process.argv.slice(2), "--format", "json"];
+const SHOULD_FIX = process.argv.includes("--fix");
+const SOURCE_CONVENTION_FIX_SCRIPT_PATHS = [
+  path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-import-spacing.mjs"),
+  path.resolve(REPOSITORY_ROOT, "scripts/fix-src-import-paths.mjs"),
+];
 const SEVERITY_LABELS = new Map([
   [2, "エラー"],
   [1, "警告"],
@@ -21,6 +26,29 @@ const normalizeWhitespace = (value) => value.replace(/\s+/gu, " ").trim();
 const toRelativePath = (filePath, cwd) => {
   const relativePath = path.relative(cwd, filePath);
   return relativePath.startsWith("..") ? filePath : relativePath.split(path.sep).join("/");
+};
+
+const runSourceConventionFixes = () => {
+  if (!SHOULD_FIX) return 0;
+
+  let exitStatus = 0;
+
+  for (const scriptPath of SOURCE_CONVENTION_FIX_SCRIPT_PATHS) {
+    const result = spawnSync(process.execPath, [scriptPath], {
+      cwd: REPOSITORY_ROOT,
+      stdio: "inherit",
+    });
+
+    if (result.error) {
+      console.error(`source 規約の自動修正に失敗しました: ${result.error.message}`);
+      exitStatus = 1;
+      continue;
+    }
+
+    if (result.status && result.status !== 0) exitStatus = result.status;
+  }
+
+  return exitStatus;
 };
 
 const translateParsingMessage = (message) => {
@@ -159,6 +187,8 @@ const parseEslintJson = (stdout) => {
   }
 };
 
+const getExitCode = (primaryStatus, fallbackStatus) => primaryStatus && primaryStatus !== 0 ? primaryStatus : fallbackStatus;
+
 const runLint = () => {
   const lintResult = spawnSync(process.execPath, ESLINT_COMMAND_ARGS, {
     cwd: REPOSITORY_ROOT,
@@ -168,7 +198,7 @@ const runLint = () => {
 
   if (lintResult.error) {
     console.error(`ESLint の実行に失敗しました: ${lintResult.error.message}`);
-    process.exitCode = 1;
+    process.exitCode = getExitCode(1, runSourceConventionFixes());
     return;
   }
 
@@ -177,13 +207,13 @@ const runLint = () => {
     console.error("ESLint の JSON 出力を解析できませんでした。");
     if (lintResult.stdout) console.error(lintResult.stdout.trimEnd());
     if (lintResult.stderr) console.error(lintResult.stderr.trimEnd());
-    process.exitCode = lintResult.status ?? 1;
+    process.exitCode = getExitCode(lintResult.status ?? 1, runSourceConventionFixes());
     return;
   }
 
   console.log(formatEslintResults(parsedResults, { cwd: REPOSITORY_ROOT }));
   if (lintResult.stderr) console.error(lintResult.stderr.trimEnd());
-  process.exitCode = lintResult.status ?? 0;
+  process.exitCode = getExitCode(lintResult.status ?? 0, runSourceConventionFixes());
 };
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) runLint();
