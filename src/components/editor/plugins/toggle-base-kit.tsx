@@ -9,4 +9,4 @@ const BaseToggleKit = [
 
 
 
-export { BaseToggleKit 
+export { BaseToggleKit };

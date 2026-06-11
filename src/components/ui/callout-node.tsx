@@ -58,3 +58,5 @@ export function CalloutElement({ attributes, children, className, ...props }: Re
         <div className="w-full">{children}</div>
       </div>
     </PlateElement>
+  );
+}

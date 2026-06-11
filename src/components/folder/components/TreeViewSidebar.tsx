@@ -132,3 +132,4 @@ export const TreeViewSidebar = ({ sidebarRef, contentScrollRef, isSidebarOpen, r
       ) : null}
     </div>
   );
+};

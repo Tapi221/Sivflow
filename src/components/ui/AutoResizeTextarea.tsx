@@ -111,4 +111,4 @@ const AutoResizeTextarea = ({
 
 
 
-export default AutoResizeTexta
+export default AutoResizeTextarea;

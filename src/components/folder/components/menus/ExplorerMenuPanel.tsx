@@ -168,3 +168,4 @@ export const ExplorerMenuPanel = ({ actions, closeMenu, className, variant = "de
       ))}
     </DropdownMenuContent>
   );
+};

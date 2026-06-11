@@ -7,4 +7,4 @@ const BaseDateKit = [BaseDatePlugin.withComponent(DateElementStatic)];
 
 
 
-export { BaseDateKit 
+export { BaseDateKit };

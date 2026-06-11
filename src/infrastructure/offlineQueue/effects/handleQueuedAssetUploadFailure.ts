@@ -2,6 +2,8 @@ import { makeAssetRecord, type QueueItem, toAssetLikeRecord } from "@/applicatio
 import { auth } from "@/infrastructure/firebase/client";
 import { getLocalDb } from "@/infrastructure/localdb/client";
 
+
+
 export const handleQueuedAssetUploadFailure = async ( item: QueueItem, ): Promise<void> => { try { const localDb = await getLocalDb();
     const existingAsset = toAssetLikeRecord(await localDb.images.get(item.id));
 

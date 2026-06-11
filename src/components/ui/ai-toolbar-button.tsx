@@ -22,4 +22,5 @@ export function AIToolbarButton( props: React.ComponentProps<typeof ToolbarButto
         e.preventDefault();
       }}
     />
-  
+  );
+}

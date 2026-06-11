@@ -40,3 +40,4 @@ export const SegmentedControlGroup = <T extends string>({ value, options, onChan
       })}
     </div>
   );
+};

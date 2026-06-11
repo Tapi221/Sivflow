@@ -68,4 +68,5 @@ export const CopilotKit = [ ...MarkdownKit, CopilotPlugin.configure(({ api }) =>
         keys: 'ctrl+space',
       },
     },
-  }
+  })),
+];

@@ -1,3 +1,4 @@
+@import "tailwindcss";
 @import "./features/markdown-mono.css";
 @import "./features/mobile-schedule.css";
 @import "./mobile-calendar-list.css";
@@ -19,7 +20,6 @@
 
 @import "./tokens/code-theme.css";
 
-@import "tailwindcss";
 @config "../../tailwind.config.js";
 
 :root {

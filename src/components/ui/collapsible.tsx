@@ -12,4 +12,4 @@ const CollapsibleContent = CollapsiblePrimitive.CollapsibleContent;
 
 
 
-export { Collapsible, CollapsibleContent, CollapsibleTrigg
+export { Collapsible, CollapsibleContent, CollapsibleTrigger };

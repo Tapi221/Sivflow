@@ -12,3 +12,4 @@ type PanelSurfaceProps = HTMLAttributes<HTMLDivElement> &
 
 
 export const PanelSurface = ({ surface = "panel", className, children, ...props }: PanelSurfaceProps) => { return ( <div className={cn(floatingSurfaceVariants({ surface }), className)} {...props} > {children} </div> );
+};

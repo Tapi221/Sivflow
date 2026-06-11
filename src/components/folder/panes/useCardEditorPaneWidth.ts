@@ -199,4 +199,4 @@ export const useCardEditorPaneWidth = ({ settings, dockToolbarsToTop, embeddedIn
 
 
 
-export { CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX, CARD_PANE_WIDTH_STE
+export { CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX, CARD_PANE_WIDTH_STEP_PX };

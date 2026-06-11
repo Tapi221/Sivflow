@@ -186,3 +186,4 @@ export const useFolderDocumentUpload = ({ actionFolderId, getNextOrderIndex, set
     currentFileAccept,
     handleToolbarFileInputChange,
   };
+};

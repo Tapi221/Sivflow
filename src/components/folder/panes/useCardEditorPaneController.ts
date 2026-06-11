@@ -253,3 +253,4 @@ export const useCardEditorPaneController = ({ selectedCardId, folderId, cardSetI
     content,
     actions,
   };
+};

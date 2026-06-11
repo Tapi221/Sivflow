@@ -148,4 +148,4 @@ const CardEditorPaneMediaDialogsInner = ({
 
 
 export const CardEditorPaneMediaDialogs = memo( CardEditorPaneMediaDialogsInner, areMediaDialogsPropsEqual, );
-CardEditorPaneMediaDialogs.displayName = "CardEditorPaneMediaDi
+CardEditorPaneMediaDialogs.displayName = "CardEditorPaneMediaDialogs";

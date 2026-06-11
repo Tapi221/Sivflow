@@ -39,4 +39,4 @@ const Badge = ({ className, variant, ...props }: BadgeProps) => {
 
 
 
-export { Ba
+export { Badge };

@@ -97,3 +97,4 @@ export const useTreeViewFilters = ({ cards, documents, tagFilter, tagMatchMode, 
     filteredDocuments,
     isFiltering,
   };
+};

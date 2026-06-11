@@ -10,4 +10,4 @@ const BaseMathKit = [
 
 
 
-export { BaseMathKit 
+export { BaseMathKit };

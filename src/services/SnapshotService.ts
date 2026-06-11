@@ -9,6 +9,8 @@ import { browserJsonFileExportAdapter } from "@/infrastructure/browser-storage/B
 import { localGenerationCounterStore } from "@/infrastructure/browser-storage/LocalGenerationCounterStore";
 import { snapshotFirestoreRepository } from "@/infrastructure/firebase/firestore/SnapshotFirestoreRepository";
 
+
+
 const SNAPSHOTS_KEY = "flashcard_snapshots";
 const createSnapshotUseCase = createCreateSnapshotUseCase({
   generationCounterStore: localGenerationCounterStore,
@@ -68,6 +70,8 @@ export const snapshotService = { createSnapshot: async ( userId: string, options
     console.log("[スナップショット] 移行が完了しました。LocalStorage をクリアしました");
   },
 };
+
+
 
 function getStoredSnapshotsFromLocalStorage(): AppSnapshot[] {
   if (typeof window === "undefined") {

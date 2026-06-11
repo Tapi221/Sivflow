@@ -175,4 +175,4 @@ export { TagBadge };
 
 
 
-export type { TagBad
+export type { TagBadgeProps };

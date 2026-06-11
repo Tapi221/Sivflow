@@ -10,4 +10,4 @@ const BaseFootnoteKit = [
 
 
 
-export { BaseFootnoteKit 
+export { BaseFootnoteKit };
