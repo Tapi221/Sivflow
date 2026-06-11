@@ -78,6 +78,24 @@ import 間の空行検査と自動修正は、import 文直前の空白・改行
 
 `npm run lint` は `var` と再代入されない `let` を検出する。`npm run lint:fix` は安全に修正できる場合に `var` と再代入されない `let` を自動修正する。
 
+## 等価比較
+
+等価比較では `==` / `!=` を使わず、`===` / `!==` を使う。
+
+```ts
+// NG
+const isSame = currentId == selectedId;
+const isDifferent = currentId != selectedId;
+
+// OK
+const isSame = currentId === selectedId;
+const isDifferent = currentId !== selectedId;
+```
+
+`null` または `undefined` の両方を欠落扱いしたい場合も、`value == null` や `value != null` に任せない。`value === null || value === undefined`、または `value !== null && value !== undefined` のように明示する。
+
+`npm run lint` は ESLint の `eqeqeq` で `==` / `!=` を検出する。`npm run lint:fix` は安全に修正できる範囲で `scripts/verify/fix-strict-equality.mjs` により `===` / `!==` へ自動修正する。
+
 ## nullish fallback
 
 `null` と `undefined` のどちらかを全面禁止しない。
