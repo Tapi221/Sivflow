@@ -5,7 +5,7 @@ import { createPlatePlugin } from 'platejs/react';
 import { FixedToolbar } from '@/components/fixed-toolbar';
 import { FixedToolbarButtons } from '@/components/fixed-toolbar-buttons';
 
-export const FixedToolbarKit = [
+const FixedToolbarKit = [
   createPlatePlugin({
     key: 'fixed-toolbar',
     render: {
@@ -17,3 +17,5 @@ export const FixedToolbarKit = [
     },
   }),
 ];
+
+export { FixedToolbarKit };
