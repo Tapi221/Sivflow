@@ -96,6 +96,30 @@ const collapseRepeatedBlankLines = (source) => {
   return source.replace(repeatedBlankLinePattern, `${newline}${newline}`);
 };
 
+const isSingleLineImportText = (line) => /^\s*import(?:\s+type)?\s.+;\s*$/u.test(line);
+
+const normalizeImportBlankLines = (source) => {
+  const newline = getNewline(source);
+  const lines = source.split(/\r?\n/u);
+  const nextLines = [];
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    if (line.trim() !== "") {
+      nextLines.push(line);
+      continue;
+    }
+
+    const previousLine = nextLines.at(-1) ?? "";
+    const nextNonEmptyLine = lines.slice(index + 1).find((nextLine) => nextLine.trim() !== "") ?? "";
+    if (isSingleLineImportText(previousLine) && isSingleLineImportText(nextNonEmptyLine)) continue;
+
+    nextLines.push(line);
+  }
+
+  return nextLines.join(newline);
+};
+
 const isImportStatement = (statement) => ts.isImportDeclaration(statement) || ts.isImportEqualsDeclaration(statement);
 
 const isDirectiveStatement = (statement) => ts.isExpressionStatement(statement) && ts.isStringLiteral(statement.expression);
@@ -255,7 +279,13 @@ const applyTopLevelSpacingFix = (filePath, source) => {
   return replacements.length === 0 ? source : applyNonOverlappingReplacements(source, replacements);
 };
 
-const applySourceConventionFix = (filePath, source) => collapseRepeatedBlankLines(applyTopLevelSpacingFix(filePath, applyDocumentFormatting(filePath, source)));
+const applySourceConventionFix = (filePath, source) => {
+  const formattedSource = applyDocumentFormatting(filePath, source);
+  const importNormalizedSource = normalizeImportBlankLines(formattedSource);
+  const topLevelNormalizedSource = applyTopLevelSpacingFix(filePath, importNormalizedSource);
+
+  return normalizeImportBlankLines(collapseRepeatedBlankLines(topLevelNormalizedSource));
+};
 
 const updateFile = (filePath) => {
   const originalSource = readFileSync(filePath, "utf8");
