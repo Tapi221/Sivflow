@@ -2,10 +2,6 @@ import type { ImportBlock, ImportColumnKey, ImportIssue, ImportParseResult, Impo
 import { isImportBlockType, isImportSide } from "@/features/import/domain/import.types";
 import { groupParsedRowsToCards } from "./groupParsedRowsToCards";
 
-
-
-
-
 type HeaderMap = Partial<Record<ImportColumnKey, number>>;
 type RowCellMap = Partial<Record<ImportColumnKey, string>>;
 type BuildRowBlockResult = {
@@ -14,15 +10,7 @@ type BuildRowBlockResult = {
   issues: ImportIssue[];
 };
 
-
-
-
-
 const REQUIRED_HEADERS: ImportColumnKey[] = ["cardId", "blockOrder", "type"];
-
-
-
-
 
 const buildIssue = ({
   level,
@@ -409,9 +397,5 @@ const parseImportRows = ({ sheetName, rows }: { sheetName: ImportSheetName;
     issues: allIssues,
   };
 };
-
-
-
-
 
 export { parseImportRows };

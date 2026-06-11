@@ -2,10 +2,6 @@ type ImageNaturalSize = { naturalW: number;
   naturalH: number;
 };
 
-
-
-
-
 const hasNaturalSize = (image: {
   naturalWidth: number;
   naturalHeight: number;
@@ -52,13 +48,5 @@ const loadImageNaturalSize = async (src: string): Promise<ImageNaturalSize | nul
   });
 };
 
-
-
-
-
 export { loadImageNaturalSize };
-
-
-
-
 export type { ImageNaturalSize };

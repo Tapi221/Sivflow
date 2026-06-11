@@ -2,18 +2,10 @@ import "./SettingsWorkspaceDialog.css";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import { SettingsWorkspaceScreen } from "./SettingsWorkspaceScreen";
 
-
-
-
-
 type SettingsWorkspaceDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
-
-
-
-
 
 const SettingsWorkspaceDialog = ({ open, onOpenChange }: SettingsWorkspaceDialogProps) => {
   const handleClose = () => onOpenChange(false);
@@ -31,9 +23,5 @@ const SettingsWorkspaceDialog = ({ open, onOpenChange }: SettingsWorkspaceDialog
     </div>
   );
 };
-
-
-
-
 
 export { SettingsWorkspaceDialog };

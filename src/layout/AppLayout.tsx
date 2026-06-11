@@ -8,10 +8,6 @@ import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspace
 import { WorkspaceLayoutRevisionProvider } from "./WorkspaceLayoutRevisionContext";
 import { WorkspaceShell } from "./WorkspaceShell";
 
-
-
-
-
 type AppLayoutOutletContext = {
   isLeftPanelCollapsed: boolean;
   onOpenSettings: () => void;
@@ -25,10 +21,6 @@ type SidebarLongPressState = {
   timerId: number;
 };
 
-
-
-
-
 const LEFT_PANEL_COLLAPSED_STORAGE_KEY = "sivflow:layout:left-panel-collapsed";
 const LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY = "flashcard-master:layout:left-panel-collapsed";
 const LEFT_PANEL_COLLAPSED_STORAGE_VALUE = "collapsed";
@@ -39,10 +31,6 @@ const MOBILE_SETTINGS_ROUTE_MEDIA_QUERY = "(max-width: 767px)";
 const SIDEBAR_LONG_PRESS_CONTEXT_MENU_TARGET_SELECTOR = ".app-layered-directory [role='treeitem']";
 const SIDEBAR_LONG_PRESS_DELAY_MS = 520;
 const SIDEBAR_LONG_PRESS_MOVE_TOLERANCE_PX = 10;
-
-
-
-
 
 const readStoredLeftPanelCollapsed = (): boolean => {
   if (typeof window === "undefined") return false;
@@ -114,10 +102,6 @@ const useIsMobileSettingsRouteViewport = (): boolean => {
 
   return isMobileSettingsRouteViewport;
 };
-
-
-
-
 
 const AppLayout = () => {
   const { pathname, isScrollLocked } = useLayoutRouteStateDesktop();
@@ -246,13 +230,5 @@ const AppLayout = () => {
   );
 };
 
-
-
-
-
 export { AppLayout };
-
-
-
-
 export type { AppLayoutOutletContext };
