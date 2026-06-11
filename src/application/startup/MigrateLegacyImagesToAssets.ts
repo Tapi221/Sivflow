@@ -5,10 +5,6 @@ import { scrubBlobUrlsDeep } from "@/services/localdb/blobUrl";
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
 import type { AssetRecord, AssetRemoteStatus, Card, CardBlock, CardFace, UploadedImage } from "@/types";
 
-
-
-
-
 type ImageRecordLike = Partial<AssetRecord> &
   Partial<UploadedImage> &
   Record<string, unknown>;
@@ -44,17 +40,9 @@ type MigrateLegacyImagesToAssetsParams = {
   userId: string;
 };
 
-
-
-
-
 const MIGRATION_VERSION = "v2";
 const MIGRATION_STORAGE_KEY_PREFIX = "legacy-image-asset-migration";
 const inFlightTouchMigrations = new Set<string>();
-
-
-
-
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
@@ -796,9 +784,5 @@ const migrateLegacyImagesToAssets = async ({ userId }: MigrateLegacyImagesToAsse
     throw error;
   }
 };
-
-
-
-
 
 export { migrateLegacyImagesToAssets };

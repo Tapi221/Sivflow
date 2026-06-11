@@ -1,19 +1,11 @@
 import { useEffect } from "react";
 import { hasPrimaryModifier, isTypingTarget } from "./hotkeyGuards";
 
-
-
-
-
 type UseReviewCardPagerHotkeysParams = {
   onFlip?: () => void;
   onNext: () => void;
   onPrev: () => void;
 };
-
-
-
-
 
 const useReviewCardPagerHotkeys = ({ onFlip, onNext, onPrev }: UseReviewCardPagerHotkeysParams) => {
   useEffect(() => {
@@ -51,9 +43,5 @@ const useReviewCardPagerHotkeys = ({ onFlip, onNext, onPrev }: UseReviewCardPage
     };
   }, [onFlip, onNext, onPrev]);
 };
-
-
-
-
 
 export { useReviewCardPagerHotkeys };

@@ -1,10 +1,6 @@
 import rawTranslations from "./translations.json";
 import type { Locale } from "./locale.store";
 
-
-
-
-
 type RawTranslations = { weekdayLabels: string[];
   calendarMonthWeekdays: string[];
   monthRowResizeTitle: string;
@@ -81,16 +77,8 @@ type RawTranslations = { weekdayLabels: string[];
 type Translations = Omit<RawTranslations, "overflowEvents"> & { overflowEvents: (count: number) => string;
 };
 
-
-
-
-
 const RAW_TRANSLATIONS = rawTranslations as Record<Locale, RawTranslations>;
 const TRANSLATIONS: Record<Locale, Translations> = { ja: toTranslations(RAW_TRANSLATIONS.ja), en: toTranslations(RAW_TRANSLATIONS.en), zh: toTranslations(RAW_TRANSLATIONS.zh), };
-
-
-
-
 
 const formatCountTemplate = (template: string, count: number): string =>
   template.replace("{{count}}", String(count));
@@ -99,13 +87,5 @@ const toTranslations = (translations: RawTranslations): Translations => ({
   overflowEvents: (count: number) => formatCountTemplate(translations.overflowEvents, count),
 });
 
-
-
-
-
 export { RAW_TRANSLATIONS, TRANSLATIONS };
-
-
-
-
 export type { RawTranslations, Translations };

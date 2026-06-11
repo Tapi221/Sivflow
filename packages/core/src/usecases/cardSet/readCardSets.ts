@@ -10,10 +10,6 @@ type CardSetQueryEntity = { id: string;
 type CardSetQueryRepository<TCardSet extends CardSetQueryEntity = CardSetQueryEntity> = { listCardSets: (userId: string) => Promise<TCardSet[]>;
 };
 
-
-
-
-
 const isDeletedEntity = (entity: { isDeleted?: boolean; is_deleted?: boolean; }) => {
   return Boolean(entity.isDeleted ?? entity.is_deleted);
 };
@@ -82,13 +78,5 @@ const listCardSetsForFolder = async <TCardSet extends CardSetQueryEntity>({ user
   return filteredCardSets.sort(compareCardSets);
 };
 
-
-
-
-
 export { listCardSetsForFolder };
-
-
-
-
 export type { CardSetQueryEntity, CardSetQueryRepository };

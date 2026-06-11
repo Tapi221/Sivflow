@@ -2,10 +2,6 @@ import React from "react";
 import { Slider } from "@/components/ui/slider";
 import { Minus, Plus, RefreshCw } from "@/ui/icons";
 
-
-
-
-
 interface CardPaneWidthAdjusterProps { modeLabel: string;
   value: number;
   min: number;
@@ -20,10 +16,6 @@ interface CardPaneWidthAdjusterProps { modeLabel: string;
   onReset: () => void;
 }
 
-
-
-
-
 const clampValue = (value: number, min: number, max: number) => {
   const safeMin = Math.min(min, max);
   const safeMax = Math.max(min, max);
@@ -31,10 +23,6 @@ const clampValue = (value: number, min: number, max: number) => {
   if (!Number.isFinite(value)) return safeMin;
   return Math.min(safeMax, Math.max(safeMin, value));
 };
-
-
-
-
 
 const CardPaneWidthAdjuster = ({ modeLabel, value, min, max, defaultValue, step = 8, valueFormatter, onPreviewChange, onCommit, onStepDown, onStepUp, onReset }: CardPaneWidthAdjusterProps) => {
   const resetDisabled = value === defaultValue;
@@ -110,13 +98,5 @@ const CardPaneWidthAdjuster = ({ modeLabel, value, min, max, defaultValue, step 
   );
 };
 
-
-
-
-
 export { CardPaneWidthAdjuster };
-
-
-
-
 export type { CardPaneWidthAdjusterProps };
