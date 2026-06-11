@@ -1,26 +1,13 @@
-/**
- * imagePreloadCache
- *
- * モジュールレベルのキャッシュ。
- * - remoteUrlCache  : assetId → Firebase Storage URL（ImageGallery と共有）
- * - decodedUrlSet   : Image.decode() 完了済み URL の Set
- *
- * これらを共有することで、useCardImagePreloader が先読みした結果を
- * ImageGallery が即座に利用でき、async 解決待ちが発生しない。
- *
- * 上限管理:
- * - 各キャッシュに MAX_* の件数上限を設ける。
- * - 上限到達時は挿入順が最も古いエントリを 1 件削除（Map/Set の挿入順保証を利用）。
- * - LRU ではなく FIFO だが、decode 済み URL は再 decode が安全なため FIFO で十分。
- */
+export interface PreloadCacheStats {
+  remoteUrlCacheSize: number;
+  decodedUrlSetSize: number;
+  remoteUrlCacheMax: number;
+  decodedUrlSetMax: number;
+}
 
 const MAX_REMOTE_URL_CACHE = 600;
 const MAX_DECODED_URL_SET = 800;
-
-/** assetId → Firebase Storage URL */
 const remoteUrlCache = new Map<string, string>();
-
-/** Image.decode() 完了済み URL */
 const decodedUrlSet = new Set<string>();
 
 export const getCachedRemoteUrl = (assetId: string) => {
@@ -29,9 +16,6 @@ export const getCachedRemoteUrl = (assetId: string) => {
 
 export const setCachedRemoteUrl = (assetId: string, url: string) => {
   if (remoteUrlCache.has(assetId)) {
-    // 既存キーの更新: 古い URL が変わった場合に decodedUrlSet の stale エントリを削除する。
-    // Firebase signed URL はローテーションされることがあるため、
-    // 同一 assetId で URL が変わったら decode 済みフラグもリセットする。
     const oldUrl = remoteUrlCache.get(assetId);
     if (oldUrl && oldUrl !== url) {
       decodedUrlSet.delete(oldUrl);
@@ -40,7 +24,6 @@ export const setCachedRemoteUrl = (assetId: string, url: string) => {
     return;
   }
   if (remoteUrlCache.size >= MAX_REMOTE_URL_CACHE) {
-    // 最古エントリを削除（Map は挿入順を保証）
     const oldest = remoteUrlCache.keys().next().value;
     if (oldest !== undefined) remoteUrlCache.delete(oldest);
   }
@@ -59,15 +42,6 @@ export const markUrlDecoded = (url: string) => {
   }
   decodedUrlSet.add(url);
 };
-
-// ── Observability ─────────────────────────────────────────────────────────
-
-export interface PreloadCacheStats {
-  remoteUrlCacheSize: number;
-  decodedUrlSetSize: number;
-  remoteUrlCacheMax: number;
-  decodedUrlSetMax: number;
-}
 
 export const getPreloadCacheStats = () => {
   return {
