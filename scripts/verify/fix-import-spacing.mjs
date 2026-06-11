@@ -1,7 +1,5 @@
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
-
 import path from "node:path";
-
 import ts from "typescript";
 
 const ROOT_DIR = process.cwd();
@@ -132,9 +130,7 @@ const getStatementOrderCategory = (statement) => {
   return "helper";
 };
 
-const getImportLeadingWhitespaceText = (source, previousStatement, statement) => source.slice(previousStatement.getEnd(), statement.getFullStart());
-
-const getBlockLeadingWhitespaceText = (source, sourceFile, previousStatement, statement) => source.slice(previousStatement.getEnd(), statement.getStart(sourceFile));
+const getLeadingWhitespaceText = (source, sourceFile, previousStatement, statement) => source.slice(previousStatement.getEnd(), statement.getStart(sourceFile));
 
 const rangesOverlap = (left, right) => left.start < right.end && right.start < left.end;
 
@@ -160,11 +156,11 @@ const collectImportSpacingReplacements = (source, sourceFile) => {
     const statement = statements[index];
     if (!isImportStatement(previousStatement) || !isImportStatement(statement)) continue;
 
-    const leadingWhitespace = getImportLeadingWhitespaceText(source, previousStatement, statement);
+    const leadingWhitespace = getLeadingWhitespaceText(source, sourceFile, previousStatement, statement);
     if (/\S/.test(leadingWhitespace)) continue;
     if (leadingWhitespace === newline) continue;
 
-    replacements.push({ end: statement.getFullStart(), start: previousStatement.getEnd(), text: newline });
+    replacements.push({ end: statement.getStart(sourceFile), start: previousStatement.getEnd(), text: newline });
   }
 
   return replacements;
@@ -186,7 +182,7 @@ const collectBlockSpacingReplacements = (filePath, source, sourceFile) => {
     const category = getStatementOrderCategory(statement);
     if (previousCategory === category) continue;
 
-    const leadingWhitespace = getBlockLeadingWhitespaceText(source, sourceFile, previousStatement, statement);
+    const leadingWhitespace = getLeadingWhitespaceText(source, sourceFile, previousStatement, statement);
     if (/\S/.test(leadingWhitespace)) continue;
     if (leadingWhitespace === blockSeparator) continue;
 
