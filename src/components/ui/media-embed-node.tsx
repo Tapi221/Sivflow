@@ -1,32 +1,18 @@
 'use client';
 
 import * as React from 'react';
-
 import LiteYouTubeEmbed from 'react-lite-youtube-embed';
-
 import { Tweet } from 'react-tweet';
-
 import type { TMediaEmbedElement } from 'platejs';
-
 import type { PlateElementProps } from 'platejs/react';
-
 import { parseTwitterUrl, parseVideoUrl } from '@platejs/media';
-
 import { MediaEmbedPlugin, useMediaState } from '@platejs/media/react';
-
 import { ResizableProvider, useResizableValue } from '@platejs/resizable';
-
 import { PlateElement, withHOC } from 'platejs/react';
-
 import { cn } from '@/lib/utils';
-
 import { Caption, CaptionTextarea } from './caption';
-
 import { MediaToolbar } from './media-toolbar';
-
 import { mediaResizeHandleVariants, Resizable, ResizeHandle, } from './resize-handle';
-
-
 
 export const MediaEmbedElement = withHOC( ResizableProvider, function MediaEmbedElement(props: PlateElementProps<TMediaEmbedElement>) { const { align = 'center', embed, focused, isTweet, isVideo, isYoutube, readOnly, selected, } = useMediaState({ urlParsers: [parseTwitterUrl, parseVideoUrl], });
     const width = useResizableValue('width');

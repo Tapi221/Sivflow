@@ -1,18 +1,7 @@
 import { lazy, Suspense } from "react";
-
-
-
 import type { ReactNode } from "react";
-
-
-
 import { Route } from "react-router-dom";
-
-
-
 import { DEV_MODE } from "@/utils/envGuards";
-
-
 
 const CodeBlockVisualTest = DEV_MODE
   ? lazy(() => import("@/routes/CodeBlockVisualTest"))
@@ -82,8 +71,6 @@ const EventChipEditorSandboxPage = DEV_MODE
     })),
   )
   : null;
-
-
 
 const withDevRouteFallback = (element: ReactNode) => {
   return <Suspense fallback={null}>{element}</Suspense>;

@@ -1,30 +1,10 @@
 import { DEFAULT_LAYOUT_ROWS, normalizeLayoutRows } from "@/domain/card/extraRows";
-
-
-
 import { normalizeCardFolderId, resolveBlocksFromCardData, resolveExtraRowsFromCardData, resolveInkFromCardData } from "@/domain/card/normalizers/cardShape";
-
-
-
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
-
-
-
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-
-
-
 import { DEFAULT_SETTINGS, useUserSettings } from "@/features/settings/hooks/useUserSettings";
-
-
-
 import { getLocalDb } from "@/services/localdb";
-
-
-
 import type { Card, CardPatch } from "@/types";
-
-
 
 type TimestampLike = { toDate?: () => Date; seconds?: number; nanoseconds?: number };
 
@@ -33,8 +13,6 @@ type SortableTimestamp = Date | TimestampLike | string | number | undefined | nu
 type CardSetAddCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   addItem: (table: "cardSets", item: Record<string, unknown>) => Promise<string>;
 };
-
-
 
 const toDateMillis = (value: SortableTimestamp): number => {
   if (!value) return 0;

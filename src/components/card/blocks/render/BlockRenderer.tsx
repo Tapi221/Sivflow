@@ -1,26 +1,9 @@
 import { useMemo } from "react";
-
-
-
 import { CardBlocksScene } from "@/components/card/blocks/shared/CardBlocksScene";
-
-
-
 import { filterRenderableCardBlocks } from "@/components/card/blocks/shared/isRenderableCardBlock";
-
-
-
 import { useViewerSceneProps } from "@/components/card/blocks/shared/useViewerSceneProps";
-
-
-
 import type { CardBlock } from "@/types/domain/card";
-
-
-
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-
-
 
 interface BlockRendererProps {
   blocks?: CardBlock[];
@@ -28,8 +11,6 @@ interface BlockRendererProps {
   displayMode?: CardDisplayMode;
   zoom?: number;
 }
-
-
 
 export const BlockRenderer = ({ blocks, onGalleryFullscreenChange, displayMode = "fixed", zoom = 1, }: BlockRendererProps) => { const viewerProps = useViewerSceneProps({ onGalleryFullscreenChange, displayMode, zoom, });
 

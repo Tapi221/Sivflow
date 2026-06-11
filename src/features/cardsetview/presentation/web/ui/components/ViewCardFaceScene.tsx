@@ -1,50 +1,15 @@
 import React from "react";
-
-
-
 import { CardFaceScene } from "./CardFaceScene";
-
-
-
 import type { FlashcardCardLike } from "@/components/card/frame/Flashcard";
-
-
-
 import { useFlashcardCornerControls } from "@/components/card/frame/FlashcardCornerControls";
-
-
-
 import { FlashcardInkOverlay } from "@/components/card/frame/FlashcardInkOverlay";
-
-
-
 import { FlashcardMediaDialogs } from "@/components/card/frame/FlashcardMediaDialogs";
-
-
-
 import { useCardFlipBehavior } from "@/components/card/frame/useCardFlipBehavior";
-
-
-
 import { useFlashcardDerived } from "@/components/card/frame/useFlashcardDerived";
-
-
-
 import { useFlashcardInk } from "@/components/card/frame/useFlashcardInk";
-
-
-
 import { useFlashcardMediaState } from "@/components/card/frame/useFlashcardMediaState";
-
-
-
 import type { Card } from "@/types";
-
-
-
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-
-
 
 type Side = "question" | "answer";
 
@@ -65,8 +30,6 @@ export type ViewCardFaceSceneProps = Readonly<{ card: Card;
   onToggleBookmark?: (card: Card) => void | Promise<void>;
 }>;
 
-
-
 const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   id: card.id,
   cardId: card.cardId,
@@ -80,8 +43,6 @@ const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   inkQuestion: card.front.ink ?? null,
   inkAnswer: card.back.ink ?? null,
 });
-
-
 
 export const ViewCardFaceScene = ({ card, side, displayMode, fixedScale, fixedHeightPx = null, contentZoom, headerIconVisualScale, previewMode, showInkLayer, drawMode = false, inkEditingEnabled, fillHeight = false, onFlip, onToggleUncertainty, onToggleBookmark, }: ViewCardFaceSceneProps) => { const contentRef = React.useRef<HTMLDivElement | null>(null);
 

@@ -1,10 +1,5 @@
 import type { AssetRecord } from "@/types";
-
-
-
 import type { SnapshotAsset } from "@/types/domain/snapshot";
-
-
 
 type FirestoreTimestampLike = {
   toDate: () => Date;
@@ -19,8 +14,6 @@ type SnapshotAssetSource = {
   createdAt?: unknown;
   updatedAt?: unknown;
 };
-
-
 
 const isFirestoreTimestampLike = (value: unknown): value is FirestoreTimestampLike => {
   return (

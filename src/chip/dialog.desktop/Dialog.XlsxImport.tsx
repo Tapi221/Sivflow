@@ -1,42 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-
-
-
 import { type CreateCard, type CreateCardSet, executeXlsxImport, loadXlsxImportFile } from "@/features/import/application/xlsxImportUseCases";
-
-
-
 import { formatImportCellLabel, hasImportBlockingError, type ImportParseResult } from "@/features/import/domain/import.types";
-
-
-
 import { downloadXlsxImportTemplate } from "@/features/import/xlsx/downloadXlsxImportTemplate";
-
-
-
 import { Button } from "@/components/ui/button";
-
-
-
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-
-
-
 import { Input } from "@/components/ui/input";
-
-
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-
-
 import type { CardSet } from "@/types";
-
-
-
 import { useToast } from "@web-renderer/contexts/ToastContext";
-
-
 
 type XlsxImportCompletedPayload = {
   cardSetId: string;
@@ -56,14 +27,10 @@ type XlsxImportDialogProps = {
   createCard: CreateCard;
 };
 
-
-
 const emptyState = {
   file: null as File | null,
   result: null as ImportParseResult | null,
 };
-
-
 
 const XlsxImportDialog = ({
   open,
@@ -455,10 +422,6 @@ const XlsxImportDialog = ({
   );
 };
 
-
-
 export { XlsxImportDialog };
-
-
 
 export type { XlsxImportCompletedPayload };

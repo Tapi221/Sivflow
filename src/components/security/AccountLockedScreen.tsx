@@ -1,15 +1,9 @@
 import React from "react";
-
-
-
 import { Shield } from "@/ui/icons";
 
 
  // IDE Check: Shield icon
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-
-
-
 import { useSecurity } from "@/contexts/security/SecurityContext";
 
 

@@ -1,22 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
-
-
-
-
 import type { ReactNode } from "react";
-
-
-
-
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
-
-
-
-
 import { areBreadcrumbCrumbsEqual } from "@/features/breadcrumbs/builders";
-
-
 
 type BreadcrumbContextValue = {
   extraCrumbs: BreadcrumbCrumb[];
@@ -27,21 +13,13 @@ type BreadcrumbActionsContextValue = {
   setExtraCrumbs: (crumbs: BreadcrumbCrumb[]) => void;
 };
 
-
-
 const BreadcrumbExtraCrumbsContext = createContext<BreadcrumbCrumb[]>([]);
 
-
-
 const noopSetExtraCrumbs = (_crumbs: BreadcrumbCrumb[]): void => {};
-
-
 
 const BreadcrumbActionsContext = createContext<BreadcrumbActionsContextValue>({
   setExtraCrumbs: noopSetExtraCrumbs,
 });
-
-
 
 export const BreadcrumbProvider = ({ children, }: { children: ReactNode;
 }) => {
@@ -68,8 +46,6 @@ export const BreadcrumbProvider = ({ children, }: { children: ReactNode;
     </BreadcrumbActionsContext.Provider>
   );
 };
-
-
 
 export const useBreadcrumbExtraCrumbs = (): BreadcrumbCrumb[] => { return useContext(BreadcrumbExtraCrumbsContext);
 };

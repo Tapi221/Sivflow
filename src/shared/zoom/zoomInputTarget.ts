@@ -12,8 +12,6 @@ const BASE_ZOOM_INPUT_IGNORE_SELECTORS = [
 
 export const DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR = BASE_ZOOM_INPUT_IGNORE_SELECTORS.join(",");
 
-
-
 export const resolveEventTargetElement = ( target: EventTarget | null, ): Element | null => { if (typeof Element !== "undefined" && target instanceof Element) { return target;
   }
 

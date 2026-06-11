@@ -1,30 +1,10 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-
-
-
 import { refreshCalendarAccessToken, requestCalendarAccessToken } from "@/integration/google-integration/google.oauth";
-
-
-
 import { auth } from "@/services/firebase";
-
-
-
 import { GoogleCalendarSyncEngine } from "@/sync/googlecalendar-sync/GoogleCalendarSyncEngine";
-
-
-
 import { fetchCalendarList } from "./gcal.api";
-
-
-
 import { readCalendarIds, readEmail, readRefreshToken, readToken, readWasConnected, writeCalendarIds, writeEmail, writeRefreshToken, writeToken, writeWasConnected } from "./gcal.storage";
-
-
-
 import type { GCalForceSyncOptions, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem, UseGoogleCalendarIntegrationOptions } from "./gcalSync.types";
-
-
 
 type EventsAction =
   | {
@@ -45,8 +25,6 @@ type EventsAction =
   | {
     type: "clear";
   };
-
-
 
 const reduceEvents = (
   state: GoogleCalendarEvent[],

@@ -1,18 +1,7 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
-
-
-
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-
-
-
 import type { SecurityState } from "@/services/interfaces/ISyncService";
-
-
-
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
-
-
 
 interface SecurityContextType {
   securityState: SecurityState;
@@ -22,8 +11,6 @@ interface SecurityContextType {
 interface SecurityProviderProps {
   children: ReactNode;
 }
-
-
 
 const defaultSecurityState: SecurityState = {
   isLocked: false,
@@ -59,8 +46,6 @@ const SecurityContext = createContext<SecurityContextType>({
 // eslint-disable-next-line react-refresh/only-export-components
 export const useSecurity = () => { return useContext(SecurityContext);
 };
-
-
 
 export const SecurityProvider = ({ children }: SecurityProviderProps) => { const { currentUser } = useAuthSession();
   const [securityState, setSecurityState] =

@@ -1,30 +1,10 @@
 import { endOfDay, endOfMonth, endOfWeek, format, isValid, parseISO, startOfDay, startOfMonth, startOfWeek } from "date-fns";
-
-
-
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
-
-
-
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
-
-
-
 import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
-
-
-
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
-
-
-
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
-
-
-
 import type { CalendarPrintRangeState } from "./calendarPrint.types";
-
-
 
 type CalendarPrintRangeInput = {
   printRange: CalendarPrintRangeState;
@@ -35,8 +15,6 @@ type CalendarPrintRangeInput = {
   currentDisplayRange: CalendarDateRange;
   weekStartDay?: CalendarWeekStartDay;
 };
-
-
 
 const normalizeRange = (left: Date, right: Date): CalendarDateRange => {
   if (left.getTime() <= right.getTime()) {

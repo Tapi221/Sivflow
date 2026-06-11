@@ -1,7 +1,5 @@
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 
-
-
 type CalendarScrollBufferSurface = "calendar";
 
 export type CalendarScrollBuffer = { before: number;
@@ -13,8 +11,6 @@ type CalendarScrollBufferConfig = {
   initialScreens: CalendarScrollBuffer;
   maxUnits: CalendarScrollBuffer;
 };
-
-
 
 const FIXED_VIRTUAL_RAIL_DAYS = 3650;
 const EMPTY_SCROLL_BUFFER = { before: 0, after: 0 } as const;
@@ -64,8 +60,6 @@ const CALENDAR_SCROLL_BUFFER_CONFIG = {
     },
   },
 } satisfies Record<CalendarScrollBufferSurface, Record<CalendarViewMode, CalendarScrollBufferConfig>>;
-
-
 
 const toUnitCount = (screenCount: number, unitsPerScreen: number) => Math.max(0, Math.round(screenCount * unitsPerScreen));
 

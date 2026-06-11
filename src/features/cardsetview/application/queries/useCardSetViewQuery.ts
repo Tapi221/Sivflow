@@ -1,26 +1,9 @@
 import { useCallback, useMemo } from "react";
-
-
-
 import { useCards } from "@/components/card/hooks/useCards";
-
-
-
 import { useCardSetById } from "@/components/card/hooks/useCardSetById";
-
-
-
 import { useFolderLineage } from "@/features/folder/hooks/useFolderLineage";
-
-
-
 import type { Card, Folder } from "@/types";
-
-
-
 import type { CardSet } from "@/types/domain/cardSet";
-
-
 
 type ReorderCardsInCardSet = (cardSetId: string, cardIds: string[]) => Promise<void>;
 
@@ -50,8 +33,6 @@ interface UseCardSetViewQueryResult {
   reorderCardsInCardSet: ReorderCardsInCardSet;
   isLoading: boolean;
 }
-
-
 
 export const useCardSetViewQuery = ({ cardSetId, }: UseCardSetViewQueryOptions): UseCardSetViewQueryResult => { const { cardSet: selectedCardSet, loading: cardSetLoading, updateCardSet, } = useCardSetById(cardSetId);
 

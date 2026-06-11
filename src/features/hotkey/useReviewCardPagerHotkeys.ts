@@ -1,18 +1,11 @@
 import { useEffect } from "react";
-
-
-
 import { hasPrimaryModifier, isTypingTarget } from "./hotkeyGuards";
-
-
 
 type UseReviewCardPagerHotkeysParams = {
   onFlip?: () => void;
   onNext: () => void;
   onPrev: () => void;
 };
-
-
 
 export const useReviewCardPagerHotkeys = ({ onFlip, onNext, onPrev }: UseReviewCardPagerHotkeysParams) => { useEffect(() => { const handleKeyDown = (event: KeyboardEvent) => { if (event.defaultPrevented) return;
       if (isTypingTarget(event.target)) return;

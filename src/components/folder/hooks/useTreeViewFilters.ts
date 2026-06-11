@@ -1,14 +1,6 @@
 import { useMemo } from "react";
-
-
-
 import { resolveCardTagNames } from "@/features/settings/hooks/useTags";
-
-
-
 import type { Card, DocumentItem } from "@/types";
-
-
 
 type TagMapLike = Parameters<typeof resolveCardTagNames>[1];
 
@@ -25,8 +17,6 @@ interface UseTreeViewFiltersParams {
   contentTypeFilter: ContentTypeFilter[];
   tagById: TagMapLike;
 }
-
-
 
 export const useTreeViewFilters = ({ cards, documents, tagFilter, tagMatchMode, uncertaintyFilter, bookmarkedFilter, draftFilter, contentTypeFilter, tagById, }: UseTreeViewFiltersParams) => { const isFilterActive = tagFilter.length > 0 || uncertaintyFilter !== "any" || bookmarkedFilter !== "any" || draftFilter !== "any" || contentTypeFilter.length < 2;
 

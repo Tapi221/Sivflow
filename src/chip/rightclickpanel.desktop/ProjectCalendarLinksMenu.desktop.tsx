@@ -1,14 +1,6 @@
 import { type CSSProperties, type RefObject } from "react";
-
-
-
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
-
-
-
 import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanel.utils";
-
-
 
 export type ProjectCalendarLinksMenuAction = { id: string;
   label: string;
@@ -25,8 +17,6 @@ type ProjectCalendarLinksMenuProps = {
   panelId?: RightClickPanelId;
 };
 
-
-
 export const PROJECT_CALENDAR_LINKS_MENU_PANEL_ID = "project-calendar-links-context-menu";
 
 const PROJECT_CALENDAR_LINKS_MENU_LABELS = [
@@ -41,11 +31,7 @@ const PROJECT_CALENDAR_LINKS_MENU_LABELS = [
 
 export const PROJECT_CALENDAR_LINKS_MENU_WIDTH = resolveRightClickPanelTextWidth(PROJECT_CALENDAR_LINKS_MENU_LABELS);
 
-
-
 export const getProjectCalendarLinksMenuHeight = (actionCount: number): number => Math.max(RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, actionCount * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE);
-
-
 
 const ProjectCalendarLinksMenu = ({
   x,
@@ -87,7 +73,5 @@ const ProjectCalendarLinksMenu = ({
     </RightClickPanelSurface>
   );
 };
-
-
 
 export { ProjectCalendarLinksMenu };

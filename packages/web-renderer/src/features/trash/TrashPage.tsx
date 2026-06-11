@@ -1,27 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-
-
-
-
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-
-
-
 import { Button } from "@/components/ui/button";
-
-
-
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-
-
-
 import type { Card, CardSet, Document, Folder } from "@/types";
-
-
-
 import { useTrashItems } from "./useTrashItems";
-
-
 
 type TrashItemKind = "folder" | "card" | "cardSet" | "document";
 
@@ -31,8 +13,6 @@ type TrashItemRow = {
   title: string;
   subtitle: string;
 };
-
-
 
 const getFolderTitle = (folder: Folder): string => {
   return folder.folderName || "無題のフォルダ";
@@ -92,8 +72,6 @@ const toTrashItemIds = (row: TrashItemRow) => ({
   cardSetIds: row.kind === "cardSet" ? [row.id] : [],
   documentIds: row.kind === "document" ? [row.id] : [],
 });
-
-
 
 const TrashPage = () => {
   const { currentUser, loading } = useAuthSession();
@@ -226,7 +204,5 @@ const TrashPage = () => {
     </main>
   );
 };
-
-
 
 export default TrashPage;

@@ -1,26 +1,9 @@
 import { getImageFromFirestore } from "@/infrastructure/images/imageFirestoreReader";
-
-
-
 import { getLocalDb } from "@/infrastructure/localdb/client";
-
-
-
 import { getImageBlob } from "@/services/imageFileStore";
-
-
-
 import { scrubBlobUrlsDeep } from "@/services/localdb/blobUrl";
-
-
-
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
-
-
-
 import type { AssetRecord, AssetRemoteStatus, Card, CardBlock, CardFace, UploadedImage } from "@/types";
-
-
 
 type ImageRecordLike = Partial<AssetRecord> &
   Partial<UploadedImage> &
@@ -61,13 +44,9 @@ type MigrateLegacyImagesToAssetsParams = {
   userId: string;
 };
 
-
-
 const MIGRATION_VERSION = "v2";
 const MIGRATION_STORAGE_KEY_PREFIX = "legacy-image-asset-migration";
 const inFlightTouchMigrations = new Set<string>();
-
-
 
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;

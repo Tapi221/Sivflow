@@ -1,141 +1,31 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-
-
-
-
 import { CANONICAL_CARD_WIDTH, CARD_ROW_PX, layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
-
-
-
-
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
-
-
-
-
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-
-
-
-
 import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
-
-
-
-
 import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
-
-
-
-
 import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
-
-
-
-
 import { BlockEditModeContext } from "@/components/card/blocks/core/BlockEditModeContext";
-
-
-
-
 import { CardFaceWithAttachments } from "@/components/card/common/CardFaceWithAttachments";
-
-
-
-
 import { CardEditorLoadingState, NewCardIdleState } from "@/components/card/editor/CardEditorPaneStates";
-
-
-
-
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
-
-
-
-
 import { CardOverlayTopRight } from "@/components/card/frame/CardOverlayTopRight";
-
-
-
-
 import { FaceSwitchBadge } from "@/components/card/frame/FaceSwitchBadge";
-
-
-
-
 import { CardMetaPanel } from "@/components/card/panels/CardMetaPanel";
-
-
-
-
 import { buildCardChromeClassName, buildCardShellClassName, type CardPresentationContext, type CardPresentationContextInput, type CardPresentationState, resolveCardPresentationState } from "@/components/card/presentation/cardPresentation";
-
-
-
-
 import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
-
-
-
-
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
-
-
-
-
 import { MetaPanelToggleIcon } from "@/components/card/shell/MetaPanelToggleIcon";
-
-
-
-
 import { useCardSyncStatusReporter } from "@/components/card/shell/useCardSyncStatusReporter";
-
-
-
-
 import { CardEditorPaneMediaDialogs } from "./CardEditorPaneMediaDialogs";
-
-
-
-
 import { CardEditorPaneReadonlySurface } from "./CardEditorPaneReadonlySurface";
-
-
-
-
 import { useCardEditorPaneController } from "./useCardEditorPaneController";
-
-
-
-
 import { CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX, CARD_PANE_WIDTH_STEP_PX, useCardEditorPaneWidth } from "./useCardEditorPaneWidth";
-
-
-
-
 import { X } from "@/ui/icons";
-
-
-
-
 import { cn } from "@/lib/utils";
-
-
-
-
 import type { Card, CardBlock, CardFaceAttachments } from "@/types/domain/card";
-
-
-
-
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-
-
-
-
 import { toMillisOrNull } from "@/utils/toMillis";
-
-
 
 type CardEditorPaneSettings = {
   accentColor?: string;
@@ -207,11 +97,7 @@ type EditorSidePaneProps = {
   overlayTopRight?: React.ReactNode;
 };
 
-
-
 const EMPTY_BLOCKS: CardBlock[] = [];
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -299,8 +185,6 @@ const areEditorSidePanePropsEqual = (
   prev.actionsTopLeft === next.actionsTopLeft &&
   prev.actionsTopRight === next.actionsTopRight &&
   prev.overlayTopRight === next.overlayTopRight;
-
-
 
 const EditorSidePaneInner = ({
   side,
@@ -436,13 +320,9 @@ const EditorSidePaneInner = ({
   );
 };
 
-
-
 const EditorSidePane = memo(EditorSidePaneInner, areEditorSidePanePropsEqual);
 
 EditorSidePane.displayName = "EditorSidePane";
-
-
 
 export const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx = null, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, hideMetaPanel = false, dockToolbarsToTop = false, hideBlockToolbars = false, externalToolbarMountQ = null, externalToolbarMountA = null, settingsOverride = null, embeddedInPager = false, pairGapClassName = "gap-0", presentationContext, showResizeHandle: showResizeHandleProp = true, onSyncStatusChange, overlayTopInsetPx = 0, displayMode = "fixed", cardLayoutMode = "split", zoom = 1, }: CardEditorPaneProps) => { const controller = useCardEditorPaneController({ selectedCardId, folderId, cardSetId, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, settingsOverride, });
 

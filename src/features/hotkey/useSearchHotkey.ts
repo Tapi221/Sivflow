@@ -1,18 +1,7 @@
 import { useEffect } from "react";
-
-
-
 import { useSearchStore } from "@/features/search/store/useSearchStore";
-
-
-
 import { isPrimaryShortcut, isTypingTarget } from "./hotkeyGuards";
-
-
-
 import { hasOpenModalDialog } from "./modalGuards";
-
-
 
 export const useSearchHotkey = () => { const isOpen = useSearchStore((state) => state.isOpen);
   const toggle = useSearchStore((state) => state.toggle);

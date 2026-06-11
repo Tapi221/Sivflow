@@ -1,30 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
-
-
-
 import { getFallbackProjectColor, getFolderProjectColor, isProjectColor } from "@/components/folder/explorer/model/projectColor";
-
-
-
 import { getFolderId, UNTITLED_PROJECT_NAME, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
-
-
-
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
-
-
-
 import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
-
-
-
 import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
-
-
-
 import type { AppCalendarItem } from "./scheduleScreen.types";
-
-
 
 export type CreateRootFolderProjectInput = { label: string;
   color?: string;
@@ -48,13 +28,9 @@ type ProjectVisibilityMap = Record<string, boolean>;
 
 type StoredLegacyProject = Partial<AppCalendarItem>;
 
-
-
 const LEGACY_APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
 const PROJECT_VISIBILITY_STORAGE_KEY = "flashcard-master:schedule:root-folder-project-visibility";
 const EMPTY_COLLECTION: never[] = [];
-
-
 
 export const normalizeRootFolderProjectLabel = (label: string): string => label.trim().toLowerCase();
 

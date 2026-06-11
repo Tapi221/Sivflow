@@ -1,26 +1,9 @@
 import { getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
-
-
-
 import { putImageBlob } from "@/services/imageFileStore";
-
-
-
 import { getLocalDb } from "@/services/localDB";
-
-
-
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
-
-
-
 import type { AssetRecord, UploadedImage } from "@/types";
-
-
-
 import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize.utils";
-
-
 
 const buildAssetRemoteKey = (uid: string, assetId: string) => `users/${uid}/assets/${assetId}`;
 

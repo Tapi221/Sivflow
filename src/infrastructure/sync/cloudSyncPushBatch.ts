@@ -1,36 +1,14 @@
 import type { FieldValue } from "firebase/firestore";
-
-
-
 import * as Firestore from "firebase/firestore";
-
-
-
 import { Timestamp, writeBatch } from "firebase/firestore";
-
-
-
 import { getPushDocumentRef, requireCloudSyncFirestore } from "./cloudSyncFirestoreRefs";
-
-
-
 import { chunkCloudSyncChangesBySize } from "@/application/usecases/cloudSyncBatching";
-
-
-
 import { getChangeId, getChangeParts, sanitizeSyncDataForCloud } from "@/application/usecases/cloudSyncShared";
-
-
-
 import type { SyncChange } from "@/services/interfaces/ISyncService";
-
-
 
 type SyncChangeWithOperation = SyncChange & {
   operationType?: unknown;
 };
-
-
 
 const cloudUpdatedAt = (): FieldValue | Timestamp => {
   const fn = (Firestore as Record<string, unknown>).serverTimestamp;

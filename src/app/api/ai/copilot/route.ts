@@ -1,15 +1,6 @@
 import type { NextRequest } from 'next/server';
-
-
-
-
 import { generateText } from 'ai';
-
-
-
 import { NextResponse } from 'next/server';
-
-
 
 export const POST = async (req: NextRequest) => { const { apiKey: key, model = 'gpt-4o-mini', prompt, system, } = await req.json();
 

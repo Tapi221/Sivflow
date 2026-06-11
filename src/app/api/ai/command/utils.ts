@@ -1,27 +1,9 @@
 import type { UIMessage } from 'ai';
-
-
-
 import type { ChatMessage } from './types';
-
-
-
-
 import { getMarkdown } from '@platejs/ai';
-
-
-
 import { serializeMd } from '@platejs/markdown';
-
-
-
 import dedent from 'dedent';
-
-
-
 import { type SlateEditor, KEYS, RangeApi } from 'platejs';
-
-
 
 export type StructuredPromptSections = { context?: string;
   examples?: string[] | string;
@@ -36,12 +18,8 @@ export type StructuredPromptSections = { context?: string;
   tone?: string;
 };
 
-
-
 const SELECTION_START = '<Selection>';
 const SELECTION_END = '</Selection>';
-
-
 
 export const tag = (tag: string, content?: string | null) => { if (!content) return '';
 

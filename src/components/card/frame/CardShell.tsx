@@ -1,22 +1,8 @@
 import React from "react";
-
-
-
 import { cardHeightPxToLayoutRows, layoutRowsToCardHeightPx, snapMinCardHeightPx } from "@/domain/card/cardGeometry.constants";
-
-
-
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-
-
-
 import { cn } from "@/lib/utils";
-
-
-
 import type { CssVars } from "@/types/style";
-
-
 
 interface CardShellProps extends React.HTMLAttributes<HTMLDivElement> {
   actions?: React.ReactNode;
@@ -35,8 +21,6 @@ interface CardShellProps extends React.HTMLAttributes<HTMLDivElement> {
   showResizeHandle?: boolean;
   lockHeight?: boolean;
 }
-
-
 
 const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
   (
@@ -424,8 +408,6 @@ const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     );
   },
 );
-
-
 
 CardShell.displayName = "CardShell";
 

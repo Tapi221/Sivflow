@@ -1,36 +1,20 @@
 'use client';
 
 import * as React from 'react';
-
 import { AIChatPlugin, AIPlugin, useEditorChat, useLastAssistantMessage } from '@platejs/ai/react';
-
 import { getTransientCommentKey } from '@platejs/comment';
-
 import { BlockSelectionPlugin, useIsSelecting } from '@platejs/selection/react';
-
 import { getTransientSuggestionKey } from '@platejs/suggestion';
-
 import { Command as CommandPrimitive } from 'cmdk';
-
 import { Album, BadgeHelp, BookOpenCheck, Check, CornerUpLeft, FeatherIcon, ListEnd, ListMinus, ListPlus, Loader2Icon, PauseIcon, PenLine, SmileIcon, Wand, X } from 'lucide-react';
-
 import { type NodeEntry, type SlateEditor, isHotkey, KEYS, NodeApi, TextApi } from 'platejs';
-
 import { type PlateEditor, useEditorPlugin, useEditorRef, useFocusedLast, useHotkeys, usePluginOption } from 'platejs/react';
-
 import { AIChatEditor } from './ai-chat-editor';
-
 import { Button } from './button';
-
 import { Command, CommandGroup, CommandItem, CommandList } from './command';
-
 import { Popover, PopoverAnchor, PopoverContent } from './popover';
-
 import { commentPlugin } from '@/components/editor/plugins/comment-kit';
-
 import { cn } from '@/lib/utils';
-
-
 
 type EditorChatState =
   | 'cursorCommand'
@@ -67,8 +51,6 @@ type AIMenuItemsProps = {
   setInput: (value: string) => void;
   setValue: (value: string) => void;
 };
-
-
 
 const AI_COMMENT_ICON = (
   <svg
@@ -348,8 +330,6 @@ const MENU_STATE_ITEMS: Record<EditorChatState, MenuStateGroup[]> = {
     },
   ],
 };
-
-
 
 const AIMenu = () => {
   const { api, editor } = useEditorPlugin(AIChatPlugin);
@@ -689,7 +669,5 @@ const AILoadingBar = () => {
 
   return null;
 };
-
-
 
 export { AILoadingBar, AIMenu, AIMenuItems };

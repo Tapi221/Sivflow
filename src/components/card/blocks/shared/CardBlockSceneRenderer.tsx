@@ -1,86 +1,24 @@
 import React from "react";
-
-
-
 import { CodeBlockContent } from "@/components/card/blocks/code/CodeBlockContent";
-
-
-
 import { normalizeEditorLanguage } from "@/components/card/blocks/code/codeBlockLanguage";
-
-
-
 import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
-
-
-
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
-
-
-
 import { ImageBlockContent } from "@/components/card/blocks/image/ImageBlockContent";
-
-
-
 import { ImageBlockShell } from "@/components/card/blocks/image/ImageBlockShell";
-
-
-
 import { MarkdownBlockContent, type MarkdownReplaceBlock } from "@/components/card/blocks/markdown/MarkdownBlockContent";
-
-
-
 import { MathBlockPreviewPane } from "@/components/card/blocks/math/MathBlockPreviewPane";
-
-
-
 import { MathEditorDialog } from "@/components/card/blocks/math/MathEditorDialog";
-
-
-
 import { QuestionBlockContent } from "@/components/card/blocks/question/QuestionBlockContent";
-
-
-
 import { TextBlockContent } from "@/components/card/blocks/text/TextBlockContent";
-
-
-
 import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
-
-
-
 import { AudioPlayer } from "@/components/card/media/CardMedia";
-
-
-
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-
-
 import { Code, HelpCircle, Link, NotebookPen, Sigma, Type, Volume2 } from "@/ui/icons";
-
-
-
 import { cn } from "@/lib/utils";
-
-
-
 import type { CodeBlockData } from "@/types/core/code-block";
-
-
-
 import type { UploadedImage } from "@/types/domain/assets";
-
-
-
 import type { MathBlockData, ReferenceBlockData } from "@/types/domain/base";
-
-
-
 import type { CardBlock } from "@/types/domain/card";
-
-
 
 export type CardBlockLayoutReplaceBlock = MarkdownReplaceBlock;
 
@@ -144,8 +82,6 @@ type SceneProps = Readonly<{
   viewerProps?: ViewerProps;
 }>;
 
-
-
 const NOOP = () => {};
 const SUPPORTED_LANGUAGES = [
   { value: "javascript", label: "JavaScript" },
@@ -166,8 +102,6 @@ const SUPPORTED_LANGUAGES = [
 ] as const;
 const MAX_MATH_LATEX_LENGTH = 10000;
 
-
-
 const renderGridOffsetSpacer = (gridOffsetPx: number) => gridOffsetPx > 0 ? <div aria-hidden className="pointer-events-none" style={{ height: `${gridOffsetPx}px` }} /> : null;
 
 const renderEditorShellProps = (editorProps?: EditorProps) => ({
@@ -183,8 +117,6 @@ const renderEditorShellProps = (editorProps?: EditorProps) => ({
   canMoveDown: editorProps?.canMoveDown,
   dragHandleClassName: "js-block-drag-handle",
 });
-
-
 
 const SharedBlockShell = ({ mode, className, contentClassName, label, icon, accentColor, isBlockSelected, onDelete, onDuplicate, onMoveUp, onMoveDown, onMoveDragStart, onMoveDragEnd, canMoveUp, canMoveDown, dragHandleClassName, children }: SharedShellProps) => {
   if (mode === "view") {

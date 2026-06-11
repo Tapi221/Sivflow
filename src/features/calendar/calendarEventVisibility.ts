@@ -1,10 +1,5 @@
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-
-
-
 import type { AppCalendarItem, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink } from "./scheduleScreen.types";
-
-
 
 type CalendarEventSourceIndex = {
   projectById: Map<string, AppCalendarItem>;
@@ -23,11 +18,7 @@ type CalendarEventDisplayMetadataInput = CalendarEventVisibilityInput & {
   googleCalendarColorOverrides: GoogleCalendarColorOverrideMap;
 };
 
-
-
 const GOOGLE_CALENDAR_KEY_SEPARATOR = "\u001f";
-
-
 
 const createGoogleCalendarColorOverrideKey = (accountId: string, calendarId: string): string => `${accountId}:${calendarId}`;
 

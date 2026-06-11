@@ -1,26 +1,9 @@
 import { useMemo, useState } from "react";
-
-
-
 import { useLiveQuery } from "dexie-react-hooks";
-
-
-
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-
-
-
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-
-
-
 import { getLocalDb } from "@/services/localdb";
-
-
-
 import type { DocumentItem } from "@/types";
-
-
 
 type DocumentWithLegacyDelete = DocumentItem & {
   is_deleted?: boolean;
@@ -29,8 +12,6 @@ type DocumentWithLegacyDelete = DocumentItem & {
 type UseDocumentsReadOptions = {
   enabled?: boolean;
 };
-
-
 
 export const useDocumentsRead = ( folderId?: string, options?: UseDocumentsReadOptions, ) => { const { currentUser } = useAuthSession();
   const userId = currentUser?.uid ?? null;

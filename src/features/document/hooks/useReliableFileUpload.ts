@@ -1,38 +1,12 @@
 import { useCallback, useState } from "react";
-
-
-
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-
-
-
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-
-
-
 import { auth, storage } from "@/services/firebase";
-
-
-
 import { imageDB } from "@/services/ImageDatabaseWriter";
-
-
-
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
-
-
-
 import type { BlobUrl, StorageUrl } from "@/types/core/branded";
-
-
-
 import type { UploadedImage, UploadFallbackReason, UploadMetadata, UploadSource } from "@/types";
-
-
-
 import { generateSafeStoragePath } from "@/utils/fileUtils";
-
-
 
 interface UploadResult {
   url: string;
@@ -67,8 +41,6 @@ type UploadValidationRule = {
   maxFileSize: number;
   defaultMimeType?: string;
 };
-
-
 
 const DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024;
 const DOCUMENT_MAX_FILE_SIZE = 50 * 1024 * 1024;
@@ -118,8 +90,6 @@ const UPLOAD_VALIDATION_RULES: Record<UploadKind, UploadValidationRule> = {
     defaultMimeType: "application/pdf",
   },
 };
-
-
 
 const isContextObject = (
   value: UploadMetadata["context"] | undefined,

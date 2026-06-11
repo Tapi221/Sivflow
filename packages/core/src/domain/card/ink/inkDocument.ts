@@ -23,13 +23,9 @@ export type InkDocument = { version: number;
   deletedStrokeIds?: string[];
 };
 
-
-
 export const INK_DOCUMENT_VERSION = 2;
 export const INK_PAPER_W = 1000;
 export const INK_PAPER_H = 1414;
-
-
 
 const isFiniteNumber = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value);

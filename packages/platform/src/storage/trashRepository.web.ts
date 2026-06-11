@@ -1,30 +1,10 @@
 import type { TrashRepository } from "@core/usecases/trash";
-
-
-
 import type { DeleteEntity } from "@/application/usecases/syncQueuePayloadGuards";
-
-
-
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
-
-
-
 import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
-
-
-
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
-
-
-
 import { getLocalDb } from "@/services/localdb";
-
-
-
 import type { Card, CardSet, Document, Folder } from "@/types";
-
-
 
 type LocalFirstTrashDb = Awaited<ReturnType<typeof getLocalDb>> & {
   updateItem: (table: "folders" | "cards" | "cardSets" | "documents", id: string, changes: Record<string, unknown>) => Promise<number>;
@@ -33,16 +13,12 @@ type LocalFirstTrashDb = Awaited<ReturnType<typeof getLocalDb>> & {
 
 type TrashTable = "folders" | "cards" | "cardSets" | "documents";
 
-
-
 const DELETE_ENTITY_BY_TABLE: Record<TrashTable, DeleteEntity> = {
   folders: "folder",
   cards: "card",
   cardSets: "cardSet",
   documents: "document",
 };
-
-
 
 const restoreLocalTrashRecord = async (userId: string, table: TrashTable, id: string): Promise<void> => {
   const db = await getLocalDb(userId);

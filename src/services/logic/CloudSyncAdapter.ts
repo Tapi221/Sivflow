@@ -1,18 +1,7 @@
 import { collection, deleteDoc, doc, getDoc, getDocs, query, Timestamp, updateDoc, where } from "firebase/firestore";
-
-
-
 import { requireFirestoreDb } from "@/infrastructure/firebase/client";
-
-
-
 import { pullCloudSyncDiff, pullCloudSyncFull, pushCloudSyncBatch } from "@/infrastructure/sync/cloudSyncFirestoreAdapter";
-
-
-
 import type { CloudDeviceStatus, ICloudSyncAdapter, SyncChange } from "@/services/interfaces/ISyncService";
-
-
 
 const getDeviceMetadataPath = (userId: string, deviceId: string) => {
   return `sync_metadata/${userId}/devices/${deviceId}`;

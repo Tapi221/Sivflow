@@ -1,7 +1,4 @@
 import { clearCachedGoogleCalendarAccount } from "./googleCalendarEventCache";
-
-
-
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
 

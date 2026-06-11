@@ -1,26 +1,9 @@
 import { useEffect, useMemo, useReducer } from "react";
-
-
-
 import { fetchGoogleTaskLists } from "./gtask.api";
-
-
-
 import { refreshConnectedServiceAccessToken, requestConnectedServiceAccessToken } from "@/integration/google-integration/google.oauth";
-
-
-
 import { getServerStoredGoogleConnectedServiceAccessToken, isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
-
-
-
 import type { GoogleConnectedServiceAccountEntry, GoogleConnectedServiceAccountTokenUpdate } from "@/integration/google-integration/googleAccount.types";
-
-
-
 import type { GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
-
-
 
 export type GoogleTaskListAccountState = { taskLists: GoogleTaskListItem[];
   isLoading: boolean;
@@ -42,15 +25,11 @@ type AccountTokenSnapshot = {
   connectionStatus: GoogleConnectedServiceAccountEntry["connectionStatus"];
 };
 
-
-
 const EMPTY_ACCOUNT_STATE: GoogleTaskListAccountState = {
   taskLists: [],
   isLoading: false,
   error: null,
 };
-
-
 
 const shouldHideAuthRecoveryError = (error: unknown): boolean => {
   if (!(error instanceof Error)) return false;

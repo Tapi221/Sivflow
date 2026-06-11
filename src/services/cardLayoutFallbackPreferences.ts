@@ -1,17 +1,10 @@
 import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
-
-
-
 import { DEFAULT_SPLIT_FALLBACK_CARD_LAYOUT_MODE, normalizeSplitFallbackCardLayoutMode, type SplitFallbackCardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-
-
 
 interface SplitFallbackPreferencesStore {
   version: 1;
   byDeviceScope: Record<string, SplitFallbackCardLayoutMode>;
 }
-
-
 
 const emptyStore = (): SplitFallbackPreferencesStore => ({
   version: 1,

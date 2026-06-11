@@ -1,22 +1,13 @@
 'use client';
 
 import * as React from 'react';
-
 import type { PointRef, TElement } from 'platejs';
-
 import { type ComboboxItemProps, Combobox, ComboboxGroup, ComboboxGroupLabel, ComboboxItem, ComboboxPopover, ComboboxProvider, ComboboxRow, Portal, useComboboxContext, useComboboxStore, } from '@ariakit/react';
-
 import { filterWords } from '@platejs/combobox';
-
 import { type UseComboboxInputResult, useComboboxInput, useHTMLInputCursorState, } from '@platejs/combobox/react';
-
 import { cva } from 'class-variance-authority';
-
 import { useComposedRef, useEditorRef } from 'platejs/react';
-
 import { cn } from '@/lib/utils';
-
-
 
 type FilterFn = (
   item: { value: string; group?: string; keywords?: string[]; label?: string },
@@ -44,8 +35,6 @@ type InlineComboboxProps = {
   setValue?: (value: string) => void;
 };
 
-
-
 const InlineComboboxContext = React.createContext<InlineComboboxContextValue>(
   null as unknown as InlineComboboxContextValue
 );
@@ -67,8 +56,6 @@ const comboboxItemVariants = cva(
 
 const InlineComboboxRow = ComboboxRow;
 
-
-
 const defaultFilter: FilterFn = (
   { group, keywords = [], label, value },
   search
@@ -81,8 +68,6 @@ const defaultFilter: FilterFn = (
     filterWords(keyword!, search)
   );
 };
-
-
 
 const InlineCombobox = ({
   children,
@@ -424,8 +409,6 @@ function InlineComboboxGroupLabel({
     />
   );
 }
-
-
 
 InlineComboboxInput.displayName = 'InlineComboboxInput';
 

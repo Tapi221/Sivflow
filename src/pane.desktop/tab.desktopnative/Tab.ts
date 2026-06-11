@@ -29,8 +29,6 @@ type WorkspaceTabBase = {
   sectionKey: WorkspaceSidebarSection;
 };
 
-
-
 export const WORKSPACE_DEFAULT_EXPLORER_TAB_ID = "explorer:default" as const;
 
 

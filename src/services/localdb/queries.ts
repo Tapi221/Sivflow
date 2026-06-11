@@ -1,23 +1,8 @@
 import { Dexie, type Table } from "dexie";
-
-
-
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
-
-
-
 import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
-
-
-
 import { warnOncePerSession } from "@/services/localDBRuntimeState";
-
-
-
 import { normalizeDate } from "@/shared/codec/date";
-
-
-
 import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 
 
@@ -52,8 +37,6 @@ type MutableDocumentBlobFields = {
   localUrl?: string | null;
   blobUrl?: string | null;
 };
-
-
 
 export const getItem = async (db: QueryDb, table: string, id: string) => { const item = await db.table(table).get(id);
   if (table === "cards") return item ? normalizeCard(item) : item;

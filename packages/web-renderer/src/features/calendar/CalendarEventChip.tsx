@@ -1,27 +1,15 @@
 import type { CSSProperties } from "react";
-
-
-
 import { memo } from "react";
-
-
-
 import type { CalendarTimeGridLayoutEntry } from "@core/calendar";
-
-
 
 type CalendarEventChipProperties = {
   entry: CalendarTimeGridLayoutEntry;
 };
 
-
-
 const CHIP_TEXT_FADE_STYLE: CSSProperties = {
   WebkitMaskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 12px), transparent 100%)",
   maskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 12px), transparent 100%)",
 };
-
-
 
 const getTimeLabel = (date: Date): string => {
   return new Intl.DateTimeFormat("ja-JP", {
@@ -43,8 +31,6 @@ const getEventChipStyle = (entry: CalendarTimeGridLayoutEntry): CSSProperties =>
     width: `calc(${entry.style.width}% - 4px)`,
   };
 };
-
-
 
 const CalendarEventChip = memo(({ entry }: CalendarEventChipProperties) => {
   const title = entry.event.title || "Untitled";

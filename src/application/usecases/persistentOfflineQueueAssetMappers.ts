@@ -1,10 +1,6 @@
 import type { AssetRecord, UploadedImage } from "@/types";
 
-
-
 export type AssetLikeRecord = Partial<AssetRecord> & Partial<UploadedImage>;
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;

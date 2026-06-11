@@ -56,6 +56,4 @@ const PositionalRuledLayer = ({
   ));
 };
 
-
-
 export { PositionalRuledLayer };

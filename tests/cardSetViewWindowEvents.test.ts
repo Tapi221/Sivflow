@@ -1,12 +1,6 @@
 // @vitest-environment jsdom
 import { CARD_SET_VIEW_EVENTS } from "@/features/cardsetview/events/cardSetViewEvents.constants";
-
-
-
 import { describe, expect, it, vi } from "vitest";
-
-
-
 import { dispatchCardSetViewWindowEvent, subscribeCardSetViewWindowEvent } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 
 describe("cardSetViewWindowEvents", () => {

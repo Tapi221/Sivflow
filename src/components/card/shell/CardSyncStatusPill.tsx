@@ -1,26 +1,9 @@
 import React from "react";
-
-
-
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-
-
-
 import { cn } from "@/lib/utils";
-
-
-
 import { RefreshCw } from "@/ui/icons";
-
-
-
 import { formatLastSyncedAt } from "./formatLastSyncedAt";
-
-
-
 import { overlayGlassPillClassName } from "./overlaySurfaceClassNames";
-
-
 
 interface CardSyncStatusPillProps {
   lastSyncedAtMs: number | null;
@@ -30,8 +13,6 @@ interface CardSyncStatusPillProps {
   onRetry?: () => Promise<void> | void;
   className?: string;
 }
-
-
 
 export const CardSyncStatusPill = ({ lastSyncedAtMs, hasError = false, isRetrying = false, canRetry = false, onRetry, className, }: CardSyncStatusPillProps) => { const label = hasError ? "同期失敗" : `最終同期: ${formatLastSyncedAt(lastSyncedAtMs)}`;
 

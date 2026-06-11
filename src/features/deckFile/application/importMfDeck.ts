@@ -1,22 +1,8 @@
 import { normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
-
-
-
 import { restoreMfDeckMediaInBlocks } from "./mfDeckMediaRestorer";
-
-
-
 import type { MfDeckArchiveV1, MfDeckCardV1, MfDeckIssue } from "@/features/deckFile/domain/mfDeck.types";
-
-
-
 import type { Card, CardBlock, CardSet } from "@/types";
-
-
-
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-
-
 
 export type CreateMfDeckCardSet = ( name: string, targetFolderId?: string | null, opts?: { description?: string;
     id?: string;
@@ -54,8 +40,6 @@ export type ImportMfDeckArchiveResult = { createdCardSetId: string;
   createdCount: number;
   issues: MfDeckIssue[];
 };
-
-
 
 const cloneJson = <T>(value: T): T => {
   if (value === undefined) return value;

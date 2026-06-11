@@ -1,27 +1,9 @@
 import { useMemo, useState, type ReactNode } from "react";
-
-
-
-
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-
-
-
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
-
-
-
 import { readStoredAccounts, type StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
-
-
-
 import type { UserSettings } from "@/types";
-
-
-
 import { ChevronRight, Globe, Keyboard, Shield, Trophy, Type, Volume2 } from "@/ui/icons";
-
-
 
 type SettingsSectionId = "account" | "general" | "study" | "editor" | "audio" | "hotkey";
 
@@ -121,8 +103,6 @@ type AccountProfile = {
   photoUrl: string | null;
   providerId: string | null;
 };
-
-
 
 const SETTINGS_CARD_CLASS_NAME = "rounded-[18px] bg-white shadow-[0_8px_24px_rgba(16,24,40,0.06)] ring-1 ring-black/[0.03]";
 const SETTINGS_ROW_CLASS_NAME = "flex min-h-[57px] w-full items-center gap-4 px-4 text-left transition active:scale-[0.995]";
@@ -293,8 +273,6 @@ const MARKDOWN_TAB_OPTIONS: readonly SettingChoiceOption<NonNullable<UserSetting
   { value: 8, label: "8" },
 ];
 
-
-
 const normalizeAccountEmail = (email: string | null | undefined): string | null => {
   const normalizedEmail = email?.trim().toLowerCase();
   return normalizedEmail ? normalizedEmail : null;
@@ -333,8 +311,6 @@ const getAccountInitial = (displayName: string): string => {
   const initial = displayName.trim().charAt(0);
   return initial ? initial.toUpperCase() : "M";
 };
-
-
 
 const SettingsRouteRow = ({ active, description, icon, label, onClick }: SettingsRouteRowProps) => (
   <button type="button" className={`${SETTINGS_ROW_CLASS_NAME}${active ? " bg-[#fafafa]" : ""}`} onClick={onClick} aria-current={active ? "page" : undefined}>
@@ -504,7 +480,5 @@ const SettingScreen = () => {
     </main>
   );
 };
-
-
 
 export default SettingScreen;

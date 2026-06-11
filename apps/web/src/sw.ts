@@ -1,38 +1,12 @@
 /// <reference lib="WebWorker" />
 
 import { CacheableResponsePlugin } from "workbox-cacheable-response";
-
-
-
-
 import { clientsClaim } from "workbox-core";
-
-
-
-
 import { ExpirationPlugin } from "workbox-expiration";
-
-
-
-
 import type { PrecacheEntry } from "workbox-precaching";
-
-
-
-
 import { cleanupOutdatedCaches, matchPrecache, precacheAndRoute } from "workbox-precaching";
-
-
-
-
 import { registerRoute, setCatchHandler } from "workbox-routing";
-
-
-
-
 import { CacheFirst, NetworkFirst } from "workbox-strategies";
-
-
 
 declare global {
   interface ServiceWorkerGlobalScope {
@@ -47,15 +21,11 @@ type ViteEnv = {
   GITHUB_SHA?: string;
 };
 
-
-
 declare let self: ServiceWorkerGlobalScope;
 
 const env = (import.meta as ImportMeta & { env?: ViteEnv }).env;
 
 const cacheVersion = env?.VITE_BUILD_VERSION ?? env?.GITHUB_SHA ?? "dev";
-
-
 
 self.addEventListener("message", (event) => {
   if (event.data && (event.data as { type?: string }).type === "SKIP_WAITING") {
@@ -114,7 +84,5 @@ setCatchHandler(async ({ request }) => {
   }
   return Response.error();
 });
-
-
 
 export {};

@@ -1,21 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-
-
-
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-
-
 
 type CalendarEventsSnapshot = {
   scopeKey: string;
   events: GoogleCalendarEvent[];
 };
 
-
-
 export const TRANSIENT_EMPTY_CALENDAR_EVENTS_HOLD_MS = 350;
-
-
 
 export const createCalendarEventsScopeKey = (rangeStart: Date, rangeEnd: Date): string => `${rangeStart.toISOString()}|${rangeEnd.toISOString()}`;
 

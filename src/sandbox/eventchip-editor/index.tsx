@@ -1,36 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-
-
-
-
 import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
-
-
-
 import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
-
-
-
 import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
-
-
-
 import * as C from "@/features/calendar/calendar.constants.desktop";
-
-
-
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
-
-
-
 import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";
-
-
-
 import type { CalendarGridStyle } from "@/features/calendar/scheduleScreen.types";
-
-
-
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 type AutosaveState = "idle" | "saving" | "saved" | "failed";

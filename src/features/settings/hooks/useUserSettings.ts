@@ -1,38 +1,16 @@
 import { useCallback, useEffect, useMemo } from "react";
-
-
-
 import { useLiveQuery } from "dexie-react-hooks";
-
-
-
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-
-
-
 import { createDefaultEditorBlockSettings, parseEditorBlockSettings } from "@/lib/editorBlockSettings";
-
-
-
 import { getLocalDb } from "@/services/localdb";
-
-
-
 import type { UserSettings } from "@/types";
-
-
-
 import { useLocaleStore, type Locale } from "@shared/i18n/locale.store";
-
-
 
 const LEGACY_SETTING_KEYS = [
   "displayName",
   "profileImage",
   "folder" + "SidebarDisplayMode",
 ] as const;
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -46,11 +24,7 @@ const toLocale = (language: UserSettings["language"] | undefined): Locale => {
   return "ja";
 };
 
-
-
 export const DEFAULT_SETTINGS: Partial<UserSettings> = { language: "ja", weekStartDay: "monday", notificationsEnabled: false, soundEnabled: true, showReviewHard: true, showReviewEasy: true, autoCarryOver: true, delayBonusEnabled: false, reviewStartNextDay: true, defaultPreviewEnabled: false, autoDraftEnabled: true, autoSaveEnabled: true, autoVoiceQuestion: false, autoVoiceAnswer: false, cardEditorHeightPx: null, questionDisplayMode: "tap_to_reveal" as const, markdownTabSize: 2, editorBlockSettings: createDefaultEditorBlockSettings(), };
-
-
 
 const buildBootSettingsSnapshot = (): Partial<UserSettings> => ({
   ...DEFAULT_SETTINGS,
