@@ -68,9 +68,9 @@ export { value };
 export type { Value };
 `);
 
-    expect(formatted).toBe(`type Value = typeof value;
+    expect(formatted).toBe(`const value = 1;
 
-const value = 1;
+type Value = typeof value;
 
 export { value };
 export type { Value };
