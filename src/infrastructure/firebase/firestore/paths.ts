@@ -57,6 +57,4 @@ const storageStatsDocPathSegments = (userId: string, docId: string = "current"):
   return ["users", userId, "storageStats", docId];
 };
 
-
-
 export { foldersPathSegments, folderDocPathSegments, cardsPathSegments, cardDocPathSegments, imageDocPathSegments, storageStatsDocPathSegments };
