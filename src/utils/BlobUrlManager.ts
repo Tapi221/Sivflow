@@ -46,14 +46,10 @@ const BlobUrlManager = class {
 };
 const blobUrlManager = new BlobUrlManager();
 
-
-
 if (typeof window !== "undefined") {
   window.addEventListener("beforeunload", () => {
     blobUrlManager.revokeAll();
   });
 }
-
-
 
 export { blobUrlManager };

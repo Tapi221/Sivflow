@@ -7,8 +7,6 @@ import { cn } from "@/lib/utils";
 import { Tag as TagIcon } from "@/ui/icons";
 import { TagBadge } from "./TagBadge";
 
-
-
 interface BulkTagDialogProps {
   open?: boolean;
   isOpen?: boolean;
@@ -17,8 +15,6 @@ interface BulkTagDialogProps {
   folderId: string;
   folderName?: string;
 }
-
-
 
 const BulkTagDialog = ({
   open,
@@ -132,7 +128,5 @@ const BulkTagDialog = ({
     </Dialog>
   );
 };
-
-
 
 export default BulkTagDialog;
