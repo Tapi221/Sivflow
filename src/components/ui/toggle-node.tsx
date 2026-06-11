@@ -5,14 +5,13 @@ import * as React from 'react';
 import type { PlateElementProps } from 'platejs/react';
 
 import { useToggleButton, useToggleButtonState } from '@platejs/toggle/react';
-
 import { ChevronRight } from 'lucide-react';
-
 import { PlateElement } from 'platejs/react';
 
 import { Button } from './button';
 
-export function ToggleElement(props: PlateElementProps) { const element = props.element;
+export const ToggleElement = (props: PlateElementProps) => {
+  const element = props.element;
   const state = useToggleButtonState(element.id as string);
   const { buttonProps, open } = useToggleButton(state);
 
@@ -25,15 +24,9 @@ export function ToggleElement(props: PlateElementProps) { const element = props.
         contentEditable={false}
         {...buttonProps}
       >
-        <ChevronRight
-          className={
-            open
-              ? 'rotate-90 transition-transform duration-75'
-              : 'rotate-0 transition-transform duration-75'
-          }
-        />
+        <ChevronRight className={open ? 'rotate-90 transition-transform duration-75' : 'rotate-0 transition-transform duration-75'} />
       </Button>
       {props.children}
     </PlateElement>
   );
-}
+};
