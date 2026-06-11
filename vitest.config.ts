@@ -22,5 +22,8 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     exclude: ["**/node_modules/**", "**/dist/**", "nouse/**"],
+    maxWorkers: 1,
+    minWorkers: 1,
+    pool: "threads",
   },
 });
