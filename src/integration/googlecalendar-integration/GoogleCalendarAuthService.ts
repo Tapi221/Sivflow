@@ -3,10 +3,10 @@ import { fetchCalendarList } from "./gcal.api";
 import { readStoredAccounts, type StoredGoogleAccount, updateStoredAccountCalendarIds, updateStoredAccountToken } from "./gcal.multi-storage";
 import type { GoogleCalendarListItem } from "./gcalSync.types";
 
-export async function silentReconnect(accountId: string): Promise<{
+export const silentReconnect = async (accountId: string): Promise<{
   accessToken: string;
   calendars: GoogleCalendarListItem[];
-} | null> {
+} | null> => {
   try {
     const stored = readStoredAccounts().find(
       (a: StoredGoogleAccount) => a.id === accountId,
@@ -36,8 +36,8 @@ export async function silentReconnect(accountId: string): Promise<{
       accessToken: result.accessToken,
       calendars,
     };
-  } catch (e) {
-    console.error("[silentReconnect]", e);
+  } catch (error) {
+    console.error("[silentReconnect]", error);
     return null;
   }
-}
+};
