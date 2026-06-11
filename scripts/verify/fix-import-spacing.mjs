@@ -146,7 +146,7 @@ const applyNonOverlappingReplacements = (source, replacements) => {
   return acceptedReplacements.reduce((nextSource, replacement) => `${nextSource.slice(0, replacement.start)}${replacement.text}${nextSource.slice(replacement.end)}`, source);
 };
 
-const getTopLevelSpacingText = (filePath, source, sourceFile, previousStatement, statement) => {
+const getTopLevelSpacingText = (filePath, source, previousStatement, statement) => {
   const newline = getNewline(source);
   if (isImportStatement(previousStatement) && isImportStatement(statement)) return newline;
   if (!shouldFixBlockSpacing(filePath)) return null;
@@ -154,13 +154,9 @@ const getTopLevelSpacingText = (filePath, source, sourceFile, previousStatement,
 
   const previousCategory = getStatementOrderCategory(previousStatement);
   const category = getStatementOrderCategory(statement);
-  const blockSeparator = `${newline}${newline}`;
-  if (previousCategory !== category) return blockSeparator;
+  if (previousCategory === category) return newline;
 
-  const leadingWhitespace = getLeadingWhitespaceText(source, sourceFile, previousStatement, statement);
-  if (leadingWhitespace.includes(blockSeparator + newline)) return blockSeparator;
-
-  return null;
+  return `${newline}${newline}`;
 };
 
 const collectTopLevelSpacingReplacements = (filePath, source, sourceFile) => {
@@ -170,7 +166,7 @@ const collectTopLevelSpacingReplacements = (filePath, source, sourceFile) => {
   for (let index = 1; index < statements.length; index += 1) {
     const previousStatement = statements[index - 1];
     const statement = statements[index];
-    const spacingText = getTopLevelSpacingText(filePath, source, sourceFile, previousStatement, statement);
+    const spacingText = getTopLevelSpacingText(filePath, source, previousStatement, statement);
     if (spacingText === null) continue;
 
     const leadingWhitespace = getLeadingWhitespaceText(source, sourceFile, previousStatement, statement);
