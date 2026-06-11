@@ -23,7 +23,6 @@ const walkSourceFiles = (directory) => {
     return [entryPath];
   });
 };
-
 const toPosix = (value) => value.split(path.sep).join("/");
 const getRelativePath = (filePath) => toPosix(path.relative(ROOT_DIR, filePath));
 const shouldCheckFile = (filePath) => {
@@ -49,9 +48,16 @@ const isNullKeyword = (node) => node.kind === ts.SyntaxKind.NullKeyword;
 const isUndefinedIdentifier = (node) => ts.isIdentifier(node) && node.text === "undefined";
 const isNullishSentinel = (node) => isNullKeyword(node) || isUndefinedIdentifier(node);
 const isThisExpression = (node) => node.kind === ts.SyntaxKind.ThisKeyword;
+const isLiteralElementAccessArgument = (node) => ts.isStringLiteral(node) || ts.isNumericLiteral(node) || node.kind === ts.SyntaxKind.TrueKeyword || node.kind === ts.SyntaxKind.FalseKeyword;
 const isSafeReusableExpression = (node) => {
   if (ts.isIdentifier(node) || isThisExpression(node)) return true;
   if (ts.isPropertyAccessExpression(node)) return isSafeReusableExpression(node.expression);
+  if (ts.isElementAccessExpression(node)) {
+    const argumentExpression = node.argumentExpression;
+    if (!argumentExpression) return false;
+    if (!isSafeReusableExpression(node.expression)) return false;
+    return isLiteralElementAccessArgument(argumentExpression) || isSafeReusableExpression(argumentExpression);
+  }
 
   return false;
 };
