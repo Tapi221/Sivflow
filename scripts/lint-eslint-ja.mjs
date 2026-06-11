@@ -126,21 +126,21 @@ const translateReactHooksDepsMessage = (message, ruleId) => {
   if (ruleId !== "react-hooks/exhaustive-deps") return null;
 
   const missingSingleMatch = message.match(/^React Hook (.+) has a missing dependency: '(.+)'\. Either include it or remove the dependency array\.$/u);
-  if (missingSingleMatch) return `React Hook ${missingSingleMatch[1]} の依存配列に \`${missingSingleMatch[2]}\` が不足しています。依存配列へ追加するか、依存配列を削除してください。`;
+  if (missingSingleMatch) return `React フック ${missingSingleMatch[1]} の依存配列に \`${missingSingleMatch[2]}\` が不足しています。依存配列へ追加するか、依存配列を削除してください。`;
 
   const missingMultipleMatch = message.match(/^React Hook (.+) has missing dependencies: (.+)\. Either include them or remove the dependency array\.$/u);
-  if (missingMultipleMatch) return `React Hook ${missingMultipleMatch[1]} の依存配列に ${missingMultipleMatch[2]} が不足しています。依存配列へ追加するか、依存配列を削除してください。`;
+  if (missingMultipleMatch) return `React フック ${missingMultipleMatch[1]} の依存配列に ${missingMultipleMatch[2]} が不足しています。依存配列へ追加するか、依存配列を削除してください。`;
 
   const unnecessarySingleMatch = message.match(/^React Hook (.+) has an unnecessary dependency: '(.+)'\. Either exclude it or remove the dependency array\.$/u);
-  if (unnecessarySingleMatch) return `React Hook ${unnecessarySingleMatch[1]} の依存配列に不要な \`${unnecessarySingleMatch[2]}\` が含まれています。依存配列から除外するか、依存配列を削除してください。`;
+  if (unnecessarySingleMatch) return `React フック ${unnecessarySingleMatch[1]} の依存配列に不要な \`${unnecessarySingleMatch[2]}\` が含まれています。依存配列から除外するか、依存配列を削除してください。`;
 
   const unnecessaryMultipleMatch = message.match(/^React Hook (.+) has unnecessary dependencies: (.+)\. Either exclude them or remove the dependency array\.$/u);
-  if (unnecessaryMultipleMatch) return `React Hook ${unnecessaryMultipleMatch[1]} の依存配列に不要な ${unnecessaryMultipleMatch[2]} が含まれています。依存配列から除外するか、依存配列を削除してください。`;
+  if (unnecessaryMultipleMatch) return `React フック ${unnecessaryMultipleMatch[1]} の依存配列に不要な ${unnecessaryMultipleMatch[2]} が含まれています。依存配列から除外するか、依存配列を削除してください。`;
 
   const refCleanupMatch = message.match(/^The ref value '(.+)' will likely have changed by the time this effect cleanup function runs\. If this ref points to a node rendered by React, copy '(.+)' to a variable inside the effect, and use that variable in the cleanup function\.$/u);
   if (refCleanupMatch) return `effect の cleanup 実行時には ref 値 \`${refCleanupMatch[1]}\` が変わっている可能性があります。effect 内で変数にコピーし、cleanup ではその変数を使ってください。`;
 
-  return "React Hook の依存配列が実際に参照している値と一致していません。依存配列を修正してください。";
+  return "React フックの依存配列が実際に参照している値と一致していません。依存配列を修正してください。";
 };
 
 const translateConstantBinaryExpressionMessage = (message, ruleId) => {
