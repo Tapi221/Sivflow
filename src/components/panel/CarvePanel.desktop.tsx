@@ -83,4 +83,4 @@ const CarvePanelShell = ({ children, toolbar = null, overlay = null, leftPanel =
 
 
 
-export { CarvePanel, CarvePanelShell, CarvePanelViewport };
+export { CarvePanel, CarvePanelShell, CarvePanel

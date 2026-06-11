@@ -79,6 +79,8 @@ const PLAIN_MENU_LABEL_CLASS =
 
 
 
+
+
 /**
  * エクスプローラーの各種メニュー（追加ボタン、コンテキストメニュー）で共有されるパネルコンポーネント
  */
@@ -166,4 +168,3 @@ export const ExplorerMenuPanel = ({ actions, closeMenu, className, variant = "de
       ))}
     </DropdownMenuContent>
   );
-};

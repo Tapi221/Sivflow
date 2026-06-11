@@ -204,6 +204,3 @@ function MediaUrlDialogContent({
           Accept
         </AlertDialogAction>
       </AlertDialogFooter>
-    </>
-  );
-}

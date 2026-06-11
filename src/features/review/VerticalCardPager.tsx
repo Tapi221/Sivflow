@@ -4,8 +4,6 @@ import { cn } from "@/lib/utils";
 import { isTypingTarget } from "@/utils/isTypingTarget";
 import { buildVerticalCardPagerItemStyle, resolveVerticalCardPagerItemWidthSpec, type VerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";
 
-
-
 type ScrollAnchorFace = "question" | "answer";
 type ScrollAnchorSnapshot = {
   preserveKey: string | number | null;
@@ -35,8 +33,6 @@ export type VerticalCardPagerProps<T> = { cards: T[];
   scrollToActiveIndexBehavior?: ScrollBehavior;
 };
 
-
-
 export const ACTIVE_INDEX_RENDER_RADIUS = 6;
 const DEFAULT_CARD_WIDTH = CANONICAL_CARD_WIDTH;
 const CARD_GAP = 16;
@@ -45,8 +41,6 @@ const CARD_RADIUS_SM = 32;
 const CARD_RADIUS_MD = 40;
 const SCROLL_IDLE_COMMIT_DELAY_MS = 110;
 const SCROLL_ANCHOR_SUPPRESSION_MS = 180;
-
-
 
 const resolveCardBaseRadius = () => {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -76,8 +70,6 @@ const getCurrentTimeMs = () => {
 
   return Date.now();
 };
-
-
 
 const VerticalCardPagerFn = <T,>({
   cards,
@@ -348,14 +340,8 @@ const VerticalCardPagerFn = <T,>({
   );
 };
 
-
-
 const VerticalCardPager = React.memo(VerticalCardPagerFn) as typeof VerticalCardPagerFn;
 
-
-
 export { VerticalCardPager };
-
-
 
 export type { VerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";

@@ -47,6 +47,8 @@ const CONTEXT_MENU_COLLISION_PADDING_PX = 8;
 
 
 
+
+
 /**
  * 右クリックなどで表示される汎用的なコンテキストメニューのコンテナ
  */
@@ -100,4 +102,3 @@ export const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions
       />
     </DropdownMenu>
   );
-};

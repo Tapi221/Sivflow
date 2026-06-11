@@ -208,5 +208,4 @@ export const useTreeViewDerivedState = ({ folders, cards, cardSets = [], documen
     folderCards,
     folderStats,
     showMobileDetail,
-  };
-};
+  

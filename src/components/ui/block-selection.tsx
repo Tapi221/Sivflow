@@ -33,5 +33,3 @@ export function BlockSelection(props: PlateElementProps) { const isBlockSelected
       })}
       data-slot="block-selection"
     />
-  );
-}

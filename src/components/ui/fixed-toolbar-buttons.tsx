@@ -169,7 +169,4 @@ export function FixedToolbarButtons() { const readOnly = useEditorReadOnly();
 
       <ToolbarGroup>
         <ModeToolbarButton />
-      </ToolbarGroup>
-    </div>
-  );
-}
+      </Toolb

@@ -61,4 +61,3 @@ export const FilterPanelShell = ({ title, searchValue, searchPlaceholder = "æ¤œç
       </div>
     </div>
   );
-};

@@ -1,8 +1,6 @@
 import type { Card } from "@/types";
 import { type CardDisplayMode, type CardSet, normalizeCardDisplayMode } from "@/types/domain/cardSet";
 
-
-
 type UpdateCardSetInput = Partial<
   Pick<CardSet, "name" | "description" | "orderIndex" | "defaultDisplayMode">
 >;
@@ -21,8 +19,6 @@ interface ToggleCardFlagOptions {
   card: Card;
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
 }
-
-
 
 const buildNewCardPayload = ({
   cardSetId,

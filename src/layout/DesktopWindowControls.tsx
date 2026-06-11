@@ -3,20 +3,14 @@ import { windowControls } from "@/platform/capabilities/windowControls";
 import { hasDesktopBridge } from "@/platform/runtime";
 import "./DesktopWindowControls.css";
 
-
-
 type AppRegionStyle = CSSProperties & {
   WebkitAppRegion?: "no-drag";
 };
 type WindowControlAction = () => Promise<void>;
 
-
-
 const NO_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "no-drag",
 };
-
-
 
 const runWindowAction = (action: WindowControlAction) => {
   void action().catch((error) => {
@@ -31,8 +25,6 @@ const handleClickWindowAction = (
   event.stopPropagation();
   runWindowAction(action);
 };
-
-
 
 export const DesktopWindowControls = () => { const isDesktop = hasDesktopBridge();
   const [isMaximized, setIsMaximized] = useState(false);

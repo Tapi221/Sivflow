@@ -577,7 +577,4 @@ function EmojiPickerContent({
     >
       <div ref={refs.current.content} className="h-full">
         {isSearching ? SearchList() : EmojiList()}
-      </div>
-    </div>
-  );
-}
+   

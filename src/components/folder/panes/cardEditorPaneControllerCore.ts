@@ -194,5 +194,4 @@ export const createMetaPanelActions = ({ selectedCard, settings, updateCard, onC
     onUpdateTags: handleUpdateTags,
     onToggleDraft: handleToggleDraft,
     onUpdateTitle: handleUpdateTitle,
-  };
-};
+  }

@@ -100,6 +100,4 @@ export function MediaToolbar({ children, plugin, }: { children: React.ReactNode;
           </div>
         )}
       </PopoverContent>
-    </Popover>
-  );
-}
+    </Pop

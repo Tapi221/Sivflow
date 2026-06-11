@@ -1040,6 +1040,4 @@ export const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPane
           setReferenceItems={setReferenceItems}
         />
       </>
-    </BlockEditModeContext.Provider>
-  );
-};
+    </BlockEditModeContext.Provider

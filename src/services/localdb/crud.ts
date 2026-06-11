@@ -5,8 +5,6 @@ import { CURRENT_TAG_STORE } from "./tagStoreNames";
 import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueuePayloadGuards";
 import type { Card, Folder } from "@/types";
 
-
-
 export type EnqueueSync = ( table: string, type: "upload" | "download", payload: unknown, ) => Promise<void>;
 export interface TableLike<T extends object> { add(item: T): PromiseLike<unknown> | unknown;
   get(id: unknown): PromiseLike<T | undefined> | T | undefined;
@@ -147,8 +145,6 @@ type Upsert = {
   ): Promise<void>;
 };
 
-
-
 const ENTITY_BY_TABLE = {
   cards: "card",
   folders: "folder",
@@ -166,8 +162,6 @@ const DELETE_CAPABLE_ENTITIES = new Set<DeleteEntity>([
   "tag",
   "asset",
 ]);
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;

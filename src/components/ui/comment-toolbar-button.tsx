@@ -24,5 +24,4 @@ export function CommentToolbarButton() { const editor = useEditorRef();
     >
       <MessageSquareTextIcon />
     </ToolbarButton>
-  );
-}
+ 

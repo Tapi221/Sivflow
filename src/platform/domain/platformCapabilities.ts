@@ -8,8 +8,6 @@ export interface PlatformCapabilities { runtimeKind: PlatformRuntimeKind;
   canUseSystemClipboard: boolean;
 }
 
-
-
 export const WEB_PLATFORM_CAPABILITIES: PlatformCapabilities = { runtimeKind: "web", canOpenExternalUrl: true, canControlWindow: false, canUseNativeShare: false, canUseSecureStorage: false, canImportFromFileSystem: true, canUseSystemClipboard: true, };
 export const DESKTOP_PLATFORM_CAPABILITIES: PlatformCapabilities = { runtimeKind: "desktop", canOpenExternalUrl: true, canControlWindow: true, canUseNativeShare: false, canUseSecureStorage: true, canImportFromFileSystem: true, canUseSystemClipboard: true, };
 export const IOS_NATIVE_PLATFORM_CAPABILITIES: PlatformCapabilities = { runtimeKind: "ios-native", canOpenExternalUrl: true, canControlWindow: false, canUseNativeShare: true, canUseSecureStorage: true, canImportFromFileSystem: true, canUseSystemClipboard: true, };

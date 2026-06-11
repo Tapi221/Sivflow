@@ -82,4 +82,4 @@ const InfoToast = ({ notification, onDismiss }: InfoToastProps) => {
 
 
 
-export { InfoToast };
+export { InfoToas

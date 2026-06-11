@@ -211,4 +211,3 @@ export const CardSetRow = ({ treeNode, style, depth, isOpen, isSelected, toggle,
       }}
     />
   );
-};

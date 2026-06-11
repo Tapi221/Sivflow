@@ -48,4 +48,3 @@ export const DocumentRow = ({ treeNode, style, depth, isSelected, editingId, edi
       onClick={(event) => { if (event.defaultPrevented) return; onItemSelect({ type: "document", id: treeNode.rawId }); }}
     />
   );
-};

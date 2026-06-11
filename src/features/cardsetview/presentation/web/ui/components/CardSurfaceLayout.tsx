@@ -2,8 +2,6 @@ import React from "react";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { cn } from "@/lib/utils";
 
-
-
 export type CardSurfaceFace = "question" | "answer";
 type CardSurfaceLayoutProps = {
   cardLayoutMode: CardLayoutMode;
@@ -12,8 +10,6 @@ type CardSurfaceLayoutProps = {
   flipNode?: React.ReactNode;
   className?: string;
 };
-
-
 
 export const CardSurfaceLayout = ({ cardLayoutMode, questionNode, answerNode, flipNode, className }: CardSurfaceLayoutProps) => { if (cardLayoutMode === "split") { return <div className={cn("grid min-w-0 grid-cols-2 items-start gap-4", className)}>{questionNode}{answerNode}</div>;
   }
