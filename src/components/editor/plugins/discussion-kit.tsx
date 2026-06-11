@@ -1,12 +1,11 @@
 'use client';
 
-import type { TComment } from '@/components/comment';
-
 import { createPlatePlugin } from 'platejs/react';
 
+import type { TComment } from '@/components/ui/comment';
 import { BlockDiscussion } from '@/components/block-discussion';
 
-export type TDiscussion = {
+type TDiscussion = {
   id: string;
   comments: TComment[];
   createdAt: Date;
@@ -16,39 +15,6 @@ export type TDiscussion = {
 };
 
 const BLOCK_SUGGESTION_SELECTOR = '[data-block-suggestion="true"]';
-
-const getTargetElement = (target: EventTarget | null) => {
-  if (target instanceof HTMLElement) return target;
-  if (target instanceof Node) return target.parentElement;
-
-  return null;
-};
-
-export const getDiscussionClickTarget = ({
-  selector,
-  target,
-}: {
-  selector: string;
-  target: EventTarget | null;
-}) => {
-  const element = getTargetElement(target);
-
-  if (!element) return null;
-
-  return element.closest(selector) as HTMLElement | null;
-};
-
-export const getDiscussionBlockClickTarget = ({
-  selector = BLOCK_SUGGESTION_SELECTOR,
-  target,
-}: {
-  selector?: string;
-  target: EventTarget | null;
-}) =>
-  getDiscussionClickTarget({
-    selector,
-    target,
-  });
 
 const discussionsData: TDiscussion[] = [
   {
@@ -163,8 +129,40 @@ const usersData: Record<
   },
 };
 
-// This plugin is purely UI. It's only used to store the discussions and users data
-export const discussionPlugin = createPlatePlugin({
+const getTargetElement = (target: EventTarget | null) => {
+  if (target instanceof HTMLElement) return target;
+  if (target instanceof Node) return target.parentElement;
+
+  return null;
+};
+
+const getDiscussionClickTarget = ({
+  selector,
+  target,
+}: {
+  selector: string;
+  target: EventTarget | null;
+}) => {
+  const element = getTargetElement(target);
+
+  if (!element) return null;
+
+  return element.closest(selector) as HTMLElement | null;
+};
+
+const getDiscussionBlockClickTarget = ({
+  selector = BLOCK_SUGGESTION_SELECTOR,
+  target,
+}: {
+  selector?: string;
+  target: EventTarget | null;
+}) =>
+  getDiscussionClickTarget({
+    selector,
+    target,
+  });
+
+const discussionPlugin = createPlatePlugin({
   key: 'discussion',
   options: {
     currentUserId: 'alice',
@@ -180,4 +178,7 @@ export const discussionPlugin = createPlatePlugin({
     user: (id: string) => getOption('users')[id],
   }));
 
-export const DiscussionKit = [discussionPlugin];
+const DiscussionKit = [discussionPlugin];
+
+export type { TDiscussion };
+export { DiscussionKit, discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarget };
