@@ -66,7 +66,7 @@ const getArrowClassName = (side: TooltipSide) => {
 
 
 
-export const HoverSuggestionTooltip = ({ children, items, side = "right", offset = 10, title, emptyLabel, className, tooltipClassName, disabled = false, }: HoverSuggestionTooltipProps) => { const anchorRef = useRef<HTMLDivElement | null>(null);
+export const HoverSuggestionTooltip = ({ children, items, side = "right", offset = 10, title, emptyLabel, className, tooltipClassName, disabled = false }: HoverSuggestionTooltipProps) => { const anchorRef = useRef<HTMLDivElement | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [position, setPosition] = useState<TooltipPosition | null>(null);
 

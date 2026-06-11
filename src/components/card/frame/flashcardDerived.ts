@@ -13,46 +13,9 @@ import type { CardBlock } from "@/types/domain/card";
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // ---------------------------------------------------------------------------
 // Scalar field normalizers
 // ---------------------------------------------------------------------------
-
 export const resolveCardId = (card: FlashcardCardLike) => { return card.id ?? card.cardId ?? null;
 };
 export const resolveHasUncertainty = (card: FlashcardCardLike) => { return card.has_uncertainty ?? card.hasUncertainty ?? false;
@@ -109,12 +72,10 @@ export const resolveAnswerCode = (card: FlashcardCardLike) => { if (Array.isArra
   }
   return card.answerCode ?? card.answer_code ?? null;
 };
-
 // ---------------------------------------------------------------------------
 // Layout rows
 // ---------------------------------------------------------------------------
-
-export const resolveLayoutRows = (card: FlashcardCardLike) => { const legacyQ = normalizeExtraRows(card.questionExtraRows ?? card.question_extra_rows ?? 0,);
+export const resolveLayoutRows = (card: FlashcardCardLike) => { const legacyQ = normalizeExtraRows(card.questionExtraRows ?? card.question_extra_rows ?? 0);
   const legacyA = normalizeExtraRows(
     card.answerExtraRows ?? card.answer_extra_rows ?? 0,
   );
@@ -146,7 +107,7 @@ export const resolveReferences = (blocks: CardBlock[]) => { const refs: Referenc
   });
   return refs.filter((r) => r.url);
 };
-export const resolveQuestionAttachmentReferences = (card: FlashcardCardLike,) => { return (card.front?.attachments?.references ?? []).filter((r) => r.url);
+export const resolveQuestionAttachmentReferences = (card: FlashcardCardLike) => { return (card.front?.attachments?.references ?? []).filter((r) => r.url);
 };
 export const resolveAnswerAttachmentReferences = (card: FlashcardCardLike) => { return (card.back?.attachments?.references ?? []).filter((r) => r.url);
 };

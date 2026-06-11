@@ -5,7 +5,11 @@ import type { UploadedImage } from "@/types";
 
 
 
+
+
 const FIRESTORE_DIAGNOSTIC_FLAG = "flashcard.firestore.diagnostics";
+
+
 
 
 
@@ -19,7 +23,7 @@ const isImageFirestoreDiagnosticsEnabled = (): boolean => {
     return false;
   }
 };
-export const getImageFromFirestore = async ({ imageId, userId, }: { imageId: string;
+export const getImageFromFirestore = async ({ imageId, userId }: { imageId: string;
   userId?: string;
 }): Promise<UploadedImage | null> => {
   const uid = userId?.trim() || auth.currentUser?.uid?.trim() || null;

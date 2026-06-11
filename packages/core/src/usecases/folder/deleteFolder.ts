@@ -13,13 +13,13 @@ export type FolderDeleteDocument = { id: string;
   isDeleted?: boolean;
   folderId: string;
 };
-export type FolderDeleteContext<TFolder extends FolderDeleteEntity = FolderDeleteEntity, TCardSet extends FolderDeleteCardSet = FolderDeleteCardSet, TCard extends FolderDeleteCard = FolderDeleteCard, TDocument extends FolderDeleteDocument = FolderDeleteDocument,> = { folders: TFolder[];
+export type FolderDeleteContext<TFolder extends FolderDeleteEntity = FolderDeleteEntity, TCardSet extends FolderDeleteCardSet = FolderDeleteCardSet, TCard extends FolderDeleteCard = FolderDeleteCard, TDocument extends FolderDeleteDocument = FolderDeleteDocument> = { folders: TFolder[];
   cardSets: TCardSet[];
   cards: TCard[];
   documents: TDocument[];
   resolveCardFolderId: (card: TCard, cardSets: TCardSet[]) => string | null | undefined;
 };
-export type FolderDeleteRepository<TFolder extends FolderDeleteEntity = FolderDeleteEntity, TCardSet extends FolderDeleteCardSet = FolderDeleteCardSet, TCard extends FolderDeleteCard = FolderDeleteCard, TDocument extends FolderDeleteDocument = FolderDeleteDocument,> = { loadDeleteContext: (userId: string) => Promise<FolderDeleteContext<TFolder, TCardSet, TCard, TDocument>>;
+export type FolderDeleteRepository<TFolder extends FolderDeleteEntity = FolderDeleteEntity, TCardSet extends FolderDeleteCardSet = FolderDeleteCardSet, TCard extends FolderDeleteCard = FolderDeleteCard, TDocument extends FolderDeleteDocument = FolderDeleteDocument> = { loadDeleteContext: (userId: string) => Promise<FolderDeleteContext<TFolder, TCardSet, TCard, TDocument>>;
   softDeleteFolder: (userId: string, folderId: string) => Promise<void>;
   softDeleteCardSet: (userId: string, cardSetId: string) => Promise<void>;
   softDeleteCard: (userId: string, cardId: string) => Promise<void>;
@@ -113,7 +113,7 @@ const collectDocumentsInFolders = <TDocument extends FolderDeleteDocument>({
     return folderIds.has(document.folderId);
   });
 };
-export const deleteFolderCascade = async <TFolder extends FolderDeleteEntity, TCardSet extends FolderDeleteCardSet, TCard extends FolderDeleteCard, TDocument extends FolderDeleteDocument,>({ userId, folderId, repository, }: { userId: string;
+export const deleteFolderCascade = async <TFolder extends FolderDeleteEntity, TCardSet extends FolderDeleteCardSet, TCard extends FolderDeleteCard, TDocument extends FolderDeleteDocument>({ userId, folderId, repository }: { userId: string;
   folderId: string;
   repository: FolderDeleteRepository<TFolder, TCardSet, TCard, TDocument>;
 }): Promise<void> => {

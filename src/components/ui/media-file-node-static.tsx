@@ -1,10 +1,10 @@
-import * as React from 'react';
-import type { TFileElement } from 'platejs';
-import type { TSuggestionData } from 'platejs';
-import type { SlateElementProps } from 'platejs/static';
-import { FileUp } from 'lucide-react';
-import { SlateElement } from 'platejs/static';
-import { cn } from '@/lib/utils';
+import * as React from "react";
+import type { TFileElement } from "platejs";
+import type { TSuggestionData } from "platejs";
+import type { SlateElementProps } from "platejs/static";
+import { FileUp } from "lucide-react";
+import { SlateElement } from "platejs/static";
+import { cn } from "@/lib/utils";
 
 
 
@@ -14,14 +14,14 @@ export function FileElementStatic(props: SlateElementProps<TFileElement>) { cons
       suggestion?: TSuggestionData;
     }
   ).suggestion;
-  const isRemoveSuggestion = suggestionData?.type === 'remove';
+  const isRemoveSuggestion = suggestionData?.type === "remove";
 
   return (
     <SlateElement className="my-px rounded-sm" {...props}>
       <a
         className={cn(
-          'group relative m-0 flex cursor-pointer items-center rounded px-0.5 py-[3px] hover:bg-muted',
-          isRemoveSuggestion && 'bg-red-100 text-red-700 hover:bg-red-200/80'
+          "group relative m-0 flex cursor-pointer items-center rounded px-0.5 py-[3px] hover:bg-muted",
+          isRemoveSuggestion && "bg-red-100 text-red-700 hover:bg-red-200/80",
         )}
         contentEditable={false}
         download={name}
@@ -32,8 +32,8 @@ export function FileElementStatic(props: SlateElementProps<TFileElement>) { cons
       >
         <div
           className={cn(
-            'flex items-center gap-1 p-1',
-            isRemoveSuggestion && 'line-through decoration-current'
+            "flex items-center gap-1 p-1",
+            isRemoveSuggestion && "line-through decoration-current",
           )}
         >
           <FileUp className="size-5" />

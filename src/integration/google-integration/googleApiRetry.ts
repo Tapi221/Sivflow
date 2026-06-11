@@ -16,7 +16,11 @@ type GoogleApiErrorWithMetadata = Error & {
 
 
 
+
+
 const GOOGLE_API_RETRY_DELAYS_MS = [500, 1_500, 4_000] as const;
+
+
 
 
 
@@ -38,7 +42,7 @@ const parseRetryAfterMs = (value: string | null): number | undefined => {
 
   return undefined;
 };
-export const createGoogleApiError = async (response: Response, prefix: string,): Promise<GoogleApiErrorWithMetadata> => { const payload = await response.json().catch(() => null) as GoogleApiErrorPayload | null;
+export const createGoogleApiError = async (response: Response, prefix: string): Promise<GoogleApiErrorWithMetadata> => { const payload = await response.json().catch(() => null) as GoogleApiErrorPayload | null;
   const message = payload?.error?.message;
   const reason = payload?.error?.errors?.[0]?.reason;
   const error = new Error(
@@ -57,26 +61,26 @@ const isRetryableGoogleApiError = (error: unknown): error is GoogleApiErrorWithM
   const status = (error as GoogleApiErrorWithMetadata).status;
   return status === 429 || (typeof status === "number" && status >= 500 && status < 600);
 };
-export const withGoogleApiRetry = async <T,>(operation: () => Promise<T>, context: GoogleApiRetryContext,): Promise<T> => { for (let attempt = 0; attempt <= GOOGLE_API_RETRY_DELAYS_MS.length; attempt += 1) {
-    try {
-      return await operation();
-    } catch (error) {
-      if (!isRetryableGoogleApiError(error) || attempt >= GOOGLE_API_RETRY_DELAYS_MS.length) {
-        throw error;
-      }
-
-      const delayMs = (error.retryAfterMs ?? GOOGLE_API_RETRY_DELAYS_MS[attempt]);
-      console.warn("[GoogleAPI] retrying transient failure", {
-        attempt: attempt + 1,
-        delayMs,
-        googleReason: error.googleReason,
-        operation: context.operation,
-        service: context.service,
-        status: error.status,
-      });
-      await sleep(delayMs);
+export const withGoogleApiRetry = async <T>(operation: () => Promise<T>, context: GoogleApiRetryContext): Promise<T> => { for (let attempt = 0; attempt <= GOOGLE_API_RETRY_DELAYS_MS.length; attempt += 1) {
+  try {
+    return await operation();
+  } catch (error) {
+    if (!isRetryableGoogleApiError(error) || attempt >= GOOGLE_API_RETRY_DELAYS_MS.length) {
+      throw error;
     }
-  }
 
-  throw new Error("Google API retry loop exhausted");
+    const delayMs = (error.retryAfterMs ?? GOOGLE_API_RETRY_DELAYS_MS[attempt]);
+    console.warn("[GoogleAPI] retrying transient failure", {
+      attempt: attempt + 1,
+      delayMs,
+      googleReason: error.googleReason,
+      operation: context.operation,
+      service: context.service,
+      status: error.status,
+    });
+    await sleep(delayMs);
+  }
+}
+
+throw new Error("Google API retry loop exhausted");
 };

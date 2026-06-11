@@ -13,7 +13,7 @@ type UseCardSetsOptions = {
 
 
 
-export const useCardSets = (folderId?: string | null, options?: UseCardSetsOptions,) => { const { currentUser } = useAuthSession();
+export const useCardSets = (folderId?: string | null, options?: UseCardSetsOptions) => { const { currentUser } = useAuthSession();
   const userId = currentUser?.uid ?? null;
   const enabled = options?.enabled ?? true;
 

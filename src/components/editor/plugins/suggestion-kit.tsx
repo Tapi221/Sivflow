@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import type { ExtendConfig, TElement, TInlineSuggestionData, TSuggestionData, TSuggestionText } from 'platejs';
+import type { ExtendConfig, TElement, TInlineSuggestionData, TSuggestionData, TSuggestionText } from "platejs";
 
-import { KEYS, TextApi, TrailingBlockPlugin } from 'platejs';
+import { KEYS, TextApi, TrailingBlockPlugin } from "platejs";
 
-import { type BaseSuggestionConfig, BaseSuggestionPlugin } from '@platejs/suggestion';
+import { type BaseSuggestionConfig, BaseSuggestionPlugin } from "@platejs/suggestion";
 
-import { toTPlatePlugin } from 'platejs/react';
+import { toTPlatePlugin } from "platejs/react";
 
-import { SuggestionLeaf, SuggestionLineBreak, VoidRemoveSuggestionOverlay } from '@/components/ui/suggestion-node';
+import { SuggestionLeaf, SuggestionLineBreak, VoidRemoveSuggestionOverlay } from "@/components/ui/suggestion-node";
 
-import { discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarget } from './discussion-kit';
+import { discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarget } from "./discussion-kit";
 
 
 
@@ -29,7 +29,7 @@ const INLINE_SUGGESTION_TARGET_PLUGINS = [KEYS.date, KEYS.inlineEquation, KEYS.l
 const suggestionPlugin = toTPlatePlugin<SuggestionConfig>(BaseSuggestionPlugin, ({ editor }) => ({
   options: {
     activeId: null,
-    currentUserId: editor.getOption(discussionPlugin, 'currentUserId'),
+    currentUserId: editor.getOption(discussionPlugin, "currentUserId"),
     hoverId: null,
   },
 })).configure({
@@ -46,7 +46,7 @@ const suggestionPlugin = toTPlatePlugin<SuggestionConfig>(BaseSuggestionPlugin, 
         });
 
       if (!markTarget && !blockTarget) {
-        setOption('activeId', null);
+        setOption("activeId", null);
 
         return;
       }
@@ -55,14 +55,14 @@ const suggestionPlugin = toTPlatePlugin<SuggestionConfig>(BaseSuggestionPlugin, 
         isText: !blockTarget,
       });
 
-      setOption('activeId', suggestionEntry ? (api.suggestion?.nodeId(suggestionEntry[0]) ?? null) : null);
+      setOption("activeId", suggestionEntry ? (api.suggestion?.nodeId(suggestionEntry[0]) ?? null) : null);
     },
   },
   inject: {
     isElement: true,
     nodeProps: {
-      nodeKey: '',
-      styleKey: 'cssText',
+      nodeKey: "",
+      styleKey: "cssText",
       transformProps: ({ editor, element, props }) => {
         if (!element) return props;
 
@@ -72,7 +72,7 @@ const suggestionPlugin = toTPlatePlugin<SuggestionConfig>(BaseSuggestionPlugin, 
 
         return {
           ...props,
-          'data-inline-suggestion': suggestionData.type,
+          "data-inline-suggestion": suggestionData.type,
         };
       },
       transformStyle: () => ({}) as CSSStyleDeclaration,
@@ -103,7 +103,7 @@ function getInlineSuggestionData(editor: any, element: TElement) {
   const data = suggestionApi.suggestionData(element) as TSuggestionData | TInlineSuggestionData | undefined;
 
   if (data) return data;
-  if (typeof suggestionApi.dataList !== 'function') return;
+  if (typeof suggestionApi.dataList !== "function") return;
 
   for (const child of element.children) {
     if (!TextApi.isText(child)) continue;

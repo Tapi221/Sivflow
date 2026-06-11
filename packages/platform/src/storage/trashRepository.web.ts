@@ -37,46 +37,46 @@ const purgeLocalTrashRecord = async (userId: string, table: TrashTable, id: stri
   await localFirstDb.queueDeleteSync({ entity: DELETE_ENTITY_BY_TABLE[table], targetId: id, priority: "high" });
 };
 export const createWebTrashRepository = (): TrashRepository<Folder, Card, CardSet, Document> => ({ loadContext: async (userId) => { const db = await getLocalDb(userId);
-    const [rawFolders, rawCards, rawCardSets, rawDocuments] = await Promise.all([
-      db.getAllFolders(),
-      db.getAllCards(),
-      db.cardSets.where("userId").equals(userId).toArray(),
-      db.documents.where("userId").equals(userId).toArray(),
-    ]);
-    const folders = rawFolders.map(normalizeFolder);
-    const cards = rawCards.map(normalizeCard);
-    const cardSetById = buildCardSetById(rawCardSets.filter((cardSet) => !cardSet.isDeleted));
+  const [rawFolders, rawCards, rawCardSets, rawDocuments] = await Promise.all([
+    db.getAllFolders(),
+    db.getAllCards(),
+    db.cardSets.where("userId").equals(userId).toArray(),
+    db.documents.where("userId").equals(userId).toArray(),
+  ]);
+  const folders = rawFolders.map(normalizeFolder);
+  const cards = rawCards.map(normalizeCard);
+  const cardSetById = buildCardSetById(rawCardSets.filter((cardSet) => !cardSet.isDeleted));
 
-    return {
-      folders,
-      cards,
-      cardSets: rawCardSets,
-      documents: rawDocuments,
-      resolveCardFolderId: (card) => resolveCardFolderIdStrict(card, cardSetById),
-    };
-  },
-  restoreFolder: async (userId, folderId) => {
-    await restoreLocalTrashRecord(userId, "folders", folderId);
-  },
-  restoreCard: async (userId, cardId) => {
-    await restoreLocalTrashRecord(userId, "cards", cardId);
-  },
-  restoreCardSet: async (userId, cardSetId) => {
-    await restoreLocalTrashRecord(userId, "cardSets", cardSetId);
-  },
-  restoreDocument: async (userId, documentId) => {
-    await restoreLocalTrashRecord(userId, "documents", documentId);
-  },
-  purgeFolder: async (userId, folderId) => {
-    await purgeLocalTrashRecord(userId, "folders", folderId);
-  },
-  purgeCard: async (userId, cardId) => {
-    await purgeLocalTrashRecord(userId, "cards", cardId);
-  },
-  purgeCardSet: async (userId, cardSetId) => {
-    await purgeLocalTrashRecord(userId, "cardSets", cardSetId);
-  },
-  purgeDocument: async (userId, documentId) => {
-    await purgeLocalTrashRecord(userId, "documents", documentId);
-  },
+  return {
+    folders,
+    cards,
+    cardSets: rawCardSets,
+    documents: rawDocuments,
+    resolveCardFolderId: (card) => resolveCardFolderIdStrict(card, cardSetById),
+  };
+},
+restoreFolder: async (userId, folderId) => {
+  await restoreLocalTrashRecord(userId, "folders", folderId);
+},
+restoreCard: async (userId, cardId) => {
+  await restoreLocalTrashRecord(userId, "cards", cardId);
+},
+restoreCardSet: async (userId, cardSetId) => {
+  await restoreLocalTrashRecord(userId, "cardSets", cardSetId);
+},
+restoreDocument: async (userId, documentId) => {
+  await restoreLocalTrashRecord(userId, "documents", documentId);
+},
+purgeFolder: async (userId, folderId) => {
+  await purgeLocalTrashRecord(userId, "folders", folderId);
+},
+purgeCard: async (userId, cardId) => {
+  await purgeLocalTrashRecord(userId, "cards", cardId);
+},
+purgeCardSet: async (userId, cardSetId) => {
+  await purgeLocalTrashRecord(userId, "cardSets", cardSetId);
+},
+purgeDocument: async (userId, documentId) => {
+  await purgeLocalTrashRecord(userId, "documents", documentId);
+},
 });

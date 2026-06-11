@@ -16,7 +16,7 @@ interface BlockRendererProps {
 
 
 
-export const BlockRenderer = ({ blocks, onGalleryFullscreenChange, displayMode = "fixed", zoom = 1, }: BlockRendererProps) => { const viewerProps = useViewerSceneProps({ onGalleryFullscreenChange, displayMode, zoom, });
+export const BlockRenderer = ({ blocks, onGalleryFullscreenChange, displayMode = "fixed", zoom = 1 }: BlockRendererProps) => { const viewerProps = useViewerSceneProps({ onGalleryFullscreenChange, displayMode, zoom });
 
   const renderableBlocks = useMemo(
     () => filterRenderableCardBlocks(blocks),

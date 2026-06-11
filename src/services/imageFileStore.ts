@@ -75,7 +75,7 @@ const putScopedImageBlob = async (id: string, blob: Blob): Promise<void> => {
     tx.onabort = () => reject(tx.error ?? new Error("Image blob save aborted"));
   });
 };
-export const putImageBlob = async (blob: Blob, options: PutImageBlobOptions,): Promise<ImageBlobRecord> => { const localBlobId = options.assetId;
+export const putImageBlob = async (blob: Blob, options: PutImageBlobOptions): Promise<ImageBlobRecord> => { const localBlobId = options.assetId;
   await putScopedImageBlob(makeScopedId(localBlobId, options), blob);
   return {
     localBlobId,
@@ -83,7 +83,7 @@ export const putImageBlob = async (blob: Blob, options: PutImageBlobOptions,): P
     mime: blob.type || "application/octet-stream",
   };
 };
-export const getImageBlob = async (id: string, options?: BlobScopeOptions,): Promise<Blob | null> => { const scopedId = makeScopedId(id, options);
+export const getImageBlob = async (id: string, options?: BlobScopeOptions): Promise<Blob | null> => { const scopedId = makeScopedId(id, options);
   const scoped = await getStoredImageFile(scopedId);
   if (scoped?.blob) return scoped.blob;
 
@@ -96,7 +96,7 @@ export const getImageBlob = async (id: string, options?: BlobScopeOptions,): Pro
   }
   return legacy.blob;
 };
-export const deleteImageBlob = async (id: string, options?: BlobScopeOptions,): Promise<void> => { const db = await openImageFileDb();
+export const deleteImageBlob = async (id: string, options?: BlobScopeOptions): Promise<void> => { const db = await openImageFileDb();
   const scopedId = makeScopedId(id, options);
   await new Promise<void>((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readwrite");

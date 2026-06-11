@@ -5,7 +5,9 @@ import type { UploadedImage } from "@/types";
 
 
 
-export const uploadQueuedAsset = async (item: QueueItem,): Promise<UploadedImage> => { const user = auth.currentUser;
+
+
+export const uploadQueuedAsset = async (item: QueueItem): Promise<UploadedImage> => { const user = auth.currentUser;
   if (!user) {
     throw new Error("Unauthenticated during background upload");
   }

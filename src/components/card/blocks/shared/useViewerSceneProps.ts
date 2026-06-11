@@ -13,7 +13,7 @@ type UseViewerScenePropsArgs = Readonly<{
 
 
 
-export const useViewerSceneProps = ({ onGalleryFullscreenChange, displayMode = "fixed", zoom = 1, }: UseViewerScenePropsArgs): ViewerProps => { const { settings } = useUserSettings();
+export const useViewerSceneProps = ({ onGalleryFullscreenChange, displayMode = "fixed", zoom = 1 }: UseViewerScenePropsArgs): ViewerProps => { const { settings } = useUserSettings();
   const questionDisplayMode = settings?.questionDisplayMode ?? "tap_to_reveal";
 
   const toMediaUrl = useCallback<ViewerProps["toMediaUrl"]>((item) => {

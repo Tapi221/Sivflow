@@ -4,7 +4,11 @@ import { createGoogleApiError } from "@/integration/google-integration/googleApi
 
 
 
+
+
 const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
+
+
 
 
 
@@ -220,7 +224,7 @@ export const createGoogleCalendar = async ({ accessToken, summary, description }
 
   return toGoogleCalendarListItem(calendar);
 };
-export const fetchEventsForCalendar = async ({ accessToken, accountId, calendarId, accentColor, rangeStart, rangeEnd, }: { accessToken: string;
+export const fetchEventsForCalendar = async ({ accessToken, accountId, calendarId, accentColor, rangeStart, rangeEnd }: { accessToken: string;
   accountId?: string;
   calendarId: string;
   accentColor: string;

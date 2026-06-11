@@ -189,7 +189,7 @@ export const encodeMfDeckArchive = (archive: MfDeckArchiveV1): Uint8Array => { c
     mtime: new Date(Date.UTC(1980, 0, 1, 0, 0, 0)),
   });
 };
-export const decodeMfDeckArchive = (buffer: ArrayBuffer): MfDeckArchiveV1 => { if (buffer.byteLength > MF_DECK_MAX_FILE_BYTES) { throw new MfDeckValidationError("mfdeck ファイルが大きすぎます。", [{ level: "error", code: "file_too_large", message: "mfdeck ファイルが大きすぎます。", },]);
+export const decodeMfDeckArchive = (buffer: ArrayBuffer): MfDeckArchiveV1 => { if (buffer.byteLength > MF_DECK_MAX_FILE_BYTES) { throw new MfDeckValidationError("mfdeck ファイルが大きすぎます。", [{ level: "error", code: "file_too_large", message: "mfdeck ファイルが大きすぎます。" }]);
   }
 
   let entries: Record<string, Uint8Array>;

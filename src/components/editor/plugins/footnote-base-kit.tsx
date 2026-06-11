@@ -1,5 +1,5 @@
-import { BaseFootnoteDefinitionPlugin, BaseFootnoteReferencePlugin } from '@platejs/footnote';
-import { FootnoteDefinitionElementStatic, FootnoteReferenceElementStatic } from '@/components/ui/footnote-node-static';
+import { BaseFootnoteDefinitionPlugin, BaseFootnoteReferencePlugin } from "@platejs/footnote";
+import { FootnoteDefinitionElementStatic, FootnoteReferenceElementStatic } from "@/components/ui/footnote-node-static";
 
 
 

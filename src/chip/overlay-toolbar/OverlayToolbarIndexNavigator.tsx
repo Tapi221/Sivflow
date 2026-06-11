@@ -39,7 +39,7 @@ const normalizeCommittedNavigatorValue = ({
 
 
 
-export const OverlayToolbarIndexNavigator = ({ value, total, onCommit, inputAriaLabel, className, inputClassName, totalClassName, }: OverlayToolbarIndexNavigatorProps) => { const skipNextBlurCommitRef = React.useRef(false);
+export const OverlayToolbarIndexNavigator = ({ value, total, onCommit, inputAriaLabel, className, inputClassName, totalClassName }: OverlayToolbarIndexNavigatorProps) => { const skipNextBlurCommitRef = React.useRef(false);
   const [draftValue, setDraftValue] = React.useState(() => String(value));
 
   React.useEffect(() => {

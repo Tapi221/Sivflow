@@ -15,39 +15,7 @@ export const MONTH_VISIBLE_EVENT_COUNT_MAX = 20;
 
 
 
-export const createInitialMonthOffsetRange = () => ({ startOffset: -INITIAL_MONTH_BUFFER, endOffset: INITIAL_MONTH_BUFFER, });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+export const createInitialMonthOffsetRange = () => ({ startOffset: -INITIAL_MONTH_BUFFER, endOffset: INITIAL_MONTH_BUFFER });
 
 
 
@@ -56,7 +24,6 @@ export const TIMELINE_HEADER_HEIGHT = 40;
 export const TIMELINE_DEFAULT_ROW_HEIGHT = 168;
 export const TIMELINE_DEFAULT_LANE_LABEL_WIDTH = 168;
 export const TIMELINE_DEFAULT_ROW_COUNT = 4;
-
 //Side Calendar
 export const WEEK_STARTS_ON_MONDAY = 1;
 export const TIME_COLUMN_WIDTH = 52;
@@ -69,7 +36,7 @@ export const TIMELINE_DAY_COLUMN_WIDTH = 104;
 export const TIMELINE_LANE_LABEL_WIDTH = 168;
 export const TIMELINE_SKELETON_ROW_COUNT = 4;
 export const WEEKDAY_SURFACE_LEFT_INSET_PX = 16;
-
 //
-export const MIN_EVENT_DISPLAY_HEIGHT_PX = 48; // min-h-12 に対応
-export const MIN_LAYOUT_MINUTES = Math.ceil((MIN_EVENT_DISPLAY_HEIGHT_PX / DEFAULT_HOUR_ROW_HEIGHT) * 60,);
+export const MIN_EVENT_DISPLAY_HEIGHT_PX = 48;
+// min-h-12 に対応
+export const MIN_LAYOUT_MINUTES = Math.ceil((MIN_EVENT_DISPLAY_HEIGHT_PX / DEFAULT_HOUR_ROW_HEIGHT) * 60);

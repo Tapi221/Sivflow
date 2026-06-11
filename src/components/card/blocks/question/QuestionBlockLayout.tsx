@@ -30,7 +30,7 @@ const scaleSpacePx = (basePx: number, zoom?: number) => {
 
 
 
-export const QuestionBlockLayout = ({ questionContent, answerContent, className, containerRef, containerProps, answerContainerProps, answerOverlay, zoom, }: QuestionBlockLayoutProps) => { const labelStyle = React.useMemo(() => mergeStyles(buildTypographyStyle({ fontSizePx: 10, lineHeightPx: 10, zoom, }), { marginTop: scaleSpacePx(2, zoom), },), [zoom],);
+export const QuestionBlockLayout = ({ questionContent, answerContent, className, containerRef, containerProps, answerContainerProps, answerOverlay, zoom }: QuestionBlockLayoutProps) => { const labelStyle = React.useMemo(() => mergeStyles(buildTypographyStyle({ fontSizePx: 10, lineHeightPx: 10, zoom }), { marginTop: scaleSpacePx(2, zoom) }), [zoom]);
 
   const containerStyle = React.useMemo(
     () =>

@@ -64,7 +64,7 @@ export const getEventInstanceKey = (dateKey: string, event: GoogleCalendarEvent)
 
   return `${dateKey}:${event.id}:${startsAt}:${endsAt}`;
 };
-export const buildListPlacementDays = ({ days, events, selectedDate, }: { days: Date[];
+export const buildListPlacementDays = ({ days, events, selectedDate }: { days: Date[];
   events: GoogleCalendarEvent[];
   selectedDate: Date;
 }): CalendarListPlacementDay[] => {
@@ -134,7 +134,7 @@ export const buildListVirtualMetrics = (days: CalendarListPlacementDay[]): Calen
 
   return { heights, offsets, totalHeight };
 };
-export const getListVirtualRange = (metrics: CalendarListVirtualMetrics, scrollTop: number, viewportHeight: number,): CalendarListVirtualRange => { if (metrics.heights.length === 0) return { start: 0, end: 0 };
+export const getListVirtualRange = (metrics: CalendarListVirtualMetrics, scrollTop: number, viewportHeight: number): CalendarListVirtualRange => { if (metrics.heights.length === 0) return { start: 0, end: 0 };
 
   const rangeStartOffset = Math.max(0, scrollTop - LIST_VIRTUAL_OVERSCAN_PX);
   const rangeEndOffset = scrollTop + viewportHeight + LIST_VIRTUAL_OVERSCAN_PX;
@@ -150,8 +150,8 @@ export const getListVirtualRange = (metrics: CalendarListVirtualMetrics, scrollT
     end: Math.min(metrics.heights.length, end + 1),
   };
 };
-export const areListVirtualRangesEqual = (left: CalendarListVirtualRange, right: CalendarListVirtualRange,): boolean => left.start === right.start && left.end === right.end;
-export const getListVisibleDate = (days: CalendarListPlacementDay[], metrics: CalendarListVirtualMetrics, targetOffset: number,): Date | null => { const index = findVirtualIndex(metrics.offsets, targetOffset);
+export const areListVirtualRangesEqual = (left: CalendarListVirtualRange, right: CalendarListVirtualRange): boolean => left.start === right.start && left.end === right.end;
+export const getListVisibleDate = (days: CalendarListPlacementDay[], metrics: CalendarListVirtualMetrics, targetOffset: number): Date | null => { const index = findVirtualIndex(metrics.offsets, targetOffset);
 
   return days[index]?.date ?? null;
 };

@@ -34,7 +34,7 @@ const getReservedScrollbarGutterWidthPx = () => {
 };
 const measureViewportWidth = (element: HTMLDivElement) =>
   Math.max(0, Math.round(element.clientWidth));
-export const useCardSetViewPaneWidth = ({ isGlobalEditing, isDesktop, settings, cardSetId, }: UseCardSetViewPaneWidthOptions) => { const reservedScrollbarGutterWidthPx = useMemo(() => (isDesktop ? getReservedScrollbarGutterWidthPx() : 0), [isDesktop],);
+export const useCardSetViewPaneWidth = ({ isGlobalEditing, isDesktop, settings, cardSetId }: UseCardSetViewPaneWidthOptions) => { const reservedScrollbarGutterWidthPx = useMemo(() => (isDesktop ? getReservedScrollbarGutterWidthPx() : 0), [isDesktop]);
 
   const sharedPreferenceKey = `${cardSetId ?? ""}:${settings?.cardViewPaneWidthPx ?? ""}:${settings?.cardEditPaneWidthPx ?? ""}`;
 

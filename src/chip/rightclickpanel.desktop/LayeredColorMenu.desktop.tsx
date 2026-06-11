@@ -125,7 +125,8 @@ const LayeredColorMenuBase = ({
                 event.preventDefault();
                 event.stopPropagation();
                 onSelectColor(option.value);
-              }}>
+              }}
+              >
                 <span className="layered-color-menu-swatch-core" />
               </button>
             );

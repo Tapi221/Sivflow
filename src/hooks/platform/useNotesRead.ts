@@ -6,6 +6,8 @@ import type { Note } from "@/types";
 
 
 
+
+
 type NoteWithLegacyDelete = Note & {
   is_deleted?: boolean;
 };
@@ -15,7 +17,9 @@ type UseNotesReadOptions = {
 
 
 
-export const useNotesRead = (folderId?: string | null, options?: UseNotesReadOptions,) => { const { currentUser } = useAuthSession();
+
+
+export const useNotesRead = (folderId?: string | null, options?: UseNotesReadOptions) => { const { currentUser } = useAuthSession();
   const userId = currentUser?.uid ?? null;
   const [error, setError] = useState<string | null>(null);
   const enabled = options?.enabled ?? true;

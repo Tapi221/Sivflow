@@ -3,8 +3,12 @@ import type { CardBlock } from "@/types";
 
 
 
+
+
 export type ApplyCardSelectionCaptureSide = "question" | "answer";
 export type CapturedCardImage = Awaited<ReturnType<typeof createSelectionCaptureImageAsset>>;
+
+
 
 
 
@@ -49,7 +53,7 @@ const createCaptureTextBlock = ({
   rowOffset: 0,
   orderIndex: insertIndex,
 });
-export const appendSelectionCaptureBlocks = ({ blocks, side, image, ocrText, }: { blocks: CardBlock[];
+export const appendSelectionCaptureBlocks = ({ blocks, side, image, ocrText }: { blocks: CardBlock[];
   side: ApplyCardSelectionCaptureSide;
   image: CapturedCardImage;
   ocrText: string | null;

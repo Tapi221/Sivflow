@@ -43,7 +43,7 @@ const resolveLogicalHeight = ({
 
 
 
-export const ScaleToFitFrame = ({ children, className, baseWidth = 480, scaleMultiplier = 1, fixedScale, disableScale = false, fitHeight = false, centerContent = false, allowUpscale = false, maxScale = 1.6, contentPaddingPx = 0, intrinsicHeightPx = null, }: ScaleToFitFrameProps) => { const frameRef = React.useRef<HTMLDivElement | null>(null);
+export const ScaleToFitFrame = ({ children, className, baseWidth = 480, scaleMultiplier = 1, fixedScale, disableScale = false, fitHeight = false, centerContent = false, allowUpscale = false, maxScale = 1.6, contentPaddingPx = 0, intrinsicHeightPx = null }: ScaleToFitFrameProps) => { const frameRef = React.useRef<HTMLDivElement | null>(null);
   const contentRef = React.useRef<HTMLDivElement | null>(null);
 
   const [scale, setScale] = React.useState(1);

@@ -19,7 +19,7 @@ export const formatExplorerUpdatedAt = (value: unknown): string => { const milli
 
   return `${year}/${month}/${day} ${hours}:${minutes}`;
 };
-export const formatExplorerSize = (bytes: number | null | undefined,): string => { if (typeof bytes !== "number" || !Number.isFinite(bytes) || bytes < 0) { return "—";
+export const formatExplorerSize = (bytes: number | null | undefined): string => { if (typeof bytes !== "number" || !Number.isFinite(bytes) || bytes < 0) { return "—";
   }
 
   if (bytes < 1024) return `${bytes} B`;

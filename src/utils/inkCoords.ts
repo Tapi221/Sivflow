@@ -57,7 +57,7 @@ export const paperPointToCanvasPoint = (point: Pick<InkPoint, "x" | "y">, canvas
     y: (point.y / paperHeight) * safeCanvasHeight,
   };
 };
-export const squaredDistance = (a: Pick<InkPoint, "x" | "y">, b: Pick<InkPoint, "x" | "y">,): number => { const dx = a.x - b.x;
+export const squaredDistance = (a: Pick<InkPoint, "x" | "y">, b: Pick<InkPoint, "x" | "y">): number => { const dx = a.x - b.x;
   const dy = a.y - b.y;
   return dx * dx + dy * dy;
 };

@@ -11,8 +11,8 @@ export type CreateMfDeckCardSet = (name: string, targetFolderId?: string | null,
   orderIndex?: number;
 },
 ) => Promise<CardSet>;
-export type UpdateMfDeckCardSet = (id: string, data: Partial<Pick<CardSet, "name" | "description" | "orderIndex" | "defaultDisplayMode">>,) => Promise<void>;
-export type CreateMfDeckCard = (cardData: Partial<Card> & { cardSetId?: string; },) => Promise<Card>;
+export type UpdateMfDeckCardSet = (id: string, data: Partial<Pick<CardSet, "name" | "description" | "orderIndex" | "defaultDisplayMode">>) => Promise<void>;
+export type CreateMfDeckCard = (cardData: Partial<Card> & { cardSetId?: string; }) => Promise<Card>;
 export type EnsureMfDeckTagByName = (name: string) => Promise<string | null>;
 export type MfDeckImportDestination = | { kind: "new-card-set";
   cardSetName?: string;
@@ -179,7 +179,7 @@ const buildCardInput = async ({
     isBookmarked: false,
   };
 };
-export const importMfDeckArchive = async ({ archive, folderId, createCardSet, updateCardSet, createCard, ensureTagByName, destination, }: ImportMfDeckArchiveParams): Promise<ImportMfDeckArchiveResult> => { const issues: MfDeckIssue[] = [];
+export const importMfDeckArchive = async ({ archive, folderId, createCardSet, updateCardSet, createCard, ensureTagByName, destination }: ImportMfDeckArchiveParams): Promise<ImportMfDeckArchiveResult> => { const issues: MfDeckIssue[] = [];
   const manifestDeck = archive.manifest.deck;
 
   const targetCardSet =

@@ -17,7 +17,7 @@ interface TagFilterPopoverProps {
 
 
 
-export const TagFilterPopover = ({ allTags, className, iconClassName, ariaLabel = "タグフィルターを開く", }: TagFilterPopoverProps) => { const { tagFilter, uncertaintyFilter, bookmarkedFilter, draftFilter, contentTypeFilter, } = useExplorerStore();
+export const TagFilterPopover = ({ allTags, className, iconClassName, ariaLabel = "タグフィルターを開く" }: TagFilterPopoverProps) => { const { tagFilter, uncertaintyFilter, bookmarkedFilter, draftFilter, contentTypeFilter } = useExplorerStore();
   const [isOpen, setIsOpen] = useState(false);
   const panelPreset = floatingPanelPresets.filter;
 

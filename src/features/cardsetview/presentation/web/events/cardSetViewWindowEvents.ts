@@ -20,10 +20,10 @@ type CardSetViewWindowEventName = keyof CardSetViewWindowEventMap;
 
 
 
-export const dispatchCardSetViewWindowEvent = <TEventName extends CardSetViewWindowEventName,>(eventName: TEventName, detail: CardSetViewWindowEventMap[TEventName],) => { if (typeof window === "undefined") return;
+export const dispatchCardSetViewWindowEvent = <TEventName extends CardSetViewWindowEventName>(eventName: TEventName, detail: CardSetViewWindowEventMap[TEventName]) => { if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent(eventName, { detail }));
 };
-export const subscribeCardSetViewWindowEvent = <TEventName extends CardSetViewWindowEventName,>(eventName: TEventName, listener: (detail: CardSetViewWindowEventMap[TEventName]) => void,) => { if (typeof window === "undefined") { return () => {};
+export const subscribeCardSetViewWindowEvent = <TEventName extends CardSetViewWindowEventName>(eventName: TEventName, listener: (detail: CardSetViewWindowEventMap[TEventName]) => void) => { if (typeof window === "undefined") { return () => {};
   }
 
   const handler: EventListener = (event) => {

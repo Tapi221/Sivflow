@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { TableCellHeaderPlugin, TableCellPlugin, TablePlugin, TableRowPlugin } from '@platejs/table/react';
+import { TableCellHeaderPlugin, TableCellPlugin, TablePlugin, TableRowPlugin } from "@platejs/table/react";
 
-import { TableCellElement, TableCellHeaderElement, TableElement, TableRowElement } from '@/components/ui/table-node';
+import { TableCellElement, TableCellHeaderElement, TableElement, TableRowElement } from "@/components/ui/table-node";
 
 
 

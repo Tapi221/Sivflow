@@ -8,5 +8,5 @@ interface UseCardSetViewDataOptions {
 
 
 
-export const useCardSetViewData = ({ cardSetId, }: UseCardSetViewDataOptions) => { return useCardSetViewQuery({ cardSetId, });
+export const useCardSetViewData = ({ cardSetId }: UseCardSetViewDataOptions) => { return useCardSetViewQuery({ cardSetId });
 };

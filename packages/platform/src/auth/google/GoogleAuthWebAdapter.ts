@@ -13,4 +13,4 @@ const signIn: GoogleAuthPort["signIn"] = async () => {
 
 
 
-export const googleAuthWebAdapter: GoogleAuthPort = { signIn, };
+export const googleAuthWebAdapter: GoogleAuthPort = { signIn };

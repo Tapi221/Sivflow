@@ -24,4 +24,4 @@ const getSyncTaskPayload = (item: SyncQueueItem): unknown => {
   if (isRemovalQueueItem(item)) return buildRemovalTombstonePayload(item);
   return item.payload;
 };
-export const queueItemToSyncTask = (item: SyncQueueItem): SyncTask => ({ id: item.id, idempotencyKey: item.idempotencyKey, targetId: item.targetId, operationType: item.operationType, type: item.type, entity: item.entity, payload: getSyncTaskPayload(item), priority: item.priority, createdAt: item.createdAt, });
+export const queueItemToSyncTask = (item: SyncQueueItem): SyncTask => ({ id: item.id, idempotencyKey: item.idempotencyKey, targetId: item.targetId, operationType: item.operationType, type: item.type, entity: item.entity, payload: getSyncTaskPayload(item), priority: item.priority, createdAt: item.createdAt });

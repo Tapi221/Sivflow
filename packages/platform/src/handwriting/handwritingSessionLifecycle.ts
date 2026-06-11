@@ -21,9 +21,9 @@ export type UpdateHandwritingSessionStatusInput = { session: HandwritingSession;
 
 
 
-export const createDesktopHandwritingSession = ({ id, userId, cardId, side, desktopDevice, now = Date.now() }: CreateDesktopHandwritingSessionInput): HandwritingSession => ({ id, userId, cardId, side, desktopDevice, status: "waiting", createdAt: now, updatedAt: now, });
-export const attachMobileDeviceToHandwritingSession = ({ session, mobileDevice, now = Date.now() }: AttachMobileDeviceToHandwritingSessionInput): HandwritingSession => ({ ...session, mobileDevice, status: "connected", updatedAt: now, });
-export const updateHandwritingSessionStatus = ({ session, status, now = Date.now() }: UpdateHandwritingSessionStatusInput): HandwritingSession => ({ ...session, status, updatedAt: now, });
+export const createDesktopHandwritingSession = ({ id, userId, cardId, side, desktopDevice, now = Date.now() }: CreateDesktopHandwritingSessionInput): HandwritingSession => ({ id, userId, cardId, side, desktopDevice, status: "waiting", createdAt: now, updatedAt: now });
+export const attachMobileDeviceToHandwritingSession = ({ session, mobileDevice, now = Date.now() }: AttachMobileDeviceToHandwritingSessionInput): HandwritingSession => ({ ...session, mobileDevice, status: "connected", updatedAt: now });
+export const updateHandwritingSessionStatus = ({ session, status, now = Date.now() }: UpdateHandwritingSessionStatusInput): HandwritingSession => ({ ...session, status, updatedAt: now });
 export const closeHandwritingSession = (session: HandwritingSession, now = Date.now()): HandwritingSession => { return updateHandwritingSessionStatus({ session, status: "closed", now });
 };
 export const failHandwritingSession = (session: HandwritingSession, now = Date.now()): HandwritingSession => { return updateHandwritingSessionStatus({ session, status: "error", now });

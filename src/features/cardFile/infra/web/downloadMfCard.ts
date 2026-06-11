@@ -18,7 +18,7 @@ const toArrayBuffer = (bytes: Uint8Array): ArrayBuffer => {
   copy.set(bytes);
   return copy.buffer;
 };
-export const downloadBytesAsMfCard = ({ bytes, cardName, }: { bytes: Uint8Array;
+export const downloadBytesAsMfCard = ({ bytes, cardName }: { bytes: Uint8Array;
   cardName: string;
 }) => {
   const blob = new Blob([toArrayBuffer(bytes)], {

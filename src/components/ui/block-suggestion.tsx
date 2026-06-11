@@ -1,34 +1,34 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
-import { acceptSuggestion, rejectSuggestion } from '@platejs/suggestion';
+import { acceptSuggestion, rejectSuggestion } from "@platejs/suggestion";
 
-import { SuggestionPlugin } from '@platejs/suggestion/react';
+import { SuggestionPlugin } from "@platejs/suggestion/react";
 
-import { CheckIcon, XIcon } from 'lucide-react';
+import { CheckIcon, XIcon } from "lucide-react";
 
-import { useEditorPlugin, usePluginOption } from 'platejs/react';
+import { useEditorPlugin, usePluginOption } from "platejs/react";
 
-import { Avatar, AvatarFallback, AvatarImage } from './avatar';
+import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 
-import { Button } from './button';
+import { Button } from "./button";
 
-import { type TDiscussion, discussionPlugin, } from '@/components/editor/plugins/discussion-kit';
+import { type TDiscussion, discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 
-import { Comment, CommentCreateForm, formatCommentDate } from './comment';
+import { Comment, CommentCreateForm, formatCommentDate } from "./comment";
 
-import { BLOCK_SUGGESTION_TOKEN, type ResolvedSuggestion, } from '@/lib/block-discussion-index';
+import { BLOCK_SUGGESTION_TOKEN, type ResolvedSuggestion } from "@/lib/block-discussion-index";
 
 
 
-export function BlockSuggestionCard({ idx, isLast, suggestion, }: { idx: number;
+export function BlockSuggestionCard({ idx, isLast, suggestion }: { idx: number;
   isLast: boolean;
   suggestion: ResolvedSuggestion;
 }) {
   const { api, editor } = useEditorPlugin(SuggestionPlugin);
 
-  const userInfo = usePluginOption(discussionPlugin, 'user', suggestion.userId);
+  const userInfo = usePluginOption(discussionPlugin, "user", suggestion.userId);
 
   const accept = (suggestion: ResolvedSuggestion) => {
     api.suggestion.withoutSuggestions(() => {
@@ -45,22 +45,22 @@ export function BlockSuggestionCard({ idx, isLast, suggestion, }: { idx: number;
   const [hovering, setHovering] = React.useState(false);
 
   const suggestionText2Array = (text: string) => {
-    if (text === BLOCK_SUGGESTION_TOKEN) return ['line breaks'];
+    if (text === BLOCK_SUGGESTION_TOKEN) return ["line breaks"];
 
     return text.split(BLOCK_SUGGESTION_TOKEN).filter(Boolean);
   };
 
   const getRemoveSummaryItems = (text: string) => {
     const items = suggestionText2Array(text).map((item) => {
-      if (item === 'column_group') return 'Column';
-      if (item === 'code_block') return 'Code Block';
+      if (item === "column_group") return "Column";
+      if (item === "code_block") return "Code Block";
 
       return item;
     });
 
-    if (items.includes('Table')) return ['Table'];
-    if (items.includes('Code Block')) return ['Code Block'];
-    if (items.includes('Column')) return ['Column'];
+    if (items.includes("Table")) return ["Table"];
+    if (items.includes("Code Block")) return ["Code Block"];
+    if (items.includes("Column")) return ["Column"];
 
     return items;
   };
@@ -93,7 +93,7 @@ export function BlockSuggestionCard({ idx, isLast, suggestion, }: { idx: number;
 
         <div className="relative mt-1 mb-4 pl-[32px]">
           <div className="flex flex-col gap-2">
-            {suggestion.type === 'remove' &&
+            {suggestion.type === "remove" &&
               getRemoveSummaryItems(suggestion.text!).map((text, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <span className="text-muted-foreground text-sm">Delete:</span>
@@ -104,18 +104,18 @@ export function BlockSuggestionCard({ idx, isLast, suggestion, }: { idx: number;
                 </div>
               ))}
 
-            {suggestion.type === 'insert' &&
+            {suggestion.type === "insert" &&
               suggestionText2Array(suggestion.newText!).map((text, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <span className="text-muted-foreground text-sm">Add:</span>
 
                   <span key={index} className="text-sm">
-                    {text || 'line breaks'}
+                    {text || "line breaks"}
                   </span>
                 </div>
               ))}
 
-            {suggestion.type === 'replace' && (
+            {suggestion.type === "replace" && (
               <div className="flex flex-col gap-2">
                 {suggestionText2Array(suggestion.newText!).map(
                   (text, index) => (
@@ -124,23 +124,23 @@ export function BlockSuggestionCard({ idx, isLast, suggestion, }: { idx: number;
                       className="flex items-start gap-2 text-brand/80"
                     >
                       <span className="text-sm">with:</span>
-                      <span className="text-sm">{text || 'line breaks'}</span>
+                      <span className="text-sm">{text || "line breaks"}</span>
                     </div>
-                  )
+                  ),
                 )}
 
                 {suggestionText2Array(suggestion.text!).map((text, index) => (
                   <div key={index} className="flex items-start gap-2">
                     <span className="text-muted-foreground text-sm">
-                      {index === 0 ? 'Replace:' : 'Delete:'}
+                      {index === 0 ? "Replace:" : "Delete:"}
                     </span>
-                    <span className="text-sm">{text || 'line breaks'}</span>
+                    <span className="text-sm">{text || "line breaks"}</span>
                   </div>
                 ))}
               </div>
             )}
 
-            {suggestion.type === 'update' && (
+            {suggestion.type === "update" && (
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground text-sm">
                   {Object.keys(suggestion.properties).map((key) => (
@@ -201,4 +201,4 @@ export function BlockSuggestionCard({ idx, isLast, suggestion, }: { idx: number;
 
 
 
-export const isResolvedSuggestion = (suggestion: ResolvedSuggestion | TDiscussion): suggestion is ResolvedSuggestion => 'suggestionId' in suggestion;
+export const isResolvedSuggestion = (suggestion: ResolvedSuggestion | TDiscussion): suggestion is ResolvedSuggestion => "suggestionId" in suggestion;

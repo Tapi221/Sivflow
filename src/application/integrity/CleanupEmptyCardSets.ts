@@ -48,7 +48,7 @@ const isCardSetStillEmpty = async (
 
   return !(await hasActiveCardsInCardSet(db, cardSetId));
 };
-export const cleanupEmptyCardSets = async (db: LocalDB, userId: string,): Promise<CleanupEmptyCardSetsResult> => { const [cards, cardSets] = await Promise.all([db.listCardsByUser(userId), db.listCardSetsByUser(userId),]);
+export const cleanupEmptyCardSets = async (db: LocalDB, userId: string): Promise<CleanupEmptyCardSetsResult> => { const [cards, cardSets] = await Promise.all([db.listCardsByUser(userId), db.listCardSetsByUser(userId)]);
 
   const activeCardSetIds = new Set<string>();
   for (const card of cards) {

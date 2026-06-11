@@ -103,26 +103,26 @@ const writeStore = (store: CardSetViewNavigationPreferencesStore) => {
   }
 };
 export const getCardSetViewNavigationPreference = (scope: CardSetViewNavigationPreferenceScope) => { if (!scope.cardSetId) { return null;
-  }
+}
 
-  return readStore().byScope[buildPreferenceScopeKey(scope)] ?? null;
+return readStore().byScope[buildPreferenceScopeKey(scope)] ?? null;
 };
 export const setCardSetViewNavigationPreference = (scope: CardSetViewNavigationPreferenceScope, updates: CardSetViewNavigationPreferenceUpdates) => { if (!scope.cardSetId) { return;
-  }
+}
 
-  const store = readStore();
-  const scopeKey = buildPreferenceScopeKey(scope);
-  const currentPreference = store.byScope[scopeKey] ?? {
-    cardId: null,
-    scrollTop: 0,
-    updatedAt: 0,
-  };
+const store = readStore();
+const scopeKey = buildPreferenceScopeKey(scope);
+const currentPreference = store.byScope[scopeKey] ?? {
+  cardId: null,
+  scrollTop: 0,
+  updatedAt: 0,
+};
 
-  store.byScope[scopeKey] = {
-    cardId: updates.cardId !== undefined ? normalizeCardId(updates.cardId) : currentPreference.cardId,
-    scrollTop: updates.scrollTop !== undefined ? normalizeScrollTop(updates.scrollTop) : currentPreference.scrollTop,
-    updatedAt: Date.now(),
-  };
+store.byScope[scopeKey] = {
+  cardId: updates.cardId !== undefined ? normalizeCardId(updates.cardId) : currentPreference.cardId,
+  scrollTop: updates.scrollTop !== undefined ? normalizeScrollTop(updates.scrollTop) : currentPreference.scrollTop,
+  updatedAt: Date.now(),
+};
 
-  writeStore(store);
+writeStore(store);
 };

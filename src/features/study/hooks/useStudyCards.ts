@@ -5,6 +5,8 @@ import type { Card, CardSet, Folder, UserSettings } from "@/types";
 
 
 
+
+
 type StudyCard = Card;
 type Params = {
   folderId: string | null;
@@ -17,7 +19,9 @@ type Params = {
 
 
 
-export const useStudyCards = ({ folderId, allCards, cardSets, folders, foldersLoading, settings, }: Params) => { const cardSetById = useMemo(() => buildCardSetById(cardSets.filter((cardSet) => !cardSet.isDeleted)), [cardSets],);
+
+
+export const useStudyCards = ({ folderId, allCards, cardSets, folders, foldersLoading, settings }: Params) => { const cardSetById = useMemo(() => buildCardSetById(cardSets.filter((cardSet) => !cardSet.isDeleted)), [cardSets]);
 
   const studyCards = useMemo(() => {
     let cards = (allCards ?? []).filter(

@@ -12,8 +12,8 @@ const performAutoBackupUseCase = createPerformAutoBackupUseCase({
   backupStore: localStorageBackupStore,
 });
 export const autoBackupService = { performAutoBackup: async (userId: string): Promise<boolean> => { return await performAutoBackupUseCase.execute(userId);
-  },
-  getLastBackupAt: (): string | null => {
-    return performAutoBackupUseCase.getLastBackupAt();
-  },
+},
+getLastBackupAt: (): string | null => {
+  return performAutoBackupUseCase.getLastBackupAt();
+},
 };

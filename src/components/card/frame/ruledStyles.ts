@@ -42,7 +42,6 @@ const makeLineSvg = (color: string, linePx: number) => {
     "</svg>";
   return toDataUri(svg);
 };
-
 /**
  * ページ背景用の繰り返し罫線 backgroundImage 値を返す。
  * rowPx=24, linePx=1 をデフォルトとして使う。

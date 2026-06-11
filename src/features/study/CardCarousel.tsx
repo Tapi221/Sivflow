@@ -5,6 +5,8 @@ import type { Card } from "@/types";
 
 
 
+
+
 type StudyCardProps = React.ComponentProps<typeof StudyCard>;
 type ReviewResultHandler = Extract<StudyCardProps, { mode: "review"; }>["onResult"];
 type PracticeResultHandler = Extract<StudyCardProps, { mode: "practice"; }>["onResult"];
@@ -29,7 +31,9 @@ export type CardCarouselProps = ReviewCardCarouselProps | PracticeCardCarouselPr
 
 
 
-export const CardCarousel = ({ cards, mode, sessionCurrentIndex, onResult, onToggleUncertainty, onToggleBookmark, onEdit, showHard, showEasy, }: CardCarouselProps) => { const [flipTrigger, setFlipTrigger] = useState(0);
+
+
+export const CardCarousel = ({ cards, mode, sessionCurrentIndex, onResult, onToggleUncertainty, onToggleBookmark, onEdit, showHard, showEasy }: CardCarouselProps) => { const [flipTrigger, setFlipTrigger] = useState(0);
 
   useEffect(() => {
     queueMicrotask(() => setFlipTrigger(0));

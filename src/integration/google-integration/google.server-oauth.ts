@@ -5,6 +5,8 @@ import { consumeGoogleCalendarServerCodeVerifier, type GoogleCalendarAccess } fr
 
 
 
+
+
 type GoogleOAuthReconnectDiagnosis = { cause: string; reconnectRequired: boolean; action: string; };
 export type GoogleOAuthCallableErrorReason = "invalid_grant" | "server_oauth_configuration" | "token_encryption_key_invalid" | "stored_refresh_token_decrypt_failed" | "stored_refresh_token_missing" | "insufficient_google_scope" | "token_endpoint_failed";
 type CallableErrorDetails = { reason?: GoogleOAuthCallableErrorReason; reconnectRequired?: boolean; userAction?: string; adminAction?: string; };
@@ -29,6 +31,8 @@ type GetGoogleCalendarAccessTokenInput = {
 type DisconnectGoogleCalendarAccountInput = {
   accountId: string;
 };
+
+
 
 
 
@@ -58,6 +62,8 @@ const disconnectGoogleCalendarAccountCallable =
     functionsClient,
     "disconnectGoogleCalendarAccount",
   );
+
+
 
 
 
@@ -157,20 +163,22 @@ export const isServerStoredGoogleOAuthEnabled = (): boolean => { if (isDesktopLi
     import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "true"
   );
 };
-export const exchangeGoogleCalendarCode = async (input: ExchangeGoogleCalendarCodeInput,): Promise<ServerGoogleCalendarAccess> => { try { await waitForCallableAuth();
+export const exchangeGoogleCalendarCode = async (input: ExchangeGoogleCalendarCodeInput): Promise<ServerGoogleCalendarAccess> => { try { await waitForCallableAuth();
 
-    const result = await exchangeGoogleCalendarCodeCallable({
-      ...input,
-      codeVerifier:
+  const result = await exchangeGoogleCalendarCodeCallable({
+    ...input,
+    codeVerifier:
         input.codeVerifier ??
         consumeGoogleCalendarServerCodeVerifier() ??
         undefined,
-    });
-    return result.data;
-  } catch (error) {
-    throw toUserTransparentAutoRecoveryError(error);
-  }
+  });
+  return result.data;
+} catch (error) {
+  throw toUserTransparentAutoRecoveryError(error);
+}
 };
+
+
 
 
 
@@ -178,12 +186,16 @@ export const exchangeGoogleConnectedServiceCode = exchangeGoogleCalendarCode;
 
 
 
-export const getServerStoredGoogleCalendarAccessToken = async (input: GetGoogleCalendarAccessTokenInput,): Promise<ServerGoogleCalendarAccess> => { try { await waitForCallableAuth();
-    return await getGoogleCalendarAccessTokenWithRetry(input);
-  } catch (error) {
-    throw toUserTransparentAutoRecoveryError(error);
-  }
+
+
+export const getServerStoredGoogleCalendarAccessToken = async (input: GetGoogleCalendarAccessTokenInput): Promise<ServerGoogleCalendarAccess> => { try { await waitForCallableAuth();
+  return await getGoogleCalendarAccessTokenWithRetry(input);
+} catch (error) {
+  throw toUserTransparentAutoRecoveryError(error);
+}
 };
+
+
 
 
 
@@ -191,6 +203,8 @@ export const getServerStoredGoogleConnectedServiceAccessToken = getServerStoredG
 
 
 
-export const disconnectServerStoredGoogleCalendarAccount = async (input: DisconnectGoogleCalendarAccountInput,): Promise<void> => { await waitForCallableAuth();
+
+
+export const disconnectServerStoredGoogleCalendarAccount = async (input: DisconnectGoogleCalendarAccountInput): Promise<void> => { await waitForCallableAuth();
   await disconnectGoogleCalendarAccountCallable(input);
 };

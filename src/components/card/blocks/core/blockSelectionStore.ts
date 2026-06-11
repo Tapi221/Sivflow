@@ -25,4 +25,4 @@ export const setSelectedBlockId = (nextSelectedBlockId: string | null) => { if (
   selectedBlockId = nextSelectedBlockId;
   emitBlockSelectionChange();
 };
-export const useSelectedBlockId = () => useSyncExternalStore(subscribeSelectedBlockId, getSelectedBlockIdSnapshot, getSelectedBlockIdSnapshot,);
+export const useSelectedBlockId = () => useSyncExternalStore(subscribeSelectedBlockId, getSelectedBlockIdSnapshot, getSelectedBlockIdSnapshot);

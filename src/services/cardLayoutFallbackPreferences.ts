@@ -72,11 +72,11 @@ const writeStore = (store: SplitFallbackPreferencesStore) => {
     // ignore local persistence failures
   }
 };
-export const resolveSplitFallbackLayoutModePreference = (deviceScope: string, fallbackMode: SplitFallbackCardLayoutMode = DEFAULT_SPLIT_FALLBACK_CARD_LAYOUT_MODE,) => { const store = readStore();
+export const resolveSplitFallbackLayoutModePreference = (deviceScope: string, fallbackMode: SplitFallbackCardLayoutMode = DEFAULT_SPLIT_FALLBACK_CARD_LAYOUT_MODE) => { const store = readStore();
   const stored = store.byDeviceScope[normalizeDeviceScope(deviceScope)];
   return stored ? normalizeSplitFallbackCardLayoutMode(stored) : fallbackMode;
 };
-export const setSplitFallbackLayoutModePreference = (deviceScope: string, mode: SplitFallbackCardLayoutMode,) => { const store = readStore();
+export const setSplitFallbackLayoutModePreference = (deviceScope: string, mode: SplitFallbackCardLayoutMode) => { const store = readStore();
   store.byDeviceScope[normalizeDeviceScope(deviceScope)] =
     normalizeSplitFallbackCardLayoutMode(mode);
   writeStore(store);

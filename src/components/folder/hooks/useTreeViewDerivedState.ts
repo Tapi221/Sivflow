@@ -38,7 +38,7 @@ const createEmptyFolderStats = (): FolderStats => ({
   unlearnedCount: 0,
   lastReviewedAt: null,
 });
-export const useTreeViewDerivedState = ({ folders, cards, cardSets = [], documents, selectedFolderId, selectedItem, selectedCardId, selectedDocumentId, autoCarryOver = true, isMobile, }: UseTreeViewDerivedStateParams) => { const getFolderPath = useCallback((folderId: string | null): string => { if (!folderId) return "";
+export const useTreeViewDerivedState = ({ folders, cards, cardSets = [], documents, selectedFolderId, selectedItem, selectedCardId, selectedDocumentId, autoCarryOver = true, isMobile }: UseTreeViewDerivedStateParams) => { const getFolderPath = useCallback((folderId: string | null): string => { if (!folderId) return "";
 
     const path: string[] = [];
     let currentFolder = folders.find((folder) => folder.id === folderId);

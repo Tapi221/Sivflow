@@ -44,7 +44,7 @@ const buildFlashcardDraft = (sentences: string[]) => {
     ...cards,
   ].join("\n");
 };
-export const generateTextLocally = ({ prompt, systemPrompt, }: LocalTextGenerationOptions) => { const source = systemPrompt ? `${systemPrompt}\n${prompt}` : prompt;
+export const generateTextLocally = ({ prompt, systemPrompt }: LocalTextGenerationOptions) => { const source = systemPrompt ? `${systemPrompt}\n${prompt}` : prompt;
   const sentences = toSentences(source);
 
   return buildFlashcardDraft(sentences);

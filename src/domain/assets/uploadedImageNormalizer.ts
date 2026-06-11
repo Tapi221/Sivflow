@@ -153,7 +153,7 @@ const normalizeUploadedImage = (
     naturalH: naturalH ?? null,
   };
 };
-export const normalizeUploadedImages = (raw: unknown, options: NormalizeUploadedImageOptions = {},) => { if (raw == null) return [];
+export const normalizeUploadedImages = (raw: unknown, options: NormalizeUploadedImageOptions = {}) => { if (raw == null) return [];
   const items = Array.isArray(raw) ? raw : [raw];
 
   return items

@@ -82,8 +82,8 @@ export const isBase64DataUrl = (url: string): url is Base64DataUrl => url.starts
  * @throws {Error} 不正な URL の場合
  */
 export const createBlobUrl = (url: string): BlobUrl => { if (!isBlobUrl(url)) { throw new Error(`[BrandedType] Invalid BlobUrl: ${url}`);
-  }
-  return url as BlobUrl;
+}
+return url as BlobUrl;
 };
 
 /**
@@ -91,8 +91,8 @@ export const createBlobUrl = (url: string): BlobUrl => { if (!isBlobUrl(url)) { 
  * @throws {Error} 不正な URL の場合
  */
 export const createStorageUrl = (url: string): StorageUrl => { if (!isStorageUrl(url)) { throw new Error(`[BrandedType] Invalid StorageUrl: ${url}`);
-  }
-  return url as StorageUrl;
+}
+return url as StorageUrl;
 };
 
 /**
@@ -103,8 +103,8 @@ export const createStorageUrl = (url: string): StorageUrl => { if (!isStorageUrl
  * DB や UploadedImage に Base64 を保存してはならない
  */
 export const createBase64DataUrl = (url: string): Base64DataUrl => { if (!isBase64DataUrl(url)) { throw new Error(`[BrandedType] Invalid Base64DataUrl: ${url}`);
-  }
-  return url as Base64DataUrl;
+}
+return url as Base64DataUrl;
 };
 
 // ============================================

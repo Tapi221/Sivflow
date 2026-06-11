@@ -19,7 +19,7 @@ export interface FilterPanelShellProps { title?: string;
 
 
 
-export const FilterPanelShell = ({ title, searchValue, searchPlaceholder = "検索...", onSearchChange, searchInputRef, headerAction, sections, children, className, bodyClassName, bodyRef, }: FilterPanelShellProps) => { const shouldRenderSearch = typeof onSearchChange === "function";
+export const FilterPanelShell = ({ title, searchValue, searchPlaceholder = "検索...", onSearchChange, searchInputRef, headerAction, sections, children, className, bodyClassName, bodyRef }: FilterPanelShellProps) => { const shouldRenderSearch = typeof onSearchChange === "function";
   const shouldRenderHeader = Boolean(title) || Boolean(headerAction);
 
   return (

@@ -1,7 +1,7 @@
-import { BaseListPlugin, isOrderedList } from '@platejs/list';
-import { KEYS } from 'platejs';
-import { BlockListStatic } from '@/components/ui/block-list-static';
-import { BaseIndentKit } from './indent-base-kit';
+import { BaseListPlugin, isOrderedList } from "@platejs/list";
+import { KEYS } from "platejs";
+import { BlockListStatic } from "@/components/ui/block-list-static";
+import { BaseIndentKit } from "./indent-base-kit";
 
 
 
@@ -18,10 +18,10 @@ const BaseListKit = [
         },
         transformProps: ({ props }) => ({
           ...props,
-          role: 'listitem',
+          role: "listitem",
           style: {
             ...props.style,
-            display: 'list-item',
+            display: "list-item",
           },
         }),
       },

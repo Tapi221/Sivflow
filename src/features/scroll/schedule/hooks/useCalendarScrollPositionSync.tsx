@@ -4,6 +4,8 @@ import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types"
 
 
 
+
+
 type Params = {
   selectedViewMode: CalendarViewMode;
   calendarBufferBefore: number;
@@ -14,6 +16,8 @@ type Params = {
   headerRef?: React.RefObject<HTMLDivElement | null>;
   headerRefs?: React.RefObject<HTMLDivElement | null>[];
 };
+
+
 
 
 
@@ -39,51 +43,51 @@ const getCalendarScrollLeft = ({
 
   return Math.max(0, anchorOffset - centerOffset);
 };
-export const useCalendarScrollPositionSync = ({ selectedViewMode, calendarBufferBefore, calendarDayColumnWidth, viewportWidth, scrollTargetToken, scrollRef, headerRef, headerRefs, }: Params) => { const lastRef = useRef<{ token: number | null;
-    viewportWidth: number;
-    selectedViewMode: CalendarViewMode | null;
-  }>({
-    token: null,
-    viewportWidth: 0,
-    selectedViewMode: null,
+export const useCalendarScrollPositionSync = ({ selectedViewMode, calendarBufferBefore, calendarDayColumnWidth, viewportWidth, scrollTargetToken, scrollRef, headerRef, headerRefs }: Params) => { const lastRef = useRef<{ token: number | null;
+  viewportWidth: number;
+  selectedViewMode: CalendarViewMode | null;
+}>({
+  token: null,
+  viewportWidth: 0,
+  selectedViewMode: null,
+});
+
+useLayoutEffect(() => {
+  const scroller = scrollRef.current;
+  if (!scroller) return;
+  if (viewportWidth <= 0) return;
+
+  const currentToken = scrollTargetToken ?? 0;
+  const { token, viewportWidth: prevWidth, selectedViewMode: prevSelectedViewMode } = lastRef.current;
+  const tokenChanged = token !== currentToken;
+  const viewportChanged = token === currentToken && prevWidth !== viewportWidth;
+  const viewModeChanged = prevSelectedViewMode !== selectedViewMode;
+
+  if (!tokenChanged && !viewportChanged && !viewModeChanged) {
+    return;
+  }
+
+  const nextScrollLeft = getCalendarScrollLeft({
+    selectedViewMode,
+    calendarBufferBefore,
+    calendarDayColumnWidth,
+    viewportWidth,
   });
 
-  useLayoutEffect(() => {
-    const scroller = scrollRef.current;
-    if (!scroller) return;
-    if (viewportWidth <= 0) return;
+  scroller.scrollLeft = nextScrollLeft;
 
-    const currentToken = scrollTargetToken ?? 0;
-    const { token, viewportWidth: prevWidth, selectedViewMode: prevSelectedViewMode } = lastRef.current;
-    const tokenChanged = token !== currentToken;
-    const viewportChanged = token === currentToken && prevWidth !== viewportWidth;
-    const viewModeChanged = prevSelectedViewMode !== selectedViewMode;
+  const fixedRowRefs = headerRefs ?? (headerRef ? [headerRef] : []);
 
-    if (!tokenChanged && !viewportChanged && !viewModeChanged) {
-      return;
+  fixedRowRefs.forEach((fixedRowRef) => {
+    if (fixedRowRef.current) {
+      fixedRowRef.current.scrollLeft = nextScrollLeft;
     }
+  });
 
-    const nextScrollLeft = getCalendarScrollLeft({
-      selectedViewMode,
-      calendarBufferBefore,
-      calendarDayColumnWidth,
-      viewportWidth,
-    });
-
-    scroller.scrollLeft = nextScrollLeft;
-
-    const fixedRowRefs = headerRefs ?? (headerRef ? [headerRef] : []);
-
-    fixedRowRefs.forEach((fixedRowRef) => {
-      if (fixedRowRef.current) {
-        fixedRowRef.current.scrollLeft = nextScrollLeft;
-      }
-    });
-
-    lastRef.current = {
-      token: currentToken,
-      viewportWidth,
-      selectedViewMode,
-    };
-  }, [selectedViewMode, calendarBufferBefore, calendarDayColumnWidth, viewportWidth, scrollTargetToken, scrollRef, headerRef, headerRefs]);
+  lastRef.current = {
+    token: currentToken,
+    viewportWidth,
+    selectedViewMode,
+  };
+}, [selectedViewMode, calendarBufferBefore, calendarDayColumnWidth, viewportWidth, scrollTargetToken, scrollRef, headerRef, headerRefs]);
 };

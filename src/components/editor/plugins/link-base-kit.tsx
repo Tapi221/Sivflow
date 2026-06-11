@@ -1,5 +1,5 @@
-import { BaseLinkPlugin } from '@platejs/link';
-import { LinkElementStatic } from '@/components/ui/link-node-static';
+import { BaseLinkPlugin } from "@platejs/link";
+import { LinkElementStatic } from "@/components/ui/link-node-static";
 
 
 

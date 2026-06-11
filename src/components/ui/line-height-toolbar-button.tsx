@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
-import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
+import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
 
-import { LineHeightPlugin } from '@platejs/basic-styles/react';
+import { LineHeightPlugin } from "@platejs/basic-styles/react";
 
-import { DropdownMenuItemIndicator } from '@radix-ui/react-dropdown-menu';
+import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
 
-import { CheckIcon, WrapText } from 'lucide-react';
+import { CheckIcon, WrapText } from "lucide-react";
 
-import { useEditorRef, useSelectionFragmentProp } from 'platejs/react';
+import { useEditorRef, useSelectionFragmentProp } from "platejs/react";
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger, } from './dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "./dropdown-menu";
 
-import { ToolbarButton } from './toolbar';
+import { ToolbarButton } from "./toolbar";
 
 
 

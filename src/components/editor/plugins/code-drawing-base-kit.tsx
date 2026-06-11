@@ -1,5 +1,5 @@
-import { BaseCodeDrawingPlugin } from '@platejs/code-drawing';
-import { CodeDrawingElement } from '@/components/ui/code-drawing-node';
+import { BaseCodeDrawingPlugin } from "@platejs/code-drawing";
+import { CodeDrawingElement } from "@/components/ui/code-drawing-node";
 
 
 

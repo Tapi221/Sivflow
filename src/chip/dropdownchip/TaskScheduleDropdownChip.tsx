@@ -15,7 +15,7 @@ type Props = {
 
 
 
-export const MultiSelectDropdown = ({ value, onChange, options, placeholder = "Select", }: Props) => { const [open, setOpen] = useState(false);
+export const MultiSelectDropdown = ({ value, onChange, options, placeholder = "Select" }: Props) => { const [open, setOpen] = useState(false);
 
   const selectedSet = new Set(value);
 

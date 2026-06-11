@@ -61,7 +61,7 @@ const createMinHeightStyle = ({ maxMinHeightHours, shouldHideEvent, suppressMinH
   return `max(0px, min(${minHeightPx}px, calc(${normalizedMaxMinHeightHours} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}) - ${eventChipDesign.weekdayGrid.timedVerticalTrimPx}px)))`;
 };
 const shouldHideCarryOverEventInShortRange = (entry: CalendarTimeGridLayoutEntry, rangeHours: number): boolean => entry.startsBeforeRange && rangeHours <= SHORT_RANGE_CARRY_OVER_HIDE_THRESHOLD_HOURS;
-export const getWeekdayTimedEventFrame = (entry: CalendarTimeGridLayoutEntry, rangeHours = GRID.WEEKDAY_HOURS): WeekdayTimedEventFrame => ({ leftPercent: entry.style.xOffset, topHours: getPercentAsHourSpan(entry.style.top, rangeHours), widthPercent: entry.style.width, heightHours: getPercentAsHourSpan(entry.style.height, rangeHours), });
+export const getWeekdayTimedEventFrame = (entry: CalendarTimeGridLayoutEntry, rangeHours = GRID.WEEKDAY_HOURS): WeekdayTimedEventFrame => ({ leftPercent: entry.style.xOffset, topHours: getPercentAsHourSpan(entry.style.top, rangeHours), widthPercent: entry.style.width, heightHours: getPercentAsHourSpan(entry.style.height, rangeHours) });
 export const getWeekdayTimedEventPositionStyle = (entry: CalendarTimeGridLayoutEntry, rangeHours = GRID.WEEKDAY_HOURS, options: WeekdayTimedEventPositionOptions = {}): WeekdayTimedEventPositionStyle => { const frame = getWeekdayTimedEventFrame(entry, rangeHours);
   const horizontalInsets = getWeekdayTimedEventHorizontalInsets(frame);
   const shouldHideEvent = shouldHideCarryOverEventInShortRange(entry, rangeHours);

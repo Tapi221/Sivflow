@@ -209,7 +209,7 @@ const MobileCalendarDateButton = ({ label, value, isActive, onClick }: MobileCal
       "h-9 min-w-[142px] rounded-[10px] px-3 text-right text-[17px] tracking-[-0.03em] outline-none transition-colors tabular-nums font-medium",
       isActive
         ? "bg-[#ff3b30]/10 text-[#ff3b30]"
-        : "bg-[#f2f2f7] text-[#111111]"
+        : "bg-[#f2f2f7] text-[#111111]",
     )}
     aria-label={label}
     aria-pressed={isActive}
@@ -228,7 +228,7 @@ const MobileCalendarTimeButton = ({ label, value, isActive, onClick }: MobileCal
       "h-9 w-[80px] rounded-[10px] px-2 text-right text-[17px] tracking-[-0.03em] outline-none transition-colors tabular-nums font-medium",
       isActive
         ? "bg-[#ff3b30]/10 text-[#ff3b30]"
-        : "bg-[#f2f2f7] text-[#111111]"
+        : "bg-[#f2f2f7] text-[#111111]",
     )}
     aria-label={label}
     aria-pressed={isActive}
@@ -296,7 +296,7 @@ const MobileCalendarInlineDatePicker = ({ value, onChange }: MobileCalendarInlin
               key={label}
               className={cn(
                 "h-7 text-center text-[12px] font-semibold leading-7 tracking-[-0.01em]",
-                index === 0 ? "text-[#ff3b30]" : index === 6 ? "text-[#007aff]" : "text-[#8e8e93]"
+                index === 0 ? "text-[#ff3b30]" : index === 6 ? "text-[#007aff]" : "text-[#8e8e93]",
               )}
             >
               {label}
@@ -333,7 +333,7 @@ const MobileCalendarInlineDatePicker = ({ value, onChange }: MobileCalendarInlin
                             ? "text-[#ff3b30]"
                             : isSaturday
                               ? "text-[#007aff]"
-                              : "text-[#111111]"
+                              : "text-[#111111]",
                   )}
                 >
                   {date.getDate()}
@@ -402,7 +402,7 @@ const MobileCalendarInlineTimeWheel = ({ value, onChange }: MobileCalendarInline
                   "block h-[44px] w-full snap-center rounded-[10px] text-center tracking-[-0.04em] transition-all tabular-nums",
                   hour === hours
                     ? "text-[30px] font-semibold text-[#111111]"
-                    : "text-[24px] font-normal text-[#8e8e93]"
+                    : "text-[24px] font-normal text-[#8e8e93]",
                 )}
                 onClick={() => onChange(createTimeInputValue(hour, minutes))}
               >
@@ -433,7 +433,7 @@ const MobileCalendarInlineTimeWheel = ({ value, onChange }: MobileCalendarInline
                   "block h-[44px] w-full snap-center rounded-[10px] text-center tracking-[-0.04em] transition-all tabular-nums",
                   minute === minutes
                     ? "text-[30px] font-semibold text-[#111111]"
-                    : "text-[24px] font-normal text-[#8e8e93]"
+                    : "text-[24px] font-normal text-[#8e8e93]",
                 )}
                 onClick={() => onChange(createTimeInputValue(hours, minute))}
               >
@@ -540,7 +540,7 @@ const MobileCalendarEventComposer = ({
         setFormValue({ location: MOBILE_EVENT_LOCATION_CURRENT_VALUE_PREFIX });
         setIsLocationSheetOpen(false);
       },
-      { enableHighAccuracy: true, maximumAge: 30000, timeout: 8000 }
+      { enableHighAccuracy: true, maximumAge: 30000, timeout: 8000 },
     );
   }, [setFormValue]);
 
@@ -629,7 +629,7 @@ const MobileCalendarEventComposer = ({
                 type="button"
                 className={cn(
                   "flex h-[46px] w-full items-center px-4 text-left text-[17px] tracking-[-0.03em] outline-none",
-                  form.location.trim() ? "text-[#111111]" : "text-[#c7c7cc]"
+                  form.location.trim() ? "text-[#111111]" : "text-[#c7c7cc]",
                 )}
                 onClick={() => { setActivePickerField(null); setIsLocationSheetOpen(true); }}
               >

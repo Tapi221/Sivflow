@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
-import type { PlateElementProps } from 'platejs/react';
+import type { PlateElementProps } from "platejs/react";
 
-import { useToggleButton, useToggleButtonState } from '@platejs/toggle/react';
+import { useToggleButton, useToggleButtonState } from "@platejs/toggle/react";
 
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight } from "lucide-react";
 
-import { PlateElement } from 'platejs/react';
+import { PlateElement } from "platejs/react";
 
-import { Button } from './button';
+import { Button } from "./button";
 
 
 
@@ -27,7 +27,7 @@ export const ToggleElement = (props: PlateElementProps) => { const element = pro
         contentEditable={false}
         {...buttonProps}
       >
-        <ChevronRight className={open ? 'rotate-90 transition-transform duration-75' : 'rotate-0 transition-transform duration-75'} />
+        <ChevronRight className={open ? "rotate-90 transition-transform duration-75" : "rotate-0 transition-transform duration-75"} />
       </Button>
       {props.children}
     </PlateElement>

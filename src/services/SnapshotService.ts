@@ -26,49 +26,49 @@ const snapshotStoreUseCase = createSnapshotStoreUseCase({
   repository: snapshotFirestoreRepository,
 });
 export const snapshotService = { createSnapshot: async (userId: string, options: { bumpGenerationCounter?: boolean;
-  } = {},
-  ) => {
-    return await createSnapshotUseCase.execute(userId, options);
-  },
+} = {},
+) => {
+  return await createSnapshotUseCase.execute(userId, options);
+},
 
-  exportToFile: async (userId: string, folderName?: string): Promise<void> => {
-    await exportSnapshotUseCase.execute(userId, folderName);
-  },
+exportToFile: async (userId: string, folderName?: string): Promise<void> => {
+  await exportSnapshotUseCase.execute(userId, folderName);
+},
 
-  exportFolder: async (userId: string, folderId: string): Promise<void> => {
-    await exportFolderSnapshotUseCase.execute(userId, folderId);
-  },
+exportFolder: async (userId: string, folderId: string): Promise<void> => {
+  await exportFolderSnapshotUseCase.execute(userId, folderId);
+},
 
-  parseSnapshotFile,
+parseSnapshotFile,
 
-  compareWithLocal: async (imported: AppSnapshot, userId: string) => {
-    return await compareSnapshotUseCase.execute(imported, userId);
-  },
+compareWithLocal: async (imported: AppSnapshot, userId: string) => {
+  return await compareSnapshotUseCase.execute(imported, userId);
+},
 
-  saveToFirestore: async (snapshot: AppSnapshot): Promise<void> => {
+saveToFirestore: async (snapshot: AppSnapshot): Promise<void> => {
+  await snapshotStoreUseCase.save(snapshot);
+},
+
+getStoredSnapshots: async (userId: string): Promise<AppSnapshot[]> => {
+  return await snapshotStoreUseCase.list(userId);
+},
+
+migrateFromLocalStorage: async (userId: string): Promise<void> => {
+  const localSnapshots = getStoredSnapshotsFromLocalStorage();
+
+  if (localSnapshots.length === 0) {
+    console.log("[スナップショット] 移行対象のローカルスナップショットはありません");
+    return;
+  }
+
+  for (const snapshot of localSnapshots) {
+    snapshot.metadata.userId = userId;
     await snapshotStoreUseCase.save(snapshot);
-  },
+  }
 
-  getStoredSnapshots: async (userId: string): Promise<AppSnapshot[]> => {
-    return await snapshotStoreUseCase.list(userId);
-  },
-
-  migrateFromLocalStorage: async (userId: string): Promise<void> => {
-    const localSnapshots = getStoredSnapshotsFromLocalStorage();
-
-    if (localSnapshots.length === 0) {
-      console.log("[スナップショット] 移行対象のローカルスナップショットはありません");
-      return;
-    }
-
-    for (const snapshot of localSnapshots) {
-      snapshot.metadata.userId = userId;
-      await snapshotStoreUseCase.save(snapshot);
-    }
-
-    localStorage.removeItem(SNAPSHOTS_KEY);
-    console.log("[スナップショット] 移行が完了しました。LocalStorage をクリアしました");
-  },
+  localStorage.removeItem(SNAPSHOTS_KEY);
+  console.log("[スナップショット] 移行が完了しました。LocalStorage をクリアしました");
+},
 };
 
 

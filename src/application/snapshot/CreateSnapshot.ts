@@ -13,7 +13,7 @@ export interface CreateSnapshotDependencies { generationCounterStore: Generation
 
 
 
-export const createCreateSnapshotUseCase = ({ generationCounterStore, }: CreateSnapshotDependencies) => { const assertPersistentStorageAvailable = (operation: string): void => { const status = getLocalDBRuntimeStatus();
+export const createCreateSnapshotUseCase = ({ generationCounterStore }: CreateSnapshotDependencies) => { const assertPersistentStorageAvailable = (operation: string): void => { const status = getLocalDBRuntimeStatus();
 
     if (status.mode === "fallback") {
       throw new Error(

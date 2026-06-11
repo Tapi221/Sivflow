@@ -80,7 +80,7 @@ export const normalizeViewerLanguage = (input?: string) => { const raw = (input 
   const normalized = VIEWER_LANGUAGE_ALIASES[raw] ?? raw;
   return VIEWER_SUPPORTED_LANGS.has(normalized) ? normalized : "clike";
 };
-export const getViewerLanguageLabels = (language: string) => { return { full: VIEWER_LANGUAGE_FULL_LABELS[language] ?? language, short: VIEWER_LANGUAGE_SHORT_LABELS[language] ?? language.toUpperCase(), };
+export const getViewerLanguageLabels = (language: string) => { return { full: VIEWER_LANGUAGE_FULL_LABELS[language] ?? language, short: VIEWER_LANGUAGE_SHORT_LABELS[language] ?? language.toUpperCase() };
 };
 export const normalizeEditorLanguage = (input?: string) => { const lang = (input || "").toLowerCase().trim();
   if (lang === "html") return "markup";

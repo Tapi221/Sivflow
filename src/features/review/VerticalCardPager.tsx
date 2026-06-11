@@ -6,6 +6,8 @@ import { buildVerticalCardPagerItemStyle, resolveVerticalCardPagerItemWidthSpec,
 
 
 
+
+
 type ScrollAnchorFace = "question" | "answer";
 type ScrollAnchorSnapshot = {
   preserveKey: string | number | null;
@@ -37,6 +39,8 @@ export type VerticalCardPagerProps<T> = { cards: T[];
 
 
 
+
+
 export const ACTIVE_INDEX_RENDER_RADIUS = 6;
 const DEFAULT_CARD_WIDTH = CANONICAL_CARD_WIDTH;
 const CARD_GAP = 16;
@@ -45,6 +49,8 @@ const CARD_RADIUS_SM = 32;
 const CARD_RADIUS_MD = 40;
 const SCROLL_IDLE_COMMIT_DELAY_MS = 110;
 const SCROLL_ANCHOR_SUPPRESSION_MS = 180;
+
+
 
 
 
@@ -61,7 +67,9 @@ const clampIndex = (idx: number, count: number) => {
   if (!Number.isFinite(idx)) return 0;
   return Math.max(0, Math.min(count - 1, Math.trunc(idx)));
 };
-const buildStableCardKey = <T,>(card: T, idx: number, getKey?: (card: T, idx: number) => string | number) => {
+
+
+const buildStableCardKey = <T>(card: T, idx: number, getKey?: (card: T, idx: number) => string | number) => {
   return String(getKey ? getKey(card, idx) : idx);
 };
 const resolveScrollAnchorFaceFromElement = (element: HTMLElement | null): ScrollAnchorFace | null => {
@@ -79,7 +87,7 @@ const getCurrentTimeMs = () => {
 
 
 
-const VerticalCardPagerFn = <T,>({
+const VerticalCardPagerFn = <T>({
   cards,
   activeIndex,
   onActiveIndexChange,

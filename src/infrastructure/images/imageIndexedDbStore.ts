@@ -4,7 +4,9 @@ import { assertImageInvariant } from "@/utils/imageAssertions";
 
 
 
-export const saveImageToIndexedDb = async (image: UploadedImage,): Promise<void> => { assertImageInvariant(image);
+
+
+export const saveImageToIndexedDb = async (image: UploadedImage): Promise<void> => { assertImageInvariant(image);
 
   try {
     const db = await getLocalDb();
@@ -15,11 +17,11 @@ export const saveImageToIndexedDb = async (image: UploadedImage,): Promise<void>
     throw error;
   }
 };
-export const getImageFromIndexedDb = async (imageId: string,): Promise<UploadedImage | null> => { try { const db = await getLocalDb();
-    const image = await db.images.get(imageId);
-    return (image as UploadedImage | null) ?? null;
-  } catch (error) {
-    console.error("[ImageDB] Failed to get from IndexedDB", error);
-    throw error;
-  }
+export const getImageFromIndexedDb = async (imageId: string): Promise<UploadedImage | null> => { try { const db = await getLocalDb();
+  const image = await db.images.get(imageId);
+  return (image as UploadedImage | null) ?? null;
+} catch (error) {
+  console.error("[ImageDB] Failed to get from IndexedDB", error);
+  throw error;
+}
 };

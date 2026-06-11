@@ -9,11 +9,11 @@ const checkDataIntegrityUseCase = createCheckDataIntegrityUseCase();
 const quarantineOrphanedCardsUseCase = createQuarantineOrphanedCardsUseCase();
 const hardDeleteOrphanedCardsUseCase = createHardDeleteOrphanedCardsUseCase();
 export const dataIntegrityService = { checkIntegrity: async () => { return await checkDataIntegrityUseCase.execute();
-  },
-  quarantineOrphanedCards: async () => {
-    return await quarantineOrphanedCardsUseCase.execute();
-  },
-  hardDeleteOrphanedCards: async (userId: string, report: IntegrityReport) => {
-    return await hardDeleteOrphanedCardsUseCase.execute(userId, report);
-  },
+},
+quarantineOrphanedCards: async () => {
+  return await quarantineOrphanedCardsUseCase.execute();
+},
+hardDeleteOrphanedCards: async (userId: string, report: IntegrityReport) => {
+  return await hardDeleteOrphanedCardsUseCase.execute(userId, report);
+},
 };

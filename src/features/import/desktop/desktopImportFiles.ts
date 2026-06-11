@@ -49,9 +49,9 @@ const normalizeDesktopFileData = (
 
   throw new Error("Unsupported desktop import file payload");
 };
-export const canUseDesktopImportFiles = (): boolean => { return Boolean(typeof window !== "undefined" && window.desktop?.files?.readImportFile && window.desktop.files.onImportFileOpen,);
+export const canUseDesktopImportFiles = (): boolean => { return Boolean(typeof window !== "undefined" && window.desktop?.files?.readImportFile && window.desktop.files.onImportFileOpen);
 };
-export const subscribeDesktopImportFileOpen = (handler: (payload: DesktopImportFileOpenPayload) => void | Promise<void>,): (() => void) => { if (!canUseDesktopImportFiles()) { return () => {};
+export const subscribeDesktopImportFileOpen = (handler: (payload: DesktopImportFileOpenPayload) => void | Promise<void>): (() => void) => { if (!canUseDesktopImportFiles()) { return () => {};
   }
 
   const filesApi = window.desktop?.files;
@@ -63,7 +63,7 @@ export const subscribeDesktopImportFileOpen = (handler: (payload: DesktopImportF
     void handler(payload);
   });
 };
-export const readDesktopImportFile = async (filePath: string,): Promise<File> => { if (!canUseDesktopImportFiles()) { throw new Error("Desktop import file bridge is unavailable");
+export const readDesktopImportFile = async (filePath: string): Promise<File> => { if (!canUseDesktopImportFiles()) { throw new Error("Desktop import file bridge is unavailable");
   }
 
   const filesApi = window.desktop?.files;
@@ -84,7 +84,7 @@ export const selectDesktopImportFiles = async (): Promise<File[]> => { if (!canU
   const paths = await window.desktop.files.selectImportFiles();
   return readDesktopImportFiles(paths);
 };
-export const readDesktopImportFiles = async (filePaths: readonly string[],): Promise<File[]> => { const uniquePaths = Array.from(new Set(filePaths.map((filePath) => filePath.trim()).filter(Boolean)),);
+export const readDesktopImportFiles = async (filePaths: readonly string[]): Promise<File[]> => { const uniquePaths = Array.from(new Set(filePaths.map((filePath) => filePath.trim()).filter(Boolean)));
 
   const files: File[] = [];
 

@@ -4,6 +4,8 @@ import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "
 
 
 
+
+
 type BuildExplorerSearchItemsParams = {
   folders: Folder[];
   cards: Card[];
@@ -12,6 +14,8 @@ type BuildExplorerSearchItemsParams = {
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
 };
+
+
 
 
 
@@ -29,7 +33,7 @@ const uniqueKeywords = (...values: Array<string | null | undefined>) => {
     ),
   );
 };
-export const buildExplorerSearchItems = ({ folders, cards, cardSets, documents, onFolderSelect, onItemSelect, }: BuildExplorerSearchItemsParams) => { const activeFolders = folders.filter((folder) => !folder.isDeleted && !folder.isHidden,);
+export const buildExplorerSearchItems = ({ folders, cards, cardSets, documents, onFolderSelect, onItemSelect }: BuildExplorerSearchItemsParams) => { const activeFolders = folders.filter((folder) => !folder.isDeleted && !folder.isHidden);
   const activeCardSets = cardSets.filter((cardSet) => !cardSet.isDeleted);
   const activeCards = cards.filter((card) => !card.isDeleted);
   const activeDocuments = documents.filter(

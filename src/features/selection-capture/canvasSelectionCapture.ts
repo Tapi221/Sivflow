@@ -2,6 +2,8 @@ import type { SelectionCaptureRect } from "./selectionCapture.types";
 
 
 
+
+
 const toBlob = (canvas: HTMLCanvasElement): Promise<Blob> => {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -14,7 +16,7 @@ const toBlob = (canvas: HTMLCanvasElement): Promise<Blob> => {
     }, "image/png");
   });
 };
-export const cropCanvasToBlob = async (sourceCanvas: HTMLCanvasElement, sourceRect: SelectionCaptureRect,): Promise<Blob> => { const outputCanvas = document.createElement("canvas");
+export const cropCanvasToBlob = async (sourceCanvas: HTMLCanvasElement, sourceRect: SelectionCaptureRect): Promise<Blob> => { const outputCanvas = document.createElement("canvas");
   outputCanvas.width = Math.max(1, Math.round(sourceRect.width));
   outputCanvas.height = Math.max(1, Math.round(sourceRect.height));
 

@@ -65,50 +65,50 @@ const initialState = (userId = "anon"): TodayStudyState => ({
 
 
 export const useTodayStudyStore = create<TodayStudyStore>()(persist((set, get) => ({ ...initialState(), hydrate: (userId: string) => { const s = get();
-    const today = localDateKey();
-    if (s.dateKey !== today || s.userId !== userId) {
-      set(initialState(userId));
-    }
-  },
+  const today = localDateKey();
+  if (s.dateKey !== today || s.userId !== userId) {
+    set(initialState(userId));
+  }
+},
 
-  resetIfNewDay: (userId?: string) => {
-    const s = get();
-    const today = localDateKey();
-    const uid = userId ?? s.userId;
-    if (s.dateKey !== today || (userId && s.userId !== userId)) {
-      set(initialState(uid));
-    }
-  },
+resetIfNewDay: (userId?: string) => {
+  const s = get();
+  const today = localDateKey();
+  const uid = userId ?? s.userId;
+  if (s.dateKey !== today || (userId && s.userId !== userId)) {
+    set(initialState(uid));
+  }
+},
 
-  addRating: (key: RatingKey, delta = 1) =>
-    set((s) => ({
-      ratings: { ...s.ratings, [key]: (s.ratings[key] ?? 0) + delta },
-    })),
+addRating: (key: RatingKey, delta = 1) =>
+  set((s) => ({
+    ratings: { ...s.ratings, [key]: (s.ratings[key] ?? 0) + delta },
+  })),
 
-  markForExtra: (cardId: string) =>
-    set((s) => {
-      if (s.extraQueue.includes(cardId)) return s;
-      return { extraQueue: [...s.extraQueue, cardId] };
-    }),
+markForExtra: (cardId: string) =>
+  set((s) => {
+    if (s.extraQueue.includes(cardId)) return s;
+    return { extraQueue: [...s.extraQueue, cardId] };
+  }),
 
-  markExtraDone: (cardId: string) =>
-    set((s) => ({
-      extraQueue: s.extraQueue.filter((id) => id !== cardId),
-      extraDone: s.extraDone.includes(cardId)
-        ? s.extraDone
-        : [...s.extraDone, cardId],
-    })),
+markExtraDone: (cardId: string) =>
+  set((s) => ({
+    extraQueue: s.extraQueue.filter((id) => id !== cardId),
+    extraDone: s.extraDone.includes(cardId)
+      ? s.extraDone
+      : [...s.extraDone, cardId],
+  })),
 }),
-  {
-    name: "manifolmia-today-study",
-    // アクション関数は除外して状態のみ永続化
-    partialize: (s) => ({
-      dateKey: s.dateKey,
-      userId: s.userId,
-      ratings: s.ratings,
-      extraQueue: s.extraQueue,
-      extraDone: s.extraDone,
-    }),
-  },
+{
+  name: "manifolmia-today-study",
+  // アクション関数は除外して状態のみ永続化
+  partialize: (s) => ({
+    dateKey: s.dateKey,
+    userId: s.userId,
+    ratings: s.ratings,
+    extraQueue: s.extraQueue,
+    extraDone: s.extraDone,
+  }),
+},
 ),
 );

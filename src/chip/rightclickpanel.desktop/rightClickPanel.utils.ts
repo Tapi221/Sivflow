@@ -55,7 +55,7 @@ export const clampRightClickPanelPosition = (x: number, y: number, dimensions: R
     y: clampRightClickPanelAxis(y, dimensions.height, window.innerHeight),
   };
 };
-export const useRightClickPanelDismiss = (panelId: RightClickPanelId, isOpen: boolean, panelRef: RefObject<HTMLElement | null>, onDismiss: () => void,): void => { useEffect(() => { if (!isOpen) return;
+export const useRightClickPanelDismiss = (panelId: RightClickPanelId, isOpen: boolean, panelRef: RefObject<HTMLElement | null>, onDismiss: () => void): void => { useEffect(() => { if (!isOpen) return;
 
     const isPanelEvent = (event: Event): boolean => {
       const panel = panelRef.current;

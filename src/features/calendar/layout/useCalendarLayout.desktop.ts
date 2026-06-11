@@ -19,7 +19,7 @@ const isWeekdayRailView = (viewMode: CalendarViewMode) =>
   viewMode === "threeDays" ||
   viewMode === "week" ||
   viewMode === "timetable";
-export const useCalendarLayout = ({ viewportWidth, visibleDays, displayDays, selectedViewMode, currentDate, calendarBuffer, }: { viewportWidth: number;
+export const useCalendarLayout = ({ viewportWidth, visibleDays, displayDays, selectedViewMode, currentDate, calendarBuffer }: { viewportWidth: number;
   visibleDays: Date[];
   displayDays: Date[];
   selectedViewMode: CalendarViewMode;

@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import type { TElement } from 'platejs';
+import type { TElement } from "platejs";
 
-import { faker } from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
 
-import { CopilotPlugin } from '@platejs/ai/react';
+import { CopilotPlugin } from "@platejs/ai/react";
 
-import { serializeMd, stripMarkdown } from '@platejs/markdown';
+import { serializeMd, stripMarkdown } from "@platejs/markdown";
 
-import { GhostText } from '@/components/ui/ghost-text';
+import { GhostText } from "@/components/ui/ghost-text";
 
-import { MarkdownKit } from './markdown-kit';
+import { MarkdownKit } from "./markdown-kit";
 
 
 
-export const CopilotKit = [...MarkdownKit, CopilotPlugin.configure(({ api }) => ({ options: { completeOptions: { api: '/api/ai/copilot', body: { system: `You are an advanced AI writing assistant, similar to VSCode Copilot but for general text. Your task is to predict and generate the next part of the text based on the given context. Rules: - Continue the text naturally up to the next punctuation mark (.,,, ;, :, ?, or !).
+export const CopilotKit = [...MarkdownKit, CopilotPlugin.configure(({ api }) => ({ options: { completeOptions: { api: "/api/ai/copilot", body: { system: `You are an advanced AI writing assistant, similar to VSCode Copilot but for general text. Your task is to predict and generate the next part of the text based on the given context. Rules: - Continue the text naturally up to the next punctuation mark (.,,, ;, :, ?, or !).
   - Maintain style and tone. Don't repeat given text.
   - For unclear context, provide the most likely continuation.
   - Handle code snippets, lists, or structured text if needed.
@@ -30,7 +30,7 @@ export const CopilotKit = [...MarkdownKit, CopilotPlugin.configure(({ api }) => 
         });
       },
       onFinish: (_, completion) => {
-        if (completion === '0') return;
+        if (completion === "0") return;
 
         api.copilot.setBlockSuggestion({
           text: stripMarkdown(completion),
@@ -42,7 +42,7 @@ export const CopilotKit = [...MarkdownKit, CopilotPlugin.configure(({ api }) => 
     getPrompt: ({ editor }) => {
       const contextEntry = editor.api.block({ highest: true });
 
-      if (!contextEntry) return '';
+      if (!contextEntry) return "";
 
       const prompt = serializeMd(editor, {
         value: [contextEntry[0] as TElement],
@@ -56,16 +56,16 @@ export const CopilotKit = [...MarkdownKit, CopilotPlugin.configure(({ api }) => 
   },
   shortcuts: {
     accept: {
-      keys: 'tab',
+      keys: "tab",
     },
     acceptNextWord: {
-      keys: 'mod+right',
+      keys: "mod+right",
     },
     reject: {
-      keys: 'escape',
+      keys: "escape",
     },
     triggerSuggestion: {
-      keys: 'ctrl+space',
+      keys: "ctrl+space",
     },
   },
 })),

@@ -1,33 +1,33 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
-import type { CodeDrawingType, TCodeDrawingElement, ViewMode, } from '@platejs/code-drawing';
+import type { CodeDrawingType, TCodeDrawingElement, ViewMode } from "@platejs/code-drawing";
 
-import { VIEW_MODE, DEFAULT_MIN_HEIGHT, CODE_DRAWING_TYPE_ARRAY, VIEW_MODE_ARRAY, renderCodeDrawing, RENDER_DEBOUNCE_DELAY, downloadImage, DOWNLOAD_FILENAME, } from '@platejs/code-drawing';
+import { VIEW_MODE, DEFAULT_MIN_HEIGHT, CODE_DRAWING_TYPE_ARRAY, VIEW_MODE_ARRAY, renderCodeDrawing, RENDER_DEBOUNCE_DELAY, downloadImage, DOWNLOAD_FILENAME } from "@platejs/code-drawing";
 
-import type { PlateElementProps } from 'platejs/react';
+import type { PlateElementProps } from "platejs/react";
 
-import { PlateElement, useEditorRef, useEditorSelector, useElement, useFocusedLast, useReadOnly, useSelected, } from 'platejs/react';
+import { PlateElement, useEditorRef, useEditorSelector, useElement, useFocusedLast, useReadOnly, useSelected } from "platejs/react";
 
-import debounce from 'lodash/debounce.js';
+import debounce from "lodash/debounce.js";
 
-import { Trash2, DownloadIcon } from 'lucide-react';
+import { Trash2, DownloadIcon } from "lucide-react";
 
-import { Button } from './button';
+import { Button } from "./button";
 
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from "@/hooks/use-mobile";
 
-import { Popover, PopoverAnchor, PopoverContent, } from './popover';
+import { Popover, PopoverAnchor, PopoverContent } from "./popover";
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from './select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
 
 
 
 function createDebouncedCodeDrawingRenderer(
   setImage: React.Dispatch<React.SetStateAction<string>>,
   setLoading: React.Dispatch<React.SetStateAction<boolean>>,
-  setError: React.Dispatch<React.SetStateAction<string | null>>
+  setError: React.Dispatch<React.SetStateAction<string | null>>,
 ) {
   let lastRequestId = 0;
 
@@ -37,7 +37,7 @@ function createDebouncedCodeDrawingRenderer(
       const requestId = lastRequestId;
 
       if (!code?.trim() || !drawingType) {
-        setImage('');
+        setImage("");
         setLoading(false);
         setError(null);
         return;
@@ -49,7 +49,7 @@ function createDebouncedCodeDrawingRenderer(
       try {
         const imageData = await renderCodeDrawing(
           drawingType as CodeDrawingType,
-          code
+          code,
         );
 
         if (lastRequestId === requestId) {
@@ -58,8 +58,8 @@ function createDebouncedCodeDrawingRenderer(
         }
       } catch (err) {
         if (lastRequestId === requestId) {
-          setError(err instanceof Error ? err.message : 'Rendering failed');
-          setImage('');
+          setError(err instanceof Error ? err.message : "Rendering failed");
+          setImage("");
         }
       } finally {
         if (lastRequestId === requestId) {
@@ -67,7 +67,7 @@ function createDebouncedCodeDrawingRenderer(
         }
       }
     },
-    RENDER_DEBOUNCE_DELAY
+    RENDER_DEBOUNCE_DELAY,
   );
 }
 
@@ -76,11 +76,11 @@ function useCodeDrawingElement({ element }: { element: TCodeDrawingElement; }) {
   const readOnly = useReadOnly();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [image, setImage] = React.useState<string>('');
+  const [image, setImage] = React.useState<string>("");
 
   const debouncedRender = React.useMemo(
     () => createDebouncedCodeDrawingRenderer(setImage, setLoading, setError),
-    []
+    [],
   );
 
   React.useEffect(() => {
@@ -135,11 +135,11 @@ export function CodeDrawingElement(props: PlateElementProps<TCodeDrawingElement>
               code,
             },
           },
-          { at: path }
+          { at: path },
         );
       }
     },
-    [editor, element]
+    [editor, element],
   );
 
   const handleDrawingTypeChange = React.useCallback(
@@ -153,11 +153,11 @@ export function CodeDrawingElement(props: PlateElementProps<TCodeDrawingElement>
               drawingType,
             },
           },
-          { at: path }
+          { at: path },
         );
       }
     },
-    [editor, element]
+    [editor, element],
   );
 
   const handleDrawingModeChange = React.useCallback(
@@ -171,20 +171,20 @@ export function CodeDrawingElement(props: PlateElementProps<TCodeDrawingElement>
               drawingMode,
             },
           },
-          { at: path }
+          { at: path },
         );
       }
     },
-    [editor, element]
+    [editor, element],
   );
 
-  const code = element.data?.code ?? '';
-  const drawingType = element.data?.drawingType ?? 'Mermaid';
-  const drawingMode = element.data?.drawingMode ?? 'Both';
+  const code = element.data?.code ?? "";
+  const drawingType = element.data?.drawingType ?? "Mermaid";
+  const drawingMode = element.data?.drawingMode ?? "Both";
 
   const selectionCollapsed = useEditorSelector(
     (editor) => !editor.api.isExpanded(),
-    []
+    [],
   );
 
   const open = isFocusedLast && !readOnly && selected && selectionCollapsed;
@@ -279,7 +279,7 @@ function CodeDrawingPreview({
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       onCodeChange(e.target.value);
     },
-    [onCodeChange]
+    [onCodeChange],
   );
 
   const toolbar = readOnly ? null : (
@@ -295,7 +295,7 @@ function CodeDrawingPreview({
 
   return (
     <div
-      className={`flex ${isMobile ? 'flex-col-reverse' : 'flex-col'} group my-4 w-full items-stretch border bg-muted/50 md:flex-row`}
+      className={`flex ${isMobile ? "flex-col-reverse" : "flex-col"} group my-4 w-full items-stretch border bg-muted/50 md:flex-row`}
       style={{
         minHeight: `${DEFAULT_MIN_HEIGHT}px`,
       }}
@@ -349,12 +349,12 @@ function CodeDrawingToolbar({
 
   const opacityClass =
     isMobile || toolbarVisible || languageSelectOpen || viewModeSelectOpen
-      ? 'opacity-100'
-      : 'opacity-0 group-hover:opacity-100';
+      ? "opacity-100"
+      : "opacity-0 group-hover:opacity-100";
 
   const positionClass = isMobile
-    ? 'flex items-center gap-2'
-    : 'absolute right-2 z-10 flex items-center gap-2';
+    ? "flex items-center gap-2"
+    : "absolute right-2 z-10 flex items-center gap-2";
 
   return (
     <div
@@ -375,7 +375,7 @@ function CodeDrawingToolbar({
           onOpenChange={setLanguageSelectOpen}
         >
           <SelectTrigger
-            className={`h-8 w-[120px] border-0 bg-muted/50 text-xs shadow-none ${isMobile ? '' : 'transition-colors hover:bg-zinc-200'
+            className={`h-8 w-[120px] border-0 bg-muted/50 text-xs shadow-none ${isMobile ? "" : "transition-colors hover:bg-zinc-200"
               }`}
           >
             <SelectValue />
@@ -398,7 +398,7 @@ function CodeDrawingToolbar({
           onOpenChange={setViewModeSelectOpen}
         >
           <SelectTrigger
-            className={`h-8 w-[80px] border-0 bg-muted/50 text-xs shadow-none ${isMobile ? '' : 'transition-colors hover:bg-zinc-200'
+            className={`h-8 w-[80px] border-0 bg-muted/50 text-xs shadow-none ${isMobile ? "" : "transition-colors hover:bg-zinc-200"
               }`}
           >
             <SelectValue />
@@ -452,21 +452,21 @@ function CodeDrawingTextarea({
       setInternalCode(newValue);
       onCodeChange(e);
     },
-    [onCodeChange]
+    [onCodeChange],
   );
 
   return (
     <div
-      className={`${isCodeOnlyMode ? 'w-full' : 'min-w-0 flex-1'
-        } flex flex-col ${isCodeOnlyMode && !isMobile ? 'relative' : ''} ${showBorder && !isMobile ? 'border-r' : ''
+      className={`${isCodeOnlyMode ? "w-full" : "min-w-0 flex-1"
+        } flex flex-col ${isCodeOnlyMode && !isMobile ? "relative" : ""} ${showBorder && !isMobile ? "border-r" : ""
         }`}
     >
       {toolbar && isCodeOnlyMode && (
         <div
           className={
             isMobile
-              ? 'mt-2 mb-2 flex justify-end px-2'
-              : 'absolute right-2 z-10 mt-2'
+              ? "mt-2 mb-2 flex justify-end px-2"
+              : "absolute right-2 z-10 mt-2"
           }
         >
           {toolbar}
@@ -476,9 +476,9 @@ function CodeDrawingTextarea({
       <div className="relative flex-1 rounded-md">
         <pre
           className={
-            'm-0 overflow-x-auto p-8 pr-4 font-mono text-sm leading-[normal] [tab-size:2] print:break-inside-avoid'
+            "m-0 overflow-x-auto p-8 pr-4 font-mono text-sm leading-[normal] [tab-size:2] print:break-inside-avoid"
           }
-          style={{ minHeight: `${DEFAULT_MIN_HEIGHT}px`, height: '100%' }}
+          style={{ minHeight: `${DEFAULT_MIN_HEIGHT}px`, height: "100%" }}
         >
           <code className="block h-full w-full">
             <textarea
@@ -521,15 +521,15 @@ function CodeDrawingPreviewArea({
 
   return (
     <div
-      className={`flex min-w-0 flex-1 flex-col ${isMobile ? '' : 'relative'} ${showBorder && isMobile ? 'border-b' : ''
+      className={`flex min-w-0 flex-1 flex-col ${isMobile ? "" : "relative"} ${showBorder && isMobile ? "border-b" : ""
         }`}
     >
       {toolbar && (
         <div
           className={
             isMobile
-              ? 'mt-2 mb-2 flex justify-end px-2'
-              : 'absolute right-2 z-10 mt-2'
+              ? "mt-2 mb-2 flex justify-end px-2"
+              : "absolute right-2 z-10 mt-2"
           }
         >
           {toolbar}
@@ -539,7 +539,7 @@ function CodeDrawingPreviewArea({
       {showImage ? (
         <div
           className={
-            'flex flex-1 items-center justify-center rounded-md bg-muted/30 p-4'
+            "flex flex-1 items-center justify-center rounded-md bg-muted/30 p-4"
           }
         >
           {loading && <div className="text-muted-foreground">Loading...</div>}
@@ -552,7 +552,7 @@ function CodeDrawingPreviewArea({
           )}
           {!loading && !image && (
             <div className="text-muted-foreground">
-              {code.trim() ? 'Rendering...' : 'Preview will appear here'}
+              {code.trim() ? "Rendering..." : "Preview will appear here"}
             </div>
           )}
         </div>

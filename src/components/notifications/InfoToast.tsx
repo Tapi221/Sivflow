@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
-import type { Notification } from '@/types/notification';
-import { Info } from '@/ui/icons';
+import { useEffect } from "react";
+import type { Notification } from "@/types/notification";
+import { Info } from "@/ui/icons";
 
 
 
@@ -44,7 +44,7 @@ const InfoToast = ({ notification, onDismiss }: InfoToastProps) => {
           <div
             className="h-full bg-primary-500 rounded-full transition-all ease-linear"
             style={{
-              width: '100%',
+              width: "100%",
               animation: `shrink ${notification.duration}ms linear`,
             }}
           />

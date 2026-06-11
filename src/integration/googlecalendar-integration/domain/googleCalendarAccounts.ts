@@ -2,6 +2,8 @@ import type { GCalConnectionStatus, GCalSyncState, GoogleCalendarListItem } from
 
 
 
+
+
 export type GoogleAccountEntry = { id: string;
   email: string | null;
   name: string | null;
@@ -44,72 +46,74 @@ export type GoogleAccountsAction = | { type: "ADD"; account: GoogleAccountEntry;
 
 
 
-export const reduceGoogleCalendarAccounts = (state: GoogleAccountEntry[], action: GoogleAccountsAction,): GoogleAccountEntry[] => { switch (action.type) { case "ADD": return state.some((account) => account.id === action.account.id) ? state.map((account) => account.id === action.account.id ? action.account : account,) : [...state, action.account];
 
-    case "REMOVE":
-      return state.filter((account) => account.id !== action.id);
 
-    case "SET_CONNECTING":
-      return state.map((account) =>
-        account.id === action.id
-          ? { ...account, isConnecting: action.value }
-          : account,
-      );
+export const reduceGoogleCalendarAccounts = (state: GoogleAccountEntry[], action: GoogleAccountsAction): GoogleAccountEntry[] => { switch (action.type) { case "ADD": return state.some((account) => account.id === action.account.id) ? state.map((account) => account.id === action.account.id ? action.account : account) : [...state, action.account];
 
-    case "SET_TOKEN":
-      return state.map((account) => {
-        if (account.id !== action.id) return account;
+  case "REMOVE":
+    return state.filter((account) => account.id !== action.id);
 
-        return {
+  case "SET_CONNECTING":
+    return state.map((account) =>
+      account.id === action.id
+        ? { ...account, isConnecting: action.value }
+        : account,
+    );
+
+  case "SET_TOKEN":
+    return state.map((account) => {
+      if (account.id !== action.id) return account;
+
+      return {
+        ...account,
+        accessToken: action.accessToken,
+        name: action.accountName ?? account.name,
+        photoUrl: action.accountPhotoUrl ?? account.photoUrl,
+        connectionStatus: "connected",
+        syncState: account.syncState === "needsReconnect" ? "idle" : account.syncState,
+        error: null,
+        ...(action.refreshToken !== undefined
+          ? { refreshToken: action.refreshToken }
+          : {}),
+      };
+    });
+
+  case "SET_CALENDARS":
+    return state.map((account) =>
+      account.id === action.id
+        ? { ...account, calendars: action.calendars }
+        : account,
+    );
+
+  case "SET_CALENDAR_IDS":
+    return state.map((account) =>
+      account.id === action.id
+        ? { ...account, selectedCalendarIds: new Set(action.ids) }
+        : account,
+    );
+
+  case "TOGGLE_CALENDAR":
+    return state.map((account) => {
+      if (account.id !== action.id) return account;
+
+      const next = new Set(account.selectedCalendarIds);
+
+      if (next.has(action.calendarId)) {
+        next.delete(action.calendarId);
+      } else {
+        next.add(action.calendarId);
+      }
+
+      return { ...account, selectedCalendarIds: next };
+    });
+
+  case "SET_SYNC_STATE":
+    return state.map((account) =>
+      account.id === action.id
+        ? {
           ...account,
-          accessToken: action.accessToken,
-          name: action.accountName ?? account.name,
-          photoUrl: action.accountPhotoUrl ?? account.photoUrl,
-          connectionStatus: "connected",
-          syncState: account.syncState === "needsReconnect" ? "idle" : account.syncState,
-          error: null,
-          ...(action.refreshToken !== undefined
-            ? { refreshToken: action.refreshToken }
-            : {}),
-        };
-      });
-
-    case "SET_CALENDARS":
-      return state.map((account) =>
-        account.id === action.id
-          ? { ...account, calendars: action.calendars }
-          : account,
-      );
-
-    case "SET_CALENDAR_IDS":
-      return state.map((account) =>
-        account.id === action.id
-          ? { ...account, selectedCalendarIds: new Set(action.ids) }
-          : account,
-      );
-
-    case "TOGGLE_CALENDAR":
-      return state.map((account) => {
-        if (account.id !== action.id) return account;
-
-        const next = new Set(account.selectedCalendarIds);
-
-        if (next.has(action.calendarId)) {
-          next.delete(action.calendarId);
-        } else {
-          next.add(action.calendarId);
-        }
-
-        return { ...account, selectedCalendarIds: next };
-      });
-
-    case "SET_SYNC_STATE":
-      return state.map((account) =>
-        account.id === action.id
-          ? {
-            ...account,
-            syncState: action.syncState,
-            connectionStatus:
+          syncState: action.syncState,
+          connectionStatus:
               action.syncState === "needsReconnect"
                 ? "needsReconnect"
                 : action.syncState === "error"
@@ -117,47 +121,47 @@ export const reduceGoogleCalendarAccounts = (state: GoogleAccountEntry[], action
                   : account.accessToken
                     ? "connected"
                     : account.connectionStatus,
-            error:
+          error:
               action.syncState === "idle" && account.connectionStatus === "error"
                 ? null
                 : account.error,
-          }
-          : account,
-      );
+        }
+        : account,
+    );
 
-    case "SET_LAST_SYNCED_AT":
-      return state.map((account) =>
-        account.id === action.id ? { ...account, lastSyncedAt: action.at } : account,
-      );
+  case "SET_LAST_SYNCED_AT":
+    return state.map((account) =>
+      account.id === action.id ? { ...account, lastSyncedAt: action.at } : account,
+    );
 
-    case "NEEDS_RECONNECT":
-      return state.map((account) =>
-        account.id === action.id
-          ? {
-            ...account,
-            accessToken: null,
-            connectionStatus: "needsReconnect",
-            syncState: "needsReconnect",
-            error: action.error ?? "Google Calendar の再連携が必要です",
-          }
-          : account,
-      );
+  case "NEEDS_RECONNECT":
+    return state.map((account) =>
+      account.id === action.id
+        ? {
+          ...account,
+          accessToken: null,
+          connectionStatus: "needsReconnect",
+          syncState: "needsReconnect",
+          error: action.error ?? "Google Calendar の再連携が必要です",
+        }
+        : account,
+    );
 
-    case "SET_ERROR":
-      return state.map((account) =>
-        account.id === action.id
-          ? {
-            ...account,
-            error: action.error,
-            connectionStatus:
+  case "SET_ERROR":
+    return state.map((account) =>
+      account.id === action.id
+        ? {
+          ...account,
+          error: action.error,
+          connectionStatus:
               action.error && account.syncState !== "needsReconnect"
                 ? "error"
                 : account.connectionStatus,
-          }
-          : account,
-      );
+        }
+        : account,
+    );
 
-    default:
-      return state;
-  }
+  default:
+    return state;
+}
 };

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { CursorOverlayPlugin } from '@platejs/selection/react';
+import { CursorOverlayPlugin } from "@platejs/selection/react";
 
-import { CursorOverlay } from '@/components/ui/cursor-overlay';
+import { CursorOverlay } from "@/components/ui/cursor-overlay";
 
 
 
-export const CursorOverlayKit = [CursorOverlayPlugin.configure({ render: { afterEditable: () => <CursorOverlay />, }, }),];
+export const CursorOverlayKit = [CursorOverlayPlugin.configure({ render: { afterEditable: () => <CursorOverlay /> } })];

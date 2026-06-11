@@ -1,21 +1,25 @@
-import * as React from 'react';
-import type { OurFileRouter } from '@/lib/uploadthing';
-import type { ClientUploadedFileData, UploadFilesOptions, } from 'uploadthing/types';
-import { generateReactHelpers } from '@uploadthing/react';
-import { toast } from 'sonner';
-import { z } from 'zod';
+import * as React from "react";
+import type { OurFileRouter } from "@/lib/uploadthing";
+import type { ClientUploadedFileData, UploadFilesOptions } from "uploadthing/types";
+import { generateReactHelpers } from "@uploadthing/react";
+import { toast } from "sonner";
+import { z } from "zod";
+
+
 
 
 
 export type UploadedFile<T = unknown> = ClientUploadedFileData<T>;
 interface UseUploadFileProps
   extends Pick<
-    UploadFilesOptions<OurFileRouter['editorUploader']>,
-    'headers' | 'onUploadBegin' | 'onUploadProgress' | 'skipPolling'
+    UploadFilesOptions<OurFileRouter["editorUploader"]>,
+    "headers" | "onUploadBegin" | "onUploadProgress" | "skipPolling"
   > {
   onUploadComplete?: (file: UploadedFile) => void;
   onUploadError?: (error: unknown) => void;
 }
+
+
 
 
 
@@ -29,7 +33,7 @@ export const useUploadFile = ({ onUploadComplete, onUploadError, ...props }: Use
     setUploadingFile(file);
 
     try {
-      const res = await uploadFiles('editorUploader', {
+      const res = await uploadFiles("editorUploader", {
         ...props,
         files: [file],
         onUploadProgress: ({ progress }) => {
@@ -48,7 +52,7 @@ export const useUploadFile = ({ onUploadComplete, onUploadError, ...props }: Use
       const message =
         errorMessage.length > 0
           ? errorMessage
-          : 'Something went wrong, please try again later.';
+          : "Something went wrong, please try again later.";
 
       toast.error(message);
 
@@ -57,7 +61,7 @@ export const useUploadFile = ({ onUploadComplete, onUploadError, ...props }: Use
       // Mock upload for unauthenticated users
       // toast.info('User not logged in. Mocking upload process.');
       const mockUploadedFile = {
-        key: 'mock-key-0',
+        key: "mock-key-0",
         appUrl: `https://mock-app-url.com/${file.name}`,
         name: file.name,
         size: file.size,
@@ -99,16 +103,20 @@ export const useUploadFile = ({ onUploadComplete, onUploadError, ...props }: Use
 
 
 
+
+
 export const { uploadFiles, useUploadThing } = generateReactHelpers<OurFileRouter>();
 
 
 
-export const getErrorMessage = (err: unknown) => { const unknownError = 'Something went wrong, please try again later.';
+
+
+export const getErrorMessage = (err: unknown) => { const unknownError = "Something went wrong, please try again later.";
 
   if (err instanceof z.ZodError) {
     const errors = err.issues.map((issue) => issue.message);
 
-    return errors.join('\n');
+    return errors.join("\n");
   }
   if (err instanceof Error) {
     return err.message;

@@ -35,7 +35,7 @@ export type ReceiveDesktopHandwritingSessionManagerMessageResult = { state: Desk
 
 
 
-export const createDesktopHandwritingSessionManagerState = (): DesktopHandwritingSessionManagerState => ({ activeSessionId: null, documents: {}, sessions: {}, });
+export const createDesktopHandwritingSessionManagerState = (): DesktopHandwritingSessionManagerState => ({ activeSessionId: null, documents: {}, sessions: {} });
 export const getDesktopHandwritingDocumentKey = (cardId: string, side: InkSide): DesktopHandwritingDocumentKey => { return `${cardId}:${side}`;
 };
 const toReceiverSession = (session: HandwritingSession): DesktopHandwritingReceiverSession => ({

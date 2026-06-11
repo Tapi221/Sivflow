@@ -31,7 +31,7 @@ export const buildMfDeckFileName = (deckName: string): string => { const sanitiz
 
   return `${baseName}${MF_DECK_FILE_EXTENSION}`;
 };
-export const downloadBytesAsMfDeck = ({ bytes, deckName, }: { bytes: Uint8Array;
+export const downloadBytesAsMfDeck = ({ bytes, deckName }: { bytes: Uint8Array;
   deckName: string;
 }): void => {
   const blobPart = new ArrayBuffer(bytes.byteLength);

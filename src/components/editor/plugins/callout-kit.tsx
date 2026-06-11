@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { CalloutPlugin } from '@platejs/callout/react';
+import { CalloutPlugin } from "@platejs/callout/react";
 
-import { CalloutElement } from '@/components/ui/callout-node';
+import { CalloutElement } from "@/components/ui/callout-node";
 
 
 

@@ -96,7 +96,7 @@ export const collectMfDeckExportIssues = (cards: Card[]): MfDeckIssue[] => { con
 
   return issues;
 };
-export const mapCardToMfDeckCard = ({ card, tagById, }: { card: Card;
+export const mapCardToMfDeckCard = ({ card, tagById }: { card: Card;
   tagById?: MfDeckTagLookup;
 }): MfDeckCardV1 => {
   return {
@@ -125,7 +125,7 @@ export const mapCardToMfDeckCard = ({ card, tagById, }: { card: Card;
     },
   };
 };
-export const buildMfDeckArchive = async ({ cardSet, cards, tagById, appVersion, }: { cardSet: CardSet;
+export const buildMfDeckArchive = async ({ cardSet, cards, tagById, appVersion }: { cardSet: CardSet;
   cards: Card[];
   tagById?: MfDeckTagLookup;
   appVersion?: string;

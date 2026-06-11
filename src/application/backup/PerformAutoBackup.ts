@@ -31,7 +31,7 @@ const defaultBuildSnapshot =
         payload,
       };
     };
-export const createPerformAutoBackupUseCase = ({ backupStore, buildSnapshot, collectUserData = defaultCollectUserData, }: PerformAutoBackupDependencies) => { const resolvedBuildSnapshot = buildSnapshot ?? defaultBuildSnapshot(collectUserData);
+export const createPerformAutoBackupUseCase = ({ backupStore, buildSnapshot, collectUserData = defaultCollectUserData }: PerformAutoBackupDependencies) => { const resolvedBuildSnapshot = buildSnapshot ?? defaultBuildSnapshot(collectUserData);
 
   const execute = async (userId: string): Promise<boolean> => {
     if (!userId) {

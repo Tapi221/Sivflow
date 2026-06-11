@@ -1,34 +1,34 @@
-'use client';
+"use client";
 
-import cloneDeep from 'lodash/cloneDeep.js';
+import cloneDeep from "lodash/cloneDeep.js";
 
-import { BaseAIPlugin, withAIBatch } from '@platejs/ai';
+import { BaseAIPlugin, withAIBatch } from "@platejs/ai";
 
-import { AIChatPlugin, AIPlugin, applyAISuggestions, getInsertPreviewStart, streamInsertChunk, useChatChunk, } from '@platejs/ai/react';
+import { AIChatPlugin, AIPlugin, applyAISuggestions, getInsertPreviewStart, streamInsertChunk, useChatChunk } from "@platejs/ai/react";
 
-import { ElementApi, getPluginType, KEYS, PathApi } from 'platejs';
+import { ElementApi, getPluginType, KEYS, PathApi } from "platejs";
 
-import { usePluginOption } from 'platejs/react';
+import { usePluginOption } from "platejs/react";
 
-import { AILoadingBar, AIMenu } from '@/components/ui/ai-menu';
+import { AILoadingBar, AIMenu } from "@/components/ui/ai-menu";
 
-import { AIAnchorElement, AILeaf } from '@/components/ui/ai-node';
+import { AIAnchorElement, AILeaf } from "@/components/ui/ai-node";
 
-import { useChat } from '@/components/editor/use-chat';
+import { useChat } from "@/components/editor/use-chat";
 
-import { CursorOverlayKit } from './cursor-overlay-kit';
+import { CursorOverlayKit } from "./cursor-overlay-kit";
 
-import { MarkdownKit } from './markdown-kit';
+import { MarkdownKit } from "./markdown-kit";
 
 
 
-export const aiChatPlugin = AIChatPlugin.extend({ options: { chatOptions: { api: '/api/ai/command', body: {}, }, }, render: { afterContainer: AILoadingBar, afterEditable: AIMenu, node: AIAnchorElement, }, shortcuts: { show: { keys: 'mod+j' } }, useHooks: ({ editor, getOption }) => { useChat();
+export const aiChatPlugin = AIChatPlugin.extend({ options: { chatOptions: { api: "/api/ai/command", body: {} } }, render: { afterContainer: AILoadingBar, afterEditable: AIMenu, node: AIAnchorElement }, shortcuts: { show: { keys: "mod+j" } }, useHooks: ({ editor, getOption }) => { useChat();
 
-    const mode = usePluginOption(AIChatPlugin, 'mode');
-    const toolName = usePluginOption(AIChatPlugin, 'toolName');
+    const mode = usePluginOption(AIChatPlugin, "mode");
+    const toolName = usePluginOption(AIChatPlugin, "toolName");
     useChatChunk({
       onChunk: ({ chunk, isFirst, nodes, text: content }) => {
-        if (isFirst && mode === 'insert') {
+        if (isFirst && mode === "insert") {
           const { startBlock, startInEmptyParagraph } =
             getInsertPreviewStart(editor);
 
@@ -44,20 +44,20 @@ export const aiChatPlugin = AIChatPlugin.extend({ options: { chatOptions: { api:
           editor.tf.withoutSaving(() => {
             editor.tf.insertNodes(
               {
-                children: [{ text: '' }],
+                children: [{ text: "" }],
                 type: getPluginType(editor, KEYS.aiChat),
               },
               {
                 at: PathApi.next(editor.selection!.focus.path.slice(0, 1)),
-              }
+              },
             );
           });
-          editor.setOption(AIChatPlugin, 'streaming', true);
+          editor.setOption(AIChatPlugin, "streaming", true);
         }
 
-        if (mode === 'insert' && nodes.length > 0) {
+        if (mode === "insert" && nodes.length > 0) {
           editor.tf.withoutSaving(() => {
-            if (!getOption('streaming')) return;
+            if (!getOption("streaming")) return;
 
             editor.tf.withScrolling(() => {
               streamInsertChunk(editor, chunk, {
@@ -69,7 +69,7 @@ export const aiChatPlugin = AIChatPlugin.extend({ options: { chatOptions: { api:
           });
         }
 
-        if (toolName === 'edit' && mode === 'chat') {
+        if (toolName === "edit" && mode === "chat") {
           withAIBatch(
             editor,
             () => {
@@ -77,7 +77,7 @@ export const aiChatPlugin = AIChatPlugin.extend({ options: { chatOptions: { api:
             },
             {
               split: isFirst,
-            }
+            },
           );
         }
       },
@@ -88,4 +88,4 @@ export const aiChatPlugin = AIChatPlugin.extend({ options: { chatOptions: { api:
   },
 });
 
-export const AIKit = [...CursorOverlayKit, ...MarkdownKit, AIPlugin.withComponent(AILeaf), aiChatPlugin,];
+export const AIKit = [...CursorOverlayKit, ...MarkdownKit, AIPlugin.withComponent(AILeaf), aiChatPlugin];

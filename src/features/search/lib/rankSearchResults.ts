@@ -3,6 +3,8 @@ import { toMillis } from "@/utils/toMillis";
 
 
 
+
+
 type RankSearchResultsParams = {
   items: SearchItem[];
   query: string;
@@ -13,6 +15,8 @@ type RankedSearchItem = {
   score: number;
   timestampMillis: number;
 };
+
+
 
 
 
@@ -168,7 +172,7 @@ const rankItemForQuery = (
     timestampMillis,
   };
 };
-export const rankSearchResults = ({ items, query, limit = 24, }: RankSearchResultsParams) => { const normalizedQuery = normalizeText(query);
+export const rankSearchResults = ({ items, query, limit = 24 }: RankSearchResultsParams) => { const normalizedQuery = normalizeText(query);
   const tokens = splitQueryTokens(query);
 
   if (!normalizedQuery) {

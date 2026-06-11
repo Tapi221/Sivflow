@@ -9,6 +9,8 @@ import type { TagRecord } from "@/services/localdb/types";
 
 
 
+
+
 export type TagCategory = string;
 export type Tag = TagRecord;
 type CardTagFields = {
@@ -23,8 +25,12 @@ type LocalDbInstance = Awaited<ReturnType<typeof getLocalDb>>;
 
 
 
+
+
 export const DEFAULT_TAG_COLOR_KEYS: TagColorKey[] = [...TAG_COLOR_KEYS];
 const MAX_PATH_DEPTH = 12;
+
+
 
 
 
@@ -54,7 +60,7 @@ const asStringArray = (value: unknown): string[] => {
 };
 const getCardTagIds = (card: Pick<CardTagFields, "tagIds">): string[] =>
   asStringArray(card.tagIds);
-export const resolveCardTagNames = (tagIds: unknown, tagById: ReadonlyMap<string, Pick<TagRecord, "name">>,): string[] => { const ids = asStringArray(tagIds);
+export const resolveCardTagNames = (tagIds: unknown, tagById: ReadonlyMap<string, Pick<TagRecord, "name">>): string[] => { const ids = asStringArray(tagIds);
   if (ids.length === 0) return [];
   return ids.map((id) => tagById.get(id)?.name ?? "").filter((name) => name);
 };

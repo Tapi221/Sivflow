@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
-import { ListStyleType, someList, toggleList } from '@platejs/list';
+import { ListStyleType, someList, toggleList } from "@platejs/list";
 
-import { useIndentTodoToolBarButton, useIndentTodoToolBarButtonState, } from '@platejs/list/react';
+import { useIndentTodoToolBarButton, useIndentTodoToolBarButtonState } from "@platejs/list/react";
 
-import { List, ListOrdered, ListTodoIcon } from 'lucide-react';
+import { List, ListOrdered, ListTodoIcon } from "lucide-react";
 
-import { useEditorRef, useEditorSelector } from 'platejs/react';
+import { useEditorRef, useEditorSelector } from "platejs/react";
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger, } from './dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu";
 
-import { ToolbarButton, ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary, } from './toolbar';
+import { ToolbarButton, ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary } from "./toolbar";
 
 
 
@@ -26,7 +26,7 @@ export function BulletedListToolbarButton() { const editor = useEditorRef();
         ListStyleType.Circle,
         ListStyleType.Square,
       ]),
-    []
+    [],
   );
 
   return (
@@ -38,7 +38,7 @@ export function BulletedListToolbarButton() { const editor = useEditorRef();
             listStyleType: ListStyleType.Disc,
           });
         }}
-        data-state={pressed ? 'on' : 'off'}
+        data-state={pressed ? "on" : "off"}
       >
         <List className="size-4" />
       </ToolbarSplitButtonPrimary>
@@ -105,7 +105,7 @@ export function NumberedListToolbarButton() { const editor = useEditorRef();
         ListStyleType.LowerRoman,
         ListStyleType.UpperRoman,
       ]),
-    []
+    [],
   );
 
   return (
@@ -117,7 +117,7 @@ export function NumberedListToolbarButton() { const editor = useEditorRef();
             listStyleType: ListStyleType.Decimal,
           })
         }
-        data-state={pressed ? 'on' : 'off'}
+        data-state={pressed ? "on" : "off"}
       >
         <ListOrdered className="size-4" />
       </ToolbarSplitButtonPrimary>
@@ -181,7 +181,7 @@ export function NumberedListToolbarButton() { const editor = useEditorRef();
   );
 }
 
-export function TodoListToolbarButton(props: React.ComponentProps<typeof ToolbarButton>) { const state = useIndentTodoToolBarButtonState({ nodeType: 'todo' });
+export function TodoListToolbarButton(props: React.ComponentProps<typeof ToolbarButton>) { const state = useIndentTodoToolBarButtonState({ nodeType: "todo" });
   const { props: buttonProps } = useIndentTodoToolBarButton(state);
 
   return (

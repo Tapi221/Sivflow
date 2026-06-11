@@ -26,7 +26,7 @@ const areRouteStatesEqual = (
   a.isSectionListMode === b.isSectionListMode &&
   a.selectedFolderId === b.selectedFolderId &&
   isSameSelectedExplorerItem(a.selectedItem, b.selectedItem);
-export const useExplorerRouteSync = ({ route, isHomeOnlyMode, isSectionListMode, selectedFolderId, selectedItem, applyRouteState, }: Params) => { const pendingQueryRef = useRef<string | null>(null);
+export const useExplorerRouteSync = ({ route, isHomeOnlyMode, isSectionListMode, selectedFolderId, selectedItem, applyRouteState }: Params) => { const pendingQueryRef = useRef<string | null>(null);
   const timerRef = useRef(0);
   const previousRouteKeyRef = useRef(route.routeKey);
 

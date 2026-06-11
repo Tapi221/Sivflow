@@ -30,7 +30,7 @@ const BreadcrumbActionsContext = createContext<BreadcrumbActionsContextValue>({
 
 
 
-export const BreadcrumbProvider = ({ children, }: { children: ReactNode;
+export const BreadcrumbProvider = ({ children }: { children: ReactNode;
 }) => {
   const [extraCrumbs, setExtraCrumbsState] = useState<BreadcrumbCrumb[]>([]);
 

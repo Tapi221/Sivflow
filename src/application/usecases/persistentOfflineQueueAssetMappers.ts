@@ -53,7 +53,7 @@ export const toAssetLikeRecord = (value: unknown): AssetLikeRecord | null => { i
     retryCount: getNumber(value, "retryCount") ?? undefined,
   };
 };
-export const makeAssetRecord = ({ existing, itemId, userId, mime, size, localBlobId, remoteKey, remoteStatus, remoteUrlCache, retryCount, }: { existing: AssetLikeRecord | null;
+export const makeAssetRecord = ({ existing, itemId, userId, mime, size, localBlobId, remoteKey, remoteStatus, remoteUrlCache, retryCount }: { existing: AssetLikeRecord | null;
   itemId: string;
   userId: string;
   mime: string;

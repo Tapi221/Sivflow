@@ -36,7 +36,7 @@ interface UseCardSetViewQueryResult {
 
 
 
-export const useCardSetViewQuery = ({ cardSetId, }: UseCardSetViewQueryOptions): UseCardSetViewQueryResult => { const { cardSet: selectedCardSet, loading: cardSetLoading, updateCardSet, } = useCardSetById(cardSetId);
+export const useCardSetViewQuery = ({ cardSetId }: UseCardSetViewQueryOptions): UseCardSetViewQueryResult => { const { cardSet: selectedCardSet, loading: cardSetLoading, updateCardSet } = useCardSetById(cardSetId);
 
   const { folders, loading: foldersLoading } = useFolderLineage(
     selectedCardSet?.folderId ?? null,

@@ -7,7 +7,7 @@ type CardCarouselScrollBehavior = ScrollBehavior | "instant";
 
 
 
-export const useCardCarousel3DWebBridge = ({ activeIndex, itemCount, itemSpan, scrollDebounceMs, onSettledIndexChange, }: { activeIndex: number;
+export const useCardCarousel3DWebBridge = ({ activeIndex, itemCount, itemSpan, scrollDebounceMs, onSettledIndexChange }: { activeIndex: number;
   itemCount: number;
   itemSpan: number;
   scrollDebounceMs: number;

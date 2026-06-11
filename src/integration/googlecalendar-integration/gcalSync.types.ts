@@ -3,6 +3,8 @@ import type { CalendarEvent, CalendarRecurrenceRule } from "@core/calendar";
 
 
 
+
+
 export type GoogleCalendarEvent = CalendarEvent;
 export type GoogleCalendarListItem = { id: string;
   summary: string;
@@ -59,15 +61,15 @@ export type GCalEventsListResponse = { items?: GCalRawIncrementalEvent[];
   nextPageToken?: string;
 };
 export type GoogleCalendarApiListResponse = { items?: Array<{ id?: string;
-    summary?: string;
-    summaryOverride?: string;
-    description?: string;
-    backgroundColor?: string;
-    foregroundColor?: string;
-    primary?: boolean;
-    selected?: boolean;
-  }>;
-  nextPageToken?: string;
+  summary?: string;
+  summaryOverride?: string;
+  description?: string;
+  backgroundColor?: string;
+  foregroundColor?: string;
+  primary?: boolean;
+  selected?: boolean;
+}>;
+nextPageToken?: string;
 };
 export type GoogleCalendarApiCalendarResponse = { id?: string;
   summary?: string;
