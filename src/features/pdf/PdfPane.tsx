@@ -715,7 +715,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       viewerElement.classList.remove(PDF_SCROLLING_CLASS_NAME);
     };
 
-    const isZoomScrollAnchorUpdate = () => {
+    const shouldDeferVisiblePageWindowUpdate = () => {
       return Boolean(pendingZoom || activeZoomPreview || activeZoomCommit || zoomFrame !== null || zoomCommitTimer !== null);
     };
 
@@ -832,9 +832,8 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     };
 
     const handleScroll = () => {
-      if (isZoomScrollAnchorUpdate()) {
+      if (shouldDeferVisiblePageWindowUpdate()) {
         clearScrollRenderingMode();
-        updateVisiblePageWindow();
         return;
       }
 
@@ -843,7 +842,10 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     };
 
     const handleScrollEnd = () => clearScrollRenderingMode();
-    const handleTouchMove = () => updateVisiblePageWindow();
+    const handleTouchMove = () => {
+      if (shouldDeferVisiblePageWindowUpdate()) return;
+      updateVisiblePageWindow();
+    };
 
     requestPdfFitWidthRef.current = requestFitWidth;
     requestPdfZoomRef.current = requestZoom;
