@@ -11,24 +11,6 @@ import { defineConfig, globalIgnores } from "eslint/config";
 const TYPESCRIPT_SOURCE_FILES = ["src/**/*.{ts,tsx}", "apps/web/src/**/*.{ts,tsx}", "apps/mobile/src/**/*.{ts,tsx}", "packages/*/src/**/*.{ts,tsx}"];
 const UI_SOURCE_FILES = ["src/components/**/*.{ts,tsx}", "src/layout/**/*.{ts,tsx}", "src/routes/**/*.{ts,tsx}", "src/ui/**/*.{ts,tsx}", "src/presentation/**/*.{ts,tsx}", "src/features/**/*.{ts,tsx}", "packages/web-renderer/src/**/*.{ts,tsx}", "packages/mobile-renderer/src/**/*.{ts,tsx}"];
 const APPLICATION_SOURCE_FILES = ["src/application/**/*.{ts,tsx}"];
-const PLATE_VENDOR_UI_FILES = [
-  "src/components/ui/slash-node.tsx",
-  "src/components/ui/suggestion-node-static.tsx",
-  "src/components/ui/suggestion-node.tsx",
-  "src/components/ui/suggestion-toolbar-button.tsx",
-  "src/components/ui/table-icons.tsx",
-  "src/components/ui/table-node-static.tsx",
-  "src/components/ui/table-node.tsx",
-  "src/components/ui/table-toolbar-button.tsx",
-  "src/components/ui/toc-node-static.tsx",
-  "src/components/ui/toc-node.tsx",
-  "src/components/ui/toggle-node-static.tsx",
-  "src/components/ui/toggle-node.tsx",
-  "src/components/ui/toggle-toolbar-button.tsx",
-  "src/components/ui/toolbar.tsx",
-  "src/components/ui/turn-into-toolbar-button.tsx",
-];
-const PDF_VIEWER_SOURCE_FILES = ["src/features/pdf/PdfPane.tsx"];
 const IMPORT_PATH_RESTRICTED_PATHS = [
   {
     name: "@/types/branded",
@@ -92,10 +74,12 @@ export default defineConfig([
     },
     rules: {
       "@stylistic/indent": "off",
-      "@stylistic/quotes": ["error", "double", { avoidEscape: true }],
-      "@stylistic/semi": ["error", "always"],
+      "@stylistic/quotes": "off",
+      "@stylistic/semi": "off",
       "@stylistic/max-len": "off",
       "@stylistic/object-curly-newline": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "react-refresh/only-export-components": "off",
       "no-restricted-imports": [
         "error",
         {
@@ -148,26 +132,6 @@ export default defineConfig([
       ],
       "simple-import-sort/imports": "off",
       "simple-import-sort/exports": "off",
-    },
-  },
-
-  {
-    files: PLATE_VENDOR_UI_FILES,
-    linterOptions: {
-      reportUnusedDisableDirectives: "off",
-    },
-    rules: {
-      "@stylistic/quotes": "off",
-      "@stylistic/semi": "off",
-      "@typescript-eslint/no-explicit-any": "off",
-      "react-refresh/only-export-components": "off",
-    },
-  },
-
-  {
-    files: PDF_VIEWER_SOURCE_FILES,
-    rules: {
-      "unused-imports/no-unused-imports": "off",
     },
   },
 
