@@ -12,6 +12,8 @@ import "@/../apps/web/src/runtime/installProductionConsoleFilter";
 import "@platform/desktop/installTauriDesktopBridge";
 import "katex/dist/katex.min.css";
 
+
+
 type AppBootstrapState =
   | { status: "loading"; }
   | { status: "ready"; App: ComponentType; }
@@ -28,6 +30,8 @@ declare global {
     __sivflowReactRootStore?: SivflowReactRootStore;
   }
 }
+
+
 
 const FIREBASE_ENV_FAILURE_MARKER = "[env] Missing required Firebase env vars";
 const STARTUP_FAILURE_TITLE = "起動設定が不足しています";
@@ -89,6 +93,8 @@ const STARTUP_LOGO_STYLE = `
   transform-origin: center;
 }
 `;
+
+
 
 const getStartupFailureMessage = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
@@ -157,6 +163,8 @@ if (!renderGoogleOAuthCallback()) {
     </StrictMode>,
   );
 }
+
+
 
 const StartupLogoMark = () => {
   return (

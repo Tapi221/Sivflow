@@ -1,5 +1,7 @@
 type StorageLike = Record<string, unknown>;
 
+
+
 const LEGACY_CARD_STORAGE_FIELDS = [
   "questionBlocks",
   "answerBlocks",
@@ -25,6 +27,8 @@ const LEGACY_CARD_STORAGE_FIELDS = [
   "answer_extra_rows",
 ] as const;
 
+
+
 const cleanupLegacyCardStorageFields = (record: StorageLike): StorageLike => {
   for (const field of LEGACY_CARD_STORAGE_FIELDS) {
     delete record[field];
@@ -32,5 +36,7 @@ const cleanupLegacyCardStorageFields = (record: StorageLike): StorageLike => {
 
   return record;
 };
+
+
 
 export { cleanupLegacyCardStorageFields };
