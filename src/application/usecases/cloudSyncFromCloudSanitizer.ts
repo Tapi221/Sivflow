@@ -4,6 +4,8 @@ import { deepStripUndefined } from "./cloudSyncValueCleaning";
 import { sanitizeBlobUrlsDeep } from "@/utils/blobUrlSanitizer";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
+
+
 const sanitizeSyncDataFromCloud = (type: string, data: unknown): unknown => { if (!data) return data;
 
   const stripped = deepStripUndefined(data);
@@ -26,5 +28,7 @@ const sanitizeSyncDataFromCloud = (type: string, data: unknown): unknown => { if
 
   return sanitized.value;
 };
+
+
 
 export { sanitizeSyncDataFromCloud };

@@ -1,8 +1,12 @@
 import type { SVGProps } from "react";
 
+
+
 type MetaPanelToggleIconProps = Readonly<SVGProps<SVGSVGElement> & { open?: boolean;
 }
 >;
+
+
 
 const MetaPanelToggleIcon = ({ className, open = false, ...props }: MetaPanelToggleIconProps) => { const indicatorX = open ? 7.25 : 14.25;
 
@@ -35,5 +39,9 @@ const MetaPanelToggleIcon = ({ className, open = false, ...props }: MetaPanelTog
   );
 };
 
+
+
 export { MetaPanelToggleIcon };
+
+
 export type { MetaPanelToggleIconProps };
