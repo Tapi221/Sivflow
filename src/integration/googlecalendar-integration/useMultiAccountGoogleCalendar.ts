@@ -11,8 +11,6 @@ import { GoogleCalendarEngineManager } from "./GoogleCalendarEngineManager";
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
-
-
 type GoogleAccountEntry = { id: string;
   email: string | null;
   name: string | null;
@@ -78,14 +76,10 @@ type GoogleOAuthCooldownEntry = {
   until: number;
 };
 
-
-
 const useServerStoredTokens = isServerStoredGoogleOAuthEnabled();
 const useDesktopSecureRefreshTokens = isDesktopLikeRuntime() && !useServerStoredTokens;
 const CALENDAR_LIST_FOCUS_REFRESH_THROTTLE_MS = 10_000;
 const GOOGLE_OAUTH_DETERMINISTIC_ERROR_COOLDOWN_MS = 60_000;
-
-
 
 const overlapsRange = (
   event: GoogleCalendarEvent,
@@ -1260,9 +1254,5 @@ const useMultiAccountGoogleCalendar = () => { const [accounts, dispatchAccounts]
   };
 };
 
-
-
 export { GOOGLE_OAUTH_DETERMINISTIC_ERROR_COOLDOWN_MS, getGoogleOAuthErrorReason, toGoogleCalendarAuthErrorMessage, shouldCooldownGoogleOAuthError, createGoogleOAuthCooldownError, useMultiAccountGoogleCalendar };
-
-
 export type { GoogleAccountEntry, GoogleAccountTokenUpdate };

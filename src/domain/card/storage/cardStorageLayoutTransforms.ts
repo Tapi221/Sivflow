@@ -1,8 +1,6 @@
 import { isStorageRecord } from "@/domain/shared/storage/storageRecordUtils";
 import { readCardStorageFiniteNumberField } from "./cardStorageFieldReaders";
 
-
-
 const sanitizeCardStorageLayout = (layoutValue: unknown) => { if (!isStorageRecord(layoutValue)) return null;
 
   return {
@@ -10,7 +8,5 @@ const sanitizeCardStorageLayout = (layoutValue: unknown) => { if (!isStorageReco
     cropX: readCardStorageFiniteNumberField(layoutValue, "cropX"),
   };
 };
-
-
 
 export { sanitizeCardStorageLayout };

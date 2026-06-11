@@ -4,8 +4,6 @@ import { MF_DECK_FORMAT, MF_DECK_VERSION, MfDeckExportError } from "@/features/d
 import type { MfDeckArchiveV1, MfDeckCardV1, MfDeckIssue } from "@/features/deckFile/domain/mfDeck.types";
 import type { Card, CardBlock, CardSet } from "@/types";
 
-
-
 const toEpoch = (value: unknown): number => {
   if (value instanceof Date) return value.getTime();
 
@@ -184,7 +182,5 @@ const buildMfDeckArchive = async ({ cardSet, cards, tagById, appVersion }: { car
     ...(mediaBundled ? { media: mediaBundle.media } : {}),
   };
 };
-
-
 
 export { collectMfDeckExportIssues, mapCardToMfDeckCard, buildMfDeckArchive };

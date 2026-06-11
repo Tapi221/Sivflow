@@ -10,8 +10,6 @@ import { z } from "zod";
 import { AI_COMMAND_PLATE_PLUGINS } from "./editorKit";
 import { buildEditTableMultiCellPrompt, getChooseToolPrompt, getCommentPrompt, getEditPrompt, getGeneratePrompt } from "@/app/api/ai/command/prompt";
 
-
-
 const POST = async (req: NextRequest) => { const { apiKey: key, ctx, messages: messagesRaw, model } = await req.json();
 
   const { children, selection, toolName: toolNameParam } = ctx;
@@ -153,8 +151,6 @@ const POST = async (req: NextRequest) => { const { apiKey: key, ctx, messages: m
   }
 };
 
-
-
 const getCommentTool = (
   editor: SlateEditor,
   {
@@ -287,7 +283,5 @@ const getTableTool = (
       });
     },
   });
-
-
 
 export { POST };

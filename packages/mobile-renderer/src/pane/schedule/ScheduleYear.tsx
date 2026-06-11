@@ -5,8 +5,6 @@ import type { NativeScrollEvent, NativeSyntheticEvent, ViewStyle } from "react-n
 import { getCalendarDateKey, getEventDateKeys } from "@core/calendar/calendarEventRange";
 import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
 
-
-
 type CalendarWeekStartDay = "sunday" | "monday";
 type CalendarWeekStartsOn = 0 | 1;
 type ScheduleYearProps = {
@@ -40,8 +38,6 @@ type ScheduleYearBlock = {
   label: string;
   months: ScheduleYearMonth[];
 };
-
-
 
 const YEAR_MONTH_GRID_DAY_COUNT = 42;
 const INITIAL_YEAR_BUFFER = 1;

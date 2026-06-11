@@ -1,7 +1,5 @@
 import type { CardBlock } from "@/types/domain/card";
 
-
-
 const isRenderableCardBlock = (block: CardBlock): boolean => { switch (block.type) { case "text": return (block.content ?? "").trim() !== "";
   case "question":
     return (
@@ -27,7 +25,5 @@ const isRenderableCardBlock = (block: CardBlock): boolean => { switch (block.typ
 const filterRenderableCardBlocks = (blocks?: readonly CardBlock[] | null): CardBlock[] => { if (!blocks || blocks.length === 0) return [];
   return blocks.filter(isRenderableCardBlock);
 };
-
-
 
 export { isRenderableCardBlock, filterRenderableCardBlocks };

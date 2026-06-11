@@ -22,6 +22,4 @@ if (
 return null;
 };
 
-
-
 export { extractCreatedCardId };

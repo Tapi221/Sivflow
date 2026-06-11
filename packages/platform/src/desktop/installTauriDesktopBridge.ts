@@ -2,8 +2,6 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import type { DesktopBridgeApi, DesktopImportFileOpenPayload, DesktopOauthCallbackPayload } from "@platform/desktopApi";
 
-
-
 const oauthCallbackHandlers = new Set<(payload: DesktopOauthCallbackPayload) => void>();
 let oauthCallbackListenerStarted = false;
 const desktopApi: DesktopBridgeApi = {
@@ -81,8 +79,6 @@ const desktopApi: DesktopBridgeApi = {
     },
   },
 };
-
-
 
 const hasWindowDesktop = (): boolean => typeof window !== "undefined" && typeof window.desktop !== "undefined";
 const canInstallTauriDesktopBridge = (): boolean => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;

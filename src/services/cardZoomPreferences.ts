@@ -1,13 +1,9 @@
 import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 
-
-
 interface CardZoomPreferencesStore {
   version: 1;
   byCardSet: Record<string, number>;
 }
-
-
 
 const empty = (): CardZoomPreferencesStore => {
   return {
@@ -68,7 +64,5 @@ const setCardSetZoomPreference = (cardSetId: string, zoomPercent: number) => { i
   store.byCardSet[cardSetId] = Math.round(zoomPercent);
   writeStore(store);
 };
-
-
 
 export { getCardSetZoomPreference, setCardSetZoomPreference };

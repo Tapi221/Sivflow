@@ -1,14 +1,10 @@
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import { createCardSelectedItem, createCardSetSelectedItem, createDocumentSelectedItem } from "@/features/explorer/utils/createSelectedExplorerItem";
 
-
-
 type Params = {
   searchParams: URLSearchParams;
   fallbackFolderId: string | null;
 };
-
-
 
 const mapSearchParamsToExplorerRouteState = ({ searchParams, fallbackFolderId }: Params): ExplorerRouteState => { const isHomeOnlyMode = searchParams.get("home") === "1";
   const isSectionListMode = searchParams.get("view") === "section-list";
@@ -45,7 +41,5 @@ const mapSearchParamsToExplorerRouteState = ({ searchParams, fallbackFolderId }:
               : null,
   };
 };
-
-
 
 export { mapSearchParamsToExplorerRouteState };

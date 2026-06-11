@@ -45,6 +45,4 @@ if (!docId) {
 return ["users", userId, "storageStats", docId];
 };
 
-
-
 export { foldersPathSegments, folderDocPathSegments, cardsPathSegments, cardDocPathSegments, imageDocPathSegments, storageStatsDocPathSegments };

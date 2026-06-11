@@ -5,8 +5,6 @@ import { isTypingTarget } from "@/utils/isTypingTarget";
 import { buildVerticalCardPagerItemStyle, resolveVerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";
 import type { VerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";
 
-
-
 type ScrollAnchorFace = "question" | "answer";
 type ScrollAnchorSnapshot = {
   preserveKey: string | number | null;
@@ -35,8 +33,6 @@ type VerticalCardPagerProps<T> = { cards: T[];
   scrollToActiveIndexRequestKey?: string | number | null;
   scrollToActiveIndexBehavior?: ScrollBehavior;
 };
-
-
 
 const ACTIVE_INDEX_RENDER_RADIUS = 6;
 const DEFAULT_CARD_WIDTH = CANONICAL_CARD_WIDTH;

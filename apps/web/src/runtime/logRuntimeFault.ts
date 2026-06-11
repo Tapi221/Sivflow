@@ -2,12 +2,8 @@ type BuildImportMetaEnv = ImportMeta["env"] & {
   readonly VITE_BUILD_VERSION?: string;
 };
 
-
-
 const env = import.meta.env as BuildImportMetaEnv;
 const BUILD_VERSION = env.VITE_BUILD_VERSION ?? import.meta.env.MODE;
-
-
 
 const logRuntimeFault = (kind: string, detail: Record<string, unknown>) => { if (typeof window === "undefined") return;
 
@@ -34,7 +30,5 @@ const logRuntimeFault = (kind: string, detail: Record<string, unknown>) => { if 
     });
   });
 };
-
-
 
 export { logRuntimeFault };

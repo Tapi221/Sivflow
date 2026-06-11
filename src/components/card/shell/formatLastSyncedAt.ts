@@ -28,6 +28,4 @@ const dateLabel = new Intl.DateTimeFormat("ja-JP", {
 return `${dateLabel} ${timeLabel}`;
 };
 
-
-
 export { formatLastSyncedAt };

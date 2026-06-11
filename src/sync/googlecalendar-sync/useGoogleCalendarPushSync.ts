@@ -3,19 +3,13 @@ import { collection, onSnapshot, query } from "firebase/firestore";
 import type { Unsubscribe } from "firebase/firestore";
 import { firestoreDb } from "@/services/firebase";
 
-
-
 type UseGoogleCalendarPushSyncOptions = {
   userId: string | null;
   selectedCalendarIds: Set<string>;
   onNotification: (calendarId: string) => void;
 };
 
-
-
 const NOTIFICATION_DEBOUNCE_MS = 250;
-
-
 
 const isPermissionDeniedError = (error: unknown): boolean => {
   return (
@@ -122,7 +116,5 @@ const useGoogleCalendarPushSync = ({ userId, selectedCalendarIds, onNotification
     };
   }, [userId, calendarKey]);
 };
-
-
 
 export { useGoogleCalendarPushSync };

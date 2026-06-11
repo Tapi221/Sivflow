@@ -2,11 +2,7 @@ import { initGlobalChunkRecovery } from "./initGlobalChunkRecovery";
 import { initServiceWorkerLifecycle } from "./initServiceWorkerLifecycle";
 import { startTabPresence } from "@/utils/tabPresence";
 
-
-
 let started = false;
-
-
 
 const initAppRuntime = () => { if (started || typeof window === "undefined") return;
   started = true;
@@ -15,7 +11,5 @@ const initAppRuntime = () => { if (started || typeof window === "undefined") ret
   initGlobalChunkRecovery();
   initServiceWorkerLifecycle();
 };
-
-
 
 export { initAppRuntime };
