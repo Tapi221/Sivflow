@@ -52,6 +52,8 @@ const shouldCheckStatementOrder = (filePath) => {
 
 const hasExportModifier = (statement) => ts.canHaveModifiers(statement) && Boolean(ts.getModifiers(statement)?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword));
 
+const isDirectiveStatement = (statement) => ts.isExpressionStatement(statement) && ts.isStringLiteral(statement.expression);
+
 const isIdentifierNamed = (expression, name) => ts.isIdentifier(expression) && expression.text === name;
 
 const isPropertyAccessNamed = (expression, name) => ts.isPropertyAccessExpression(expression) && expression.name.text === name;
@@ -188,7 +190,7 @@ const isConstDependentTypeStatement = (source, statement, highestRank) => {
   if (!ts.isTypeAliasDeclaration(statement) && !ts.isInterfaceDeclaration(statement)) return false;
   if (highestRank > ORDER_RANKS.constant) return false;
 
-  return getStatementPreview(source, statement).includes("typeof ");
+  return source.slice(statement.getStart(), statement.getEnd()).includes("typeof ");
 };
 
 const checkStatementOrder = (filePath, source, sourceFile) => {
@@ -199,6 +201,8 @@ const checkStatementOrder = (filePath, source, sourceFile) => {
   if (!shouldCheckStatementOrder(filePath)) return violations;
 
   for (const statement of sourceFile.statements) {
+    if (isDirectiveStatement(statement)) continue;
+
     const category = getStatementOrderCategory(statement);
     const rank = ORDER_RANKS[category];
 
