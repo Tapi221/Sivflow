@@ -4,6 +4,8 @@ import type { SlateEditor } from "platejs";
 import type { ChatMessage } from "@/app/api/ai/command/types";
 import { buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction } from "@/app/api/ai/command/utils";
 
+
+
 const buildEditTableMultiCellPrompt = (editor: SlateEditor, messages: ChatMessage[]): string => {
   const tableCellMarkdown = getMarkdown(editor, { type: "tableCellWithId" });
 
@@ -99,5 +101,7 @@ const buildEditTableMultiCellPrompt = (editor: SlateEditor, messages: ChatMessag
     `,
   });
 };
+
+
 
 export { buildEditTableMultiCellPrompt };
