@@ -2,7 +2,11 @@
 
 import { createSlatePlugin, createTextSubstitutionInputRule, KEYS } from 'platejs';
 
+
+
 type AutoformatTextSubstitutionPatterns = Parameters<typeof createTextSubstitutionInputRule>[0]['patterns'];
+
+
 
 const AUTOFORMAT_TEXT_SUBSTITUTION_PATTERN_GROUPS = [
   [

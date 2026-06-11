@@ -4,6 +4,8 @@ import { filterRenderableCardBlocks } from "@/components/card/blocks/shared/isRe
 import { useViewerSceneProps } from "@/components/card/blocks/shared/useViewerSceneProps";
 import type { SharedCardContentViewProps } from "./SharedCardContent.types";
 
+
+
 export const SharedCardViewScene = ({ blocks, onGalleryFullscreenChange, displayMode, zoom, }: SharedCardContentViewProps) => { const viewerProps = useViewerSceneProps({ onGalleryFullscreenChange, displayMode, zoom, });
 
   const renderableBlocks = React.useMemo(

@@ -2,6 +2,8 @@
 import type { CardBlock } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 export const MF_DECK_FORMAT = "sivflow.deck" as const;
 export const MF_DECK_VERSION = 1 as const;
 export const MF_DECK_MANIFEST_PATH = "manifest.json" as const;
@@ -14,6 +16,8 @@ export const MF_DECK_MEDIA_URI_PREFIX = "mfdeck://media/" as const;
 export const MF_DECK_MAX_CARDS = 50000 as const;
 export const MF_DECK_MAX_BLOCKS_PER_FACE = 1000 as const;
 export const MF_DECK_MAX_MEDIA_ENTRIES = 5000 as const;
+
+
 
 export type MfDeckIssueLevel = "error" | "warning";
 
@@ -105,6 +109,8 @@ export type MfDeckValidationResult = | { ok: true;
       ok: false;
       issues: MfDeckIssue[];
     };
+
+
 
 export class MfDeckValidationError extends Error { readonly issues: MfDeckIssue[];
 

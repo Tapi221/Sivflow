@@ -4,6 +4,8 @@ import type { MouseEvent, PointerEvent } from "react";
 
 import type { SelectionCaptureArea, SelectionCapturePoint, SelectionCaptureRect, SelectionCaptureShape } from "./selectionCapture.types";
 
+
+
 type SelectionCaptureTargetRef = {
   readonly current: HTMLElement | null;
 };
@@ -17,9 +19,13 @@ type SelectionCaptureOverlayProps = {
   onCapture: (area: SelectionCaptureArea) => Promise<void> | void;
 };
 
+
+
 const MIN_SELECTION_SIZE_PX = 5;
 
 const MIN_FREEHAND_POINTS = 3;
+
+
 
 const clamp = (value: number, min: number, max: number): number => {
   return Math.min(Math.max(value, min), max);
@@ -64,6 +70,8 @@ const buildSvgPathData = (path: SelectionCapturePoint[]): string => {
     "Z",
   ].join(" ");
 };
+
+
 
 export const SelectionCaptureOverlay = ({ targetRef, active, busy = false, shape = "rectangle", onCancel, onCapture, }: SelectionCaptureOverlayProps) => { const overlayRef = useRef<HTMLDivElement | null>(null);
   const [startPoint, setStartPoint] = useState<SelectionCapturePoint | null>(null);

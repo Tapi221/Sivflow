@@ -4,6 +4,8 @@ import { TocPlugin } from '@platejs/toc/react';
 
 import { TocElement } from '@/components/ui/toc-node';
 
+
+
 const TocKit = [
   TocPlugin.configure({
     options: {
@@ -12,5 +14,7 @@ const TocKit = [
     },
   }).withComponent(TocElement),
 ];
+
+
 
 export { TocKit };

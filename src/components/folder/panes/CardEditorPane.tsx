@@ -54,6 +54,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 import { toMillisOrNull } from "@/utils/toMillis";
 
+
+
 type CardEditorPaneSettings = {
   accentColor?: string;
   duplicateToOpposite?: boolean;
@@ -124,7 +126,11 @@ type EditorSidePaneProps = {
   overlayTopRight?: React.ReactNode;
 };
 
+
+
 const EMPTY_BLOCKS: CardBlock[] = [];
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -212,6 +218,8 @@ const areEditorSidePanePropsEqual = (
   prev.actionsTopLeft === next.actionsTopLeft &&
   prev.actionsTopRight === next.actionsTopRight &&
   prev.overlayTopRight === next.overlayTopRight;
+
+
 
 const EditorSidePaneInner = ({
   side,
@@ -347,9 +355,13 @@ const EditorSidePaneInner = ({
   );
 };
 
+
+
 const EditorSidePane = memo(EditorSidePaneInner, areEditorSidePanePropsEqual);
 
 EditorSidePane.displayName = "EditorSidePane";
+
+
 
 export const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx = null, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, hideMetaPanel = false, dockToolbarsToTop = false, hideBlockToolbars = false, externalToolbarMountQ = null, externalToolbarMountA = null, settingsOverride = null, embeddedInPager = false, pairGapClassName = "gap-0", presentationContext, showResizeHandle: showResizeHandleProp = true, onSyncStatusChange, overlayTopInsetPx = 0, displayMode = "fixed", cardLayoutMode = "split", zoom = 1, }: CardEditorPaneProps) => { const controller = useCardEditorPaneController({ selectedCardId, folderId, cardSetId, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, settingsOverride, });
 

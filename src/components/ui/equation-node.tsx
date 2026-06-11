@@ -24,9 +24,13 @@ import { cn } from '@/lib/utils';
 
 import { inlineSuggestionVariants } from '@/lib/suggestion';
 
+
+
 const EquationInput = createPrimitiveComponent(TextareaAutosize)({
   propsHook: useEquationInput,
 });
+
+
 
 export function EquationElement(props: PlateElementProps<TEquationElement>) { const selected = useSelected();
   const [open, setOpen] = React.useState(selected);
