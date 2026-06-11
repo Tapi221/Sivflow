@@ -5,8 +5,18 @@ import ts from "typescript";
 const ROOT_DIR = process.cwd();
 const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src", "tests", "scripts/dev", "scripts/verify"].map((directory) => path.join(ROOT_DIR, directory));
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx"]);
+const RESOLVABLE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".json", ".css", ".scss", ".sass", ".less"];
 const ORDER_EXCLUDED_PATH_PARTS = ["/tests/", "/scripts/", "/src/sandbox/"];
 const ORDER_EXCLUDED_FILE_SUFFIXES = [".d.ts"];
+const ALIAS_ROOTS = [
+  { directory: path.join(ROOT_DIR, "src"), prefix: "@" },
+  { directory: path.join(ROOT_DIR, "apps/mobile/src"), prefix: "@mobile" },
+  { directory: path.join(ROOT_DIR, "packages/core/src"), prefix: "@core" },
+  { directory: path.join(ROOT_DIR, "packages/platform/src"), prefix: "@platform" },
+  { directory: path.join(ROOT_DIR, "packages/web-renderer/src"), prefix: "@web-renderer" },
+  { directory: path.join(ROOT_DIR, "packages/mobile-renderer/src"), prefix: "@mobile-renderer" },
+  { directory: path.join(ROOT_DIR, "shared"), prefix: "@shared" },
+];
 const ORDER_RANKS = {
   import: 1,
   type: 2,
@@ -50,6 +60,39 @@ const shouldCheckStatementOrder = (filePath) => {
   return !ORDER_EXCLUDED_PATH_PARTS.some((part) => relativePath.includes(part));
 };
 
+const fileExists = (filePath) => {
+  try {
+    return statSync(filePath).isFile();
+  } catch {
+    return false;
+  }
+};
+
+const resolveExistingModulePath = (basePath) => {
+  if (fileExists(basePath)) return basePath;
+
+  for (const extension of RESOLVABLE_EXTENSIONS) {
+    if (fileExists(`${basePath}${extension}`)) return `${basePath}${extension}`;
+  }
+
+  for (const extension of RESOLVABLE_EXTENSIONS) {
+    const indexPath = path.join(basePath, `index${extension}`);
+    if (fileExists(indexPath)) return indexPath;
+  }
+
+  return null;
+};
+
+const findAliasRootByPrefix = (specifier) => ALIAS_ROOTS.find(({ prefix }) => specifier.startsWith(`${prefix}/`));
+
+const resolveSpecifierPath = (filePath, specifier) => {
+  const aliasRoot = findAliasRootByPrefix(specifier);
+  if (aliasRoot) return resolveExistingModulePath(path.join(aliasRoot.directory, specifier.slice(aliasRoot.prefix.length + 1)));
+  if (specifier.startsWith(".")) return resolveExistingModulePath(path.resolve(path.dirname(filePath), specifier));
+
+  return null;
+};
+
 const hasExportModifier = (statement) => ts.canHaveModifiers(statement) && Boolean(ts.getModifiers(statement)?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword));
 
 const isDirectiveStatement = (statement) => ts.isExpressionStatement(statement) && ts.isStringLiteral(statement.expression);
@@ -71,11 +114,7 @@ const containsJsx = (node) => {
   let found = false;
 
   const visit = (child) => {
-    if (
-      ts.isJsxElement(child) ||
-      ts.isJsxFragment(child) ||
-      ts.isJsxSelfClosingElement(child)
-    ) {
+    if (ts.isJsxElement(child) || ts.isJsxFragment(child) || ts.isJsxSelfClosingElement(child)) {
       found = true;
       return;
     }
@@ -169,6 +208,7 @@ const getStatementPreview = (source, statement) => source.slice(statement.getSta
 const checkModuleSpecifier = (filePath, sourceFile, node, specifier) => {
   const line = getLineNumber(sourceFile, node.getStart(sourceFile));
   const violations = [];
+  const targetPath = resolveSpecifierPath(filePath, specifier);
 
   if (specifier.startsWith("../")) {
     violations.push({ filePath, line, message: `Use an alias for cross-folder imports instead of ${specifier}.` });
@@ -176,6 +216,10 @@ const checkModuleSpecifier = (filePath, sourceFile, node, specifier) => {
 
   if (/^\.\/[^/]+\//.test(specifier)) {
     violations.push({ filePath, line, message: `Use an alias for child-folder imports instead of ${specifier}.` });
+  }
+
+  if (specifier.startsWith("@") && targetPath && path.dirname(targetPath) === path.dirname(filePath)) {
+    violations.push({ filePath, line, message: `Use a same-directory relative import instead of ${specifier}.` });
   }
 
   if (specifier === "@constants" || specifier.startsWith("@constants/")) {
@@ -259,12 +303,38 @@ const checkStatementOrder = (filePath, source, sourceFile) => {
       continue;
     }
 
-    highestCategory = category;
+    if (rank > highestRank) {
+      highestCategory = category;
+    }
+
     highestRank = rank;
     previousStatements.push(statement);
   }
 
   return violations;
+};
+
+const getLeadingWhitespaceText = (source, previousStatement, statement) => source.slice(previousStatement.getEnd(), statement.getFullStart());
+
+const getBlankLineCountBetweenStatements = (source, previousStatement, statement) => getLeadingWhitespaceText(source, previousStatement, statement).split("\n").length - 1;
+
+const checkBlockSpacing = (filePath, source, sourceFile) => {
+  if (!shouldCheckStatementOrder(filePath)) return [];
+
+  return sourceFile.statements.flatMap((statement, index, statements) => {
+    const previousStatement = statements[index - 1];
+    if (!previousStatement) return [];
+    if (isDirectiveStatement(previousStatement) || isDirectiveStatement(statement)) return [];
+
+    const previousCategory = getStatementOrderCategory(previousStatement);
+    const category = getStatementOrderCategory(statement);
+    if (previousCategory === category) return [];
+
+    const blankLineCount = getBlankLineCountBetweenStatements(source, previousStatement, statement);
+    if (blankLineCount === 2) return [];
+
+    return [{ filePath, line: getLineNumber(sourceFile, statement.getStart(sourceFile)), message: `Put exactly one blank line between ${ORDER_LABELS[previousCategory]} and ${ORDER_LABELS[category]} blocks.` }];
+  });
 };
 
 const isJsxTagNamed = (tagName, name) => ts.isIdentifier(tagName) && tagName.text === name;
@@ -337,10 +407,7 @@ const checkJsxWrapperConventions = (filePath, sourceFile) => {
 
   const visit = (node) => {
     if (ts.isJsxElement(node)) {
-      violations.push(
-        ...checkExplicitFragmentUsage(filePath, sourceFile, node, node.openingElement.tagName, node.openingElement.attributes),
-        ...checkMeaninglessDivUsage(filePath, sourceFile, node),
-      );
+      violations.push(...checkExplicitFragmentUsage(filePath, sourceFile, node, node.openingElement.tagName, node.openingElement.attributes), ...checkMeaninglessDivUsage(filePath, sourceFile, node));
     }
 
     if (ts.isJsxSelfClosingElement(node)) {
@@ -370,7 +437,7 @@ const checkSourceFile = (filePath) => {
     return [...checkSingleLineImportExport(filePath, sourceFile, node), ...checkModuleSpecifier(filePath, sourceFile, node, specifier)];
   });
 
-  return [...importViolations, ...checkStatementOrder(filePath, source, sourceFile), ...checkJsxWrapperConventions(filePath, sourceFile)];
+  return [...importViolations, ...checkStatementOrder(filePath, source, sourceFile), ...checkBlockSpacing(filePath, source, sourceFile), ...checkJsxWrapperConventions(filePath, sourceFile)];
 };
 
 const formatViolation = ({ filePath, line, message }) => `${toPosix(path.relative(ROOT_DIR, filePath))}:${line} ${message}`;

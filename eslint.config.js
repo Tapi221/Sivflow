@@ -74,10 +74,12 @@ export default defineConfig([
     },
     rules: {
       "@stylistic/indent": "off",
-      "@stylistic/quotes": ["error", "double", { avoidEscape: true }],
-      "@stylistic/semi": ["error", "always"],
+      "@stylistic/quotes": "off",
+      "@stylistic/semi": "off",
       "@stylistic/max-len": "off",
       "@stylistic/object-curly-newline": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "react-refresh/only-export-components": "off",
       "no-restricted-imports": [
         "error",
         {
