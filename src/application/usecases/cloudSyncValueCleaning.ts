@@ -1,4 +1,5 @@
-const deepStripUndefined = (input: unknown): unknown => { if (input === undefined) return undefined;
+const deepStripUndefined = (input: unknown): unknown => {
+  if (input === undefined) return undefined;
   if (input === null) return null;
   if (input instanceof Date) return input;
 

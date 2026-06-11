@@ -907,7 +907,8 @@ const TableFloatingToolbar = ({
     </Popover>
   );
 };
-const TableElement = withHOC(TableProvider, ({ children, ...props }: PlateElementProps<TTableElement>) => { const readOnly = useReadOnly();
+const TableElement = withHOC(TableProvider, ({ children, ...props }: PlateElementProps<TTableElement>) => {
+  const readOnly = useReadOnly();
   const isSelectionAreaVisible = usePluginOption(
     BlockSelectionPlugin,
     "isSelectionAreaVisible",
@@ -1090,7 +1091,8 @@ const RowDropLine = () => {
     />
   );
 };
-const TableRowElement = ({ children, ...props }: PlateElementProps<TTableRowElement>) => { const { element } = props;
+const TableRowElement = ({ children, ...props }: PlateElementProps<TTableRowElement>) => {
+  const { element } = props;
   const readOnly = useReadOnly();
   const editor = useEditorRef();
   const rowIndex = useElementSelector(([, path]) => path.at(-1) as number, [], {
@@ -1155,7 +1157,8 @@ const TableRowElement = ({ children, ...props }: PlateElementProps<TTableRowElem
     </PlateElement>
   );
 };
-const TableCellHeaderElement = (props: React.ComponentProps<typeof TableCellElement>) => { return <TableCellElement {...props} isHeader />;
+const TableCellHeaderElement = (props: React.ComponentProps<typeof TableCellElement>) => {
+  return <TableCellElement {...props} isHeader />;
 };
 const TableCellElement = ({ isHeader, ...props }: PlateElementProps<TTableCellElement> & { isHeader?: boolean;
 }) => {

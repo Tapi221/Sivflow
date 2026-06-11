@@ -4,7 +4,8 @@ import { startTabPresence } from "@/utils/tabPresence";
 
 let started = false;
 
-const initAppRuntime = () => { if (started || typeof window === "undefined") return;
+const initAppRuntime = () => {
+  if (started || typeof window === "undefined") return;
   started = true;
 
   startTabPresence();

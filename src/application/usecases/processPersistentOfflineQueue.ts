@@ -18,7 +18,11 @@ interface PersistentOfflineQueueProcessingDeps {
 const defaultYieldToUi = async (): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, 0));
 };
-const processPersistentOfflineQueue = async (items: QueueItem[], deps: PersistentOfflineQueueProcessingDeps): Promise<void> => { for (const item of items) { try { try { const shouldSkip = await deps.shouldSkipItem(item);
+const processPersistentOfflineQueue = async (items: QueueItem[], deps: PersistentOfflineQueueProcessingDeps): Promise<void> => {
+  for (const item of items) {
+  try {
+  try {
+  const shouldSkip = await deps.shouldSkipItem(item);
   if (shouldSkip) {
     await deps.dequeue(item.id);
     continue;

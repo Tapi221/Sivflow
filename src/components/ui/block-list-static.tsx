@@ -72,7 +72,8 @@ const List = (props: SlateRenderElementProps) => {
     </List>
   );
 };
-const BlockListStatic: RenderStaticNodeWrapper = (props) => { if (!props.element.listStyleType) return;
+const BlockListStatic: RenderStaticNodeWrapper = (props) => {
+  if (!props.element.listStyleType) return;
   if (!isOrderedList(props.element)) return;
 
   return (props) => <List {...props} />;

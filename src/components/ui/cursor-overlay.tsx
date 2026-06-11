@@ -63,7 +63,8 @@ const Cursor = ({
     </>
   );
 };
-const CursorOverlay = () => { const { cursors } = useCursorOverlay();
+const CursorOverlay = () => {
+  const { cursors } = useCursorOverlay();
 
   return cursors.map((cursor) => (
     <Cursor key={cursor.id} {...cursor} />

@@ -29,7 +29,8 @@ const subjectiveScoreToRating = (value: number): 1 | 2 | 3 | 4 | null => {
 
   return clampRating(rounded);
 };
-const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => { if (!Array.isArray(rawLogs)) return [];
+const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => {
+  if (!Array.isArray(rawLogs)) return [];
 
   return rawLogs
     .map((item): NormalizedReviewLog | null => {

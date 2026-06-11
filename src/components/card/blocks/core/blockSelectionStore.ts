@@ -15,7 +15,8 @@ const subscribeSelectedBlockId = (listener: BlockSelectionListener) => {
     blockSelectionListeners.delete(listener);
   };
 };
-const setSelectedBlockId = (nextSelectedBlockId: string | null) => { if (selectedBlockId === nextSelectedBlockId) return;
+const setSelectedBlockId = (nextSelectedBlockId: string | null) => {
+  if (selectedBlockId === nextSelectedBlockId) return;
   selectedBlockId = nextSelectedBlockId;
   emitBlockSelectionChange();
 };

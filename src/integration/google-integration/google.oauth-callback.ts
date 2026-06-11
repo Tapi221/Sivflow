@@ -185,7 +185,8 @@ const notifyCallbackPayload = (payload: GoogleOAuthCallbackPayload): void => {
   clearSensitiveCallbackUrl();
   closeCallbackWindow();
 };
-const createGoogleOAuthCallbackPayload = (url: URL): GoogleOAuthCallbackPayload | null => { if (!hasGoogleOAuthCallbackResult(url)) return null;
+const createGoogleOAuthCallbackPayload = (url: URL): GoogleOAuthCallbackPayload | null => {
+  if (!hasGoogleOAuthCallbackResult(url)) return null;
   return {
     type: GOOGLE_OAUTH_CALLBACK_CHANNEL,
     url: url.href,
@@ -195,10 +196,12 @@ const createGoogleOAuthCallbackPayload = (url: URL): GoogleOAuthCallbackPayload 
     errorDescription: url.searchParams.get("error_description"),
   };
 };
-const isGoogleOAuthCallbackPayload = (value: unknown): value is GoogleOAuthCallbackPayload => { if (!isRecord(value)) return false;
+const isGoogleOAuthCallbackPayload = (value: unknown): value is GoogleOAuthCallbackPayload => {
+  if (!isRecord(value)) return false;
   return value.type === GOOGLE_OAUTH_CALLBACK_CHANNEL && typeof value.url === "string" && isNullableString(value.state) && isNullableString(value.code) && isNullableString(value.error) && isNullableString(value.errorDescription);
 };
-const renderGoogleOAuthCallback = (): boolean => { if (typeof window === "undefined") return false;
+const renderGoogleOAuthCallback = (): boolean => {
+  if (typeof window === "undefined") return false;
   const payload = createGoogleOAuthCallbackPayload(new URL(window.location.href));
   if (!payload) return false;
   const text = getOAuthCallbackText();

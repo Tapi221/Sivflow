@@ -3,7 +3,8 @@ import { toMillis } from "@/utils/toMillis";
 const pad2 = (value: number): string => {
   return String(value).padStart(2, "0");
 };
-const formatExplorerUpdatedAt = (value: unknown): string => { const millis = toMillis(value);
+const formatExplorerUpdatedAt = (value: unknown): string => {
+  const millis = toMillis(value);
   if (!Number.isFinite(millis) || millis <= 0) return "—";
 
   const date = new Date(millis);
@@ -17,7 +18,9 @@ const formatExplorerUpdatedAt = (value: unknown): string => { const millis = toM
 
   return `${year}/${month}/${day} ${hours}:${minutes}`;
 };
-const formatExplorerSize = (bytes: number | null | undefined): string => { if (typeof bytes !== "number" || !Number.isFinite(bytes) || bytes < 0) { return "—";
+const formatExplorerSize = (bytes: number | null | undefined): string => {
+  if (typeof bytes !== "number" || !Number.isFinite(bytes) || bytes < 0) {
+  return "—";
 }
 
 if (bytes < 1024) return `${bytes} B`;
@@ -34,7 +37,8 @@ while (value >= 1024 && unitIndex < units.length - 1) {
 const fractionDigits = value >= 10 ? 1 : 2;
 return `${value.toFixed(fractionDigits)} ${units[unitIndex]}`;
 };
-const formatExplorerTags = (tags: string[]): string => { const normalizedTags = tags.map((tag) => tag.trim()).filter(Boolean).map((tag) => (tag.startsWith("#") ? tag : `#${tag}`));
+const formatExplorerTags = (tags: string[]): string => {
+  const normalizedTags = tags.map((tag) => tag.trim()).filter(Boolean).map((tag) => (tag.startsWith("#") ? tag : `#${tag}`));
 
   return normalizedTags.length > 0 ? normalizedTags.join(" ") : "—";
 };

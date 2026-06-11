@@ -13,7 +13,8 @@ type SearchState = {
   unregisterSource: (sourceId: string) => void;
 };
 
-const useSearchStore = create<SearchState>((set) => ({ isOpen: false, query: "", sources: {}, open: () => { set({ isOpen: true });
+const useSearchStore = create<SearchState>((set) => ({ isOpen: false, query: "", sources: {}, open: () => {
+  set({ isOpen: true });
 },
 close: () => {
   set({ isOpen: false, query: "" });

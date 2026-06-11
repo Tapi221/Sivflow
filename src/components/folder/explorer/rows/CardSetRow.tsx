@@ -43,7 +43,8 @@ interface CardSetRowProps {
   setRowRef: (id: string, node: HTMLElement | null) => void;
 }
 
-const CardSetRow = ({ treeNode, style, depth, isOpen, isSelected, toggle, editingId, editingName, renameCancelledRef, editInputRef, setEditingId, setEditingName, openRowMenuId, setOpenRowMenuId, onItemSelect, canRename, canDelete, handleDelete, handleRenameConfirm, setRowRef }: CardSetRowProps) => { const rowMenuId = `cardSet:${treeNode.rawId}`;
+const CardSetRow = ({ treeNode, style, depth, isOpen, isSelected, toggle, editingId, editingName, renameCancelledRef, editInputRef, setEditingId, setEditingName, openRowMenuId, setOpenRowMenuId, onItemSelect, canRename, canDelete, handleDelete, handleRenameConfirm, setRowRef }: CardSetRowProps) => {
+  const rowMenuId = `cardSet:${treeNode.rawId}`;
   const isRowMenuOpen = openRowMenuId === rowMenuId;
   const isEditing = editingId === treeNode.rawId;
   const hasChildren = (treeNode.children?.length ?? 0) > 0;

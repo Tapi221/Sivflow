@@ -109,14 +109,18 @@ const initializeFirebaseClient = (): FirebaseClientState => {
     firestoreDb,
   };
 };
-const requireFirebaseClient = (): FirebaseClientState => { if (isFirebaseClientAvailable && firebaseClientState.app) { return firebaseClientState;
+const requireFirebaseClient = (): FirebaseClientState => {
+  if (isFirebaseClientAvailable && firebaseClientState.app) {
+  return firebaseClientState;
 }
 
 throw new Error(
   `[Firebase] Firebase クライアントを利用できません。不足している環境変数: ${missingFirebaseEnvVars.join(", ")}`,
 );
 };
-const requireFirestoreDb = (): Firestore => { if (firestoreDb) { return firestoreDb;
+const requireFirestoreDb = (): Firestore => {
+  if (firestoreDb) {
+  return firestoreDb;
 }
 
 if (!isFirebaseClientAvailable) {

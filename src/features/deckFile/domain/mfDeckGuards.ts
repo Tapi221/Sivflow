@@ -188,7 +188,8 @@ const pushMediaManifestIssues = (
     }
   }
 };
-const isMfDeckManifestV1 = (value: unknown): value is MfDeckManifestV1 => { if (!isRecord(value)) return false;
+const isMfDeckManifestV1 = (value: unknown): value is MfDeckManifestV1 => {
+  if (!isRecord(value)) return false;
   if (value.format !== MF_DECK_FORMAT) return false;
   if (value.version !== MF_DECK_VERSION) return false;
   if (!isIsoLikeString(value.exportedAt)) return false;
@@ -237,7 +238,8 @@ const isMfDeckManifestV1 = (value: unknown): value is MfDeckManifestV1 => { if (
 
   return true;
 };
-const isMfDeckCardsJsonV1 = (value: unknown): value is MfDeckCardsJsonV1 => { if (!isRecord(value)) return false;
+const isMfDeckCardsJsonV1 = (value: unknown): value is MfDeckCardsJsonV1 => {
+  if (!isRecord(value)) return false;
   if (value.format !== "sivflow.deck.cards") return false;
   if (value.version !== MF_DECK_VERSION) return false;
   if (!Array.isArray(value.cards)) return false;
@@ -275,7 +277,8 @@ const isMfDeckCardsJsonV1 = (value: unknown): value is MfDeckCardsJsonV1 => { if
     return true;
   });
 };
-const isMfDeckMediaManifestV1 = (value: unknown): value is MfDeckMediaManifestV1 => { if (value === undefined) return true;
+const isMfDeckMediaManifestV1 = (value: unknown): value is MfDeckMediaManifestV1 => {
+  if (value === undefined) return true;
   if (!isRecord(value)) return false;
   if (value.format !== "sivflow.deck.media") return false;
   if (value.version !== MF_DECK_VERSION) return false;

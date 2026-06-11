@@ -9,7 +9,9 @@ import { APP_VERSION, CURRENT_SCHEMA_VERSION } from "@/types/domain/snapshot";
 interface CreateSnapshotDependencies { generationCounterStore: GenerationCounterStorePort;
 }
 
-const createCreateSnapshotUseCase = ({ generationCounterStore }: CreateSnapshotDependencies) => { const assertPersistentStorageAvailable = (operation: string): void => { const status = getLocalDBRuntimeStatus();
+const createCreateSnapshotUseCase = ({ generationCounterStore }: CreateSnapshotDependencies) => {
+  const assertPersistentStorageAvailable = (operation: string): void => {
+  const status = getLocalDBRuntimeStatus();
 
   if (status.mode === "fallback") {
     throw new Error(

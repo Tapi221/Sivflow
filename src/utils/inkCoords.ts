@@ -54,7 +54,8 @@ const paperPointToCanvasPoint = (point: Pick<InkPoint, "x" | "y">, canvasWidth: 
     y: (point.y / paperHeight) * safeCanvasHeight,
   };
 };
-const squaredDistance = (a: Pick<InkPoint, "x" | "y">, b: Pick<InkPoint, "x" | "y">): number => { const dx = a.x - b.x;
+const squaredDistance = (a: Pick<InkPoint, "x" | "y">, b: Pick<InkPoint, "x" | "y">): number => {
+  const dx = a.x - b.x;
   const dy = a.y - b.y;
   return dx * dx + dy * dy;
 };

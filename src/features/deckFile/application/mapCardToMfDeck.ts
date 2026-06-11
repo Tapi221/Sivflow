@@ -71,7 +71,8 @@ const visitObject = (
   visitor(record);
   Object.values(record).forEach((item) => visitObject(item, visitor));
 };
-const collectMfDeckExportIssues = (cards: Card[]): MfDeckIssue[] => { const issues: MfDeckIssue[] = [];
+const collectMfDeckExportIssues = (cards: Card[]): MfDeckIssue[] => {
+  const issues: MfDeckIssue[] = [];
 
   cards.forEach((card) => {
     const faces = [card.front, card.back];

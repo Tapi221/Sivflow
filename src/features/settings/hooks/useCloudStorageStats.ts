@@ -29,7 +29,8 @@ const getErrorMessage = (error: unknown): string => {
 
   return "クラウド使用量の取得に失敗しました。";
 };
-const useCloudStorageStats = (userId: string | null | undefined): UseCloudStorageStatsResult => { const [stats, setStats] = useState<CloudStorageStats | null>(null);
+const useCloudStorageStats = (userId: string | null | undefined): UseCloudStorageStatsResult => {
+  const [stats, setStats] = useState<CloudStorageStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rebuilding, setRebuilding] = useState(false);

@@ -3,7 +3,9 @@ const hasMethod = (value: unknown): value is (...args: unknown[]) => unknown =>
 const hasTauriInternals = (): boolean =>
   typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 const hasWindowDesktopBridge = (): boolean => typeof window !== "undefined" && typeof window.desktop !== "undefined";
-const hasDesktopBridge = (): boolean => { if (!hasWindowDesktopBridge()) { return false;
+const hasDesktopBridge = (): boolean => {
+  if (!hasWindowDesktopBridge()) {
+  return false;
 }
 
 const bridge = window.desktop;

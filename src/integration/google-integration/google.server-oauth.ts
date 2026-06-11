@@ -87,7 +87,8 @@ const sleep = (ms: number): Promise<void> =>
   new Promise((resolve) => {
     window.setTimeout(resolve, ms);
   });
-const readGoogleOAuthCallableErrorDetails = (error: unknown): CallableErrorDetails => { if (!isRecord(error)) return {};
+const readGoogleOAuthCallableErrorDetails = (error: unknown): CallableErrorDetails => {
+  if (!isRecord(error)) return {};
   const details = error.details;
   if (!isRecord(details)) return {};
   return {
@@ -97,10 +98,12 @@ const readGoogleOAuthCallableErrorDetails = (error: unknown): CallableErrorDetai
     adminAction: typeof details.adminAction === "string" ? details.adminAction : undefined,
   };
 };
-const getGoogleOAuthCallableErrorReason = (error: unknown): GoogleOAuthCallableErrorReason | undefined => { const wrappedReason = error instanceof Error ? (error as GoogleOAuthReasonedError).googleOAuthReason : undefined;
+const getGoogleOAuthCallableErrorReason = (error: unknown): GoogleOAuthCallableErrorReason | undefined => {
+  const wrappedReason = error instanceof Error ? (error as GoogleOAuthReasonedError).googleOAuthReason : undefined;
   return wrappedReason ?? readGoogleOAuthCallableErrorDetails(error).reason;
 };
-const diagnoseGoogleOAuthReconnectCause = (error: unknown): GoogleOAuthReconnectDiagnosis => { const code = normalizeCallableErrorCode(error);
+const diagnoseGoogleOAuthReconnectCause = (error: unknown): GoogleOAuthReconnectDiagnosis => {
+  const code = normalizeCallableErrorCode(error);
   const details = readGoogleOAuthCallableErrorDetails(error);
   const reason = details.reason;
 
@@ -116,7 +119,8 @@ const diagnoseGoogleOAuthReconnectCause = (error: unknown): GoogleOAuthReconnect
   return { cause: "Google OAuth refresh token 更新に失敗しました。原因は未分類です。", reconnectRequired: false, action: "Firebase Functions ログ、Firestore の保存状態、Google Cloud Console の OAuth 設定を確認してください。" };
 };
 const isGoogleOAuthDeterministicErrorReason = (reason: string | undefined): boolean => reason === "invalid_grant" || reason === "stored_refresh_token_missing" || reason === "insufficient_google_scope" || reason === "server_oauth_configuration" || reason === "token_encryption_key_invalid" || reason === "stored_refresh_token_decrypt_failed";
-const toUserTransparentAutoRecoveryError = (sourceError: unknown): Error => { const code = normalizeCallableErrorCode(sourceError);
+const toUserTransparentAutoRecoveryError = (sourceError: unknown): Error => {
+  const code = normalizeCallableErrorCode(sourceError);
   const reason = getGoogleOAuthCallableErrorReason(sourceError);
   if (reason === "server_oauth_configuration" || isOAuthClientConfigurationError(sourceError)) return createGoogleOAuthError(SERVER_OAUTH_CONFIGURATION_ERROR_MESSAGE, SERVER_OAUTH_CONFIGURATION_ERROR_CODE, reason ?? "server_oauth_configuration");
   if (reason === "token_encryption_key_invalid" || reason === "stored_refresh_token_decrypt_failed") return createGoogleOAuthError(SERVER_TOKEN_DECRYPT_ERROR_MESSAGE, SERVER_TOKEN_DECRYPT_ERROR_CODE, reason);
@@ -146,7 +150,8 @@ const getGoogleCalendarAccessTokenWithRetry = async (
 
   throw new Error("Google server token refresh retry loop exhausted");
 };
-const isServerStoredGoogleOAuthEnabled = (): boolean => { if (isDesktopLikeRuntime()) return true;
+const isServerStoredGoogleOAuthEnabled = (): boolean => {
+  if (isDesktopLikeRuntime()) return true;
   if (import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "false") return false;
 
   return (
@@ -154,7 +159,9 @@ const isServerStoredGoogleOAuthEnabled = (): boolean => { if (isDesktopLikeRunti
     import.meta.env.VITE_GOOGLE_OAUTH_SERVER_TOKENS === "true"
   );
 };
-const exchangeGoogleCalendarCode = async (input: ExchangeGoogleCalendarCodeInput): Promise<ServerGoogleCalendarAccess> => { try { await waitForCallableAuth();
+const exchangeGoogleCalendarCode = async (input: ExchangeGoogleCalendarCodeInput): Promise<ServerGoogleCalendarAccess> => {
+  try {
+  await waitForCallableAuth();
 
   const result = await exchangeGoogleCalendarCodeCallable({
     ...input,
@@ -168,13 +175,16 @@ const exchangeGoogleCalendarCode = async (input: ExchangeGoogleCalendarCodeInput
   throw toUserTransparentAutoRecoveryError(error);
 }
 };
-const getServerStoredGoogleCalendarAccessToken = async (input: GetGoogleCalendarAccessTokenInput): Promise<ServerGoogleCalendarAccess> => { try { await waitForCallableAuth();
+const getServerStoredGoogleCalendarAccessToken = async (input: GetGoogleCalendarAccessTokenInput): Promise<ServerGoogleCalendarAccess> => {
+  try {
+  await waitForCallableAuth();
   return await getGoogleCalendarAccessTokenWithRetry(input);
 } catch (error) {
   throw toUserTransparentAutoRecoveryError(error);
 }
 };
-const disconnectServerStoredGoogleCalendarAccount = async (input: DisconnectGoogleCalendarAccountInput): Promise<void> => { await waitForCallableAuth();
+const disconnectServerStoredGoogleCalendarAccount = async (input: DisconnectGoogleCalendarAccountInput): Promise<void> => {
+  await waitForCallableAuth();
   await disconnectGoogleCalendarAccountCallable(input);
 };
 

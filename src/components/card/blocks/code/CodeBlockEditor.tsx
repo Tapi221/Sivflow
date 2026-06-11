@@ -65,7 +65,8 @@ const pushRecentLang = (lang: string) => {
   }
 };
 
-const CodeBlockEditor = ({ value, onChange, className, zoom }: CodeBlockEditorProps) => { const [recentLangs, setRecentLangs] = useState<string[]>(() => getRecentLangs());
+const CodeBlockEditor = ({ value, onChange, className, zoom }: CodeBlockEditorProps) => {
+  const [recentLangs, setRecentLangs] = useState<string[]>(() => getRecentLangs());
 
   const code = value?.code ?? "";
   const normalizedLanguage = normalizeEditorLanguage(

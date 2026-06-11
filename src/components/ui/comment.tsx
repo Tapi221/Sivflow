@@ -42,7 +42,8 @@ const useCommentEditor = (
 
   return commentEditor;
 };
-const formatCommentDate = (date: Date) => { const now = new Date();
+const formatCommentDate = (date: Date) => {
+  const now = new Date();
   const diffMinutes = differenceInMinutes(now, date);
   const diffHours = differenceInHours(now, date);
   const diffDays = differenceInDays(now, date);

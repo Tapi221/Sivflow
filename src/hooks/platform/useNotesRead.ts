@@ -11,7 +11,8 @@ type UseNotesReadOptions = {
   enabled?: boolean;
 };
 
-const useNotesRead = (folderId?: string | null, options?: UseNotesReadOptions) => { const { currentUser } = useAuthSession();
+const useNotesRead = (folderId?: string | null, options?: UseNotesReadOptions) => {
+  const { currentUser } = useAuthSession();
   const userId = currentUser?.uid ?? null;
   const [error, setError] = useState<string | null>(null);
   const enabled = options?.enabled ?? true;

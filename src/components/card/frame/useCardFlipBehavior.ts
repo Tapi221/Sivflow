@@ -27,7 +27,8 @@ type UseCardFlipBehaviorResult = Readonly<{ handleFlip: (event?: React.MouseEven
 
 const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
 
-const shouldIgnoreFlipTarget = (target: EventTarget | null): boolean => { const element = target as HTMLElement | null;
+const shouldIgnoreFlipTarget = (target: EventTarget | null): boolean => {
+  const element = target as HTMLElement | null;
   if (!element) return false;
 
   return Boolean(
@@ -42,7 +43,8 @@ const createInitialPointerGestureState = (): PointerGestureState => ({
   startY: 0,
   moved: false,
 });
-const useCardFlipBehavior = ({ isCardClickable, previewMode, onFlip, onPreviewFlip, isModalBlockingFlip, isInkEditingActive }: UseCardFlipBehaviorParams): UseCardFlipBehaviorResult => { const suppressNextFlipRef = React.useRef(false);
+const useCardFlipBehavior = ({ isCardClickable, previewMode, onFlip, onPreviewFlip, isModalBlockingFlip, isInkEditingActive }: UseCardFlipBehaviorParams): UseCardFlipBehaviorResult => {
+  const suppressNextFlipRef = React.useRef(false);
   const pointerGestureRef = React.useRef<PointerGestureState>(
     createInitialPointerGestureState(),
   );

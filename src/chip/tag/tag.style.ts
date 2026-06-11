@@ -7,7 +7,8 @@ const getTagPalette = (input?: string) => {
   return { colorKey, palette: TAG_COLOR_PALETTE[colorKey] };
 };
 const getTagBackgroundColor = (colorKey: ReturnType<typeof getTagColorKey>): string => `var(--ds-color-tag-${colorKey}-bg)`;
-const getTagColorStyle = (input?: string): CSSProperties => { const { colorKey, palette } = getTagPalette(input);
+const getTagColorStyle = (input?: string): CSSProperties => {
+  const { colorKey, palette } = getTagPalette(input);
 
   return {
     backgroundColor: getTagBackgroundColor(colorKey),
@@ -15,7 +16,8 @@ const getTagColorStyle = (input?: string): CSSProperties => { const { colorKey, 
     borderColor: palette.border,
   };
 };
-const getTagColorSwatchStyle = (input?: string): CSSProperties => { const { palette } = getTagPalette(input);
+const getTagColorSwatchStyle = (input?: string): CSSProperties => {
+  const { palette } = getTagPalette(input);
 
   return {
     backgroundColor: palette.swatch,

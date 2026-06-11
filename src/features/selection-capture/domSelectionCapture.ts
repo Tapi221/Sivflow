@@ -42,7 +42,8 @@ const cloneElementForCapture = (element: HTMLElement): HTMLElement => {
   });
   return clone;
 };
-const captureElementRectToBlob = async (element: HTMLElement, rect: SelectionCaptureRect): Promise<Blob> => { const bounds = element.getBoundingClientRect();
+const captureElementRectToBlob = async (element: HTMLElement, rect: SelectionCaptureRect): Promise<Blob> => {
+  const bounds = element.getBoundingClientRect();
   const clone = cloneElementForCapture(element);
   const wrapper = document.createElement("div");
   const serializedRect = {

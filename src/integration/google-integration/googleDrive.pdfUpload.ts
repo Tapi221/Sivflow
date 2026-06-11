@@ -39,7 +39,9 @@ const readGoogleDriveErrorMessage = async (response: Response): Promise<string> 
     return `Google Drive upload failed (${response.status})`;
   }
 };
-const uploadPdfToGoogleDrive = async ({ accessToken, fileName, pdf }: GoogleDrivePdfUploadInput): Promise<GoogleDrivePdfUploadResult> => { if (!accessToken.trim()) { throw new Error("Google Drive access token is missing");
+const uploadPdfToGoogleDrive = async ({ accessToken, fileName, pdf }: GoogleDrivePdfUploadInput): Promise<GoogleDrivePdfUploadResult> => {
+  if (!accessToken.trim()) {
+  throw new Error("Google Drive access token is missing");
 }
 
 const response = await fetch(

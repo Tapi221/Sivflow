@@ -25,7 +25,8 @@ type OrderedOptimisticCreateParams<T> = {
   onAfterOptimisticCreate?: (entity: T) => void;
 };
 
-const createOrderedOptimistically = async <T>({ entities, setOptimisticEntities, getEntityId, getParentId, getOrderIndex, setOrderIndex, createTempEntity, persistCreate, targetParentId, newEntityName, newEntityId, onAfterOptimisticCreate }: OrderedOptimisticCreateParams<T>) => { const siblingIds = new Set<string>();
+const createOrderedOptimistically = async <T>({ entities, setOptimisticEntities, getEntityId, getParentId, getOrderIndex, setOrderIndex, createTempEntity, persistCreate, targetParentId, newEntityName, newEntityId, onAfterOptimisticCreate }: OrderedOptimisticCreateParams<T>) => {
+  const siblingIds = new Set<string>();
   const originalOrderIndexes = new Map<string, number>();
 
   for (const entity of entities) {

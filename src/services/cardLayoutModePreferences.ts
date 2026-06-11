@@ -45,12 +45,14 @@ const writeStorageValue = (key: string, value: string) => {
     // Ignore local persistence failures and keep the in-memory override path working.
   }
 };
-const getCardLayoutModePreference = (scope: CardLayoutModePreferenceScope): CardLayoutMode | null => { if (!scope.cardSetId) return null;
+const getCardLayoutModePreference = (scope: CardLayoutModePreferenceScope): CardLayoutMode | null => {
+  if (!scope.cardSetId) return null;
 
   const raw = readStorageValue(buildStorageKey(scope));
   return raw == null ? null : normalizeCardLayoutMode(raw);
 };
-const resolveCardLayoutModePreference = (scope: CardLayoutModePreferenceScope, fallbackMode?: CardLayoutMode | null): CardLayoutMode => { const stored = getCardLayoutModePreference(scope);
+const resolveCardLayoutModePreference = (scope: CardLayoutModePreferenceScope, fallbackMode?: CardLayoutMode | null): CardLayoutMode => {
+  const stored = getCardLayoutModePreference(scope);
   if (stored) return stored;
 
   if (fallbackMode) {
@@ -59,7 +61,8 @@ const resolveCardLayoutModePreference = (scope: CardLayoutModePreferenceScope, f
 
   return resolveDefaultCardLayoutMode(scope.interactionMode);
 };
-const setCardLayoutModePreference = (scope: CardLayoutModePreferenceScope, mode: CardLayoutMode) => { if (!scope.cardSetId) return;
+const setCardLayoutModePreference = (scope: CardLayoutModePreferenceScope, mode: CardLayoutMode) => {
+  if (!scope.cardSetId) return;
   writeStorageValue(buildStorageKey(scope), normalizeCardLayoutMode(mode));
 };
 

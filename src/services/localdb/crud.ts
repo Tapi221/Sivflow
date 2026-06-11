@@ -268,7 +268,9 @@ const enqueueThroughSyncQueueApi = async (
     priority: "high",
   });
 };
-const addItem: AddItem = async (db: DbLike, table: string, item: unknown, skipSync: boolean, enqueueSync: EnqueueSync): Promise<string> => { if (table === "cards") { assertNoBlobUrlInCardPayload(item, { entityType: table, entityId: getId(item) });
+const addItem: AddItem = async (db: DbLike, table: string, item: unknown, skipSync: boolean, enqueueSync: EnqueueSync): Promise<string> => {
+  if (table === "cards") {
+  assertNoBlobUrlInCardPayload(item, { entityType: table, entityId: getId(item) });
 }
 
 const payload = toStorageRow(item);
@@ -381,7 +383,10 @@ try {
   throw error;
 }
 };
-const updateItem: UpdateItem = async (db: DbLike, table: string, id: string, changes: unknown, skipSync: boolean, enqueueSync: EnqueueSync): Promise<number> => { if (table === "documents") { if (!isDocDbCtx(db)) { throw new Error("[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.");
+const updateItem: UpdateItem = async (db: DbLike, table: string, id: string, changes: unknown, skipSync: boolean, enqueueSync: EnqueueSync): Promise<number> => {
+  if (table === "documents") {
+  if (!isDocDbCtx(db)) {
+  throw new Error("[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.");
 }
 
 await cleanupBeforeDocumentUpdate(db, id, changes as DocumentUpdateChanges);
@@ -435,7 +440,10 @@ if (!skipSync) {
 
 return result;
 };
-const deleteItem: DeleteItem = async (db: DbLike, table: string, id: string): Promise<void> => { if (table === "documents") { if (!isDocDbCtx(db)) { throw new Error("[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.");
+const deleteItem: DeleteItem = async (db: DbLike, table: string, id: string): Promise<void> => {
+  if (table === "documents") {
+  if (!isDocDbCtx(db)) {
+  throw new Error("[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.");
 }
 
 await cleanupBeforeDocumentDelete(db, id);
@@ -444,7 +452,8 @@ await cleanupBeforeDocumentDelete(db, id);
 const tableApi = db.table<AnyRow>(table);
 await tableApi.delete(id);
 };
-const softDelete = async (db: DbLike, table: string, id: string, updateItemFn: (table: string, id: string, changes: Record<string, unknown>) => Promise<number>): Promise<number> => { const now = new Date();
+const softDelete = async (db: DbLike, table: string, id: string, updateItemFn: (table: string, id: string, changes: Record<string, unknown>) => Promise<number>): Promise<number> => {
+  const now = new Date();
 
   console.log(`[LocalDB] softDelete -> table=${table} id=${id}`);
 
@@ -470,7 +479,8 @@ const softDelete = async (db: DbLike, table: string, id: string, updateItemFn: (
     ...extraChanges,
   });
 };
-const bulkUpsert: BulkUpsert = async (db: DbLike, table: string, items: unknown[], skipSync: boolean, enqueueSync: EnqueueSync): Promise<void> => { if (items.length === 0) return;
+const bulkUpsert: BulkUpsert = async (db: DbLike, table: string, items: unknown[], skipSync: boolean, enqueueSync: EnqueueSync): Promise<void> => {
+  if (items.length === 0) return;
 
   if (table === "cards") {
     for (const item of items) {
@@ -501,7 +511,9 @@ const bulkUpsert: BulkUpsert = async (db: DbLike, table: string, items: unknown[
     }
   }
 };
-const upsert: Upsert = async (db: DbLike, tableName: string, data: unknown, skipSync: boolean, enqueueSync: EnqueueSync): Promise<void> => { if (tableName === "cards") { assertNoBlobUrlInCardPayload(data, { entityType: tableName, entityId: getId(data) });
+const upsert: Upsert = async (db: DbLike, tableName: string, data: unknown, skipSync: boolean, enqueueSync: EnqueueSync): Promise<void> => {
+  if (tableName === "cards") {
+  assertNoBlobUrlInCardPayload(data, { entityType: tableName, entityId: getId(data) });
 }
 
 const payload = toStorageRow(data);

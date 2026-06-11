@@ -8,11 +8,13 @@ type LoadMfDeckFileResult = { file: File;
   suggestedCardSetName: string;
 };
 
-const buildMfDeckSuggestedCardSetName = (fileName: string): string => { const baseName = fileName.replace(new RegExp(`${MF_DECK_FILE_EXTENSION}$`, "i"), "").trim();
+const buildMfDeckSuggestedCardSetName = (fileName: string): string => {
+  const baseName = fileName.replace(new RegExp(`${MF_DECK_FILE_EXTENSION}$`, "i"), "").trim();
 
   return baseName || "インポートしたカードセット";
 };
-const readMfDeckFile = async (file: File): Promise<LoadMfDeckFileResult> => { const issues: MfDeckIssue[] = [];
+const readMfDeckFile = async (file: File): Promise<LoadMfDeckFileResult> => {
+  const issues: MfDeckIssue[] = [];
 
   if (!file.name.toLowerCase().endsWith(MF_DECK_FILE_EXTENSION)) {
     issues.push({

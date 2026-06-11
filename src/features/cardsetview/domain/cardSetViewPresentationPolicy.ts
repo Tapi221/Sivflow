@@ -38,16 +38,21 @@ const roundToStep = (value: number, stepPercent: number): number => {
 const isMobileCardSetViewDevicePresentation = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => {
   return deviceScope === MOBILE_CARD_SET_VIEW_DEVICE_SCOPE;
 };
-const resolveCardSetViewUsesViewportWidth = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => { return isMobileCardSetViewDevicePresentation({ deviceScope });
+const resolveCardSetViewUsesViewportWidth = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => {
+  return isMobileCardSetViewDevicePresentation({ deviceScope });
 };
-const resolveCardSetViewUsesZoomPreference = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => { return !isMobileCardSetViewDevicePresentation({ deviceScope });
+const resolveCardSetViewUsesZoomPreference = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => {
+  return !isMobileCardSetViewDevicePresentation({ deviceScope });
 };
-const resolveCardSetViewZoomPercentOverride = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => { return isMobileCardSetViewDevicePresentation({ deviceScope }) ? MOBILE_CARD_SET_VIEW_ZOOM_PERCENT : null;
+const resolveCardSetViewZoomPercentOverride = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => {
+  return isMobileCardSetViewDevicePresentation({ deviceScope }) ? MOBILE_CARD_SET_VIEW_ZOOM_PERCENT : null;
 };
-const resolveCardSetViewShowsConstraintIndicator = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => { return !isMobileCardSetViewDevicePresentation({ deviceScope });
+const resolveCardSetViewShowsConstraintIndicator = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => {
+  return !isMobileCardSetViewDevicePresentation({ deviceScope });
 };
 const clampNormalizedZoomPercent = (value: number, stepPercent: number = CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT) => roundToStep(value, stepPercent);
-const resolveZoomMinBaseWidthPx = ({ cardLayoutMode }: ResolveZoomWidthArgs) => { return CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX[cardLayoutMode];
+const resolveZoomMinBaseWidthPx = ({ cardLayoutMode }: ResolveZoomWidthArgs) => {
+  return CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX[cardLayoutMode];
 };
 const clampZoomPercent = (value: number) => clampZoomPercentRange(value);
 const resolveZoomPercentForPresentationWidthPx = ({ targetPresentationWidthPx, cardLayoutMode, maxPresentationWidthPx }: { targetPresentationWidthPx: number;

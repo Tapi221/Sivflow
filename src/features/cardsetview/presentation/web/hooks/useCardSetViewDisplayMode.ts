@@ -17,7 +17,8 @@ const buildDisplayModeScopeKey = (
 ) => {
   return `${cardSetId ?? "__null__"}::${defaultDisplayMode ?? "__unset__"}`;
 };
-const useCardSetViewDisplayMode = ({ cardSetId, defaultDisplayMode }: UseCardSetViewDisplayModeOptions) => { const scopeKey = useMemo(() => buildDisplayModeScopeKey(cardSetId, defaultDisplayMode), [cardSetId, defaultDisplayMode]);
+const useCardSetViewDisplayMode = ({ cardSetId, defaultDisplayMode }: UseCardSetViewDisplayModeOptions) => {
+  const scopeKey = useMemo(() => buildDisplayModeScopeKey(cardSetId, defaultDisplayMode), [cardSetId, defaultDisplayMode]);
 
   const resolvedDisplayMode = useMemo(
     () => resolveCardSetDisplayMode(cardSetId, defaultDisplayMode ?? undefined),

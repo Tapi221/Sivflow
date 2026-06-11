@@ -15,7 +15,8 @@ const getChangeParts = (change: SyncChange): { type: CloudEntityType; id: string
     data: change.data,
   };
 };
-const getChangeId = (change: SyncChange): string | null => { const parts = getChangeParts(change);
+const getChangeId = (change: SyncChange): string | null => {
+  const parts = getChangeParts(change);
   return parts?.id ?? null;
 };
 

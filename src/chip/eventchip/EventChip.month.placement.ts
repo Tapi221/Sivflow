@@ -108,7 +108,8 @@ const getMonthEventChipCount = (contentHeight: number) => {
     ),
   );
 };
-const createMonthEventIndex = (visibleEvents: GoogleCalendarEvent[], allowedDayKeys?: ReadonlySet<string>): CalendarMonthEventIndex => { const eventIndex = new Map<string, GoogleCalendarEvent[]>();
+const createMonthEventIndex = (visibleEvents: GoogleCalendarEvent[], allowedDayKeys?: ReadonlySet<string>): CalendarMonthEventIndex => {
+  const eventIndex = new Map<string, GoogleCalendarEvent[]>();
   const allowedRange = allowedDayKeys ? getAllowedDayKeyRange(allowedDayKeys) : null;
 
   if (allowedDayKeys && !allowedRange) return eventIndex;
@@ -184,7 +185,8 @@ const getVisibleMonthEvents = (
 
   return visibleEvents;
 };
-const getVisibleMonthEventChipCount = (eventCount: number, monthRowHeight: number) => { const contentHeight = monthRowHeight - MONTH_EVENT_CONTENT_TOP_PX - MONTH_EVENT_BOTTOM_PADDING_PX;
+const getVisibleMonthEventChipCount = (eventCount: number, monthRowHeight: number) => {
+  const contentHeight = monthRowHeight - MONTH_EVENT_CONTENT_TOP_PX - MONTH_EVENT_BOTTOM_PADDING_PX;
 
   const maxChipsWithoutOverflow = getMonthEventChipCount(contentHeight);
 

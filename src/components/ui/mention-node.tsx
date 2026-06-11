@@ -134,7 +134,8 @@ const MentionElement = (props: PlateElementProps<TMentionElement> & { prefix?: s
     </PlateElement>
   );
 };
-const MentionInputElement = (props: PlateElementProps<TComboboxInputElement>) => { const { editor, element } = props;
+const MentionInputElement = (props: PlateElementProps<TComboboxInputElement>) => {
+  const { editor, element } = props;
   const [search, setSearch] = React.useState("");
 
   return (

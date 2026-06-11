@@ -381,7 +381,8 @@ const computeNextReview = ({ card, subjectiveScore, now = new Date(), delayBonus
     difficulty: newDifficulty,
   };
 };
-const ratingToSubjectiveScore = (rating: ReviewLog["rating"]): SubjectiveScore => { return Math.max(0, Math.min(3, rating - 1)) as SubjectiveScore;
+const ratingToSubjectiveScore = (rating: ReviewLog["rating"]): SubjectiveScore => {
+  return Math.max(0, Math.min(3, rating - 1)) as SubjectiveScore;
 };
 const buildCardStateBeforeLatestReview = ({
   card,
@@ -511,7 +512,8 @@ durationMinutes?: number | null;
     },
   };
 };
-const createLatestReviewLogPatch = (params: LatestReviewLogPatchParams) => { const reviewLogs = [...(params.reviewLogs ?? [])].sort((left, right) => toMillis(left.reviewedAt) - toMillis(right.reviewedAt));
+const createLatestReviewLogPatch = (params: LatestReviewLogPatchParams) => {
+  const reviewLogs = [...(params.reviewLogs ?? [])].sort((left, right) => toMillis(left.reviewedAt) - toMillis(right.reviewedAt));
 
   if (reviewLogs.length === 0) {
     throw new Error("最新の学習記録がありません");

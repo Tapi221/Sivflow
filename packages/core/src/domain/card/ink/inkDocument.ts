@@ -29,7 +29,9 @@ const isFiniteNumber = (value: unknown): value is number =>
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
 const createEmptyInkDocument = (): InkDocument => ({ version: INK_DOCUMENT_VERSION, updatedAt: 0, strokes: [] });
-const normalizeInkDocument = (value: unknown): InkDocument => { if (!value || typeof value !== "object") { return createEmptyInkDocument();
+const normalizeInkDocument = (value: unknown): InkDocument => {
+  if (!value || typeof value !== "object") {
+  return createEmptyInkDocument();
 }
 
 const maybe = value as Partial<InkDocument>;

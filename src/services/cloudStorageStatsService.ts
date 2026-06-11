@@ -64,12 +64,15 @@ const parseCloudStorageStats = (
     lastRebuiltAt: toTimestampLike(data.lastRebuiltAt),
   };
 };
-const isCloudStorageStatsOutdated = (stats: CloudStorageStats | null): boolean => { if (!stats) { return true;
+const isCloudStorageStatsOutdated = (stats: CloudStorageStats | null): boolean => {
+  if (!stats) {
+  return true;
 }
 
 return stats.schemaVersion !== CLOUD_STORAGE_STATS_SCHEMA_VERSION;
 };
-const subscribeToCloudStorageStats = (userId: string, onChange: (stats: CloudStorageStats | null) => void, onError: (error: unknown) => void): Unsubscribe => { const db = requireFirestoreDb();
+const subscribeToCloudStorageStats = (userId: string, onChange: (stats: CloudStorageStats | null) => void, onError: (error: unknown) => void): Unsubscribe => {
+  const db = requireFirestoreDb();
   const pathSegments = storageStatsDocPathSegments(userId);
 
   return onSnapshot(
@@ -91,7 +94,8 @@ const subscribeToCloudStorageStats = (userId: string, onChange: (stats: CloudSto
     onError,
   );
 };
-const rebuildCloudStorageStats = async (userId: string): Promise<CloudStorageStats> => { const callable = httpsCallable<void, RebuildStorageStatsResponse>(functionsClient, "rebuildStorageStats");
+const rebuildCloudStorageStats = async (userId: string): Promise<CloudStorageStats> => {
+  const callable = httpsCallable<void, RebuildStorageStatsResponse>(functionsClient, "rebuildStorageStats");
   const result = await callable();
 
   return parseCloudStorageStats(userId, {

@@ -11,7 +11,8 @@ const normalizeFileName = (value: string | undefined): string => {
 const normalizeMimeType = (value: string | undefined): string => {
   return (value ?? "").trim().toLowerCase();
 };
-const detectImportFileKind = (file: Pick<File, "name" | "type">): ImportFileKind => { const fileName = normalizeFileName(file.name);
+const detectImportFileKind = (file: Pick<File, "name" | "type">): ImportFileKind => {
+  const fileName = normalizeFileName(file.name);
   const mimeType = normalizeMimeType(file.type);
 
   if (
@@ -37,15 +38,20 @@ const detectImportFileKind = (file: Pick<File, "name" | "type">): ImportFileKind
 
   return "unknown";
 };
-const isSupportedImportFileKind = (kind: ImportFileKind): kind is Exclude<ImportFileKind, "unknown"> => { return kind !== "unknown";
+const isSupportedImportFileKind = (kind: ImportFileKind): kind is Exclude<ImportFileKind, "unknown"> => {
+  return kind !== "unknown";
 };
-const isPortableImportFileKind = (kind: ImportFileKind): kind is PortableImportFileKind => { return kind === "mfdeck" || kind === "mfcard";
+const isPortableImportFileKind = (kind: ImportFileKind): kind is PortableImportFileKind => {
+  return kind === "mfdeck" || kind === "mfcard";
 };
-const isPortableImportFile = (file: Pick<File, "name" | "type">) => { return isPortableImportFileKind(detectImportFileKind(file));
+const isPortableImportFile = (file: Pick<File, "name" | "type">) => {
+  return isPortableImportFileKind(detectImportFileKind(file));
 };
-const getSupportedImportFiles = (files: FileList | File[]): File[] => { return Array.from(files).filter((file) => isSupportedImportFileKind(detectImportFileKind(file)));
+const getSupportedImportFiles = (files: FileList | File[]): File[] => {
+  return Array.from(files).filter((file) => isSupportedImportFileKind(detectImportFileKind(file)));
 };
-const getPortableImportFiles = (files: FileList | File[]): File[] => { return Array.from(files).filter(isPortableImportFile);
+const getPortableImportFiles = (files: FileList | File[]): File[] => {
+  return Array.from(files).filter(isPortableImportFile);
 };
 
 export { IMPORT_FILE_MIME_TYPES, IMPORT_FILE_EXTENSIONS, IMPORT_FILE_LABELS, detectImportFileKind, isSupportedImportFileKind, isPortableImportFileKind, isPortableImportFile, getSupportedImportFiles, getPortableImportFiles };

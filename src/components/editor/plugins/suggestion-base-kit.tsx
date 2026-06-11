@@ -9,7 +9,8 @@ const INLINE_SUGGESTION_TARGET_PLUGINS = [
   KEYS.link,
   KEYS.mention,
 ];
-const BaseSuggestionKit = [BaseSuggestionPlugin.configure({ inject: { isElement: true, nodeProps: { nodeKey: "", styleKey: "cssText", transformProps: ({ editor, element, props }) => { if (!element) return props;
+const BaseSuggestionKit = [BaseSuggestionPlugin.configure({ inject: { isElement: true, nodeProps: { nodeKey: "", styleKey: "cssText", transformProps: ({ editor, element, props }) => {
+  if (!element) return props;
 
   const suggestionData = getInlineSuggestionData(editor, element);
 

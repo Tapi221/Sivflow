@@ -171,7 +171,8 @@ const processAssetQueueBestEffort = async (): Promise<void> => {
     console.warn("[CardSave] Failed to process image upload queue", error);
   }
 };
-const waitForDraftImageUploads = async (draft: EditorDraft): Promise<EditorDraft> => { const images = uniqueImagesByAssetKey(collectDraftImages(draft));
+const waitForDraftImageUploads = async (draft: EditorDraft): Promise<EditorDraft> => {
+  const images = uniqueImagesByAssetKey(collectDraftImages(draft));
   const pendingImages = images.filter(shouldWaitForImage);
 
   if (pendingImages.length === 0) {

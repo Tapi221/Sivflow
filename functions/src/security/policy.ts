@@ -27,7 +27,8 @@ const WINDOWED_EVENT_THRESHOLDS: Partial<Record<SecurityEventType, number>> = {
 const RISK_DECAY_PER_HOUR = 3;
 
 const clampRiskScore = (score: number): number => Math.max(0, Math.min(RISK_SCORE_THRESHOLDS.accountLock, Math.round(score)));
-const getRiskLevel = (score: number): SecurityRiskLevel => { if (score >= RISK_SCORE_THRESHOLDS.accountLock) return "critical";
+const getRiskLevel = (score: number): SecurityRiskLevel => {
+  if (score >= RISK_SCORE_THRESHOLDS.accountLock) return "critical";
   if (score >= RISK_SCORE_THRESHOLDS.require2FA) return "high";
   if (score >= RISK_SCORE_THRESHOLDS.warning) return "warning";
   return "normal";

@@ -8,7 +8,8 @@ const getMatchesDesktopLayoutMediaQuery = () => {
 
   return window.matchMedia(DESKTOP_LAYOUT_MEDIA_QUERY).matches;
 };
-const useDesktopLayoutMediaQuery = () => { const [matchesDesktopLayout, setMatchesDesktopLayout] = useState(getMatchesDesktopLayoutMediaQuery);
+const useDesktopLayoutMediaQuery = () => {
+  const [matchesDesktopLayout, setMatchesDesktopLayout] = useState(getMatchesDesktopLayoutMediaQuery);
 
   useEffect(() => {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") return;

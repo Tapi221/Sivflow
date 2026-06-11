@@ -157,7 +157,8 @@ const EmbeddedEditorFace = ({
     />
   );
 };
-const DesktopEmbeddedCardEditorSurface = ({ selectedCardId, folderId, cardSetId, cardsOverride, settings = null, displayMode, cardLayoutMode, zoomScale, isInteractive }: DesktopEmbeddedCardEditorSurfaceProps) => { const controller = useCardEditorPaneController({ selectedCardId, folderId: folderId ?? undefined, cardSetId: cardSetId ?? undefined, cardsOverride, autoEdit: true, settingsOverride: settings });
+const DesktopEmbeddedCardEditorSurface = ({ selectedCardId, folderId, cardSetId, cardsOverride, settings = null, displayMode, cardLayoutMode, zoomScale, isInteractive }: DesktopEmbeddedCardEditorSurfaceProps) => {
+  const controller = useCardEditorPaneController({ selectedCardId, folderId: folderId ?? undefined, cardSetId: cardSetId ?? undefined, cardsOverride, autoEdit: true, settingsOverride: settings });
 
   const { settings: controllerSettings, session, layout, content } = controller;
   const {

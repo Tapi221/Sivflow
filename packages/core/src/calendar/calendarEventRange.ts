@@ -22,7 +22,8 @@ const getDayRange = (date: Date): { start: Date; end: Date; } => {
     end: addDays(start, 1),
   };
 };
-const compareCalendarEvents = (a: CalendarEvent, b: CalendarEvent): number => { const allDayDiff = Number(b.isAllDay) - Number(a.isAllDay);
+const compareCalendarEvents = (a: CalendarEvent, b: CalendarEvent): number => {
+  const allDayDiff = Number(b.isAllDay) - Number(a.isAllDay);
 
   if (allDayDiff !== 0) return allDayDiff;
 
@@ -40,7 +41,8 @@ const compareCalendarEvents = (a: CalendarEvent, b: CalendarEvent): number => { 
 
   return compareText(`${a.calendarId}:${a.id}`, `${b.calendarId}:${b.id}`);
 };
-const eventOverlapsRange = (event: CalendarEvent, rangeStart: Date, rangeEnd: Date): boolean => { const startsAt = toDate(event.startsAt);
+const eventOverlapsRange = (event: CalendarEvent, rangeStart: Date, rangeEnd: Date): boolean => {
+  const startsAt = toDate(event.startsAt);
   const endsAt = toDate(event.endsAt);
 
   if (!startsAt || !endsAt) return false;
@@ -51,11 +53,13 @@ const eventOverlapsRange = (event: CalendarEvent, rangeStart: Date, rangeEnd: Da
 
   return startTime < rangeEnd.getTime() && normalizedEndTime > rangeStart.getTime();
 };
-const eventOverlapsDay = (event: CalendarEvent, day: Date): boolean => { const { start, end } = getDayRange(day);
+const eventOverlapsDay = (event: CalendarEvent, day: Date): boolean => {
+  const { start, end } = getDayRange(day);
 
   return eventOverlapsRange(event, start, end);
 };
-const getEventDateKeys = (event: CalendarEvent): string[] => { const startsAt = toDate(event.startsAt);
+const getEventDateKeys = (event: CalendarEvent): string[] => {
+  const startsAt = toDate(event.startsAt);
   const endsAt = toDate(event.endsAt);
 
   if (!startsAt || !endsAt) return [];
@@ -76,7 +80,8 @@ const getEventDateKeys = (event: CalendarEvent): string[] => { const startsAt = 
 
   return keys;
 };
-const clipEventToDay = (event: CalendarEvent, day: Date): CalendarEvent | null => { const startsAt = toDate(event.startsAt);
+const clipEventToDay = (event: CalendarEvent, day: Date): CalendarEvent | null => {
+  const startsAt = toDate(event.startsAt);
   const endsAt = toDate(event.endsAt);
 
   if (!startsAt || !endsAt) return null;

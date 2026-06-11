@@ -1,6 +1,7 @@
 import { useLocation } from "react-router-dom";
 
-const useLayoutRouteStateDesktop = () => { const { pathname } = useLocation();
+const useLayoutRouteStateDesktop = () => {
+  const { pathname } = useLocation();
 
   const isLibraryRoute = /^\/library(?:\/|$)/i.test(pathname);
 

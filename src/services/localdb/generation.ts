@@ -33,7 +33,8 @@ const getGenerationForUser = (userId: string) => {
 };
 const isLocalDbGenerationStorageKey = (key: string): boolean => key.startsWith(LOCALDB_GENERATION_KEY_PREFIX) || key.startsWith(LOCALDB_LEGACY_GENERATION_KEY_PREFIX);
 const isLocalDbPersistentDatabaseName = (name: string): boolean => name.startsWith(LOCALDB_NAME_PREFIX) || name.startsWith(LOCALDB_LEGACY_NAME_PREFIX);
-const getKnownLocalDbNamesForUser = (userId: string): string[] => { const names: string[] = [];
+const getKnownLocalDbNamesForUser = (userId: string): string[] => {
+  const names: string[] = [];
   const generationPrefix = makeGenerationDbPrefix(LOCALDB_NAME_PREFIX, userId);
   const legacyGenerationPrefix = makeGenerationDbPrefix(LOCALDB_LEGACY_NAME_PREFIX, userId);
 
@@ -72,7 +73,9 @@ const listUserPersistentDbNames = async (userId: string) => {
 
   return Array.from(names.values());
 };
-const bumpGenerationForUser = (userId: string) => { if (generationBumpedUsers.has(userId)) { return getGenerationForUser(userId);
+const bumpGenerationForUser = (userId: string) => {
+  if (generationBumpedUsers.has(userId)) {
+  return getGenerationForUser(userId);
 }
 generationBumpedUsers.add(userId);
 const current = getGenerationForUser(userId);
@@ -82,12 +85,15 @@ if (next !== current) {
 }
 return next;
 };
-const getDatabaseNameForUser = (userId: string = "anonymous") => { const generation = getGenerationForUser(userId);
+const getDatabaseNameForUser = (userId: string = "anonymous") => {
+  const generation = getGenerationForUser(userId);
   return `${LOCALDB_NAME_PREFIX}${userId}_v${LOCALDB_SCHEMA_VERSION_FOR_NAME}_g${generation}`;
 };
-const getFallbackDatabaseNameForUser = (userId: string) => { return `${LOCALDB_NAME_PREFIX}mem_${userId}`;
+const getFallbackDatabaseNameForUser = (userId: string) => {
+  return `${LOCALDB_NAME_PREFIX}mem_${userId}`;
 };
-const deleteUserPersistentDatabases = async (userId: string) => { const names = await listUserPersistentDbNames(userId);
+const deleteUserPersistentDatabases = async (userId: string) => {
+  const names = await listUserPersistentDbNames(userId);
   let failureReason: string | null = null;
 
   for (const name of names) {

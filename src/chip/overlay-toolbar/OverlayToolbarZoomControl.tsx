@@ -35,7 +35,8 @@ type OverlayToolbarZoomControlProps = | OverlayToolbarZoomControlWithoutStepButt
 
 const DEFAULT_FORMAT_VALUE = (value: number) => `${Math.round(value)}%`;
 
-const OverlayToolbarZoomControl = (props: OverlayToolbarZoomControlProps) => { const { value, min, max, step, onChange, label, disabled = false, sliderWrapperClassName, valueClassName, trackClassName, rangeClassName, thumbClassName, formatValue = DEFAULT_FORMAT_VALUE } = props;
+const OverlayToolbarZoomControl = (props: OverlayToolbarZoomControlProps) => {
+  const { value, min, max, step, onChange, label, disabled = false, sliderWrapperClassName, valueClassName, trackClassName, rangeClassName, thumbClassName, formatValue = DEFAULT_FORMAT_VALUE } = props;
 
   const sliderValue = React.useMemo<readonly [number]>(
     () => [value] as const,

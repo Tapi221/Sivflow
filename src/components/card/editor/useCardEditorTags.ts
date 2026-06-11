@@ -25,7 +25,8 @@ const genId = (): string => {
   }
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 };
-const useCardEditorTags = (): UseCardEditorTagsResult => { const { currentUser } = useAuthSession();
+const useCardEditorTags = (): UseCardEditorTagsResult => {
+  const { currentUser } = useAuthSession();
 
   const rawTags = useLiveQuery(
     async () => {

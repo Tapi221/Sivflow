@@ -7,7 +7,8 @@ type ImageUrlField = "remoteUrl" | "localUrl" | "thumbnailUrl";
  * 画像ドメインの不変条件違反を示すエラー
  * このエラーが発生した場合、設計上の重大な問題がある
  */
-class ImageInvariantViolation extends Error { constructor(message: string, public readonly imageId?: string) { super(`[ImageInvariant] ${message}`);
+class ImageInvariantViolation extends Error { constructor(message: string, public readonly imageId?: string) {
+  super(`[ImageInvariant] ${message}`);
   this.name = "ImageInvariantViolation";
 }
 }
@@ -57,7 +58,8 @@ const assertBlobUrlField = (
  *
  * @throws {ImageInvariantViolation} Base64 が検出された場合
  */
-const assertNoBase64InImage = (image: UploadedImage): void => { assertNoBase64Url(image.remoteUrl ?? null, "remoteUrl", image.id);
+const assertNoBase64InImage = (image: UploadedImage): void => {
+  assertNoBase64Url(image.remoteUrl ?? null, "remoteUrl", image.id);
   assertNoBase64Url(image.localUrl ?? null, "localUrl", image.id);
   assertNoBase64Url(image.thumbnailUrl ?? null, "thumbnailUrl", image.id);
 };
@@ -84,7 +86,8 @@ const assertValidLocalUrl = (image: UploadedImage): void => {
  *
  * @throws {ImageInvariantViolation} いずれかの不変条件に違反した場合
  */
-const assertImageInvariant = (image: UploadedImage): void => { assertNoBase64InImage(image);
+const assertImageInvariant = (image: UploadedImage): void => {
+  assertNoBase64InImage(image);
   assertValidRemoteUrls(image);
   assertValidLocalUrl(image);
 };
@@ -93,7 +96,8 @@ const assertImageInvariant = (image: UploadedImage): void => { assertNoBase64InI
  *
  * @throws {ImageInvariantViolation} いずれかの画像が不変条件に違反した場合
  */
-const assertImageArrayInvariant = (images: UploadedImage[]): void => { images.forEach(assertImageInvariant);
+const assertImageArrayInvariant = (images: UploadedImage[]): void => {
+  images.forEach(assertImageInvariant);
 };
 
 export { ImageInvariantViolation, assertNoBase64InImage, assertImageInvariant, assertImageArrayInvariant };

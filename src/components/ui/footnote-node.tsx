@@ -65,7 +65,8 @@ const getReferenceContextLabel = (
     : normalized;
 };
 
-const FootnoteReferenceElement = (props: PlateElementProps<TFootnoteElement>) => { const { editor, element } = props;
+const FootnoteReferenceElement = (props: PlateElementProps<TFootnoteElement>) => {
+  const { editor, element } = props;
   const identifier = element.identifier ?? "";
   const footnoteApi = editor.getApi(FootnoteReferencePlugin).footnote;
   const footnoteTransforms = editor.getTransforms(
@@ -188,7 +189,8 @@ const FootnoteReferenceElement = (props: PlateElementProps<TFootnoteElement>) =>
     </PlateElement>
   );
 };
-const FootnoteDefinitionElement = (props: PlateElementProps<TFootnoteElement>) => { const { editor, element } = props;
+const FootnoteDefinitionElement = (props: PlateElementProps<TFootnoteElement>) => {
+  const { editor, element } = props;
   const identifier = element.identifier ?? "";
   const footnoteApi = editor.getApi(FootnoteReferencePlugin).footnote;
   const footnoteTransforms = editor.getTransforms(
@@ -353,7 +355,8 @@ const FootnoteDefinitionElement = (props: PlateElementProps<TFootnoteElement>) =
     </PlateElement>
   );
 };
-const FootnoteInputElement = (props: PlateElementProps) => { const { editor, element } = props;
+const FootnoteInputElement = (props: PlateElementProps) => {
+  const { editor, element } = props;
   const [search, setSearch] = React.useState("");
   const footnoteApi = editor.getApi(FootnoteReferencePlugin).footnote;
   const insertTransforms = editor.getTransforms(FootnoteReferencePlugin).insert;

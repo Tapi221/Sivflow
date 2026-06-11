@@ -57,7 +57,8 @@ const buildSvgPathData = (path: SelectionCapturePoint[]): string => {
   ].join(" ");
 };
 
-const SelectionCaptureOverlay = ({ targetRef, active, busy = false, shape = "rectangle", onCancel, onCapture }: SelectionCaptureOverlayProps) => { const overlayRef = useRef<HTMLDivElement | null>(null);
+const SelectionCaptureOverlay = ({ targetRef, active, busy = false, shape = "rectangle", onCancel, onCapture }: SelectionCaptureOverlayProps) => {
+  const overlayRef = useRef<HTMLDivElement | null>(null);
   const [startPoint, setStartPoint] = useState<SelectionCapturePoint | null>(null);
   const [endPoint, setEndPoint] = useState<SelectionCapturePoint | null>(null);
   const [pathPoints, setPathPoints] = useState<SelectionCapturePoint[]>([]);

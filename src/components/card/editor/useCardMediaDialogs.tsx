@@ -24,7 +24,8 @@ const normalizeAttachments = (attachments: CardFaceAttachments | null | undefine
   audios: attachments?.audios ?? [],
   references: attachments?.references ?? [],
 });
-const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: UseCardMediaDialogsParams) => { const [imageDialogSide, setImageDialogSide] = useState<Side | null>(null);
+const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: UseCardMediaDialogsParams) => {
+  const [imageDialogSide, setImageDialogSide] = useState<Side | null>(null);
   const [audioDialogSide, setAudioDialogSide] = useState<Side | null>(null);
   const [linkDialogSide, setLinkDialogSide] = useState<Side | null>(null);
 

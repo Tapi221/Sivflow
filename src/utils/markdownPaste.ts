@@ -24,7 +24,8 @@ turndown.addRule("fencedCode", {
     return `\n\n\`\`\`${lang}\n${code}\n\`\`\`\n\n`;
   },
 });
-const sanitizeAndConvertToMarkdown = (html: string) => { const clean = DOMPurify.sanitize(html, { ALLOWED_TAGS: ["p", "br", "strong", "b", "em", "i", "u", "a", "ul", "ol", "li", "h1", "h2", "h3", "h4", "h5", "h6", "pre", "code", "blockquote", "hr", "table", "thead", "tbody", "tr", "th", "td", "del", "sup", "sub", "span", "div"], ALLOWED_ATTR: ["href", "class", "className", "lang"], KEEP_CONTENT: true });
+const sanitizeAndConvertToMarkdown = (html: string) => {
+  const clean = DOMPurify.sanitize(html, { ALLOWED_TAGS: ["p", "br", "strong", "b", "em", "i", "u", "a", "ul", "ol", "li", "h1", "h2", "h3", "h4", "h5", "h6", "pre", "code", "blockquote", "hr", "table", "thead", "tbody", "tr", "th", "td", "del", "sup", "sub", "span", "div"], ALLOWED_ATTR: ["href", "class", "className", "lang"], KEEP_CONTENT: true });
   const markdown = turndown.turndown(clean).replace(/\n{3,}/g, "\n\n");
 
   return markdown.trim();

@@ -98,12 +98,16 @@ const writeStore = (store: CardSetViewNavigationPreferencesStore) => {
     // ignore local persistence failures
   }
 };
-const getCardSetViewNavigationPreference = (scope: CardSetViewNavigationPreferenceScope) => { if (!scope.cardSetId) { return null;
+const getCardSetViewNavigationPreference = (scope: CardSetViewNavigationPreferenceScope) => {
+  if (!scope.cardSetId) {
+  return null;
 }
 
 return readStore().byScope[buildPreferenceScopeKey(scope)] ?? null;
 };
-const setCardSetViewNavigationPreference = (scope: CardSetViewNavigationPreferenceScope, updates: CardSetViewNavigationPreferenceUpdates) => { if (!scope.cardSetId) { return;
+const setCardSetViewNavigationPreference = (scope: CardSetViewNavigationPreferenceScope, updates: CardSetViewNavigationPreferenceUpdates) => {
+  if (!scope.cardSetId) {
+  return;
 }
 
 const store = readStore();

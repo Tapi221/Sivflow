@@ -30,7 +30,8 @@ const generateSafeStoragePath = (originalName: string, fileType?: string): { saf
 
   return { safeName, extension, id };
 };
-const formatBytes = (bytes: number, decimals = 2) => { if (bytes === 0) return "0 Bytes";
+const formatBytes = (bytes: number, decimals = 2) => {
+  if (bytes === 0) return "0 Bytes";
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
   const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];

@@ -9,7 +9,8 @@ type EmptyMetaPanelProps = {
   style?: CSSProperties;
 };
 
-const EmptyMetaPanel = ({ children, className, bodyClassName, contentClassName, style }: EmptyMetaPanelProps) => { return (<MetaPanelShell className={className} bodyClassName={bodyClassName} contentClassName={contentClassName} style={style} > {children} </MetaPanelShell>);
+const EmptyMetaPanel = ({ children, className, bodyClassName, contentClassName, style }: EmptyMetaPanelProps) => {
+  return (<MetaPanelShell className={className} bodyClassName={bodyClassName} contentClassName={contentClassName} style={style} > {children} </MetaPanelShell>);
 };
 
 export { EmptyMetaPanel };

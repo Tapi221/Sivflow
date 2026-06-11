@@ -71,7 +71,8 @@ const putScopedImageBlob = async (id: string, blob: Blob): Promise<void> => {
     tx.onabort = () => reject(tx.error ?? new Error("Image blob save aborted"));
   });
 };
-const putImageBlob = async (blob: Blob, options: PutImageBlobOptions): Promise<ImageBlobRecord> => { const localBlobId = options.assetId;
+const putImageBlob = async (blob: Blob, options: PutImageBlobOptions): Promise<ImageBlobRecord> => {
+  const localBlobId = options.assetId;
   await putScopedImageBlob(makeScopedId(localBlobId, options), blob);
   return {
     localBlobId,
@@ -79,7 +80,8 @@ const putImageBlob = async (blob: Blob, options: PutImageBlobOptions): Promise<I
     mime: blob.type || "application/octet-stream",
   };
 };
-const deleteImageBlob = async (id: string, options?: BlobScopeOptions): Promise<void> => { const db = await openImageFileDb();
+const deleteImageBlob = async (id: string, options?: BlobScopeOptions): Promise<void> => {
+  const db = await openImageFileDb();
   const scopedId = makeScopedId(id, options);
   await new Promise<void>((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readwrite");
@@ -95,7 +97,8 @@ const deleteImageBlob = async (id: string, options?: BlobScopeOptions): Promise<
       reject(tx.error ?? new Error("Image blob delete aborted"));
   });
 };
-const getImageBlob = async (id: string, options?: BlobScopeOptions): Promise<Blob | null> => { const scopedId = makeScopedId(id, options);
+const getImageBlob = async (id: string, options?: BlobScopeOptions): Promise<Blob | null> => {
+  const scopedId = makeScopedId(id, options);
   const scoped = await getStoredImageFile(scopedId);
   if (scoped?.blob) return scoped.blob;
 
@@ -108,7 +111,8 @@ const getImageBlob = async (id: string, options?: BlobScopeOptions): Promise<Blo
   }
   return legacy.blob;
 };
-const deleteImageBlobsByUser = async (userId: string): Promise<void> => { const prefix = `${userId.trim()}:`;
+const deleteImageBlobsByUser = async (userId: string): Promise<void> => {
+  const prefix = `${userId.trim()}:`;
   if (!userId.trim()) return;
   const db = await openImageFileDb();
   await new Promise<void>((resolve, reject) => {

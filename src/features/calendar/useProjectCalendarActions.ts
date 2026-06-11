@@ -61,8 +61,10 @@ const useProjectCalendarActions = ({ googleAccounts, reconnectGoogleAccount, tog
   const [projectCalendarLinks, setProjectCalendarLinks] = useState<ProjectCalendarLink[]>(readStoredProjectCalendarLinks);
   const [googleCalendarColorOverrides, setGoogleCalendarColorOverrides] = useState<GoogleCalendarColorOverrideMap>(readStoredGoogleCalendarColorOverrides);
 
-  useEffect(() => { persistProjectCalendarLinks(projectCalendarLinks); }, [projectCalendarLinks]);
-  useEffect(() => { persistGoogleCalendarColorOverrides(googleCalendarColorOverrides); }, [googleCalendarColorOverrides]);
+  useEffect(() => {
+    persistProjectCalendarLinks(projectCalendarLinks); }, [projectCalendarLinks]);
+  useEffect(() => {
+    persistGoogleCalendarColorOverrides(googleCalendarColorOverrides); }, [googleCalendarColorOverrides]);
   useEffect(() => {
     if (didMigrateLegacyProjectsRef.current || rootFolderProjectsLoading) return;
     const legacyProjects = readLegacyStoredAppProjects();
@@ -93,9 +95,11 @@ const useProjectCalendarActions = ({ googleAccounts, reconnectGoogleAccount, tog
     });
   }, [appProjects, createRootFolderProject, findProjectByLabel, rootFolderProjectsLoading, setProjectVisibility]);
 
-  const handleAddAppProject = useCallback((projectName: string) => { void createRootFolderProject({ label: projectName, checked: true }); }, [createRootFolderProject]);
+  const handleAddAppProject = useCallback((projectName: string) => {
+    void createRootFolderProject({ label: projectName, checked: true }); }, [createRootFolderProject]);
 
-  const handleToggleAppProject = useCallback((projectId: string) => { toggleProject(projectId); }, [toggleProject]);
+  const handleToggleAppProject = useCallback((projectId: string) => {
+    toggleProject(projectId); }, [toggleProject]);
 
   const linkProjectToGoogleCalendar = useCallback((project: AppCalendarItem, account: GoogleAccountDisplay, calendar: GoogleCalendarListItem, createdByApp: boolean) => {
     const color = googleCalendarColorOverrides[createGoogleCalendarColorOverrideKey(account.accountId, calendar.id)] ?? calendar.backgroundColor ?? project.color;
@@ -124,7 +128,8 @@ const useProjectCalendarActions = ({ googleAccounts, reconnectGoogleAccount, tog
       }
       const calendar = await createGoogleCalendar({ accessToken: account.accessToken, summary: project.label });
       linkProjectToGoogleCalendar(project, { ...account, calendars: [...account.calendars, calendar] }, calendar, true);
-    })().catch((error) => { console.warn("[ScheduleScreen] Google Calendar creation failed", error); });
+    })().catch((error) => {
+      console.warn("[ScheduleScreen] Google Calendar creation failed", error); });
   }, [appProjects, googleAccounts, linkProjectToGoogleCalendar, reconnectGoogleAccount]);
 
   const handleLinkGoogleCalendarAsProject = useCallback((accountId: string, calendarId: string) => {
@@ -136,10 +141,12 @@ const useProjectCalendarActions = ({ googleAccounts, reconnectGoogleAccount, tog
       const color = googleCalendarColorOverrides[createGoogleCalendarColorOverrideKey(account.accountId, calendar.id)] ?? calendar.backgroundColor;
       const project = findProjectByLabel(calendarLabel) ?? await createRootFolderProject({ label: calendarLabel, color, checked: true });
       if (project) linkProjectToGoogleCalendar(project, account, calendar, false);
-    })().catch((error) => { console.warn("[ScheduleScreen] Google Calendar project link failed", error); });
+    })().catch((error) => {
+      console.warn("[ScheduleScreen] Google Calendar project link failed", error); });
   }, [createRootFolderProject, findProjectByLabel, googleAccounts, googleCalendarColorOverrides, linkProjectToGoogleCalendar]);
 
-  const handleUnlinkProjectCalendar = useCallback((linkId: string) => { setProjectCalendarLinks((links) => links.filter((link) => link.id !== linkId)); }, []);
+  const handleUnlinkProjectCalendar = useCallback((linkId: string) => {
+    setProjectCalendarLinks((links) => links.filter((link) => link.id !== linkId)); }, []);
 
   const handleChangeGoogleCalendarColor = useCallback((accountId: string, calendarId: string, color: string) => {
     if (!isHexColor(color)) return;
@@ -147,7 +154,8 @@ const useProjectCalendarActions = ({ googleAccounts, reconnectGoogleAccount, tog
     const linkedProjectIds = projectCalendarLinks.filter((link) => link.provider === "google" && link.accountId === accountId && link.externalCalendarId === calendarId).map((link) => link.projectId);
     setGoogleCalendarColorOverrides((overrides) => ({ ...overrides, [key]: color }));
     setProjectCalendarLinks((links) => links.map((link) => link.provider === "google" && link.accountId === accountId && link.externalCalendarId === calendarId ? { ...link, color } : link));
-    void Promise.all(Array.from(new Set(linkedProjectIds)).map((projectId) => updateRootFolderProjectColor(projectId, color))).catch((error) => { console.warn("[ScheduleScreen] root folder project color update failed", error); });
+    void Promise.all(Array.from(new Set(linkedProjectIds)).map((projectId) => updateRootFolderProjectColor(projectId, color))).catch((error) => {
+      console.warn("[ScheduleScreen] root folder project color update failed", error); });
   }, [projectCalendarLinks, updateRootFolderProjectColor]);
 
   const googleAccountsWithColorOverrides = useMemo(() => applyGoogleCalendarColorOverridesToAccounts(googleAccounts, googleCalendarColorOverrides), [googleAccounts, googleCalendarColorOverrides]);

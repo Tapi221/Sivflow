@@ -20,11 +20,14 @@ type UpdateHandwritingSessionStatusInput = { session: HandwritingSession;
 const createDesktopHandwritingSession = ({ id, userId, cardId, side, desktopDevice, now = Date.now() }: CreateDesktopHandwritingSessionInput): HandwritingSession => ({ id, userId, cardId, side, desktopDevice, status: "waiting", createdAt: now, updatedAt: now });
 const attachMobileDeviceToHandwritingSession = ({ session, mobileDevice, now = Date.now() }: AttachMobileDeviceToHandwritingSessionInput): HandwritingSession => ({ ...session, mobileDevice, status: "connected", updatedAt: now });
 const updateHandwritingSessionStatus = ({ session, status, now = Date.now() }: UpdateHandwritingSessionStatusInput): HandwritingSession => ({ ...session, status, updatedAt: now });
-const closeHandwritingSession = (session: HandwritingSession, now = Date.now()): HandwritingSession => { return updateHandwritingSessionStatus({ session, status: "closed", now });
+const closeHandwritingSession = (session: HandwritingSession, now = Date.now()): HandwritingSession => {
+  return updateHandwritingSessionStatus({ session, status: "closed", now });
 };
-const failHandwritingSession = (session: HandwritingSession, now = Date.now()): HandwritingSession => { return updateHandwritingSessionStatus({ session, status: "error", now });
+const failHandwritingSession = (session: HandwritingSession, now = Date.now()): HandwritingSession => {
+  return updateHandwritingSessionStatus({ session, status: "error", now });
 };
-const isHandwritingSessionActive = (session: Pick<HandwritingSession, "status">): boolean => { return session.status === "waiting" || session.status === "connected";
+const isHandwritingSessionActive = (session: Pick<HandwritingSession, "status">): boolean => {
+  return session.status === "waiting" || session.status === "connected";
 };
 
 export { createDesktopHandwritingSession, attachMobileDeviceToHandwritingSession, updateHandwritingSessionStatus, closeHandwritingSession, failHandwritingSession, isHandwritingSessionActive };

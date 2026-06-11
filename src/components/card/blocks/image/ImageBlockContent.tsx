@@ -24,7 +24,9 @@ type ImageBlockContentProps =
     zoom?: number;
   };
 
-const ImageBlockContent = (props: ImageBlockContentProps) => { if (props.mode === "view") { return (<ImageGallery urls={props.urls} items={props.items} onFullscreenChange={props.onFullscreenChange} displayMode={props.displayMode} zoom={props.zoom} />);
+const ImageBlockContent = (props: ImageBlockContentProps) => {
+  if (props.mode === "view") {
+  return (<ImageGallery urls={props.urls} items={props.items} onFullscreenChange={props.onFullscreenChange} displayMode={props.displayMode} zoom={props.zoom} />);
 }
 
 return (

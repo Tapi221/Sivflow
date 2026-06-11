@@ -176,7 +176,8 @@ const ReferenceBlockScene = ({ mode, block, editorProps }: SceneProps) => {
     <SharedBlockShell mode={mode} className="bg-transparent px-0 py-0" contentClassName="px-0" label="Reference" icon={Link} {...renderEditorShellProps(editorProps)}>
       <section className="rounded-xl border border-slate-200/80 bg-white/70 px-3 py-3 shadow-sm">
         <div className="mb-2 text-[11px] font-semibold tracking-wide text-slate-500">References</div>
-        {references.length > 0 ? <ul className="space-y-1.5">{references.map((reference, index) => { const href = reference.url?.trim() ?? ""; const label = reference.name?.trim() || href; return <li key={`${href}-${index}`} className="min-w-0">{href ? <a href={href} target="_blank" rel="noreferrer" className="block truncate text-sm text-sky-700 underline underline-offset-2 hover:text-sky-800">{label}</a> : <span className="block truncate text-sm text-slate-600">{label}</span>}</li>; })}</ul> : <div className="text-sm text-slate-400">リンクがありません</div>}
+        {references.length > 0 ? <ul className="space-y-1.5">{references.map((reference, index) => {
+          const href = reference.url?.trim() ?? ""; const label = reference.name?.trim() || href; return <li key={`${href}-${index}`} className="min-w-0">{href ? <a href={href} target="_blank" rel="noreferrer" className="block truncate text-sm text-sky-700 underline underline-offset-2 hover:text-sky-800">{label}</a> : <span className="block truncate text-sm text-slate-600">{label}</span>}</li>; })}</ul> : <div className="text-sm text-slate-400">リンクがありません</div>}
       </section>
     </SharedBlockShell>
   );
@@ -186,7 +187,9 @@ const MathBlockScene = ({ mode, block, meta, editorProps, viewerProps }: ScenePr
   const [isEditorOpen, setIsEditorOpen] = React.useState(false);
   const mathData = block.math || { latex: "", displayMode: "block" };
   const latex = mathData.latex ?? "";
-  const handleMathChange = React.useCallback((next: MathBlockData) => { if (next.latex.length > MAX_MATH_LATEX_LENGTH) { setError(`KaTeX文字列は最大 ${MAX_MATH_LATEX_LENGTH.toLocaleString()} 文字までです`); return; } setError(null); editorProps?.onUpdateBlock(block.id, { math: next }); }, [block.id, editorProps]);
+  const handleMathChange = React.useCallback((next: MathBlockData) => {
+    if (next.latex.length > MAX_MATH_LATEX_LENGTH) {
+    setError(`KaTeX文字列は最大 ${MAX_MATH_LATEX_LENGTH.toLocaleString()} 文字までです`); return; } setError(null); editorProps?.onUpdateBlock(block.id, { math: next }); }, [block.id, editorProps]);
 
   return <SharedBlockShell mode={mode} className={cn(latex.trim().length > 0 && "border-transparent")} label="Math" icon={Sigma} {...renderEditorShellProps({ ...editorProps, isBlockSelected: Boolean(editorProps?.isBlockSelected || isEditorOpen) } as EditorProps | undefined)}><div className="w-full max-w-full overflow-visible space-y-1.5 px-2 py-0.5">{renderGridOffsetSpacer(meta?.gridOffsetPx ?? 0)}<MathBlockPreviewPane latex={latex} displayMode={mathData.displayMode || "block"} className="rounded-lg" interactive={mode === "edit"} onActivate={mode === "edit" ? () => setIsEditorOpen(true) : undefined} showPlaceholder={mode === "edit"} placeholder={mode === "edit" ? "数式を入力..." : undefined} zoom={mode === "edit" ? editorProps?.zoom : viewerProps?.zoom} />{mode === "edit" && editorProps ? <MathEditorDialog open={isEditorOpen} onOpenChange={setIsEditorOpen} data={mathData} onChange={handleMathChange} accentColor={editorProps.accentColor} error={error} /> : null}</div></SharedBlockShell>;
 };
@@ -196,7 +199,8 @@ const MarkdownBlockScene = ({ mode, block, editorProps, viewerProps }: SceneProp
   const isEmpty = markdown.trim().length === 0;
   return <SharedBlockShell mode={mode} className={cn("bg-transparent px-0 py-0", !isEmpty && "border-0")} contentClassName="px-0" label="Markdown" icon={NotebookPen} {...renderEditorShellProps({ ...editorProps, isBlockSelected: Boolean(editorProps?.isBlockSelected || isEditorOpen) } as EditorProps | undefined)}>{mode === "edit" && editorProps ? <MarkdownBlockContent mode="edit" markdown={markdown} open={isEditorOpen} onOpenChange={setIsEditorOpen} onChange={(nextMarkdown) => editorProps.onUpdateBlock(block.id, { markdown: nextMarkdown })} onReplaceWithBlocks={editorProps.onReplaceMarkdownWithBlocks} accentColor={editorProps.accentColor} zoom={editorProps.zoom} /> : <MarkdownBlockContent mode="view" markdown={markdown} zoom={viewerProps?.zoom} />}</SharedBlockShell>;
 };
-const CardBlockSceneRenderer = (props: CardBlockSceneRendererProps) => { const { block, meta } = props;
+const CardBlockSceneRenderer = (props: CardBlockSceneRendererProps) => {
+  const { block, meta } = props;
 
   switch (block.type) {
     case "text":

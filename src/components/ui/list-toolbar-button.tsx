@@ -8,7 +8,8 @@ import { useEditorRef, useEditorSelector } from "platejs/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu";
 import { ToolbarButton, ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary } from "./toolbar";
 
-const BulletedListToolbarButton = () => { const editor = useEditorRef();
+const BulletedListToolbarButton = () => {
+  const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
 
   const pressed = useEditorSelector(
@@ -84,7 +85,8 @@ const BulletedListToolbarButton = () => { const editor = useEditorRef();
     </ToolbarSplitButton>
   );
 };
-const NumberedListToolbarButton = () => { const editor = useEditorRef();
+const NumberedListToolbarButton = () => {
+  const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
 
   const pressed = useEditorSelector(
@@ -171,7 +173,8 @@ const NumberedListToolbarButton = () => { const editor = useEditorRef();
     </ToolbarSplitButton>
   );
 };
-const TodoListToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => { const state = useIndentTodoToolBarButtonState({ nodeType: "todo" });
+const TodoListToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => {
+  const state = useIndentTodoToolBarButtonState({ nodeType: "todo" });
   const { props: buttonProps } = useIndentTodoToolBarButton(state);
 
   return (

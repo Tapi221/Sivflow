@@ -9,7 +9,9 @@ const shouldClearSelectionFolder = (item: SelectedExplorerItem) =>
   item?.type === "gallery" ||
   item?.type === "calendar" ||
   item?.type === "trash";
-const explorerReducer = (state: ExplorerControllerState, action: ExplorerAction): ExplorerControllerState => { switch (action.type) { case "APPLY_ROUTE_STATE": { const next = action.payload;
+const explorerReducer = (state: ExplorerControllerState, action: ExplorerAction): ExplorerControllerState => {
+  switch (action.type) { case "APPLY_ROUTE_STATE": {
+  const next = action.payload;
 
   const nextSelectedFolderId =
     next.isHomeOnlyMode || next.isSectionListMode

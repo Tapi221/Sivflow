@@ -52,7 +52,8 @@ const formatFileSize = (size: number): string => {
 const cloneItem = (item: PortableImportBatchItem): PortableImportBatchItem => ({
   ...item,
 });
-const buildPortableImportBatchItems = (files: File[]): PortableImportBatchItem[] => { const seen = new Set<string>();
+const buildPortableImportBatchItems = (files: File[]): PortableImportBatchItem[] => {
+  const seen = new Set<string>();
   const items: PortableImportBatchItem[] = [];
 
   for (const file of files) {
@@ -154,7 +155,8 @@ const emitItem = (
 ) => {
   onItemChange?.(cloneItem(item));
 };
-const importPortableFileBatch = async ({ files, folderId, createCardSet, updateCardSet, createCard, ensureTagByName, onItemChange }: ImportPortableFileBatchParams): Promise<PortableImportBatchResult> => { const items = buildPortableImportBatchItems(files);
+const importPortableFileBatch = async ({ files, folderId, createCardSet, updateCardSet, createCard, ensureTagByName, onItemChange }: ImportPortableFileBatchParams): Promise<PortableImportBatchResult> => {
+  const items = buildPortableImportBatchItems(files);
   let importedCount = 0;
   let failedCount = 0;
   let skippedCount = 0;
@@ -229,7 +231,8 @@ const importPortableFileBatch = async ({ files, folderId, createCardSet, updateC
     lastImportedCardSetName,
   };
 };
-const formatPortableImportBatchItemSubtitle = (item: Pick<PortableImportBatchItem, "kind" | "size">): string => { return `${IMPORT_FILE_LABELS[item.kind]} / ${formatFileSize(item.size)}`;
+const formatPortableImportBatchItemSubtitle = (item: Pick<PortableImportBatchItem, "kind" | "size">): string => {
+  return `${IMPORT_FILE_LABELS[item.kind]} / ${formatFileSize(item.size)}`;
 };
 
 export { buildPortableImportBatchItems, importPortableFileBatch, formatPortableImportBatchItemSubtitle };

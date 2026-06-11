@@ -296,7 +296,8 @@ const buildCardRows = ({
     })
     .sort(compareDetailRowsWithinKind);
 };
-const buildExplorerDetailRows = ({ folders, cards, cardSets, documents, currentFolderId, currentCardSetId = null }: BuildExplorerDetailRowsParams): ExplorerDetailRow[] => { const folderById = buildFolderById(folders);
+const buildExplorerDetailRows = ({ folders, cards, cardSets, documents, currentFolderId, currentCardSetId = null }: BuildExplorerDetailRowsParams): ExplorerDetailRow[] => {
+  const folderById = buildFolderById(folders);
   const activeCardSet = currentCardSetId
     ? (cardSets.find((cardSet) => cardSet.id === currentCardSetId) ?? null)
     : null;

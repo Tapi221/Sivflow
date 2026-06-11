@@ -62,7 +62,8 @@ const PHASES: Array<{ min: number; phase: StabilityPhase; }> = [
   },
 ];
 
-const getStabilityPhase = (stabilityInternal: number, intervalDays: number = 1): StabilityPhase => { const s = normalizeMemoryStability(stabilityInternal);
+const getStabilityPhase = (stabilityInternal: number, intervalDays: number = 1): StabilityPhase => {
+  const s = normalizeMemoryStability(stabilityInternal);
   const retention = calculateRetentionProbability(s, intervalDays);
   const matched = [...PHASES].reverse().find((entry) => retention >= entry.min);
   return matched?.phase ?? PHASES[0].phase;

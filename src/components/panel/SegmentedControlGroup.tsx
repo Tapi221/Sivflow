@@ -16,7 +16,9 @@ interface SegmentedControlGroupProps<T extends string> {
   buttonClassName?: string;
 }
 
-const SegmentedControlGroup = <T extends string,>({ value, options, onChange, size = "xs", className, buttonClassName }: SegmentedControlGroupProps<T>) => { return (<div className={cn("ds-segmented-control", className)}> {options.map((option) => { const isSelected = value === option.value;
+const SegmentedControlGroup = <T extends string,>({ value, options, onChange, size = "xs", className, buttonClassName }: SegmentedControlGroupProps<T>) => {
+  return (<div className={cn("ds-segmented-control", className)}> {options.map((option) => {
+  const isSelected = value === option.value;
 
   return (
     <SurfaceButton

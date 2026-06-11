@@ -74,7 +74,8 @@ const EquationPopoverContent = ({
     </PopoverContent>
   );
 };
-const EquationElement = (props: PlateElementProps<TEquationElement>) => { const selected = useSelected();
+const EquationElement = (props: PlateElementProps<TEquationElement>) => {
+  const selected = useSelected();
   const [open, setOpen] = React.useState(selected);
   const katexRef = React.useRef<HTMLDivElement | null>(null);
   const lineBreakBadge = (
@@ -142,7 +143,8 @@ const EquationElement = (props: PlateElementProps<TEquationElement>) => { const 
     </PlateElement>
   );
 };
-const InlineEquationElement = (props: PlateElementProps<TEquationElement>) => { const { element } = props;
+const InlineEquationElement = (props: PlateElementProps<TEquationElement>) => {
+  const { element } = props;
   const katexRef = React.useRef<HTMLDivElement | null>(null);
   const selected = useSelected();
   const isCollapsed = useEditorSelector(

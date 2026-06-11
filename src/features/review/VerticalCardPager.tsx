@@ -42,6 +42,8 @@ const CARD_RADIUS_SM = 32;
 const CARD_RADIUS_MD = 40;
 const SCROLL_IDLE_COMMIT_DELAY_MS = 110;
 const SCROLL_ANCHOR_SUPPRESSION_MS = 180;
+const VerticalCardPager = React.memo(VerticalCardPagerFn) as typeof VerticalCardPagerFn;
+
 const buildStableCardKey = <T,>(card: T, idx: number, getKey?: (card: T, idx: number) => string | number) => {
   return String(getKey ? getKey(card, idx) : idx);
 };
@@ -56,6 +58,19 @@ const getCurrentTimeMs = () => {
   }
 
   return Date.now();
+};
+const resolveCardBaseRadius = () => {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return CARD_RADIUS_MD;
+  }
+
+  return window.matchMedia("(min-width: 768px)").matches ? CARD_RADIUS_MD : CARD_RADIUS_SM;
+};
+const cardBorderRadius = () => `${Math.round(Math.max(0, resolveCardBaseRadius()))}px`;
+const clampIndex = (idx: number, count: number) => {
+  if (count <= 0) return -1;
+  if (!Number.isFinite(idx)) return 0;
+  return Math.max(0, Math.min(count - 1, Math.trunc(idx)));
 };
 
 const VerticalCardPagerFn = <T,>({
@@ -327,27 +342,7 @@ const VerticalCardPagerFn = <T,>({
   );
 };
 
-const VerticalCardPager = React.memo(VerticalCardPagerFn) as typeof VerticalCardPagerFn;
-
 export { VerticalCardPager };
-
-export type { VerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";
-
 export { ACTIVE_INDEX_RENDER_RADIUS };
+export type { VerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";
 export type { VerticalCardPagerProps };
-
-const resolveCardBaseRadius = () => {
-  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
-    return CARD_RADIUS_MD;
-  }
-
-  return window.matchMedia("(min-width: 768px)").matches ? CARD_RADIUS_MD : CARD_RADIUS_SM;
-};
-
-const cardBorderRadius = () => `${Math.round(Math.max(0, resolveCardBaseRadius()))}px`;
-
-const clampIndex = (idx: number, count: number) => {
-  if (count <= 0) return -1;
-  if (!Number.isFinite(idx)) return 0;
-  return Math.max(0, Math.min(count - 1, Math.trunc(idx)));
-};

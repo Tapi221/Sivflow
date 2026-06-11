@@ -5,7 +5,8 @@ import { hardReloadOnce } from "./reloadGuard";
 
 let started = false;
 
-const initGlobalChunkRecovery = () => { if (started || typeof window === "undefined") return;
+const initGlobalChunkRecovery = () => {
+  if (started || typeof window === "undefined") return;
   started = true;
 
   window.addEventListener(

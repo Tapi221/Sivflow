@@ -74,7 +74,8 @@ const getDeletedItems = <
     documents: deletedDocuments,
   };
 };
-const getTrashItems = async <TFolder extends TrashFolderBase, TCard extends TrashCardBase, TCardSet extends TrashCardSetBase, TDocument extends TrashDocumentBase>({ userId, repository }: TrashUseCaseInput<TFolder, TCard, TCardSet, TDocument>): Promise<TrashItems<TFolder, TCard, TCardSet, TDocument>> => { const context = await repository.loadContext(userId);
+const getTrashItems = async <TFolder extends TrashFolderBase, TCard extends TrashCardBase, TCardSet extends TrashCardSetBase, TDocument extends TrashDocumentBase>({ userId, repository }: TrashUseCaseInput<TFolder, TCard, TCardSet, TDocument>): Promise<TrashItems<TFolder, TCard, TCardSet, TDocument>> => {
+  const context = await repository.loadContext(userId);
 
   return getDeletedItems(context);
 };
@@ -102,7 +103,8 @@ const restoreFolderWithParents = async <TFolder extends TrashFolderBase, TCard e
 
   await repository.restoreFolder(userId, folderId);
 };
-const restoreTrashItems = async <TFolder extends TrashFolderBase, TCard extends TrashCardBase, TCardSet extends TrashCardSetBase, TDocument extends TrashDocumentBase>({ userId, repository, folderIds = [], cardIds = [], cardSetIds = [], documentIds = [] }: TrashUseCaseInput<TFolder, TCard, TCardSet, TDocument> & TrashItemIds): Promise<void> => { const { folders, cards, cardSets, documents, resolveCardFolderId } = await repository.loadContext(userId);
+const restoreTrashItems = async <TFolder extends TrashFolderBase, TCard extends TrashCardBase, TCardSet extends TrashCardSetBase, TDocument extends TrashDocumentBase>({ userId, repository, folderIds = [], cardIds = [], cardSetIds = [], documentIds = [] }: TrashUseCaseInput<TFolder, TCard, TCardSet, TDocument> & TrashItemIds): Promise<void> => {
+  const { folders, cards, cardSets, documents, resolveCardFolderId } = await repository.loadContext(userId);
   const folderById = new Map(folders.map((folder) => [folder.id, folder]));
   const cardById = new Map(cards.map((card) => [card.id, card]));
   const cardSetById = new Map(cardSets.map((cardSet) => [cardSet.id, cardSet]));
@@ -170,7 +172,9 @@ const restoreTrashItems = async <TFolder extends TrashFolderBase, TCard extends 
     await repository.restoreCard(userId, cardId);
   }
 };
-const permanentlyDeleteTrashItems = async <TFolder extends TrashFolderBase, TCard extends TrashCardBase, TCardSet extends TrashCardSetBase, TDocument extends TrashDocumentBase>({ userId, repository, folderIds = [], cardIds = [], cardSetIds = [], documentIds = [] }: TrashUseCaseInput<TFolder, TCard, TCardSet, TDocument> & TrashItemIds): Promise<void> => { for (const folderId of folderIds) { await repository.purgeFolder(userId, folderId);
+const permanentlyDeleteTrashItems = async <TFolder extends TrashFolderBase, TCard extends TrashCardBase, TCardSet extends TrashCardSetBase, TDocument extends TrashDocumentBase>({ userId, repository, folderIds = [], cardIds = [], cardSetIds = [], documentIds = [] }: TrashUseCaseInput<TFolder, TCard, TCardSet, TDocument> & TrashItemIds): Promise<void> => {
+  for (const folderId of folderIds) {
+  await repository.purgeFolder(userId, folderId);
 }
 
 for (const cardSetId of cardSetIds) {
@@ -223,7 +227,8 @@ const purgeExpiredTrashItems = async <TFolder extends TrashFolderBase, TCard ext
     documents: expiredDocuments,
   };
 };
-const emptyTrash = async <TFolder extends TrashFolderBase, TCard extends TrashCardBase, TCardSet extends TrashCardSetBase, TDocument extends TrashDocumentBase>({ userId, repository }: TrashUseCaseInput<TFolder, TCard, TCardSet, TDocument>): Promise<void> => { const { folders, cards, cardSets, documents } = await getTrashItems({ userId, repository });
+const emptyTrash = async <TFolder extends TrashFolderBase, TCard extends TrashCardBase, TCardSet extends TrashCardSetBase, TDocument extends TrashDocumentBase>({ userId, repository }: TrashUseCaseInput<TFolder, TCard, TCardSet, TDocument>): Promise<void> => {
+  const { folders, cards, cardSets, documents } = await getTrashItems({ userId, repository });
 
   await permanentlyDeleteTrashItems({
     userId,

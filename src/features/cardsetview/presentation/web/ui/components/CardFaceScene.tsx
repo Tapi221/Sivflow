@@ -36,7 +36,8 @@ type CardFaceSceneProps = Readonly<{ displayMode: CardDisplayMode;
   onResizeEnd?: () => void;
 }>;
 
-const CardFaceScene = ({ displayMode, fixedScale, contentZoom, contentProps, actionsTopLeft, actionsTopRight, overlay, topAttachment, contentWrapperRef, frameClassName, role, tabIndex, onClick, onKeyDown, onPointerDownCapture, onPointerMoveCapture, onPointerUpCapture, onPointerCancelCapture, resizable = false, showResizeHandle = false, resizeStepPx, heightPx = null, lockHeight = false, fillHeight = false, onHeightChange, onMinHeightChange, onResizeStart, onResizeEnd }: CardFaceSceneProps) => { const isFluidDisplay = displayMode === "fluid";
+const CardFaceScene = ({ displayMode, fixedScale, contentZoom, contentProps, actionsTopLeft, actionsTopRight, overlay, topAttachment, contentWrapperRef, frameClassName, role, tabIndex, onClick, onKeyDown, onPointerDownCapture, onPointerMoveCapture, onPointerUpCapture, onPointerCancelCapture, resizable = false, showResizeHandle = false, resizeStepPx, heightPx = null, lockHeight = false, fillHeight = false, onHeightChange, onMinHeightChange, onResizeStart, onResizeEnd }: CardFaceSceneProps) => {
+  const isFluidDisplay = displayMode === "fluid";
   const shouldFillHeight = isFluidDisplay && fillHeight;
   const resolvedFrameClassName = cn(
     isFluidDisplay &&

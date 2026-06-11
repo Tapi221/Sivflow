@@ -16,10 +16,13 @@ type CardSetViewWindowEventMap = { [CARD_SET_VIEW_EVENTS.editingChange]: boolean
 };
 type CardSetViewWindowEventName = keyof CardSetViewWindowEventMap;
 
-const dispatchCardSetViewWindowEvent = <TEventName extends CardSetViewWindowEventName>(eventName: TEventName, detail: CardSetViewWindowEventMap[TEventName]) => { if (typeof window === "undefined") return;
+const dispatchCardSetViewWindowEvent = <TEventName extends CardSetViewWindowEventName>(eventName: TEventName, detail: CardSetViewWindowEventMap[TEventName]) => {
+  if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent(eventName, { detail }));
 };
-const subscribeCardSetViewWindowEvent = <TEventName extends CardSetViewWindowEventName>(eventName: TEventName, listener: (detail: CardSetViewWindowEventMap[TEventName]) => void) => { if (typeof window === "undefined") { return () => {};
+const subscribeCardSetViewWindowEvent = <TEventName extends CardSetViewWindowEventName>(eventName: TEventName, listener: (detail: CardSetViewWindowEventMap[TEventName]) => void) => {
+  if (typeof window === "undefined") {
+  return () => {};
 }
 
 const handler: EventListener = (event) => {

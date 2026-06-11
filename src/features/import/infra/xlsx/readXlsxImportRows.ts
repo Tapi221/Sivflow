@@ -24,7 +24,8 @@ const buildIssue = ({
     message,
   };
 };
-const readXlsxImportRows = (fileBuffer: ArrayBuffer): ReadXlsxImportRowsResult => { const workbook = XLSX.read(fileBuffer, { type: "array", raw: false, dense: false });
+const readXlsxImportRows = (fileBuffer: ArrayBuffer): ReadXlsxImportRowsResult => {
+  const workbook = XLSX.read(fileBuffer, { type: "array", raw: false, dense: false });
 
   const sheetName = IMPORT_SHEET_NAME;
   const worksheet = workbook.Sheets[sheetName];

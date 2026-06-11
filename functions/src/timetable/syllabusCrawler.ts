@@ -58,7 +58,8 @@ const USER_AGENT = "SivflowSyllabusCrawler/1.0 (+https://sivflow.app)";
 const COURSE_LINK_PATTERN = /syllabus|course|class|lesson|subject|detail|授業|講義|科目|シラバス/i;
 const WEEKDAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] as const;
 const PRIVATE_IPV4_PATTERNS = [/^10\./, /^127\./, /^169\.254\./, /^192\.168\./, /^172\.(1[6-9]|2\d|3[0-1])\./, /^0\./];
-const upsertTimetableSyllabusSource = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
+const upsertTimetableSyllabusSource = onCall({ region: REGION }, async (request) => {
+  const uid = requireUid(request);
   await requireAdmin(uid);
 
   const db = await getDb();
@@ -71,12 +72,14 @@ const upsertTimetableSyllabusSource = onCall({ region: REGION }, async (request)
   await db.doc(`timetableSyllabusSources/${sourceId}`).set({ seedUrl, institutionName: getStringValue(request.data?.institutionName), facultyName: getStringValue(request.data?.facultyName), departmentName: getStringValue(request.data?.departmentName), maxPages: clampMaxPages(request.data?.maxPages), enabled: request.data?.enabled !== false, updatedAt: now, createdAt: now }, { merge: true });
   return { ok: true, sourceId };
 });
-const crawlTimetableSyllabusUrl = onCall({ region: REGION, timeoutSeconds: 300, memory: "512MiB" }, async (request) => { const uid = requireUid(request);
+const crawlTimetableSyllabusUrl = onCall({ region: REGION, timeoutSeconds: 300, memory: "512MiB" }, async (request) => {
+  const uid = requireUid(request);
   const source: CrawlSource = { sourceId: null, seedUrl: getStringValue(request.data?.seedUrl), institutionName: getStringValue(request.data?.institutionName), facultyName: getStringValue(request.data?.facultyName), departmentName: getStringValue(request.data?.departmentName), maxPages: clampMaxPages(request.data?.maxPages) };
   if (!source.seedUrl) throw new HttpsError("invalid-argument", "seedUrl is required.");
   return await crawlSyllabusSource(source, uid);
 });
-const runTimetableSyllabusCatalogCrawl = onSchedule({ schedule: "every 24 hours", timeZone: "Asia/Tokyo", region: REGION, timeoutSeconds: 540, memory: "1GiB" }, async () => { const db = await getDb();
+const runTimetableSyllabusCatalogCrawl = onSchedule({ schedule: "every 24 hours", timeZone: "Asia/Tokyo", region: REGION, timeoutSeconds: 540, memory: "1GiB" }, async () => {
+  const db = await getDb();
   const snapshot = await db.collection("timetableSyllabusSources").where("enabled", "==", true).limit(20).get();
 
   for (const doc of snapshot.docs) {

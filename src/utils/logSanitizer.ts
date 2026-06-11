@@ -35,7 +35,8 @@ const sanitizeValue = (value: unknown, depth: number): unknown => {
   }
   return out;
 };
-const sanitizeForLog = <T>(value: T): T => { return sanitizeValue(value, 0) as T;
+const sanitizeForLog = <T>(value: T): T => {
+  return sanitizeValue(value, 0) as T;
 };
 
 export { sanitizeForLog };

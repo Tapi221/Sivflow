@@ -25,7 +25,8 @@ const resolveDocumentFileId = (
 
   return localFileId.length > 0 ? localFileId : document.id;
 };
-const saveDocumentWithBlob = async ({ db, document, blob }: SaveDocumentWithBlobParams): Promise<void> => { const documentFiles = getDocumentFilesTable(db);
+const saveDocumentWithBlob = async ({ db, document, blob }: SaveDocumentWithBlobParams): Promise<void> => {
+  const documentFiles = getDocumentFilesTable(db);
   const localFileId = resolveDocumentFileId(document);
 
   await db.runSyncTransaction(async () => {
@@ -38,7 +39,8 @@ const saveDocumentWithBlob = async ({ db, document, blob }: SaveDocumentWithBlob
     await db.documents.put(document);
   });
 };
-const saveDocumentBlob = async (id: string, blob: Blob, options?: BlobScopeOptions): Promise<void> => { const db = await getLocalDb(options?.userId ?? undefined);
+const saveDocumentBlob = async (id: string, blob: Blob, options?: BlobScopeOptions): Promise<void> => {
+  const db = await getLocalDb(options?.userId ?? undefined);
 
   await getDocumentFilesTable(db).put({
     id,
@@ -46,15 +48,18 @@ const saveDocumentBlob = async (id: string, blob: Blob, options?: BlobScopeOptio
     updatedAt: Date.now(),
   });
 };
-const getDocumentBlob = async (id: string, options?: BlobScopeOptions): Promise<Blob | null> => { const db = await getLocalDb(options?.userId ?? undefined);
+const getDocumentBlob = async (id: string, options?: BlobScopeOptions): Promise<Blob | null> => {
+  const db = await getLocalDb(options?.userId ?? undefined);
   const stored = await getDocumentFilesTable(db).get(id);
 
   return stored?.blob ?? null;
 };
-const deleteDocumentBlob = async (id: string, options?: BlobScopeOptions): Promise<void> => { const db = await getLocalDb(options?.userId ?? undefined);
+const deleteDocumentBlob = async (id: string, options?: BlobScopeOptions): Promise<void> => {
+  const db = await getLocalDb(options?.userId ?? undefined);
   await getDocumentFilesTable(db).delete(id);
 };
-const deleteDocumentBlobsByUser = async (userId: string): Promise<void> => { if (!userId) return;
+const deleteDocumentBlobsByUser = async (userId: string): Promise<void> => {
+  if (!userId) return;
 
   const db = await getLocalDb(userId);
   await getDocumentFilesTable(db).clear();

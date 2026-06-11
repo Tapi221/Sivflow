@@ -11,7 +11,8 @@ type Props = {
   placeholder?: string;
 };
 
-const MultiSelectDropdown = ({ value, onChange, options, placeholder = "Select" }: Props) => { const [open, setOpen] = useState(false);
+const MultiSelectDropdown = ({ value, onChange, options, placeholder = "Select" }: Props) => {
+  const [open, setOpen] = useState(false);
 
   const selectedSet = new Set(value);
 

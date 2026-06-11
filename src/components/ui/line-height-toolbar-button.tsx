@@ -9,7 +9,8 @@ import { useEditorRef, useSelectionFragmentProp } from "platejs/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "./dropdown-menu";
 import { ToolbarButton } from "./toolbar";
 
-const LineHeightToolbarButton = (props: DropdownMenuProps) => { const editor = useEditorRef();
+const LineHeightToolbarButton = (props: DropdownMenuProps) => {
+  const editor = useEditorRef();
   const { defaultNodeValue, validNodeValues: values = [] } =
     editor.getInjectProps(LineHeightPlugin);
 

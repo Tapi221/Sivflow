@@ -19,7 +19,8 @@ const waitForCallableAuth = async (): Promise<void> => {
     throw new Error("Firebase 認証が必要です。ログイン状態を確認してください。");
   }
 };
-const listServerStoredGoogleCalendarAccounts = async (): Promise<ListGoogleCalendarAccountsOutput["accounts"]> => { await waitForCallableAuth();
+const listServerStoredGoogleCalendarAccounts = async (): Promise<ListGoogleCalendarAccountsOutput["accounts"]> => {
+  await waitForCallableAuth();
   const result = await listGoogleCalendarAccountsCallable();
   return result.data.accounts;
 };

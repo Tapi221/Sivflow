@@ -42,7 +42,9 @@ const clearDevSwAndCaches = () => {
     });
   });
 };
-const initServiceWorkerLifecycle = () => { if (started || typeof window === "undefined" || !("serviceWorker" in navigator)) { return;
+const initServiceWorkerLifecycle = () => {
+  if (started || typeof window === "undefined" || !("serviceWorker" in navigator)) {
+  return;
 }
 started = true;
 

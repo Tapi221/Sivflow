@@ -331,7 +331,8 @@ const toResolvedSuggestion = ({
 
   return null;
 };
-const buildBlockDiscussionIndex = ({ discussions, entries, getCommentId, getSuggestionData, getSuggestionDataList, getSuggestionId, isBlockSuggestion }: BuildBlockDiscussionIndexOptions): BlockDiscussionIndex => { const commentOwnerById = new Map<string, Path>();
+const buildBlockDiscussionIndex = ({ discussions, entries, getCommentId, getSuggestionData, getSuggestionDataList, getSuggestionId, isBlockSuggestion }: BuildBlockDiscussionIndexOptions): BlockDiscussionIndex => {
+  const commentOwnerById = new Map<string, Path>();
   const suggestionOwnerById = new Map<string, Path>();
   const commentIds = new Set<string>();
   const suggestionEntriesById = new Map<string, SuggestionEntry[]>();
@@ -444,7 +445,8 @@ const getDiscussionIndex = (
 
   return index;
 };
-const useBlockDiscussionItems = (blockPath: Path) => { const editor = useEditorRef();
+const useBlockDiscussionItems = (blockPath: Path) => {
+  const editor = useEditorRef();
   const discussions = usePluginOption(discussionPlugin, "discussions");
   const version = useEditorVersion() ?? 0;
 

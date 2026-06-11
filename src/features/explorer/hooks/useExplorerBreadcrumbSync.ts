@@ -13,7 +13,8 @@ type Params = {
   documentById: Map<string, DocumentItem>;
 };
 
-const useExplorerBreadcrumbSync = ({ selectedFolderId, selectedItem, explorerBreadcrumbContext, folderById, cardById, documentById }: Params) => { const setExtraCrumbs = useSetBreadcrumbCrumbs();
+const useExplorerBreadcrumbSync = ({ selectedFolderId, selectedItem, explorerBreadcrumbContext, folderById, cardById, documentById }: Params) => {
+  const setExtraCrumbs = useSetBreadcrumbCrumbs();
 
   const extraCrumbs = useMemo(
     () =>

@@ -21,7 +21,8 @@ const cardSetViewChromeResetStyle: CardSetViewChromeResetStyle = {
   "--card-selected-outline-accent": "transparent",
 };
 
-const CardSetViewDesktopContent = ({ controller }: CardSetViewContentProps) => { const { folderId, cardSetId, settings, data, state, zoom, effectiveCardLayoutMode } = controller;
+const CardSetViewDesktopContent = ({ controller }: CardSetViewContentProps) => {
+  const { folderId, cardSetId, settings, data, state, zoom, effectiveCardLayoutMode } = controller;
 
   return (
     <div className="h-full min-h-0 w-full" style={cardSetViewChromeResetStyle}>

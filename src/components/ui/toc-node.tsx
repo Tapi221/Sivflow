@@ -24,7 +24,8 @@ const headingItemVariants = cva(
   },
 );
 
-const TocElement = (props: PlateElementProps) => { const state = useTocElementState();
+const TocElement = (props: PlateElementProps) => {
+  const state = useTocElementState();
   const { props: btnProps } = useTocElement(state);
   const { activeContentId, headingList } = state;
 

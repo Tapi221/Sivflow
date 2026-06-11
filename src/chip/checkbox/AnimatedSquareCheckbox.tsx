@@ -6,7 +6,8 @@ type AnimatedSquareCheckboxProps = Omit<
   "shape" | "variant" | "indeterminate"
 >;
 
-const AnimatedSquareCheckbox = (props: AnimatedSquareCheckboxProps) => { return <AnimatedCheckboxBase {...props} shape="square" variant="filled" />;
+const AnimatedSquareCheckbox = (props: AnimatedSquareCheckboxProps) => {
+  return <AnimatedCheckboxBase {...props} shape="square" variant="filled" />;
 };
 
 export { AnimatedSquareCheckbox };

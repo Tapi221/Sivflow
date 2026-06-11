@@ -18,7 +18,8 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-const useToast = () => { const context = useContext(ToastContext);
+const useToast = () => {
+  const context = useContext(ToastContext);
   if (!context) {
     throw new Error("useToast must be used within a ToastProvider");
   }

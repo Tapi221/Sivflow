@@ -24,11 +24,14 @@ const CALENDAR_MONTH_GRID_CELL_COUNT = 42;
 const CALENDAR_MONTH_WEEK_DAY_COUNT = 7;
 const DEFAULT_CALENDAR_MONTH_WEEK_START_DAY: CalendarWeekStartDay = "monday";
 
-const getCalendarMonthKey = (date: Date): string => { return format(startOfMonth(date), "yyyy-MM");
+const getCalendarMonthKey = (date: Date): string => {
+  return format(startOfMonth(date), "yyyy-MM");
 };
-const getCalendarWeekKey = (date: Date, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY): string => { return format(startOfWeek(date, { weekStartsOn: getCalendarWeekStartsOn(weekStartDay) }), "yyyy-MM-dd");
+const getCalendarWeekKey = (date: Date, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY): string => {
+  return format(startOfWeek(date, { weekStartsOn: getCalendarWeekStartsOn(weekStartDay) }), "yyyy-MM-dd");
 };
-const addCalendarMonths = (date: Date, amount: number): Date => { return startOfMonth(addMonths(startOfMonth(date), amount));
+const addCalendarMonths = (date: Date, amount: number): Date => {
+  return startOfMonth(addMonths(startOfMonth(date), amount));
 };
 const buildCalendarGridDay = (
   date: Date,
@@ -45,7 +48,8 @@ const buildCalendarGridDay = (
 const resolveVisibleMonthDateForWeek = (weekStart: Date): Date => {
   return startOfMonth(addDays(weekStart, 3));
 };
-const buildCalendarMonthGridDays = (baseDate: Date, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY): CalendarMonthGridDay[] => { const monthStart = startOfMonth(baseDate);
+const buildCalendarMonthGridDays = (baseDate: Date, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY): CalendarMonthGridDay[] => {
+  const monthStart = startOfMonth(baseDate);
   const gridStart = startOfWeek(monthStart, {
     weekStartsOn: getCalendarWeekStartsOn(weekStartDay),
   });
@@ -55,7 +59,8 @@ const buildCalendarMonthGridDays = (baseDate: Date, weekStartDay: CalendarWeekSt
     return buildCalendarGridDay(date, monthStart);
   });
 };
-const buildCalendarMonthPage = (baseDate: Date, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY): CalendarMonthPage => { const monthStart = startOfMonth(baseDate);
+const buildCalendarMonthPage = (baseDate: Date, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY): CalendarMonthPage => {
+  const monthStart = startOfMonth(baseDate);
 
   return {
     key: getCalendarMonthKey(monthStart),

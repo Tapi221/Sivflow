@@ -49,7 +49,8 @@ const asStringArray = (value: unknown): string[] => {
 };
 const getCardTagIds = (card: Pick<CardTagFields, "tagIds">): string[] =>
   asStringArray(card.tagIds);
-const resolveCardTagNames = (tagIds: unknown, tagById: ReadonlyMap<string, Pick<TagRecord, "name">>): string[] => { const ids = asStringArray(tagIds);
+const resolveCardTagNames = (tagIds: unknown, tagById: ReadonlyMap<string, Pick<TagRecord, "name">>): string[] => {
+  const ids = asStringArray(tagIds);
   if (ids.length === 0) return [];
   return ids.map((id) => tagById.get(id)?.name ?? "").filter((name) => name);
 };
@@ -110,7 +111,8 @@ const findPathCandidate = (
     (tag) => Boolean(tag.isDeleted) && matchesParent(tag, parentId),
   );
 };
-const useTags = () => { const { currentUser } = useAuthSession();
+const useTags = () => {
+  const { currentUser } = useAuthSession();
   const { settings, updateSettings } = useUserSettings();
 
   const rawTags = useLiveQuery(

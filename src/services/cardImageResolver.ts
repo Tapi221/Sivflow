@@ -94,7 +94,8 @@ const resolveDirectUrl = (image: ResolvableImageRef): string | null => {
 
   return null;
 };
-const resolveCardImageUrl = async (image: ResolvableImageRef, userId?: string | null): Promise<ResolvedCardImage> => { const directUrl = resolveDirectUrl(image);
+const resolveCardImageUrl = async (image: ResolvableImageRef, userId?: string | null): Promise<ResolvedCardImage> => {
+  const directUrl = resolveDirectUrl(image);
   if (directUrl) {
     return {
       ...image,

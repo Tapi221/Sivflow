@@ -51,7 +51,8 @@ const MarkdownBlockPreviewSurface: React.FC<
     </BlockSurface>
   );
 };
-const MarkdownBlockView: React.FC<MarkdownBlockViewProps> = ({ md, ...rest }) => { return <MarkdownBlockPreviewSurface markdown={md} {...rest} />;
+const MarkdownBlockView: React.FC<MarkdownBlockViewProps> = ({ md, ...rest }) => {
+  return <MarkdownBlockPreviewSurface markdown={md} {...rest} />;
 };
 
 export { MarkdownBlockView };

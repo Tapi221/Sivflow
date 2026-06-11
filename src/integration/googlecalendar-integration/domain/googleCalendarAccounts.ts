@@ -40,7 +40,8 @@ type GoogleAccountsAction = | { type: "ADD"; account: GoogleAccountEntry; }
   | { type: "NEEDS_RECONNECT"; id: string; error?: string | null; }
   | { type: "SET_ERROR"; id: string; error: string | null; };
 
-const reduceGoogleCalendarAccounts = (state: GoogleAccountEntry[], action: GoogleAccountsAction): GoogleAccountEntry[] => { switch (action.type) { case "ADD": return state.some((account) => account.id === action.account.id) ? state.map((account) => account.id === action.account.id ? action.account : account) : [...state, action.account];
+const reduceGoogleCalendarAccounts = (state: GoogleAccountEntry[], action: GoogleAccountsAction): GoogleAccountEntry[] => {
+  switch (action.type) { case "ADD": return state.some((account) => account.id === action.account.id) ? state.map((account) => account.id === action.account.id ? action.account : account) : [...state, action.account];
 
   case "REMOVE":
     return state.filter((account) => account.id !== action.id);

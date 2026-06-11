@@ -74,13 +74,16 @@ const VIEWER_LANGUAGE_SHORT_LABELS: Record<string, string> = {
   clike: "TXT",
 };
 
-const normalizeViewerLanguage = (input?: string) => { const raw = (input || "").toLowerCase().trim();
+const normalizeViewerLanguage = (input?: string) => {
+  const raw = (input || "").toLowerCase().trim();
   const normalized = VIEWER_LANGUAGE_ALIASES[raw] ?? raw;
   return VIEWER_SUPPORTED_LANGS.has(normalized) ? normalized : "clike";
 };
-const getViewerLanguageLabels = (language: string) => { return { full: VIEWER_LANGUAGE_FULL_LABELS[language] ?? language, short: VIEWER_LANGUAGE_SHORT_LABELS[language] ?? language.toUpperCase() };
+const getViewerLanguageLabels = (language: string) => {
+  return { full: VIEWER_LANGUAGE_FULL_LABELS[language] ?? language, short: VIEWER_LANGUAGE_SHORT_LABELS[language] ?? language.toUpperCase() };
 };
-const normalizeEditorLanguage = (input?: string) => { const lang = (input || "").toLowerCase().trim();
+const normalizeEditorLanguage = (input?: string) => {
+  const lang = (input || "").toLowerCase().trim();
   if (lang === "html") return "markup";
   return lang || "javascript";
 };

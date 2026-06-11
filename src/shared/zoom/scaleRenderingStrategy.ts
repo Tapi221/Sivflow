@@ -19,7 +19,9 @@ const normalizeScale = (value: number) => {
 
   return value;
 };
-const detectCssZoomSupport = () => { if (typeof CSS === "undefined") { return false;
+const detectCssZoomSupport = () => {
+  if (typeof CSS === "undefined") {
+  return false;
 }
 
 if (typeof CSS.supports !== "function") {
@@ -32,7 +34,8 @@ try {
   return false;
 }
 };
-const resolveScaleRenderingStrategy = ({ disableScale, effectiveScale, supportsCssZoom }: ResolveScaleRenderingStrategyArgs): ScaleRenderingStrategy => { const safeScale = normalizeScale(effectiveScale);
+const resolveScaleRenderingStrategy = ({ disableScale, effectiveScale, supportsCssZoom }: ResolveScaleRenderingStrategyArgs): ScaleRenderingStrategy => {
+  const safeScale = normalizeScale(effectiveScale);
   const shouldApplyScale =
     !disableScale && Math.abs(safeScale - 1) > SCALE_EPSILON;
 

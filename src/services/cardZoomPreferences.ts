@@ -46,7 +46,8 @@ const writeStore = (store: CardZoomPreferencesStore) => {
     // localStorage 失敗は黙殺
   }
 };
-const getCardSetZoomPreference = (cardSetId: string) => { if (!cardSetId) return undefined;
+const getCardSetZoomPreference = (cardSetId: string) => {
+  if (!cardSetId) return undefined;
 
   const store = readStore();
   const value = store.byCardSet[cardSetId];
@@ -57,7 +58,8 @@ const getCardSetZoomPreference = (cardSetId: string) => { if (!cardSetId) return
 
   return undefined;
 };
-const setCardSetZoomPreference = (cardSetId: string, zoomPercent: number) => { if (!cardSetId) return;
+const setCardSetZoomPreference = (cardSetId: string, zoomPercent: number) => {
+  if (!cardSetId) return;
   if (!Number.isFinite(zoomPercent) || zoomPercent <= 0) return;
 
   const store = readStore();

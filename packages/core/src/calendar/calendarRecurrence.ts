@@ -29,7 +29,8 @@ const uniqueNumbersInRange = <T extends number>(values: readonly number[] | unde
 
   return normalized.length > 0 ? normalized : undefined;
 };
-const normalizeCalendarRecurrenceRule = (rule: CalendarRecurrenceRule | null | undefined): CalendarRecurrenceRule | undefined => { if (!rule || !CALENDAR_RECURRENCE_FREQUENCIES.includes(rule.frequency)) return undefined;
+const normalizeCalendarRecurrenceRule = (rule: CalendarRecurrenceRule | null | undefined): CalendarRecurrenceRule | undefined => {
+  if (!rule || !CALENDAR_RECURRENCE_FREQUENCIES.includes(rule.frequency)) return undefined;
 
   const normalized: CalendarRecurrenceRule = {
     frequency: rule.frequency,

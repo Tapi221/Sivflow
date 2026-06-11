@@ -18,7 +18,8 @@ const closeSettingsTabIfNeeded = (pathname: string) => {
     closeTab(SETTINGS_ROUTE_TAB_ID);
   }
 };
-const useWorkspaceTabsRouteSync = ({ enabled = true }: UseWorkspaceTabsRouteSyncOptions = {}) => { const location = useLocation();
+const useWorkspaceTabsRouteSync = ({ enabled = true }: UseWorkspaceTabsRouteSyncOptions = {}) => {
+  const location = useLocation();
 
   useEffect(() => {
     if (!enabled) {

@@ -41,7 +41,8 @@ type SchemaTarget = {
   };
 };
 
-const defineSchema = (db: SchemaTarget): void => { db.version(34).stores(currentStores);
+const defineSchema = (db: SchemaTarget): void => {
+  db.version(34).stores(currentStores);
 };
 
 export { defineSchema };

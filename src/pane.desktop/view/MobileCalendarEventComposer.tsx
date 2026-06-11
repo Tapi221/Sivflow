@@ -421,7 +421,8 @@ const MobileCalendarEventComposer = ({
   const selectedCalendarOption = useMemo(() => calendarOptions.find((option) => option.key === form.calendarKey) ?? null, [calendarOptions, form.calendarKey]);
   const isSubmitDisabled = isSubmitting || !form.title.trim() || !selectedCalendarOption;
 
-  useEffect(() => { calendarOptionsRef.current = calendarOptions; }, [calendarOptions]);
+  useEffect(() => {
+    calendarOptionsRef.current = calendarOptions; }, [calendarOptions]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -446,7 +447,8 @@ const MobileCalendarEventComposer = ({
     if (!isOpen) return;
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = originalOverflow; };
+    return () => {
+      document.body.style.overflow = originalOverflow; };
   }, [isOpen]);
 
   const setFormValue = useCallback((patch: Partial<MobileCalendarEventFormState>) => {
@@ -461,7 +463,8 @@ const MobileCalendarEventComposer = ({
 
   const handleAddCalendar = useCallback(() => {
     if (!onAddCalendar) return;
-    void onAddCalendar().catch((caughtError) => { setError(getErrorMessage(caughtError)); });
+    void onAddCalendar().catch((caughtError) => {
+      setError(getErrorMessage(caughtError)); });
   }, [onAddCalendar]);
 
   const handleSelectFaceTime = useCallback(() => {
@@ -513,9 +516,12 @@ const MobileCalendarEventComposer = ({
     setIsSubmitting(true);
     setError(null);
     void onCreateEvent(selectedCalendarOption.accountId, writableEvent)
-      .then(() => { onClose(); })
-      .catch((caughtError) => { setError(getErrorMessage(caughtError)); })
-      .finally(() => { setIsSubmitting(false); });
+      .then(() => {
+        onClose(); })
+      .catch((caughtError) => {
+        setError(getErrorMessage(caughtError)); })
+      .finally(() => {
+        setIsSubmitting(false); });
   }, [form, isSubmitDisabled, onClose, onCreateEvent, selectedCalendarOption]);
 
   if (!isOpen) return null;
@@ -577,7 +583,8 @@ const MobileCalendarEventComposer = ({
                   "flex h-[46px] w-full items-center px-4 text-left text-[17px] tracking-[-0.03em] outline-none",
                   form.location.trim() ? "text-[#111]" : "text-[#c7c7cc]",
                 )}
-                onClick={() => { setActivePickerField(null); setIsLocationSheetOpen(true); }}
+                onClick={() => {
+                  setActivePickerField(null); setIsLocationSheetOpen(true); }}
               >
                 <span className="min-w-0 flex-1 truncate">{form.location.trim() || "場所またはビデオ通話"}</span>
                 {form.location.trim() && (
@@ -593,7 +600,8 @@ const MobileCalendarEventComposer = ({
                 <span className="text-[17px] tracking-[-0.03em] text-[#111]">終日</span>
                 <Switch
                   checked={form.isAllDay}
-                  onCheckedChange={(checked) => { setFormValue({ isAllDay: checked }); setActivePickerField(null); }}
+                  onCheckedChange={(checked) => {
+                    setFormValue({ isAllDay: checked }); setActivePickerField(null); }}
                   aria-label="終日"
                 />
               </div>
@@ -754,7 +762,8 @@ const MobileCalendarEventComposer = ({
                   className="min-w-0 flex-1 border-0 bg-transparent text-[17px] leading-none tracking-[-0.03em] text-[#111] outline-none placeholder:text-[#8e8e93]"
                   value={form.location}
                   onChange={(event) => setFormValue({ location: event.target.value })}
-                  onKeyDown={(event) => { if (event.key === "Enter") setIsLocationSheetOpen(false); }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") setIsLocationSheetOpen(false); }}
                   placeholder="場所またはビデオ通話を入力"
                   inputMode="text"
                 />

@@ -8,7 +8,9 @@ type ImportFormatDialogProps = {
   onSelect: (format: ImportFormat) => void;
 };
 
-const ImportFormatDialog = ({ open, onOpenChange, onSelect }: ImportFormatDialogProps) => { const handleSelect = (format: ImportFormat) => { onOpenChange(false);
+const ImportFormatDialog = ({ open, onOpenChange, onSelect }: ImportFormatDialogProps) => {
+  const handleSelect = (format: ImportFormat) => {
+  onOpenChange(false);
   onSelect(format);
 };
 

@@ -46,7 +46,8 @@ const DEFAULT_DIRECTORY_BADGE_VISIBILITY: DirectoryBadgeVisibility = {
   bookmarked: true,
   tags: true,
 };
-const useExplorerStore = create<ExplorerState>()(persist((set) => ({ ...createDefaultState(), setTagFilter: (tags) => set({ tagFilter: tags }), toggleTag: (tag) => set((state) => { const exists = state.tagFilter.includes(tag);
+const useExplorerStore = create<ExplorerState>()(persist((set) => ({ ...createDefaultState(), setTagFilter: (tags) => set({ tagFilter: tags }), toggleTag: (tag) => set((state) => {
+  const exists = state.tagFilter.includes(tag);
   const next = exists
     ? state.tagFilter.filter((currentTag) => currentTag !== tag)
     : [...state.tagFilter, tag];

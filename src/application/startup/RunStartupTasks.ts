@@ -47,9 +47,12 @@ const logIntegrityReport = (report: Awaited<ReturnType<typeof checkDataIntegrity
  *
  * App.tsx からの既存呼び出し互換を維持するため関数自体は残す。
  */
-const resetStartupTasks = async (): Promise<void> => { return Promise.resolve();
+const resetStartupTasks = async (): Promise<void> => {
+  return Promise.resolve();
 };
-const runStartupTasks = async ({ userId, isDisposed = isDisposedDefault }: RunStartupTasksParams): Promise<void> => { try { const { migrateLegacyImagesToAssets } = await import("./MigrateLegacyImagesToAssets");
+const runStartupTasks = async ({ userId, isDisposed = isDisposedDefault }: RunStartupTasksParams): Promise<void> => {
+  try {
+  const { migrateLegacyImagesToAssets } = await import("./MigrateLegacyImagesToAssets");
 
   const migrationSummary = await migrateLegacyImagesToAssets({ userId });
 

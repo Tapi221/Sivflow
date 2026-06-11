@@ -30,7 +30,9 @@ interface BlockListProps {
   renderBlock: (block: CardBlock, meta: BlockListRowMeta) => ReactNode;
 }
 
-const BlockList = ({ blocks, className, rowClassName, getRowRef, getRowContainerProps, renderBlock }: BlockListProps) => { return (<div className={cn("w-full max-w-full", className)}> {blocks.map((block, index) => { const isGridOffsetBlock = isGridOffsetType(block.type);
+const BlockList = ({ blocks, className, rowClassName, getRowRef, getRowContainerProps, renderBlock }: BlockListProps) => {
+  return (<div className={cn("w-full max-w-full", className)}> {blocks.map((block, index) => {
+  const isGridOffsetBlock = isGridOffsetType(block.type);
   const isLinePositionable = isRowPositionableType(block.type);
   const rowOffsetRows = !isLinePositionable
     ? 0

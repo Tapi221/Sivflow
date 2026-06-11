@@ -39,7 +39,8 @@ const parseLocalAiSettings = (value: unknown): LocalAiSettings => {
   };
 };
 const getDefaultLocalAiSettings = (): LocalAiSettings => ({ ...DEFAULT_LOCAL_AI_SETTINGS });
-const getLocalAiSettings = (): LocalAiSettings => { if (typeof window === "undefined") return getDefaultLocalAiSettings();
+const getLocalAiSettings = (): LocalAiSettings => {
+  if (typeof window === "undefined") return getDefaultLocalAiSettings();
 
   try {
     const rawValue = window.localStorage.getItem(LOCAL_AI_SETTINGS_STORAGE_KEY);
@@ -50,7 +51,8 @@ const getLocalAiSettings = (): LocalAiSettings => { if (typeof window === "undef
     return getDefaultLocalAiSettings();
   }
 };
-const setLocalAiSettings = (settings: LocalAiSettings): LocalAiSettings => { const nextSettings = parseLocalAiSettings(settings);
+const setLocalAiSettings = (settings: LocalAiSettings): LocalAiSettings => {
+  const nextSettings = parseLocalAiSettings(settings);
 
   if (typeof window !== "undefined") {
     window.localStorage.setItem(LOCAL_AI_SETTINGS_STORAGE_KEY, JSON.stringify(nextSettings));

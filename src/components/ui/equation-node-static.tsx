@@ -7,7 +7,8 @@ import { SlateElement } from "platejs/static";
 import { cn } from "@/lib/utils";
 import { inlineSuggestionVariants } from "@/lib/suggestion";
 
-const EquationElementStatic = (props: SlateElementProps<TEquationElement>) => { const { element } = props;
+const EquationElementStatic = (props: SlateElementProps<TEquationElement>) => {
+  const { element } = props;
 
   const html = getEquationHtml({
     element,
@@ -49,7 +50,8 @@ const EquationElementStatic = (props: SlateElementProps<TEquationElement>) => { 
     </SlateElement>
   );
 };
-const InlineEquationElementStatic = (props: SlateElementProps<TEquationElement>) => { const html = getEquationHtml({ element: props.element, options: { displayMode: true, errorColor: "#c00", fleqn: false, leqno: false, macros: { "\f": "#1f(#2)" }, output: "htmlAndMathml", strict: "warn", throwOnError: false, trust: false } });
+const InlineEquationElementStatic = (props: SlateElementProps<TEquationElement>) => {
+  const html = getEquationHtml({ element: props.element, options: { displayMode: true, errorColor: "#c00", fleqn: false, leqno: false, macros: { "\f": "#1f(#2)" }, output: "htmlAndMathml", strict: "warn", throwOnError: false, trust: false } });
 
   return (
     <SlateElement
@@ -81,7 +83,8 @@ const InlineEquationElementStatic = (props: SlateElementProps<TEquationElement>)
  * DOCX-compatible block equation component.
  * Displays LaTeX source code with styling.
  */
-const EquationElementDocx = (props: SlateElementProps<TEquationElement>) => { const { element } = props;
+const EquationElementDocx = (props: SlateElementProps<TEquationElement>) => {
+  const { element } = props;
 
   if (!element.texExpression || element.texExpression.length === 0) {
     return (
@@ -112,7 +115,8 @@ const EquationElementDocx = (props: SlateElementProps<TEquationElement>) => { co
  * DOCX-compatible inline equation component.
  * Displays LaTeX source code inline.
  */
-const InlineEquationElementDocx = (props: SlateElementProps<TEquationElement>) => { const { element } = props;
+const InlineEquationElementDocx = (props: SlateElementProps<TEquationElement>) => {
+  const { element } = props;
 
   if (!element.texExpression || element.texExpression.length === 0) {
     return (

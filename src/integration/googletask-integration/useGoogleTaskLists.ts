@@ -214,7 +214,8 @@ const buildAccountTokenKey = (accounts: GoogleConnectedServiceAccountEntry[]) =>
       ].join("\t"),
     )
     .join("\n");
-const useGoogleTaskLists = (accounts: GoogleConnectedServiceAccountEntry[], onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void, retryNonce = 0): GoogleTaskListsState => { const [state, dispatch] = useReducer(reduceGoogleTaskLists, {});
+const useGoogleTaskLists = (accounts: GoogleConnectedServiceAccountEntry[], onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void, retryNonce = 0): GoogleTaskListsState => {
+  const [state, dispatch] = useReducer(reduceGoogleTaskLists, {});
 
   const accountTokenKey = buildAccountTokenKey(accounts);
 

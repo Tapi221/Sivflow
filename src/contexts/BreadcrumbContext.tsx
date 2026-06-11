@@ -17,11 +17,14 @@ const BreadcrumbActionsContext = createContext<BreadcrumbActionsContextValue>({
 });
 
 const noopSetExtraCrumbs = (_crumbs: BreadcrumbCrumb[]): void => {};
-const useBreadcrumbExtraCrumbs = (): BreadcrumbCrumb[] => { return useContext(BreadcrumbExtraCrumbsContext);
+const useBreadcrumbExtraCrumbs = (): BreadcrumbCrumb[] => {
+  return useContext(BreadcrumbExtraCrumbsContext);
 };
-const useSetBreadcrumbCrumbs = (): BreadcrumbActionsContextValue["setExtraCrumbs"] => { return useContext(BreadcrumbActionsContext).setExtraCrumbs;
+const useSetBreadcrumbCrumbs = (): BreadcrumbActionsContextValue["setExtraCrumbs"] => {
+  return useContext(BreadcrumbActionsContext).setExtraCrumbs;
 };
-const useBreadcrumbContext = (): BreadcrumbContextValue => { const extraCrumbs = useBreadcrumbExtraCrumbs();
+const useBreadcrumbContext = (): BreadcrumbContextValue => {
+  const extraCrumbs = useBreadcrumbExtraCrumbs();
   const setExtraCrumbs = useSetBreadcrumbCrumbs();
 
   return useMemo(

@@ -4,7 +4,8 @@ type MetaPanelToggleIconProps = Readonly<SVGProps<SVGSVGElement> & { open?: bool
 }
 >;
 
-const MetaPanelToggleIcon = ({ className, open = false, ...props }: MetaPanelToggleIconProps) => { const indicatorX = open ? 7.25 : 14.25;
+const MetaPanelToggleIcon = ({ className, open = false, ...props }: MetaPanelToggleIconProps) => {
+  const indicatorX = open ? 7.25 : 14.25;
 
   return (
     <svg

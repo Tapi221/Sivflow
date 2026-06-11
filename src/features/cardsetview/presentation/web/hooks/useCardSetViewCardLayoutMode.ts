@@ -16,7 +16,8 @@ type CardLayoutModeOverrideState = {
   mode: CardLayoutMode;
 } | null;
 
-const useCardSetViewCardLayoutMode = ({ deviceScope, cardSetId, displayMode, interactionMode, defaultCardLayoutMode }: UseCardSetViewCardLayoutModeOptions) => { const scopeKey = useMemo(() => buildCardLayoutPreferenceScopeKey({ deviceScope, cardSetId, displayMode, interactionMode }), [cardSetId, deviceScope, displayMode, interactionMode]);
+const useCardSetViewCardLayoutMode = ({ deviceScope, cardSetId, displayMode, interactionMode, defaultCardLayoutMode }: UseCardSetViewCardLayoutModeOptions) => {
+  const scopeKey = useMemo(() => buildCardLayoutPreferenceScopeKey({ deviceScope, cardSetId, displayMode, interactionMode }), [cardSetId, deviceScope, displayMode, interactionMode]);
 
   const resolvedCardLayoutMode = useMemo(
     () =>

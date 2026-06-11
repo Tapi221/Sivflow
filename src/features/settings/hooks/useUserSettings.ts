@@ -70,7 +70,8 @@ const areSettingsRecordsEquivalent = (
 ) => {
   return toComparableRecordJson(left) === toComparableRecordJson(right);
 };
-const useUserSettings = () => { const { currentUser } = useAuthSession();
+const useUserSettings = () => {
+  const { currentUser } = useAuthSession();
   const currentUserId = currentUser?.uid ?? null;
   const bootSettings = useMemo(() => buildBootSettingsSnapshot(), []);
   const setLocale = useLocaleStore((state) => state.setLocale);

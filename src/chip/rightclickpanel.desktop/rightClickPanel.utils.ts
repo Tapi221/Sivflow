@@ -35,7 +35,8 @@ const measureRightClickPanelTextWidth = (text: string): number => {
   context.font = RIGHT_CLICK_PANEL_FONT;
   return context.measureText(text).width;
 };
-const resolveRightClickPanelTextWidth = (labels: readonly string[], minimumWidth = RIGHT_CLICK_PANEL_MIN_WIDTH): number => { const textWidth = labels.reduce((maxWidth, label) => Math.max(maxWidth, measureRightClickPanelTextWidth(label)), 0);
+const resolveRightClickPanelTextWidth = (labels: readonly string[], minimumWidth = RIGHT_CLICK_PANEL_MIN_WIDTH): number => {
+  const textWidth = labels.reduce((maxWidth, label) => Math.max(maxWidth, measureRightClickPanelTextWidth(label)), 0);
   return Math.ceil(Math.max(RIGHT_CLICK_PANEL_MIN_WIDTH, minimumWidth, textWidth + RIGHT_CLICK_PANEL_TEXT_HORIZONTAL_EDGE));
 };
 const clampRightClickPanelAxis = (value: number, size: number, viewportSize: number): number => {
@@ -43,14 +44,17 @@ const clampRightClickPanelAxis = (value: number, size: number, viewportSize: num
   const max = Math.max(min, viewportSize - size - RIGHT_CLICK_PANEL_MARGIN);
   return Math.min(Math.max(value, min), max);
 };
-const clampRightClickPanelPosition = (x: number, y: number, dimensions: RightClickPanelDimensions): RightClickPanelPosition => { if (typeof window === "undefined") return { x, y };
+const clampRightClickPanelPosition = (x: number, y: number, dimensions: RightClickPanelDimensions): RightClickPanelPosition => {
+  if (typeof window === "undefined") return { x, y };
 
   return {
     x: clampRightClickPanelAxis(x, dimensions.width, window.innerWidth),
     y: clampRightClickPanelAxis(y, dimensions.height, window.innerHeight),
   };
 };
-const useRightClickPanelDismiss = (panelId: RightClickPanelId, isOpen: boolean, panelRef: RefObject<HTMLElement | null>, onDismiss: () => void): void => { useEffect(() => { if (!isOpen) return;
+const useRightClickPanelDismiss = (panelId: RightClickPanelId, isOpen: boolean, panelRef: RefObject<HTMLElement | null>, onDismiss: () => void): void => {
+  useEffect(() => {
+  if (!isOpen) return;
 
   const isPanelEvent = (event: Event): boolean => {
     const panel = panelRef.current;

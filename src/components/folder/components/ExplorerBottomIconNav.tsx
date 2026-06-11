@@ -31,7 +31,8 @@ const NAV_ITEMS: BottomNavItem[] = [
   },
 ];
 
-const ExplorerBottomIconNav = () => { const { pathname } = useLocation();
+const ExplorerBottomIconNav = () => {
+  const { pathname } = useLocation();
 
   return (
     <nav

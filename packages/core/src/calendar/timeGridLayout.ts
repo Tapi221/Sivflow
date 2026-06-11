@@ -414,7 +414,8 @@ const layoutNoOverlapEvents = ({
     };
   });
 };
-const layoutCalendarTimeGridEvents = ({ events, rangeStart, rangeEnd, layoutMode = "overlap", includeAllDayEvents = false, minimumVisibleHeightPercent = 0 }: CalendarTimeGridLayoutOptions): CalendarTimeGridLayoutEntry[] => { const rangeStartMs = getDateTime(rangeStart);
+const layoutCalendarTimeGridEvents = ({ events, rangeStart, rangeEnd, layoutMode = "overlap", includeAllDayEvents = false, minimumVisibleHeightPercent = 0 }: CalendarTimeGridLayoutOptions): CalendarTimeGridLayoutEntry[] => {
+  const rangeStartMs = getDateTime(rangeStart);
   const rangeEndMs = getDateTime(rangeEnd);
 
   if (!isFiniteTime(rangeStartMs) || !isFiniteTime(rangeEndMs)) return [];

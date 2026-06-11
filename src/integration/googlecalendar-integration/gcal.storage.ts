@@ -31,7 +31,9 @@ const removeStorageItemPair = (key: string, legacyKey: string): void => {
   localStorage.removeItem(key);
   localStorage.removeItem(legacyKey);
 };
-const readTokenExpiry = (): number | null => { try { const raw = readMigratedStorageItem(LOCAL_TOKEN_EXPIRY_KEY, LEGACY_LOCAL_TOKEN_EXPIRY_KEY);
+const readTokenExpiry = (): number | null => {
+  try {
+  const raw = readMigratedStorageItem(LOCAL_TOKEN_EXPIRY_KEY, LEGACY_LOCAL_TOKEN_EXPIRY_KEY);
   if (!raw) return null;
 
   const value = Number(raw);
@@ -40,14 +42,17 @@ const readTokenExpiry = (): number | null => { try { const raw = readMigratedSto
   return null;
 }
 };
-const clearToken = (): void => { try { removeStorageItemPair(LOCAL_TOKEN_KEY, LEGACY_LOCAL_TOKEN_KEY);
+const clearToken = (): void => {
+  try {
+  removeStorageItemPair(LOCAL_TOKEN_KEY, LEGACY_LOCAL_TOKEN_KEY);
   removeStorageItemPair(LOCAL_TOKEN_EXPIRY_KEY, LEGACY_LOCAL_TOKEN_EXPIRY_KEY);
   cachedToken = null;
 } catch {
   // ignore
 }
 };
-const readToken = (): string | null => { if (cachedToken) return cachedToken;
+const readToken = (): string | null => {
+  if (cachedToken) return cachedToken;
 
   try {
     const expiry = readMigratedStorageItem(LOCAL_TOKEN_EXPIRY_KEY, LEGACY_LOCAL_TOKEN_EXPIRY_KEY);
@@ -64,7 +69,8 @@ const readToken = (): string | null => { if (cachedToken) return cachedToken;
     return null;
   }
 };
-const writeToken = (token: string | null): void => { cachedToken = token;
+const writeToken = (token: string | null): void => {
+  cachedToken = token;
 
   try {
     if (!token) {
@@ -83,7 +89,10 @@ const writeToken = (token: string | null): void => { cachedToken = token;
     // ignore
   }
 };
-const readRefreshToken = (): string | null => { try { if (!shouldStoreLocalRefreshToken()) { removeStorageItemPair(LOCAL_REFRESH_TOKEN_KEY, LEGACY_LOCAL_REFRESH_TOKEN_KEY);
+const readRefreshToken = (): string | null => {
+  try {
+  if (!shouldStoreLocalRefreshToken()) {
+  removeStorageItemPair(LOCAL_REFRESH_TOKEN_KEY, LEGACY_LOCAL_REFRESH_TOKEN_KEY);
   return null;
 }
 
@@ -92,7 +101,10 @@ return readMigratedStorageItem(LOCAL_REFRESH_TOKEN_KEY, LEGACY_LOCAL_REFRESH_TOK
   return null;
 }
 };
-const writeRefreshToken = (token: string | null): void => { try { if (!shouldStoreLocalRefreshToken() || !token) { removeStorageItemPair(LOCAL_REFRESH_TOKEN_KEY, LEGACY_LOCAL_REFRESH_TOKEN_KEY);
+const writeRefreshToken = (token: string | null): void => {
+  try {
+  if (!shouldStoreLocalRefreshToken() || !token) {
+  removeStorageItemPair(LOCAL_REFRESH_TOKEN_KEY, LEGACY_LOCAL_REFRESH_TOKEN_KEY);
   return;
 }
 
@@ -102,12 +114,17 @@ localStorage.removeItem(LEGACY_LOCAL_REFRESH_TOKEN_KEY);
   // ignore
 }
 };
-const readEmail = (): string | null => { try { return readMigratedStorageItem(PERSIST_EMAIL_KEY, LEGACY_PERSIST_EMAIL_KEY);
+const readEmail = (): string | null => {
+  try {
+  return readMigratedStorageItem(PERSIST_EMAIL_KEY, LEGACY_PERSIST_EMAIL_KEY);
 } catch {
   return null;
 }
 };
-const writeEmail = (email: string | null): void => { try { if (!email) { removeStorageItemPair(PERSIST_EMAIL_KEY, LEGACY_PERSIST_EMAIL_KEY);
+const writeEmail = (email: string | null): void => {
+  try {
+  if (!email) {
+  removeStorageItemPair(PERSIST_EMAIL_KEY, LEGACY_PERSIST_EMAIL_KEY);
   return;
 }
 localStorage.setItem(PERSIST_EMAIL_KEY, email);
@@ -116,7 +133,9 @@ localStorage.removeItem(LEGACY_PERSIST_EMAIL_KEY);
   // ignore
 }
 };
-const readCalendarIds = (): string[] => { try { const raw = readMigratedStorageItem(PERSIST_CALENDAR_IDS_KEY, LEGACY_PERSIST_CALENDAR_IDS_KEY);
+const readCalendarIds = (): string[] => {
+  try {
+  const raw = readMigratedStorageItem(PERSIST_CALENDAR_IDS_KEY, LEGACY_PERSIST_CALENDAR_IDS_KEY);
   if (!raw) return [];
 
   const parsed = JSON.parse(raw);
@@ -125,18 +144,25 @@ const readCalendarIds = (): string[] => { try { const raw = readMigratedStorageI
   return [];
 }
 };
-const writeCalendarIds = (ids: string[]): void => { try { localStorage.setItem(PERSIST_CALENDAR_IDS_KEY, JSON.stringify(ids));
+const writeCalendarIds = (ids: string[]): void => {
+  try {
+  localStorage.setItem(PERSIST_CALENDAR_IDS_KEY, JSON.stringify(ids));
   localStorage.removeItem(LEGACY_PERSIST_CALENDAR_IDS_KEY);
 } catch {
   // ignore
 }
 };
-const readWasConnected = (): boolean => { try { return readMigratedStorageItem(PERSIST_WAS_CONNECTED_KEY, LEGACY_PERSIST_WAS_CONNECTED_KEY) === "true";
+const readWasConnected = (): boolean => {
+  try {
+  return readMigratedStorageItem(PERSIST_WAS_CONNECTED_KEY, LEGACY_PERSIST_WAS_CONNECTED_KEY) === "true";
 } catch {
   return false;
 }
 };
-const writeWasConnected = (value: boolean): void => { try { if (!value) { removeStorageItemPair(PERSIST_WAS_CONNECTED_KEY, LEGACY_PERSIST_WAS_CONNECTED_KEY);
+const writeWasConnected = (value: boolean): void => {
+  try {
+  if (!value) {
+  removeStorageItemPair(PERSIST_WAS_CONNECTED_KEY, LEGACY_PERSIST_WAS_CONNECTED_KEY);
   return;
 }
 localStorage.setItem(PERSIST_WAS_CONNECTED_KEY, "true");

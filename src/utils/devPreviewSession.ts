@@ -39,7 +39,8 @@ const createDevPreviewUserJson = (): DevPreviewUserJson => ({
   providerId: DEV_PREVIEW_PROVIDER_ID,
   uid: DEV_PREVIEW_USER_ID,
 });
-const isDevPreviewSessionEnabled = (): boolean => { if (!DEV_MODE) return false;
+const isDevPreviewSessionEnabled = (): boolean => {
+  if (!DEV_MODE) return false;
 
   const url = getCurrentUrl();
   if (!url) return false;
@@ -47,7 +48,8 @@ const isDevPreviewSessionEnabled = (): boolean => { if (!DEV_MODE) return false;
 
   return isLocalDevHost(url.hostname);
 };
-const disableDevPreviewSession = (): void => { const url = getCurrentUrl();
+const disableDevPreviewSession = (): void => {
+  const url = getCurrentUrl();
   if (!url || typeof window === "undefined") return;
 
   url.searchParams.set(DEV_PREVIEW_DISABLE_PARAM, "true");

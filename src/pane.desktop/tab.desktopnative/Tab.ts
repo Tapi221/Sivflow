@@ -82,7 +82,8 @@ const createDefaultExplorerRouteState = (): ExplorerRouteState => ({ isHomeOnlyM
 /**
  * section → routeタブ解決
  */
-const resolveRouteTabBySection = (sectionKey: WorkspaceRouteSection): WorkspaceRouteTab => { const matchedTab = WORKSPACE_ROUTE_TABS.find((tab) => tab.sectionKey === sectionKey);
+const resolveRouteTabBySection = (sectionKey: WorkspaceRouteSection): WorkspaceRouteTab => {
+  const matchedTab = WORKSPACE_ROUTE_TABS.find((tab) => tab.sectionKey === sectionKey);
 
   if (!matchedTab) {
     throw new Error(`Unknown workspace route section: ${sectionKey}`);

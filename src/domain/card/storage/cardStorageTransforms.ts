@@ -7,7 +7,8 @@ import type { Card } from "@/types";
 
 type StorageLike = Record<string, unknown>;
 
-const denormalizeCardForStorage = (value: Partial<Card> | StorageLike): StorageLike => { const record = cloneStorageRecord(value);
+const denormalizeCardForStorage = (value: Partial<Card> | StorageLike): StorageLike => {
+  const record = cloneStorageRecord(value);
   const frontBlocks = sanitizeCardStorageBlockImages(
     resolveBlocksFromCardData(record, "question"),
   );

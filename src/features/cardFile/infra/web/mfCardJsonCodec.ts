@@ -19,9 +19,11 @@ const parseJson = (raw: string): unknown => {
     ]);
   }
 };
-const encodeMfCardFile = (file: MfCardFileV1): Uint8Array => { return textEncoder.encode(`${JSON.stringify(file, null, 2)}\n`);
+const encodeMfCardFile = (file: MfCardFileV1): Uint8Array => {
+  return textEncoder.encode(`${JSON.stringify(file, null, 2)}\n`);
 };
-const decodeMfCardFile = (buffer: ArrayBuffer): MfCardFileV1 => { const parsed = parseJson(textDecoder.decode(buffer));
+const decodeMfCardFile = (buffer: ArrayBuffer): MfCardFileV1 => {
+  const parsed = parseJson(textDecoder.decode(buffer));
   const validation = validateMfCardFile(parsed);
 
   if (!validation.ok) {

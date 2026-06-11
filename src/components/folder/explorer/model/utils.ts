@@ -29,22 +29,26 @@ const UNTITLED_PROJECT_NAME = "無題のプロジェクト";
 const UNTITLED_FOLDER_NAME = "無題のフォルダ";
 
 const getFolderId = (folder: FolderTreeNode): string => String(folder?.id ?? folder?.folderId ?? "");
-const getParentFolderId = (folder: FolderTreeNode): string | null => { const parent = folder?.parentFolderId ?? folder?.parent_folder_id ?? null;
+const getParentFolderId = (folder: FolderTreeNode): string | null => {
+  const parent = folder?.parentFolderId ?? folder?.parent_folder_id ?? null;
   return parent == null ? null : String(parent);
 };
 const normalizeFolderId = (folderId: string | null | undefined): string => folderId ?? ROOT_FOLDER_ID;
 const isSameFolder = (left: string | null | undefined, right: string | null | undefined): boolean => normalizeFolderId(left) === normalizeFolderId(right);
-const getEntityTime = (value: unknown): number => { return toMillis(value);
+const getEntityTime = (value: unknown): number => {
+  return toMillis(value);
 };
 const createOptimisticId = (prefix: "folder" | "card"): string => `tmp-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 const createDocumentId = (): string => typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 const buildStoragePath = (uid: string, docId: string, ext: "pdf"): string => `users/${uid}/documents/${docId}/source.${ext}`;
 const isTextInputTarget = (target: HTMLElement | null): boolean => isTypingTarget(target);
-const isFileDragEvent = (event: React.DragEvent | DragEvent): boolean => { const dataTransfer = (event as React.DragEvent).dataTransfer || (event as DragEvent).dataTransfer;
+const isFileDragEvent = (event: React.DragEvent | DragEvent): boolean => {
+  const dataTransfer = (event as React.DragEvent).dataTransfer || (event as DragEvent).dataTransfer;
   const types = Array.from(dataTransfer?.types ?? []);
   return types.includes("Files");
 };
-const extractPdfFiles = (fileList: FileList | null): File[] => { if (!fileList) return [];
+const extractPdfFiles = (fileList: FileList | null): File[] => {
+  if (!fileList) return [];
   return Array.from(fileList).filter((file) => {
     const name = file.name?.toLowerCase() ?? "";
     return file.type === "application/pdf" || name.endsWith(".pdf");

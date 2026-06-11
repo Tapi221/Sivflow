@@ -107,7 +107,8 @@ const readRowsForAccountCalendar = async ({
 
   return rows.filter((row) => overlapsRange(row, rangeStartMs, rangeEndMs));
 };
-const readCachedGoogleCalendarEvents = async ({ accountIds, calendarIds, rangeStart, rangeEnd }: ReadCachedGoogleCalendarEventsOptions = {}): Promise<GoogleCalendarEvent[]> => { const db = getCacheDb();
+const readCachedGoogleCalendarEvents = async ({ accountIds, calendarIds, rangeStart, rangeEnd }: ReadCachedGoogleCalendarEventsOptions = {}): Promise<GoogleCalendarEvent[]> => {
+  const db = getCacheDb();
   if (!db) return [];
 
   const resolvedAccountIds = accountIds && accountIds.length > 0 ? accountIds.map(getResolvedAccountId) : null;
@@ -145,7 +146,8 @@ const readCachedGoogleCalendarEvents = async ({ accountIds, calendarIds, rangeSt
     })
     .map(toCalendarEvent);
 };
-const upsertCachedGoogleCalendarEvent = async (accountId: string | undefined, event: GoogleCalendarEvent): Promise<void> => { const db = getCacheDb();
+const upsertCachedGoogleCalendarEvent = async (accountId: string | undefined, event: GoogleCalendarEvent): Promise<void> => {
+  const db = getCacheDb();
   if (!db) return;
 
   const resolvedAccountId = getResolvedAccountId(accountId ?? event.accountId);
@@ -181,7 +183,8 @@ const replaceCachedGoogleCalendarRange = async ({ accountId, calendarId, rangeSt
     }
   });
 };
-const deleteCachedGoogleCalendarEvent = async (accountId: string | undefined, calendarId: string | undefined, eventId: string): Promise<void> => { const db = getCacheDb();
+const deleteCachedGoogleCalendarEvent = async (accountId: string | undefined, calendarId: string | undefined, eventId: string): Promise<void> => {
+  const db = getCacheDb();
   if (!db) return;
 
   const resolvedAccountId = getResolvedAccountId(accountId);
@@ -194,7 +197,8 @@ const deleteCachedGoogleCalendarEvent = async (accountId: string | undefined, ca
   const rows = await db.googleCalendarEvents.where("accountId").equals(resolvedAccountId).filter((row) => row.eventId === eventId).toArray();
   await db.googleCalendarEvents.bulkDelete(rows.map((row) => row.id));
 };
-const clearCachedGoogleCalendarAccount = async (accountId: string | undefined): Promise<void> => { const db = getCacheDb();
+const clearCachedGoogleCalendarAccount = async (accountId: string | undefined): Promise<void> => {
+  const db = getCacheDb();
   if (!db) return;
 
   await db.googleCalendarEvents.where("accountId").equals(getResolvedAccountId(accountId)).delete();

@@ -20,7 +20,8 @@ interface SidebarTreeRowProps {
   children: React.ReactNode;
 }
 
-const SidebarTreeRow = ({ menuOpen, onMenuOpenChange, menuActions = [], hasContextMenu = false, contextMenuVariant = "default", isEditing = false, isDimmed = false, isDraggingOver = false, style, className, onContextMenuSelect, children }: SidebarTreeRowProps) => { const { anchorPoint, handleContextMenu, resetAnchor } = useContextMenuAnchor();
+const SidebarTreeRow = ({ menuOpen, onMenuOpenChange, menuActions = [], hasContextMenu = false, contextMenuVariant = "default", isEditing = false, isDimmed = false, isDraggingOver = false, style, className, onContextMenuSelect, children }: SidebarTreeRowProps) => {
+  const { anchorPoint, handleContextMenu, resetAnchor } = useContextMenuAnchor();
 
   const suppressNextClickRef = React.useRef(false);
   const suppressNextClickTimeoutRef = React.useRef<number | null>(null);

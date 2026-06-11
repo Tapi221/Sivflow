@@ -27,7 +27,8 @@ import { ToggleToolbarButton } from "./toggle-toolbar-button";
 import { ToolbarGroup } from "./toolbar";
 import { TurnIntoToolbarButton } from "./turn-into-toolbar-button";
 
-const FixedToolbarButtons = () => { const readOnly = useEditorReadOnly();
+const FixedToolbarButtons = () => {
+  const readOnly = useEditorReadOnly();
 
   return (
     <div className="flex w-full">

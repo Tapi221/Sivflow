@@ -145,7 +145,8 @@ const setHighlightedEditorCode = (
   }
 };
 
-const CodeBlockContent = (props: CodeBlockContentProps) => { const [copied, setCopied] = useState(false);
+const CodeBlockContent = (props: CodeBlockContentProps) => {
+  const [copied, setCopied] = useState(false);
   const copiedTimerRef = useRef<number | null>(null);
   const editorCodeRef = useRef<HTMLElement | null>(null);
   const editorSelectionRef = useRef<EditorTextSelection | null>(null);

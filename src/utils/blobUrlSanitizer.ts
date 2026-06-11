@@ -10,7 +10,8 @@ type SanitizeResult<T> = { value: T;
 };
 
 const isBlobUrl = (v: unknown): v is string => typeof v === "string" && v.startsWith("blob:");
-const sanitizeBlobUrlsDeep = <T>(input: T): SanitizeResult<T> => { const fixes: BlobUrlFix[] = [];
+const sanitizeBlobUrlsDeep = <T>(input: T): SanitizeResult<T> => {
+  const fixes: BlobUrlFix[] = [];
 
   const shouldPreserveObject = (value: unknown): boolean => {
     if (!value || typeof value !== "object") return false;
@@ -49,7 +50,8 @@ const sanitizeBlobUrlsDeep = <T>(input: T): SanitizeResult<T> => { const fixes: 
     fixes,
   };
 };
-const findBlobUrlFixesDeep = (input: unknown) => { return sanitizeBlobUrlsDeep(input).fixes;
+const findBlobUrlFixesDeep = (input: unknown) => {
+  return sanitizeBlobUrlsDeep(input).fixes;
 };
 
 export { isBlobUrl, sanitizeBlobUrlsDeep, findBlobUrlFixesDeep };

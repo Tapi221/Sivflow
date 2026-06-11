@@ -69,7 +69,8 @@ const assignColumns = (cluster: LayoutEvent[]): Map<string, number> => {
 
   return columnOf;
 };
-const computeEventLayout = (events: LayoutEvent[]): Map<string, LayoutResult> => { const result = new Map<string, LayoutResult>();
+const computeEventLayout = (events: LayoutEvent[]): Map<string, LayoutResult> => {
+  const result = new Map<string, LayoutResult>();
 
   if (events.length === 0) return result;
 
@@ -93,7 +94,8 @@ const computeEventLayout = (events: LayoutEvent[]): Map<string, LayoutResult> =>
 
   return result;
 };
-const toLayoutEvent = (id: string, startsAt: Date, minutes: number, minimumDurationMinutes = 0): LayoutEvent => { const startMinutes = startsAt.getHours() * 60 + startsAt.getMinutes();
+const toLayoutEvent = (id: string, startsAt: Date, minutes: number, minimumDurationMinutes = 0): LayoutEvent => {
+  const startMinutes = startsAt.getHours() * 60 + startsAt.getMinutes();
   const layoutDurationMinutes = Math.max(minutes, minimumDurationMinutes);
 
   return {

@@ -6,7 +6,8 @@ type AnimatedSoftCheckboxProps = Omit<
   "shape" | "variant" | "indeterminate"
 >;
 
-const AnimatedSoftCheckbox = (props: AnimatedSoftCheckboxProps) => { return <AnimatedCheckboxBase {...props} shape="square" variant="soft" />;
+const AnimatedSoftCheckbox = (props: AnimatedSoftCheckboxProps) => {
+  return <AnimatedCheckboxBase {...props} shape="square" variant="soft" />;
 };
 
 export { AnimatedSoftCheckbox };

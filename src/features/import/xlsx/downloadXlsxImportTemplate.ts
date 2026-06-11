@@ -78,7 +78,8 @@ const downloadBlob = (blob: Blob, fileName: string) => {
     URL.revokeObjectURL(url);
   }, 0);
 };
-const downloadXlsxImportTemplate = () => { const workbook = buildWorkbook();
+const downloadXlsxImportTemplate = () => {
+  const workbook = buildWorkbook();
 
   const arrayBuffer = XLSX.write(workbook, {
     bookType: "xlsx",

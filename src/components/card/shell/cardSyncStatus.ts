@@ -10,7 +10,9 @@ type CardSyncStatusSnapshot = Readonly<{ lastSyncedAtMs: number | null;
   canRetry: boolean;
 }>;
 
-const toCardSyncStatusSnapshot = (status: CardSyncStatus | null): CardSyncStatusSnapshot | null => { if (!status) { return null;
+const toCardSyncStatusSnapshot = (status: CardSyncStatus | null): CardSyncStatusSnapshot | null => {
+  if (!status) {
+  return null;
 }
 
 return {

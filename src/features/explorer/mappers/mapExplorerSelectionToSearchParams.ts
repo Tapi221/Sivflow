@@ -7,7 +7,8 @@ type Params = {
   selectedItem: SelectedExplorerItem;
 };
 
-const mapExplorerSelectionToSearchParams = ({ isHomeOnlyMode, isSectionListMode, selectedFolderId, selectedItem }: Params): URLSearchParams => { const next = new URLSearchParams();
+const mapExplorerSelectionToSearchParams = ({ isHomeOnlyMode, isSectionListMode, selectedFolderId, selectedItem }: Params): URLSearchParams => {
+  const next = new URLSearchParams();
 
   if (isHomeOnlyMode) {
     next.set("home", "1");

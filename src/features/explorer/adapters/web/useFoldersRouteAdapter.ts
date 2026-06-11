@@ -36,7 +36,8 @@ const toLibraryAwareSearchParams = (
 
   return next;
 };
-const useFoldersRouteAdapter = (): FoldersRouteAdapter => { const [searchParams, setSearchParams] = useSearchParams();
+const useFoldersRouteAdapter = (): FoldersRouteAdapter => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { pathname } = useLocation();
 
   const presentationTarget = usePresentationTarget();

@@ -2,7 +2,8 @@
 
 import * as React from "react";
 
-const useIsTouchDevice = () => { const [isTouchDevice, setIsTouchDevice] = React.useState(false);
+const useIsTouchDevice = () => {
+  const [isTouchDevice, setIsTouchDevice] = React.useState(false);
 
   React.useEffect(() => {
     const onResize = () => {

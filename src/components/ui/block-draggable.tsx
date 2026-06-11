@@ -203,7 +203,8 @@ const Gutter = ({
     </div>
   );
 };
-const BlockDraggable: RenderNodeWrapper = (props) => { const { editor, element, path } = props;
+const BlockDraggable: RenderNodeWrapper = (props) => {
+  const { editor, element, path } = props;
 
   const enabled = React.useMemo(() => {
     if (editor.dom.readOnly) return false;

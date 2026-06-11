@@ -22,7 +22,8 @@ interface FlashcardInkOverlayProps {
   setPreviewInkHistory: React.Dispatch<React.SetStateAction<InkHistoryState>>;
 }
 
-const FlashcardInkOverlay = ({ extraHeaderRight, extraFooter, previewMode, showInkLayer, inkEditingEnabled, cardId, activeInkSide, activeInkDocument, layoutStable, shouldMountInkLayer, previewInkRef, previewInkTool, previewInkHistory, onInkDocumentChange, setPreviewInkTool, setPreviewInkHistory }: FlashcardInkOverlayProps) => { const hasInkContent = (activeInkDocument.strokes?.length ?? 0) > 0;
+const FlashcardInkOverlay = ({ extraHeaderRight, extraFooter, previewMode, showInkLayer, inkEditingEnabled, cardId, activeInkSide, activeInkDocument, layoutStable, shouldMountInkLayer, previewInkRef, previewInkTool, previewInkHistory, onInkDocumentChange, setPreviewInkTool, setPreviewInkHistory }: FlashcardInkOverlayProps) => {
+  const hasInkContent = (activeInkDocument.strokes?.length ?? 0) > 0;
   const hasHeaderOverlay = Boolean(extraHeaderRight && !previewMode);
   const hasFooterOverlay = Boolean(extraFooter);
   const hasInkOverlay = Boolean(showInkLayer && cardId && (hasInkContent || inkEditingEnabled));

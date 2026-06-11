@@ -404,7 +404,8 @@ const CodeDrawingPreview = ({
     </div>
   );
 };
-const CodeDrawingElement = (props: PlateElementProps<TCodeDrawingElement>) => { const { children } = props;
+const CodeDrawingElement = (props: PlateElementProps<TCodeDrawingElement>) => {
+  const { children } = props;
   const isMobile = useIsMobile();
   const editor = useEditorRef();
   const readOnly = useReadOnly();

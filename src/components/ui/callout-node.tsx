@@ -8,7 +8,8 @@ import { Button } from "./button";
 import { cn } from "@/lib/utils";
 import { EmojiPicker, EmojiPopover } from "./emoji-toolbar-button";
 
-const CalloutElement = ({ attributes, children, className, ...props }: React.ComponentProps<typeof PlateElement>) => { const { emojiPickerState, isOpen, setIsOpen } = useEmojiDropdownMenuState({ closeOnSelect: true });
+const CalloutElement = ({ attributes, children, className, ...props }: React.ComponentProps<typeof PlateElement>) => {
+  const { emojiPickerState, isOpen, setIsOpen } = useEmojiDropdownMenuState({ closeOnSelect: true });
 
   const { emojiToolbarDropdownProps, props: calloutProps } =
     useCalloutEmojiPicker({

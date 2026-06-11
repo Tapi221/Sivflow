@@ -30,7 +30,8 @@ const getBlockSuggestionWrapperClassName = ({ elementType, isActive, isHover, is
     }),
   );
 };
-const isVoidRemoveSuggestion = (editor: PlateEditor, element: TElement) => { return (editor.getApi(SuggestionPlugin).suggestion.suggestionData(element)?.type === "remove");
+const isVoidRemoveSuggestion = (editor: PlateEditor, element: TElement) => {
+  return (editor.getApi(SuggestionPlugin).suggestion.suggestionData(element)?.type === "remove");
 };
 
 const VoidRemoveSuggestionOverlay = ({ editor, element }: { editor: PlateEditor;
@@ -71,7 +72,8 @@ const SuggestionLineBreakElementAnchor = ({ badgeProps, children, className }: {
 
   return React.cloneElement(children as React.ReactElement<any>, { lineBreakBadge: badge });
 };
-const SuggestionLeaf = (props: PlateLeafProps<TSuggestionText>) => { const { api, setOption } = useEditorPlugin(suggestionPlugin);
+const SuggestionLeaf = (props: PlateLeafProps<TSuggestionText>) => {
+  const { api, setOption } = useEditorPlugin(suggestionPlugin);
   const leaf = props.leaf;
   const leafId: string = api.suggestion.nodeId(leaf) ?? "";
   const activeSuggestionId = usePluginOption(suggestionPlugin, "activeId");
@@ -100,14 +102,21 @@ const SuggestionLineBreakContent = ({ children, elementType, suggestionData }: {
   const lineBreakBadgeClassName = cn(isInsert && "bg-transparent! text-emerald-700! transition-colors duration-200", isInsert && (isActive || isHover) && "bg-transparent! text-emerald-700!", isRemove && "bg-transparent! text-red-700! transition-colors duration-200", isRemove && (isActive || isHover) && "bg-transparent! text-red-700!");
 
   if (isLineBreak) {
-    if (React.isValidElement(children) && typeof children.type !== "string") return <SuggestionLineBreakElementAnchor badgeProps={{ onClick: (event) => { event.stopPropagation(); setOption("activeId", suggestionData.id); }, onMouseDown: (event) => { event.preventDefault(); } }} className={lineBreakBadgeClassName}>{children}</SuggestionLineBreakElementAnchor>;
-    if (React.isValidElement(children) && (children.type === "ol" || children.type === "ul")) return <SuggestionLineBreakElementAnchor badgeProps={{ onClick: (event) => { event.stopPropagation(); setOption("activeId", suggestionData.id); }, onMouseDown: (event) => { event.preventDefault(); } }} className={lineBreakBadgeClassName}>{children}</SuggestionLineBreakElementAnchor>;
-    return <SuggestionLineBreakAnchor badgeProps={{ onClick: (event) => { event.stopPropagation(); setOption("activeId", suggestionData.id); }, onMouseDown: (event) => { event.preventDefault(); } }} className={lineBreakBadgeClassName}>{children}</SuggestionLineBreakAnchor>;
+    if (React.isValidElement(children) && typeof children.type !== "string") return <SuggestionLineBreakElementAnchor badgeProps={{ onClick: (event) => {
+      event.stopPropagation(); setOption("activeId", suggestionData.id); }, onMouseDown: (event) => {
+      event.preventDefault(); } }} className={lineBreakBadgeClassName}>{children}</SuggestionLineBreakElementAnchor>;
+    if (React.isValidElement(children) && (children.type === "ol" || children.type === "ul")) return <SuggestionLineBreakElementAnchor badgeProps={{ onClick: (event) => {
+      event.stopPropagation(); setOption("activeId", suggestionData.id); }, onMouseDown: (event) => {
+      event.preventDefault(); } }} className={lineBreakBadgeClassName}>{children}</SuggestionLineBreakElementAnchor>;
+    return <SuggestionLineBreakAnchor badgeProps={{ onClick: (event) => {
+      event.stopPropagation(); setOption("activeId", suggestionData.id); }, onMouseDown: (event) => {
+      event.preventDefault(); } }} className={lineBreakBadgeClassName}>{children}</SuggestionLineBreakAnchor>;
   }
 
   return <div className={getBlockSuggestionWrapperClassName({ elementType, isActive, isHover, isInsert, isRemove })} onMouseEnter={() => setOption("hoverId", suggestionData.id)} onMouseLeave={() => setOption("hoverId", null)} data-block-suggestion="true">{children}</div>;
 };
-const SuggestionLineBreak: RenderNodeWrapper<AnyPluginConfig> = ({ api, element }) => { if (!api.suggestion.isBlockSuggestion(element)) return;
+const SuggestionLineBreak: RenderNodeWrapper<AnyPluginConfig> = ({ api, element }) => {
+  if (!api.suggestion.isBlockSuggestion(element)) return;
 
   const suggestionData = element.suggestion as TSuggestionData;
 

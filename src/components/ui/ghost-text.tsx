@@ -13,7 +13,8 @@ const GhostTextContent = () => {
     </span>
   );
 };
-const GhostText = () => { const element = useElement();
+const GhostText = () => {
+  const element = useElement();
 
   const isSuggested = usePluginOption(CopilotPlugin, "isSuggested", element.id as string);
 

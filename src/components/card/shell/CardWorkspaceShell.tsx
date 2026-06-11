@@ -90,7 +90,8 @@ const resolveTaskMessage = (values: Array<string | void>): string | null => {
   return values.find((value): value is string => typeof value === "string" && value.trim().length > 0) ?? null;
 };
 
-const CardWorkspaceShell = ({ children, containerClassName, shellClassName, contentAreaClassName, viewportClassName, viewportStyle, surfaceVariant = "plain", viewportRef, widthControl = null, widthControlClassName, topLeftControl, topRightControl, overlayChildren, overlayTopInsetPx = 0, isMetaOpen, metaPanel, metaPanelContainerClassName, selectionCaptureEnabled = true }: CardWorkspaceShellProps) => { const viewportNodeRef = useRef<HTMLDivElement | null>(null);
+const CardWorkspaceShell = ({ children, containerClassName, shellClassName, contentAreaClassName, viewportClassName, viewportStyle, surfaceVariant = "plain", viewportRef, widthControl = null, widthControlClassName, topLeftControl, topRightControl, overlayChildren, overlayTopInsetPx = 0, isMetaOpen, metaPanel, metaPanelContainerClassName, selectionCaptureEnabled = true }: CardWorkspaceShellProps) => {
+  const viewportNodeRef = useRef<HTMLDivElement | null>(null);
   const [isSelectionCaptureActive, setIsSelectionCaptureActive] = useState(false);
   const [isSelectionCaptureBusy, setIsSelectionCaptureBusy] = useState(false);
   const [selectionCaptureMessage, setSelectionCaptureMessage] = useState<string | null>(null);

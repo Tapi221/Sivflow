@@ -12,11 +12,13 @@ import { enUS, ja, zhCN } from "date-fns/locale";
 import { useLocaleStore } from "./locale.store";
 import { TRANSLATIONS } from "./translations";
 
-const useT = () => { const locale = useLocaleStore((s) => s.locale);
+const useT = () => {
+  const locale = useLocaleStore((s) => s.locale);
   return TRANSLATIONS[locale];
 };
 /** date-fns の Locale オブジェクトを返すフック。format() の locale 引数に渡す。 */
-const useDateFnsLocale = (): DateFnsLocale => { const locale = useLocaleStore((s) => s.locale);
+const useDateFnsLocale = (): DateFnsLocale => {
+  const locale = useLocaleStore((s) => s.locale);
   return useMemo(() => {
     if (locale === "ja") return ja;
     if (locale === "zh") return zhCN;
@@ -27,7 +29,8 @@ const useDateFnsLocale = (): DateFnsLocale => { const locale = useLocaleStore((s
  * ロケールに応じた月ラベルフォーマット文字列を返す。
  * 日本語/中国語: "yyyy年 M月"  英語: "MMMM yyyy"
  */
-const useMonthLabelFormat = (): string => { const locale = useLocaleStore((s) => s.locale);
+const useMonthLabelFormat = (): string => {
+  const locale = useLocaleStore((s) => s.locale);
   return locale === "en" ? "MMMM yyyy" : "yyyy年 M月";
 };
 

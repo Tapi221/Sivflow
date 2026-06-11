@@ -19,7 +19,9 @@ const triggerAssetQueueProcessing = (
     });
   });
 };
-const bindPersistentQueueAutoProcessing = (persistentQueue: AssetQueueProcessor): void => { if (typeof window === "undefined" || typeof document === "undefined") { return;
+const bindPersistentQueueAutoProcessing = (persistentQueue: AssetQueueProcessor): void => {
+  if (typeof window === "undefined" || typeof document === "undefined") {
+  return;
 }
 
 const target = window as Window & {

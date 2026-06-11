@@ -68,7 +68,8 @@ const setNestedPath = (
 
   cursor[keys[keys.length - 1]] = value;
 };
-const safeRevokeBlobUrl = (url: unknown, context: string): void => { if (typeof url !== "string" || !url.startsWith("blob:")) return;
+const safeRevokeBlobUrl = (url: unknown, context: string): void => {
+  if (typeof url !== "string" || !url.startsWith("blob:")) return;
   if (typeof URL === "undefined" || typeof URL.revokeObjectURL !== "function") return;
 
   try {
@@ -77,7 +78,8 @@ const safeRevokeBlobUrl = (url: unknown, context: string): void => { if (typeof 
     console.warn(`[LocalDB] Failed to revoke blob URL (${context})`, error);
   }
 };
-const hasBlobUrlDeep = (value: unknown): boolean => { return findBlobUrlFixesDeep(value).length > 0;
+const hasBlobUrlDeep = (value: unknown): boolean => {
+  return findBlobUrlFixesDeep(value).length > 0;
 };
 const assertNoBlobUrlInCardPayload = (cardLike: unknown, context?: { entityType?: string; entityId?: string; },
 ): void => {
@@ -101,7 +103,9 @@ const assertNoBlobUrlInCardPayload = (cardLike: unknown, context?: { entityType?
     path: fixPath,
   });
 };
-const scrubBlobUrlsDeep = (value: unknown): unknown => { if (typeof value === "string") { return value.startsWith("blob:") ? null : value;
+const scrubBlobUrlsDeep = (value: unknown): unknown => {
+  if (typeof value === "string") {
+  return value.startsWith("blob:") ? null : value;
 }
 
 if (Array.isArray(value)) {
@@ -118,7 +122,8 @@ if (isRecord(value)) {
 
 return value;
 };
-const buildCardCandidateFromMods = (obj: unknown, mods: unknown): unknown => { if (!isRecord(obj)) return mods;
+const buildCardCandidateFromMods = (obj: unknown, mods: unknown): unknown => {
+  if (!isRecord(obj)) return mods;
   if (!isRecord(mods)) return obj;
 
   const candidate: Record<string, unknown> = { ...obj };

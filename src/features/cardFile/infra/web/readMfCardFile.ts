@@ -28,7 +28,8 @@ const buildMfCardImportCardSetName = ({ fileName, title }: { fileName: string;
 
   return `${baseName} ${dateLabel}`;
 };
-const readMfCardFile = async (file: File): Promise<LoadMfCardFileResult> => { const issues: MfCardIssue[] = [];
+const readMfCardFile = async (file: File): Promise<LoadMfCardFileResult> => {
+  const issues: MfCardIssue[] = [];
 
   if (!file.name.toLowerCase().endsWith(MF_CARD_FILE_EXTENSION)) {
     throw new MfCardValidationError("mfcard ファイルではありません。", [

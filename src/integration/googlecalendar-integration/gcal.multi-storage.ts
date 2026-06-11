@@ -44,12 +44,15 @@ const pendingLegacyDesktopRefreshTokens = new Map<string, string>();
 // ─────────────────────────────────────────────────────────────
 // Token validity
 // ─────────────────────────────────────────────────────────────
-const isStoredTokenValid = (account: StoredGoogleAccount): boolean => { if (!account.accessToken) return false;
+const isStoredTokenValid = (account: StoredGoogleAccount): boolean => {
+  if (!account.accessToken) return false;
   // expiry が null = レガシーデータ。有効として扱う（再接続時に刷新）
   if (account.accessTokenExpiry === null) return true;
   return Date.now() < account.accessTokenExpiry;
 };
-const buildTokenExpiry = (expiresInSeconds?: number | null): number => { if (!expiresInSeconds) { return Date.now() + TOKEN_LIFETIME_MS;
+const buildTokenExpiry = (expiresInSeconds?: number | null): number => {
+  if (!expiresInSeconds) {
+  return Date.now() + TOKEN_LIFETIME_MS;
 }
 
 return Date.now() + Math.max(0, expiresInSeconds * 1000 - TOKEN_EXPIRY_SAFETY_MARGIN_MS);
@@ -138,7 +141,9 @@ const hydratePendingLegacyDesktopRefreshTokens = (
     return refreshToken ? { ...account, refreshToken } : account;
   });
 };
-const writeStoredAccounts = (accounts: StoredGoogleAccount[]): void => { try { localStorage.setItem(MULTI_ACCOUNTS_KEY, JSON.stringify(stripLocalRefreshTokens(dedupeStoredAccounts(accounts), shouldStripLocalRefreshTokensOnWrite())));
+const writeStoredAccounts = (accounts: StoredGoogleAccount[]): void => {
+  try {
+  localStorage.setItem(MULTI_ACCOUNTS_KEY, JSON.stringify(stripLocalRefreshTokens(dedupeStoredAccounts(accounts), shouldStripLocalRefreshTokensOnWrite())));
 } catch {
   // ignore quota errors
 }
@@ -194,7 +199,9 @@ const migrateFromLegacy = (): StoredGoogleAccount[] => {
 // ─────────────────────────────────────────────────────────────
 // CRUD
 // ─────────────────────────────────────────────────────────────
-const readStoredAccounts = (): StoredGoogleAccount[] => { try { const raw = localStorage.getItem(MULTI_ACCOUNTS_KEY);
+const readStoredAccounts = (): StoredGoogleAccount[] => {
+  try {
+  const raw = localStorage.getItem(MULTI_ACCOUNTS_KEY);
   if (!raw) return migrateFromLegacy();
   const parsed = JSON.parse(raw);
   if (!Array.isArray(parsed)) return [];
@@ -214,7 +221,8 @@ const readStoredAccounts = (): StoredGoogleAccount[] => { try { const raw = loca
   return [];
 }
 };
-const upsertStoredAccount = (account: StoredGoogleAccount): void => { const accounts = readStoredAccounts();
+const upsertStoredAccount = (account: StoredGoogleAccount): void => {
+  const accounts = readStoredAccounts();
   const idx = getStoredAccountMatchIndex(accounts, account);
   if (idx >= 0) {
     accounts[idx] = mergeStoredAccounts(accounts[idx], account);
@@ -223,12 +231,14 @@ const upsertStoredAccount = (account: StoredGoogleAccount): void => { const acco
   }
   writeStoredAccounts(accounts);
 };
-const removeStoredAccount = (accountId: string): void => { writeStoredAccounts(readStoredAccounts().filter((a) => a.id !== accountId));
+const removeStoredAccount = (accountId: string): void => {
+  writeStoredAccounts(readStoredAccounts().filter((a) => a.id !== accountId));
   void clearCachedGoogleCalendarAccount(accountId).catch((error) => {
     console.warn("[gcal.multi-storage] failed to clear cached calendar events", error);
   });
 };
-const updateStoredAccountToken = (accountId: string, accessToken: string, refreshToken?: string | null, profile?: StoredGoogleAccountProfile, expiresInSeconds?: number | null): void => { const accounts = readStoredAccounts();
+const updateStoredAccountToken = (accountId: string, accessToken: string, refreshToken?: string | null, profile?: StoredGoogleAccountProfile, expiresInSeconds?: number | null): void => {
+  const accounts = readStoredAccounts();
   const idx = accounts.findIndex((a) => a.id === accountId);
   if (idx < 0) return;
 
@@ -242,7 +252,8 @@ const updateStoredAccountToken = (accountId: string, accessToken: string, refres
   };
   writeStoredAccounts(accounts);
 };
-const updateStoredAccountCalendarIds = (accountId: string, selectedCalendarIds: string[]): void => { const accounts = readStoredAccounts();
+const updateStoredAccountCalendarIds = (accountId: string, selectedCalendarIds: string[]): void => {
+  const accounts = readStoredAccounts();
   const idx = accounts.findIndex((a) => a.id === accountId);
   if (idx < 0) return;
   accounts[idx] = { ...accounts[idx], selectedCalendarIds };

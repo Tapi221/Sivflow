@@ -676,7 +676,8 @@ const collectUnresolvedAssetIds = async ({
 
   return unresolvedAssetIds;
 };
-const migrateLegacyImagesToAssets = async ({ userId }: MigrateLegacyImagesToAssetsParams): Promise<MigrationSummary> => { const migratedAssetIds = new Set<string>();
+const migrateLegacyImagesToAssets = async ({ userId }: MigrateLegacyImagesToAssetsParams): Promise<MigrationSummary> => {
+  const migratedAssetIds = new Set<string>();
   const previousState = readMigrationState(userId);
   if (previousState?.status === "done") {
     return (

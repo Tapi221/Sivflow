@@ -14,7 +14,8 @@ const RowSnap = ({ rowPx, children, afterGapRows = 0 }: RowSnapProps) => {
   const safeRowPx = Math.max(1, rowPx);
   const gapPx = Math.max(0, Math.round(afterGapRows)) * safeRowPx;
 
-  React.useEffect(() => { paddingRef.current = snapPaddingBottomPx; }, [snapPaddingBottomPx]);
+  React.useEffect(() => {
+    paddingRef.current = snapPaddingBottomPx; }, [snapPaddingBottomPx]);
 
   const scheduleMeasure = React.useCallback(() => {
     if (rafRef.current != null) return;
@@ -41,7 +42,8 @@ const RowSnap = ({ rowPx, children, afterGapRows = 0 }: RowSnapProps) => {
     scheduleMeasure();
   }, [scheduleMeasure]);
 
-  React.useLayoutEffect(() => { scheduleMeasure(); }, [scheduleMeasure]);
+  React.useLayoutEffect(() => {
+    scheduleMeasure(); }, [scheduleMeasure]);
 
   React.useEffect(() => {
     return () => {

@@ -37,7 +37,8 @@ const emptyLoadedState = {
   loaded: null as LoadMfCardFileResult | null,
 };
 
-const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets, onImported, createCardSet, updateCardSet, createCard, ensureTagByName, initialFile = null, initialFileRevision = 0 }: MfCardImportDialogProps) => { const toast = useToast();
+const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets, onImported, createCardSet, updateCardSet, createCard, ensureTagByName, initialFile = null, initialFileRevision = 0 }: MfCardImportDialogProps) => {
+  const toast = useToast();
   const [destinationMode, setDestinationMode] = useState<"new" | "existing">(
     "new",
   );
