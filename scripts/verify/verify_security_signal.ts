@@ -64,7 +64,7 @@ const verifySecuritySignal = async () => {
   userRef.onSnapshot((snap) => {
     const data = snap.data();
     if (data?.isAccountLocked) {
-      console.log("✅ [SUCCESS] Account lock signal received!");
+      console.log("[SUCCESS] Account lock signal received!");
       console.log("   Data:", JSON.stringify(data, null, 2));
       process.exit(0);
     }
@@ -81,7 +81,7 @@ const verifySecuritySignal = async () => {
 
   console.log("[Verify] Waiting for trigger...");
   await wait(5000);
-  console.error("❌ [FAIL] Timeout waiting for lock signal");
+  console.error("[FAIL] Timeout waiting for lock signal");
   process.exit(1);
 };
 
