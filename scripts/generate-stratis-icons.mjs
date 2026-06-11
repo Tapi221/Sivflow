@@ -28,20 +28,20 @@ const SVG_ATTR_ALIASES = new Map([
   ["xlink:href", "xlinkHref"],
 ]);
 
-function toPascalCase(value) {
+const toPascalCase = (value) => {
   return value
     .replace(/\.svg$/i, "")
     .split(/[^a-zA-Z0-9]+/)
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join("");
-}
+};
 
-function escapeRegExp(value) {
+const escapeRegExp = (value) => {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
+};
 
-function normalizeAttributes(markup) {
+const normalizeAttributes = (markup) => {
   let normalized = markup.replace(/\bclass=/g, "className=");
   for (const [from, to] of SVG_ATTR_ALIASES) {
     normalized = normalized.replace(
@@ -50,9 +50,9 @@ function normalizeAttributes(markup) {
     );
   }
   return normalized;
-}
+};
 
-function normalizePaint(markup, prefersStroke) {
+const normalizePaint = (markup, prefersStroke) => {
   let normalized = markup
     .replace(/\s(width|height)="[^"]*"/g, "")
     .replace(
@@ -72,9 +72,9 @@ function normalizePaint(markup, prefersStroke) {
   }
 
   return normalized;
-}
+};
 
-function uniquifyIds(markup) {
+const uniquifyIds = (markup) => {
   const ids = [...markup.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
   if (ids.length === 0) {
     return { markup, usesIds: false };
@@ -98,9 +98,9 @@ function uniquifyIds(markup) {
   }
 
   return { markup: nextMarkup, usesIds: true };
-}
+};
 
-function extractSvgParts(svgSource) {
+const extractSvgParts = (svgSource) => {
   const cleaned = svgSource
     .replace(/<\?xml[\s\S]*?\?>/gi, "")
     .replace(/<!doctype[\s\S]*?>/gi, "")
@@ -110,9 +110,9 @@ function extractSvgParts(svgSource) {
     throw new Error("SVG root element not found");
   }
   return { attributes: match[1], inner: match[2].trim() };
-}
+};
 
-function resolveViewBox(attributes) {
+const resolveViewBox = (attributes) => {
   const viewBox = attributes.match(/\bviewBox="([^"]+)"/i)?.[1];
   if (viewBox) return viewBox;
 
@@ -120,9 +120,9 @@ function resolveViewBox(attributes) {
   const height = attributes.match(/\bheight="([^"]+)"/i)?.[1];
   if (width && height) return `0 0 ${width} ${height}`;
   return "0 0 24 24";
-}
+};
 
-function buildComponentSource(componentName, svgMarkup, usesIds) {
+const buildComponentSource = (componentName, svgMarkup, usesIds) => {
   const hookLine = usesIds
     ? "  const idPrefix = useId().replace(/:/g, '');\n\n"
     : "";
@@ -135,10 +135,7 @@ import type { SVGProps } from 'react';
 
 export type ${componentName}Props = SVGProps<SVGSVGElement>;
 
-export const ${componentName} = forwardRef<SVGSVGElement, ${componentName}Props>(function ${componentName}(
-  { className, ...props },
-  ref
-) {
+export const ${componentName} = forwardRef<SVGSVGElement, ${componentName}Props>(({ className, ...props }, ref) => {
 ${hookLine}  return (
     ${svgMarkup
       .replace(
@@ -148,10 +145,12 @@ ${hookLine}  return (
       .replace("<svg ", "<svg ref={ref} {...props} ")}
   );
 });
-`;
-}
 
-async function main() {
+${componentName}.displayName = "${componentName}";
+`;
+};
+
+const main = async () => {
   await fs.mkdir(inputDir, { recursive: true });
   await fs.mkdir(outputDir, { recursive: true });
 
@@ -191,7 +190,7 @@ async function main() {
     "utf8",
   );
   console.log(`Generated ${svgFiles.length} Stratis icon component(s).`);
-}
+};
 
 main().catch((error) => {
   console.error(error);
