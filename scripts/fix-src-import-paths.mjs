@@ -10,6 +10,7 @@ const IMPORT_PATTERNS = [
   /(\bimport\s*\(\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+)(["']\s*\))/g,
   /(\bexport\s+[^;]*?\s+from\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+)(["'])/g,
 ];
+const MULTILINE_IMPORT_EXPORT_PATTERN = /(^|\n)((?:import|export)\s[\s\S]*?;)/g;
 const ALIAS_ROOTS = [
   { directory: path.join(ROOT_DIR, "src"), prefix: "@" },
   { directory: path.join(ROOT_DIR, "apps/mobile/src"), prefix: "@mobile" },
@@ -130,6 +131,21 @@ const normalizeImportSpecifiers = (filePath, source) => IMPORT_PATTERNS.reduce((
   return nextSpecifier === specifier ? match : `${prefix}${nextSpecifier}${suffix}`;
 }), source);
 
+const collapseMultilineImportExportDeclarations = (source) => source.replace(MULTILINE_IMPORT_EXPORT_PATTERN, (match, prefix, declaration) => {
+  if (!declaration.includes("\n")) return match;
+  if (!/^import\s/.test(declaration) && !/^export\s/.test(declaration)) return match;
+
+  const collapsedDeclaration = declaration
+    .replace(/\s*\n\s*/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/\{\s+/g, "{ ")
+    .replace(/\s+\}/g, " }")
+    .replace(/\s+,/g, ",")
+    .trim();
+
+  return `${prefix}${collapsedDeclaration}`;
+});
+
 const applyTargetedLintFixes = (filePath, source) => {
   const relativePath = toPosix(path.relative(ROOT_DIR, filePath));
   let nextSource = source;
@@ -162,7 +178,8 @@ const applyTargetedLintFixes = (filePath, source) => {
 const updateFile = (filePath) => {
   const originalSource = readFileSync(filePath, "utf8");
   const normalizedSource = normalizeImportSpecifiers(filePath, originalSource);
-  const nextSource = applyTargetedLintFixes(filePath, normalizedSource);
+  const collapsedSource = collapseMultilineImportExportDeclarations(normalizedSource);
+  const nextSource = applyTargetedLintFixes(filePath, collapsedSource);
 
   if (nextSource === originalSource) return false;
 
