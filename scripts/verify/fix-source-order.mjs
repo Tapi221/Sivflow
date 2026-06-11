@@ -172,7 +172,7 @@ const collectOrderNodes = (source, sourceFile, statements, startIndex) => {
 
   for (const target of nodes) {
     for (const sourceNode of nodes) {
-      if (sourceNode === target) continue;
+      if (sourceNode.index >= target.index) continue;
       if (sourceNode.names.length === 0) continue;
       if (sourceNode.names.some((name) => statementReferencesName(target.statementText, name))) target.dependencies.add(sourceNode.index);
     }
