@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
 import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
 import type { ImageGalleryItem } from "./types";
@@ -133,7 +133,7 @@ export const AudioPlayer = ({ urls }: AudioPlayerProps) => { const [playingIndex
   return (
     <div className="flex flex-wrap gap-2 mt-3 justify-center">
       {urls.map((url, index) => (
-        <div key={index}>
+        <Fragment key={index}>
           <audio
             ref={(el) => {
               audioRefs.current[index] = el;
@@ -157,7 +157,7 @@ export const AudioPlayer = ({ urls }: AudioPlayerProps) => { const [playingIndex
             )}
             <Volume2 className="w-3 h-3" />
           </Button>
-        </div>
+        </Fragment>
       ))}
     </div>
   );
