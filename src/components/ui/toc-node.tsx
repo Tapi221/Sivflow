@@ -5,9 +5,7 @@ import * as React from 'react';
 import type { PlateElementProps } from 'platejs/react';
 
 import { useTocElement, useTocElementState } from '@platejs/toc/react';
-
 import { cva } from 'class-variance-authority';
-
 import { PlateElement } from 'platejs/react';
 
 import { Button } from './button';
@@ -29,7 +27,8 @@ const headingItemVariants = cva(
   }
 );
 
-export function TocElement(props: PlateElementProps) { const state = useTocElementState();
+export const TocElement = (props: PlateElementProps) => {
+  const state = useTocElementState();
   const { props: btnProps } = useTocElement(state);
   const { activeContentId, headingList } = state;
 
@@ -41,25 +40,18 @@ export function TocElement(props: PlateElementProps) { const state = useTocEleme
             <Button
               key={item.id}
               variant="ghost"
-              className={headingItemVariants({
-                active: item.id === activeContentId,
-                depth: item.depth as 1 | 2 | 3,
-              })}
+              className={headingItemVariants({ active: item.id === activeContentId, depth: item.depth as 1 | 2 | 3 })}
               onClick={(e) => btnProps.onClick(e, item, 'smooth')}
-              aria-current={
-                item.id === activeContentId ? 'location' : undefined
-              }
+              aria-current={item.id === activeContentId ? 'location' : undefined}
             >
               {item.title}
             </Button>
           ))
         ) : (
-          <div className="text-gray-500 text-sm">
-            Create a heading to display the table of contents.
-          </div>
+          <div className="text-gray-500 text-sm">Create a heading to display the table of contents.</div>
         )}
       </div>
       {props.children}
     </PlateElement>
   );
-}
+};
