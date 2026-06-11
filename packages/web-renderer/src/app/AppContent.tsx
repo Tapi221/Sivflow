@@ -58,7 +58,7 @@ const AppContent = () => {
 
   const devStandaloneRouteElement = getDevStandaloneRouteElement(isTestBypass);
   if (devStandaloneRouteElement) {
-    return <>{devStandaloneRouteElement}</>;
+    return devStandaloneRouteElement;
   }
 
   return (
