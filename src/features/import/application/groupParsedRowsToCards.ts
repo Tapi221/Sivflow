@@ -1,5 +1,7 @@
 import type { ImportIssue, ParsedImportRow } from "@/features/import/domain/import.types";
 
+
+
 const buildIssue = ({
   level,
   code,
@@ -17,8 +19,7 @@ const buildIssue = ({
     message,
   };
 };
-export const groupParsedRowsToCards = (rows: ParsedImportRow[]) => {
-  const issues: ImportIssue[] = [];
+export const groupParsedRowsToCards = (rows: ParsedImportRow[]) => { const issues: ImportIssue[] = [];
   const cardMap = new Map<
     string,
     {

@@ -11,6 +11,8 @@ import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 
 
+
+
 type FirebaseClientState = {
   app: FirebaseApp | null;
   auth: Auth | null;
@@ -18,6 +20,8 @@ type FirebaseClientState = {
   functionsClient: Functions | null;
   firestoreDb: Firestore | null;
 };
+
+
 
 
 
@@ -48,6 +52,8 @@ const firebaseConfig = {
 
 
 
+
+
 const getFirebaseEnvValue = (key: (typeof REQUIRED_FIREBASE_ENV_KEYS)[number]) => {
   return import.meta.env[key];
 };
@@ -71,8 +77,12 @@ const createUnavailableState = (): FirebaseClientState => ({
 
 
 
+
+
 export const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
 export const isFirebaseClientAvailable = missingFirebaseEnvVars.length === 0;
+
+
 
 
 
@@ -137,6 +147,8 @@ const initializeFirebaseClient = (): FirebaseClientState => {
 
 
 
+
+
 const firebaseClientState = initializeFirebaseClient();
 export const firebaseApp = firebaseClientState.app;
 export const auth = firebaseClientState.auth as Auth;
@@ -144,6 +156,8 @@ export const storage = firebaseClientState.storage as FirebaseStorage;
 export const functionsClient = firebaseClientState.functionsClient as Functions;
 export const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
 export const db: Firestore | null = firebaseClientState.firestoreDb;
+
+
 
 
 

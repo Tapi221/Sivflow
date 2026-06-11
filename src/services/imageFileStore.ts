@@ -18,10 +18,14 @@ export type ImageBlobRecord = { localBlobId: string;
 
 
 
+
+
 const DB_NAME = "image_file_store";
 const STORE_NAME = "image_files";
 const DB_VERSION = 1;
 let dbPromise: Promise<IDBDatabase> | null = null;
+
+
 
 
 

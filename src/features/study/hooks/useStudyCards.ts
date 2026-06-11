@@ -9,6 +9,8 @@ import type { Card, CardSet, Folder, UserSettings } from "@/types";
 
 
 
+
+
 type StudyCard = Card;
 type Params = {
   folderId: string | null;
@@ -18,6 +20,8 @@ type Params = {
   foldersLoading: boolean;
   settings: Partial<UserSettings> | null | undefined;
 };
+
+
 
 
 

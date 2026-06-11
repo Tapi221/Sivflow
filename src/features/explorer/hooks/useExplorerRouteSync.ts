@@ -5,6 +5,8 @@ import { mapExplorerSelectionToSearchParams } from "@/features/explorer/mappers/
 import { isSameSelectedExplorerItem } from "@/features/explorer/utils/isSameSelectedExplorerItem";
 import type { SelectedExplorerItem } from "@/types";
 
+
+
 type Params = {
   route: FoldersRouteAdapter;
   isHomeOnlyMode: boolean;
@@ -14,6 +16,8 @@ type Params = {
   applyRouteState: (next: ExplorerRouteState) => void;
 };
 
+
+
 const areRouteStatesEqual = (
   a: ExplorerRouteState,
   b: ExplorerRouteState,
@@ -22,8 +26,7 @@ const areRouteStatesEqual = (
   a.isSectionListMode === b.isSectionListMode &&
   a.selectedFolderId === b.selectedFolderId &&
   isSameSelectedExplorerItem(a.selectedItem, b.selectedItem);
-export const useExplorerRouteSync = ({ route, isHomeOnlyMode, isSectionListMode, selectedFolderId, selectedItem, applyRouteState }: Params) => {
-  const pendingQueryRef = useRef<string | null>(null);
+export const useExplorerRouteSync = ({ route, isHomeOnlyMode, isSectionListMode, selectedFolderId, selectedItem, applyRouteState }: Params) => { const pendingQueryRef = useRef<string | null>(null);
   const timerRef = useRef(0);
   const previousRouteKeyRef = useRef(route.routeKey);
 

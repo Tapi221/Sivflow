@@ -11,6 +11,8 @@ import { Check, Palette, Plus, Tag as TagIcon } from "@/ui/icons";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
 
+
+
 interface TagInputProps {
   tags: string[];
   onChange: (tags: string[]) => void;
@@ -19,8 +21,9 @@ interface TagInputProps {
   quietHover?: boolean;
 }
 
-export const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", className, quietHover = false }: TagInputProps) => {
-  const [open, setOpen] = React.useState(false);
+
+
+export const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", className, quietHover = false }: TagInputProps) => { const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
   const [selectedColor, setSelectedColor] = React.useState<TagColorKey | null>(
     null,

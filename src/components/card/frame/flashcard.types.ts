@@ -2,6 +2,8 @@ import type { InkDocument } from "@core/domain/card/ink/inkDocument";
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 
+
+
 export type FlashcardMediaLike = string | { remoteUrl?: string | null; localUrl?: string | null; url?: string | null; localFileId?: string | null; assetId?: string | null; };
 type FlashcardCodeLike = { code?: string; language?: string; } | null;
 type FlashcardFaceLike = {
@@ -9,8 +11,7 @@ type FlashcardFaceLike = {
   attachments?: CardFaceAttachments | null;
   ink?: InkDocument | null;
 } | null;
-export type FlashcardCardLike = {
-  id?: string;
+export type FlashcardCardLike = { id?: string;
   cardId?: string;
   has_uncertainty?: boolean;
   hasUncertainty?: boolean;
@@ -46,8 +47,7 @@ export type FlashcardCardLike = {
   inkAnswer?: InkDocument | null;
   [key: string]: unknown;
 };
-export type FlashcardSideDerivedSnapshot = {
-  activeSide: "question" | "answer";
+export type FlashcardSideDerivedSnapshot = { activeSide: "question" | "answer";
   activeImageItems: FlashcardMediaLike[];
   activeImages: string[];
   activeAudioUrls: string[];
@@ -55,14 +55,12 @@ export type FlashcardSideDerivedSnapshot = {
   activeBlocks: CardBlock[];
   activeInkDocument: InkDocument;
 };
-export type FlashcardSharedDerivedSnapshot = {
-  cardId: string | null;
+export type FlashcardSharedDerivedSnapshot = { cardId: string | null;
   hasUncertainty: boolean;
   isBookmarked: boolean;
   layoutRows: number;
 };
-export type FlashcardDualDerivedSnapshot = FlashcardSharedDerivedSnapshot & {
-  question: FlashcardSideDerivedSnapshot;
+export type FlashcardDualDerivedSnapshot = FlashcardSharedDerivedSnapshot & { question: FlashcardSideDerivedSnapshot;
   answer: FlashcardSideDerivedSnapshot;
 };
 export interface FlashcardDerived extends FlashcardSharedDerivedSnapshot, FlashcardSideDerivedSnapshot {}

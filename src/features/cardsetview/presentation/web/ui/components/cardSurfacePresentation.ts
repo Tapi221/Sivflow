@@ -2,8 +2,9 @@ import { buildCardRenderSpec, type CardInteractionMode, type CardRenderSpec, res
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-export type SharedCardSurfaceMetrics = {
-  renderSpec: CardRenderSpec;
+
+
+export type SharedCardSurfaceMetrics = { renderSpec: CardRenderSpec;
   isSplitLayout: boolean;
   isFlipLayout: boolean;
   baseFixedScale?: number;
@@ -13,8 +14,7 @@ export type SharedCardSurfaceMetrics = {
   sideContentZoom: number;
   sideHeaderIconVisualScale: number;
 };
-export type BuildCardSurfaceMetricsArgs = Readonly<{
-  displayMode: CardDisplayMode;
+export type BuildCardSurfaceMetricsArgs = Readonly<{ displayMode: CardDisplayMode;
   cardLayoutMode: CardLayoutMode;
   interactionMode?: CardInteractionMode;
   zoomScale: number;
@@ -22,14 +22,15 @@ export type BuildCardSurfaceMetricsArgs = Readonly<{
   showInk?: boolean;
 }>;
 
+
+
 const resolveSafeFitScale = (value?: number) => {
   if (typeof value !== "number") return 1;
   if (!Number.isFinite(value)) return 1;
   if (value <= 0) return 1;
   return value;
 };
-export const buildCardSurfaceMetrics = ({ displayMode, cardLayoutMode, interactionMode = "view", zoomScale, fitScale = 1, showInk = interactionMode === "view" && displayMode === "fixed" }: BuildCardSurfaceMetricsArgs): SharedCardSurfaceMetrics => {
-  const safeFitScale = resolveSafeFitScale(fitScale);
+export const buildCardSurfaceMetrics = ({ displayMode, cardLayoutMode, interactionMode = "view", zoomScale, fitScale = 1, showInk = interactionMode === "view" && displayMode === "fixed" }: BuildCardSurfaceMetricsArgs): SharedCardSurfaceMetrics => { const safeFitScale = resolveSafeFitScale(fitScale);
   const renderSpec = buildCardRenderSpec({
     displayMode,
     interactionMode,
@@ -83,8 +84,7 @@ export const buildCardSurfaceMetrics = ({ displayMode, cardLayoutMode, interacti
     sideHeaderIconVisualScale,
   };
 };
-export const buildSharedCardSurfaceMetrics = ({ displayMode, cardLayoutMode, zoomScale }: {
-  displayMode: CardDisplayMode;
+export const buildSharedCardSurfaceMetrics = ({ displayMode, cardLayoutMode, zoomScale }: { displayMode: CardDisplayMode;
   cardLayoutMode: CardLayoutMode;
   zoomScale: number;
 }) => buildCardSurfaceMetrics({ displayMode, cardLayoutMode, zoomScale });

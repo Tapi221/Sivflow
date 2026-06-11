@@ -1,4 +1,3 @@
-export type CalendarDateRange = {
-  start: Date;
+export type CalendarDateRange = { start: Date;
   end: Date;
 };

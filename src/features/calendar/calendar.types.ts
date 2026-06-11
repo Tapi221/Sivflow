@@ -1,6 +1,5 @@
 export type CalendarWeekStartDay = "sunday" | "monday";
-export type CalendarTimestampLike = | Date | string | number | {
-  toDate?: () => Date;
+export type CalendarTimestampLike = | Date | string | number | { toDate?: () => Date;
   seconds?: number;
   nanoseconds?: number;
   _seconds?: number;
@@ -8,14 +7,12 @@ export type CalendarTimestampLike = | Date | string | number | {
 }
   | null
   | undefined;
-export type CalendarFolderLike = {
-  id?: string;
+export type CalendarFolderLike = { id?: string;
   folderId?: string;
   isDeleted?: boolean;
   is_deleted?: boolean;
 };
-export type CalendarCardLike = {
-  id: string;
+export type CalendarCardLike = { id: string;
   cardSetId?: string | null;
   card_set_id?: string | null;
   folderId?: string | null;
@@ -38,29 +35,24 @@ export type CalendarCardLike = {
   memoryStability?: number | null;
   title?: string;
 };
-export type CalendarCardSetLike = {
-  id: string;
+export type CalendarCardSetLike = { id: string;
   folderId?: string | null;
   isDeleted?: boolean;
 };
-export type CalendarDisplayCard = CalendarCardLike & {
-  is_overdue?: boolean;
+export type CalendarDisplayCard = CalendarCardLike & { is_overdue?: boolean;
 };
-export type CalendarStudyLogLike = {
-  id?: string;
+export type CalendarStudyLogLike = { id?: string;
   studiedAt?: CalendarTimestampLike;
   createdAt?: CalendarTimestampLike;
 };
 export type CalendarDateKey = string;
 export type CalendarCardsByDate = Record<CalendarDateKey, CalendarDisplayCard[]>;
-export type CalendarResistanceLegendItem = {
-  label: string;
+export type CalendarResistanceLegendItem = { label: string;
   min: number;
   max: number;
   color: string;
 };
-export type CalendarDayCell = {
-  date: Date;
+export type CalendarDayCell = { date: Date;
   dateKey: string;
   isCurrentMonth: boolean;
   isSelected: boolean;
@@ -68,21 +60,17 @@ export type CalendarDayCell = {
   cards: CalendarDisplayCard[];
   intensity: number;
 };
-export type CalendarHeaderViewModel = {
-  monthLabel: string;
+export type CalendarHeaderViewModel = { monthLabel: string;
   streak: number;
 };
-export type CalendarSummaryViewModel = {
-  todayDueCount: number;
+export type CalendarSummaryViewModel = { todayDueCount: number;
   todayDescription: string;
   isTodaySelected: boolean;
 };
-export type CalendarGridViewModel = {
-  weekDays: string[];
+export type CalendarGridViewModel = { weekDays: string[];
   days: CalendarDayCell[];
 };
-export type CalendarScreenViewModel = {
-  header: CalendarHeaderViewModel;
+export type CalendarScreenViewModel = { header: CalendarHeaderViewModel;
   summary: CalendarSummaryViewModel;
   grid: CalendarGridViewModel;
   selectedDateLabel: string;
@@ -90,8 +78,7 @@ export type CalendarScreenViewModel = {
 export type CalendarViewMode = "year" | "month" | "week" | "threeDays" | "days" | "timetable" | "list" | "pieChart";
 export type CalendarViewModeSelection = CalendarViewMode | readonly CalendarViewMode[];
 export type CalendarToolbarMode = "calendar" | "task";
-export type CalendarDemoEvent = {
-  id: string;
+export type CalendarDemoEvent = { id: string;
   title: string;
   startsAt: Date;
   minutes: number;

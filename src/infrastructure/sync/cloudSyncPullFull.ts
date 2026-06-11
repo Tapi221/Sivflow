@@ -8,6 +8,8 @@ import type { SyncChange } from "@/services/interfaces/ISyncService";
 
 
 
+
+
 export const pullCloudSyncFull = async (userId: string, entityIds: string[]): Promise<SyncChange[]> => { const results: SyncChange[] = [];
   const firestore = requireCloudSyncFirestore();
 

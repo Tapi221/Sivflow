@@ -5,4 +5,6 @@ import platform from "@/platform";
 
 
 
+
+
 export const appInfo: AppInfoPort = { getVersion: () => platform.app.getVersion() };

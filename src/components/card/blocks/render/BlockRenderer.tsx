@@ -5,6 +5,8 @@ import { useViewerSceneProps } from "@/components/card/blocks/shared/useViewerSc
 import type { CardBlock } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 interface BlockRendererProps {
   blocks?: CardBlock[];
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
@@ -12,8 +14,9 @@ interface BlockRendererProps {
   zoom?: number;
 }
 
-export const BlockRenderer = ({ blocks, onGalleryFullscreenChange, displayMode = "fixed", zoom = 1 }: BlockRendererProps) => {
-  const viewerProps = useViewerSceneProps({ onGalleryFullscreenChange, displayMode, zoom });
+
+
+export const BlockRenderer = ({ blocks, onGalleryFullscreenChange, displayMode = "fixed", zoom = 1 }: BlockRendererProps) => { const viewerProps = useViewerSceneProps({ onGalleryFullscreenChange, displayMode, zoom });
 
   const renderableBlocks = useMemo(
     () => filterRenderableCardBlocks(blocks),
