@@ -12,18 +12,27 @@
 }
 
 .pdf-pane__toolbar {
-  position: relative;
-  z-index: 2;
+  position: absolute;
+  top: 0.75rem;
+  right: 1rem;
+  z-index: 20;
   display: flex;
-  flex: 0 0 3rem;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: 0.375rem;
+  max-width: max(16rem, calc(100% - 22rem));
   min-width: 0;
-  min-height: 3rem;
-  padding: 0.5rem 0.75rem;
-  border-bottom: 1px solid rgb(0 0 0 / 0.1);
-  background: rgb(255 255 255 / 0.82);
-  backdrop-filter: blur(12px);
+  min-height: 2rem;
+  padding: 0;
+  border-bottom: 0;
+  background: transparent;
+  backdrop-filter: none;
+  pointer-events: none;
+}
+
+.pdf-pane__toolbar > * {
+  pointer-events: auto;
 }
 
 .pdf-pane__toolbar-label {
@@ -43,7 +52,7 @@
 /* PDF.js requires the container passed to PDFViewer to be absolutely positioned. */
 .pdf-pane__scroll-container {
   position: absolute;
-  inset: 3rem 0 0;
+  inset: 0;
   contain: layout paint style;
   overflow: auto;
   overflow-anchor: none;
