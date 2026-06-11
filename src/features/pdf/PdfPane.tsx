@@ -109,8 +109,6 @@ type PdfZoomCommit = {
   pageNumbers: Set<number>;
 };
 
-export type { PdfPaneProps, PdfViewerStateChangeOptions };
-
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 640;
 const PDF_EXPLICIT_ZOOM_SCALE_CHANGE_WINDOW_MS = 500;
 const PDF_HISTORY_LIMIT = 80;
@@ -1131,4 +1129,5 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
   );
 };
 
+export type { PdfPaneProps, PdfViewerStateChangeOptions };
 export { PdfPane };
