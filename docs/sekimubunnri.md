@@ -26,6 +26,16 @@ apps/mobile
   ios/ に必要な Swift native module / native view を置く。
   android/ に必要なら Kotlin native module を置く。
 
+functions
+  Firebase Cloud Functions の実装と functions package 設定。
+  src/ に function 本体を置く。
+  repo 全体の運用スクリプトは置かない。
+
+scripts
+  repo 全体の運用スクリプト置き場。
+  dev、verify、predeploy、functions 用の補助処理をここに置く。
+  functions/scripts は作らない。
+
 packages/web-renderer
   Web と Tauri が共有する React UI 本体。
   DOM 前提の component はここ。
@@ -53,6 +63,45 @@ shared/schemas
 shared/design-tokens
   Web CSS / RN StyleSheet / Swift Color に変換する元。
 ```
+
+## scripts と functions の責務分離
+
+`functions/` は Firebase Cloud Functions の resource directory として扱う。Cloud Functions の実装、`functions/package.json`、`tsconfig.json`、生成される `functions.yaml` など、Firebase Functions package として必要なものだけを置く。
+
+repo 全体の運用スクリプトは root の `scripts/` 配下に置く。`functions/scripts/` は作らない。互換用 wrapper を `functions/scripts/` に残すことも禁止する。
+
+Firebase Functions に関係する運用スクリプトでも、実装本体ではなく manifest 生成、predeploy、検証、整形などの補助処理であれば root の `scripts/` に置く。
+
+```text
+Firebase Functions の実装
+  functions/src/
+
+Firebase Functions package 設定
+  functions/package.json
+  functions/tsconfig.json
+
+Firebase Functions manifest 生成 script
+  scripts/functions/generateManifest.cjs
+
+Firebase deploy 前処理
+  scripts/predeploy/firebase-predeploy.cjs
+
+source 規約や検証 script
+  scripts/verify/
+
+開発用 watch script
+  scripts/dev/
+```
+
+`functions/package.json` から root scripts を呼ぶ場合は `../scripts/...` を使う。
+
+```text
+OK: node ../scripts/functions/generateManifest.cjs
+NG: node scripts/generateManifest.mjs
+NG: node functions/scripts/generateManifest.mjs
+```
+
+`firebase.json` の predeploy は root の predeploy script を入口にし、`ci`、`build`、`manifest` などの実行順序は `scripts/predeploy/firebase-predeploy.cjs` 側で管理する。Firebase 設定ファイルに同じ手順を複数行で分散させない。
 
 ## constants フォルダを作らない
 
@@ -216,6 +265,9 @@ Swift / Kotlin / TypeScript 間で型生成したい Ink document や handwritin
 Web と Tauri は renderer を共有する。
 React Native は別 renderer にする。
 Swift は apps/mobile/ios 配下の native extension として扱う。
+functions は Firebase Functions 実装と package 設定に限定する。
+repo 全体の運用スクリプトは root scripts に置く。
+functions/scripts は作らない。
 constants フォルダは作らず、責務を持つ module に値を置く。
 そのファイルでしか使わない定数は、そのファイル内に定義する。
 複数ファイルで使う定数だけ、責務 module 内の .constants.ts に置いてよい。
