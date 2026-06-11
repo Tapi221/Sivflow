@@ -100,6 +100,10 @@ Rules:
 - File order must be imports, type definitions, constants, helper functions, component body, memo / displayName / export.
 - Put exactly one blank line between those blocks.
 - Put dependencies before dependents.
+- Use <>...</> for wrapper-only multiple JSX children.
+- Do not use React.Fragment or Fragment explicitly except with key inside map.
+- Do not wrap a single child in <>...</>; return the child directly.
+- Do not use a div only as a wrapper unless className, style, ref, onClick, role, aria-*, data-*, or layout is needed.
 - Preserve behavior.
 
 File: ${toPosix(relative(ROOT_DIR, filePath))}

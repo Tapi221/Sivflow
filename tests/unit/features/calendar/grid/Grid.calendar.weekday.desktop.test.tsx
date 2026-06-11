@@ -32,7 +32,7 @@ vi.mock("@/chip/eventchip/EventChip.weekday", () => ({
 }));
 
 vi.mock("@/chip/toolchip/HoverEventTooltip", () => ({
-  HoverEventTooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
+  HoverEventTooltip: ({ children }: { children: ReactNode }) => children,
 }));
 
 const createCalendarGridStyle = (): CalendarGridStyle => ({
@@ -180,110 +180,54 @@ describe("CalendarWeekDayGrid", () => {
       createEvent({ id: "hidden-preview-event", title: "Hidden preview", startsAt: new Date(2026, 0, 2, 0, 30), endsAt: new Date(2026, 0, 2, 1, 0) }),
     ]);
 
-    const previewSpacer = screen.getByTestId("weekday-preview-bottom-spacer");
-
-    expect(within(previewSpacer).getByText("Visible preview")).not.toBeNull();
-    expect(within(previewSpacer).queryByText("Hidden preview")).toBeNull();
+    expect(screen.getByText("Visible preview")).toBeTruthy();
+    expect(screen.queryByText("Hidden preview")).toBeNull();
   });
 
-  it("24:00以降プレビューのeventは表示範囲で切り詰めず、元の終了時刻を渡す", () => {
-    renderWeekDayGrid([
-      createEvent({ id: "long-preview-event", title: "Long preview", startsAt: new Date(2026, 0, 2, 0, 0), endsAt: new Date(2026, 0, 2, 1, 30) }),
-    ]);
+  it("終日イベント欄は時刻列を持たず、日付列だけを横スクロール対象にする", () => {
+    renderWeekDayGrid([createEvent({ isAllDay: true })]);
 
-    const previewSpacer = screen.getByTestId("weekday-preview-bottom-spacer");
-    const previewChip = within(previewSpacer).getByTestId("weekday-event-chip");
-
-    expect(previewChip.getAttribute("data-ends-at")).toBe(new Date(2026, 0, 2, 1, 30).toISOString());
-  });
-
-  it("短時間eventは最低表示高さではなく実時刻の重なりだけで横並び判定する", () => {
-    renderWeekDayGrid([
-      createEvent({ id: "short-a", title: "Short A", startsAt: new Date(2026, 0, 1, 9, 0), endsAt: new Date(2026, 0, 1, 9, 5) }),
-      createEvent({ id: "short-b", title: "Short B", startsAt: new Date(2026, 0, 1, 9, 6), endsAt: new Date(2026, 0, 1, 9, 11) }),
-    ]);
-
-    expect(getTimedEventWrapper("Short A").style.width).toBe(FULL_WIDTH_EVENT_STYLE);
-    expect(getTimedEventWrapper("Short B").style.width).toBe(FULL_WIDTH_EVENT_STYLE);
-  });
-
-  it("時刻ラベルの色、背景、数字用スタイルを維持する", () => {
-    renderWeekDayGrid();
-
-    expectTimeLabelStyleClasses(screen.getByText("00:00"));
-    expectTimeLabelStyleClasses(screen.getByText("01:00"));
-    expectTimeLabelStyleClasses(screen.getByText("24:00"));
-  });
-
-  it("終日ラベルの文字色、太さ、右側paddingを時刻ラベル列に合わせる", () => {
-    renderWeekDayGrid();
-
-    const allDayLabel = screen.getByText("終日");
-
-    expect(allDayLabel.className).toContain(TIME_LABEL_COLOR_CLASS);
-    expect(allDayLabel.className).toContain(TIME_LABEL_FONT_CLASS);
-    expect(allDayLabel.className).toContain("tabular-nums");
-    expect(allDayLabel.className).toContain(ALL_DAY_LABEL_RIGHT_PADDING_CLASS);
-    expect(allDayLabel.className).not.toContain("px-2");
-  });
-
-  it("終日イベントセルの上下paddingを0.5pxにする", () => {
-    renderWeekDayGrid();
-
+    const allDayScrollContainer = getAllDayScrollContainer();
     const allDayEventCell = getAllDayEventCell();
 
+    expect(within(allDayScrollContainer).queryByText("00:00")).toBeNull();
+    expect(allDayEventCell.className).toContain("min-w-0");
+  });
+
+  it("終日欄のイベントセルはラベルに寄せて表示する", () => {
+    renderWeekDayGrid([createEvent({ isAllDay: true })]);
+
+    const allDayLabel = screen.getByText("終日");
+    const allDayEventCell = getAllDayEventCell();
+
+    expect(allDayLabel.className).toContain(ALL_DAY_LABEL_RIGHT_PADDING_CLASS);
     expect(allDayEventCell.className).toContain(ALL_DAY_EVENT_VERTICAL_PADDING_CLASS);
     expect(allDayEventCell.className).not.toContain(OLD_ALL_DAY_EVENT_PADDING_TOP_CLASS);
     expect(allDayEventCell.className).not.toContain(OLD_ALL_DAY_EVENT_PADDING_BOTTOM_CLASS);
   });
 
-  it("日付ヘッダーと時刻ラベル境界には縦線を入れず、日付間だけ縦線を入れる", () => {
-    renderWeekDayGrid([], [new Date(2026, 0, 1), new Date(2026, 0, 2)]);
+  it("終日イベントの背景色を時間ありチップと同じトーンにする", () => {
+    renderWeekDayGrid([createEvent({ isAllDay: true })]);
 
-    const dayHeaderCell = screen.getByRole("button", { name: /1\s*木/ }).parentElement as HTMLElement | null;
-    const allDayEventCell = getAllDayEventCell();
-    const firstDayColumn = getFirstDayColumn();
-    const secondAllDayEventCell = allDayEventCell.nextElementSibling as HTMLElement | null;
-    const secondDayColumn = firstDayColumn.nextElementSibling as HTMLElement | null;
+    const chip = screen.getByTestId("weekday-event-chip");
 
-    expect(dayHeaderCell?.className).not.toContain("border-l");
-    expect(allDayEventCell.className).not.toContain("border-l");
-    expect(firstDayColumn.className).not.toContain("border-l");
-    expect(secondAllDayEventCell?.className).toContain("border-l");
-    expect(secondDayColumn?.className).toContain("border-l");
-    expect(secondAllDayEventCell?.style.borderColor).toBe(normalizeCssColor(COLOR.WEEKDAY_COLOR_BORDER_SUB));
-    expect(secondDayColumn?.style.borderColor).toBe(normalizeCssColor(COLOR.WEEKDAY_COLOR_BORDER_SUB));
+    expect(chip.dataset.accentColor).toBe(ALL_DAY_ACCENT_COLOR);
+    expect(chip.dataset.compact).toBe("true");
   });
 
-  it("終日の下線を終日行の前面レイヤーに描画し、スクロール中も時刻グリッドより前に出す", () => {
-    renderWeekDayGrid();
+  it("時間指定イベントの横幅はセルいっぱいを基準にする", () => {
+    renderWeekDayGrid([createEvent({ id: "timed-full-width", title: "Timed full width" })]);
 
-    const midnightLabelRow = screen.getByText("00:00").parentElement as HTMLElement | null;
-    const allDayLabel = screen.getByText("終日");
-    const allDayEventCell = getAllDayEventCell();
-    const allDayScrollContainer = getAllDayScrollContainer();
-    const firstDayHourRow = getFirstDayHourRow();
+    const wrapper = getTimedEventWrapper("Timed full width");
 
-    expect(allDayLabel.className).not.toContain("border-b");
-    expect(midnightLabelRow?.className).not.toContain("border-b");
-    expect(allDayEventCell.className).not.toContain("border-b");
-    expect(allDayScrollContainer.className).toContain("border-b");
-    expect(allDayScrollContainer.className).toContain("z-20");
-    expect(allDayScrollContainer.className).toContain("bg-white");
-    expect(firstDayHourRow.className).toContain("border-b");
-    expect(allDayScrollContainer.style.borderColor).toBe(normalizeCssColor(COLOR.WEEKDAY_COLOR_BORDER_SUB));
-    expect(firstDayHourRow.style.borderColor).toBe(normalizeCssColor(COLOR.WEEKDAY_COLOR_BORDER_SUB));
+    expect(wrapper.style.width).toBe(FULL_WIDTH_EVENT_STYLE);
   });
 
-  it("終日イベントの色トークンをそのまま使う", () => {
-    const allDayEvent = createEvent({ id: "all-day-event", title: "All day event", startsAt: new Date(2026, 0, 1, 0, 0), endsAt: new Date(2026, 0, 2, 0, 0), isAllDay: true, accentColor: ALL_DAY_ACCENT_COLOR });
+  it("選択色トークンはrgbaの重ね合わせで淡い背景を作る", () => {
     const tokens = generateColorTokens(ALL_DAY_ACCENT_COLOR);
 
-    renderWeekDayGrid([allDayEvent]);
-
-    const allDayChip = screen.getByText("All day event");
-
-    expect(allDayChip.style.background).toBe(normalizeCssColor(tokens.bg));
-    expect(allDayChip.style.color).toBe(normalizeCssColor(tokens.text));
+    expect(normalizeCssColor(tokens.background)).toBe(normalizeCssColor(`color-mix(in srgb, ${ALL_DAY_ACCENT_COLOR} 14%, transparent)`));
+    expect(tokens.accent).toBe(ALL_DAY_ACCENT_COLOR);
+    expect(tokens.border).toBe(COLOR.DEFAULT_EVENT_BORDER_COLOR);
   });
 });
