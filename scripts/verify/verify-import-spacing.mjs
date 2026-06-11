@@ -1,11 +1,5 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-
-
-
 import path from "node:path";
-
-
-
 import ts from "typescript";
 
 const ROOT_DIR = process.cwd();
@@ -39,7 +33,7 @@ const getNewline = (source) => source.includes("\r\n") ? "\r\n" : "\n";
 
 const isImportStatement = (statement) => ts.isImportDeclaration(statement) || ts.isImportEqualsDeclaration(statement);
 
-const getLeadingWhitespaceText = (source, previousStatement, statement) => source.slice(previousStatement.getEnd(), statement.getFullStart());
+const getLeadingWhitespaceText = (source, sourceFile, previousStatement, statement) => source.slice(previousStatement.getEnd(), statement.getStart(sourceFile));
 
 const checkImportSpacing = (filePath) => {
   const source = readFileSync(filePath, "utf8");
@@ -53,7 +47,7 @@ const checkImportSpacing = (filePath) => {
     const statement = statements[index];
     if (!isImportStatement(previousStatement) || !isImportStatement(statement)) continue;
 
-    const leadingWhitespace = getLeadingWhitespaceText(source, previousStatement, statement);
+    const leadingWhitespace = getLeadingWhitespaceText(source, sourceFile, previousStatement, statement);
     if (/\S/.test(leadingWhitespace)) continue;
     if (leadingWhitespace === newline) continue;
 
