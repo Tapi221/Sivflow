@@ -41,7 +41,7 @@ import {
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
-import { aiChatPlugin } from './plugins/ai-kit';
+import { aiChatPlugin } from '@/components/editor/plugins/ai-kit';
 
 type Model = {
   label: string;

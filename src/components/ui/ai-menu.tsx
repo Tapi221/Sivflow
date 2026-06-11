@@ -45,18 +45,18 @@ import {
 } from 'platejs/react';
 import { type PlateEditor, useEditorRef } from 'platejs/react';
 
-import { Button } from '@/components/ui/button';
+import { Button } from './button';
 import {
   Command,
   CommandGroup,
   CommandItem,
   CommandList,
-} from '@/components/ui/command';
+} from './command';
 import {
   Popover,
   PopoverAnchor,
   PopoverContent,
-} from '@/components/ui/popover';
+} from './popover';
 import { cn } from '@/lib/utils';
 import { commentPlugin } from '@/components/editor/plugins/comment-kit';
 

@@ -16,13 +16,13 @@ import {
 import { type AnyPluginConfig, type NodeEntry, PathApi } from 'platejs';
 import { useEditorRef, usePluginOption } from 'platejs/react';
 
-import { Button } from '@/components/ui/button';
+import { Button } from './button';
 import {
   Popover,
   PopoverAnchor,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
+} from './popover';
 import { commentPlugin } from '@/components/editor/plugins/comment-kit';
 import type { TDiscussion } from '@/components/editor/plugins/discussion-kit';
 import { useBlockDiscussionItems } from '@/components/block-discussion-index';

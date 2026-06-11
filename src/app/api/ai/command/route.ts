@@ -1,4 +1,4 @@
-import type { ChatMessage, ToolName } from '@/app/api/ai/command/types';
+import type { ChatMessage, ToolName } from './types';
 import type { NextRequest } from 'next/server';
 
 import { createGateway } from '@ai-sdk/gateway';
@@ -7,7 +7,7 @@ import { NextResponse } from 'next/server';
 import { type SlateEditor, createSlateEditor, nanoid } from 'platejs';
 import { z } from 'zod';
 
-import { AI_COMMAND_PLATE_PLUGINS } from '@/app/api/ai/command/editorKit';
+import { AI_COMMAND_PLATE_PLUGINS } from './editorKit';
 import { buildEditTableMultiCellPrompt, getChooseToolPrompt, getCommentPrompt, getEditPrompt, getGeneratePrompt } from '@/app/api/ai/command/prompt';
 
 export const POST = async (req: NextRequest) => {
