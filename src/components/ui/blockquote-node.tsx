@@ -1,6 +1,7 @@
 "use client";
 
 import type { PlateElementProps } from "platejs/react";
+
 import { PlateElement } from "platejs/react";
 
 const BlockquoteElement = (props: PlateElementProps) => {

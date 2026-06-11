@@ -1,5 +1,7 @@
 import { getLocalAiSettings } from "./localAiSettings";
 
+
+
 type GenerateOllamaAnswerInput = { question: string;
   model?: string;
 };
@@ -13,7 +15,11 @@ type TestOllamaConnectionResult = { ok: boolean;
   models: string[];
 };
 
+
+
 const OLLAMA_REQUEST_TIMEOUT_MS = 60_000;
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 const getString = (value: unknown): string | null => typeof value === "string" ? value : null;
@@ -125,5 +131,9 @@ const testOllamaConnection = async (): Promise<TestOllamaConnectionResult> => {
   };
 };
 
+
+
 export { generateOllamaAnswer, testOllamaConnection };
+
+
 export type { GenerateOllamaAnswerInput, GenerateOllamaAnswerResult, TestOllamaConnectionResult };

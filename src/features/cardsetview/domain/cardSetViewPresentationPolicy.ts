@@ -4,6 +4,8 @@ import type { CardLayoutMode } from "./cardLayoutMode";
 import { CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT } from "./cardSetView.constants";
 import { CARD_SET_VIEW_DEFAULT_ZOOM_SCALE, CARD_SET_VIEW_FIXED_LAYOUT_SAFETY_ALLOWANCE_PX, CARD_SET_VIEW_SCROLLBAR_RESERVE_PX, CARD_SET_VIEW_SPLIT_LAYOUT_INTERNAL_ALLOWANCE_PX, CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX, CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX } from "./cardSetViewPresentation.constants";
 
+
+
 type ResolveZoomWidthArgs = {
   cardLayoutMode: CardLayoutMode;
 };
@@ -11,8 +13,12 @@ type ResolveCardSetViewDevicePresentationArgs = {
   deviceScope: string;
 };
 
+
+
 const MOBILE_CARD_SET_VIEW_DEVICE_SCOPE = "mobile";
 const MOBILE_CARD_SET_VIEW_ZOOM_PERCENT = 100;
+
+
 
 // zoom semantics must remain identical between view/edit.
 // interactionMode-dependent behavior belongs outside this policy layer.
@@ -222,5 +228,7 @@ const resolveZoomScaleFromPresentationWidthPx = ({ presentationWidthPx, canonica
 
   return presentationWidthPx / canonicalCardWidthPx;
 };
+
+
 
 export { resolveCardSetViewUsesViewportWidth, resolveCardSetViewUsesZoomPreference, resolveCardSetViewZoomPercentOverride, resolveCardSetViewShowsConstraintIndicator, clampNormalizedZoomPercent, resolveZoomMinBaseWidthPx, clampZoomPercent, resolveZoomPercentForPresentationWidthPx, resolveZoomDefaultPercent, resolveUsablePresentationWidthPx, resolveCardSetViewUsablePresentationWidthPx, resolvePresentationMaxWidthPx, resolveCardSetViewMaxPresentationWidthPx, resolveCardSetViewDefaultZoomPercent, resolveSplitMinimumRequiredWidthPx, resolveCanUseSplitLayout, resolveCardSetViewCanUseSplitLayout, resolvePresentationWidthPx, resolveZoomScaleFromPresentationWidthPx };

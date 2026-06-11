@@ -1,20 +1,30 @@
 "use client";
 
 import * as React from "react";
+
 import type { ComboboxItemProps } from "@ariakit/react";
+
 import { Combobox, ComboboxGroup, ComboboxGroupLabel, ComboboxItem, ComboboxPopover, ComboboxProvider, ComboboxRow, Portal, useComboboxContext, useComboboxStore } from "@ariakit/react";
+
 import { filterWords } from "@platejs/combobox";
+
 import type { UseComboboxInputResult } from "@platejs/combobox/react";
+
 import { useComboboxInput, useHTMLInputCursorState } from "@platejs/combobox/react";
+
 import { cva } from "class-variance-authority";
+
 import type { PointRef, TElement } from "platejs";
+
 import { useComposedRef, useEditorRef } from "platejs/react";
+
 import { cn } from "@/lib/utils";
 
 type FilterFn = (
   item: { value: string; group?: string; keywords?: string[]; label?: string; },
   search: string,
 ) => boolean;
+
 type InlineComboboxContextValue = {
   filter: FilterFn | false;
   inputProps: UseComboboxInputResult["props"];
@@ -24,6 +34,7 @@ type InlineComboboxContextValue = {
   trigger: string;
   setHasEmpty: (hasEmpty: boolean) => void;
 };
+
 type InlineComboboxProps = {
   children: React.ReactNode;
   element: TElement;
@@ -38,6 +49,7 @@ type InlineComboboxProps = {
 const InlineComboboxContext = React.createContext<InlineComboboxContextValue>(
   null as unknown as InlineComboboxContextValue,
 );
+
 const comboboxItemVariants = cva(
   "relative mx-1 flex h-[28px] select-none items-center rounded-sm px-2 text-foreground text-sm outline-none [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
@@ -52,6 +64,7 @@ const comboboxItemVariants = cva(
     },
   },
 );
+
 const InlineComboboxRow = ComboboxRow;
 
 const defaultFilter: FilterFn = (
@@ -212,6 +225,7 @@ const InlineCombobox = ({
     </span>
   );
 };
+
 const InlineComboboxInput = ({
   className,
   ref: propRef,
@@ -265,6 +279,7 @@ const InlineComboboxInput = ({
     </>
   );
 };
+
 const InlineComboboxContent: typeof ComboboxPopover = ({
   className,
   ...props
@@ -304,6 +319,7 @@ const InlineComboboxContent: typeof ComboboxPopover = ({
     </Portal>
   );
 };
+
 const InlineComboboxItem = ({
   className,
   focusEditor = true,
@@ -347,6 +363,7 @@ const InlineComboboxItem = ({
     />
   );
 };
+
 const InlineComboboxEmpty = ({
   children,
   className,
@@ -373,6 +390,7 @@ const InlineComboboxEmpty = ({
     </div>
   );
 };
+
 const InlineComboboxGroup = ({
   className,
   ...props
@@ -387,6 +405,7 @@ const InlineComboboxGroup = ({
     />
   );
 };
+
 const InlineComboboxGroupLabel = ({
   className,
   ...props
@@ -403,4 +422,5 @@ const InlineComboboxGroupLabel = ({
 };
 
 InlineComboboxInput.displayName = "InlineComboboxInput";
+
 export { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxGroupLabel, InlineComboboxInput, InlineComboboxItem, InlineComboboxRow };

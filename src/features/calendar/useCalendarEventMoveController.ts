@@ -189,4 +189,5 @@ const useCalendarEventMoveController = ({ updateGoogleCalendarEvent }: UseCalend
 };
 
 export { applyCalendarEventMoveOverrides, useCalendarEventMoveController };
+
 export type { CalendarEventMoveOverride, UseCalendarEventMoveControllerOptions, UseCalendarEventMoveControllerReturn };

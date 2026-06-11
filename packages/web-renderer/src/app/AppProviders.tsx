@@ -1,3 +1,4 @@
+import "@mantine/core/styles.css";
 import { Suspense } from "react";
 import { MantineProvider } from "@mantine/core";
 import { ToastProvider } from "@web-renderer/contexts/ToastContext";
@@ -7,11 +8,14 @@ import { AppSonnerToaster } from "@/components/notifications/AppSonnerToaster";
 import { NotificationProvider } from "@/components/notifications/NotificationProvider";
 import { AuthProvider } from "@/contexts/AuthProvider";
 import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
-import "@mantine/core/styles.css";
+
+
 
 type AppProvidersProps = {
   children: ReactNode;
 };
+
+
 
 const AppProviders = ({ children }: AppProvidersProps) => (
   <MantineProvider defaultColorScheme="light">
@@ -30,5 +34,9 @@ const AppProviders = ({ children }: AppProvidersProps) => (
   </MantineProvider>
 );
 
+
+
 export { AppProviders };
+
+
 export type { AppProvidersProps };
