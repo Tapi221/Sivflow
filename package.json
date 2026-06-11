@@ -48,7 +48,8 @@
     "lint": "npm run lint:imports && eslint .",
     "lint:fix": "npm run lint:imports && eslint . --fix",
     "preview": "vite preview --config apps/web/vite.config.ts",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:e2e:codeblock": "playwright test tests/e2e/codeblock_visual.spec.ts",
     "test:e2e:card-layout": "playwright test tests/e2e/card_layout_consistency.spec.ts"
   },
