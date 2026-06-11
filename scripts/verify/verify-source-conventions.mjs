@@ -91,7 +91,17 @@ const isPascalCaseName = (name) => /^[A-Z][A-Za-z0-9]*$/.test(name);
 
 const isUpperCaseConstantName = (name) => /^[A-Z0-9_]+$/.test(name);
 
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const getVariableStatementNames = (statement) => statement.declarationList.declarations.flatMap((declaration) => ts.isIdentifier(declaration.name) ? [declaration.name.text] : []);
+
+const getStatementDeclarationNames = (statement) => {
+  if (ts.isVariableStatement(statement)) return getVariableStatementNames(statement);
+  if ((ts.isClassDeclaration(statement) || ts.isFunctionDeclaration(statement) || ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement)) && statement.name) return [statement.name.text];
+  if (ts.isModuleDeclaration(statement) && ts.isIdentifier(statement.name)) return [statement.name.text];
+
+  return [];
+};
 
 const isConstVariableStatement = (statement) => (statement.declarationList.flags & ts.NodeFlags.Const) !== 0;
 
@@ -101,7 +111,7 @@ const isComponentVariableStatement = (statement) => statement.declarationList.de
   if (!ts.isIdentifier(declaration.name)) return false;
   if (!isPascalCaseName(declaration.name.text)) return false;
   if (!declaration.initializer) return false;
-  if (isMemoCall(declaration.initializer)) return true;
+  if (isMemoCall(declaration.initializer)) return false;
   if (!isFunctionLikeInitializer(declaration.initializer)) return containsJsx(declaration.initializer);
 
   return containsJsx(declaration.initializer);
@@ -114,7 +124,7 @@ const getStatementOrderCategory = (statement) => {
   if (isTypeOnlyExportDeclaration(statement)) return "type";
   if (ts.isExportDeclaration(statement) || ts.isExportAssignment(statement)) return "postComponent";
   if (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement) || ts.isModuleDeclaration(statement)) return "type";
-  if (isDisplayNameAssignment(statement)) return "component";
+  if (isDisplayNameAssignment(statement)) return "postComponent";
 
   if (ts.isClassDeclaration(statement)) {
     if (statement.name && isPascalCaseName(statement.name.text) && containsJsx(statement)) return "component";
@@ -133,7 +143,7 @@ const getStatementOrderCategory = (statement) => {
 
     const names = getVariableStatementNames(statement);
     const hasMemoName = statement.declarationList.declarations.some((declaration) => declaration.initializer && isMemoCall(declaration.initializer));
-    if (hasMemoName) return "component";
+    if (hasMemoName) return "postComponent";
     if (isConstVariableStatement(statement) && names.length > 0 && names.every(isUpperCaseConstantName)) return "constant";
 
     const hasFunctionInitializer = statement.declarationList.declarations.some((declaration) => isFunctionLikeInitializer(declaration.initializer));
@@ -193,8 +203,21 @@ const isConstDependentTypeStatement = (source, statement, highestRank) => {
   return source.slice(statement.getStart(), statement.getEnd()).includes("typeof ");
 };
 
+const statementReferencesPreviousHigherRankDeclaration = (source, sourceFile, statement, previousStatements, rank) => {
+  const higherRankNames = previousStatements.flatMap((previousStatement) => {
+    const previousCategory = getStatementOrderCategory(previousStatement);
+    if (ORDER_RANKS[previousCategory] <= rank) return [];
+
+    return getStatementDeclarationNames(previousStatement);
+  });
+  const statementText = source.slice(statement.getStart(sourceFile), statement.getEnd());
+
+  return higherRankNames.some((name) => new RegExp(`\\b${escapeRegExp(name)}\\b`).test(statementText));
+};
+
 const checkStatementOrder = (filePath, source, sourceFile) => {
   const violations = [];
+  const previousStatements = [];
   let highestCategory = "import";
   let highestRank = 0;
 
@@ -207,20 +230,38 @@ const checkStatementOrder = (filePath, source, sourceFile) => {
     const rank = ORDER_RANKS[category];
 
     if (rank < highestRank) {
-      if (isTypeOnlyExportDeclaration(statement)) continue;
-      if (canAppearInExportBlock(statement)) continue;
-      if (isConstDependentTypeStatement(source, statement, highestRank)) continue;
+      if (isTypeOnlyExportDeclaration(statement)) {
+        previousStatements.push(statement);
+        continue;
+      }
+
+      if (canAppearInExportBlock(statement)) {
+        previousStatements.push(statement);
+        continue;
+      }
+
+      if (isConstDependentTypeStatement(source, statement, highestRank)) {
+        previousStatements.push(statement);
+        continue;
+      }
+
+      if (statementReferencesPreviousHigherRankDeclaration(source, sourceFile, statement, previousStatements, rank)) {
+        previousStatements.push(statement);
+        continue;
+      }
 
       violations.push({
         filePath,
         line: getLineNumber(sourceFile, statement.getStart(sourceFile)),
         message: `Move ${ORDER_LABELS[category]} before ${ORDER_LABELS[highestCategory]}: ${getStatementPreview(source, statement)}`,
       });
+      previousStatements.push(statement);
       continue;
     }
 
     highestCategory = category;
     highestRank = rank;
+    previousStatements.push(statement);
   }
 
   return violations;
