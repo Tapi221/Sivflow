@@ -6,7 +6,7 @@ const ROOT_DIR = process.cwd();
 const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src", "tests", "scripts/dev", "scripts/verify"].map((directory) => path.join(ROOT_DIR, directory));
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 const EXCLUDED_PATH_PARTS = ["/node_modules/", "/dist/", "/build/", "/coverage/", "/.firebase/", "/tmp/"];
-const FUNCTION_SYNTAX_MESSAGE = "Use a const arrow function instead of function syntax.";
+const FUNCTION_SYNTAX_MESSAGE = "関数定義は function 構文ではなく const arrow 関数にしてください。";
 
 const walkSourceFiles = (directory) => {
   if (!existsSync(directory)) return [];
@@ -64,7 +64,7 @@ const sourceFiles = SOURCE_DIRECTORIES.flatMap(walkSourceFiles);
 const violations = sourceFiles.flatMap(checkSourceFile);
 
 if (violations.length > 0) {
-  console.error("Const arrow function violations:");
+  console.error("const arrow 関数規約違反:");
   for (const violation of violations) {
     console.error(`- ${formatViolation(violation)}`);
   }
