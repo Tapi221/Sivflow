@@ -1,14 +1,20 @@
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
-
-
 import path from "node:path";
-
-
 import ts from "typescript";
 
 const ROOT_DIR = process.cwd();
 const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src", "tests", "scripts/dev", "scripts/verify"].map((directory) => path.join(ROOT_DIR, directory));
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
+const ORDER_EXCLUDED_PATH_PARTS = ["/tests/", "/scripts/", "/src/sandbox/"];
+const ORDER_EXCLUDED_FILE_SUFFIXES = [".d.ts"];
+const ORDER_RANKS = {
+  import: 1,
+  type: 2,
+  constant: 3,
+  helper: 4,
+  component: 5,
+  postComponent: 6,
+};
 
 const walkSourceFiles = (directory) => {
   if (!existsSync(directory)) return [];
@@ -25,6 +31,15 @@ const walkSourceFiles = (directory) => {
   });
 };
 
+const toPosix = (value) => value.split(path.sep).join("/");
+
+const shouldFixBlockSpacing = (filePath) => {
+  const relativePath = `/${toPosix(path.relative(ROOT_DIR, filePath))}`;
+  if (ORDER_EXCLUDED_FILE_SUFFIXES.some((suffix) => relativePath.endsWith(suffix))) return false;
+
+  return !ORDER_EXCLUDED_PATH_PARTS.some((part) => relativePath.includes(part));
+};
+
 const getScriptKind = (filePath) => path.extname(filePath).endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
 
 const createSourceFile = (filePath, source) => ts.createSourceFile(filePath, source, ts.ScriptTarget.Latest, true, getScriptKind(filePath));
@@ -33,7 +48,91 @@ const getNewline = (source) => source.includes("\r\n") ? "\r\n" : "\n";
 
 const isImportStatement = (statement) => ts.isImportDeclaration(statement) || ts.isImportEqualsDeclaration(statement);
 
-const getLeadingWhitespaceText = (source, previousStatement, statement) => source.slice(previousStatement.getEnd(), statement.getFullStart());
+const hasExportModifier = (statement) => ts.canHaveModifiers(statement) && Boolean(ts.getModifiers(statement)?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword));
+
+const isDirectiveStatement = (statement) => ts.isExpressionStatement(statement) && ts.isStringLiteral(statement.expression);
+
+const isIdentifierNamed = (expression, name) => ts.isIdentifier(expression) && expression.text === name;
+
+const isPropertyAccessNamed = (expression, name) => ts.isPropertyAccessExpression(expression) && expression.name.text === name;
+
+const isMemoCall = (expression) => ts.isCallExpression(expression) && (isIdentifierNamed(expression.expression, "memo") || isPropertyAccessNamed(expression.expression, "memo"));
+
+const isDisplayNameAssignment = (statement) => {
+  if (!ts.isExpressionStatement(statement)) return false;
+  const expression = statement.expression;
+
+  return ts.isBinaryExpression(expression) && ts.isPropertyAccessExpression(expression.left) && expression.left.name.text === "displayName";
+};
+
+const containsJsx = (node) => {
+  let found = false;
+
+  const visit = (child) => {
+    if (ts.isJsxElement(child) || ts.isJsxFragment(child) || ts.isJsxSelfClosingElement(child)) {
+      found = true;
+      return;
+    }
+
+    if (!found) ts.forEachChild(child, visit);
+  };
+
+  ts.forEachChild(node, visit);
+  return found;
+};
+
+const isPascalCaseName = (name) => /^[A-Z][A-Za-z0-9]*$/.test(name);
+
+const isUpperCaseConstantName = (name) => /^[A-Z0-9_]+$/.test(name);
+
+const getVariableStatementNames = (statement) => statement.declarationList.declarations.flatMap((declaration) => ts.isIdentifier(declaration.name) ? [declaration.name.text] : []);
+
+const isConstVariableStatement = (statement) => (statement.declarationList.flags & ts.NodeFlags.Const) !== 0;
+
+const isFunctionLikeInitializer = (initializer) => Boolean(initializer && (ts.isArrowFunction(initializer) || ts.isFunctionExpression(initializer)));
+
+const isComponentVariableStatement = (statement) => statement.declarationList.declarations.some((declaration) => {
+  if (!ts.isIdentifier(declaration.name)) return false;
+  if (!isPascalCaseName(declaration.name.text)) return false;
+  if (!declaration.initializer) return false;
+  if (isMemoCall(declaration.initializer)) return false;
+
+  return containsJsx(declaration.initializer);
+});
+
+const isTypeOnlyExportDeclaration = (statement) => ts.isExportDeclaration(statement) && statement.isTypeOnly;
+
+const canAppearInExportBlock = (statement) => hasExportModifier(statement) && !ts.isImportDeclaration(statement) && !ts.isImportEqualsDeclaration(statement);
+
+const getStatementOrderCategory = (statement) => {
+  if (isImportStatement(statement)) return "import";
+  if (isTypeOnlyExportDeclaration(statement)) return "type";
+  if (ts.isExportDeclaration(statement) || ts.isExportAssignment(statement)) return "postComponent";
+  if (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement) || ts.isModuleDeclaration(statement)) return "type";
+  if (isDisplayNameAssignment(statement)) return "postComponent";
+  if (ts.isClassDeclaration(statement)) return statement.name && isPascalCaseName(statement.name.text) && containsJsx(statement) ? "component" : "helper";
+  if (ts.isFunctionDeclaration(statement)) return statement.name && isPascalCaseName(statement.name.text) && containsJsx(statement) ? "component" : "helper";
+
+  if (ts.isVariableStatement(statement)) {
+    if (isComponentVariableStatement(statement)) return "component";
+
+    const names = getVariableStatementNames(statement);
+    const hasMemoName = statement.declarationList.declarations.some((declaration) => declaration.initializer && isMemoCall(declaration.initializer));
+    if (hasMemoName) return "postComponent";
+    if (isConstVariableStatement(statement) && names.length > 0 && names.every(isUpperCaseConstantName)) return "constant";
+
+    const hasFunctionInitializer = statement.declarationList.declarations.some((declaration) => isFunctionLikeInitializer(declaration.initializer));
+    if (hasFunctionInitializer) return "helper";
+
+    return "constant";
+  }
+
+  return "helper";
+};
+
+const getImportLeadingWhitespaceText = (source, previousStatement, statement) => source.slice(previousStatement.getEnd(), statement.getFullStart());
+
+const getBlockLeadingWhitespaceText = (source, sourceFile, previousStatement, statement) => source.slice(previousStatement.getEnd(), statement.getStart(sourceFile));
 
 const rangesOverlap = (left, right) => left.start < right.end && right.start < left.end;
 
@@ -59,7 +158,7 @@ const collectImportSpacingReplacements = (source, sourceFile) => {
     const statement = statements[index];
     if (!isImportStatement(previousStatement) || !isImportStatement(statement)) continue;
 
-    const leadingWhitespace = getLeadingWhitespaceText(source, previousStatement, statement);
+    const leadingWhitespace = getImportLeadingWhitespaceText(source, previousStatement, statement);
     if (/\S/.test(leadingWhitespace)) continue;
     if (leadingWhitespace === newline) continue;
 
@@ -69,16 +168,45 @@ const collectImportSpacingReplacements = (source, sourceFile) => {
   return replacements;
 };
 
-const applyImportSpacingFix = (filePath, source) => {
+const collectBlockSpacingReplacements = (filePath, source, sourceFile) => {
+  if (!shouldFixBlockSpacing(filePath)) return [];
+
+  const replacements = [];
+  const statements = [...sourceFile.statements];
+  const blockSeparator = `${getNewline(source)}${getNewline(source)}`;
+
+  for (let index = 1; index < statements.length; index += 1) {
+    const previousStatement = statements[index - 1];
+    const statement = statements[index];
+    if (isDirectiveStatement(previousStatement) || isDirectiveStatement(statement)) continue;
+
+    const previousCategory = getStatementOrderCategory(previousStatement);
+    const category = getStatementOrderCategory(statement);
+    if (previousCategory === category) continue;
+
+    const leadingWhitespace = getBlockLeadingWhitespaceText(source, sourceFile, previousStatement, statement);
+    if (/\S/.test(leadingWhitespace)) continue;
+    if (leadingWhitespace === blockSeparator) continue;
+
+    replacements.push({ end: statement.getStart(sourceFile), start: previousStatement.getEnd(), text: blockSeparator });
+  }
+
+  return replacements;
+};
+
+const applySourceConventionSpacingFix = (filePath, source) => {
   const sourceFile = createSourceFile(filePath, source);
-  const replacements = collectImportSpacingReplacements(source, sourceFile);
+  const replacements = [
+    ...collectImportSpacingReplacements(source, sourceFile),
+    ...collectBlockSpacingReplacements(filePath, source, sourceFile),
+  ];
 
   return replacements.length === 0 ? source : applyNonOverlappingReplacements(source, replacements);
 };
 
 const updateFile = (filePath) => {
   const originalSource = readFileSync(filePath, "utf8");
-  const nextSource = applyImportSpacingFix(filePath, originalSource);
+  const nextSource = applySourceConventionSpacingFix(filePath, originalSource);
 
   if (nextSource === originalSource) return false;
 
@@ -89,5 +217,5 @@ const updateFile = (filePath) => {
 const updatedFiles = SOURCE_DIRECTORIES.flatMap(walkSourceFiles).filter(updateFile);
 
 if (updatedFiles.length > 0) {
-  console.log(`Removed blank lines between import statements in ${updatedFiles.length} file(s).`);
+  console.log(`source 規約の空行を ${updatedFiles.length} file(s) 修正しました。`);
 }
