@@ -1,47 +1,25 @@
 'use client';
 
-import type { ExtendConfig, TElement, TInlineSuggestionData, TSuggestionData, TSuggestionText, } from 'platejs';
-
+import type { ExtendConfig, TElement, TInlineSuggestionData, TSuggestionData, TSuggestionText } from 'platejs';
 import { KEYS, TextApi, TrailingBlockPlugin } from 'platejs';
-
-import { type BaseSuggestionConfig, BaseSuggestionPlugin, } from '@platejs/suggestion';
-
+import { type BaseSuggestionConfig, BaseSuggestionPlugin } from '@platejs/suggestion';
 import { toTPlatePlugin } from 'platejs/react';
+import { SuggestionLeaf, SuggestionLineBreak, VoidRemoveSuggestionOverlay } from '@/components/suggestion-node';
+import { discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarget } from './discussion-kit';
 
-import { SuggestionLeaf, SuggestionLineBreak, VoidRemoveSuggestionOverlay, } from '@/components/suggestion-node';
-
-import { discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarget, } from './discussion-kit';
-
-export type SuggestionConfig = ExtendConfig< BaseSuggestionConfig, { activeId: string | null;
+type SuggestionConfig = ExtendConfig<
+  BaseSuggestionConfig,
+  {
+    activeId: string | null;
     hoverId: string | null;
   }
 >;
 
-const INLINE_SUGGESTION_TARGET_PLUGINS = [
-  KEYS.date,
-  KEYS.inlineEquation,
-  KEYS.link,
-  KEYS.mention,
-];
+const INLINE_SUGGESTION_TARGET_PLUGINS = [KEYS.date, KEYS.inlineEquation, KEYS.link, KEYS.mention];
 
-const suggestionEntry = api.suggestion?.node({
-        isText: !blockTarget,
-      });
-
-const trailingBlockPlugin = TrailingBlockPlugin.configure({
-  options: {
-    insert: (editor, { insert }) => {
-      editor.getApi(suggestionPlugin).suggestion.withoutSuggestions(insert);
-    },
-  },
-});
-
-function getInlineSuggestionData(editor: any, element: TElement) {
+const getInlineSuggestionData = (editor: any, element: TElement) => {
   const suggestionApi = editor.getApi(BaseSuggestionPlugin).suggestion;
-  const data = suggestionApi.suggestionData(element) as
-    | TSuggestionData
-    | TInlineSuggestionData
-    | undefined;
+  const data = suggestionApi.suggestionData(element) as TSuggestionData | TInlineSuggestionData | undefined;
 
   if (data) return data;
   if (typeof suggestionApi.dataList !== 'function') return;
@@ -53,9 +31,21 @@ function getInlineSuggestionData(editor: any, element: TElement) {
 
     if (childData) return childData;
   }
-}
+};
 
-export const suggestionPlugin = toTPlatePlugin<SuggestionConfig>( BaseSuggestionPlugin, ({ editor }) => ({ options: { activeId: null, currentUserId: editor.getOption(discussionPlugin, 'currentUserId'), hoverId: null, }, }) ).configure({ handlers: { // unset active suggestion when clicking outside of suggestion onClick: ({ api, event, setOption, type }) => { const markTarget = getDiscussionClickTarget({ selector: `.slate-${type}`, target: event.target, });
+const suggestionPlugin = toTPlatePlugin<SuggestionConfig>(BaseSuggestionPlugin, ({ editor }) => ({
+  options: {
+    activeId: null,
+    currentUserId: editor.getOption(discussionPlugin, 'currentUserId'),
+    hoverId: null,
+  },
+})).configure({
+  handlers: {
+    onClick: ({ api, event, setOption, type }) => {
+      const markTarget = getDiscussionClickTarget({
+        selector: `.slate-${type}`,
+        target: event.target,
+      });
       const blockTarget = markTarget
         ? null
         : getDiscussionBlockClickTarget({
@@ -63,20 +53,19 @@ export const suggestionPlugin = toTPlatePlugin<SuggestionConfig>( BaseSuggestion
           });
 
       if (!markTarget && !blockTarget) {
-        setOption
+        setOption('activeId', null);
 
-('activeId', null);
+        return;
+      }
 
-return;
+      const suggestionEntry = api.suggestion?.node({
+        isText: !blockTarget,
+      });
 
-setOption(
-        'activeId',
-        suggestionEntry
-          ? (api.suggestion?.nodeId(suggestionEntry[0]) ?? null)
-          : null
-      );
-
-inject: {
+      setOption('activeId', suggestionEntry ? (api.suggestion?.nodeId(suggestionEntry[0]) ?? null) : null);
+    },
+  },
+  inject: {
     isElement: true,
     nodeProps: {
       nodeKey: '',
@@ -96,14 +85,24 @@ inject: {
       transformStyle: () => ({}) as CSSStyleDeclaration,
     },
     targetPlugins: INLINE_SUGGESTION_TARGET_PLUGINS,
-  }
-
-render: {
+  },
+  render: {
     belowNodes: SuggestionLineBreak as any,
     belowRootNodes: VoidRemoveSuggestionOverlay as any,
     node: SuggestionLeaf,
-  }
+  },
+});
 
-;
+const trailingBlockPlugin = TrailingBlockPlugin.configure({
+  options: {
+    insert: (editor, { insert }) => {
+      editor.getApi(suggestionPlugin).suggestion.withoutSuggestions(insert);
+    },
+  },
+});
 
-export const SuggestionKit = [suggestionPlugin, trailingBlockPlugin];
+const SuggestionKit = [suggestionPlugin, trailingBlockPlugin];
+
+export type { SuggestionConfig };
+
+export { SuggestionKit, suggestionPlugin };
