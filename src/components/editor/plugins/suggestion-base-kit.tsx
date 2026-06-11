@@ -9,26 +9,6 @@ const INLINE_SUGGESTION_TARGET_PLUGINS = [
   KEYS.link,
   KEYS.mention,
 ];
-
-const getInlineSuggestionData = (editor: any, element: TElement) => {
-  const suggestionApi = editor.getApi(BaseSuggestionPlugin).suggestion;
-  const data = suggestionApi.suggestionData(element) as
-    | TSuggestionData
-    | TInlineSuggestionData
-    | undefined;
-
-  if (data) return data;
-  if (typeof suggestionApi.dataList !== "function") return;
-
-  for (const child of element.children) {
-    if (!TextApi.isText(child)) continue;
-
-    const childData = suggestionApi.dataList(child as TSuggestionText).at(-1);
-
-    if (childData) return childData;
-  }
-};
-
 const BaseSuggestionKit = [BaseSuggestionPlugin.configure({ inject: { isElement: true, nodeProps: { nodeKey: "", styleKey: "cssText", transformProps: ({ editor, element, props }) => { if (!element) return props;
 
         const suggestionData = getInlineSuggestionData(editor, element);
@@ -50,5 +30,24 @@ const BaseSuggestionKit = [BaseSuggestionPlugin.configure({ inject: { isElement:
   },
 }),
 ];
+
+const getInlineSuggestionData = (editor: any, element: TElement) => {
+  const suggestionApi = editor.getApi(BaseSuggestionPlugin).suggestion;
+  const data = suggestionApi.suggestionData(element) as
+    | TSuggestionData
+    | TInlineSuggestionData
+    | undefined;
+
+  if (data) return data;
+  if (typeof suggestionApi.dataList !== "function") return;
+
+  for (const child of element.children) {
+    if (!TextApi.isText(child)) continue;
+
+    const childData = suggestionApi.dataList(child as TSuggestionText).at(-1);
+
+    if (childData) return childData;
+  }
+};
 
 export { BaseSuggestionKit };

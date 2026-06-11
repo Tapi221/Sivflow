@@ -55,6 +55,8 @@ const disconnectGoogleCalendarAccountCallable =
     functionsClient,
     "disconnectGoogleCalendarAccount",
   );
+const exchangeGoogleConnectedServiceCode = exchangeGoogleCalendarCode;
+const getServerStoredGoogleConnectedServiceAccessToken = getServerStoredGoogleCalendarAccessToken;
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
 const normalizeCallableErrorCode = (error: unknown): string | undefined => error instanceof Error ? (error as Error & { code?: string; }).code?.replace(/^functions\//, "") : undefined;
@@ -166,18 +168,12 @@ const exchangeGoogleCalendarCode = async (input: ExchangeGoogleCalendarCodeInput
   throw toUserTransparentAutoRecoveryError(error);
 }
 };
-
-const exchangeGoogleConnectedServiceCode = exchangeGoogleCalendarCode;
-
 const getServerStoredGoogleCalendarAccessToken = async (input: GetGoogleCalendarAccessTokenInput): Promise<ServerGoogleCalendarAccess> => { try { await waitForCallableAuth();
   return await getGoogleCalendarAccessTokenWithRetry(input);
 } catch (error) {
   throw toUserTransparentAutoRecoveryError(error);
 }
 };
-
-const getServerStoredGoogleConnectedServiceAccessToken = getServerStoredGoogleCalendarAccessToken;
-
 const disconnectServerStoredGoogleCalendarAccount = async (input: DisconnectGoogleCalendarAccountInput): Promise<void> => { await waitForCallableAuth();
   await disconnectGoogleCalendarAccountCallable(input);
 };

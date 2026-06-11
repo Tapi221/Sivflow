@@ -9,6 +9,19 @@ import type { PlateElementProps, RenderNodeWrapper } from "platejs/react";
 import { Checkbox } from "./checkbox";
 import { cn } from "@/lib/utils";
 
+const config: Record<
+  string,
+  {
+    Li: React.FC<PlateElementProps & { lineBreakBadge?: React.ReactNode; }>;
+    Marker: React.FC<PlateElementProps>;
+  }
+> = {
+  todo: {
+    Li: TodoLi,
+    Marker: TodoMarker,
+  },
+};
+
 const TodoMarker = (props: PlateElementProps) => {
   const state = useTodoListElementState({ element: props.element });
   const { checkboxProps } = useTodoListElement(state);
@@ -40,20 +53,6 @@ const TodoLi = (props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }
     </li>
   );
 };
-
-const config: Record<
-  string,
-  {
-    Li: React.FC<PlateElementProps & { lineBreakBadge?: React.ReactNode; }>;
-    Marker: React.FC<PlateElementProps>;
-  }
-> = {
-  todo: {
-    Li: TodoLi,
-    Marker: TodoMarker,
-  },
-};
-
 const List = (props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }) => {
   const { listStart, listStyleType } = props.element as TListElement;
   const { Li, Marker } = config[listStyleType] ?? {};

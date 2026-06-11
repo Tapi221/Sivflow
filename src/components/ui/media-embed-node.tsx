@@ -13,6 +13,8 @@ import { Caption, CaptionTextarea } from "./caption";
 import { MediaToolbar } from "./media-toolbar";
 import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "./resize-handle";
 
+const MediaEmbedElement = withHOC(ResizableProvider, MediaEmbedElementBase);
+
 const MediaEmbedElementBase = (props: PlateElementProps<TMediaEmbedElement>) => {
   const { align = "center", embed, focused, isTweet, isVideo, isYoutube, readOnly, selected } = useMediaState({
     urlParsers: [parseTwitterUrl, parseVideoUrl],
@@ -99,8 +101,6 @@ const MediaEmbedElementBase = (props: PlateElementProps<TMediaEmbedElement>) => 
     </MediaToolbar>
   );
 };
-
-const MediaEmbedElement = withHOC(ResizableProvider, MediaEmbedElementBase);
 
 MediaEmbedElementBase.displayName = "MediaEmbedElement";
 export { MediaEmbedElement };

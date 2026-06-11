@@ -2,14 +2,6 @@ import type { WindowControlsPort } from "@/application/ports/WindowControlsPort"
 import { getDesktopBridge } from "@/platform/desktop/bridge";
 import { hasDesktopBridge } from "@/platform/runtime";
 
-const getDesktopWindowApi = () => {
-  if (!hasDesktopBridge()) {
-    return null;
-  }
-
-  return getDesktopBridge().window;
-};
-
 const windowControls: WindowControlsPort = { minimize: async () => { const api = getDesktopWindowApi();
   if (!api) return;
   await api.minimize();
@@ -34,6 +26,14 @@ onMaximizedStateChange: (handler: (isMaximized: boolean) => void) =>
     (() => {
       // no-op on web
     }),
+};
+
+const getDesktopWindowApi = () => {
+  if (!hasDesktopBridge()) {
+    return null;
+  }
+
+  return getDesktopBridge().window;
 };
 
 export { windowControls };

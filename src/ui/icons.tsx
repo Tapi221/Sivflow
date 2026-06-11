@@ -122,6 +122,96 @@ const ImageIcon = Image;
 const CircleHelp = HelpCircle;
 const Sigma = SigmaIcon;
 const NotebookPen = NotebookPenIcon;
+const BookOpen = makeIcon("BookOpen");
+const Brain = makeIcon("Brain");
+const Camera = makeIcon("Camera");
+const Check = makeIcon("Check");
+const CheckCheck = makeIcon("CheckCheck");
+const CheckCircle = makeIcon("CheckCircle");
+const CheckCircle2 = makeIcon("CheckCircle2");
+const Circle = makeIcon("Circle");
+const Cloud = makeIcon("Cloud");
+const CloudOff = makeIcon("CloudOff");
+const Database = makeIcon("Database");
+const Download = makeIcon("Download");
+const Eraser = makeIcon("Eraser");
+const FileAudio = makeIcon("FileAudio");
+const FileJson = makeIcon("FileJson");
+const FileWarning = makeIcon("FileWarning");
+const FileX = makeIcon("FileX");
+const Flame = makeIcon("Flame");
+const FolderInput = makeIcon("FolderInput");
+const FolderTree = makeIcon("FolderTree");
+const GitMerge = makeIcon("GitMerge");
+const GripVertical = makeIcon("GripVertical");
+const HardDrive = makeIcon("HardDrive");
+const Layers = makeIcon("Layers");
+const List = makeIcon("List");
+const Loader2 = makeIcon("Loader2");
+const Merge = makeIcon("Merge");
+const MessageSquare = makeIcon("MessageSquare");
+const Minus = makeIcon("Minus");
+const Move = makeIcon("Move");
+const Palette = makeIcon("Palette");
+const Pause = makeIcon("Pause");
+const PenLine = makeIcon("PenLine");
+const Pencil = makeIcon("Pencil");
+const Pin = makeIcon("Pin");
+const Play = makeIcon("Play");
+const Redo2 = makeIcon("Redo2");
+const RotateCcw = makeIcon("RotateCcw");
+const Settings2 = makeIcon("Settings2");
+const Shield = makeIcon("Shield");
+const Smartphone = makeIcon("Smartphone");
+const Sparkles = makeIcon("Sparkles");
+const SigmaIcon = makeIcon("SigmaIcon");
+const NotebookPenIcon = makeIcon("NotebookPenIcon");
+const Trophy = makeIcon("Trophy");
+const Undo2 = makeIcon("Undo2");
+const Upload = makeIcon("Upload");
+const User = makeIcon("User");
+const Zap = makeIcon("Zap");
+const AlertCircle = makeStratisIcon("suIconAlertCircle", "AlertCircle");
+const AlertTriangle = makeStratisIcon("suIconAlertTriangle", "AlertTriangle");
+const ArrowLeft = makeStratisIcon("suIconArrowLeftSquareContained", "ArrowLeft");
+const ArrowRight = makeStratisIcon("suIconArrowRightSquareContained", "ArrowRight");
+const ArrowUpDown = makeStratisIcon("suIconArrowSwitchHorizontal", "ArrowUpDown");
+const Calendar = makeStratisIcon("suIconCalendarNumber", "Calendar");
+const ChevronLeft = makeStratisIcon("suIconChevronLeft", "ChevronLeft");
+const ChevronUp = makeStratisIcon("suIconChevronUp", "ChevronUp");
+const Clock = makeStratisIcon("suIconClock01", "Clock");
+const Construction = makeStratisIcon("suIconWrench", "Construction");
+const Copy = makeStratisIcon("suIconCopyLeft", "Copy");
+const Edit = makeStratisIcon("suIconEditContained", "Edit");
+const ExternalLink = makeStratisIcon("suIconLinkExternal", "ExternalLink");
+const FileEdit = makeStratisIcon("suIconFileEdit02", "FileEdit");
+const Filter = makeStratisIcon("suIconFilter", "Filter");
+const Globe = makeStratisIcon("suIconGlobe02", "Globe");
+const HelpCircle = makeStratisIcon("suIconHelpCircleContained", "HelpCircle");
+const History = makeStratisIcon("suIconClockBackward", "History");
+const Image = makeStratisIcon("suIconImage", "Image");
+const Info = makeStratisIcon("suIconInfoSquare01Contained", "Info");
+const Keyboard = makeStratisIcon("suIconKeyboard", "Keyboard");
+const Link = makeStratisIcon("suIconLinkAngled", "Link");
+const LogOut = makeStratisIcon("suIconLogout01", "LogOut");
+const Plus = makeStratisIcon("suIconPlus01", "Plus");
+const RefreshCw = makeStratisIcon("suIconArrowRefresh01", "RefreshCw");
+const Search = makeStratisIcon("suIconSearch01", "Search");
+const SearchX = makeStratisIcon("suIconFolderSearch01", "SearchX");
+const Star = makeStratisIcon("suIconStar02", "Star");
+const Tag = makeStratisIcon("suIconTag", "Tag");
+const Trash2 = makeStratisIcon("suIconTrash03", "Trash2");
+const Type = makeStratisIcon("suIconType03", "Type");
+const Volume2 = makeStratisIcon("suIconAudioSettings01", "Volume2");
+const X = makeStratisIcon("suIconX01", "X");
+const XCircle = makeStratisIcon("suIconXCircleContained", "XCircle");
+const Code = makeStratisIcon("suIconCode01", "Code");
+const MoreVertical = MoreVerticalIcon;
+const ChevronDown = ExplorerChevronDownIcon;
+const ChevronRight = ExplorerChevronRightIcon;
+const FileText = ExplorerFileTextIcon;
+const Folder = ExplorerFolderOpenIcon;
+const FolderOutlineIcon = ExplorerFolderOutlineIcon;
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 const isStratisDataIcon = (value: unknown): value is StratisDataIcon => isRecord(value) && typeof value.data === "string";
@@ -176,57 +266,6 @@ const makeIcon = (name: string) => {
   Icon.displayName = name;
   return Icon;
 };
-
-const BookOpen = makeIcon("BookOpen");
-const Brain = makeIcon("Brain");
-const Camera = makeIcon("Camera");
-const Check = makeIcon("Check");
-const CheckCheck = makeIcon("CheckCheck");
-const CheckCircle = makeIcon("CheckCircle");
-const CheckCircle2 = makeIcon("CheckCircle2");
-const Circle = makeIcon("Circle");
-const Cloud = makeIcon("Cloud");
-const CloudOff = makeIcon("CloudOff");
-const Database = makeIcon("Database");
-const Download = makeIcon("Download");
-const Eraser = makeIcon("Eraser");
-const FileAudio = makeIcon("FileAudio");
-const FileJson = makeIcon("FileJson");
-const FileWarning = makeIcon("FileWarning");
-const FileX = makeIcon("FileX");
-const Flame = makeIcon("Flame");
-const FolderInput = makeIcon("FolderInput");
-const FolderTree = makeIcon("FolderTree");
-const GitMerge = makeIcon("GitMerge");
-const GripVertical = makeIcon("GripVertical");
-const HardDrive = makeIcon("HardDrive");
-const Layers = makeIcon("Layers");
-const List = makeIcon("List");
-const Loader2 = makeIcon("Loader2");
-const Merge = makeIcon("Merge");
-const MessageSquare = makeIcon("MessageSquare");
-const Minus = makeIcon("Minus");
-const Move = makeIcon("Move");
-const Palette = makeIcon("Palette");
-const Pause = makeIcon("Pause");
-const PenLine = makeIcon("PenLine");
-const Pencil = makeIcon("Pencil");
-const Pin = makeIcon("Pin");
-const Play = makeIcon("Play");
-const Redo2 = makeIcon("Redo2");
-const RotateCcw = makeIcon("RotateCcw");
-const Settings2 = makeIcon("Settings2");
-const Shield = makeIcon("Shield");
-const Smartphone = makeIcon("Smartphone");
-const Sparkles = makeIcon("Sparkles");
-const SigmaIcon = makeIcon("SigmaIcon");
-const NotebookPenIcon = makeIcon("NotebookPenIcon");
-const Trophy = makeIcon("Trophy");
-const Undo2 = makeIcon("Undo2");
-const Upload = makeIcon("Upload");
-const User = makeIcon("User");
-const Zap = makeIcon("Zap");
-
 const makeStratisIcon = (exportName: string, name: string) => {
   const candidate = stratisIconRegistry[exportName];
 
@@ -234,42 +273,6 @@ const makeStratisIcon = (exportName: string, name: string) => {
   if (isStratisIconComponent(candidate)) return wrapStratisIcon(candidate, name);
   return makeIcon(name);
 };
-
-const AlertCircle = makeStratisIcon("suIconAlertCircle", "AlertCircle");
-const AlertTriangle = makeStratisIcon("suIconAlertTriangle", "AlertTriangle");
-const ArrowLeft = makeStratisIcon("suIconArrowLeftSquareContained", "ArrowLeft");
-const ArrowRight = makeStratisIcon("suIconArrowRightSquareContained", "ArrowRight");
-const ArrowUpDown = makeStratisIcon("suIconArrowSwitchHorizontal", "ArrowUpDown");
-const Calendar = makeStratisIcon("suIconCalendarNumber", "Calendar");
-const ChevronLeft = makeStratisIcon("suIconChevronLeft", "ChevronLeft");
-const ChevronUp = makeStratisIcon("suIconChevronUp", "ChevronUp");
-const Clock = makeStratisIcon("suIconClock01", "Clock");
-const Construction = makeStratisIcon("suIconWrench", "Construction");
-const Copy = makeStratisIcon("suIconCopyLeft", "Copy");
-const Edit = makeStratisIcon("suIconEditContained", "Edit");
-const ExternalLink = makeStratisIcon("suIconLinkExternal", "ExternalLink");
-const FileEdit = makeStratisIcon("suIconFileEdit02", "FileEdit");
-const Filter = makeStratisIcon("suIconFilter", "Filter");
-const Globe = makeStratisIcon("suIconGlobe02", "Globe");
-const HelpCircle = makeStratisIcon("suIconHelpCircleContained", "HelpCircle");
-const History = makeStratisIcon("suIconClockBackward", "History");
-const Image = makeStratisIcon("suIconImage", "Image");
-const Info = makeStratisIcon("suIconInfoSquare01Contained", "Info");
-const Keyboard = makeStratisIcon("suIconKeyboard", "Keyboard");
-const Link = makeStratisIcon("suIconLinkAngled", "Link");
-const LogOut = makeStratisIcon("suIconLogout01", "LogOut");
-const Plus = makeStratisIcon("suIconPlus01", "Plus");
-const RefreshCw = makeStratisIcon("suIconArrowRefresh01", "RefreshCw");
-const Search = makeStratisIcon("suIconSearch01", "Search");
-const SearchX = makeStratisIcon("suIconFolderSearch01", "SearchX");
-const Star = makeStratisIcon("suIconStar02", "Star");
-const Tag = makeStratisIcon("suIconTag", "Tag");
-const Trash2 = makeStratisIcon("suIconTrash03", "Trash2");
-const Type = makeStratisIcon("suIconType03", "Type");
-const Volume2 = makeStratisIcon("suIconAudioSettings01", "Volume2");
-const X = makeStratisIcon("suIconX01", "X");
-const XCircle = makeStratisIcon("suIconXCircleContained", "XCircle");
-const Code = makeStratisIcon("suIconCode01", "Code");
 
 const MoreVerticalIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, ...rest }, ref) => {
   const resolvedLabel = label ?? rest["aria-label"];
@@ -285,9 +288,6 @@ const MoreVerticalIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, clas
     </svg>
   );
 });
-
-const MoreVertical = MoreVerticalIcon;
-
 const ExplorerChevronDownIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
   return (
     <UiIcon ref={ref} size={size} {...props}>
@@ -295,9 +295,6 @@ const ExplorerChevronDownIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 1
     </UiIcon>
   );
 });
-
-const ChevronDown = ExplorerChevronDownIcon;
-
 const ExplorerChevronRightIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
   return (
     <UiIcon ref={ref} size={size} {...props}>
@@ -305,9 +302,6 @@ const ExplorerChevronRightIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 
     </UiIcon>
   );
 });
-
-const ChevronRight = ExplorerChevronRightIcon;
-
 const ExplorerFileTextIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
   return (
     <UiIcon ref={ref} size={size} {...props}>
@@ -318,9 +312,6 @@ const ExplorerFileTextIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, 
     </UiIcon>
   );
 });
-
-const FileText = ExplorerFileTextIcon;
-
 const ExplorerFolderOpenIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
   return (
     <UiIcon ref={ref} size={size} {...props}>
@@ -329,9 +320,6 @@ const ExplorerFolderOpenIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16
     </UiIcon>
   );
 });
-
-const Folder = ExplorerFolderOpenIcon;
-
 const ExplorerFolderOutlineIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
   return (
     <UiIcon ref={ref} size={size} {...props}>
@@ -339,8 +327,6 @@ const ExplorerFolderOutlineIcon = forwardRef<SVGSVGElement, IconProps>(({ size =
     </UiIcon>
   );
 });
-
-const FolderOutlineIcon = ExplorerFolderOutlineIcon;
 
 MoreVerticalIcon.displayName = "MoreVerticalIcon";
 ExplorerChevronDownIcon.displayName = "ExplorerChevronDownIcon";

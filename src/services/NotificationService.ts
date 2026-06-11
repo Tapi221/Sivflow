@@ -4,20 +4,6 @@ import platform from "@/platform";
 type NotificationListener = (notification: Notification) => void;
 
 const notificationService = new NotificationService();
-
-const createDismissedNotification = (id: string): Notification => {
-  return {
-    id,
-    level: "info",
-    title: "",
-    message: "",
-    timestamp: Date.now(),
-    autoClose: true,
-    closeable: true,
-    duration: 0,
-  };
-};
-
 const NotificationService = class {
   private readonly listeners = new Set<NotificationListener>();
   private readonly notifications = new Map<string, Notification>();
@@ -111,6 +97,19 @@ const NotificationService = class {
 
   public readonly getAll = (): Notification[] => {
     return Array.from(this.notifications.values());
+  };
+};
+
+const createDismissedNotification = (id: string): Notification => {
+  return {
+    id,
+    level: "info",
+    title: "",
+    message: "",
+    timestamp: Date.now(),
+    autoClose: true,
+    closeable: true,
+    duration: 0,
   };
 };
 

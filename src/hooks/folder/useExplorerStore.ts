@@ -46,90 +46,6 @@ const DEFAULT_DIRECTORY_BADGE_VISIBILITY: DirectoryBadgeVisibility = {
   bookmarked: true,
   tags: true,
 };
-
-const normalizeTagFilter = (value: unknown): string[] => {
-  if (!Array.isArray(value)) return [];
-  return value.filter((entry): entry is string => typeof entry === "string");
-};
-const normalizePinnedFolderIds = (value: unknown): string[] => {
-  if (!Array.isArray(value)) return [];
-  return value.filter((entry): entry is string => typeof entry === "string");
-};
-const normalizeTagMatchMode = (value: unknown): TagMatchMode => {
-  return value === "all" ? "all" : "any";
-};
-const normalizeToggleableFlag = (value: unknown): ToggleableFlag => {
-  if (value === "on" || value === "off") return value;
-  return "any";
-};
-const normalizeExplorerLayoutMode = (value: unknown): ExplorerLayoutMode => {
-  if (
-    value === "list" ||
-    value === "card" ||
-    value === "icon" ||
-    value === "column"
-  ) {
-    return value;
-  }
-
-  return DEFAULT_EXPLORER_LAYOUT_MODE;
-};
-const normalizeContentTypeFilter = (value: unknown): ContentTypeFilter[] => {
-  if (!Array.isArray(value)) return [...DEFAULT_CONTENT_TYPE_FILTER];
-
-  const next = value.filter(
-    (entry): entry is ContentTypeFilter => entry === "card" || entry === "pdf",
-  );
-
-  return next.length > 0 ? next : [...DEFAULT_CONTENT_TYPE_FILTER];
-};
-const normalizeDirectoryBadgeVisibility = (
-  value: unknown,
-): DirectoryBadgeVisibility => {
-  if (!value || typeof value !== "object") {
-    return { ...DEFAULT_DIRECTORY_BADGE_VISIBILITY };
-  }
-
-  const record = value as Partial<Record<DirectoryBadgeVisibilityKey, unknown>>;
-
-  return {
-    uncertainty:
-      typeof record.uncertainty === "boolean"
-        ? record.uncertainty
-        : DEFAULT_DIRECTORY_BADGE_VISIBILITY.uncertainty,
-    bookmarked:
-      typeof record.bookmarked === "boolean"
-        ? record.bookmarked
-        : DEFAULT_DIRECTORY_BADGE_VISIBILITY.bookmarked,
-    tags:
-      typeof record.tags === "boolean"
-        ? record.tags
-        : DEFAULT_DIRECTORY_BADGE_VISIBILITY.tags,
-  };
-};
-const createDefaultState = (): Pick<
-  ExplorerState,
-  | "tagFilter"
-  | "tagMatchMode"
-  | "uncertaintyFilter"
-  | "bookmarkedFilter"
-  | "draftFilter"
-  | "contentTypeFilter"
-  | "directoryBadgeVisibility"
-  | "explorerLayoutMode"
-  | "pinnedFolderIds"
-> => ({
-  tagFilter: [],
-  tagMatchMode: "any",
-  uncertaintyFilter: "any",
-  bookmarkedFilter: "any",
-  draftFilter: "any",
-  contentTypeFilter: [...DEFAULT_CONTENT_TYPE_FILTER],
-  directoryBadgeVisibility: { ...DEFAULT_DIRECTORY_BADGE_VISIBILITY },
-  explorerLayoutMode: DEFAULT_EXPLORER_LAYOUT_MODE,
-  pinnedFolderIds: [],
-});
-
 const useExplorerStore = create<ExplorerState>()(persist((set) => ({ ...createDefaultState(), setTagFilter: (tags) => set({ tagFilter: tags }), toggleTag: (tag) => set((state) => { const exists = state.tagFilter.includes(tag);
   const next = exists
     ? state.tagFilter.filter((currentTag) => currentTag !== tag)
@@ -236,6 +152,89 @@ togglePinnedFolder: (folderId) =>
 },
 ),
 );
+
+const normalizeTagFilter = (value: unknown): string[] => {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is string => typeof entry === "string");
+};
+const normalizePinnedFolderIds = (value: unknown): string[] => {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is string => typeof entry === "string");
+};
+const normalizeTagMatchMode = (value: unknown): TagMatchMode => {
+  return value === "all" ? "all" : "any";
+};
+const normalizeToggleableFlag = (value: unknown): ToggleableFlag => {
+  if (value === "on" || value === "off") return value;
+  return "any";
+};
+const normalizeExplorerLayoutMode = (value: unknown): ExplorerLayoutMode => {
+  if (
+    value === "list" ||
+    value === "card" ||
+    value === "icon" ||
+    value === "column"
+  ) {
+    return value;
+  }
+
+  return DEFAULT_EXPLORER_LAYOUT_MODE;
+};
+const normalizeContentTypeFilter = (value: unknown): ContentTypeFilter[] => {
+  if (!Array.isArray(value)) return [...DEFAULT_CONTENT_TYPE_FILTER];
+
+  const next = value.filter(
+    (entry): entry is ContentTypeFilter => entry === "card" || entry === "pdf",
+  );
+
+  return next.length > 0 ? next : [...DEFAULT_CONTENT_TYPE_FILTER];
+};
+const normalizeDirectoryBadgeVisibility = (
+  value: unknown,
+): DirectoryBadgeVisibility => {
+  if (!value || typeof value !== "object") {
+    return { ...DEFAULT_DIRECTORY_BADGE_VISIBILITY };
+  }
+
+  const record = value as Partial<Record<DirectoryBadgeVisibilityKey, unknown>>;
+
+  return {
+    uncertainty:
+      typeof record.uncertainty === "boolean"
+        ? record.uncertainty
+        : DEFAULT_DIRECTORY_BADGE_VISIBILITY.uncertainty,
+    bookmarked:
+      typeof record.bookmarked === "boolean"
+        ? record.bookmarked
+        : DEFAULT_DIRECTORY_BADGE_VISIBILITY.bookmarked,
+    tags:
+      typeof record.tags === "boolean"
+        ? record.tags
+        : DEFAULT_DIRECTORY_BADGE_VISIBILITY.tags,
+  };
+};
+const createDefaultState = (): Pick<
+  ExplorerState,
+  | "tagFilter"
+  | "tagMatchMode"
+  | "uncertaintyFilter"
+  | "bookmarkedFilter"
+  | "draftFilter"
+  | "contentTypeFilter"
+  | "directoryBadgeVisibility"
+  | "explorerLayoutMode"
+  | "pinnedFolderIds"
+> => ({
+  tagFilter: [],
+  tagMatchMode: "any",
+  uncertaintyFilter: "any",
+  bookmarkedFilter: "any",
+  draftFilter: "any",
+  contentTypeFilter: [...DEFAULT_CONTENT_TYPE_FILTER],
+  directoryBadgeVisibility: { ...DEFAULT_DIRECTORY_BADGE_VISIBILITY },
+  explorerLayoutMode: DEFAULT_EXPLORER_LAYOUT_MODE,
+  pinnedFolderIds: [],
+});
 
 export { useExplorerStore };
 export type { ExplorerLayoutMode, ExplorerState };

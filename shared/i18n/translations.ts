@@ -78,6 +78,7 @@ type Translations = Omit<RawTranslations, "overflowEvents"> & { overflowEvents: 
 };
 
 const RAW_TRANSLATIONS = rawTranslations as Record<Locale, RawTranslations>;
+const TRANSLATIONS: Record<Locale, Translations> = { ja: toTranslations(RAW_TRANSLATIONS.ja), en: toTranslations(RAW_TRANSLATIONS.en), zh: toTranslations(RAW_TRANSLATIONS.zh), };
 
 const formatCountTemplate = (template: string, count: number): string =>
   template.replace("{{count}}", String(count));
@@ -85,8 +86,6 @@ const toTranslations = (translations: RawTranslations): Translations => ({
   ...translations,
   overflowEvents: (count: number) => formatCountTemplate(translations.overflowEvents, count),
 });
-
-const TRANSLATIONS: Record<Locale, Translations> = { ja: toTranslations(RAW_TRANSLATIONS.ja), en: toTranslations(RAW_TRANSLATIONS.en), zh: toTranslations(RAW_TRANSLATIONS.zh), };
 
 export { RAW_TRANSLATIONS, TRANSLATIONS };
 export type { RawTranslations, Translations };

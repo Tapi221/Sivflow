@@ -5,6 +5,19 @@ import { isOrderedList } from "@platejs/list";
 import { CheckIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+const config: Record<
+  string,
+  {
+    Li: React.FC<SlateRenderElementProps>;
+    Marker: React.FC<SlateRenderElementProps>;
+  }
+> = {
+  todo: {
+    Li: TodoLiStatic,
+    Marker: TodoMarkerStatic,
+  },
+};
+
 const TodoMarkerStatic = (props: SlateRenderElementProps) => {
   const checked = props.element.checked as boolean;
 
@@ -38,20 +51,6 @@ const TodoLiStatic = (props: SlateRenderElementProps) => {
     </li>
   );
 };
-
-const config: Record<
-  string,
-  {
-    Li: React.FC<SlateRenderElementProps>;
-    Marker: React.FC<SlateRenderElementProps>;
-  }
-> = {
-  todo: {
-    Li: TodoLiStatic,
-    Marker: TodoMarkerStatic,
-  },
-};
-
 const List = (props: SlateRenderElementProps) => {
   const { indent, listStart, listStyleType } = props.element as TListElement & {
     indent?: number;

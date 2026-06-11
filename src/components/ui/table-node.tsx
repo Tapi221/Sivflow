@@ -1157,6 +1157,79 @@ const TableRowElement = ({ children, ...props }: PlateElementProps<TTableRowElem
 };
 const TableCellHeaderElement = (props: React.ComponentProps<typeof TableCellElement>) => { return <TableCellElement {...props} isHeader />;
 };
+const TableCellElement = ({ isHeader, ...props }: PlateElementProps<TTableCellElement> & { isHeader?: boolean;
+}) => {
+  const readOnly = useReadOnly();
+  const element = props.element;
+
+  const tableId = useElementSelector(([node]) => node.id as string, [], {
+    key: KEYS.table,
+  });
+  const rowId = useElementSelector(([node]) => node.id as string, [], {
+    key: KEYS.tr,
+  });
+  const isSelectingTable = useBlockSelected(tableId);
+  const isSelectingRow = useBlockSelected(rowId) || isSelectingTable;
+  const isSelectionAreaVisible = usePluginOption(
+    BlockSelectionPlugin,
+    "isSelectionAreaVisible",
+  );
+
+  const { borders, colIndex, colSpan, rowIndex, rowSpan, width } =
+    useTableCellPresentation(element);
+
+  return (
+    <PlateElement
+      {...props}
+      as={isHeader ? "th" : "td"}
+      className={cn(
+        "relative h-full overflow-visible border-none bg-background p-0",
+        element.background ? "bg-(--cellBackground)" : "bg-background",
+        isHeader && "text-left *:m-0",
+        "before:size-full",
+        "data-[table-cell-selected=true]:before:z-10",
+        "data-[table-cell-selected=true]:before:bg-brand/5",
+        "before:absolute before:box-border before:select-none before:content-['']",
+        borders.bottom?.size && "before:border-b before:border-b-border",
+        borders.right?.size && "before:border-r before:border-r-border",
+        borders.left?.size && "before:border-l before:border-l-border",
+        borders.top?.size && "before:border-t before:border-t-border",
+      )}
+      style={
+        {
+          "--cellBackground": element.background,
+          maxWidth: width,
+          minWidth: width,
+        } as React.CSSProperties
+      }
+      attributes={{
+        ...props.attributes,
+        colSpan,
+        "data-table-cell-id": element.id,
+        rowSpan,
+      }}
+    >
+      <div
+        className="relative z-20 box-border h-full px-3 py-2"
+        style={
+          rowSpan === 1
+            ? { minHeight: "var(--tableRowMinHeight, 0px)" }
+            : undefined
+        }
+      >
+        {props.children}
+      </div>
+
+      {!readOnly && !isSelectionAreaVisible && (
+        <TableCellResizeControls colIndex={colIndex} rowIndex={rowIndex} />
+      )}
+
+      {isSelectingRow && (
+        <div className={blockSelectionVariants()} contentEditable={false} />
+      )}
+    </PlateElement>
+  );
+};
 
 const TableCellResizeControls = React.memo(({
   colIndex,
@@ -1253,80 +1326,5 @@ const TableCellResizeControls = React.memo(({
     </div>
   );
 });
-
-const TableCellElement = ({ isHeader, ...props }: PlateElementProps<TTableCellElement> & { isHeader?: boolean;
-}) => {
-  const readOnly = useReadOnly();
-  const element = props.element;
-
-  const tableId = useElementSelector(([node]) => node.id as string, [], {
-    key: KEYS.table,
-  });
-  const rowId = useElementSelector(([node]) => node.id as string, [], {
-    key: KEYS.tr,
-  });
-  const isSelectingTable = useBlockSelected(tableId);
-  const isSelectingRow = useBlockSelected(rowId) || isSelectingTable;
-  const isSelectionAreaVisible = usePluginOption(
-    BlockSelectionPlugin,
-    "isSelectionAreaVisible",
-  );
-
-  const { borders, colIndex, colSpan, rowIndex, rowSpan, width } =
-    useTableCellPresentation(element);
-
-  return (
-    <PlateElement
-      {...props}
-      as={isHeader ? "th" : "td"}
-      className={cn(
-        "relative h-full overflow-visible border-none bg-background p-0",
-        element.background ? "bg-(--cellBackground)" : "bg-background",
-        isHeader && "text-left *:m-0",
-        "before:size-full",
-        "data-[table-cell-selected=true]:before:z-10",
-        "data-[table-cell-selected=true]:before:bg-brand/5",
-        "before:absolute before:box-border before:select-none before:content-['']",
-        borders.bottom?.size && "before:border-b before:border-b-border",
-        borders.right?.size && "before:border-r before:border-r-border",
-        borders.left?.size && "before:border-l before:border-l-border",
-        borders.top?.size && "before:border-t before:border-t-border",
-      )}
-      style={
-        {
-          "--cellBackground": element.background,
-          maxWidth: width,
-          minWidth: width,
-        } as React.CSSProperties
-      }
-      attributes={{
-        ...props.attributes,
-        colSpan,
-        "data-table-cell-id": element.id,
-        rowSpan,
-      }}
-    >
-      <div
-        className="relative z-20 box-border h-full px-3 py-2"
-        style={
-          rowSpan === 1
-            ? { minHeight: "var(--tableRowMinHeight, 0px)" }
-            : undefined
-        }
-      >
-        {props.children}
-      </div>
-
-      {!readOnly && !isSelectionAreaVisible && (
-        <TableCellResizeControls colIndex={colIndex} rowIndex={rowIndex} />
-      )}
-
-      {isSelectingRow && (
-        <div className={blockSelectionVariants()} contentEditable={false} />
-      )}
-    </PlateElement>
-  );
-};
-
 TableCellResizeControls.displayName = "TableCellResizeControls";
 export { TableElement, TableRowElement, TableCellElement, TableCellHeaderElement };

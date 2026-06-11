@@ -4,27 +4,6 @@ import type { DesktopBridgeApi, DesktopImportFileOpenPayload, DesktopOauthCallba
 
 const oauthCallbackHandlers = new Set<(payload: DesktopOauthCallbackPayload) => void>();
 let oauthCallbackListenerStarted = false;
-
-const hasWindowDesktop = (): boolean => typeof window !== "undefined" && typeof window.desktop !== "undefined";
-const canInstallTauriDesktopBridge = (): boolean => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
-const dispatchOauthCallback = (payload: DesktopOauthCallbackPayload): void => {
-  for (const handler of Array.from(oauthCallbackHandlers)) {
-    handler(payload);
-  }
-};
-const ensureOauthCallbackListener = (): void => {
-  if (oauthCallbackListenerStarted || !canInstallTauriDesktopBridge()) return;
-
-  oauthCallbackListenerStarted = true;
-
-  void listen<DesktopOauthCallbackPayload>("oauth:callback", (event) => {
-    dispatchOauthCallback(event.payload);
-  }).catch((error) => {
-    oauthCallbackListenerStarted = false;
-    console.error("[TauriDesktopBridge] failed to listen for OAuth callback", error);
-  });
-};
-
 const desktopApi: DesktopBridgeApi = {
   app: {
     getVersion: () => invoke<string>("app_get_version"),
@@ -101,6 +80,25 @@ const desktopApi: DesktopBridgeApi = {
   },
 };
 
+const hasWindowDesktop = (): boolean => typeof window !== "undefined" && typeof window.desktop !== "undefined";
+const canInstallTauriDesktopBridge = (): boolean => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+const dispatchOauthCallback = (payload: DesktopOauthCallbackPayload): void => {
+  for (const handler of Array.from(oauthCallbackHandlers)) {
+    handler(payload);
+  }
+};
+const ensureOauthCallbackListener = (): void => {
+  if (oauthCallbackListenerStarted || !canInstallTauriDesktopBridge()) return;
+
+  oauthCallbackListenerStarted = true;
+
+  void listen<DesktopOauthCallbackPayload>("oauth:callback", (event) => {
+    dispatchOauthCallback(event.payload);
+  }).catch((error) => {
+    oauthCallbackListenerStarted = false;
+    console.error("[TauriDesktopBridge] failed to listen for OAuth callback", error);
+  });
+};
 if (!hasWindowDesktop() && canInstallTauriDesktopBridge()) {
   ensureOauthCallbackListener();
   window.desktop = desktopApi;

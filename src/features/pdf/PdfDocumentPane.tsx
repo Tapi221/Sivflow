@@ -21,6 +21,11 @@ type PendingPdfViewerStateSave = {
   viewerState: PdfViewerState;
   onDocumentUpdate: NonNullable<PdfDocumentPaneProps["onDocumentUpdate"]>;
 };
+type PdfDocumentPaneProps = {
+  document: DocumentItem;
+  className?: string;
+  onDocumentUpdate?: (updates: Partial<DocumentItem>) => Promise<void> | void;
+};
 
 const PDF_SOURCE_RESOLUTION_TIMEOUT_MS = 15_000;
 const PDF_VIEWER_STATE_SAVE_DEBOUNCE_MS = 800;
@@ -30,12 +35,6 @@ const PDF_SOURCE_MISSING_ERROR_MESSAGE = "表示できるPDFデータが見つ�
 const PDF_DOCUMENT_PANE_CLASS_NAME = "flex h-full min-h-0 w-full min-w-0 flex-1";
 const PDF_DOCUMENT_STATUS_CLASS_NAME = "flex h-full min-h-0 w-full min-w-0 flex-1 items-center justify-center bg-[var(--carvepanel-surface)] px-6 text-center text-[13px] leading-6 text-[#6d6d6d]";
 const waitForPdfSourceResolution = async<T>(promise: Promise<T>): Promise;
-
-type PdfDocumentPaneProps = {
-  document: DocumentItem;
-  className?: string;
-  onDocumentUpdate?: (updates: Partial<DocumentItem>) => Promise<void> | void;
-};
 
 const createPendingLocalPdfSourceState = (documentId: string): LocalPdfSourceState => ({
   documentId,

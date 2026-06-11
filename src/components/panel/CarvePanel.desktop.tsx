@@ -44,10 +44,6 @@ const CarvePanelViewportBase = forwardRef<HTMLDivElement, CarvePanelViewportProp
 const CarvePanelBase = ({ children, className }: CarvePanelProps) => {
   return <div className={cn(CARVE_PANEL_BASE_CLASS, CARVE_PANEL_CLASS, className)}>{children}</div>;
 };
-
-CarvePanelViewportBase.displayName = "CarvePanelViewportBase";
-const CarvePanelViewport = memo(CarvePanelViewportBase);
-
 const CarvePanelShell = ({ children, toolbar = null, overlay = null, leftPanel = null, isLeftPanelCollapsed = false, reserveToolbar = false, reserveLeftPanel = false, viewportRef, className, bodyClassName, viewportClassName }: CarvePanelShellProps) => {
   const toolbarNode = toolbar ?? (reserveToolbar ? <div aria-hidden="true" className={CARVE_PANEL_TOOLBAR_SPACER_CLASS} /> : null);
   const leftPanelNode = leftPanel && !isLeftPanelCollapsed ? <div className={CARVE_PANEL_LEFT_PANEL_CLASS}>{leftPanel}</div> : reserveLeftPanel && !isLeftPanelCollapsed ? <div aria-hidden="true" className={CARVE_PANEL_LEFT_SPACER_CLASS} /> : null;
@@ -68,6 +64,8 @@ const CarvePanelShell = ({ children, toolbar = null, overlay = null, leftPanel =
   );
 };
 
+CarvePanelViewportBase.displayName = "CarvePanelViewportBase";
+const CarvePanelViewport = memo(CarvePanelViewportBase);
 CarvePanelViewport.displayName = "CarvePanelViewport";
 CarvePanelBase.displayName = "CarvePanelBase";
 const CarvePanel = memo(CarvePanelBase);

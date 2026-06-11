@@ -455,9 +455,6 @@ const CalendarListDaySectionComponent = ({
     </div>
   </section>
 );
-
-const CalendarListDaySection = memo(CalendarListDaySectionComponent);
-
 const CalendarListViewComponent = ({
   days: _days,
   virtualRail,
@@ -675,6 +672,7 @@ const CalendarListViewComponent = ({
   );
 };
 
+const CalendarListDaySection = memo(CalendarListDaySectionComponent);
 CalendarListDaySection.displayName = "CalendarListDaySection";
 const CalendarListView = memo(CalendarListViewComponent);
 CalendarListView.displayName = "CalendarListView";

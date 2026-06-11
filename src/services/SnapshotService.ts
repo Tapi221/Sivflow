@@ -23,16 +23,6 @@ const exportFolderSnapshotUseCase = createExportFolderSnapshotUseCase({
 const snapshotStoreUseCase = createSnapshotStoreUseCase({
   repository: snapshotFirestoreRepository,
 });
-
-const getStoredSnapshotsFromLocalStorage = (): AppSnapshot[] => {
-  if (typeof window === "undefined") {
-    return [];
-  }
-
-  const storedJson = localStorage.getItem(SNAPSHOTS_KEY);
-  return storedJson ? (JSON.parse(storedJson) as AppSnapshot[]) : [];
-};
-
 const snapshotService = { createSnapshot: async (userId: string, options: { bumpGenerationCounter?: boolean;
 } = {},
 ) => {
@@ -77,6 +67,15 @@ migrateFromLocalStorage: async (userId: string): Promise<void> => {
   localStorage.removeItem(SNAPSHOTS_KEY);
   console.log("[スナップショット] 移行が完了しました。LocalStorage をクリアしました");
 },
+};
+
+const getStoredSnapshotsFromLocalStorage = (): AppSnapshot[] => {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  const storedJson = localStorage.getItem(SNAPSHOTS_KEY);
+  return storedJson ? (JSON.parse(storedJson) as AppSnapshot[]) : [];
 };
 
 export { snapshotService };

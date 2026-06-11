@@ -12,13 +12,11 @@ type BreadcrumbActionsContextValue = {
 };
 
 const BreadcrumbExtraCrumbsContext = createContext<BreadcrumbCrumb[]>([]);
-
-const noopSetExtraCrumbs = (_crumbs: BreadcrumbCrumb[]): void => {};
-
 const BreadcrumbActionsContext = createContext<BreadcrumbActionsContextValue>({
   setExtraCrumbs: noopSetExtraCrumbs,
 });
 
+const noopSetExtraCrumbs = (_crumbs: BreadcrumbCrumb[]): void => {};
 const useBreadcrumbExtraCrumbs = (): BreadcrumbCrumb[] => { return useContext(BreadcrumbExtraCrumbsContext);
 };
 const useSetBreadcrumbCrumbs = (): BreadcrumbActionsContextValue["setExtraCrumbs"] => { return useContext(BreadcrumbActionsContext).setExtraCrumbs;

@@ -386,17 +386,6 @@ const PureColorPicker = ({
     </div>
   );
 };
-
-const ColorPicker = React.memo(
-  PureColorPicker,
-  (prev, next) =>
-    prev.color === next.color &&
-    prev.colors === next.colors &&
-    prev.colorsQueue === next.colorsQueue &&
-    prev.customColors === next.customColors &&
-    prev.updatedColor === next.updatedColor,
-);
-
 const FontColorToolbarButton = ({ children, nodeType, tooltip }: { nodeType: string;
   tooltip?: string;
 } & DropdownMenuProps) => {
@@ -533,4 +522,13 @@ const FontColorToolbarButton = ({ children, nodeType, tooltip }: { nodeType: str
   );
 };
 
+const ColorPicker = React.memo(
+  PureColorPicker,
+  (prev, next) =>
+    prev.color === next.color &&
+    prev.colors === next.colors &&
+    prev.colorsQueue === next.colorsQueue &&
+    prev.customColors === next.customColors &&
+    prev.updatedColor === next.updatedColor,
+);
 export { FontColorToolbarButton, ColorDropdownMenuItems, DEFAULT_COLORS };

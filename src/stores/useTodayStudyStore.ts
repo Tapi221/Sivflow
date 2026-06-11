@@ -32,25 +32,6 @@ type TodayStudyActions = {
 };
 type TodayStudyStore = TodayStudyState & TodayStudyActions;
 
-const emptyRatings = (): Record<RatingKey, number> => ({
-  forgot: 0,
-  vague: 0,
-  remembered: 0,
-  easy: 0,
-});
-/** ローカル日付を YYYY-MM-DD 形式で返す */
-const localDateKey = (): string => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-};
-const initialState = (userId = "anon"): TodayStudyState => ({
-  dateKey: localDateKey(),
-  userId,
-  ratings: emptyRatings(),
-  extraQueue: [],
-  extraDone: [],
-});
-
 const useTodayStudyStore = create<TodayStudyStore>()(persist((set, get) => ({ ...initialState(), hydrate: (userId: string) => { const s = get();
   const today = localDateKey();
   if (s.dateKey !== today || s.userId !== userId) {
@@ -99,6 +80,25 @@ markExtraDone: (cardId: string) =>
 },
 ),
 );
+
+const emptyRatings = (): Record<RatingKey, number> => ({
+  forgot: 0,
+  vague: 0,
+  remembered: 0,
+  easy: 0,
+});
+/** ローカル日付を YYYY-MM-DD 形式で返す */
+const localDateKey = (): string => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+const initialState = (userId = "anon"): TodayStudyState => ({
+  dateKey: localDateKey(),
+  userId,
+  ratings: emptyRatings(),
+  extraQueue: [],
+  extraDone: [],
+});
 
 export { useTodayStudyStore };
 export type { RatingKey, TodayStudyStore };
