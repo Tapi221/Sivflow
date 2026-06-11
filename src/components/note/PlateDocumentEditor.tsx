@@ -17,7 +17,6 @@ import remarkEmoji from 'remark-emoji';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 
-import { PlateFixedToolbarKit } from './plateFixedToolbarKit';
 import { PlateSlashInputElement } from './PlateSlashInputElement';
 import type { Note, NoteBlockContent } from '@/types';
 
@@ -78,7 +77,6 @@ const NOTE_PLATE_PLUGINS = [
   MarkdownPlugin.configure({ options: { plainMarks: [KEYS.suggestion, KEYS.comment], remarkPlugins: [remarkMath, remarkGfm, remarkEmoji as any, remarkMdx, remarkMention] } }),
   SlashPlugin.configure({ options: { triggerQuery: (editor: SlateEditor) => !editor.api.some({ match: { type: editor.getType(KEYS.codeBlock) } }) } }),
   SlashInputPlugin.withComponent(PlateSlashInputElement),
-  ...PlateFixedToolbarKit,
 ];
 
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
