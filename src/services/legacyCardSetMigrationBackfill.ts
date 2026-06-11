@@ -1,18 +1,12 @@
 import type { Card, CardSet, Folder } from "@/types";
 import { getLocalDb } from "./localdb";
 
-
-
 type LocalFirstBackfillDb = Awaited<ReturnType<typeof getLocalDb>> & {
   addItem: (table: "cardSets", item: Record<string, unknown>) => Promise<string>;
   updateItem: (table: "cards" | "cardSets", id: string, changes: Record<string, unknown>) => Promise<number>;
 };
 
-
-
 const backfillPromiseByUserId = new Map<string, Promise<void>>();
-
-
 
 const createId = (): string => {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -168,7 +162,5 @@ const ensureLegacyCardsBackfilled = async (userId: string) => {
   backfillPromiseByUserId.set(userId, promise);
   await promise;
 };
-
-
 
 export { backfillLegacyCardsToCardSets, ensureLegacyCardsBackfilled };
