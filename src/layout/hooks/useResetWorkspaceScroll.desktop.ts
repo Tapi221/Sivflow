@@ -1,6 +1,6 @@
 import { type RefObject, useLayoutEffect } from "react";
 
-type WorkspaceScrollRef = RefObject<HTMLElement | null>;
+type WorkspaceScrollRef = RefObject<HTMLElement | null> | undefined;
 
 const resetWorkspaceScrollPosition = (mainRef: WorkspaceScrollRef) => {
   const containers = document.querySelectorAll<HTMLElement>(
@@ -12,7 +12,7 @@ const resetWorkspaceScrollPosition = (mainRef: WorkspaceScrollRef) => {
     element.scrollLeft = 0;
   });
 
-  const mainElement = mainRef.current;
+  const mainElement = mainRef?.current ?? null;
 
   if (mainElement) {
     mainElement.scrollTop = 0;
