@@ -1,5 +1,5 @@
+import type { ChatMessage } from '@/app/api/ai/command/types';
 import type { SlateEditor } from 'platejs';
-import type { ChatMessage } from '../types';
 
 import { getMarkdown } from '@platejs/ai';
 import dedent from 'dedent';
