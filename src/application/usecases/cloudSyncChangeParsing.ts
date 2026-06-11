@@ -2,6 +2,8 @@ import { isCloudEntityType } from "./cloudSyncEntityMetadata";
 import type { CloudEntityType } from "./cloudSyncEntityMetadata";
 import type { SyncChange } from "@/services/interfaces/ISyncService";
 
+
+
 const getChangeParts = (change: SyncChange): { type: CloudEntityType; id: string; data: unknown; } | null => {
   const type = change.type;
   const id = change.id;
@@ -18,5 +20,7 @@ const getChangeParts = (change: SyncChange): { type: CloudEntityType; id: string
 const getChangeId = (change: SyncChange): string | null => { const parts = getChangeParts(change);
   return parts?.id ?? null;
 };
+
+
 
 export { getChangeParts, getChangeId };

@@ -5,10 +5,14 @@ import { cn } from "@/lib/utils";
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardFaceAttachments } from "@/types/domain/card";
 
+
+
 type SharedCardAttachmentsProps = Readonly<{
   attachments?: CardFaceAttachments | null;
   className?: string;
 }>;
+
+
 
 const normalizeAudioUrls = (
   attachments?: CardFaceAttachments | null,
@@ -19,6 +23,8 @@ const normalizeAudioUrls = (
 const normalizeReferences = (
   attachments?: CardFaceAttachments | null,
 ): ReferenceBlockData[] => sanitizeReferences(attachments?.references ?? []);
+
+
 
 const SharedCardAttachments = ({ attachments, className }: SharedCardAttachmentsProps) => { const audioUrls = React.useMemo(() => normalizeAudioUrls(attachments), [attachments]);
   const references = React.useMemo(
@@ -77,5 +83,7 @@ const SharedCardAttachments = ({ attachments, className }: SharedCardAttachments
     </div>
   );
 };
+
+
 
 export { SharedCardAttachments };

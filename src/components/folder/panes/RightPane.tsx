@@ -4,6 +4,8 @@ import { PdfDocumentPane } from "@/features/pdf/PdfDocumentPane";
 import type { Card, DocumentItem, SelectedExplorerItem } from "@/types";
 import { CardPane } from "./CardPane";
 
+
+
 type RightPaneProps = {
   selectedItem: SelectedExplorerItem;
   selectedCardId: string | null;
@@ -21,6 +23,8 @@ type RightPaneProps = {
   };
   folderSelectionNonce: number;
 };
+
+
 
 const UnsupportedDocumentPane = () => {
   return (
@@ -80,5 +84,7 @@ if (selectedFolderId) {
 
 return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
 };
+
+
 
 export { RightPane };
