@@ -1,4 +1,4 @@
-import type { HTMLAttributes, ReactNode, Ref } from "react";
+import { Fragment, type HTMLAttributes, type ReactNode, type Ref } from "react";
 import { CARD_ROW_PX } from "@/domain/card/cardGeometry.constants";
 import { shouldRenderInterBlockSeparator } from "./blockDisplayPolicy";
 import { BlockSeparator } from "./BlockSeparator";
@@ -72,7 +72,7 @@ export const BlockList = ({ blocks, className, rowClassName, getRowRef, getRowCo
             : undefined;
 
         return (
-          <div key={block.id}>
+          <Fragment key={block.id}>
             {showSeparator && <BlockSeparator />}
 
             <div
@@ -92,7 +92,7 @@ export const BlockList = ({ blocks, className, rowClassName, getRowRef, getRowCo
             >
               {content}
             </div>
-          </div>
+          </Fragment>
         );
       })}
     </div>
