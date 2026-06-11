@@ -1,12 +1,13 @@
+const DEFAULT_WHEEL_DELTA_PER_ZOOM_STEP = 120;
+
 export const resolveWheelZoomStepCount = ({
   deltaY,
-  deltaPerStep = 80,
+  deltaPerStep = DEFAULT_WHEEL_DELTA_PER_ZOOM_STEP,
 }: {
   deltaY: number;
   deltaPerStep?: number;
 }) => {
-  const safeDeltaPerStep =
-    Number.isFinite(deltaPerStep) && deltaPerStep > 0 ? deltaPerStep : 80;
+  const safeDeltaPerStep = Number.isFinite(deltaPerStep) && deltaPerStep > 0 ? deltaPerStep : DEFAULT_WHEEL_DELTA_PER_ZOOM_STEP;
 
   return Math.max(1, Math.round(Math.abs(deltaY) / safeDeltaPerStep));
 };
