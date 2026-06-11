@@ -3,9 +3,7 @@
     "source": "functions",
     "runtime": "nodejs22",
     "predeploy": [
-      "npm --prefix functions ci",
-      "npm --prefix functions run build",
-      "npm --prefix functions run manifest"
+      "node scripts/predeploy/firebase-predeploy.cjs"
     ]
   },
   "firestore": {
