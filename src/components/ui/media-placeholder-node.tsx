@@ -145,8 +145,7 @@ export const PlaceholderElement = withHOC(PlaceholderProvider, function Placehol
 
     replaceCurrentPlaceholder(currentFiles);
 
-
-  }, [isReplaced]);
+}, [isReplaced]);
 
   return (
     <PlateElement className="my-1" {...props}>
