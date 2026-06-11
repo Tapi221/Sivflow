@@ -19,7 +19,7 @@ export function EquationElementStatic( props: SlateElementProps<TEquationElement
       errorColor: '#cc0000',
       fleqn: false,
       leqno: false,
-      macros: { '\\f': '#1f(#2)' },
+      macros: { '\f': '#1f(#2)' },
       output: 'htmlAndMathml',
       strict: 'warn',
       throwOnError: false,
@@ -44,7 +44,7 @@ export function EquationElementStatic( props: SlateElementProps<TEquationElement
         ) : (
           <div className="flex h-7 w-full items-center gap-2 whitespace-nowrap text-muted-foreground text-sm">
             <RadicalIcon className="size-6 text-muted-foreground/80" />
-            <>Add a Tex equation</>
+            Add a Tex equation
           </div>
         )}
       </div>
@@ -53,7 +53,7 @@ export function EquationElementStatic( props: SlateElementProps<TEquationElement
   );
 }
 
-export function InlineEquationElementStatic( props: SlateElementProps<TEquationElement> ) { const html = getEquationHtml({ element: props.element, options: { displayMode: true, errorColor: '#cc0000', fleqn: false, leqno: false, macros: { '\\f': '#1f(#2)' }, output: 'htmlAndMathml', strict: 'warn', throwOnError: false, trust: false, }, });
+export function InlineEquationElementStatic( props: SlateElementProps<TEquationElement> ) { const html = getEquationHtml({ element: props.element, options: { displayMode: true, errorColor: '#cc0000', fleqn: false, leqno: false, macros: { '\f': '#1f(#2)' }, output: 'htmlAndMathml', strict: 'warn', throwOnError: false, trust: false, }, });
 
   return (
     <SlateElement
