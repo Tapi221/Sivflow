@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
-import { EventBus, PDFLinkService, PDFViewer } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
+import { EventBus, PDFLinkService, PDFViewer, RenderingStates } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
 import "pdfjs-dist/legacy/web/pdf_viewer.css";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
@@ -58,6 +58,10 @@ type PdfScaleChangingEvent = {
   scale?: number;
 };
 
+type PdfPageRenderedEvent = {
+  pageNumber?: number;
+};
+
 type PdfGestureEvent = Event & {
   clientX?: number;
   clientY?: number;
@@ -92,10 +96,14 @@ type PdfScrollAnchor = {
 type PdfZoomPreview = {
   scale: number;
   scaleRatio: number;
-  originX: number;
-  originY: number;
+  viewerOriginX: number;
+  viewerOriginY: number;
   clientX?: number;
   clientY?: number;
+};
+
+type PdfZoomCommit = {
+  pageNumbers: Set<number>;
 };
 
 export type { PdfPaneProps, PdfViewerStateChangeOptions };
@@ -111,6 +119,7 @@ const PDF_MIN_SCALE = 0.25;
 const PDF_RANGE_CHUNK_SIZE = 65_536;
 const PDF_SCALE_EPSILON = 0.001;
 const PDF_SCROLL_CONTAINER_CLASS_NAME = "pdf-pane__scroll-container";
+const PDF_SCROLLING_CLASS_NAME = "pdf-pane--scrolling";
 const PDF_STANDARD_MAX_CANVAS_PIXELS = 4096 * 8192;
 const PDF_TOOLBAR_BUTTON_CLASS_NAME = "inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-black/10 bg-white/90 px-2 text-[12px] font-medium text-[#4a4a4a] shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40";
 const PDF_TOOLBAR_INPUT_CLASS_NAME = "h-8 w-14 rounded-md border border-black/10 bg-white/90 px-2 text-center text-[12px] font-medium text-[#4a4a4a] shadow-sm outline-none focus:border-black/25";
@@ -121,7 +130,6 @@ const PDF_WHEEL_DELTA_MODE_LINE = 1;
 const PDF_WHEEL_DELTA_MODE_PAGE = 2;
 const PDF_ZOOM_BUTTON_SCALE_FACTOR = 1.1;
 const PDF_ZOOM_COMMIT_DELAY_MS = 110;
-const PDF_ZOOM_PREVIEW_RELEASE_DELAY_MS = 90;
 const PDF_ZOOMING_CLASS_NAME = "pdf-pane--zooming";
 const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
@@ -304,21 +312,21 @@ const applyPdfViewerNumericScaleWithAnchor = (pdfViewer: PdfViewerInstance, cont
   return applyPdfViewerScaleValueWithAnchor(pdfViewer, container, String(nextScale), clientX, clientY, afterRestore);
 };
 
-const createPdfZoomPreview = (pdfViewer: PdfViewerInstance, container: HTMLElement, scale: number, clientX?: number, clientY?: number): PdfZoomPreview | null => {
+const createPdfZoomPreview = (pdfViewer: PdfViewerInstance, container: HTMLElement, viewerElement: HTMLElement, scale: number, clientX?: number, clientY?: number): PdfZoomPreview | null => {
   const currentScale = getPdfViewerCurrentScale(pdfViewer);
   const nextScale = clampPdfViewerScale(scale);
   if (Math.abs(nextScale - currentScale) < PDF_SCALE_EPSILON) return null;
 
-  const containerRect = container.getBoundingClientRect();
   const clientPoint = getPdfZoomClientPoint(container, clientX, clientY);
-  const originX = Math.min(Math.max(clientPoint.clientX - containerRect.left, 0), Math.max(container.clientWidth, 1));
-  const originY = Math.min(Math.max(clientPoint.clientY - containerRect.top, 0), Math.max(container.clientHeight, 1));
+  const viewerRect = viewerElement.getBoundingClientRect();
+  const viewerOriginX = Math.min(Math.max(clientPoint.clientX - viewerRect.left, 0), Math.max(viewerRect.width, 1));
+  const viewerOriginY = Math.min(Math.max(clientPoint.clientY - viewerRect.top, 0), Math.max(viewerRect.height, 1));
 
   return {
     scale: nextScale,
     scaleRatio: nextScale / currentScale,
-    originX,
-    originY,
+    viewerOriginX,
+    viewerOriginY,
     clientX: clientPoint.clientX,
     clientY: clientPoint.clientY,
   };
@@ -386,18 +394,25 @@ const createPdfZoomSnapshot = (container: HTMLElement, viewerElement: HTMLElemen
   return snapshotElement;
 };
 
-const applyPdfZoomSnapshotPreview = (container: HTMLElement, viewerElement: HTMLElement, snapshotElement: HTMLElement, preview: PdfZoomPreview): void => {
+const applyPdfZoomLivePreview = (container: HTMLElement, viewerElement: HTMLElement, preview: PdfZoomPreview): void => {
   container.classList.add(PDF_ZOOMING_CLASS_NAME);
   viewerElement.classList.add(PDF_ZOOMING_CLASS_NAME);
-  viewerElement.style.visibility = "hidden";
-  snapshotElement.style.transform = `scale(${preview.scaleRatio})`;
-  snapshotElement.style.transformOrigin = `${preview.originX}px ${preview.originY}px`;
+  viewerElement.style.transform = `scale(${preview.scaleRatio})`;
+  viewerElement.style.transformOrigin = `${preview.viewerOriginX}px ${preview.viewerOriginY}px`;
+};
+
+const preparePdfZoomScaleCommit = (viewerElement: HTMLElement, snapshotElement: HTMLElement | null): void => {
+  viewerElement.style.removeProperty("transform");
+  viewerElement.style.removeProperty("transform-origin");
+  if (snapshotElement) viewerElement.style.visibility = "hidden";
 };
 
 const clearPdfZoomPreview = (container: HTMLElement, viewerElement: HTMLElement): void => {
   container.classList.remove(PDF_ZOOMING_CLASS_NAME);
   viewerElement.classList.remove(PDF_ZOOMING_CLASS_NAME);
   viewerElement.style.removeProperty("visibility");
+  viewerElement.style.removeProperty("transform");
+  viewerElement.style.removeProperty("transform-origin");
   container.querySelectorAll(".pdf-pane__zoom-snapshot").forEach((snapshotElement) => snapshotElement.remove());
 };
 
@@ -415,6 +430,13 @@ const collectPdfPageWindowMetrics = (viewerElement: HTMLElement): PdfPageWindowM
   });
 };
 
+const getPdfVisiblePageSet = (pdfViewer: PdfViewerInstance, container: HTMLElement, viewerElement: HTMLElement, fallbackPageNumber: number = pdfViewer.currentPageNumber): Set<number> => {
+  const pageCount = getPdfViewerPageCount(pdfViewer);
+  const pageMetrics = collectPdfPageWindowMetrics(viewerElement);
+  if (pageCount <= 0 || pageMetrics.length === 0) return new Set();
+  return getPdfPageWindowKeepSet(pageMetrics, container.scrollTop, container.clientHeight, pageCount, { fallbackPageNumber, overscanPageCount: 0 });
+};
+
 const updatePdfViewerVisiblePageWindow = (pdfViewer: PdfViewerInstance, container: HTMLElement, viewerElement: HTMLElement, fallbackPageNumber: number = pdfViewer.currentPageNumber): void => {
   const pageCount = getPdfViewerPageCount(pdfViewer);
   const pageMetrics = collectPdfPageWindowMetrics(viewerElement);
@@ -427,6 +449,17 @@ const updatePdfViewerVisiblePageWindow = (pdfViewer: PdfViewerInstance, containe
     pageElement.dataset.windowRetained = idsToKeep.has(pageNumber) ? "true" : "false";
   });
   pdfViewer.update();
+};
+
+const isPdfPageRendered = (pdfViewer: PdfViewerInstance, pageNumber: number): boolean => {
+  const pageView = pdfViewer.getPageView(pageNumber - 1) as { renderingState?: number } | null | undefined;
+  return pageView?.renderingState === RenderingStates.FINISHED;
+};
+
+const pruneRenderedPdfZoomCommitPages = (pdfViewer: PdfViewerInstance, zoomCommit: PdfZoomCommit): void => {
+  for (const pageNumber of zoomCommit.pageNumbers) {
+    if (isPdfPageRendered(pdfViewer, pageNumber)) zoomCommit.pageNumbers.delete(pageNumber);
+  }
 };
 
 const createPdfToolbarState = (pdfViewer: PdfViewerInstance | null, viewerState: PdfViewerState | null): PdfToolbarState => {
@@ -461,6 +494,8 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const pdfViewerElementRef = useRef<HTMLDivElement | null>(null);
   const pdfViewerRef = useRef<PdfViewerInstance | null>(null);
+  const requestPdfFitWidthRef = useRef<(() => void) | null>(null);
+  const requestPdfZoomRef = useRef<((scale: number, clientX?: number, clientY?: number) => void) | null>(null);
   const viewerStateRef = useRef<PdfViewerState | null>(viewerState);
   const onLoadErrorRef = useRef(onLoadError);
   const onViewerStateChangeRef = useRef(onViewerStateChange);
@@ -508,6 +543,11 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     const pdfViewer = pdfViewerRef.current;
     const container = scrollContainerRef.current;
     if (!pdfViewer || !container) return;
+    if (requestPdfZoomRef.current) {
+      requestPdfZoomRef.current(scale, clientX, clientY);
+      return;
+    }
+
     lastExplicitZoomAtRef.current = Date.now();
     if (!applyPdfViewerNumericScaleWithAnchor(pdfViewer, container, scale, clientX, clientY, updateActivePdfPageWindow)) refreshPdfToolbarState();
   }, [refreshPdfToolbarState, updateActivePdfPageWindow]);
@@ -528,6 +568,11 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     const pdfViewer = pdfViewerRef.current;
     const container = scrollContainerRef.current;
     if (!pdfViewer || !container) return;
+    if (requestPdfFitWidthRef.current) {
+      requestPdfFitWidthRef.current();
+      return;
+    }
+
     isApplyingFitScaleRef.current = true;
     lastExplicitZoomAtRef.current = Date.now();
     if (!applyPdfViewerScaleValueWithAnchor(pdfViewer, container, "page-width", undefined, undefined, updateActivePdfPageWindow)) refreshPdfToolbarState();
@@ -631,11 +676,11 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     let resizeFrame: number | null = null;
     let zoomFrame: number | null = null;
     let zoomCommitTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
-    let zoomPreviewReleaseTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
     let pendingZoom: PendingPdfZoom | null = null;
     let activeZoomPreview: PdfZoomPreview | null = null;
-    let activeZoomSnapshot: HTMLDivElement | null = null;
+    let activeZoomCommit: PdfZoomCommit | null = null;
     let gestureBaseScale: number | null = null;
+    let isScrollActive = false;
     const performanceTraceName = createPdfPerformanceTraceName("viewer.load");
     const eventBus = new EventBus() as PdfEventBusLike;
     const linkService = new PDFLinkService({ eventBus });
@@ -658,32 +703,32 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       zoomCommitTimer = null;
     };
 
-    const clearZoomPreviewReleaseTimer = () => {
-      if (zoomPreviewReleaseTimer === null) return;
-      globalThis.clearTimeout(zoomPreviewReleaseTimer);
-      zoomPreviewReleaseTimer = null;
-    };
-
     const clearActiveZoomPreview = () => {
       activeZoomPreview = null;
-      activeZoomSnapshot = null;
-      clearZoomPreviewReleaseTimer();
+      activeZoomCommit = null;
       clearPdfZoomPreview(container, viewerElement);
     };
 
-    const releaseActiveZoomPreviewAfterScaleCommit = () => {
-      updateVisiblePageWindow();
-      clearZoomPreviewReleaseTimer();
-      zoomPreviewReleaseTimer = globalThis.setTimeout(() => {
-        zoomPreviewReleaseTimer = null;
-        clearActiveZoomPreview();
-      }, PDF_ZOOM_PREVIEW_RELEASE_DELAY_MS);
+    const finishActiveZoomCommitIfRendered = () => {
+      const zoomCommit = activeZoomCommit;
+      if (!zoomCommit) return;
+      pruneRenderedPdfZoomCommitPages(pdfViewer, zoomCommit);
+      if (zoomCommit.pageNumbers.size > 0) return;
+      clearActiveZoomPreview();
+      refreshPdfToolbarState();
     };
 
-    const ensureActiveZoomSnapshot = (): HTMLDivElement | null => {
-      if (activeZoomSnapshot?.isConnected) return activeZoomSnapshot;
-      activeZoomSnapshot = createPdfZoomSnapshot(container, viewerElement);
-      return activeZoomSnapshot;
+    const updateAfterZoomScaleCommit = () => {
+      updateVisiblePageWindow();
+      window.requestAnimationFrame(finishActiveZoomCommitIfRendered);
+    };
+
+    const beginActiveZoomCommit = (): void => {
+      const snapshotElement = createPdfZoomSnapshot(container, viewerElement);
+      const pageNumbers = getPdfVisiblePageSet(pdfViewer, container, viewerElement);
+      activeZoomCommit = { pageNumbers };
+      preparePdfZoomScaleCommit(viewerElement, snapshotElement);
+      if (pageNumbers.size === 0) clearActiveZoomPreview();
     };
 
     const commitActiveZoomPreview = () => {
@@ -695,7 +740,8 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       }
 
       lastExplicitZoomAtRef.current = Date.now();
-      if (applyPdfViewerNumericScaleWithAnchor(pdfViewer, container, zoomPreview.scale, zoomPreview.clientX, zoomPreview.clientY, releaseActiveZoomPreviewAfterScaleCommit)) return;
+      beginActiveZoomCommit();
+      if (applyPdfViewerNumericScaleWithAnchor(pdfViewer, container, zoomPreview.scale, zoomPreview.clientX, zoomPreview.clientY, updateAfterZoomScaleCommit)) return;
       clearActiveZoomPreview();
       refreshPdfToolbarState();
     };
@@ -727,7 +773,8 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       const nextZoom = pendingZoom;
       pendingZoom = null;
       if (isCancelled || !loadedPdfDocument || !nextZoom) return;
-      const zoomPreview = createPdfZoomPreview(pdfViewer, container, nextZoom.scale, nextZoom.clientX, nextZoom.clientY);
+      if (activeZoomCommit) return;
+      const zoomPreview = createPdfZoomPreview(pdfViewer, container, viewerElement, nextZoom.scale, nextZoom.clientX, nextZoom.clientY);
       if (!zoomPreview) {
         clearActiveZoomPreview();
         clearZoomCommitTimer();
@@ -735,9 +782,8 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         return;
       }
 
-      const snapshotElement = ensureActiveZoomSnapshot();
       activeZoomPreview = zoomPreview;
-      if (snapshotElement) applyPdfZoomSnapshotPreview(container, viewerElement, snapshotElement, zoomPreview);
+      applyPdfZoomLivePreview(container, viewerElement, zoomPreview);
       setToolbarState((current) => ({ ...current, scale: zoomPreview.scale }));
       scheduleZoomCommit();
     };
@@ -748,9 +794,44 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       zoomFrame = window.requestAnimationFrame(flushPendingZoomPreview);
     };
 
-    const handleScroll = () => updateVisiblePageWindow();
+    const requestFitWidth = () => {
+      if (isCancelled || !loadedPdfDocument || activeZoomCommit) return;
+      clearZoomCommitTimer();
+      const snapshotElement = createPdfZoomSnapshot(container, viewerElement);
+      const pageNumbers = getPdfVisiblePageSet(pdfViewer, container, viewerElement);
+      activeZoomCommit = { pageNumbers };
+      preparePdfZoomScaleCommit(viewerElement, snapshotElement);
+      isApplyingFitScaleRef.current = true;
+      lastExplicitZoomAtRef.current = Date.now();
+      if (applyPdfViewerScaleValueWithAnchor(pdfViewer, container, "page-width", undefined, undefined, updateAfterZoomScaleCommit)) return;
+      clearActiveZoomPreview();
+      refreshPdfToolbarState();
+    };
+
+    const activateScrollRenderingMode = () => {
+      if (isScrollActive) return;
+      isScrollActive = true;
+      container.classList.add(PDF_SCROLLING_CLASS_NAME);
+      viewerElement.classList.add(PDF_SCROLLING_CLASS_NAME);
+      recordPdfPerformanceMark(`${performanceTraceName}.scrollActive`, { debugOnly: true });
+    };
+
+    const clearScrollRenderingMode = () => {
+      isScrollActive = false;
+      container.classList.remove(PDF_SCROLLING_CLASS_NAME);
+      viewerElement.classList.remove(PDF_SCROLLING_CLASS_NAME);
+    };
+
+    const handleScroll = () => {
+      activateScrollRenderingMode();
+      updateVisiblePageWindow();
+    };
+
+    const handleScrollEnd = () => clearScrollRenderingMode();
     const handleTouchMove = () => updateVisiblePageWindow();
 
+    requestPdfFitWidthRef.current = requestFitWidth;
+    requestPdfZoomRef.current = requestZoom;
     retainPdfDocumentSource(source);
     recordPdfPerformanceMark(`${performanceTraceName}.start`, { detail: { sourceType: source.type } });
     pdfViewerRef.current = pdfViewer;
@@ -763,8 +844,10 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     resizeObserver?.observe(container);
     window.addEventListener("orientationchange", requestResponsiveScaleUpdate);
     container.addEventListener("scroll", handleScroll, { passive: true });
+    container.addEventListener("scrollend", handleScrollEnd, { passive: true });
     container.addEventListener("touchmove", handleTouchMove, { passive: true });
     removeEventListeners.push(() => container.removeEventListener("scroll", handleScroll));
+    removeEventListeners.push(() => container.removeEventListener("scrollend", handleScrollEnd));
     removeEventListeners.push(() => container.removeEventListener("touchmove", handleTouchMove));
     removeEventListeners.push(() => window.removeEventListener("orientationchange", requestResponsiveScaleUpdate));
 
@@ -773,18 +856,19 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       const normalizedDeltaY = getNormalizedPdfWheelDeltaY(event, container);
       if (normalizedDeltaY === 0) return;
       event.preventDefault();
+      if (activeZoomCommit) return;
       const baseScale = pendingZoom?.scale ?? activeZoomPreview?.scale ?? getPdfViewerCurrentScale(pdfViewer);
       requestZoom(baseScale * Math.exp(-normalizedDeltaY * PDF_TRACKPAD_ZOOM_SENSITIVITY), event.clientX, event.clientY);
     };
 
     const handleGestureStart = (event: PdfGestureEvent) => {
-      if (isCancelled || !loadedPdfDocument) return;
+      if (isCancelled || !loadedPdfDocument || activeZoomCommit) return;
       event.preventDefault();
       gestureBaseScale = pendingZoom?.scale ?? activeZoomPreview?.scale ?? getPdfViewerCurrentScale(pdfViewer);
     };
 
     const handleGestureChange = (event: PdfGestureEvent) => {
-      if (isCancelled || !loadedPdfDocument) return;
+      if (isCancelled || !loadedPdfDocument || activeZoomCommit) return;
       const gestureScale = Number(event.scale);
       if (!Number.isFinite(gestureScale) || gestureScale <= 0) return;
       event.preventDefault();
@@ -840,6 +924,14 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       if (viewerStateRef.current?.scale !== scale || viewerStateRef.current?.fitMode !== fitMode) updateViewerState({ scale, fitMode }, { persistence: isExplicitZoom ? "immediate" : "none" });
       updateVisiblePageWindow();
       refreshPdfToolbarState();
+      window.requestAnimationFrame(finishActiveZoomCommitIfRendered);
+    }));
+
+    removeEventListeners.push(addPdfViewerEventListener(eventBus, "pagerendered", (event: unknown) => {
+      if (isCancelled || !activeZoomCommit) return;
+      const pageNumber = (event as PdfPageRenderedEvent).pageNumber;
+      if (typeof pageNumber === "number" && Number.isFinite(pageNumber)) activeZoomCommit.pageNumbers.delete(pageNumber);
+      finishActiveZoomCommitIfRendered();
     }));
 
     void loadPdfDocument(source, viewerOptions).then((nextPdfDocument) => {
@@ -869,6 +961,9 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       gestureBaseScale = null;
       clearZoomCommitTimer();
       clearActiveZoomPreview();
+      clearScrollRenderingMode();
+      if (requestPdfFitWidthRef.current === requestFitWidth) requestPdfFitWidthRef.current = null;
+      if (requestPdfZoomRef.current === requestZoom) requestPdfZoomRef.current = null;
       if (visiblePageWindowFrame !== null) window.cancelAnimationFrame(visiblePageWindowFrame);
       if (resizeFrame !== null) window.cancelAnimationFrame(resizeFrame);
       if (zoomFrame !== null) window.cancelAnimationFrame(zoomFrame);

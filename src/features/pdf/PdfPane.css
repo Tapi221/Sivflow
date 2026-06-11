@@ -20,6 +20,7 @@
 }
 
 .pdf-pane__viewer.pdf-pane--zooming {
+  contain: layout style;
   will-change: transform;
   transform-box: border-box;
 }
