@@ -14,6 +14,8 @@ import { inlineSuggestionVariants } from '@/lib/suggestion';
 
 
 
+
+
 export function EquationElementStatic( props: SlateElementProps<TEquationElement> ) { const { element } = props;
 
   const html = getEquationHtml({

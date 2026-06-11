@@ -8,6 +8,8 @@ import type { CardBlock } from "@/types/domain/card";
 
 
 
+
+
 type RowContainerProps = Readonly<Record<string, unknown>>;
 
 type GetRowRef = (
@@ -47,6 +49,8 @@ type CardBlocksSceneProps = SharedSceneProps &
 
 
 
+
+
 const CardBlocksSceneInner = ({
   blocks,
   getRowRef,
@@ -78,11 +82,15 @@ const CardBlocksSceneInner = ({
 
 
 
+
+
 const CardBlocksScene = React.memo(CardBlocksSceneInner);
 
 CardBlocksScene.displayName = "CardBlocksScene";
 
 export { CardBlocksScene };
+
+
 
 
 

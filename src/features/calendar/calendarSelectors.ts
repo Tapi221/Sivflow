@@ -7,6 +7,8 @@ import { getCalendarIntensity, getStreakFromLogs, getTodayDescription, getWeekDa
 
 
 
+
+
 const isDeletedCard = (card: CalendarCardLike) => {
   return Boolean(
     card.isDeleted ??

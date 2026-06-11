@@ -4,6 +4,8 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
 
 
 
+
+
 interface Props {
   children: ReactNode;
 }
@@ -16,9 +18,13 @@ interface State {
 
 
 
+
+
 const ErrorScreen = () => {
   return "error";
 };
+
+
 
 
 
@@ -54,6 +60,8 @@ class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
+
+
 
 
 

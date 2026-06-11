@@ -20,6 +20,8 @@ import type { CardBlock } from "@/types/domain/card";
 
 
 
+
+
 interface BlockToolbarProps {
   label: string;
   onAddBlock: (type: CardBlock["type"]) => void;
@@ -41,6 +43,8 @@ type ToolbarBlockConfig = {
 
 
 
+
+
 const areBlockToolbarPropsEqual = (
   prev: BlockToolbarProps,
   next: BlockToolbarProps,
@@ -51,6 +55,8 @@ const areBlockToolbarPropsEqual = (
   prev.hiddenBlockTypes === next.hiddenBlockTypes &&
   prev.desktopLayout === next.desktopLayout &&
   prev.className === next.className;
+
+
 
 
 
@@ -303,6 +309,8 @@ const MarkdownBlockGlyph = ({
 
 
 
+
+
 const getIcon = (
   iconName: EditorBlockIconName,
 ): React.ComponentType<IconProps> => {
@@ -317,6 +325,8 @@ const getIcon = (
 
   return map[iconName];
 };
+
+
 
 
 
@@ -638,6 +648,8 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
 
   return renderToolbarShell();
 };
+
+
 
 
 

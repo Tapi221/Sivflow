@@ -7,11 +7,15 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 type UseViewerScenePropsArgs = Readonly<{
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
   displayMode?: CardDisplayMode;
   zoom?: number;
 }>;
+
+
 
 
 
