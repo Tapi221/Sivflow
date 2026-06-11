@@ -53,8 +53,6 @@ const createSourceFile = (filePath, source) => ts.createSourceFile(filePath, sou
 
 const getNewline = (source) => source.includes("\r\n") ? "\r\n" : "\n";
 
-const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
 const isImportStatement = (statement) => ts.isImportDeclaration(statement) || ts.isImportEqualsDeclaration(statement);
 
 const isDirectiveStatement = (statement) => ts.isExpressionStatement(statement) && ts.isStringLiteral(statement.expression);
@@ -93,14 +91,6 @@ const isPascalCaseName = (name) => /^[A-Z][A-Za-z0-9]*$/.test(name);
 const isUpperCaseConstantName = (name) => /^[A-Z0-9_]+$/.test(name);
 
 const getVariableStatementNames = (statement) => statement.declarationList.declarations.flatMap((declaration) => ts.isIdentifier(declaration.name) ? [declaration.name.text] : []);
-
-const getStatementDeclarationNames = (statement) => {
-  if (ts.isVariableStatement(statement)) return getVariableStatementNames(statement);
-  if ((ts.isClassDeclaration(statement) || ts.isFunctionDeclaration(statement) || ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement)) && statement.name) return [statement.name.text];
-  if (ts.isModuleDeclaration(statement) && ts.isIdentifier(statement.name)) return [statement.name.text];
-
-  return [];
-};
 
 const isConstVariableStatement = (statement) => (statement.declarationList.flags & ts.NodeFlags.Const) !== 0;
 
@@ -153,24 +143,8 @@ const isConstDependentTypeStatement = (source, statement, highestRank) => {
   return source.slice(statement.getStart(), statement.getEnd()).includes("typeof ");
 };
 
-const statementReferencesName = (statementText, name) => new RegExp(`\\b${escapeRegExp(name)}\\b`).test(statementText);
-
-const getStatementText = (source, sourceFile, statement) => source.slice(statement.getStart(sourceFile), statement.getEnd()).trim();
-
-const statementReferencesPreviousHigherRankDeclaration = (source, sourceFile, statement, previousStatements, rank) => {
-  const higherRankNames = previousStatements.flatMap((previousStatement) => {
-    const previousCategory = getStatementOrderCategory(previousStatement);
-    if (ORDER_RANKS[previousCategory] <= rank) return [];
-
-    return getStatementDeclarationNames(previousStatement);
-  });
-  const statementText = getStatementText(source, sourceFile, statement);
-
-  return higherRankNames.some((name) => statementReferencesName(statementText, name));
-};
-
-const canKeepStatementAfterHigherRank = (source, sourceFile, statement, previousStatements, rank, highestRank) => {
-  return isTypeOnlyExportDeclaration(statement) || canAppearInExportBlock(statement) || isConstDependentTypeStatement(source, statement, highestRank) || statementReferencesPreviousHigherRankDeclaration(source, sourceFile, statement, previousStatements, rank);
+const canKeepStatementAfterHigherRank = (source, statement, highestRank) => {
+  return isTypeOnlyExportDeclaration(statement) || canAppearInExportBlock(statement) || isConstDependentTypeStatement(source, statement, highestRank);
 };
 
 const findMoveTargetIndex = (statements, rank, fromIndex) => {
@@ -185,7 +159,6 @@ const findMoveTargetIndex = (statements, rank, fromIndex) => {
 
 const findFirstOrderMove = (source, sourceFile) => {
   const statements = [...sourceFile.statements];
-  const previousStatements = [];
   let highestRank = 0;
 
   for (let index = 0; index < statements.length; index += 1) {
@@ -196,17 +169,13 @@ const findFirstOrderMove = (source, sourceFile) => {
     const rank = ORDER_RANKS[category];
 
     if (rank < highestRank) {
-      if (canKeepStatementAfterHigherRank(source, sourceFile, statement, previousStatements, rank, highestRank)) {
-        previousStatements.push(statement);
-        continue;
-      }
+      if (canKeepStatementAfterHigherRank(source, statement, highestRank)) continue;
 
       const targetIndex = findMoveTargetIndex(statements, rank, index);
       if (targetIndex >= 0) return { fromIndex: index, targetIndex };
     }
 
     highestRank = Math.max(highestRank, rank);
-    previousStatements.push(statement);
   }
 
   return null;
