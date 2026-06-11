@@ -1,10 +1,15 @@
 import { useEffect } from "react";
 
+
 import { useSearchStore } from "@/features/search/store/useSearchStore";
+
 
 import { isPrimaryShortcut, isTypingTarget } from "./hotkeyGuards";
 
+
 import { hasOpenModalDialog } from "./modalGuards";
+
+
 
 
 

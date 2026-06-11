@@ -1,12 +1,18 @@
 import { useCallback, useEffect, useState } from "react";
 
+
 import { liveQuery } from "dexie";
+
 
 import type { CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTimetableDepartment, CalendarTimetableInstitution, CalendarTimetablePeriod, CalendarTimetableSettings, CalendarTimetableSyllabusCourse, CalendarTimetableSyllabusCourseDisplay, CalendarTimetableSyllabusCourseDraft, CalendarTimetableVisibleDayCount } from "@core/domain/calendar/timetable/timetable.types";
 
+
 import { createDefaultCalendarTimetablePeriods } from "@core/domain/calendar/timetable/timetable.model";
 
+
 import { addCalendarTimetableCourseFromSyllabus, addCalendarTimetablePeriod, deleteCalendarTimetableCourse, deleteCalendarTimetablePeriod, ensureCalendarTimetableSeedData, getCalendarTimetableSettings, listCalendarTimetableCourses, listCalendarTimetableDepartments, listCalendarTimetableInstitutions, listCalendarTimetablePeriods, saveCalendarTimetableCourse, saveCalendarTimetableSyllabusCourse, searchCalendarTimetableSyllabusCourses, updateCalendarTimetablePeriod, updateCalendarTimetableVisibleDayCount } from "./calendarTimetable.storage";
+
+
 
 
 
@@ -50,8 +56,12 @@ type UseCalendarTimetableReturn = UseCalendarTimetableState & {
 
 
 
+
+
 const DEFAULT_SETTINGS: CalendarTimetableSettings = { id: "default", activeSemesterId: "default-semester", visibleDayCount: 5, updatedAt: "" };
 const DEFAULT_PERIODS = createDefaultCalendarTimetablePeriods();
+
+
 
 
 
@@ -98,6 +108,8 @@ const useCalendarTimetable = (): UseCalendarTimetableReturn => {
 
   return { ...state, saveCourse, deleteCourse, updateVisibleDayCount, addPeriod, updatePeriod, deletePeriod, saveSyllabusCourse, addCourseFromSyllabus, searchSyllabusCourses };
 };
+
+
 
 
 

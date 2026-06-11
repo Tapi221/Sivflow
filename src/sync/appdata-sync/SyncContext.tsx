@@ -1,18 +1,27 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
+
 
 import type { ISyncService, UserSettingsSnapshot } from "@/services/interfaces/ISyncService";
 
+
 import { getLocalDb } from "@/services/localdb";
+
 
 import type { LocalDBTableMap, SyncableEntityTable } from "@/services/localdb/types";
 
+
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
+
 
 import { DEFAULT_SYNC_SETTINGS, type SyncConflict, type SyncEntity, type SyncSettings } from "@/types/domain/sync";
 
+
 import { SyncContext, type SyncContextType, type SyncNotice, type SyncProviderProps, type SyncStatus } from "./SyncContextCore";
+
+
 
 
 
@@ -33,6 +42,8 @@ const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, SyncableEntityTable> = {
   userSetting: "userSettings",
   asset: "images",
 };
+
+
 
 
 
@@ -70,6 +81,8 @@ const buildResolvedConflictRecord = (conflict: SyncConflict, resolvedData: unkno
     id: conflict.entityId,
   };
 };
+
+
 
 
 

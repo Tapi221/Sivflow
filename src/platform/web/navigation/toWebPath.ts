@@ -14,7 +14,11 @@ type LegacyDestination = {
 
 
 
+
+
 const SCHEDULE_PATH = "/schedule";
+
+
 
 
 

@@ -1,8 +1,12 @@
 import { memo, type CSSProperties, type RefObject } from "react";
 
+
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 
+
 import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanel.utils";
+
+
 
 
 
@@ -42,6 +46,8 @@ type DocumentContextMenuProps = {
 
 
 
+
+
 export const DOCUMENT_CONTEXT_MENU_PANEL_ID = "document-context-menu";
 
 const DOCUMENT_CONTEXT_MENU_LABELS = [
@@ -63,6 +69,8 @@ const DOCUMENT_CONTEXT_MENU_STYLE = `
   background: #fef2f2;
 }
 `;
+
+
 
 
 
@@ -109,6 +117,8 @@ const DocumentContextMenuBase = ({
     </>
   );
 };
+
+
 
 
 

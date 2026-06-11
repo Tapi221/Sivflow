@@ -10,8 +10,12 @@ import type { GenerationCounterStorePort } from "@/application/ports/GenerationC
 
 
 
+
+
 const GENERATION_COUNTER_KEY = "sivflow_generation_counter";
 const LEGACY_GENERATION_COUNTER_KEY = "flashcard_generation_counter";
+
+
 
 
 
@@ -43,6 +47,8 @@ const increment = (): number => {
   localStorage.removeItem(LEGACY_GENERATION_COUNTER_KEY);
   return next;
 };
+
+
 
 
 

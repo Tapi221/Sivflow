@@ -1,6 +1,8 @@
 import { initGlobalChunkRecovery } from "./initGlobalChunkRecovery";
 
+
 import { initServiceWorkerLifecycle } from "./initServiceWorkerLifecycle";
+
 
 import { startTabPresence } from "@/utils/tabPresence";
 
@@ -14,7 +16,11 @@ import { startTabPresence } from "@/utils/tabPresence";
 
 
 
+
+
 let started = false;
+
+
 
 
 

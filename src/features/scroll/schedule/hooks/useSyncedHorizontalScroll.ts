@@ -10,11 +10,15 @@ import { useEffect, type RefObject } from "react";
 
 
 
+
+
 type Params = {
   primaryRef: RefObject<HTMLElement | null>;
   syncedRefs: Array<RefObject<HTMLElement | null> | undefined | null>;
   syncKey?: string | number;
 };
+
+
 
 
 

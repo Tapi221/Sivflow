@@ -1,12 +1,18 @@
 import { useCallback } from "react";
 
+
 import { useLiveQuery } from "dexie-react-hooks";
+
 
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 
+
 import { getLocalDb } from "@/services/localdb/LocalDB";
 
+
 import type { Note, NoteBlockContent } from "@/types";
+
+
 
 
 
@@ -37,7 +43,11 @@ type CreateNoteOptions = {
 
 
 
+
+
 const DEFAULT_NOTE_CONTENT: NoteBlockContent = [];
+
+
 
 
 
@@ -136,6 +146,8 @@ const useNotes = (folderId?: string | null, options?: UseNotesOptions) => {
     deleteNote,
   };
 };
+
+
 
 
 

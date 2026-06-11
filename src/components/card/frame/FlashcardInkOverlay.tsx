@@ -1,10 +1,15 @@
 import React from "react";
 
+
 import { InkLayer, InkToolbar } from "@/components/ink/InkLayer";
+
 
 import type { InkDocument, InkEditTool } from "@core/domain/card/ink/inkDocument";
 
+
 import type { InkHistoryState, InkLayerHandle } from "@/components/ink/inkLayer.types";
+
+
 
 
 
@@ -34,6 +39,8 @@ interface FlashcardInkOverlayProps {
   setPreviewInkTool: React.Dispatch<React.SetStateAction<InkEditTool | null>>;
   setPreviewInkHistory: React.Dispatch<React.SetStateAction<InkHistoryState>>;
 }
+
+
 
 
 

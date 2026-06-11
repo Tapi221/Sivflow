@@ -1,10 +1,15 @@
 import { normalizeInkDocument, type InkDocument, type InkSide } from "@core/domain/card/ink/inkDocument";
 
+
 import { receiveDesktopHandwritingMessage, type DesktopHandwritingReceiverReason, type DesktopHandwritingReceiverSession } from "./desktopHandwritingReceiver";
+
 
 import { attachMobileDeviceToHandwritingSession, closeHandwritingSession, createDesktopHandwritingSession, failHandwritingSession } from "./handwritingSessionLifecycle";
 
+
 import type { HandwritingDeviceInfo, HandwritingSession, HandwritingSessionMessage } from "./handwritingSession.types";
+
+
 
 
 
@@ -48,6 +53,8 @@ export type ReceiveDesktopHandwritingSessionManagerMessageResult = { state: Desk
   applied: boolean;
   reason?: DesktopHandwritingReceiverReason | "session-not-found";
 };
+
+
 
 
 

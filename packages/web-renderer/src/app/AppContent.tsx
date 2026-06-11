@@ -1,20 +1,29 @@
 import { useEffect, useState } from "react";
 
+
 import { AccountLockedScreen } from "@/components/security/AccountLockedScreen";
+
 
 import { LoadingFallback } from "@/components/common/LoadingFallback";
 
+
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
+
 
 import { useStartupTasks } from "@/application/startup/useStartupTasks";
 
+
 import { LoginPage } from "@web-renderer/features/auth/LoginPage";
+
 
 import { MobileLoginPage } from "@web-renderer/features/auth/MobileLoginPage";
 
+
 import { AppRoutes } from "@web-renderer/app/routing/AppRoutes";
 
+
 import { getDevStandaloneRouteElement } from "@web-renderer/app/routing/DevRoutes";
+
 
 import { isTestBypassEnabled } from "@web-renderer/app/routing/testBypass";
 
@@ -28,7 +37,11 @@ import { isTestBypassEnabled } from "@web-renderer/app/routing/testBypass";
 
 
 
+
+
 const MOBILE_LOGIN_VIEWPORT_MAX_WIDTH = 767;
+
+
 
 
 
@@ -79,6 +92,8 @@ const useIsMobileLoginViewport = (): boolean => {
 
 
 
+
+
 const AppContent = () => {
   const { currentUser, loading } = useAuthSession();
   const isMobileLoginViewport = useIsMobileLoginViewport();
@@ -107,6 +122,8 @@ const AppContent = () => {
     </>
   );
 };
+
+
 
 
 

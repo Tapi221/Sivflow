@@ -1,8 +1,12 @@
 import { deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
 
+
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
+
 import { requireFirestoreDb } from "@/services/firebase";
+
+
 
 
 
@@ -37,9 +41,13 @@ type GoogleWatchResponse = {
 
 
 
+
+
 const GCAL_API_BASE = "https://www.googleapis.com/calendar/v3";
 const WATCH_TTL_MS = 6 * 24 * 60 * 60 * 1000;
 const RENEWAL_THRESHOLD_MS = 24 * 60 * 60 * 1000;
+
+
 
 
 

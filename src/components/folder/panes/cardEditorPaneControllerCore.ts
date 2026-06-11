@@ -1,16 +1,22 @@
 import { WEB_STORAGE_KEYS } from "@platform/storage/webStorageKeys.constants";
 
 
+
 import type { CardSetViewEditingDraftPatch } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
+
 
 
 import { createLatestReviewLogPatch, createReviewPatchFromRating } from "@/services/reviewAlgorithm";
 
 
+
 import type { ReviewLog } from "@/types/domain/base";
 
 
+
 import type { Card, UserSettings } from "@/types";
+
+
 
 
 
@@ -47,7 +53,11 @@ type CreateMetaPanelActionsArgs = {
 
 
 
+
+
 export const META_PANEL_OPEN_STORAGE_KEY = WEB_STORAGE_KEYS.cardEditorMetaPanelOpen;
+
+
 
 
 

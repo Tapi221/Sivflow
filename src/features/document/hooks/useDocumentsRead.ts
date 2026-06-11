@@ -1,14 +1,21 @@
 import { useMemo, useState } from "react";
 
+
 import { useLiveQuery } from "dexie-react-hooks";
+
 
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 
+
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+
 
 import { getLocalDb } from "@/services/localdb";
 
+
 import type { DocumentItem } from "@/types";
+
+
 
 
 
@@ -27,6 +34,8 @@ type DocumentWithLegacyDelete = DocumentItem & {
 type UseDocumentsReadOptions = {
   enabled?: boolean;
 };
+
+
 
 
 

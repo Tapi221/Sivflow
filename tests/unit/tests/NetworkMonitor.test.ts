@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+
 import { NetworkMonitor } from "@/services/logic/NetworkMonitor";
 
 describe("NetworkMonitor", () => {

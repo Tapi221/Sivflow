@@ -11,11 +11,15 @@ export type PortableImportFileKind = "mfdeck" | "mfcard";
 
 
 
+
+
 export const IMPORT_FILE_MIME_TYPES = { mfdeck: "application/vnd.sivflow.deck+zip", mfcard: "application/vnd.sivflow.card+json", xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", } as const satisfies Record<Exclude<ImportFileKind, "unknown">, string>;
 
 export const IMPORT_FILE_EXTENSIONS = { mfdeck: ".mfdeck", mfcard: ".mfcard", xlsx: ".xlsx", } as const satisfies Record<Exclude<ImportFileKind, "unknown">, string>;
 
 export const IMPORT_FILE_LABELS = { mfdeck: "MFDeck", mfcard: "MFCard", xlsx: "XLSX", unknown: "不明な形式", } as const satisfies Record<ImportFileKind, string>;
+
+
 
 
 

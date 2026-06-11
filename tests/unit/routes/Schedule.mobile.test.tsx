@@ -1,15 +1,21 @@
 // @vitest-environment jsdom
 import React from "react";
 
+
 import { readFileSync } from "node:fs";
+
 
 import { resolve } from "node:path";
 
+
 import { cleanup, render, screen } from "@testing-library/react";
+
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+
 import ScheduleRoute from "@/routes/Schedule";
+
 
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 

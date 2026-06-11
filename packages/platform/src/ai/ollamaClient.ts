@@ -10,6 +10,8 @@ import { getLocalAiSettings } from "./localAiSettings";
 
 
 
+
+
 export type GenerateOllamaAnswerInput = { question: string;
   model?: string;
 };
@@ -35,7 +37,11 @@ export type TestOllamaConnectionResult = { ok: boolean;
 
 
 
+
+
 const OLLAMA_REQUEST_TIMEOUT_MS = 60_000;
+
+
 
 
 

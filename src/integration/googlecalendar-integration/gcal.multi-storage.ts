@@ -1,6 +1,9 @@
 import { clearCachedGoogleCalendarAccount } from "./googleCalendarEventCache";
 
+
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
+
+
 
 
 
@@ -56,6 +59,8 @@ const pendingLegacyDesktopRefreshTokens = new Map<string, string>();
 
 
 
+
+
 // ─────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────
@@ -74,6 +79,8 @@ export type StoredGoogleAccount = { /** メールアドレス or ランダムUUI
 export type StoredGoogleAccountProfile = { name?: string | null;
   photoUrl?: string | null;
 };
+
+
 
 
 

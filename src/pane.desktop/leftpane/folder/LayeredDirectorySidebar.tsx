@@ -1,82 +1,110 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type DragEvent as ReactDragEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type RefObject, type SetStateAction } from "react";
 
 
+
 import { CARD_SET_CONTEXT_MENU_HEIGHT, CARD_SET_CONTEXT_MENU_PANEL_ID, CARD_SET_CONTEXT_MENU_WIDTH, CardSetContextMenu, type CardSetContextMenuAction } from "@/chip/rightclickpanel.desktop/CardSetContextMenu.desktop";
+
 
 
 import { DOCUMENT_CONTEXT_MENU_HEIGHT, DOCUMENT_CONTEXT_MENU_PANEL_ID, DOCUMENT_CONTEXT_MENU_WIDTH, DocumentContextMenu, type DocumentContextMenuAction } from "@/chip/rightclickpanel.desktop/DocumentContextMenu.desktop";
 
 
+
 import { LAYERED_COLOR_MENU_HEIGHT, LAYERED_COLOR_MENU_WIDTH, LayeredColorMenu } from "@/chip/rightclickpanel.desktop/LayeredColorMenu.desktop";
+
 
 
 import { LAYERED_PROJECT_MENU_HEIGHT, LAYERED_PROJECT_MENU_PANEL_ID, LAYERED_PROJECT_MENU_WIDTH, LayeredProjectMenu, type LayeredProjectMenuAction, type LayeredProjectMenuActionId, type LayeredProjectMenuSubmenuAnchor } from "@/chip/rightclickpanel.desktop/LayeredProjectMenu";
 
 
+
 import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
+
 
 
 import { useCardSets } from "@/components/card/hooks/useCardSets";
 
 
+
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+
 
 
 import { ExplorerChromeCardSetIcon, ExplorerChromeFolderIcon, ExplorerChromePdfIcon } from "@/components/explorer/icons";
 
 
+
 import { getFolderProjectColor } from "@/components/folder/explorer/model/projectColor";
+
 
 
 import { DEFAULT_NEW_CARD_SET_NAME, DEFAULT_NEW_FOLDER_NAME, getFolderId, getParentFolderId, UNTITLED_FOLDER_NAME, UNTITLED_PROJECT_NAME, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
 
 
+
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
+
 
 
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 
 
+
 import { useDocumentCommands } from "@/features/document/hooks/useDocumentCommands";
+
 
 
 import { useDocumentsRead } from "@/features/document/hooks/useDocumentsRead";
 
 
+
 import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
+
 
 
 import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
 
 
+
 import { useNotes } from "@/hooks/note/useNotes";
+
 
 
 import { cn } from "@/lib/utils";
 
 
+
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+
 
 
 import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 
 
+
 import type { CardSet, DocumentItem, Note, SelectedExplorerItem } from "@/types";
+
 
 
 import { LayeredTreeDropIndicator } from "./layeredTreeDnd";
 
 
+
 import { LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX, LAYERED_TREE_ROOT_LEVEL } from "./layeredTreeDnd.constants";
+
 
 
 import type { LayeredTreeDragState } from "./layeredTreeDnd.types";
 
 
+
 import { getLayeredTreeDropIndicatorLeft, isLayeredTreeAppendDropTarget } from "./layeredTreeDnd.utils";
 
 
+
 import { useLayeredTreeDragDrop } from "./useLayeredTreeDragDrop";
+
+
 
 
 
@@ -251,6 +279,8 @@ type LegacyNoteFields = {
 
 
 
+
+
 const DEFAULT_NEW_NOTE_NAME = "新規ノート";
 
 const EMPTY_COLLECTION: never[] = [];
@@ -264,6 +294,8 @@ const CARD_SET_CONTEXT_MENU_DIMENSIONS = { width: CARD_SET_CONTEXT_MENU_WIDTH, h
 const DOCUMENT_CONTEXT_MENU_DIMENSIONS = { width: DOCUMENT_CONTEXT_MENU_WIDTH, height: DOCUMENT_CONTEXT_MENU_HEIGHT };
 
 const LAYERED_PROJECT_SUBMENU_OVERLAP_PX = 6;
+
+
 
 
 
@@ -523,6 +555,8 @@ const useFolderLayeredTreeDragDrop = ({ rootFolders, rootDropParentId, scrollCon
 
 
 
+
+
 const IconChevronRight = ({ className }: IconProps) => (
   <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
     <path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -736,6 +770,8 @@ const LibraryHierarchySidebar = ({ parentFolderId = null, onOpenCardSet }: Libra
 
   return <><aside aria-label="Library hierarchy explorer" className="h-full min-h-0 overflow-hidden"><div ref={scrollContainerRef} className="h-full min-h-0 overflow-y-auto px-3 pb-3 pt-1"><div role="tree" aria-label="ライブラリ" className="flex min-h-full flex-col gap-0.5" onDragOver={handleListDragOver} onDragLeave={handleListDragLeave} onDrop={handleListDrop}>{hasVisibleItems ? <>{visibleFolders.map((folder) => <DirectoryTreeNode key={folder.id} folder={folder} level={firstLevel} isRootProject={!parentFolderId} selectedFolderId={selectedFolderId} selectedItem={selectedItem} expandedFolderIds={expandedFolderIds} dragState={dragState} getChildFolders={getChildFolders} getCardSets={getCardSets} getFolderDocuments={getFolderDocuments} getFolderNotes={getFolderNotes} onToggleFolder={handleToggleFolder} onSelectFolder={handleSelectFolder} onSelectCardSet={handleSelectCardSet} onSelectDocument={handleSelectDocument} onSelectNote={handleSelectNote} onOpenContextMenu={openFolderContextMenu} onOpenCardSetContextMenu={openCardSetContextMenu} onOpenDocumentContextMenu={openDocumentContextMenu} onOpenNoteContextMenu={openNoteContextMenu} onFolderDragStart={handleItemDragStart} onFolderDragOver={handleItemDragOver} onFolderDragLeave={handleItemDragLeave} onFolderDrop={handleItemDrop} onFolderDragEnd={handleItemDragEnd} />)}{visibleNotes.map((note) => <DirectoryEntityRow key={note.id} id={note.id} kind="note" label={getNoteTitle(note)} level={firstLevel} isSelected={isSelectedExplorerItem(selectedItem, "note", note.id)} onSelect={() => handleSelectNote(note)} onContextMenu={(event) => openNoteContextMenu(event, note)} />)}{visibleCardSets.map((cardSet) => <DirectoryEntityRow key={cardSet.id} id={cardSet.id} kind="cardSet" label={getCardSetName(cardSet)} level={firstLevel} isSelected={isSelectedExplorerItem(selectedItem, "cardSet", cardSet.id)} onSelect={() => handleSelectCardSet(cardSet)} onContextMenu={(event) => openCardSetContextMenu(event, cardSet)} />)}{visibleDocuments.map((document) => <DirectoryEntityRow key={document.id} id={document.id} kind="document" label={getDocumentName(document)} level={firstLevel} isSelected={isSelectedExplorerItem(selectedItem, "document", document.id)} onSelect={() => handleSelectDocument(document)} onContextMenu={(event) => openDocumentContextMenu(event, document)} />)}</> : <p className="px-1 py-2 text-[13px] font-medium text-[#9aa1ad]">{emptyMessage}</p>}{isAppendingToCurrentList ? <LayeredTreeDropIndicator position="append" left={appendIndicatorLeft} className="mx-2" /> : null}<div aria-hidden="true" className="min-h-8 flex-1" /></div></div></aside>{folderContextMenuElement}{cardSetContextMenuElement}{documentContextMenuElement}{noteContextMenuElement}</>;
 };
+
+
 
 
 

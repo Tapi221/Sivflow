@@ -10,8 +10,12 @@ import { useEffect, useState } from "react";
 
 
 
+
+
 export const DESKTOP_LAYOUT_BREAKPOINT_PX = 768;
 export const DESKTOP_LAYOUT_MEDIA_QUERY = `(min-width: ${DESKTOP_LAYOUT_BREAKPOINT_PX}px)`;
+
+
 
 
 

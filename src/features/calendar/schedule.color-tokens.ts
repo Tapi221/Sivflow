@@ -10,6 +10,8 @@ import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 
 
 
+
+
 export type CalendarColorTokens = { bg: string;
   border: string;
   text: string;
@@ -31,12 +33,16 @@ type RgbColor = {
 
 
 
+
+
 const FALLBACK_ACCENT_COLOR = "#185FA5";
 const LIGHT_ACCENT_LUMINANCE_THRESHOLD = 0.8;
 const LIGHT_ACCENT_BORDER_MIX_AMOUNT = 0.28;
 const colorTokensCache = new Map<string, CalendarColorTokens>();
 
 const BLACK: RgbColor = { red: 0, green: 0, blue: 0 };
+
+
 
 
 

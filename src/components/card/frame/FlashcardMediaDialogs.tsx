@@ -7,17 +7,25 @@
  */
 import { AudioPlayer, ImageGallery } from "@/components/card/media/CardMedia";
 
+
 import { ReferencePopup } from "@/components/card/overlays/ReferencePopup";
+
 
 import { Button } from "@/components/ui/button";
 
+
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+
 
 import { Volume2, X } from "@/ui/icons";
 
+
 import type { FlashcardMediaLike } from "./flashcard.types";
 
+
 import type { ReferenceBlockData } from "@/types";
+
+
 
 
 
@@ -41,6 +49,8 @@ interface FlashcardMediaDialogsProps {
   activeAudioUrls: string[];
   activeReferences: ReferenceBlockData[];
 }
+
+
 
 
 

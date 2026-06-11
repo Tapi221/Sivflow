@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
+
 import { createPortal } from "react-dom";
 
+
 import { cn } from "@/lib/utils";
+
+
 
 
 
@@ -51,6 +55,8 @@ type HoverSuggestionTooltipProps = {
 
 
 
+
+
 const getTransform = (side: TooltipSide) => {
   if (side === "top") return "translate(-50%, -100%)";
   if (side === "bottom") return "translate(-50%, 0)";
@@ -86,6 +92,8 @@ const getArrowClassName = (side: TooltipSide) => {
 
   return "left-[-3px] top-1/2 -translate-y-1/2";
 };
+
+
 
 
 

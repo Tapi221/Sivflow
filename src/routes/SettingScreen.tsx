@@ -1,15 +1,22 @@
 import { useMemo, useState, type ReactNode } from "react";
 
 
+
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
+
 
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 
+
 import { readStoredAccounts, type StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
+
 
 import type { UserSettings } from "@/types";
 
+
 import { ChevronRight, Globe, Keyboard, Shield, Trophy, Type, Volume2 } from "@/ui/icons";
+
+
 
 
 
@@ -119,6 +126,8 @@ type AccountProfile = {
   photoUrl: string | null;
   providerId: string | null;
 };
+
+
 
 
 
@@ -309,6 +318,8 @@ const MARKDOWN_TAB_OPTIONS: readonly SettingChoiceOption<NonNullable<UserSetting
 
 
 
+
+
 const normalizeAccountEmail = (email: string | null | undefined): string | null => {
   const normalizedEmail = email?.trim().toLowerCase();
   return normalizedEmail ? normalizedEmail : null;
@@ -347,6 +358,8 @@ const getAccountInitial = (displayName: string): string => {
   const initial = displayName.trim().charAt(0);
   return initial ? initial.toUpperCase() : "M";
 };
+
+
 
 
 
@@ -526,6 +539,8 @@ const SettingScreen = () => {
     </main>
   );
 };
+
+
 
 
 

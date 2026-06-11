@@ -1,22 +1,33 @@
 import React from "react";
 
+
 import { layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
+
 
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 
+
 import { CardSurfaceLayout } from "./CardSurfaceLayout";
+
 
 import { buildCardSurfaceMetrics } from "./cardSurfacePresentation";
 
+
 import { DesktopEmbeddedCardEditorSurface } from "./DesktopEmbeddedCardEditorSurface";
+
 
 import { PreparedViewCardFaceScene } from "./PreparedViewCardFaceScene";
 
+
 import { useFlashcardDualDerived } from "@/components/card/frame/useFlashcardDualDerived";
+
 
 import type { Card, UserSettings } from "@/types";
 
+
 import type { CardDisplayMode } from "@/types/domain/cardSet";
+
+
 
 
 
@@ -44,6 +55,8 @@ interface DesktopCardSurfaceProps {
   onToggleUncertainty: (card: Card) => void | Promise<void>;
   onToggleBookmark: (card: Card) => void | Promise<void>;
 }
+
+
 
 
 
@@ -89,6 +102,8 @@ const areDesktopCardSurfacePropsEqual = (
 
   return true;
 };
+
+
 
 
 
@@ -285,6 +300,8 @@ const DesktopCardSurfaceInner = ({
 
 
 
+
+
 const DesktopCardSurface = React.memo(
   DesktopCardSurfaceInner,
   areDesktopCardSurfacePropsEqual,
@@ -293,6 +310,8 @@ const DesktopCardSurface = React.memo(
 DesktopCardSurface.displayName = "DesktopCardSurface";
 
 export { DesktopCardSurface };
+
+
 
 
 

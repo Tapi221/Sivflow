@@ -1,15 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 
 
+
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+
 
 import { Button } from "@/components/ui/button";
 
+
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
+
 
 import type { Card, CardSet, Document, Folder } from "@/types";
 
+
 import { useTrashItems } from "./useTrashItems";
+
+
 
 
 
@@ -29,6 +36,8 @@ type TrashItemRow = {
   title: string;
   subtitle: string;
 };
+
+
 
 
 
@@ -98,6 +107,8 @@ const toTrashItemIds = (row: TrashItemRow) => ({
   cardSetIds: row.kind === "cardSet" ? [row.id] : [],
   documentIds: row.kind === "document" ? [row.id] : [],
 });
+
+
 
 
 
@@ -240,6 +251,8 @@ const TrashPage = () => {
     </main>
   );
 };
+
+
 
 
 

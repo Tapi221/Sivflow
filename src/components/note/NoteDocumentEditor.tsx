@@ -1,12 +1,17 @@
 import type { Value } from 'platejs';
 
 
+
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+
 
 
 import { PlateEditor } from '@/components/editor/plate-editor';
 
+
 import type { Note, NoteBlockContent } from '@/types';
+
+
 
 
 
@@ -50,9 +55,13 @@ type PlateChangePayload = unknown[] | {
 
 
 
+
+
 const EMPTY_NOTE_TITLE_LABEL = '無題';
 const NOTE_SAVE_DEBOUNCE_MS = 500;
 const NOTE_CONTENT_VERSION = 2;
+
+
 
 
 
@@ -112,6 +121,8 @@ const getChangeValue = (change: PlateChangePayload): unknown[] | null => {
 
 
 
+
+
 const NoteDocumentEditor = ({ note, onChange }: NoteDocumentEditorProps) => {
   const initialValue = useMemo(() => toInitialValue(note.content), [note.content]);
   const latestChangeRef = useRef<Pick<Note, 'content' | 'contentText' | 'contentVersion' | 'editor'> | null>(null);
@@ -158,6 +169,8 @@ const NoteDocumentEditor = ({ note, onChange }: NoteDocumentEditorProps) => {
     </div>
   );
 };
+
+
 
 
 

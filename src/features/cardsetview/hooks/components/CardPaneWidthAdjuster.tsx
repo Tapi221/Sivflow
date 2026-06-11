@@ -1,8 +1,12 @@
 import React from "react";
 
+
 import { Slider } from "@/components/ui/slider";
 
+
 import { Minus, Plus, RefreshCw } from "@/ui/icons";
+
+
 
 
 
@@ -32,6 +36,8 @@ const clampValue = (value: number, min: number, max: number) => {
 
 
 
+
+
 export interface CardPaneWidthAdjusterProps { modeLabel: string;
   value: number;
   min: number;
@@ -45,6 +51,8 @@ export interface CardPaneWidthAdjusterProps { modeLabel: string;
   onStepUp: () => void;
   onReset: () => void;
 }
+
+
 
 
 

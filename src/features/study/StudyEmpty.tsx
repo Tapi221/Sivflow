@@ -1,10 +1,15 @@
 import React from "react";
 
+
 import { Button } from "@/components/ui/button";
+
 
 import { Card, CardContent } from "@/components/ui/card";
 
+
 import { Trophy } from "@/ui/icons";
+
+
 
 
 
@@ -20,6 +25,8 @@ type Props = {
   folderId: string | null;
   handleBack: () => void;
 };
+
+
 
 
 

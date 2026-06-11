@@ -1,6 +1,9 @@
 import type { CSSProperties } from "react";
 
+
 import { getRuledStyle } from "@/components/card/frame/ruledStyles";
+
+
 
 
 
@@ -30,8 +33,12 @@ type RuledTextareaStyleParams = Readonly<{
 
 
 
+
+
 const DEFAULT_RULED_TEXTAREA_COLOR = "rgba(0,0,0,0.05)";
 const DEFAULT_RULED_TEXTAREA_LINE_PX = 1;
+
+
 
 
 
@@ -70,6 +77,8 @@ const buildRuledTextareaStyle = ({
     backgroundAttachment: "local",
   };
 };
+
+
 
 
 

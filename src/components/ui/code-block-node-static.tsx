@@ -1,10 +1,14 @@
 import * as React from 'react';
 
 
+
 import type { TCodeBlockElement } from 'platejs';
 
 
+
 import { type SlateElementProps, type SlateLeafProps, SlateElement, SlateLeaf, } from 'platejs/static';
+
+
 
 
 
@@ -74,11 +78,15 @@ const syntaxColors: Record<string, string> = {
 
 
 
+
+
 // Convert regular spaces to non-breaking spaces to preserve indentation in Word
 const preserveSpaces = (text: string): string => {
   // Replace regular spaces with non-breaking spaces
   return text.replace(/ /g, '\u00A0');
 };
+
+
 
 
 

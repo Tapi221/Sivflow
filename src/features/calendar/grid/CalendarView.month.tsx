@@ -1,22 +1,33 @@
 import { useLayoutEffect, useMemo, useRef } from "react";
 
+
 import type { CSSProperties } from "react";
+
 
 import * as C from "@/features/calendar/calendar.constants.desktop";
 
+
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
+
 
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
 
+
 import { useCalendarWeekStartSetting } from "@/features/calendar/useCalendarWeekStartSetting";
+
 
 import type { CalendarEventMoveHandler } from "@/features/calendar/scheduleScreen.types";
 
+
 import { useMonthInfiniteScroll } from "@/features/scroll/schedule/useInfiniteScroll.month.desktop";
+
 
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
+
 import { GridCalendarMonthDesktop } from "./Grid.calendar.month.desktop";
+
+
 
 
 
@@ -56,7 +67,11 @@ type MonthViewStyle = CSSProperties & {
 
 
 
+
+
 const MONTH_ROW_HEIGHT_PER_EVENT_COUNT = 22;
+
+
 
 
 
@@ -80,6 +95,8 @@ const getMonthRowHeight = (monthVisibleEventCount: number): number => {
 const createMonthViewStyle = (monthRowHeight: number): MonthViewStyle => ({
   "--calendar-month-row-height": `${monthRowHeight}px`,
 });
+
+
 
 
 
@@ -144,6 +161,8 @@ const CalendarMonthView = ({
     </div>
   );
 };
+
+
 
 
 

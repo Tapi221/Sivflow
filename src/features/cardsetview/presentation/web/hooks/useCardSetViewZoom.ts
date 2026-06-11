@@ -1,20 +1,30 @@
 import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+
 import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
+
 
 import { CARD_SET_VIEW_LAYOUT_CONSTRAINT_INDICATOR_DURATION_MS } from "@/features/cardsetview/domain/cardSetViewPresentation.constants";
 
+
 import { CARD_PANE_VIEW_DEFAULT_WIDTH_PX } from "@/components/card/frame/cardPane.constants";
+
 
 import { CARD_VIEW_ZOOM_BUTTON_STEP_PERCENT } from "@/features/cardsetview/domain/cardSetView.constants";
 
+
 import type { CardLayoutMode, CardSetInteractionMode, SplitFallbackCardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
+
 
 import { clampZoomPercent as clampZoomPercentRange, resolveCanUseSplitLayout, resolvePresentationMaxWidthPx, resolvePresentationWidthPx, resolveUsablePresentationWidthPx, resolveZoomDefaultPercent, resolveZoomScaleFromPresentationWidthPx } from "@/features/cardsetview/domain/cardSetViewPresentationPolicy";
 
+
 import { buildCardSetViewZoomPreferenceScopeKey, type CardSetViewZoomPreferenceScope, getCardSetViewZoomPreference, setCardSetViewZoomPreference } from "@/services/cardSetViewZoomPreferences";
 
+
 import type { CardDisplayMode } from "@/types/domain/cardSet";
+
+
 
 
 
@@ -56,7 +66,11 @@ type LegacyZoomMigrationHint = Pick<
 
 
 
+
+
 const DEFAULT_SOURCE_KEY = "__cardsetview_zoom_default__";
+
+
 
 
 

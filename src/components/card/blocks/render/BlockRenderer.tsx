@@ -1,14 +1,21 @@
 import { useMemo } from "react";
 
+
 import { CardBlocksScene } from "@/components/card/blocks/shared/CardBlocksScene";
+
 
 import { filterRenderableCardBlocks } from "@/components/card/blocks/shared/isRenderableCardBlock";
 
+
 import { useViewerSceneProps } from "@/components/card/blocks/shared/useViewerSceneProps";
+
 
 import type { CardBlock } from "@/types/domain/card";
 
+
 import type { CardDisplayMode } from "@/types/domain/cardSet";
+
+
 
 
 
@@ -26,6 +33,8 @@ interface BlockRendererProps {
   displayMode?: CardDisplayMode;
   zoom?: number;
 }
+
+
 
 
 

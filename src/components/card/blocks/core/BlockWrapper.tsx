@@ -1,10 +1,15 @@
 import React from "react";
 
+
 import { BlockFrame } from "./BlockFrame";
+
 
 import { Copy, GripVertical, Trash2 } from "@/ui/icons";
 
+
 import { cn } from "@/lib/utils";
+
+
 
 
 
@@ -55,7 +60,11 @@ interface BlockWrapperProps {
 
 
 
+
+
 const STEP_PX = 24;
+
+
 
 
 

@@ -1,22 +1,33 @@
 import React from "react";
 
+
 import { layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
+
 
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 
+
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
+
 
 import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
 
+
 import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
+
 
 import { ViewCardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/ViewCardFaceScene";
 
+
 import { CardFaceWithAttachments } from "@/components/card/common/CardFaceWithAttachments";
+
 
 import type { Card } from "@/types/domain/card";
 
+
 import type { CardDisplayMode } from "@/types/domain/cardSet";
+
+
 
 
 
@@ -40,6 +51,8 @@ export type CardEditorPaneReadonlySurfaceProps = Readonly<{ card: Card;
   zoomScale: number;
   fitScale?: number;
 }>;
+
+
 
 
 

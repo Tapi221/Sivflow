@@ -1,31 +1,46 @@
 import React, { useEffect, useRef, useState } from "react";
 
 
+
 import { toAssetRecordFromSnapshotAsset } from "@/application/snapshot/snapshotAssetManifest";
+
 
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 
+
 import { Button } from "@/components/ui/button";
+
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
+
 import { Label } from "@/components/ui/label";
+
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
+
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
+
 
 import { getLocalDb, getLocalDBRuntimeStatus, subscribeLocalDBRuntimeStatus } from "@/services/localDB";
 
+
 import { snapshotService } from "@/services/SnapshotService";
+
 
 import type { Card, Folder } from "@/types";
 
+
 import type { CardSet } from "@/types/domain/cardSet";
+
 
 import type { AppSnapshot, SnapshotComparison } from "@/types/domain/snapshot";
 
+
 import { AlertTriangle, ArrowRight, CheckCircle, FileJson, Upload } from "@/ui/icons";
+
+
 
 
 
@@ -55,6 +70,8 @@ type ImportAction = "replace" | "keep" | "cancel";
 
 
 
+
+
 const normalizeImportedCard = (card: Card, userId: string): Card => ({
   ...card,
   userId,
@@ -69,6 +86,8 @@ const normalizeImportedCardSet = (cardSet: CardSet, userId: string): CardSet => 
   ...cardSet,
   userId,
 });
+
+
 
 
 
@@ -262,6 +281,8 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
     </Dialog>
   );
 };
+
+
 
 
 

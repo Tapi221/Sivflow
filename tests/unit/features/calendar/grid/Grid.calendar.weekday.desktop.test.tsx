@@ -2,19 +2,27 @@
 
 import React, { createRef } from "react";
 
+
 import type { ReactNode, RefObject } from "react";
+
 
 import { cleanup, render, screen, within } from "@testing-library/react";
 
+
 import { afterEach, describe, expect, it, vi } from "vitest";
+
 
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 
+
 import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
+
 
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 
+
 import type { CalendarGridStyle } from "@/features/calendar/scheduleScreen.types";
+
 
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 

@@ -1,14 +1,21 @@
 import React from "react";
 
+
 import StudyCard from "./StudyCard";
+
 
 import { Button } from "@/components/ui/button";
 
+
 import { Card, CardContent } from "@/components/ui/card";
+
 
 import type { PracticeFilterRating, PracticeSessionState } from "@/features/study/hooks/usePracticeMode";
 
+
 import type { Card as StudyEntityCard } from "@/types";
+
+
 
 
 
@@ -30,6 +37,8 @@ type Props = {
   handlePracticeExit: (reason?: string) => void;
   ratingLabels: Record<PracticeFilterRating, string>;
 };
+
+
 
 
 
