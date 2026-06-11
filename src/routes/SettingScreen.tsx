@@ -327,7 +327,7 @@ const SettingsRouteRow = ({ active, description, icon, label, onClick }: Setting
 const SettingsDetailCard = ({ title, children }: SettingsDetailCardProps) => (
   <section className={`${SETTINGS_CARD_CLASS_NAME} overflow-hidden`} aria-label={title}>
     <h2 className="border-b border-[#ececf0] px-4 py-3 text-[13px] font-semibold tracking-[-0.01em] text-[#8c8c92]">{title}</h2>
-    <>{children}</>
+    {children}
   </section>
 );
 

@@ -558,32 +558,28 @@ export const AIMenuItems = ({ input, setInput, setValue, }: { input: string;
     }
   }, [menuGroups, setValue]);
 
-  return (
-    <>
-      {menuGroups.map((group, index) => (
-        <CommandGroup key={index} heading={group.heading}>
-          {group.items.map((menuItem) => (
-            <CommandItem
-              key={menuItem.value}
-              className="[&_svg]:text-muted-foreground"
-              value={menuItem.value}
-              onSelect={() => {
-                menuItem.onSelect?.({
-                  aiEditor,
-                  editor,
-                  input,
-                });
-                setInput('');
-              }}
-            >
-              {menuItem.icon}
-              <span>{menuItem.label}</span>
-            </CommandItem>
-          ))}
-        </CommandGroup>
+  return menuGroups.map((group, index) => (
+    <CommandGroup key={index} heading={group.heading}>
+      {group.items.map((menuItem) => (
+        <CommandItem
+          key={menuItem.value}
+          className="[&_svg]:text-muted-foreground"
+          value={menuItem.value}
+          onSelect={() => {
+            menuItem.onSelect?.({
+              aiEditor,
+              editor,
+              input,
+            });
+            setInput('');
+          }}
+        >
+          {menuItem.icon}
+          <span>{menuItem.label}</span>
+        </CommandItem>
       ))}
-    </>
-  );
+    </CommandGroup>
+  ));
 };
 
 export function AILoadingBar() { const editor = useEditorRef();
