@@ -136,7 +136,7 @@ const applyNonOverlappingReplacements = (source, replacements) => {
   return acceptedReplacements.reduce((nextSource, replacement) => `${nextSource.slice(0, replacement.start)}${replacement.text}${nextSource.slice(replacement.end)}`, source);
 };
 
-const collectSpacingReplacements = (sourceFile) => sourceFile.statements.flatMap((statement, index, statements) => {
+const collectSpacingReplacements = (source, sourceFile) => sourceFile.statements.flatMap((statement, index, statements) => {
   const previousStatement = statements[index - 1];
   if (!previousStatement) return [];
   if (isDirectiveStatement(previousStatement) || isDirectiveStatement(statement)) return [];
@@ -144,11 +144,11 @@ const collectSpacingReplacements = (sourceFile) => sourceFile.statements.flatMap
   const previousCategory = getStatementOrderCategory(previousStatement);
   const category = getStatementOrderCategory(statement);
   if (previousCategory === category) return [];
-  if (ORDER_RANKS[previousCategory] > ORDER_RANKS[category]) return [];
 
   const start = previousStatement.getEnd();
   const end = statement.getFullStart();
   if (start > end) return [];
+  if (/\S/.test(source.slice(start, end))) return [];
 
   return [{ start, end, text: "\n\n" }];
 });
@@ -157,7 +157,7 @@ const applySourceConventionSpacingFix = (filePath, source) => {
   if (!shouldCheckStatementOrder(filePath)) return source;
 
   const sourceFile = createSourceFile(filePath, source);
-  const replacements = collectSpacingReplacements(sourceFile);
+  const replacements = collectSpacingReplacements(source, sourceFile);
   if (replacements.length === 0) return source;
 
   return applyNonOverlappingReplacements(source, replacements);
