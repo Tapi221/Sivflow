@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeNextScaleFromGesture, computeNextScaleFromWheel } from "@/features/pdf/pdfZoom.utils";
+import { computeNextScaleFromGesture, computeNextScaleFromWheel, resolveTrackpadDeltaYForScaleRatio } from "@/features/pdf/pdfZoom.utils";
 
 describe("computeNextScaleFromWheel", () => {
   it("wheel up 1 step で Sioyek と同じ 1.2 倍にする", () => {
@@ -27,5 +27,19 @@ describe("computeNextScaleFromGesture", () => {
 
   it("base scale がない場合は current scale を使う", () => {
     expect(computeNextScaleFromGesture({ currentScale: 2, baseScale: null, gestureScale: 1.5, minScale: 0.25, maxScale: 5 })).toBe(3);
+  });
+});
+
+describe("resolveTrackpadDeltaYForScaleRatio", () => {
+  it("PdfPane の Math.exp 式で同じ scale ratio になる deltaY を返す", () => {
+    const deltaY = resolveTrackpadDeltaYForScaleRatio({ scaleRatio: 1.2, sensitivity: 0.0015 });
+
+    expect(deltaY).not.toBeNull();
+    expect(Math.exp(-(deltaY ?? 0) * 0.0015)).toBeCloseTo(1.2);
+  });
+
+  it("無効な scale ratio と sensitivity は null を返す", () => {
+    expect(resolveTrackpadDeltaYForScaleRatio({ scaleRatio: 0, sensitivity: 0.0015 })).toBeNull();
+    expect(resolveTrackpadDeltaYForScaleRatio({ scaleRatio: 1.2, sensitivity: 0 })).toBeNull();
   });
 });
