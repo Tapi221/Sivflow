@@ -31,32 +31,115 @@ const runFormatterOnSource = (source: string, scriptPath = FIX_IMPORT_SPACING_SC
 
 describe("source convention formatter", () => {
   it("分割代入の宣言時 export を末尾 export に移動する", () => {
-    const formatted = runFormatterOnSource(`const createHelpers = () => ({ uploadFiles: () => undefined, useUploadThing: () => undefined });\n\nexport const { uploadFiles, useUploadThing } = createHelpers();\n`);
+    const formatted = runFormatterOnSource(`const createHelpers = () => ({ uploadFiles: () => undefined, useUploadThing: () => undefined });
 
-    expect(formatted).toBe(`const createHelpers = () => ({ uploadFiles: () => undefined, useUploadThing: () => undefined });\n\nconst { uploadFiles, useUploadThing } = createHelpers();\n\nexport { uploadFiles, useUploadThing };\n`);
+export const { uploadFiles, useUploadThing } = createHelpers();
+`);
+
+    expect(formatted).toBe(`const createHelpers = () => ({ uploadFiles: () => undefined, useUploadThing: () => undefined });
+
+const { uploadFiles, useUploadThing } = createHelpers();
+
+export { uploadFiles, useUploadThing };
+`);
+  });
+
+  it("export 文の前に空行を1行入れる", () => {
+    const formatted = runFormatterOnSource(`const Component = () => null;
+Component.displayName = "Component";
+export { Component };
+`);
+
+    expect(formatted).toBe(`const Component = () => null;
+
+Component.displayName = "Component";
+
+export { Component };
+`);
+  });
+
+  it("export 文同士の間の空行を削除する", () => {
+    const formatted = runFormatterOnSource(`const value = 1;
+type Value = typeof value;
+
+
+export { value };
+
+export type { Value };
+`);
+
+    expect(formatted).toBe(`type Value = typeof value;
+
+const value = 1;
+
+export { value };
+export type { Value };
+`);
   });
 
   it("ブロック開始直後の文を次の行へ分ける", () => {
-    const formatted = runFormatterOnSource(`const getValue = () => { const value = 1;\n\n  return value;\n};\n`);
+    const formatted = runFormatterOnSource(`const getValue = () => { const value = 1;
 
-    expect(formatted).toBe(`const getValue = () => {\n  const value = 1;\n\n  return value;\n};\n`);
+  return value;
+};
+`);
+
+    expect(formatted).toBe(`const getValue = () => {
+  const value = 1;
+
+  return value;
+};
+`);
   });
 
   it("同じ行で入れ子になったブロック開始直後の文を反復修正する", () => {
-    const formatted = runFormatterOnSource(`const getValue = () => { try { const value = 1;\n\n  return value;\n} catch { return 0;\n}\n};\n`);
+    const formatted = runFormatterOnSource(`const getValue = () => { try { const value = 1;
 
-    expect(formatted).toBe(`const getValue = () => {\n  try {\n    const value = 1;\n\n  return value;\n} catch {\n  return 0;\n}\n};\n`);
+  return value;
+} catch { return 0;
+}
+};
+`);
+
+    expect(formatted).toBe(`const getValue = () => {
+  try {
+    const value = 1;
+
+  return value;
+} catch {
+  return 0;
+}
+};
+`);
   });
 
   it("連続空行を1行に正規化する", () => {
-    const formatted = runFormatterOnSource(`import * as React from "react";\n\n\n\nconst useValue = () => React.useState(false);\n\n\n\nexport { useValue };\n`, FIX_REPEATED_BLANK_LINES_SCRIPT);
+    const formatted = runFormatterOnSource(`import * as React from "react";
 
-    expect(formatted).toBe(`import * as React from "react";\n\nconst useValue = () => React.useState(false);\n\nexport { useValue };\n`);
+
+
+const useValue = () => React.useState(false);
+
+
+
+export { useValue };
+`, FIX_REPEATED_BLANK_LINES_SCRIPT);
+
+    expect(formatted).toBe(`import * as React from "react";
+
+const useValue = () => React.useState(false);
+
+export { useValue };
+`);
   });
 
   it("既知 lint の constant nullish fallback を自動修正する", () => {
-    const formatted = runFormatterOnSource(`const path = folderPath.join(" / ") ?? "未分類";\nconst orderIndex = Number(cardSet.orderIndex) ?? 0;\n`, FIX_KNOWN_LINT_ERRORS_SCRIPT);
+    const formatted = runFormatterOnSource(`const path = folderPath.join(" / ") ?? "未分類";
+const orderIndex = Number(cardSet.orderIndex) ?? 0;
+`, FIX_KNOWN_LINT_ERRORS_SCRIPT);
 
-    expect(formatted).toBe(`const path = folderPath.length > 0 ? folderPath.join(" / ") : "未分類";\nconst orderIndex = Number.isFinite(Number(cardSet.orderIndex)) ? Number(cardSet.orderIndex) : 0;\n`);
+    expect(formatted).toBe(`const path = folderPath.length > 0 ? folderPath.join(" / ") : "未分類";
+const orderIndex = Number.isFinite(Number(cardSet.orderIndex)) ? Number(cardSet.orderIndex) : 0;
+`);
   });
 });
