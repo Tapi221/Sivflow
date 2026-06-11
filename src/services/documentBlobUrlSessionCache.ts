@@ -8,8 +8,12 @@ type CacheEntry = {
   staleUrls: string[];
 };
 
+
+
 const MAX_CACHE_ENTRIES = 40;
 const cache = new Map<string, CacheEntry>();
+
+
 
 const makeScopedId = (id: string, options?: BlobScopeOptions): string => {
   const userId = options?.userId?.trim();

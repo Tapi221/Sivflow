@@ -79,4 +79,5 @@ export const CardSetViewScreen = ({ cardSetId: controlledCardSetId = null }: Car
     >
       <Content controller={controller} />
     </CardWorkspaceShell>
-  
+  );
+};

@@ -115,4 +115,6 @@ function Indicator() {
       <DropdownMenuItemIndicator>
         <CheckIcon />
       </DropdownMenuItemIndicator>
-    </span
+    </span>
+  );
+}

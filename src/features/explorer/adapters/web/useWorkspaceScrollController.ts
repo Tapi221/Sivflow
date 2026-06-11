@@ -57,3 +57,4 @@ export const useWorkspaceScrollController = ({ isDesktop }: Params) => { const r
   return {
     resetExplorerPaneScroll,
   };
+};

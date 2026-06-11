@@ -97,3 +97,4 @@ export const useFoldersRouteAdapter = (): FoldersRouteAdapter => { const [search
       writeRouteState,
     ],
   );
+};

@@ -23,3 +23,4 @@ export const useTreeViewSidebarHotkey = ({ onToggle }: UseTreeViewSidebarHotkeyP
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [onToggle]);
+};

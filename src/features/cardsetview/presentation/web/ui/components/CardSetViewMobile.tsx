@@ -141,3 +141,5 @@ export const CardSetViewMobile = ({ cardsForPager, selectedCardId, safeCurrentIn
       getKey={(card) => card.id}
       renderCard={renderCard}
     />
+  );
+};

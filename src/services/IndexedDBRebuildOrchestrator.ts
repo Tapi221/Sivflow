@@ -5,6 +5,8 @@ import { CloudSyncAdapter } from "@/services/logic/CloudSyncAdapter";
 import { type BlobUrlFix, sanitizeBlobUrlsDeep } from "@/utils/blobUrlSanitizer";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
+
+
 type RebuildTableByType = {
   card: "cards";
   folder: "folders";
@@ -28,6 +30,8 @@ type RebuildFailure = {
   fixes?: BlobUrlFix[];
 };
 
+
+
 const REBUILD_TABLE_BY_TYPE: RebuildTableByType = {
   card: "cards",
   folder: "folders",
@@ -37,6 +41,8 @@ const REBUILD_TABLE_BY_TYPE: RebuildTableByType = {
   asset: "images",
   userSetting: "userSettings",
 };
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;

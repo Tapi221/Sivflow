@@ -33,3 +33,4 @@ export const cleanupLegacyCardStorageFields = ( record: StorageLike, ): StorageL
   }
 
   return record;
+};

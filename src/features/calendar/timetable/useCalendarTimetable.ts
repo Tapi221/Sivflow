@@ -70,4 +70,4 @@ const useCalendarTimetable = (): UseCalendarTimetableReturn => {
 
 
 
-export { useCalendarTimeta
+export { useCalendarTimetable };

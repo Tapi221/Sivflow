@@ -10,4 +10,5 @@ export const editorVariants = cva( cn( 'group/editor', 'relative w-full cursor-t
 
 
 
-export function EditorStatic({ className, variant, ...props }: PlateStaticProps & VariantProps<typeof editorVariants>) { return ( <PlateStatic className={cn(editorVariants({ variant }), className)} {...props} /> )
+export function EditorStatic({ className, variant, ...props }: PlateStaticProps & VariantProps<typeof editorVariants>) { return ( <PlateStatic className={cn(editorVariants({ variant }), className)} {...props} /> );
+}

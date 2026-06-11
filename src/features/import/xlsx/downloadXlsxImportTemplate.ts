@@ -94,3 +94,4 @@ export const downloadXlsxImportTemplate = () => { const workbook = buildWorkbook
   });
 
   downloadBlob(blob, TEMPLATE_FILE_NAME);
+};

@@ -200,4 +200,4 @@ export { applyCalendarEventMoveOverrides, useCalendarEventMoveController };
 
 
 
-export type { CalendarEventMoveOverride, UseCalendarEventMoveControllerOptions, UseCalendarEventMoveController
+export type { CalendarEventMoveOverride, UseCalendarEventMoveControllerOptions, UseCalendarEventMoveControllerReturn };

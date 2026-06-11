@@ -41,4 +41,4 @@ const RadioGroupItem = React.forwardRef<
 
 RadioGroup.displayName = RadioGroupPrimitive.Root.displayName;
 RadioGroupItem.displayName = RadioGroupPrimitive.Item.displayName;
-export { RadioGroup, RadioGroupItem 
+export { RadioGroup, RadioGroupItem };

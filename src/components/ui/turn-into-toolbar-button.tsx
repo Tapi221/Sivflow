@@ -85,4 +85,6 @@ export function TurnIntoToolbarButton(props: DropdownMenuProps) { const editor =
           ))}
         </ToolbarMenuGroup>
       </DropdownMenuContent>
-    </Dropdown
+    </DropdownMenu>
+  );
+}
