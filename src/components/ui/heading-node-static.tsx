@@ -9,6 +9,8 @@ import { SlateElement } from 'platejs/static';
 
 
 
+
+
 const headingVariants = cva('relative mb-1', {
   variants: {
     variant: {
@@ -21,6 +23,8 @@ const headingVariants = cva('relative mb-1', {
     },
   },
 });
+
+
 
 
 

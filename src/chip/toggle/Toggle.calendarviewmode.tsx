@@ -8,6 +8,8 @@ import { useT } from "@shared/i18n/useT";
 
 
 
+
+
 type CalendarViewModeOption = {
   value: CalendarViewMode;
   label: string;
@@ -19,6 +21,8 @@ type ToggleCalendarViewModeProps = {
   options: readonly CalendarViewModeOption[];
   className?: string;
 };
+
+
 
 
 
@@ -38,6 +42,8 @@ const CALENDAR_VIEW_MODE_MOTION_TRANSITION: Transition = {
   duration: 0.12,
   ease: "easeOut",
 };
+
+
 
 
 
@@ -84,6 +90,8 @@ const isDisabledViewModeOption = (
   value: CalendarViewModeSelection,
   optionValue: CalendarViewMode,
 ) => hasMultipleSelectedViewModes(value) && !isSelectedViewMode(value, optionValue);
+
+
 
 
 
@@ -210,5 +218,9 @@ const ToggleCalendarViewMode = ({
 
 
 
+
+
 export { ToggleCalendarViewMode };
+
+
 export const ViewModeDropdown = ToggleCalendarViewMode;

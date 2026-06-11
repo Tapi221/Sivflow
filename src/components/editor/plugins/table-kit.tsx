@@ -8,12 +8,16 @@ import { TableCellElement, TableCellHeaderElement, TableElement, TableRowElement
 
 
 
+
+
 const TableKit = [
   TablePlugin.withComponent(TableElement),
   TableRowPlugin.withComponent(TableRowElement),
   TableCellPlugin.withComponent(TableCellElement),
   TableCellHeaderPlugin.withComponent(TableCellHeaderElement),
 ];
+
+
 
 
 

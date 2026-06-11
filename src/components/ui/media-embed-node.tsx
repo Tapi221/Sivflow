@@ -30,6 +30,8 @@ import { mediaResizeHandleVariants, Resizable, ResizeHandle, } from './resize-ha
 
 
 
+
+
 export const MediaEmbedElement = withHOC( ResizableProvider, function MediaEmbedElement(props: PlateElementProps<TMediaEmbedElement>) { const { align = 'center', embed, focused, isTweet, isVideo, isYoutube, readOnly, selected, } = useMediaState({ urlParsers: [parseTwitterUrl, parseVideoUrl], });
     const width = useResizableValue('width');
     const provider = embed?.provider;

@@ -6,6 +6,8 @@ import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
 
 
+
+
 type TreeViewMainPaneProps = {
   showMobileDetail: boolean;
   hideOnSectionList?: boolean;
@@ -33,6 +35,8 @@ type TreeViewMainPaneProps = {
 
 
 
+
+
 const TreeViewMainPane = ({ showMobileDetail, hideOnSectionList = false, selectedItem, selectedCardId, selectedDocument, selectedFolderId, selectedFolderName, folderCards, onCardUpdated, onDocumentUpdated, onRenameFolder, handlers, folderSelectionNonce }: TreeViewMainPaneProps) => {
   const shouldHidePane = hideOnSectionList && !showMobileDetail;
 
@@ -42,6 +46,8 @@ const TreeViewMainPane = ({ showMobileDetail, hideOnSectionList = false, selecte
     </section>
   );
 };
+
+
 
 
 

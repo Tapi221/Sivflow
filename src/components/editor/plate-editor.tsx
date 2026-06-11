@@ -14,10 +14,14 @@ import { SettingsDialog } from './settings-dialog';
 
 
 
+
+
 type PlateEditorProps = {
   initialValue: Value;
   onChange: (change: unknown) => void;
 };
+
+
 
 
 
@@ -39,6 +43,8 @@ const PlateEditor = ({ initialValue, onChange }: PlateEditorProps) => {
     </Plate>
   );
 };
+
+
 
 
 

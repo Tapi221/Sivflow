@@ -10,6 +10,8 @@ import type { CardBlock } from "@/types/domain/card";
 
 
 
+
+
 export type BlockListRowMeta = { index: number;
   rowOffsetRows: number;
   rowOffsetPx: number;
@@ -33,6 +35,8 @@ interface BlockListProps {
   ) => HTMLAttributes<HTMLDivElement> | undefined;
   renderBlock: (block: CardBlock, meta: BlockListRowMeta) => ReactNode;
 }
+
+
 
 
 

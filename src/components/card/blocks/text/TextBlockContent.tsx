@@ -9,6 +9,8 @@ import { TEXT_BLOCK_CONTENT_CLASS, TEXT_BLOCK_LINE_HEIGHT_PX } from "./textBlock
 
 
 
+
+
 type TextBlockContentProps =
   | {
     mode: "view";
@@ -23,6 +25,8 @@ type TextBlockContentProps =
     autoFocus?: boolean;
     zoom?: number;
   };
+
+
 
 
 
@@ -48,6 +52,8 @@ const buildTextBlockPresentation = (zoom?: number) => {
     ),
   };
 };
+
+
 
 
 
@@ -94,6 +100,8 @@ const TextBlockContent = (props: TextBlockContentProps) => {
     />
   );
 };
+
+
 
 
 

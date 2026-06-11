@@ -7,6 +7,8 @@ import { ArrowLeft, Construction } from "@/ui/icons";
 
 
 
+
+
 const NotImplementedPlaceholder = () => {
   const navigate = useNavigate();
 
@@ -35,6 +37,8 @@ const NotImplementedPlaceholder = () => {
     </div>
   );
 };
+
+
 
 
 

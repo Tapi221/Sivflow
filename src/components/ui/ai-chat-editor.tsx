@@ -14,6 +14,8 @@ import { EditorStatic } from './editor-static';
 
 
 
+
+
 export const AIChatEditor = React.memo(function AIChatEditor({ content, }: { content: string;
 }) {
   const aiEditor = usePlateEditor({

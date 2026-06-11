@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type CalendarPanelProps = {
   children: ReactNode;
   hasTrailingPanel?: boolean;
@@ -16,6 +18,8 @@ type CalendarPanelViewportProps = {
   hasTrailingPanel?: boolean;
   className?: string;
 };
+
+
 
 
 
@@ -40,6 +44,8 @@ const CALENDAR_PANEL_WITH_TRAILING_PANEL_CLASS = "rounded-t-[28px]";
 
 
 
+
+
 export const CalendarPanelViewport = forwardRef<HTMLDivElement, CalendarPanelViewportProps>( ({ children, hasTrailingPanel = false, className }, ref) => { return ( <div ref={ref} className={cn( CALENDAR_PANEL_VIEWPORT_BASE_CLASS, hasTrailingPanel ? CALENDAR_PANEL_VIEWPORT_WITH_TRAILING_PANEL_CLASS : CALENDAR_PANEL_VIEWPORT_STANDALONE_CLASS, className, )} > {children} </div> );
   },
 );
@@ -48,7 +54,11 @@ export const CalendarPanelViewport = forwardRef<HTMLDivElement, CalendarPanelVie
 
 
 
+
+
 CalendarPanelViewport.displayName = "CalendarPanelViewport";
+
+
 
 export const CalendarPanel = ({ children, hasTrailingPanel = false, className, }: CalendarPanelProps) => { return ( <div className={cn( CALENDAR_PANEL_BASE_CLASS, hasTrailingPanel ? CALENDAR_PANEL_WITH_TRAILING_PANEL_CLASS : CALENDAR_PANEL_STANDALONE_CLASS, className, )} > {children} </div> );
 };

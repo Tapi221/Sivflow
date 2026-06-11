@@ -5,6 +5,8 @@ import type { CardSetViewContentProps } from "./cardSetViewContentProps";
 
 
 
+
+
 export const CardSetViewMobileContent = ({ controller }: CardSetViewContentProps) => { const { folderId, cardSetId, settings, data, state, zoom, effectiveCardLayoutMode } = controller;
 
   return (

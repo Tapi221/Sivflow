@@ -9,6 +9,8 @@ import type { GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types"
 
 
 
+
+
 export type GoogleTaskListAccountState = { taskLists: GoogleTaskListItem[];
   isLoading: boolean;
   error: string | null;
@@ -33,11 +35,15 @@ type AccountTokenSnapshot = {
 
 
 
+
+
 const EMPTY_ACCOUNT_STATE: GoogleTaskListAccountState = {
   taskLists: [],
   isLoading: false,
   error: null,
 };
+
+
 
 
 

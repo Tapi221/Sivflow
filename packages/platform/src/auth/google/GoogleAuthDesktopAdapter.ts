@@ -8,7 +8,11 @@ import { requestGoogleSignInServerCode } from "@/integration/google-integration/
 
 
 
+
+
 const exchangeGoogleSignInCodeCallable = httpsCallable<{ code: string; codeVerifier: string; redirectUri: string }, { firebaseToken: string }>(functionsClient, "exchangeGoogleSignInCode");
+
+
 
 
 
@@ -24,5 +28,7 @@ const signIn: GoogleAuthPort["signIn"] = async () => {
   const firebaseToken = await exchangeCodeForFirebaseToken(input);
   await signInWithCustomToken(auth, firebaseToken);
 };
+
+
 
 export const googleAuthDesktopAdapter: GoogleAuthPort = { signIn, };

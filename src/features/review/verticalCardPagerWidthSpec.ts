@@ -4,6 +4,8 @@ import type { CSSProperties } from "react";
 
 
 
+
+
 export type VerticalCardPagerItemWidthSpec = { mode: "fixed"; widthPx: number } | { mode: "stretch" };
 
 type ResolveVerticalCardPagerItemWidthSpecOptions<T> = {
@@ -14,6 +16,8 @@ type ResolveVerticalCardPagerItemWidthSpecOptions<T> = {
   getCardWidth?: (card: T, idx: number, isActive: boolean) => number;
   getCardWidthSpec?: (card: T, idx: number, isActive: boolean) => VerticalCardPagerItemWidthSpec;
 };
+
+
 
 
 

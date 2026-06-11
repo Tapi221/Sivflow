@@ -7,6 +7,8 @@ import { computeNextCardSetViewZoomPercentFromGesture, computeNextCardSetViewZoo
 
 
 
+
+
 interface UseCardSetViewZoomInputOptions {
   containerRef: RefObject<HTMLDivElement | null>;
   enabled?: boolean;
@@ -20,6 +22,8 @@ interface UseCardSetViewZoomInputOptions {
   gestureZoomStepPercent?: number;
   onZoomPercentChange: (nextZoomPercent: number) => void;
 }
+
+
 
 
 

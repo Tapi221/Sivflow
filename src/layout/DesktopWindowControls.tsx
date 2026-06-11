@@ -7,6 +7,8 @@ import "./DesktopWindowControls.css";
 
 
 
+
+
 type AppRegionStyle = CSSProperties & {
   WebkitAppRegion?: "no-drag";
 };
@@ -17,9 +19,13 @@ type WindowControlAction = () => Promise<void>;
 
 
 
+
+
 const NO_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "no-drag",
 };
+
+
 
 
 
@@ -39,6 +45,8 @@ const handleClickWindowAction = (
   event.stopPropagation();
   runWindowAction(action);
 };
+
+
 
 
 

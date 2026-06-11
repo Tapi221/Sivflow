@@ -8,6 +8,8 @@ import { createDefaultExplorerRouteState, resolveRouteTabBySection, WORKSPACE_DE
 
 
 
+
+
 type OpenExplorerTabParams = {
   id?: WorkspaceExplorerTab["id"];
   title?: string;
@@ -56,7 +58,11 @@ type WorkspaceTabsPersistedState = Pick<WorkspaceTabsState, "tabs" | "activeTabI
 
 
 
+
+
 const EXPLORER_TAB_TITLE = "Library";
+
+
 
 
 
@@ -201,6 +207,8 @@ const createRouteTabFromSection = (
 ): WorkspaceRouteTab => {
   return { ...resolveRouteTabBySection(sectionKey) };
 };
+
+
 
 export const useWorkspaceTabsStore = create<WorkspaceTabsState>()( persist( (set, get) => ({ tabs: [], activeTabId: null, lastOpenedTabId: null, openExplorerTab: (params = {}) => { const id = params.id ?? WORKSPACE_DEFAULT_EXPLORER_TAB_ID;
         const existing = get().tabs.find((tab) => tab.id === id);

@@ -26,6 +26,8 @@ import { ToolbarButton } from './toolbar';
 
 
 
+
+
 const emojiCategoryIcons: Record<
   EmojiCategoryList,
   {
@@ -120,6 +122,8 @@ const emojiSearchIcons = {
   delete: <XIcon className="size-4 text-current" />,
   loupe: <SearchIcon className="size-4 text-current" />,
 };
+
+
 
 
 
@@ -392,6 +396,8 @@ function EmojiPickerNavigation({
 
 
 
+
+
 const EmojiButton = React.memo(function EmojiButton({
   emoji,
   index,
@@ -457,6 +463,8 @@ const RowOfButtons = React.memo(function RowOfButtons({
     </div>
   );
 });
+
+
 
 function EmojiPickerContent({
   emojiLibrary,

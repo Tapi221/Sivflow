@@ -16,6 +16,8 @@ import { Link, Plus } from "@/ui/icons";
 
 
 
+
+
 type CardQuestionLinksPanelProps = {
   selectedCardId: string | null;
 };
@@ -43,10 +45,14 @@ type QuestionLinksSnapshot = {
 
 
 
+
+
 const MAX_CANDIDATE_TERMS = 8;
 const MAX_CUSTOM_TERM_LENGTH = 60;
 const TERM_PATTERN = /[A-Za-z][A-Za-z0-9+\-/#]{1,24}|[\p{Script=Han}\p{Script=Katakana}ー]{2,16}/gu;
 const TERM_STOP_WORDS = new Set(["card", "cards", "qa", "q", "a", "これ", "それ", "この", "その", "こと", "もの", "ため", "よう", "カード", "問題", "解答", "回答", "質問", "疑問", "リンク", "する", "いる", "ある", "なる"]);
+
+
 
 
 
@@ -95,6 +101,8 @@ const extractQuestionTerms = (card: Card | null): string[] => {
 const getCardTitle = (card: Card): string => card.title?.trim() || card.front.blocks.map(getBlockText).find((text) => text.trim().length > 0)?.trim() || card.questionNumber || "無題のカード";
 
 const sanitizeCustomTerm = (value: string): string => normalizeTerm(value).slice(0, MAX_CUSTOM_TERM_LENGTH);
+
+
 
 
 
@@ -222,8 +230,12 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
 
 
 
+
+
 const CardQuestionLinksPanel = memo(CardQuestionLinksPanelComponent);
 CardQuestionLinksPanel.displayName = "CardQuestionLinksPanel";
 
 export { CardQuestionLinksPanel };
+
+
 export type { CardQuestionLinksPanelProps };

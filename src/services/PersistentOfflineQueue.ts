@@ -9,6 +9,8 @@ import type { UploadedImage } from "@/types";
 
 
 
+
+
 class PersistentOfflineQueue {
   private isProcessing = false;
   private readonly store = new IndexedDbPersistentOfflineQueueStore();
@@ -95,7 +97,11 @@ class PersistentOfflineQueue {
   };
 }
 
+
+
 export type { AssetUploadRequest };
+
+
 
 
 

@@ -7,11 +7,15 @@ import type { CardFaceAttachments } from "@/types/domain/card";
 
 
 
+
+
 type CardFaceWithAttachmentsProps = Readonly<{
   faceNode: React.ReactNode;
   attachments?: CardFaceAttachments | null;
   className?: string;
 }>;
+
+
 
 
 

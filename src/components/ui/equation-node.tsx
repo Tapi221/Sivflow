@@ -28,9 +28,13 @@ import { inlineSuggestionVariants } from '@/lib/suggestion';
 
 
 
+
+
 const EquationInput = createPrimitiveComponent(TextareaAutosize)({
   propsHook: useEquationInput,
 });
+
+
 
 
 

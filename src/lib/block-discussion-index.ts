@@ -24,6 +24,8 @@ import type { TComment } from '@/components/ui/comment';
 
 
 
+
+
 export interface ResolvedSuggestion extends TResolvedSuggestion { comments: TComment[];
 }
 
@@ -62,6 +64,8 @@ type BuildBlockDiscussionIndexOptions = {
   getSuggestionId: (node: TElement | TSuggestionText) => string | undefined;
   isBlockSuggestion: (node: TElement | TSuggestionText) => boolean;
 };
+
+
 
 
 
@@ -107,6 +111,8 @@ const TYPE_TEXT_MAP: Record<string, (node?: TElement) => string> = {
   [KEYS.toggle]: () => 'Toggle',
   [KEYS.video]: () => 'Video',
 };
+
+
 
 
 

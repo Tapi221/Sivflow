@@ -5,7 +5,11 @@ import { clampCardCarouselIndex } from "@/features/review/domain/cardCarouselInd
 
 
 
+
+
 type CardCarouselScrollBehavior = ScrollBehavior | "instant";
+
+
 
 
 

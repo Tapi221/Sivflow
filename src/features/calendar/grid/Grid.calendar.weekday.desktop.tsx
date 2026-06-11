@@ -22,6 +22,8 @@ import { WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX, getWeekdayTimedEventFrame, getWeekda
 
 
 
+
+
 export type CalendarWeekDayGridRef = { scrollToHour: (hour: number) => void };
 
 type WeekdayEventsByDay = { allDayEvents: Map<string, GoogleCalendarEvent[]> };
@@ -29,6 +31,8 @@ type WeekdayEventDragState = { eventKey: string; event: GoogleCalendarEvent; poi
 type WeekdayDayColumnHit = { day: Date; element: HTMLDivElement };
 type WeekdayEventDragPreview = { previewStartsAt: Date; previewEndsAt: Date; previewIsAllDay: boolean; previewAllDayIndex: number | null; previewColumnDayKey: string | null };
 type WeekdayAllDayRenderItem = { event: GoogleCalendarEvent; eventKey: string; isDragPreview: boolean };
+
+
 
 
 
@@ -51,6 +55,8 @@ const WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME = "relative overflow-hidden";
 const WEEKDAY_TIMED_EVENT_DRAG_SNAP_MINUTES = 15;
 const WEEKDAY_TIMED_EVENT_DRAG_FALLBACK_MINUTES = 30;
 const MINUTE_MS = 60 * 1000;
+
+
 
 
 
@@ -235,6 +241,8 @@ const useCurrentTime = () => {
 
 
 
+
+
 const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scrollContainerRef, visibleDays, visibleEvents, calendarGridStyle, allDayEventOrder, onScroll, selectedDate, onSelectDate, onMoveCalendarEvent, onReorderAllDayEvents }: CalendarWeekDayGridProps) => {
   const now = useCurrentTime();
   const allDayColumnRefs = useRef(new Map<string, HTMLDivElement>());
@@ -281,6 +289,8 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
     </div>
   );
 };
+
+
 
 
 

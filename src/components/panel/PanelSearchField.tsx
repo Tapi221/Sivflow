@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 interface PanelSearchFieldProps {
   value: string;
   placeholder?: string;
@@ -15,6 +17,8 @@ interface PanelSearchFieldProps {
   className?: string;
   inputClassName?: string;
 }
+
+
 
 
 

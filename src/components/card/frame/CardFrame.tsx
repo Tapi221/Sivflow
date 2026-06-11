@@ -10,6 +10,8 @@ import type { CssVars } from "@/types/style";
 
 
 
+
+
 type CardShellProps = React.ComponentProps<typeof CardShell>;
 
 export interface CardFrameProps extends Omit< CardShellProps, "children" | "className" | "ref" > { children: React.ReactNode;
@@ -32,6 +34,8 @@ export interface CardFrameProps extends Omit< CardShellProps, "children" | "clas
   overlay?: React.ReactNode;
   topAttachment?: React.ReactNode;
 }
+
+
 
 
 
@@ -152,6 +156,8 @@ const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
     );
   },
 );
+
+
 
 
 

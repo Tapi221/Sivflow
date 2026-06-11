@@ -7,9 +7,13 @@ import type { SyncQueueItem } from "@/types/domain/sync";
 
 
 
+
+
 type QueueReadableLocalDB = LocalDBLike & {
   getQueuedItemsOldestFirst?: () => Promise<SyncQueueItem[]>;
 };
+
+
 
 
 
@@ -23,6 +27,8 @@ const PRIORITY_ORDER: Record<SyncTask["priority"], number> = {
 };
 
 const DELETE_OPERATION_TYPE = "delete";
+
+
 
 
 

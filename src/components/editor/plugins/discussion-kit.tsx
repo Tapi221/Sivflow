@@ -10,6 +10,8 @@ import { BlockDiscussion } from '@/components/ui/block-discussion';
 
 
 
+
+
 type TDiscussion = {
   id: string;
   comments: TComment[];
@@ -25,6 +27,8 @@ type TDiscussionUser = {
   name: string;
   hue?: number;
 };
+
+
 
 
 
@@ -161,6 +165,8 @@ const DiscussionKit = [discussionPlugin];
 
 
 
+
+
 const getTargetElement = (target: EventTarget | null) => {
   if (target instanceof HTMLElement) return target;
   if (target instanceof Node) return target.parentElement;
@@ -194,7 +200,11 @@ const getDiscussionBlockClickTarget = ({
     target,
   });
 
+
+
 export type { TDiscussion };
+
+
 
 
 

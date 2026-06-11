@@ -6,7 +6,11 @@ import { createSlatePlugin, createTextSubstitutionInputRule, KEYS } from 'platej
 
 
 
+
+
 type AutoformatTextSubstitutionPatterns = Parameters<typeof createTextSubstitutionInputRule>[0]['patterns'];
+
+
 
 
 
@@ -36,6 +40,8 @@ const AUTOFORMAT_SHORTCUTS_PLUGIN = createSlatePlugin({
 
 
 
+
+
 const isTextSubstitutionBlocked = (editor: SlateEditor) =>
   editor.api.some({
     match: {
@@ -52,6 +58,8 @@ const createAutoformatTextSubstitutionRule = ({
     enabled: ({ editor }) => !isTextSubstitutionBlocked(editor),
     patterns,
   });
+
+
 
 const ARROWS_RULE = createAutoformatTextSubstitutionRule({
   patterns: [

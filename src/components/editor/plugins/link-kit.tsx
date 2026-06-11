@@ -12,6 +12,8 @@ import { LinkFloatingToolbar } from '@/components/ui/link-toolbar';
 
 
 
+
+
 const LinkKit = [
   LinkPlugin.configure({
     inputRules: [
@@ -26,6 +28,8 @@ const LinkKit = [
     },
   }),
 ];
+
+
 
 
 

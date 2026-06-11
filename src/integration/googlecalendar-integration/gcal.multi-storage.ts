@@ -5,6 +5,8 @@ import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
 
 
+
+
 /**
  * gcal.multi-storage.ts
  *
@@ -31,6 +33,8 @@ const LEGACY_WAS_CONNECTED_KEY = "flashcard-master.gcal.was_connected";
 
 const pendingLegacyDesktopRefreshTokens = new Map<string, string>();
 
+
+
 // ─────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────
@@ -49,6 +53,8 @@ export type StoredGoogleAccount = { /** メールアドレス or ランダムUUI
 export type StoredGoogleAccountProfile = { name?: string | null;
   photoUrl?: string | null;
 };
+
+
 
 
 

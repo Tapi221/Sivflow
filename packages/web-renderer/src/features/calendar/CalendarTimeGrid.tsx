@@ -7,6 +7,8 @@ import { CalendarEventChip } from "./CalendarEventChip";
 
 
 
+
+
 type CalendarTimeGridProperties = {
   events: readonly CalendarEvent[];
   rangeStart: Date;
@@ -24,10 +26,14 @@ type TimeGridHourLabel = {
 
 
 
+
+
 const DEFAULT_HOUR_HEIGHT = 72;
 const HOURS_IN_DAY = 24;
 const MINUTES_IN_HOUR = 60;
 const PERCENT_MAX = 100;
+
+
 
 
 
@@ -58,6 +64,8 @@ const getHourLabels = (rangeStart: Date, rangeEnd: Date): TimeGridHourLabel[] =>
 
   return labels;
 };
+
+
 
 
 
