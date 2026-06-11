@@ -32,7 +32,7 @@
     "verify:app-icon": "node scripts/sync-app-icon.mjs --check",
     "verify:icons": "node scripts/verify-icons-entry.mjs",
     "verify:sw": "node scripts/verify/verify-sw.mjs",
-    "verify:source-conventions": "node scripts/verify/verify-source-conventions.mjs",
+    "verify:source-conventions": "node scripts/verify/fix-source-convention-wrappers.mjs && node scripts/verify/verify-source-conventions.mjs",
     "watch:source-conventions": "node scripts/dev/watch-source-conventions.mjs",
     "watch:source-conventions:fix": "node scripts/dev/watch-source-conventions.mjs --fix",
     "fix:source-conventions:local-llm": "node scripts/dev/watch-source-conventions.mjs --fix --once",
