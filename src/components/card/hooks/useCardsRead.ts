@@ -10,6 +10,8 @@ import { getLocalDb } from "@/services/localDB";
 import type { Card } from "@/types";
 import { toMillis } from "@/utils/toMillis";
 
+
+
 type UseCardsReadOptions = {
   enabled?: boolean;
 };
@@ -19,6 +21,8 @@ type CardsReadSnapshot = {
   key: string;
   rawCards: unknown[];
 };
+
+
 
 const buildCardsReadKey = ({ enabled, userId, folderId, cardSetId }: { enabled: boolean; userId: string | null; folderId?: string; cardSetId?: string; }) => {
   return JSON.stringify([enabled, userId, folderId ?? null, cardSetId ?? null]);
@@ -143,8 +147,7 @@ const resolveVisibleCards = ({
 
   return normalized;
 };
-export const useCardsRead = (folderId?: string, cardSetId?: string, options?: UseCardsReadOptions) => {
-  const { search } = useLocation();
+export const useCardsRead = (folderId?: string, cardSetId?: string, options?: UseCardsReadOptions) => { const { search } = useLocation();
   const userId = useEffectiveLocalUserId();
   const isActiveWorkspaceCardSetSelected = useWorkspaceTabsStore((state) => {
     const activeTab = state.tabs.find((tab) => tab.id === state.activeTabId);
@@ -248,5 +251,7 @@ export const useCardsRead = (folderId?: string, cardSetId?: string, options?: Us
     error,
   };
 };
+
+
 
 export type { UseCardsReadOptions };

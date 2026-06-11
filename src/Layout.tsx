@@ -21,6 +21,8 @@ import { UI_TYPO } from "@shared/design-tokens/typography";
 
 
 
+
+
 const Layout = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -143,6 +145,8 @@ const Layout = () => {
     </div>
   );
 };
+
+
 
 
 

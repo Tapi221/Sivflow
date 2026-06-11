@@ -8,6 +8,8 @@ import { useWorkspaceTabsStore } from "./useTabsStore";
 
 
 
+
+
 type UseWorkspaceTabsRouteSyncOptions = {
   enabled?: boolean;
 };
@@ -18,7 +20,11 @@ type UseWorkspaceTabsRouteSyncOptions = {
 
 
 
+
+
 const SETTINGS_ROUTE_TAB_ID = "route:settings" as const;
+
+
 
 
 

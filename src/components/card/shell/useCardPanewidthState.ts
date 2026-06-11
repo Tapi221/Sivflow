@@ -1,6 +1,8 @@
 import { type DependencyList, useCallback, useEffect, useRef, useState } from "react";
 import { type CardPaneMode, clampPaneWidthPx } from "@/components/card/frame/cardPane.constants";
 
+
+
 type PaneWidthMap<T> = {
   view: T;
   edit: T;
@@ -29,14 +31,17 @@ interface UseCardPaneWidthStateOptions {
   onPersist?: (mode: CardPaneMode, widthPx: number) => void;
 }
 
+
+
 const DEFAULT_INITIAL_VIEWPORT_WIDTH_PX = 1024;
+
+
 
 const defaultMeasureViewportWidth = (element: HTMLDivElement) =>
   Math.max(0, Math.round(element.clientWidth));
 const getActiveMode = (isEditMode: boolean): CardPaneMode =>
   isEditMode ? "edit" : "view";
-export const useCardPaneWidthState = ({ isEditMode, preferredWidths, defaultWidths, minWidths, measureViewportWidth = defaultMeasureViewportWidth, viewportObserverDeps = [], initialViewportWidth = DEFAULT_INITIAL_VIEWPORT_WIDTH_PX, reservedViewportInsetPx = 0, allowStoredWidthBeyondViewport = false, previewBehavior = "active-only", persistBehavior = "active-only", onPersist }: UseCardPaneWidthStateOptions) => {
-  const contentViewportRef = useRef<HTMLDivElement | null>(null);
+export const useCardPaneWidthState = ({ isEditMode, preferredWidths, defaultWidths, minWidths, measureViewportWidth = defaultMeasureViewportWidth, viewportObserverDeps = [], initialViewportWidth = DEFAULT_INITIAL_VIEWPORT_WIDTH_PX, reservedViewportInsetPx = 0, allowStoredWidthBeyondViewport = false, previewBehavior = "active-only", persistBehavior = "active-only", onPersist }: UseCardPaneWidthStateOptions) => { const contentViewportRef = useRef<HTMLDivElement | null>(null);
 
   const [contentViewportWidth, setContentViewportWidth] = useState<number>(
     () =>

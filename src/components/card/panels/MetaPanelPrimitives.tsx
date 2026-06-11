@@ -3,6 +3,8 @@ import { SurfaceButton, type SurfaceButtonProps } from "@/components/ui/surface-
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
+
+
 type MetaPanelActionRowAlign = "start" | "between" | "end";
 type MetaPanelActionRowProps = {
   children: React.ReactNode;
@@ -54,11 +56,15 @@ type MetaPanelSwitchProps = {
   switchAriaLabel?: string;
 };
 
+
+
 const META_PANEL_ACTION_ROW_ALIGN_CLASS: Record<MetaPanelActionRowAlign, string> = {
   start: "ds-editor-pane__action-row--start",
   between: "ds-editor-pane__action-row--between",
   end: "ds-editor-pane__action-row--end",
 };
+
+
 
 const MetaPanelActionRow = ({
   children,
@@ -218,6 +224,8 @@ const MetaPanelSwitch = ({
     </MetaPanelActionRow>
   );
 };
+
+
 
 MetaPanelInput.displayName = "MetaPanelInput";
 MetaPanelSectionActionButton.displayName = "MetaPanelSectionActionButton";

@@ -9,6 +9,8 @@ import type { GCalEventsListResponse, GCalForceSyncOptions, GCalRawIncrementalEv
 
 
 
+
+
 const GCAL_API_BASE = "https://www.googleapis.com/calendar/v3";
 const SYNC_TOKENS_STORAGE_KEY = "flashcard-master.gcal.sync_tokens";
 const DEFAULT_POLL_INTERVAL_MS = 60_000;
@@ -16,6 +18,8 @@ const MAX_BACKOFF_MS = 10 * 60 * 1000;
 const INITIAL_BACKOFF_MS = 60_000;
 const DEFAULT_FULL_SYNC_PAST_DAYS = 365;
 const DEFAULT_FULL_SYNC_FUTURE_DAYS = 3650;
+
+
 
 
 

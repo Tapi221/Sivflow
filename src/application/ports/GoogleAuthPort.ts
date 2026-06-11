@@ -1,3 +1,2 @@
-export interface GoogleAuthPort {
-  signIn: () => Promise<void>;
+export interface GoogleAuthPort { signIn: () => Promise<void>;
 }

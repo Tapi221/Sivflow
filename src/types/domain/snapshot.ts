@@ -52,6 +52,8 @@ import type { CardSet } from "./cardSet";
 
 
 
+
+
 /** スナップショットのメタデータ */
 export interface SnapshotMetadata { /** スキーマバージョン（マイグレーション用） */ schemaVersion: number;
 
@@ -130,6 +132,8 @@ export interface SnapshotComparison { /** どちらが新しいか */ newerSnaps
     assetsRemoved: number;
   };
 }
+
+
 
 
 

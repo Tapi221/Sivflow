@@ -7,11 +7,15 @@ import { AppProviders } from "@web-renderer/app/AppProviders";
 
 
 
+
+
 const App = () => (
   <AppProviders>
     <AppContent />
   </AppProviders>
 );
+
+
 
 
 

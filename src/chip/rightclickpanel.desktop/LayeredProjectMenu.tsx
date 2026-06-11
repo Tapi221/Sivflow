@@ -2,6 +2,8 @@ import { Fragment, memo, type CSSProperties, type ReactNode, type RefObject } fr
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanel.utils";
 
+
+
 type LayeredProjectMenuItemDefinition = {
   id: LayeredProjectMenuActionId;
   label: string;
@@ -10,13 +12,11 @@ type LayeredProjectMenuItemDefinition = {
   submenu?: boolean;
 };
 export type LayeredProjectMenuActionId = "change-color" | "rename" | "create-note" | "create-card-set" | "create-folder" | "import-pdf" | "add-to-favorites" | "hide" | "delete";
-export type LayeredProjectMenuAction = {
-  id: LayeredProjectMenuActionId;
+export type LayeredProjectMenuAction = { id: LayeredProjectMenuActionId;
   disabled?: boolean;
   onSelect: () => void;
 };
-export type LayeredProjectMenuSubmenuAnchor = {
-  itemOffsetY: number;
+export type LayeredProjectMenuSubmenuAnchor = { itemOffsetY: number;
 };
 type LayeredProjectMenuProps = {
   x: number;
@@ -30,6 +30,8 @@ type LayeredProjectMenuProps = {
   onOpenSubmenu?: (id: LayeredProjectMenuActionId, anchor: LayeredProjectMenuSubmenuAnchor) => void;
   onCloseSubmenu?: () => void;
 };
+
+
 
 export const LAYERED_PROJECT_MENU_PANEL_ID = "layered-project-context-menu";
 const LAYERED_PROJECT_MENU_SEPARATOR_HEIGHT = 5;
@@ -90,12 +92,16 @@ const LAYERED_PROJECT_MENU_STYLE = `
 }
 `;
 
+
+
 const getLayeredProjectMenuAction = (actions: LayeredProjectMenuAction[], id: LayeredProjectMenuActionId) => actions.find((action) => action.id === id);
 const getLayeredProjectMenuSubmenuAnchor = (index: number): LayeredProjectMenuSubmenuAnchor => {
   const separatorOffset = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.slice(0, index).filter((item) => item.separatorBefore).length * LAYERED_PROJECT_MENU_SEPARATOR_HEIGHT;
 
   return { itemOffsetY: RIGHT_CLICK_PANEL_SURFACE_PADDING + index * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + separatorOffset };
 };
+
+
 
 const LayeredProjectMenuBase = ({ x, y, actions, menuRef, noDragStyle, panelId = LAYERED_PROJECT_MENU_PANEL_ID, openSubmenuId, submenuElement, onOpenSubmenu, onCloseSubmenu }: LayeredProjectMenuProps) => {
   return (
@@ -124,6 +130,8 @@ const LayeredProjectMenuBase = ({ x, y, actions, menuRef, noDragStyle, panelId =
     </>
   );
 };
+
+
 
 const LayeredProjectMenu = memo(LayeredProjectMenuBase);
 LayeredProjectMenu.displayName = "LayeredProjectMenu";

@@ -8,6 +8,8 @@ import type { Card } from "@/types/domain/card";
 import type { Folder } from "@/types/domain/folder";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
+
+
 const TIMESTAMP_KEYS = [
   "createdAt",
   "updatedAt",
@@ -15,6 +17,8 @@ const TIMESTAMP_KEYS = [
   "nextReviewDate",
   "lastReviewAt",
 ] as const;
+
+
 
 const isMissingFolderId = (folderId: unknown): boolean => {
   return (
@@ -36,9 +40,7 @@ const toNonEmptyString = (value: unknown): string | null => {
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
 };
-export const createCheckDataIntegrityUseCase = () => {
-  const execute = async (): Promise<IntegrityReport> => {
-    const issues: IntegrityIssue[] = [];
+export const createCheckDataIntegrityUseCase = () => { const execute = async (): Promise<IntegrityReport> => { const issues: IntegrityIssue[] = [];
 
     try {
       const db = await getLocalDb();

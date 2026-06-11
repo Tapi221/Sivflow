@@ -13,6 +13,8 @@ import type { Card as StudyEntityCard } from "@/types";
 
 
 
+
+
 type Props = {
   practiceState: PracticeSessionState;
   practiceCurrentCard: StudyEntityCard | null;
@@ -23,6 +25,8 @@ type Props = {
   handlePracticeExit: (reason?: string) => void;
   ratingLabels: Record<PracticeFilterRating, string>;
 };
+
+
 
 
 

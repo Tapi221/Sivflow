@@ -13,6 +13,8 @@ import { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, isGoo
 
 
 
+
+
 export type GoogleCalendarAccess = { accessToken: string;
   accountEmail: string | null;
   accountName: string | null;
@@ -53,6 +55,8 @@ type GoogleOAuthCallbackLike = {
 
 
 
+
+
 const GOOGLE_SIGN_IN_SCOPE_PARAM = "openid email profile";
 const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
 const GOOGLE_CALENDAR_READONLY_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
@@ -75,6 +79,8 @@ export const GOOGLE_CONNECTED_SERVICE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_CA
 const GOOGLE_SCOPES = GOOGLE_CONNECTED_SERVICE_SCOPES;
 const GOOGLE_CONNECTED_SERVICE_SCOPE_PARAM = `${GOOGLE_SIGN_IN_SCOPE_PARAM} ${GOOGLE_SCOPES.join(" ")}`;
 let pendingGoogleCalendarServerCodeVerifier: string | null = null;
+
+
 
 
 
@@ -372,7 +378,11 @@ export const consumeGoogleCalendarServerCodeVerifier = (): string | null => { co
 
 
 
+
+
 export const consumeGoogleConnectedServiceServerCodeVerifier = consumeGoogleCalendarServerCodeVerifier;
+
+
 
 
 
@@ -407,7 +417,11 @@ export const requestCalendarAccessToken = async (auth: Auth, silent = false): Pr
 
 
 
+
+
 export const requestConnectedServiceAccessToken = requestCalendarAccessToken;
+
+
 
 
 
@@ -425,6 +439,8 @@ export const refreshCalendarAccessToken = async ({ refreshToken }: { refreshToke
   await validateGrantedGoogleScopes({ accessToken: json.access_token, scope: json.scope, allowTokenInfoFallback: true });
   return { accessToken: json.access_token, refreshToken: json.refresh_token, expiresInSeconds: json.expires_in, ...getGoogleProfileFromIdToken(json.id_token) };
 };
+
+
 
 
 

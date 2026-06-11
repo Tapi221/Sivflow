@@ -11,10 +11,14 @@ import { Trophy } from "@/ui/icons";
 
 
 
+
+
 type Props = {
   folderId: string | null;
   handleBack: () => void;
 };
+
+
 
 
 

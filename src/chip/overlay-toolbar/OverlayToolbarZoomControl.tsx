@@ -4,6 +4,8 @@ import { Minus, Plus } from "@/ui/icons";
 import { OverlayToolbarButton } from "./OverlayToolbarButton";
 import { cn } from "@/lib/utils";
 
+
+
 type OverlayToolbarZoomControlBaseProps = {
   value: number;
   min: number;
@@ -33,10 +35,13 @@ type OverlayToolbarZoomControlWithStepButtonsProps =
   };
 export type OverlayToolbarZoomControlProps = | OverlayToolbarZoomControlWithoutStepButtonsProps | OverlayToolbarZoomControlWithStepButtonsProps;
 
+
+
 const DEFAULT_FORMAT_VALUE = (value: number) => `${Math.round(value)}%`;
 
-export const OverlayToolbarZoomControl = (props: OverlayToolbarZoomControlProps) => {
-  const { value, min, max, step, onChange, label, disabled = false, sliderWrapperClassName, valueClassName, trackClassName, rangeClassName, thumbClassName, formatValue = DEFAULT_FORMAT_VALUE } = props;
+
+
+export const OverlayToolbarZoomControl = (props: OverlayToolbarZoomControlProps) => { const { value, min, max, step, onChange, label, disabled = false, sliderWrapperClassName, valueClassName, trackClassName, rangeClassName, thumbClassName, formatValue = DEFAULT_FORMAT_VALUE } = props;
 
   const sliderValue = React.useMemo<readonly [number]>(
     () => [value] as const,
