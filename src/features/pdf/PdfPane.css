@@ -38,7 +38,9 @@
 }
 
 .pdf-pane__zoom-snapshot {
-  position: absolute;
+  position: sticky;
+  left: 0;
+  top: 0;
   z-index: 10;
   overflow: hidden;
   pointer-events: none;
