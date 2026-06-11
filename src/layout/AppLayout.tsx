@@ -225,14 +225,16 @@ const AppLayout = () => {
   const outletContext = useMemo<AppLayoutOutletContext>(() => ({ isLeftPanelCollapsed, onOpenSettings: handleOpenSettings, onToggleLeftPanel: handleToggleLeftPanel }), [handleOpenSettings, handleToggleLeftPanel, isLeftPanelCollapsed]);
 
   return (
-    <WorkspaceLayoutRevisionProvider revision={workspaceLayoutRevision}>
-      <WorkspaceShell isScrollLocked={isScrollLocked} mainRef={mainRef}>
-        <Suspense fallback={null}>
-          <Outlet context={outletContext} />
-        </Suspense>
-        <SettingsWorkspaceDialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen} />
-      </WorkspaceShell>
-    </WorkspaceLayoutRevisionProvider>
+    <div className="app-layout">
+      <WorkspaceLayoutRevisionProvider revision={workspaceLayoutRevision}>
+        <WorkspaceShell isScrollLocked={isScrollLocked} mainRef={mainRef}>
+          <Suspense fallback={null}>
+            <Outlet context={outletContext} />
+          </Suspense>
+          <SettingsWorkspaceDialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen} />
+        </WorkspaceShell>
+      </WorkspaceLayoutRevisionProvider>
+    </div>
   );
 };
 
