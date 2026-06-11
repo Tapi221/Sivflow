@@ -33,6 +33,7 @@ const ORDER_LABELS = {
   component: "component 本体",
   postComponent: "memo / displayName / export",
 };
+const INLINE_BLOCK_STATEMENT_MESSAGE = "ブロック開始直後の文は { と同じ行に置かず、次の行へ分けてください。";
 
 const walkSourceFiles = (directory) => {
   if (!existsSync(directory)) return [];
@@ -132,7 +133,14 @@ const isUpperCaseConstantName = (name) => /^[A-Z0-9_]+$/.test(name);
 
 const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const getVariableStatementNames = (statement) => statement.declarationList.declarations.flatMap((declaration) => ts.isIdentifier(declaration.name) ? [declaration.name.text] : []);
+const getBindingNameIdentifiers = (name) => {
+  if (ts.isIdentifier(name)) return [name.text];
+  if (ts.isObjectBindingPattern(name) || ts.isArrayBindingPattern(name)) return name.elements.flatMap((element) => ts.isBindingElement(element) ? getBindingNameIdentifiers(element.name) : []);
+
+  return [];
+};
+
+const getVariableStatementNames = (statement) => statement.declarationList.declarations.flatMap((declaration) => getBindingNameIdentifiers(declaration.name));
 
 const getStatementDeclarationNames = (statement) => {
   if (ts.isVariableStatement(statement)) return getVariableStatementNames(statement);
@@ -387,6 +395,31 @@ const checkJsxWrapperConventions = (filePath, sourceFile) => {
   return violations;
 };
 
+const checkInlineBlockStatementSpacing = (filePath, source, sourceFile) => {
+  if (!shouldCheckStatementOrder(filePath)) return [];
+
+  const violations = [];
+
+  const visit = (node) => {
+    if (ts.isBlock(node) && node.statements.length > 0) {
+      const openingBracePosition = node.getStart(sourceFile);
+      const firstStatement = node.statements[0];
+      const firstStatementStart = firstStatement.getStart(sourceFile);
+      const openingBraceLine = sourceFile.getLineAndCharacterOfPosition(openingBracePosition).line;
+      const firstStatementLine = sourceFile.getLineAndCharacterOfPosition(firstStatementStart).line;
+      const leadingText = source.slice(openingBracePosition + 1, firstStatementStart);
+      if (openingBraceLine === firstStatementLine && !/\S/u.test(leadingText)) {
+        violations.push({ filePath, line: getLineNumber(sourceFile, firstStatementStart), message: INLINE_BLOCK_STATEMENT_MESSAGE });
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+  return violations;
+};
+
 const checkSourceFile = (filePath) => {
   const source = readFileSync(filePath, "utf8");
   const scriptKind = path.extname(filePath).endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
@@ -399,7 +432,7 @@ const checkSourceFile = (filePath) => {
     return [...checkSingleLineImportExport(filePath, sourceFile, node), ...checkModuleSpecifier(filePath, sourceFile, node, specifier)];
   });
 
-  return [...importViolations, ...checkStatementOrder(filePath, source, sourceFile), ...checkBlockSpacing(filePath, source, sourceFile), ...checkJsxWrapperConventions(filePath, sourceFile)];
+  return [...importViolations, ...checkStatementOrder(filePath, source, sourceFile), ...checkBlockSpacing(filePath, source, sourceFile), ...checkInlineBlockStatementSpacing(filePath, source, sourceFile), ...checkJsxWrapperConventions(filePath, sourceFile)];
 };
 
 const formatViolation = ({ filePath, line, message }) => `${toPosix(path.relative(ROOT_DIR, filePath))}:${line} ${message}`;
