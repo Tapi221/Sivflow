@@ -10,8 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/contexts/ToastContext";
 import type { CardSet } from "@/types";
 
-export type MfCardImportCompletedPayload = {
-  cardSetId: string;
+
+
+export type MfCardImportCompletedPayload = { cardSetId: string;
   cardSetName: string;
   folderId: string;
   createdCount: number;
@@ -31,13 +32,16 @@ type MfCardImportDialogProps = {
   initialFileRevision?: number;
 };
 
+
+
 const emptyLoadedState = {
   file: null as File | null,
   loaded: null as LoadMfCardFileResult | null,
 };
 
-export const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets, onImported, createCardSet, updateCardSet, createCard, ensureTagByName, initialFile = null, initialFileRevision = 0 }: MfCardImportDialogProps) => {
-  const toast = useToast();
+
+
+export const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets, onImported, createCardSet, updateCardSet, createCard, ensureTagByName, initialFile = null, initialFileRevision = 0 }: MfCardImportDialogProps) => { const toast = useToast();
   const [destinationMode, setDestinationMode] = useState<"new" | "existing">(
     "new",
   );

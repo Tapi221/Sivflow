@@ -1,7 +1,8 @@
 import type { CalendarProvider, ProjectCalendarLink, ProjectCalendarSyncDirection } from "./scheduleScreen.types";
 
-export type CreateProjectCalendarLinkInput = {
-  projectId: string;
+
+
+export type CreateProjectCalendarLinkInput = { projectId: string;
   provider: CalendarProvider;
   accountId: string;
   externalCalendarId: string;
@@ -13,11 +14,15 @@ export type CreateProjectCalendarLinkInput = {
 };
 type StoredProjectCalendarLink = Partial<ProjectCalendarLink>;
 
+
+
 export const PROJECT_CALENDAR_LINKS_STORAGE_KEY = "sivflow:schedule:project-calendar-links";
 const LEGACY_PROJECT_CALENDAR_LINKS_STORAGE_KEY = "flashcard-master:schedule:project-calendar-links";
 const DEFAULT_SYNC_DIRECTION: ProjectCalendarSyncDirection = "twoWay";
 const SUPPORTED_CALENDAR_PROVIDERS = new Set<CalendarProvider>(["local", "google", "appleEventKit", "appleCalDav"]);
 const SUPPORTED_SYNC_DIRECTIONS = new Set<ProjectCalendarSyncDirection>(["importOnly", "exportOnly", "twoWay"]);
+
+
 
 const encodeLinkIdPart = (value: string): string => encodeURIComponent(value.trim());
 const readString = (value: unknown): string | null => {
@@ -86,8 +91,7 @@ const readStoredProjectCalendarLinksRaw = (): string | null => {
 };
 export const buildProjectCalendarLinkId = (provider: CalendarProvider, accountId: string, externalCalendarId: string): string => ["project-calendar-link", encodeLinkIdPart(provider), encodeLinkIdPart(accountId), encodeLinkIdPart(externalCalendarId)].join(":");
 export const createProjectCalendarLink = ({ projectId, provider, accountId, externalCalendarId, externalCalendarName, syncDirection, createdByApp, color, lastSyncedAt }: CreateProjectCalendarLinkInput): ProjectCalendarLink => ({ id: buildProjectCalendarLinkId(provider, accountId, externalCalendarId), projectId, provider, accountId, externalCalendarId, externalCalendarName, syncDirection: normalizeCreatedLinkSyncDirection(syncDirection), createdByApp, color, lastSyncedAt });
-export const readStoredProjectCalendarLinks = (): ProjectCalendarLink[] => {
-  if (typeof window === "undefined") return [];
+export const readStoredProjectCalendarLinks = (): ProjectCalendarLink[] => { if (typeof window === "undefined") return [];
 
   try {
     const raw = readStoredProjectCalendarLinksRaw();
@@ -110,8 +114,7 @@ export const readStoredProjectCalendarLinks = (): ProjectCalendarLink[] => {
     return [];
   }
 };
-export const persistProjectCalendarLinks = (links: ProjectCalendarLink[]) => {
-  if (typeof window === "undefined") return;
+export const persistProjectCalendarLinks = (links: ProjectCalendarLink[]) => { if (typeof window === "undefined") return;
 
   try {
     window.localStorage.setItem(PROJECT_CALENDAR_LINKS_STORAGE_KEY, JSON.stringify(links));

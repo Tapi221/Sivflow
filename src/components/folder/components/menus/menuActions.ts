@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
 
+
+
 /**
  * メニューのアクションを定義する型
  */
-export type MenuAction = {
-  id: string;
+export type MenuAction = { id: string;
   label: string;
   icon?: ReactNode;
   danger?: boolean;

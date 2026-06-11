@@ -10,6 +10,8 @@ import type { GoogleTaskListAccountState } from "./useGoogleTaskLists";
 
 
 
+
+
 export type GoogleTasksAccountState = { tasks: GoogleTaskItem[];
   isLoading: boolean;
   error: string | null;
@@ -46,12 +48,16 @@ type AccountTokenSnapshot = {
 
 
 
+
+
 const EMPTY_ACCOUNT_STATE: GoogleTasksAccountState = {
   tasks: [],
   isLoading: false,
   error: null,
 };
 const DEFAULT_POLL_INTERVAL_MS = 10_000;
+
+
 
 
 

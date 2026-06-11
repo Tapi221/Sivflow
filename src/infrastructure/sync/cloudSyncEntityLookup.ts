@@ -7,6 +7,8 @@ import type { SyncChange } from "@/services/interfaces/ISyncService";
 
 
 
+
+
 type LookupContext = {
   firestore: Firestore;
   userId: string;
@@ -17,6 +19,8 @@ type CloudSyncLookupDescriptor = {
   resolveData: (context: LookupContext) => Promise<DocumentData | null>;
   resolveSyncId: (context: LookupContext) => string;
 };
+
+
 
 
 
@@ -54,6 +58,8 @@ const lookupUserSettingData = async (
 
 
 
+
+
 const PULL_FULL_LOOKUP_ORDER: readonly CloudSyncLookupDescriptor[] = [
   createPullableLookupDescriptor("card"),
   createPullableLookupDescriptor("cardSet"),
@@ -68,6 +74,8 @@ const PULL_FULL_LOOKUP_ORDER: readonly CloudSyncLookupDescriptor[] = [
     resolveSyncId: ({ userId }) => userId,
   },
 ];
+
+
 
 
 

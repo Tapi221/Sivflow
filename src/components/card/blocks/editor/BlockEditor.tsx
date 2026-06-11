@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 type CssVars = React.CSSProperties & Record<`--${string}`, string>;
 interface BlockEditorProps {
   blocks: CardBlock[];
@@ -36,20 +38,26 @@ interface BlockEditorProps {
   zoom?: number;
 }
 
+
+
 const ROW_STEP_PX = CARD_ROW_PX;
 const EMPTY_HIDDEN_BLOCK_TYPES: CardBlock["type"][] = [];
+
+
 
 const uid = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : Math.random().toString(36).slice(2);
 
-export interface BlockEditorHandle {
-  addBlock: (type: CardBlock["type"]) => void;
+
+
+export interface BlockEditorHandle { addBlock: (type: CardBlock["type"]) => void;
 }
 
-export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>(({ blocks = [], onChange, prefix, label, accentColor, duplicateToOpposite = false, onCrossDuplicate, autoFocus = false, customPlaceholders, hideToolbar = false, onDelete, minDeletableIndex = 0, hiddenBlockTypes = EMPTY_HIDDEN_BLOCK_TYPES, settings = undefined, toolbarMount = null, toolbarDesktopLayout = "horizontal", enableBlockSelectionState = true, displayMode = "fixed", zoom = 1 }, ref) => {
-  const [selectedContainerBlockId, setSelectedContainerBlockId] = useState<string | null>(null);
+
+
+export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>(({ blocks = [], onChange, prefix, label, accentColor, duplicateToOpposite = false, onCrossDuplicate, autoFocus = false, customPlaceholders, hideToolbar = false, onDelete, minDeletableIndex = 0, hiddenBlockTypes = EMPTY_HIDDEN_BLOCK_TYPES, settings = undefined, toolbarMount = null, toolbarDesktopLayout = "horizontal", enableBlockSelectionState = true, displayMode = "fixed", zoom = 1 }, ref) => { const [selectedContainerBlockId, setSelectedContainerBlockId] = useState<string | null>(null);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
 
@@ -613,5 +621,7 @@ export const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>
   );
 },
 );
+
+
 
 BlockEditor.displayName = "BlockEditor";

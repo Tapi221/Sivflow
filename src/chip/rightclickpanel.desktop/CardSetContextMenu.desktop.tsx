@@ -2,9 +2,10 @@ import { memo, type CSSProperties, type RefObject } from "react";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanel.utils";
 
+
+
 export type CardSetContextMenuActionId = "rename" | "delete";
-export type CardSetContextMenuAction = {
-  id: CardSetContextMenuActionId;
+export type CardSetContextMenuAction = { id: CardSetContextMenuActionId;
   label: string;
   danger?: boolean;
   disabled?: boolean;
@@ -18,6 +19,8 @@ type CardSetContextMenuProps = {
   noDragStyle: CSSProperties;
   panelId?: RightClickPanelId;
 };
+
+
 
 export const CARD_SET_CONTEXT_MENU_PANEL_ID = "card-set-context-menu";
 const CARD_SET_CONTEXT_MENU_LABELS = [
@@ -37,6 +40,8 @@ const CARD_SET_CONTEXT_MENU_STYLE = `
   background: #fef2f2;
 }
 `;
+
+
 
 const CardSetContextMenuBase = ({
   x,
@@ -73,6 +78,8 @@ const CardSetContextMenuBase = ({
     </>
   );
 };
+
+
 
 const CardSetContextMenu = memo(CardSetContextMenuBase);
 CardSetContextMenu.displayName = "CardSetContextMenu";

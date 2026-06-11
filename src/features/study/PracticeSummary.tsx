@@ -6,6 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 
 
 
+
+
 type PracticeSummaryState = {
   roundNumber: number;
   filterRating: string;
@@ -18,6 +20,8 @@ type Props = {
   handlePracticeExit: (reason?: string) => void;
   ratingLabels: Record<string, string>;
 };
+
+
 
 
 

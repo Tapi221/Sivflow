@@ -6,6 +6,8 @@ import type { Card, CardSet, Document, Folder } from "@/types";
 
 
 
+
+
 const generateFolderId = () => {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();

@@ -4,6 +4,8 @@ import type { ExplorerBreadcrumbContext } from "@/features/explorer/contracts/ex
 import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
+
+
 type Params = {
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
@@ -13,8 +15,9 @@ type Params = {
   documentById: Map<string, DocumentItem>;
 };
 
-export const useExplorerBreadcrumbSync = ({ selectedFolderId, selectedItem, explorerBreadcrumbContext, folderById, cardById, documentById }: Params) => {
-  const setExtraCrumbs = useSetBreadcrumbCrumbs();
+
+
+export const useExplorerBreadcrumbSync = ({ selectedFolderId, selectedItem, explorerBreadcrumbContext, folderById, cardById, documentById }: Params) => { const setExtraCrumbs = useSetBreadcrumbCrumbs();
 
   const extraCrumbs = useMemo(
     () =>

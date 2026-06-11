@@ -4,6 +4,8 @@ import React from "react";
 
 
 
+
+
 type RatingKey = "forgot" | "vague" | "remembered" | "easy";
 type Props = {
   counts: Record<RatingKey, number>;
@@ -14,6 +16,8 @@ type Props = {
   singleRow?: boolean;
   surface?: "convex" | "concave";
 };
+
+
 
 
 
@@ -70,6 +74,8 @@ const FACE_DESIGN: Record<
   },
 };
 const ORDER: RatingKey[] = ["forgot", "vague", "remembered", "easy"];
+
+
 
 
 

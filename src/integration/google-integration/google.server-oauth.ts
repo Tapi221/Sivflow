@@ -7,6 +7,8 @@ import { consumeGoogleCalendarServerCodeVerifier, type GoogleCalendarAccess } fr
 
 
 
+
+
 type GoogleOAuthReconnectDiagnosis = { cause: string; reconnectRequired: boolean; action: string; };
 export type GoogleOAuthCallableErrorReason = "invalid_grant" | "server_oauth_configuration" | "token_encryption_key_invalid" | "stored_refresh_token_decrypt_failed" | "stored_refresh_token_missing" | "insufficient_google_scope" | "token_endpoint_failed";
 type CallableErrorDetails = { reason?: GoogleOAuthCallableErrorReason; reconnectRequired?: boolean; userAction?: string; adminAction?: string; };
@@ -31,6 +33,8 @@ type GetGoogleCalendarAccessTokenInput = {
 type DisconnectGoogleCalendarAccountInput = {
   accountId: string;
 };
+
+
 
 
 
@@ -62,6 +66,8 @@ const disconnectGoogleCalendarAccountCallable =
     functionsClient,
     "disconnectGoogleCalendarAccount",
   );
+
+
 
 
 
@@ -182,7 +188,11 @@ export const exchangeGoogleCalendarCode = async (input: ExchangeGoogleCalendarCo
 
 
 
+
+
 export const exchangeGoogleConnectedServiceCode = exchangeGoogleCalendarCode;
+
+
 
 
 
@@ -199,7 +209,11 @@ export const getServerStoredGoogleCalendarAccessToken = async (input: GetGoogleC
 
 
 
+
+
 export const getServerStoredGoogleConnectedServiceAccessToken = getServerStoredGoogleCalendarAccessToken;
+
+
 
 
 

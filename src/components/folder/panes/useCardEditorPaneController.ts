@@ -16,6 +16,8 @@ import { useCards } from "@/components/card/hooks/useCards";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { Card, CardPatch, UserSettings } from "@/types";
 
+
+
 type UseCardsResult = {
   cards: Card[];
   updateCard: (cardId: string, data: unknown) => void | Promise<void>;
@@ -32,8 +34,9 @@ type UseCardEditorPaneControllerParams = {
   settingsOverride?: Partial<UserSettings> | null;
 };
 
-export const useCardEditorPaneController = ({ selectedCardId, folderId, cardSetId, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, settingsOverride }: UseCardEditorPaneControllerParams) => {
-  const { settings: settingsFromHook } = useUserSettings();
+
+
+export const useCardEditorPaneController = ({ selectedCardId, folderId, cardSetId, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, settingsOverride }: UseCardEditorPaneControllerParams) => { const { settings: settingsFromHook } = useUserSettings();
   const settings = settingsOverride ?? settingsFromHook;
   const { currentUser } = useAuthSession();
   const { success: toastSuccess, error: toastError } = useToast();

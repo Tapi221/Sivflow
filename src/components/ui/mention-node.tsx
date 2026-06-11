@@ -1,17 +1,29 @@
 "use client";
 
 import * as React from "react";
+
 import type { TComboboxInputElement, TMentionElement } from "platejs";
+
 import type { PlateElementProps } from "platejs/react";
+
 import { getMentionOnSelectItem } from "@platejs/mention";
+
 import { IS_APPLE, KEYS } from "platejs";
+
 import { PlateElement, useFocused, useReadOnly, useSelected } from "platejs/react";
+
 import { cn } from "@/lib/utils";
+
 import { useMounted } from "@/hooks/use-mounted";
+
 import { inlineSuggestionVariants } from "@/lib/suggestion";
+
 import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem } from "./inline-combobox";
 
+
+
 const onSelectItem = getMentionOnSelectItem();
+
 const MENTIONABLES = [
   { key: "0", text: "Aayla Secura" },
   { key: "1", text: "Adi Gallia" },
@@ -89,8 +101,9 @@ const MENTIONABLES = [
   { key: "49", text: "BT-1" },
 ];
 
-export function MentionElement(props: PlateElementProps<TMentionElement> & {
-  prefix?: string;
+
+
+export function MentionElement(props: PlateElementProps<TMentionElement> & { prefix?: string;
 },
 ) {
   const { element } = props;
@@ -136,8 +149,8 @@ export function MentionElement(props: PlateElementProps<TMentionElement> & {
     </PlateElement>
   );
 }
-export function MentionInputElement(props: PlateElementProps<TComboboxInputElement>) {
-  const { editor, element } = props;
+
+export function MentionInputElement(props: PlateElementProps<TComboboxInputElement>) { const { editor, element } = props;
   const [search, setSearch] = React.useState("");
 
   return (

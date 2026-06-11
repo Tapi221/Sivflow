@@ -15,10 +15,11 @@ import type { Card, UserSettings } from "@/types";
 import type { CardBlock } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 type Side = "question" | "answer";
 type EditorSettings = Partial<UserSettings> | null | undefined;
-export interface DesktopEmbeddedCardEditorSurfaceProps {
-  selectedCardId: string;
+export interface DesktopEmbeddedCardEditorSurfaceProps { selectedCardId: string;
   folderId: string | null;
   cardSetId: string | null;
   cardsOverride?: Card[];
@@ -54,6 +55,8 @@ type EmbeddedEditorFaceProps = Readonly<{
   onResizeEnd: () => void;
 }>;
 
+
+
 const isCardEntity = (value: unknown): value is Card =>
   typeof value === "object" &&
   value !== null &&
@@ -68,6 +71,8 @@ const measureSurfaceViewportWidth = (element: HTMLDivElement) =>
       Math.max(element.clientWidth, element.parentElement?.clientWidth ?? 0),
     ),
   );
+
+
 
 const EmbeddedEditorHeaderRight = ({
   mediaActions,
@@ -158,8 +163,7 @@ const EmbeddedEditorFace = ({
     />
   );
 };
-export const DesktopEmbeddedCardEditorSurface = ({ selectedCardId, folderId, cardSetId, cardsOverride, settings = null, displayMode, cardLayoutMode, zoomScale, isInteractive }: DesktopEmbeddedCardEditorSurfaceProps) => {
-  const controller = useCardEditorPaneController({ selectedCardId, folderId: folderId ?? undefined, cardSetId: cardSetId ?? undefined, cardsOverride, autoEdit: true, settingsOverride: settings });
+export const DesktopEmbeddedCardEditorSurface = ({ selectedCardId, folderId, cardSetId, cardsOverride, settings = null, displayMode, cardLayoutMode, zoomScale, isInteractive }: DesktopEmbeddedCardEditorSurfaceProps) => { const controller = useCardEditorPaneController({ selectedCardId, folderId: folderId ?? undefined, cardSetId: cardSetId ?? undefined, cardsOverride, autoEdit: true, settingsOverride: settings });
 
   const { settings: controllerSettings, session, layout, content } = controller;
   const {
