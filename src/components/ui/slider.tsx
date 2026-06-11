@@ -1,5 +1,8 @@
 import * as React from "react";
+
 import { cn } from "@/lib/utils";
+
+
 
 
 
@@ -21,6 +24,8 @@ type SliderProps = Omit<
   rangeClassName?: string;
   thumbClassName?: string;
 };
+
+
 
 
 
@@ -67,6 +72,8 @@ const clampValue = (value: number, min: number, max: number) => {
 
   return Math.min(safeMax, Math.max(safeMin, value));
 };
+
+
 
 
 
@@ -252,6 +259,8 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
     );
   },
 );
+
+
 
 
 

@@ -1,11 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { getDownloadURL, ref as storageRef } from "firebase/storage";
+
 import { getCardImages } from "@/domain/card/content";
+
 import { storage } from "@/services/firebase";
+
 import { getBlobCacheStats, getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
+
 import { getCachedRemoteUrl, getPreloadCacheStats, isUrlDecoded, markUrlDecoded, setCachedRemoteUrl } from "@/services/imagePreloadCache";
+
 import { getLocalDb } from "@/services/localDB";
+
 import type { Card, UploadedImage } from "@/types/domain/card";
+
+
 
 
 
@@ -38,6 +47,8 @@ type CardCatalogEntry = {
 
 
 
+
+
 const CARD_IMAGE_PRELOAD_DEBUG_STORAGE_KEY = "sivflow_preload_debug";
 
 const CARD_IMAGE_PRELOAD = {
@@ -46,6 +57,8 @@ const CARD_IMAGE_PRELOAD = {
   idleExtra: 12,
   maxEagerConcurrent: 5,
 } as const;
+
+
 
 
 
@@ -506,6 +519,8 @@ const useCardImagePreloader = (
 
   return readySet;
 };
+
+
 
 
 

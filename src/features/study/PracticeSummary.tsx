@@ -1,6 +1,10 @@
 import React from "react";
+
 import { Button } from "@/components/ui/button";
+
 import { Card, CardContent } from "@/components/ui/card";
+
+
 
 
 
@@ -23,6 +27,8 @@ type Props = {
   handlePracticeExit: (reason?: string) => void;
   ratingLabels: Record<string, string>;
 };
+
+
 
 
 

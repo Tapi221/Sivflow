@@ -1,8 +1,13 @@
 import { createSignInWithGoogleUseCase } from "@/application/auth/SignInWithGoogle";
+
 import type { GoogleAuthPort } from "@/application/ports/GoogleAuthPort";
+
 import { getRuntimeKind } from "@/platform/runtimeKind";
+
 import { googleAuthDesktopAdapter } from "@platform/auth/google/GoogleAuthDesktopAdapter";
+
 import { googleAuthWebAdapter } from "@platform/auth/google/GoogleAuthWebAdapter";
+
 import { selectGoogleAuthPort } from "@platform/auth/google/selectGoogleAuthPort";
 
 
@@ -13,7 +18,11 @@ import { selectGoogleAuthPort } from "@platform/auth/google/selectGoogleAuthPort
 
 
 
+
+
 let pendingSignInWithGoogle: Promise<void> | null = null;
+
+
 
 
 
@@ -44,6 +53,8 @@ const signInWithGoogle = async (): Promise<void> => {
 
   return pendingSignInWithGoogle;
 };
+
+
 
 
 

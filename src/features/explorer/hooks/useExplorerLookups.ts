@@ -1,8 +1,14 @@
 import { useMemo } from "react";
+
 import { buildCardById, buildDocumentById, buildFolderById } from "@/features/explorer/services/buildExplorerLookups";
+
 import { buildExplorerSelectedState } from "@/features/explorer/services/buildExplorerSelectedState";
+
 import { normalizeFolders } from "@/features/explorer/services/normalizeFolders";
+
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
+
+
 
 
 
@@ -18,6 +24,8 @@ type Params = {
   documents: DocumentItem[];
   selectedItem: SelectedExplorerItem;
 };
+
+
 
 
 

@@ -1,21 +1,40 @@
 import type { CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, RefObject } from "react";
+
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { addDays, format, startOfDay } from "date-fns";
+
 import { ja } from "date-fns/locale";
+
 import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
+
 import { computeMonthEventsByDay, EMPTY_MONTH_DAY_EVENTS } from "@/chip/eventchip/EventChip.month.placement";
+
 import type { CalendarMonthDayEvents } from "@/chip/eventchip/EventChip.month.placement";
+
 import { CalendarDayNumberCircle } from "@/chip/icons/CalendarDayNumberCircle";
+
 import { WEEKDAY_LABELS } from "@/features/calendar/calendar.text";
+
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
+
 import { rotateCalendarWeekdayLabels } from "@/features/calendar/calendarWeekStart";
+
 import type { CalendarEventMoveHandler } from "@/features/calendar/scheduleScreen.types";
+
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+
 import { cn } from "@/lib/utils";
+
 import { CALENDAR_EVENT_DRAGGING_STYLE, areSameCalendarEventTimes, createCalendarEventDragPointerSnapshot, createCalendarEventDragPreview, createCalendarEventKey, getCalendarEventDateOrNull, isCalendarEventDraggable, isSameCalendarEventMove, useCalendarEventDragAutoScroll, useCalendarEventDragBodyStyle } from "./calendarEventDrag.shared";
+
 import type { CalendarEventDragPointerSnapshot } from "./calendarEventDrag.shared";
+
 import * as COLOR from "./grid.color.constants.desktop";
+
 import * as GD from "./grid.layout.constants.desktop";
+
+
 
 
 
@@ -98,10 +117,14 @@ type CalendarMonthWeekRowProps = {
 
 
 
+
+
 const MONTH_GRID_BORDER_STYLE: CSSProperties = { borderColor: COLOR.WEEKDAY_COLOR_BORDER_SUB };
 const DEFAULT_MONTH_TIMED_EVENT_DURATION_MS = 30 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const CALENDAR_EVENT_DRAG_FINE_POINTER_QUERY = "(hover: hover) and (pointer: fine)";
+
+
 
 
 
@@ -235,6 +258,8 @@ const createMonthEventRenderItems = (visibleEvents: GoogleCalendarEvent[], dayKe
 
 
 
+
+
 const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScrollHovered, hasLeadingBorder, dragState, dragPreviewEvent, dragPreviewDayKey, showEventTimeLabel, setDayCellRef, onSelectDate, onEventClick, onEventPointerDown, onMoveCalendarEvent }: CalendarMonthDayCellProps) => {
   const monthAnnotation = getMonthAnnotation(day.date);
   const { visibleEvents, totalCount } = dayEvents;
@@ -304,6 +329,8 @@ const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDay
 });
 
 CalendarMonthWeekRow.displayName = "CalendarMonthWeekRow";
+
+
 
 
 
@@ -485,6 +512,8 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, weekStartDay, visibleEv
     </>
   );
 };
+
+
 
 
 

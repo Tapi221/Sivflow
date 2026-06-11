@@ -1,12 +1,22 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { Outlet, useNavigate } from "react-router-dom";
+
 import { SettingsWorkspaceDialog } from "@/features/settings/SettingsWorkspaceDialog";
+
 import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
+
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
+
 import "@/styles/backpane.css";
+
 import { WorkspaceLayoutRevisionProvider } from "./WorkspaceLayoutRevisionContext";
+
 import { WorkspaceShell } from "./WorkspaceShell";
+
 import "./AppLayout.css";
+
+
 
 
 
@@ -38,6 +48,8 @@ type SidebarLongPressState = {
 
 
 
+
+
 const LEFT_PANEL_COLLAPSED_STORAGE_KEY = "sivflow:layout:left-panel-collapsed";
 const LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY = "flashcard-master:layout:left-panel-collapsed";
 const LEFT_PANEL_COLLAPSED_STORAGE_VALUE = "collapsed";
@@ -48,6 +60,8 @@ const MOBILE_SETTINGS_ROUTE_MEDIA_QUERY = "(max-width: 767px)";
 const SIDEBAR_LONG_PRESS_CONTEXT_MENU_TARGET_SELECTOR = ".app-layered-directory [role='treeitem']";
 const SIDEBAR_LONG_PRESS_DELAY_MS = 520;
 const SIDEBAR_LONG_PRESS_MOVE_TOLERANCE_PX = 10;
+
+
 
 
 
@@ -134,6 +148,8 @@ const useIsMobileSettingsRouteViewport = (): boolean => {
 
   return isMobileSettingsRouteViewport;
 };
+
+
 
 
 
@@ -278,7 +294,11 @@ const AppLayout = () => {
 
 
 
+
+
 export type { AppLayoutOutletContext };
+
+
 
 
 

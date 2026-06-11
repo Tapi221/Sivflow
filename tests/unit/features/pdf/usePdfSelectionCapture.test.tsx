@@ -1,8 +1,12 @@
 // @vitest-environment jsdom
 import { act, cleanup, renderHook } from "@testing-library/react";
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { usePdfSelectionCapture } from "@/features/pdf/hooks/usePdfSelectionCapture";
+
 import { CARD_SELECTION_CAPTURE_EVENT, type CardSelectionCaptureEventDetail } from "@/features/selection-capture/cardSelectionCaptureEvents";
+
 import type { SelectionCaptureArea } from "@/features/selection-capture/selectionCapture.types";
 
 const state = vi.hoisted(() => {

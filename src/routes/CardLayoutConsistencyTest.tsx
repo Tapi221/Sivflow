@@ -1,11 +1,20 @@
 import React from "react";
+
 import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from "@/domain/card/cardGeometry.constants";
+
 import { DragDropContext } from "@hello-pangea/dnd";
+
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
+
 import { CardFrame } from "@/components/card/frame/CardFrame";
+
 import { Flashcard } from "@/components/card/frame/Flashcard";
+
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
+
 import type { CardBlock } from "@/types/domain/card";
+
+
 
 
 
@@ -39,6 +48,8 @@ const FIXTURE_CARD = {
   questionExtraRows: 2,
   answerExtraRows: 2,
 };
+
+
 
 
 
@@ -97,6 +108,8 @@ const CardLayoutConsistencyTest = () => {
     </div>
   );
 };
+
+
 
 
 

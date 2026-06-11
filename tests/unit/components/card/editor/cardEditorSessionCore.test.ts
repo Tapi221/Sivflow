@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest";
+
 import { createPanelCard, draftSignature, extractCreatedCardId, hasMeaningfulDraft } from "@/components/card/editor/cardEditorSessionCore";
 
 describe("cardEditorSessionCore", () => {

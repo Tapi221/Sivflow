@@ -1,8 +1,12 @@
 import type { CSSProperties, ReactNode } from "react";
 
+
 import { cn } from "@/lib/utils";
 
+
 import { NUMERIC_TYPO, UI_TYPO } from "@shared/design-tokens/typography";
+
+
 
 
 
@@ -24,6 +28,8 @@ type MetaPanelLeadSectionProps = {
   children: ReactNode;
   className?: string;
 };
+
+
 
 
 

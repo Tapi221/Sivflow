@@ -1,10 +1,15 @@
 // @vitest-environment jsdom
 
 import React from "react";
+
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { persistScheduleCalendarScrollTop, readStoredScheduleCalendarScrollTop } from "@/features/calendar/scheduleNavigationPersistence";
+
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
+
 import { useCalendarScrollController } from "@/features/scroll/schedule/hooks/useCalendarScrollController";
 
 type TestHarnessProps = {

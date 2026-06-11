@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+
 import { applyExplorerDetailOptimisticOrder, buildExplorerDetailOrderScopeKeyByKind, type ExplorerDetailOptimisticOrderState, getExplorerDetailOptimisticOrderKey, pruneResolvedExplorerDetailOptimisticOrder } from "@/components/folder/components/detail-view/folderDetailOptimisticOrder";
+
 import type { ExplorerDetailRow, ExplorerDetailRowKind } from "@/components/folder/explorer/model/detailRows";
 
 const createRow = (

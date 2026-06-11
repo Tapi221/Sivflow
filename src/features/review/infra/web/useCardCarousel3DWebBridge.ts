@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+
 import { clampCardCarouselIndex } from "@/features/review/domain/cardCarouselIndexRules";
 
 
@@ -9,7 +10,11 @@ import { clampCardCarouselIndex } from "@/features/review/domain/cardCarouselInd
 
 
 
+
+
 type CardCarouselScrollBehavior = ScrollBehavior | "instant";
+
+
 
 
 

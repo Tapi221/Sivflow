@@ -1,14 +1,26 @@
 import { type KeyboardEvent, type MouseEvent, useEffect, useMemo, useRef, useState } from "react";
+
 import { getTagColorKey, type TagColorKey } from "@/chip/tag/tagColor";
+
 import { FilterPanelShell } from "@/components/panel/FilterPanelShell";
+
 import { PanelEmptyState } from "@/components/panel/PanelEmptyState";
+
 import { SegmentedControlGroup, type SegmentedOption } from "@/components/panel/SegmentedControlGroup";
+
 import { TagBadge } from "@/components/tag/TagBadge";
+
 import { SurfaceButton } from "@/components/ui/surface-button";
+
 import { useTags } from "@/features/settings/hooks/useTags";
+
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+
 import { cn } from "@/lib/utils";
+
 import { Tag } from "@/ui/icons";
+
+
 
 
 
@@ -65,6 +77,8 @@ type TagFilterSelectionSwitchProps = {
 
 
 
+
+
 const TAG_MATCH_MODE_OPTIONS = [
   { label: "いずれか (OR)", value: "any" },
   { label: "すべて (AND)", value: "all" },
@@ -83,6 +97,8 @@ const CONTENT_TYPE_OPTIONS = [
   label: string;
   value: ContentTypeFilter;
 }>;
+
+
 
 
 
@@ -223,6 +239,8 @@ const buildVisibleTagTreeItems = (
 
   return flattenTagTreeNodes(visibleNodes, 0);
 };
+
+
 
 
 

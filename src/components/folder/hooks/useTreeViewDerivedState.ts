@@ -1,7 +1,12 @@
 import { useCallback, useMemo } from "react";
+
 import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
+
 import { normalizeDate } from "@/shared/codec/date";
+
 import { type Card, type CardSet, type DocumentItem, type Folder, type SelectedExplorerItem } from "@/types";
+
+
 
 
 
@@ -38,11 +43,15 @@ type FolderStats = {
 
 
 
+
+
 const EMPTY_FOLDER_STATS: FolderStats = {
   dueCount: 0,
   unlearnedCount: 0,
   lastReviewedAt: null,
 };
+
+
 
 
 

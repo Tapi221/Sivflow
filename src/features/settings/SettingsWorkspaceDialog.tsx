@@ -1,6 +1,10 @@
 import { type MouseEvent as ReactMouseEvent } from "react";
+
 import { SettingsWorkspaceScreen } from "./SettingsWorkspaceScreen";
+
 import "./SettingsWorkspaceDialog.css";
+
+
 
 
 
@@ -14,6 +18,8 @@ type SettingsWorkspaceDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
+
+
 
 
 
@@ -39,6 +45,8 @@ const SettingsWorkspaceDialog = ({ open, onOpenChange }: SettingsWorkspaceDialog
     </div>
   );
 };
+
+
 
 
 

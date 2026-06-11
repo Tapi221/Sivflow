@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize.utils";
 
 type MockImageOptions = {

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+
 import { appendSelectionCaptureBlocks, normalizeSelectionCaptureOcrText, type CapturedCardImage } from "@/features/selection-capture/applyCardSelectionCapture";
+
 import type { CardBlock } from "@/types";
 
 const capturedImage: CapturedCardImage = {

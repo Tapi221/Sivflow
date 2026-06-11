@@ -1,10 +1,18 @@
 import { handleQueuedAssetUploadFailure } from "@/infrastructure/offlineQueue/effects/handleQueuedAssetUploadFailure";
+
 import { handleQueuedAssetUploadSuccess } from "@/infrastructure/offlineQueue/effects/handleQueuedAssetUploadSuccess";
+
 import { handleQueuedDocumentUploadFailure } from "@/infrastructure/offlineQueue/effects/handleQueuedDocumentUploadFailure";
+
 import { handleQueuedDocumentUploadSuccess } from "@/infrastructure/offlineQueue/effects/handleQueuedDocumentUploadSuccess";
+
 import { shouldSkipQueuedDocumentUpload } from "@/infrastructure/offlineQueue/effects/shouldSkipQueuedDocumentUpload";
+
 import { isDocumentQueueItem, type QueueItem } from "@/application/usecases/persistentOfflineQueueModels";
+
 import type { UploadedImage } from "@/types";
+
+
 
 
 
@@ -41,6 +49,8 @@ const handleQueuedUploadPermanentFailure = async (
     await handleQueuedAssetUploadFailure(item);
   }
 };
+
+
 
 
 

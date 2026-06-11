@@ -1,9 +1,14 @@
 import type { TElement, TInlineSuggestionData, TSuggestionData, TSuggestionText, } from 'platejs';
 
+
 import { BaseSuggestionPlugin } from '@platejs/suggestion';
+
 import { KEYS, TextApi } from 'platejs';
 
+
 import { SuggestionLeafStatic, VoidRemoveSuggestionOverlayStatic, } from '@/components/ui/suggestion-node-static';
+
+
 
 
 
@@ -19,6 +24,8 @@ const INLINE_SUGGESTION_TARGET_PLUGINS = [
   KEYS.link,
   KEYS.mention,
 ];
+
+
 
 
 
@@ -46,6 +53,8 @@ function getInlineSuggestionData(editor: any, element: TElement) {
     if (childData) return childData;
   }
 }
+
+
 
 
 

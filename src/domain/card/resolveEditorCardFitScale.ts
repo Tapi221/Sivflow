@@ -1,6 +1,10 @@
 import { CANONICAL_CARD_WIDTH } from "./cardGeometry.constants";
+
 import { CARD_PANE_AUTO_MAX_SCALE } from "@/components/card/frame/cardPane.constants";
+
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
+
+
 
 
 
@@ -16,6 +20,8 @@ type ResolveEditorCardFitScaleArgs = Readonly<{
   cardLayoutMode: CardLayoutMode;
   splitGapPx?: number;
 }>;
+
+
 
 
 

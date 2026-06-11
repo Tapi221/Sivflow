@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
+
 import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
+
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+
+
 
 
 
@@ -15,6 +19,8 @@ type UseWorkspaceTabDndArgs = {
   reorderTabs: (nextTabs: WorkspaceTab[]) => void;
   onDragStart?: () => void;
 };
+
+
 
 
 

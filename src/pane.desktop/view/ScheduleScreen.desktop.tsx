@@ -1,40 +1,74 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+
 import { addDays, endOfDay, endOfMonth, format, startOfDay, startOfMonth, subDays } from "date-fns";
+
 import type { PlanResultMode } from "@/chip/toggle/Toggle.planresult";
+
 import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
+
 import { DEFAULT_MONTH_VISIBLE_EVENT_COUNT } from "@/features/calendar/calendar.constants.desktop";
+
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
+
 import { attachCalendarEventDisplayMetadata, filterCalendarEventsBySourceVisibility } from "@/features/calendar/calendarEventVisibility";
+
 import { createCalendarYearEventDisplayResolver } from "@/features/calendar/calendarEventSourcePriority";
+
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
+
 import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
+
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
+
 import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
+
 import { CalendarPrintRangeView } from "@/features/calendar/print/CalendarPrintRangeView.desktop";
+
 import type { CalendarPrintRangeState } from "@/features/calendar/print/calendarPrint.types";
+
 import { createCalendarPrintDateInputValue, getCalendarPrintRange, getCalendarPrintRangeLabel } from "@/features/calendar/print/calendarPrintRange.utils";
+
 import { useCalendarPrintController } from "@/features/calendar/print/useCalendarPrintController";
+
 import { normalizeScheduleMonthVisibleEventCount, persistScheduleMonthVisibleEventCount, readStoredScheduleMonthVisibleEventCount } from "@/features/calendar/scheduleNavigationPersistence";
+
 import type { CalendarAllDayEventOrderMap, CalendarAllDayEventReorderHandler, CalendarViewMode, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
+
 import { CalendarTimetableView } from "@/features/calendar/timetable/CalendarTimetableView";
+
 import { applyCalendarEventMoveOverrides, useCalendarEventMoveController } from "@/features/calendar/useCalendarEventMoveController";
+
 import { useProjectCalendarActions } from "@/features/calendar/useProjectCalendarActions";
+
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
+
 import { createCalendarEventsScopeKey, useTransientEmptyCalendarEvents } from "@/features/calendar/useTransientEmptyCalendarEvents";
+
 import { ScheduleScreenHeaderDesktop } from "@/features/header/ScheduleScreenHeader.desktop";
+
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+
 import { cn } from "@/lib/utils";
+
 import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
+
 import { CalendarSidebar } from "@/pane.desktop/leftpane/schedule/CalendarSidebar";
+
 import { CalendarSelectedViewsSplitView } from "@/pane.desktop/leftpane/schedule/Calendar.SelectedViewsSplitView.desktop";
+
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
+
 import { MobileCalendarEventComposer } from "./MobileCalendarEventComposer";
+
+
 
 
 
 type CalendarEventDisplayRange = { start: Date; end: Date };
 
 type CalendarEventDisplayRangeOptions = { primaryViewMode: CalendarViewMode; currentDate: Date; selectedDate: Date; monthTitleDate: Date; visibleDays: Date[]; monthRenderedRange: CalendarDateRange; yearRenderedRange: CalendarDateRange | null };
+
+
 
 
 
@@ -45,6 +79,8 @@ const DEFAULT_PLAN_RESULT_MODES: readonly PlanResultMode[] = ["plan", "actual"];
 const PLAN_RESULT_TOGGLE_VIEW_MODES = new Set(["threeDays", "days", "pieChart"]);
 const LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS = 45;
 const WEEKDAY_EVENT_BUFFER_DAYS = 1;
+
+
 
 
 
@@ -105,6 +141,8 @@ const createInitialCalendarPrintRange = (date: Date): CalendarPrintRangeState =>
 };
 
 const createInitialMonthVisibleEventCount = (): number => readStoredScheduleMonthVisibleEventCount() ?? DEFAULT_MONTH_VISIBLE_EVENT_COUNT;
+
+
 
 
 
@@ -224,6 +262,8 @@ const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose }: Sch
     </CarvePanelShell>
   );
 };
+
+
 
 
 

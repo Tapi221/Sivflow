@@ -1,8 +1,14 @@
 import React from "react";
+
 import { ScrollBar } from "@/chip/bar/ScrollBar";
+
 import { Minus, Plus } from "@/ui/icons";
+
 import { OverlayToolbarButton } from "./OverlayToolbarButton";
+
 import { cn } from "@/lib/utils";
+
+
 
 
 
@@ -52,7 +58,11 @@ export type OverlayToolbarZoomControlProps = | OverlayToolbarZoomControlWithoutS
 
 
 
+
+
 const DEFAULT_FORMAT_VALUE = (value: number) => `${Math.round(value)}%`;
+
+
 
 
 

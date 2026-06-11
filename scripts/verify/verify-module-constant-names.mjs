@@ -1,5 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+
 import path from "node:path";
+
 import ts from "typescript";
 
 const ROOT_DIR = process.cwd();

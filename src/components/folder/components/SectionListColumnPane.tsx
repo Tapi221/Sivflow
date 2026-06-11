@@ -1,11 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { useLocation, useSearchParams } from "react-router-dom";
+
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
+
 import { CardSetLibraryDashboard } from "@/features/library-cardset/components/CardSetLibraryDashboard";
+
 import { PdfLibraryDashboard } from "@/features/library-pdf/components/PdfLibraryDashboard";
+
 import { SectionListBlankPane } from "./SectionListBlankPane";
+
 import { cn } from "@/lib/utils";
+
 import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
+
+
 
 
 
@@ -96,10 +105,14 @@ type ExternalPathSelectionSnapshot = {
 
 
 
+
+
 const EXPLORER_COLUMN_PATH_CHANGE_EVENT =
   "sivflow:explorer-column-path-change";
 const EXPLORER_COLUMN_PATH_NAVIGATE_EVENT =
   "sivflow:explorer-column-path-navigate";
+
+
 
 
 
@@ -244,6 +257,8 @@ const getSelectedItemKey = (item: SelectedExplorerItem): string => {
   if (!item) return "__none__";
   return "id" in item ? `${item.type}:${item.id}` : item.type;
 };
+
+
 
 
 
@@ -536,6 +551,8 @@ const SectionListColumnPane = ({
     </SectionListBlankPane>
   );
 };
+
+
 
 
 

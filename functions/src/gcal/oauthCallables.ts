@@ -1,9 +1,16 @@
 import crypto from "node:crypto";
+
 import { defineSecret } from "firebase-functions/params";
+
 import { HttpsError, onCall } from "firebase-functions/v2/https";
+
 import { getAdminAuth, getDb, serverTimestamp } from "#src/firebaseAdmin.js";
+
 import { cacheGoogleProfileImageUrl } from "#src/gcal/profileImageCache.js";
+
 import { classifyGoogleTokenEndpointFailure, type GoogleOAuthServerErrorReason } from "#src/gcal/tokenErrors.js";
+
+
 
 
 
@@ -36,6 +43,8 @@ type GoogleOAuthProfile = {
 
 
 
+
+
 const GOOGLE_OAUTH_CLIENT_ID = defineSecret("GOOGLE_OAUTH_CLIENT_ID");
 const GOOGLE_OAUTH_CLIENT_SECRET = defineSecret("GOOGLE_OAUTH_CLIENT_SECRET");
 const GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY = defineSecret("GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY");
@@ -45,6 +54,8 @@ const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const GOOGLE_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
 const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
 const REQUIRED_GOOGLE_SCOPES = ["https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.readonly", "https://www.googleapis.com/auth/calendar.app.created", "https://www.googleapis.com/auth/tasks", "https://www.googleapis.com/auth/drive.file"] as const;
+
+
 
 
 
@@ -213,6 +224,8 @@ const getStoredAccessToken = async (uid: string, accountId: string) => {
 
 
 
+
+
 export const connectGoogleCalendarAccount = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => { const uid = requireUid(request);
   const code = typeof request.data?.code === "string" ? request.data.code : "";
   const codeVerifier = typeof request.data?.codeVerifier === "string" ? request.data.codeVerifier : "";
@@ -258,6 +271,8 @@ export const disconnectGoogleCalendarAccount = onCall({ region: REGION }, async 
 export const createGoogleCalendarCustomToken = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
   return { customToken: await (await getAdminAuth()).createCustomToken(uid) };
 });
+
+
 
 
 

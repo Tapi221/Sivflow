@@ -19,6 +19,8 @@ interface PositionalRuledLayerProps {
 
 
 
+
+
 /**
  * Renders individual ruled lines at specific y positions.
  * Must be inside a `position: relative` container.
@@ -49,6 +51,8 @@ const PositionalRuledLayer = ({
     />
   ));
 };
+
+
 
 
 

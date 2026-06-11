@@ -1,9 +1,16 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
+
 import type { FoldersRouteAdapter } from "@/features/explorer/adapters/web/useFoldersRouteAdapter";
+
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
+
 import { mapExplorerSelectionToSearchParams } from "@/features/explorer/mappers/mapExplorerSelectionToSearchParams";
+
 import { isSameSelectedExplorerItem } from "@/features/explorer/utils/isSameSelectedExplorerItem";
+
 import type { SelectedExplorerItem } from "@/types";
+
+
 
 
 
@@ -21,6 +28,8 @@ type Params = {
   selectedItem: SelectedExplorerItem;
   applyRouteState: (next: ExplorerRouteState) => void;
 };
+
+
 
 
 

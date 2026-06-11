@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { CARD_SELECTION_CAPTURE_EVENT, dispatchCardSelectionCaptureEvent } from "@/features/selection-capture/cardSelectionCaptureEvents";
 
 const createBlob = () => new Blob(["capture"], { type: "image/png" });

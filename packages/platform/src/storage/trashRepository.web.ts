@@ -1,10 +1,18 @@
 import type { TrashRepository } from "@core/usecases/trash";
+
 import type { DeleteEntity } from "@/application/usecases/syncQueuePayloadGuards";
+
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
+
 import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
+
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
+
 import { getLocalDb } from "@/services/localdb";
+
 import type { Card, CardSet, Document, Folder } from "@/types";
+
+
 
 
 
@@ -29,12 +37,16 @@ type TrashTable = "folders" | "cards" | "cardSets" | "documents";
 
 
 
+
+
 const DELETE_ENTITY_BY_TABLE: Record<TrashTable, DeleteEntity> = {
   folders: "folder",
   cards: "card",
   cardSets: "cardSet",
   documents: "document",
 };
+
+
 
 
 

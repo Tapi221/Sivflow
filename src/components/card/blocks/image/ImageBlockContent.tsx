@@ -1,7 +1,12 @@
 import { ImageGallery } from "@/components/card/media/CardMedia";
+
 import MediaUploader from "@/components/card/media/MediaUploader";
+
 import type { ImageGalleryItem } from "@/components/card/media/types";
+
 import type { UploadedImage } from "@/types/domain/assets";
+
+
 
 
 
@@ -31,6 +36,8 @@ type ImageBlockContentProps =
     displayMode?: "fixed" | "fluid";
     zoom?: number;
   };
+
+
 
 
 

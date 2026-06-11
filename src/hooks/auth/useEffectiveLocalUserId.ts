@@ -8,7 +8,11 @@ import { useAuthSession } from "@/contexts/auth/useAuthSession";
 
 
 
+
+
 const ANONYMOUS_USER_ID = "anonymous";
+
+
 
 
 

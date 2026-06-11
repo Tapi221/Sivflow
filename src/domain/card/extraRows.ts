@@ -14,6 +14,8 @@ export const MAX_LAYOUT_ROWS = LEGACY_BASE_LAYOUT_ROWS + MAX_EXTRA_ROWS;
 
 
 
+
+
 export const normalizeExtraRows = (value: unknown) => { const parsed = Number(value);
   if (!Number.isFinite(parsed)) return 0;
   return Math.max(0, Math.round(parsed));

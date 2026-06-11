@@ -1,5 +1,8 @@
 import { onRequest } from "firebase-functions/v2/https";
+
 import { getDb, serverTimestamp } from "#src/firebaseAdmin.js";
+
+
 
 
 
@@ -29,8 +32,12 @@ type StoredGoogleCalendarWatchChannel = {
 
 
 
+
+
 const REGION = "asia-northeast1";
 const INITIAL_SYNC_RESOURCE_STATE = "sync";
+
+
 
 
 
@@ -78,6 +85,8 @@ const isMatchingWatchChannel = (
     data.calendarId === expected.calendarId
   );
 };
+
+
 
 
 

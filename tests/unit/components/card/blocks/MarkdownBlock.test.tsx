@@ -1,8 +1,12 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+
 import userEvent from "@testing-library/user-event";
+
 import React from "react";
+
 import { afterEach, describe, expect, it, vi } from "vitest";
+
 import { MarkdownBlock } from "@/components/card/blocks/MarkdownBlock";
 
 afterEach(() => {

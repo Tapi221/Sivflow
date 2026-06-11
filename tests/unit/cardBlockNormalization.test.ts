@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 
 describe("normalizeCard block typing", () => {
