@@ -10,14 +10,6 @@ import type { DocumentItem } from "@/types";
 import { getOrCreateDeviceId } from "@/utils/device";
 import { useToast } from "@web-renderer/contexts/ToastContext";
 
-
-
-
-
-
-
-
-
 interface UseFolderDocumentUploadParams {
   actionFolderId: string | null;
   getNextOrderIndex: (folderId: string | null) => number;
@@ -26,38 +18,23 @@ interface UseFolderDocumentUploadParams {
 
 type LegacyEntityFields = { blobUrl?: string | null };
 
-
-
-
-
-
-
-
-
-const withLegacyFields = <T extends object>(value: T): T & LegacyEntityFields =>
-  value as T & LegacyEntityFields;
+const withLegacyFields = <T extends object>(value: T): T & LegacyEntityFields => value as T & LegacyEntityFields;
 
 const getErrorMessage = (error: unknown, fallback: string): string => {
   if (error instanceof Error && error.message) return error.message;
-  if (
-    typeof error === "object" &&
-    error !== null &&
-    "message" in error &&
-    typeof (error as { message?: unknown }).message === "string"
-  ) {
+  if (typeof error === "object" && error !== null && "message" in error && typeof (error as { message?: unknown }).message === "string") {
     return (error as { message: string }).message;
   }
   return fallback;
 };
 
-export const useFolderDocumentUpload = ({ actionFolderId, getNextOrderIndex, setExpandedFolders, }: UseFolderDocumentUploadParams) => { const { currentUser } = useAuthSession();
+export const useFolderDocumentUpload = ({ actionFolderId, getNextOrderIndex, setExpandedFolders }: UseFolderDocumentUploadParams) => {
+  const { currentUser } = useAuthSession();
   const { error: toastError, success: toastSuccess } = useToast();
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const uploadTargetFolderIdRef = useRef<string | null>(null);
-  const [currentFileAccept, setCurrentFileAccept] = React.useState(
-    ".pdf,application/pdf",
-  );
+  const [currentFileAccept, setCurrentFileAccept] = React.useState(".pdf,application/pdf");
 
   const handlePdfDropped = useCallback(
     async (folderId: string, files: File[]) => {
@@ -84,12 +61,7 @@ export const useFolderDocumentUpload = ({ actionFolderId, getNextOrderIndex, set
       } catch (error) {
         driveAuthFailed = true;
         console.error("[useFolderDocumentUpload] Google Drive auth failed", error);
-        toastError?.(
-          getErrorMessage(
-            error,
-            "Google Driveの認可に失敗しました。PDFはローカルに保存されます。",
-          ),
-        );
+        toastError?.(getErrorMessage(error, "Google Driveの認可に失敗しました。PDFはローカルに保存されます。"));
       }
 
       for (const file of pdfFiles) {
@@ -125,54 +97,24 @@ export const useFolderDocumentUpload = ({ actionFolderId, getNextOrderIndex, set
         };
 
         try {
-          await saveDocumentWithBlob({
-            db,
-            document: baseDoc,
-            blob: file,
-          });
+          await saveDocumentWithBlob({ db, document: baseDoc, blob: file });
           nextOrderIndex += 1;
         } catch (localErr: unknown) {
-          console.error(
-            "[useFolderDocumentUpload] Failed to persist PDF locally",
-            {
-              error: localErr,
-              docId,
-              fileName: file.name,
-            },
-          );
-          toastError?.(
-            getErrorMessage(localErr, "PDFのローカル保存に失敗しました"),
-          );
+          console.error("[useFolderDocumentUpload] Failed to persist PDF locally", { error: localErr, docId, fileName: file.name });
+          toastError?.(getErrorMessage(localErr, "PDFのローカル保存に失敗しました"));
           continue;
         }
 
         if (!driveAccessToken) {
           const latestDoc = await db.documents.get(docId);
-          console.info(
-            "[useFolderDocumentUpload] PDF kept local because Google Drive token is unavailable",
-            {
-              docId,
-              localFileId: latestDoc?.localFileId ?? null,
-              blobUrl:
-                withLegacyFields(latestDoc ?? {}).blobUrl ??
-                latestDoc?.localUrl ??
-                null,
-            },
-          );
+          console.info("[useFolderDocumentUpload] PDF kept local because Google Drive token is unavailable", { docId, localFileId: latestDoc?.localFileId ?? null, blobUrl: withLegacyFields(latestDoc ?? {}).blobUrl ?? latestDoc?.localUrl ?? null });
           continue;
         }
 
         try {
-          await db.updateItem("documents", docId, {
-            uploadStatus: "uploading",
-            updatedAt: new Date(),
-          });
+          await db.documents.update(docId, { uploadStatus: "uploading", updatedAt: new Date() });
 
-          const result = await uploadPdfToGoogleDrive({
-            accessToken: driveAccessToken,
-            fileName: file.name,
-            pdf: file,
-          });
+          const result = await uploadPdfToGoogleDrive({ accessToken: driveAccessToken, fileName: file.name, pdf: file });
 
           await db.updateItem("documents", docId, {
             downloadUrl: result.webContentLink ?? result.webViewLink,
@@ -188,27 +130,11 @@ export const useFolderDocumentUpload = ({ actionFolderId, getNextOrderIndex, set
         } catch (err: unknown) {
           console.error("[useFolderDocumentUpload] Google Drive PDF upload failed", err);
           try {
-            await db.updateItem("documents", docId, {
-              uploadStatus: "failed",
-              updatedAt: new Date(),
-            });
+            await db.documents.update(docId, { uploadStatus: "failed", updatedAt: new Date() });
             const failedDoc = await db.documents.get(docId);
-            console.error(
-              "[useFolderDocumentUpload] Drive upload failed but local source kept",
-              {
-                docId,
-                localFileId: failedDoc?.localFileId ?? null,
-                blobUrl:
-                  withLegacyFields(failedDoc ?? {}).blobUrl ??
-                  failedDoc?.localUrl ??
-                  null,
-              },
-            );
+            console.error("[useFolderDocumentUpload] Drive upload failed but local source kept", { docId, localFileId: failedDoc?.localFileId ?? null, blobUrl: withLegacyFields(failedDoc ?? {}).blobUrl ?? failedDoc?.localUrl ?? null });
           } catch (markErr) {
-            console.error(
-              "[useFolderDocumentUpload] Failed to mark Drive upload failure",
-              markErr,
-            );
+            console.error("[useFolderDocumentUpload] Failed to mark Drive upload failure", markErr);
           }
           toastError?.(getErrorMessage(err, "Google DriveへのPDF保存に失敗しました"));
         }
@@ -216,13 +142,7 @@ export const useFolderDocumentUpload = ({ actionFolderId, getNextOrderIndex, set
 
       setExpandedFolders((prev) => new Set(prev).add(folderId));
     },
-    [
-      currentUser,
-      getNextOrderIndex,
-      toastError,
-      toastSuccess,
-      setExpandedFolders,
-    ],
+    [currentUser, getNextOrderIndex, toastError, toastSuccess, setExpandedFolders],
   );
 
   const handleToolbarAddDocument = useCallback(() => {
