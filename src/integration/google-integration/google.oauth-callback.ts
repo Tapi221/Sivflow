@@ -1,8 +1,7 @@
 import appIconSrc from "@shared/assets/icons/app-icon.svg";
 import { readStoredLocale, type Locale } from "@shared/i18n/locale.store";
 
-export type GoogleOAuthCallbackPayload = {
-  type: "sivflow:google-oauth-callback";
+export type GoogleOAuthCallbackPayload = { type: "sivflow:google-oauth-callback";
   url: string;
   state: string | null;
   code: string | null;
@@ -200,8 +199,7 @@ const notifyCallbackPayload = (payload: GoogleOAuthCallbackPayload): void => {
   closeCallbackWindow();
 };
 
-export const createGoogleOAuthCallbackPayload = (url: URL): GoogleOAuthCallbackPayload | null => {
-  if (!hasGoogleOAuthCallbackResult(url)) return null;
+export const createGoogleOAuthCallbackPayload = (url: URL): GoogleOAuthCallbackPayload | null => { if (!hasGoogleOAuthCallbackResult(url)) return null;
   return {
     type: GOOGLE_OAUTH_CALLBACK_CHANNEL,
     url: url.href,
@@ -212,13 +210,11 @@ export const createGoogleOAuthCallbackPayload = (url: URL): GoogleOAuthCallbackP
   };
 };
 
-export const isGoogleOAuthCallbackPayload = (value: unknown): value is GoogleOAuthCallbackPayload => {
-  if (!isRecord(value)) return false;
+export const isGoogleOAuthCallbackPayload = (value: unknown): value is GoogleOAuthCallbackPayload => { if (!isRecord(value)) return false;
   return value.type === GOOGLE_OAUTH_CALLBACK_CHANNEL && typeof value.url === "string" && isNullableString(value.state) && isNullableString(value.code) && isNullableString(value.error) && isNullableString(value.errorDescription);
 };
 
-export const renderGoogleOAuthCallback = (): boolean => {
-  if (typeof window === "undefined") return false;
+export const renderGoogleOAuthCallback = (): boolean => { if (typeof window === "undefined") return false;
   const payload = createGoogleOAuthCallbackPayload(new URL(window.location.href));
   if (!payload) return false;
   const text = getOAuthCallbackText();

@@ -21,11 +21,7 @@ const getLegacyExtraRowsKeys = (side: CardFaceSide) => {
     : (["answerExtraRows", "answer_extra_rows"] as const);
 };
 
-export const resolveBlocksFromCardData = (
-  value: CardLike,
-  side: CardFaceSide,
-) => {
-  const aliasKey = side === "question" ? "frontBlocks" : "backBlocks";
+export const resolveBlocksFromCardData = ( value: CardLike, side: CardFaceSide, ) => { const aliasKey = side === "question" ? "frontBlocks" : "backBlocks";
   const legacyKey = getLegacyBlocksKey(side);
   const faceKey = side === "question" ? "front" : "back";
   const face = value[faceKey];
@@ -46,12 +42,7 @@ export const resolveBlocksFromCardData = (
   return [];
 };
 
-export const resolveInkFromCardData = (
-  value: CardLike,
-  side: CardFaceSide,
-  options?: ResolveCardShapeOptions,
-): InkDocument | null => {
-  const faceKey = side === "question" ? "front" : "back";
+export const resolveInkFromCardData = ( value: CardLike, side: CardFaceSide, options?: ResolveCardShapeOptions, ): InkDocument | null => { const faceKey = side === "question" ? "front" : "back";
   const legacyKey = getLegacyInkKey(side);
   const face = value[faceKey];
   const faceInk =
@@ -67,11 +58,7 @@ export const resolveInkFromCardData = (
   return document;
 };
 
-export const resolveExtraRowsFromCardData = (
-  value: CardLike,
-  side: CardFaceSide,
-) => {
-  const faceKey = side === "question" ? "front" : "back";
+export const resolveExtraRowsFromCardData = ( value: CardLike, side: CardFaceSide, ) => { const faceKey = side === "question" ? "front" : "back";
   const [legacyKey, snakeKey] = getLegacyExtraRowsKeys(side);
   const face = value[faceKey];
   const faceExtraRows =
@@ -84,6 +71,5 @@ export const resolveExtraRowsFromCardData = (
   );
 };
 
-export const normalizeCardFolderId = (value: unknown): string => {
-  return typeof value === "string" ? value.trim() : "";
+export const normalizeCardFolderId = (value: unknown): string => { return typeof value === "string" ? value.trim() : "";
 };

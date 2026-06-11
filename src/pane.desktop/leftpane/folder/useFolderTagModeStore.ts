@@ -7,7 +7,4 @@ type FolderTagModeState = {
   setFolderTagMode: (mode: FolderTagMode) => void;
 };
 
-export const useFolderTagModeStore = create<FolderTagModeState>((set) => ({
-  folderTagMode: "folder",
-  setFolderTagMode: (folderTagMode) => set({ folderTagMode }),
-}));
+export const useFolderTagModeStore = create<FolderTagModeState>((set) => ({ folderTagMode: "folder", setFolderTagMode: (folderTagMode) => set({ folderTagMode }), }));

@@ -1,13 +1,11 @@
-export type GoogleTaskListItem = {
-  id: string;
+export type GoogleTaskListItem = { id: string;
   title: string;
   updated?: string;
 };
 
 export type GoogleTaskStatus = "needsAction" | "completed";
 
-export type GoogleTaskItem = {
-  id: string;
+export type GoogleTaskItem = { id: string;
   taskListId: string;
   title: string;
   notes?: string;
@@ -19,18 +17,14 @@ export type GoogleTaskItem = {
   position?: string;
 };
 
-export type GoogleTasksApiTaskListsResponse = {
-  items?: Array<{
-    id?: string;
+export type GoogleTasksApiTaskListsResponse = { items?: Array<{ id?: string;
     title?: string;
     updated?: string;
   }>;
   nextPageToken?: string;
 };
 
-export type GoogleTasksApiTasksResponse = {
-  items?: Array<{
-    id?: string;
+export type GoogleTasksApiTasksResponse = { items?: Array<{ id?: string;
     title?: string;
     notes?: string;
     status?: GoogleTaskStatus;

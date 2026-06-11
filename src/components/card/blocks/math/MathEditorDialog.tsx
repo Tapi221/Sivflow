@@ -23,18 +23,7 @@ interface MathEditorDialogProps {
   error?: string | null;
 }
 
-export const MathEditorDialog: React.FC<MathEditorDialogProps> = ({
-  open,
-  onOpenChange,
-  data,
-  onChange,
-  accentColor,
-  error,
-}) => {
-  const ringColor =
-    accentColor && isHexColor(accentColor)
-      ? `${accentColor}40`
-      : "var(--primary-color-alpha-40)";
+export const MathEditorDialog: React.FC<MathEditorDialogProps> = ({ open, onOpenChange, data, onChange, accentColor, error, }) => { const ringColor = accentColor && isHexColor(accentColor) ? `${accentColor}40` : "var(--primary-color-alpha-40)";
 
   const latex = data?.latex ?? "";
 

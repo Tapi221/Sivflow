@@ -10,9 +10,7 @@ const getDesktopWindowApi = () => {
   return getDesktopBridge().window;
 };
 
-export const windowControls: WindowControlsPort = {
-  minimize: async () => {
-    const api = getDesktopWindowApi();
+export const windowControls: WindowControlsPort = { minimize: async () => { const api = getDesktopWindowApi();
     if (!api) return;
     await api.minimize();
   },

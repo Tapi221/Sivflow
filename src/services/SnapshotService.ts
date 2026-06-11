@@ -30,11 +30,7 @@ const snapshotStoreUseCase = createSnapshotStoreUseCase({
   repository: snapshotFirestoreRepository,
 });
 
-export const snapshotService = {
-  createSnapshot: async (
-    userId: string,
-    options: {
-      bumpGenerationCounter?: boolean;
+export const snapshotService = { createSnapshot: async ( userId: string, options: { bumpGenerationCounter?: boolean;
     } = {},
   ) => {
     return await createSnapshotUseCase.execute(userId, options);

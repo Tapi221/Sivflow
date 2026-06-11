@@ -12,8 +12,7 @@ type FlashcardFaceLike = {
   ink?: InkDocument | null;
 } | null;
 
-export type FlashcardCardLike = {
-  id?: string;
+export type FlashcardCardLike = { id?: string;
   cardId?: string;
   has_uncertainty?: boolean;
   hasUncertainty?: boolean;
@@ -50,8 +49,7 @@ export type FlashcardCardLike = {
   [key: string]: unknown;
 };
 
-export type FlashcardSideDerivedSnapshot = {
-  activeSide: "question" | "answer";
+export type FlashcardSideDerivedSnapshot = { activeSide: "question" | "answer";
   activeImageItems: FlashcardMediaLike[];
   activeImages: string[];
   activeAudioUrls: string[];
@@ -60,15 +58,13 @@ export type FlashcardSideDerivedSnapshot = {
   activeInkDocument: InkDocument;
 };
 
-export type FlashcardSharedDerivedSnapshot = {
-  cardId: string | null;
+export type FlashcardSharedDerivedSnapshot = { cardId: string | null;
   hasUncertainty: boolean;
   isBookmarked: boolean;
   layoutRows: number;
 };
 
-export type FlashcardDualDerivedSnapshot = FlashcardSharedDerivedSnapshot & {
-  question: FlashcardSideDerivedSnapshot;
+export type FlashcardDualDerivedSnapshot = FlashcardSharedDerivedSnapshot & { question: FlashcardSideDerivedSnapshot;
   answer: FlashcardSideDerivedSnapshot;
 };
 

@@ -4,15 +4,13 @@ export type HandwritingSessionStatus = "idle" | "waiting" | "connected" | "close
 
 export type HandwritingDeviceRole = "desktop" | "mobile";
 
-export type HandwritingDeviceInfo = {
-  id: string;
+export type HandwritingDeviceInfo = { id: string;
   role: HandwritingDeviceRole;
   name: string;
   platform: string;
 };
 
-export type HandwritingSession = {
-  id: string;
+export type HandwritingSession = { id: string;
   userId: string;
   cardId: string;
   side: InkSide;
@@ -23,16 +21,14 @@ export type HandwritingSession = {
   updatedAt: number;
 };
 
-export type HandwritingStrokeDeltaMessage = {
-  type: "handwriting:stroke-delta";
+export type HandwritingStrokeDeltaMessage = { type: "handwriting:stroke-delta";
   sessionId: string;
   cardId: string;
   side: InkSide;
   stroke: InkStroke;
 };
 
-export type HandwritingSessionControlMessage = {
-  type: "handwriting:session-control";
+export type HandwritingSessionControlMessage = { type: "handwriting:session-control";
   sessionId: string;
   status: HandwritingSessionStatus;
   reason?: string;

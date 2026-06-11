@@ -119,8 +119,7 @@ const readCardDraft = (cardId: string) => {
   }
 };
 
-export const useCardEntity = (cardId?: string | null) => {
-  const { currentUser } = useAuthSession();
+export const useCardEntity = (cardId?: string | null) => { const { currentUser } = useAuthSession();
   const { updateCard } = useCards(undefined, undefined, { enabled: false });
 
   const serverCard = useLiveQuery(

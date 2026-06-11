@@ -13,13 +13,7 @@ const hoverCircleTooltipClassName = cn(
   "group-hover/action:opacity-100 group-focus-visible/action:opacity-100",
 );
 
-export const HoverCircleTooltip = ({
-  label,
-  children,
-  className,
-  disabled = false,
-}: HoverCircleTooltipProps) => {
-  const tooltipLabel = label?.trim();
+export const HoverCircleTooltip = ({ label, children, className, disabled = false, }: HoverCircleTooltipProps) => { const tooltipLabel = label?.trim();
   const content = children ?? tooltipLabel;
 
   if (disabled || content == null || content === "") return null;

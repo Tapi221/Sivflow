@@ -52,8 +52,7 @@ const prune = (map: PresenceMap, now: number) => {
   }
 };
 
-export const startTabPresence = () => {
-  if (typeof window === "undefined") return;
+export const startTabPresence = () => { if (typeof window === "undefined") return;
 
   const startedHost = window as typeof window & {
     [TAB_PRESENCE_STORAGE_KEYS.started]?: boolean;

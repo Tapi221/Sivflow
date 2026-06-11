@@ -148,8 +148,7 @@ const restoreBlockMedia = (input: {
   }
 };
 
-export const restoreMfDeckMediaInBlocks = (input: {
-  blocks: CardBlock[];
+export const restoreMfDeckMediaInBlocks = (input: { blocks: CardBlock[];
   media?: Record<string, Uint8Array>;
   mediaManifest?: MfDeckMediaManifestV1;
   issues: MfDeckIssue[];

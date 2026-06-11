@@ -5,14 +5,4 @@ import { type SlateEditor, KEYS } from 'platejs';
 
 import { SlashInputElement } from '@/components/slash-node';
 
-export const SlashKit = [
-  SlashPlugin.configure({
-    options: {
-      triggerQuery: (editor: SlateEditor) =>
-        !editor.api.some({
-          match: { type: editor.getType(KEYS.codeBlock) },
-        }),
-    },
-  }),
-  SlashInputPlugin.withComponent(SlashInputElement),
-];
+export const SlashKit = [ SlashPlugin.configure({ options: { triggerQuery: (editor: SlateEditor) => !editor.api.some({ match: { type: editor.getType(KEYS.codeBlock) }, }), }, }), SlashInputPlugin.withComponent(SlashInputElement), ];

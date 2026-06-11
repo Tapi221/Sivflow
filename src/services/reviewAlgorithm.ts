@@ -6,9 +6,7 @@ import { normalizeDate as toDate } from "@/shared/codec/date";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import { toMillis } from "@/utils/toMillis";
 
-export type ReviewAlgorithmInput = {
-  card: {
-    memoryStability?: number | null;
+export type ReviewAlgorithmInput = { card: { memoryStability?: number | null;
     currentLevel?: number | null;
     level?: number | null;
     nextReviewDate?: Date | Timestamp | null;
@@ -22,8 +20,7 @@ export type ReviewAlgorithmInput = {
   now?: Date;
 };
 
-export type ReviewAlgorithmResult = {
-  memoryStability: number;
+export type ReviewAlgorithmResult = { memoryStability: number;
   nextReviewDate: Date;
   lastReviewAt: Date;
   lastSubjectiveScore: SubjectiveScore;
@@ -36,8 +33,7 @@ export type ReviewAlgorithmResult = {
 
 export type MultipleChoiceConfidence = "high" | "mid" | "luck";
 
-export type MultipleChoiceReviewMeta = {
-  isCorrect: boolean;
+export type MultipleChoiceReviewMeta = { isCorrect: boolean;
   isUnknown?: boolean;
   confidence?: MultipleChoiceConfidence;
   choiceTimeMs?: number;
@@ -433,13 +429,7 @@ const buildCardStateBeforeLatestReview = ({
   };
 };
 
-export const computeNextReview = ({
-  card,
-  subjectiveScore,
-  now = new Date(),
-  delayBonusEnabled = false,
-}: ReviewAlgorithmInput & {
-  delayBonusEnabled?: boolean;
+export const computeNextReview = ({ card, subjectiveScore, now = new Date(), delayBonusEnabled = false, }: ReviewAlgorithmInput & { delayBonusEnabled?: boolean;
 }): ReviewAlgorithmResult => {
   const record = isRecord(card) ? card : {};
 
@@ -504,19 +494,10 @@ export const computeNextReview = ({
   };
 };
 
-export const ratingToSubjectiveScore = (
-  rating: ReviewLog["rating"],
-): SubjectiveScore => {
-  return Math.max(0, Math.min(3, rating - 1)) as SubjectiveScore;
+export const ratingToSubjectiveScore = ( rating: ReviewLog["rating"], ): SubjectiveScore => { return Math.max(0, Math.min(3, rating - 1)) as SubjectiveScore;
 };
 
-export const createReviewLogEntry = ({
-  reviewedAt,
-  rating,
-  intervalDays,
-  durationMinutes = null,
-}: {
-  reviewedAt: Date;
+export const createReviewLogEntry = ({ reviewedAt, rating, intervalDays, durationMinutes = null, }: { reviewedAt: Date;
   rating: ReviewLog["rating"];
   intervalDays: number;
   durationMinutes?: number | null;
@@ -532,15 +513,7 @@ export const createReviewLogEntry = ({
   };
 };
 
-export const createReviewPatchFromRating = ({
-  card,
-  rating,
-  now = new Date(),
-  delayBonusEnabled = false,
-  durationMinutes = null,
-}: {
-  card: ReviewAlgorithmInput["card"] & {
-    reviewLogs?: ReviewLog[] | null;
+export const createReviewPatchFromRating = ({ card, rating, now = new Date(), delayBonusEnabled = false, durationMinutes = null, }: { card: ReviewAlgorithmInput["card"] & { reviewLogs?: ReviewLog[] | null;
   };
   rating: ReviewLog["rating"];
   now?: Date;
@@ -573,12 +546,7 @@ export const createReviewPatchFromRating = ({
   };
 };
 
-export const createLatestReviewLogPatch = (
-  params: LatestReviewLogPatchParams,
-) => {
-  const reviewLogs = [...(params.reviewLogs ?? [])].sort(
-    (left, right) => toMillis(left.reviewedAt) - toMillis(right.reviewedAt),
-  );
+export const createLatestReviewLogPatch = ( params: LatestReviewLogPatchParams, ) => { const reviewLogs = [...(params.reviewLogs ?? [])].sort( (left, right) => toMillis(left.reviewedAt) - toMillis(right.reviewedAt), );
 
   if (reviewLogs.length === 0) {
     throw new Error("最新の学習記録がありません");

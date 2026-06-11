@@ -4,11 +4,8 @@ import type { Folder } from "@/types";
 
 type StorageLike = Record<string, unknown>;
 
-export const denormalizeFolderForStorage = (
-  value: Partial<Folder> | StorageLike,
-): StorageLike => cloneStorageRecord(value);
+export const denormalizeFolderForStorage = ( value: Partial<Folder> | StorageLike, ): StorageLike => cloneStorageRecord(value);
 
-export const normalizeFolderFromStorage = (value: unknown): Folder =>
-  normalizeFolder(value);
+export const normalizeFolderFromStorage = (value: unknown): Folder => normalizeFolder(value);
 
 export { normalizeFolderWithSilent };

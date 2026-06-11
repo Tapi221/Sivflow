@@ -11,8 +11,7 @@ const getDevicesMetadataPath = (userId: string) => {
   return `sync_metadata/${userId}/devices`;
 };
 
-export class CloudSyncAdapter implements ICloudSyncAdapter {
-  private readonly userId: string;
+export class CloudSyncAdapter implements ICloudSyncAdapter { private readonly userId: string;
 
   constructor(userId: string) {
     this.userId = userId;

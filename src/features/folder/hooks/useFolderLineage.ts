@@ -13,8 +13,7 @@ const normalizeFolderId = (value: string | null | undefined) => {
   return trimmed.length > 0 ? trimmed : null;
 };
 
-export const useFolderLineage = (folderId: string | null) => {
-  const { currentUser } = useAuthSession();
+export const useFolderLineage = (folderId: string | null) => { const { currentUser } = useAuthSession();
   const currentUserId = currentUser?.uid ?? null;
 
   const folders = useLiveQuery(

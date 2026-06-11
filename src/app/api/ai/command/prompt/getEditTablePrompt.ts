@@ -6,10 +6,7 @@ import dedent from 'dedent';
 
 import { buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction } from '@/app/api/ai/command/utils';
 
-export function buildEditTableMultiCellPrompt(editor: SlateEditor, messages: ChatMessage[]): string {
-  const tableCellMarkdown = getMarkdown(editor, {
-    type: 'tableCellWithId',
-  });
+export function buildEditTableMultiCellPrompt(editor: SlateEditor, messages: ChatMessage[]): string { const tableCellMarkdown = getMarkdown(editor, { type: 'tableCellWithId', });
 
   return buildStructuredPrompt({
     context: tableCellMarkdown,

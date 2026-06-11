@@ -6,8 +6,7 @@ import type { CodeBlockData } from "@/types/core/code-block";
 
 export type { UploadedImage };
 
-export type CardBlock = {
-  id: string;
+export type CardBlock = { id: string;
   type:
     | "text"
     | "question"
@@ -35,27 +34,23 @@ export type CardBlock = {
   markdown?: string;
 };
 
-export type CardFaceAttachmentAudio = {
-  url: string;
+export type CardFaceAttachmentAudio = { url: string;
   filename: string;
   order: number;
 };
 
-export type CardFaceAttachments = {
-  images?: UploadedImage[];
+export type CardFaceAttachments = { images?: UploadedImage[];
   audios?: CardFaceAttachmentAudio[];
   references?: ReferenceBlockData[];
 };
 
-export type CardFace = {
-  blocks: CardBlock[];
+export type CardFace = { blocks: CardBlock[];
   ink?: InkDocument | null;
   extraRows?: number;
   attachments?: CardFaceAttachments;
 };
 
-export type Card = BaseEntity & {
-  cardSetId: string;
+export type Card = BaseEntity & { cardSetId: string;
   folderId?: string;
   orderIndex: number;
   questionNumber: string;
@@ -92,10 +87,6 @@ export type Card = BaseEntity & {
   _rescueRaw?: unknown;
 };
 
-export type CardPatch = Omit<
-  Partial<Card>,
-  "front" | "back" | "cardSetId" | "folderId"
-> & {
-  front?: Partial<CardFace>;
+export type CardPatch = Omit< Partial<Card>, "front" | "back" | "cardSetId" | "folderId" > & { front?: Partial<CardFace>;
   back?: Partial<CardFace>;
 };

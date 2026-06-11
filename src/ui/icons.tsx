@@ -3,8 +3,7 @@ import { forwardRef } from "react";
 import { StratisAlertCircleIcon, StratisAlertTriangleIcon, StratisArrowLeftSquareContainedIcon, StratisArrowRefresh01Icon, StratisArrowRightSquareContainedIcon, StratisArrowSwitchHorizontalIcon, StratisAudioSettings01Icon, StratisCalendarNumberIcon, StratisChevronLeftIcon, StratisChevronUpIcon, StratisClock01Icon, StratisClockBackwardIcon, StratisCode01Icon, StratisCopyLeftIcon, StratisEditContainedIcon, StratisFileEdit02Icon, StratisFilterIcon, StratisFolderSearch01Icon, StratisFormulaIcon, StratisGlobe02Icon, StratisHelpCircleContainedIcon, StratisImageIcon, StratisInfoSquare01ContainedIcon, StratisKeyboardIcon, StratisLinkAngledIcon, StratisLinkExternalIcon, StratisLogout01Icon, StratisMarkdownIcon, StratisPlus01Icon, StratisSearch01Icon, StratisStar02Icon, StratisTagIcon, StratisTrash03Icon, StratisType03Icon, StratisWrenchIcon, StratisX01Icon, StratisXCircleContainedIcon } from "@/ui/icons/stratis";
 import { UiIcon } from "./UiIcon";
 
-export type IconProps = SVGProps<SVGSVGElement> & {
-  size?: number;
+export type IconProps = SVGProps<SVGSVGElement> & { size?: number;
   label?: string;
   title?: string;
 };

@@ -91,9 +91,7 @@ const toDateFromTimestampFields = (value: TimestampLike): Date | null => {
   return toDateFromMillis(millis);
 };
 
-export const toDateOrNull = (value: unknown): Date | null => {
-  if (value === null || value === undefined || value === "") {
-    return null;
+export const toDateOrNull = (value: unknown): Date | null => { if (value === null || value === undefined || value === "") { return null;
   }
 
   if (isValidDate(value)) {
@@ -120,16 +118,13 @@ export const toDateOrNull = (value: unknown): Date | null => {
   );
 };
 
-export const toMillisOrNull = (value: unknown): number | null => {
-  const date = toDateOrNull(value);
+export const toMillisOrNull = (value: unknown): number | null => { const date = toDateOrNull(value);
   return date ? date.getTime() : null;
 };
 
-export const toMillis = (value: unknown, fallback = 0): number => {
-  return toMillisOrNull(value) ?? fallback;
+export const toMillis = (value: unknown, fallback = 0): number => { return toMillisOrNull(value) ?? fallback;
 };
 
-export const toIsoStringOrNull = (value: unknown): string | null => {
-  const date = toDateOrNull(value);
+export const toIsoStringOrNull = (value: unknown): string | null => { const date = toDateOrNull(value);
   return date ? date.toISOString() : null;
 };

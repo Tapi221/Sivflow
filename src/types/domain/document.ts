@@ -6,8 +6,7 @@ export type PdfPageLayoutMode = "single" | "double";
 export type PdfSidePanelTab = "bookmarks" | "highlights" | "ocr" | "outline" | "thumbnails";
 export type LegacyDocumentFields = { folder_id?: string | null; file_name?: string | null; order_index?: number; };
 
-export interface PdfViewerState {
-  currentPage?: number;
+export interface PdfViewerState { currentPage?: number;
   scale?: number;
   fitMode?: "width" | "manual";
   pageLayoutMode?: PdfPageLayoutMode;
@@ -19,8 +18,7 @@ export interface PdfViewerState {
   historyForwardPages?: number[];
 }
 
-export interface DocumentItem extends BaseEntity, LegacyDocumentFields {
-  kind: DocumentKind;
+export interface DocumentItem extends BaseEntity, LegacyDocumentFields { kind: DocumentKind;
   folderId: string;
   orderIndex: number;
   title: string;

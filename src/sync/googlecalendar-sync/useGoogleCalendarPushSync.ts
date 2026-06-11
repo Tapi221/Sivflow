@@ -19,12 +19,7 @@ const isPermissionDeniedError = (error: unknown): boolean => {
   );
 };
 
-export const useGoogleCalendarPushSync = ({
-  userId,
-  selectedCalendarIds,
-  onNotification,
-}: UseGoogleCalendarPushSyncOptions): void => {
-  const onNotificationRef = useRef(onNotification);
+export const useGoogleCalendarPushSync = ({ userId, selectedCalendarIds, onNotification, }: UseGoogleCalendarPushSyncOptions): void => { const onNotificationRef = useRef(onNotification);
   const selectedCalendarIdsRef = useRef(selectedCalendarIds);
   const listenerDisabledRef = useRef(false);
   const pendingNotificationTimersRef = useRef(new Map<string, ReturnType<typeof setTimeout>>());

@@ -12,8 +12,7 @@ interface LegacyCardSetViewZoomPreferencesStore {
   byCardSet: Record<string, number>;
 }
 
-export interface CardSetViewZoomPreferenceScope {
-  deviceScope: string;
+export interface CardSetViewZoomPreferenceScope { deviceScope: string;
   cardSetId: string | null | undefined;
   displayMode?: CardDisplayMode;
   interactionMode?: CardSetInteractionMode;
@@ -54,14 +53,7 @@ const buildLegacyZoomPreferenceScopeKey = ({
   ].join("::");
 };
 
-export const buildCardSetViewZoomPreferenceScopeKey = ({
-  deviceScope,
-  cardSetId,
-}: CardSetViewZoomPreferenceScope) => {
-  return [
-    normalizeDeviceScope(deviceScope),
-    cardSetId ?? "__no_card_set__",
-  ].join("::");
+export const buildCardSetViewZoomPreferenceScopeKey = ({ deviceScope, cardSetId, }: CardSetViewZoomPreferenceScope) => { return [ normalizeDeviceScope(deviceScope), cardSetId ?? "__no_card_set__", ].join("::");
 };
 
 const canResolveLegacyScopedKey = (
@@ -226,11 +218,7 @@ const migrateLegacyScopedZoomPreference = ({
   writeStore(store);
 };
 
-export const getCardSetViewZoomPreference = (
-  scope: CardSetViewZoomPreferenceScope,
-) => {
-  if (!scope.cardSetId) {
-    return undefined;
+export const getCardSetViewZoomPreference = ( scope: CardSetViewZoomPreferenceScope, ) => { if (!scope.cardSetId) { return undefined;
   }
 
   const store = readStore();
@@ -255,12 +243,7 @@ export const getCardSetViewZoomPreference = (
   return readLegacyCardSetValue(scope.cardSetId);
 };
 
-export const setCardSetViewZoomPreference = (
-  scope: CardSetViewZoomPreferenceScope,
-  zoomPercent: number,
-) => {
-  if (!scope.cardSetId) {
-    return;
+export const setCardSetViewZoomPreference = ( scope: CardSetViewZoomPreferenceScope, zoomPercent: number, ) => { if (!scope.cardSetId) { return;
   }
 
   const safeZoomPercent =

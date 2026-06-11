@@ -6,20 +6,5 @@ type OverlayToolbarProps = PropsWithChildren<{
   className?: string;
 }>;
 
-export const OverlayToolbar = ({
-  className,
-  children,
-}: OverlayToolbarProps) => {
-  return (
-    <div
-      className={cn(
-        overlayGlassToolbarClassName,
-        "gap-1.5 px-2 py-1",
-        className,
-      )}
-      data-card-zoom-input-ignore="true"
-    >
-      {children}
-    </div>
-  );
+export const OverlayToolbar = ({ className, children, }: OverlayToolbarProps) => { return ( <div className={cn( overlayGlassToolbarClassName, "gap-1.5 px-2 py-1", className, )} data-card-zoom-input-ignore="true" > {children} </div> );
 };

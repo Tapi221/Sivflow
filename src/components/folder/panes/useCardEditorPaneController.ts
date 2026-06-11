@@ -33,17 +33,7 @@ type UseCardEditorPaneControllerParams = {
   settingsOverride?: Partial<UserSettings> | null;
 };
 
-export const useCardEditorPaneController = ({
-  selectedCardId,
-  folderId,
-  cardSetId,
-  cardsOverride,
-  autoEdit,
-  onCardUpdated,
-  onSelectCardId,
-  settingsOverride,
-}: UseCardEditorPaneControllerParams) => {
-  const { settings: settingsFromHook } = useUserSettings();
+export const useCardEditorPaneController = ({ selectedCardId, folderId, cardSetId, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, settingsOverride, }: UseCardEditorPaneControllerParams) => { const { settings: settingsFromHook } = useUserSettings();
   const settings = settingsOverride ?? settingsFromHook;
   const { currentUser } = useAuthSession();
   const { success: toastSuccess, error: toastError } = useToast();

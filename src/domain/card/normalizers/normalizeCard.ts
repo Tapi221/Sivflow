@@ -258,8 +258,7 @@ const normalizeCardBlock = (
   return normalizeBlockOffsets(normalized) as CardBlock;
 };
 
-export const normalizeCard = (raw: unknown): Card => {
-  const record = asRecord(raw) ?? {};
+export const normalizeCard = (raw: unknown): Card => { const record = asRecord(raw) ?? {};
   const id =
     toStringOr(pick(record.id, record.cardId, record.card_id), "") ||
     makeFallbackId();

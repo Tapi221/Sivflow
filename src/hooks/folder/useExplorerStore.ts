@@ -19,8 +19,7 @@ type DirectoryBadgeVisibility = {
   tags: boolean;
 };
 
-export interface ExplorerState {
-  tagFilter: string[];
+export interface ExplorerState { tagFilter: string[];
   tagMatchMode: TagMatchMode;
   uncertaintyFilter: ToggleableFlag;
   bookmarkedFilter: ToggleableFlag;
@@ -142,14 +141,7 @@ const createDefaultState = (): Pick<
   pinnedFolderIds: [],
 });
 
-export const useExplorerStore = create<ExplorerState>()(
-  persist(
-    (set) => ({
-      ...createDefaultState(),
-      setTagFilter: (tags) => set({ tagFilter: tags }),
-      toggleTag: (tag) =>
-        set((state) => {
-          const exists = state.tagFilter.includes(tag);
+export const useExplorerStore = create<ExplorerState>()( persist( (set) => ({ ...createDefaultState(), setTagFilter: (tags) => set({ tagFilter: tags }), toggleTag: (tag) => set((state) => { const exists = state.tagFilter.includes(tag);
           const next = exists
             ? state.tagFilter.filter((currentTag) => currentTag !== tag)
             : [...state.tagFilter, tag];

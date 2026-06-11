@@ -6,9 +6,4 @@ import { BlockContextMenu } from '@/components/block-context-menu';
 
 import { BlockSelectionKit } from './block-selection-kit';
 
-export const BlockMenuKit = [
-  ...BlockSelectionKit,
-  BlockMenuPlugin.configure({
-    render: { aboveEditable: BlockContextMenu },
-  }),
-];
+export const BlockMenuKit = [ ...BlockSelectionKit, BlockMenuPlugin.configure({ render: { aboveEditable: BlockContextMenu }, }), ];

@@ -4,8 +4,7 @@ import { TAG_COLOR_PALETTE } from "@shared/design-tokens/tag.palette";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, type RightClickPanelId } from "./rightClickPanel.utils";
 
-export type LayeredColorMenuOption = {
-  id: TagColorKey;
+export type LayeredColorMenuOption = { id: TagColorKey;
   label: string;
   value: string;
 };

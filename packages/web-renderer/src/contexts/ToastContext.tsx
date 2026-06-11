@@ -2,8 +2,7 @@
 import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useState } from "react";
 
-export interface Toast {
-  id: string;
+export interface Toast { id: string;
   type: "success" | "error" | "warning" | "info";
   message: string;
   duration?: number;
@@ -21,8 +20,7 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-export const ToastProvider = ({ children }: { children: ReactNode }) => {
-  const [toasts, setToasts] = useState<Toast[]>([]);
+export const ToastProvider = ({ children }: { children: ReactNode }) => { const [toasts, setToasts] = useState<Toast[]>([]);
 
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
@@ -83,8 +81,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useToast = () => {
-  const context = useContext(ToastContext);
+export const useToast = () => { const context = useContext(ToastContext);
   if (!context) {
     throw new Error("useToast must be used within a ToastProvider");
   }

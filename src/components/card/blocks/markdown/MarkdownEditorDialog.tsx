@@ -22,20 +22,7 @@ const EDITOR_MAX_HEIGHT = 520;
 
 const isHexColor = (color: string) => /^#[0-9a-fA-F]{3,8}$/.test(color);
 
-export const MarkdownEditorDialog: React.FC<MarkdownEditorDialogProps> = ({
-  open,
-  onOpenChange,
-  value,
-  onChange,
-  onPasteCapture,
-  onKeyDown,
-  accentColor,
-  error,
-}) => {
-  const ringColor =
-    accentColor && isHexColor(accentColor)
-      ? `${accentColor}40`
-      : "var(--primary-color-alpha-40)";
+export const MarkdownEditorDialog: React.FC<MarkdownEditorDialogProps> = ({ open, onOpenChange, value, onChange, onPasteCapture, onKeyDown, accentColor, error, }) => { const ringColor = accentColor && isHexColor(accentColor) ? `${accentColor}40` : "var(--primary-color-alpha-40)";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

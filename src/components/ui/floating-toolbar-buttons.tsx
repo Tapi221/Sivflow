@@ -2,14 +2,7 @@
 
 import * as React from 'react';
 
-import {
-  BoldIcon,
-  Code2Icon,
-  ItalicIcon,
-  StrikethroughIcon,
-  UnderlineIcon,
-  WandSparklesIcon,
-} from 'lucide-react';
+import { BoldIcon, Code2Icon, ItalicIcon, StrikethroughIcon, UnderlineIcon, WandSparklesIcon, } from 'lucide-react';
 import { KEYS } from 'platejs';
 import { useEditorReadOnly } from 'platejs/react';
 
@@ -23,8 +16,7 @@ import { SuggestionToolbarButton } from './suggestion-toolbar-button';
 import { ToolbarGroup } from './toolbar';
 import { TurnIntoToolbarButton } from './turn-into-toolbar-button';
 
-export function FloatingToolbarButtons() {
-  const readOnly = useEditorReadOnly();
+export function FloatingToolbarButtons() { const readOnly = useEditorReadOnly();
 
   return (
     <>

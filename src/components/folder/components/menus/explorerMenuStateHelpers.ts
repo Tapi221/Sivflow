@@ -7,15 +7,7 @@ interface BeginInlineRenameParams {
   beforeStart?: () => void;
 }
 
-export const beginInlineRename = ({
-  id,
-  name,
-  closeMenu,
-  setEditingId,
-  setEditingName,
-  beforeStart,
-}: BeginInlineRenameParams) => {
-  beforeStart?.();
+export const beginInlineRename = ({ id, name, closeMenu, setEditingId, setEditingName, beforeStart, }: BeginInlineRenameParams) => { beforeStart?.();
   closeMenu?.();
   setEditingId(id);
   setEditingName(name);

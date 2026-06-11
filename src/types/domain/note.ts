@@ -4,8 +4,7 @@ export type NoteEditor = "plate";
 export type NoteContentVersion = 2;
 export type NoteBlockContent = Record<string, unknown>[];
 
-export interface Note extends BaseEntity {
-  folderId: string;
+export interface Note extends BaseEntity { folderId: string;
   orderIndex: number;
   title: string;
   content: NoteBlockContent;

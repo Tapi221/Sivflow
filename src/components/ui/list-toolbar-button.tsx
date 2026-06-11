@@ -3,30 +3,15 @@
 import * as React from 'react';
 
 import { ListStyleType, someList, toggleList } from '@platejs/list';
-import {
-  useIndentTodoToolBarButton,
-  useIndentTodoToolBarButtonState,
-} from '@platejs/list/react';
+import { useIndentTodoToolBarButton, useIndentTodoToolBarButtonState, } from '@platejs/list/react';
 import { List, ListOrdered, ListTodoIcon } from 'lucide-react';
 import { useEditorRef, useEditorSelector } from 'platejs/react';
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from './dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger, } from './dropdown-menu';
 
-import {
-  ToolbarButton,
-  ToolbarSplitButton,
-  ToolbarSplitButtonPrimary,
-  ToolbarSplitButtonSecondary,
-} from './toolbar';
+import { ToolbarButton, ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary, } from './toolbar';
 
-export function BulletedListToolbarButton() {
-  const editor = useEditorRef();
+export function BulletedListToolbarButton() { const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
 
   const pressed = useEditorSelector(
@@ -103,8 +88,7 @@ export function BulletedListToolbarButton() {
   );
 }
 
-export function NumberedListToolbarButton() {
-  const editor = useEditorRef();
+export function NumberedListToolbarButton() { const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
 
   const pressed = useEditorSelector(
@@ -192,10 +176,7 @@ export function NumberedListToolbarButton() {
   );
 }
 
-export function TodoListToolbarButton(
-  props: React.ComponentProps<typeof ToolbarButton>
-) {
-  const state = useIndentTodoToolBarButtonState({ nodeType: 'todo' });
+export function TodoListToolbarButton( props: React.ComponentProps<typeof ToolbarButton> ) { const state = useIndentTodoToolBarButtonState({ nodeType: 'todo' });
   const { props: buttonProps } = useIndentTodoToolBarButton(state);
 
   return (

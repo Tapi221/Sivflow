@@ -19,15 +19,9 @@ const subscribeSelectedBlockId = (listener: BlockSelectionListener) => {
   };
 };
 
-export const setSelectedBlockId = (nextSelectedBlockId: string | null) => {
-  if (selectedBlockId === nextSelectedBlockId) return;
+export const setSelectedBlockId = (nextSelectedBlockId: string | null) => { if (selectedBlockId === nextSelectedBlockId) return;
   selectedBlockId = nextSelectedBlockId;
   emitBlockSelectionChange();
 };
 
-export const useSelectedBlockId = () =>
-  useSyncExternalStore(
-    subscribeSelectedBlockId,
-    getSelectedBlockIdSnapshot,
-    getSelectedBlockIdSnapshot,
-  );
+export const useSelectedBlockId = () => useSyncExternalStore( subscribeSelectedBlockId, getSelectedBlockIdSnapshot, getSelectedBlockIdSnapshot, );

@@ -1,7 +1,6 @@
 export type LocalAiProvider = "ollama";
 
-export type LocalAiSettings = {
-  enabled: boolean;
+export type LocalAiSettings = { enabled: boolean;
   provider: LocalAiProvider;
   baseUrl: string;
   model: string;
@@ -46,8 +45,7 @@ const parseLocalAiSettings = (value: unknown): LocalAiSettings => {
 
 export const getDefaultLocalAiSettings = (): LocalAiSettings => ({ ...DEFAULT_LOCAL_AI_SETTINGS });
 
-export const getLocalAiSettings = (): LocalAiSettings => {
-  if (typeof window === "undefined") return getDefaultLocalAiSettings();
+export const getLocalAiSettings = (): LocalAiSettings => { if (typeof window === "undefined") return getDefaultLocalAiSettings();
 
   try {
     const rawValue = window.localStorage.getItem(LOCAL_AI_SETTINGS_STORAGE_KEY);
@@ -59,8 +57,7 @@ export const getLocalAiSettings = (): LocalAiSettings => {
   }
 };
 
-export const setLocalAiSettings = (settings: LocalAiSettings): LocalAiSettings => {
-  const nextSettings = parseLocalAiSettings(settings);
+export const setLocalAiSettings = (settings: LocalAiSettings): LocalAiSettings => { const nextSettings = parseLocalAiSettings(settings);
 
   if (typeof window !== "undefined") {
     window.localStorage.setItem(LOCAL_AI_SETTINGS_STORAGE_KEY, JSON.stringify(nextSettings));

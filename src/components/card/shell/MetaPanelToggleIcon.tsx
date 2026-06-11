@@ -1,17 +1,10 @@
 import type { SVGProps } from "react";
 
-export type MetaPanelToggleIconProps = Readonly<
-  SVGProps<SVGSVGElement> & {
-    open?: boolean;
+export type MetaPanelToggleIconProps = Readonly< SVGProps<SVGSVGElement> & { open?: boolean;
   }
 >;
 
-export const MetaPanelToggleIcon = ({
-  className,
-  open = false,
-  ...props
-}: MetaPanelToggleIconProps) => {
-  const indicatorX = open ? 7.25 : 14.25;
+export const MetaPanelToggleIcon = ({ className, open = false, ...props }: MetaPanelToggleIconProps) => { const indicatorX = open ? 7.25 : 14.25;
 
   return (
     <svg

@@ -37,8 +37,7 @@ const buildRefreshRange = (event: Pick<GoogleCalendarEvent, "startsAt" | "endsAt
   return { rangeStart, rangeEnd };
 };
 
-export const useGoogleCalendarLayer = () => {
-  useServerStoredGoogleAccountBootstrap();
+export const useGoogleCalendarLayer = () => { useServerStoredGoogleAccountBootstrap();
   const [taskListRetryNonce, setTaskListRetryNonce] = useState(0);
 
   const retryGoogleTaskLists = useCallback(() => {

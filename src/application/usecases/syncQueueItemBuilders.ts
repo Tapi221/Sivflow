@@ -112,14 +112,7 @@ const createBaseQueueFields = ({
   };
 };
 
-export const createUpsertQueueItem = <TEntity extends UpsertEntity>({
-  entity,
-  operationType,
-  payload,
-  priority = "high",
-  type = "upload",
-}: {
-  entity: TEntity;
+export const createUpsertQueueItem = <TEntity extends UpsertEntity>({ entity, operationType, payload, priority = "high", type = "upload", }: { entity: TEntity;
   operationType: Extract<SyncOperationType, "create" | "update">;
   payload: unknown;
   priority?: SyncPriority;
@@ -143,13 +136,7 @@ export const createUpsertQueueItem = <TEntity extends UpsertEntity>({
   } as UpsertQueueItem<TEntity>;
 };
 
-export const createDeleteQueueItem = ({
-  entity,
-  targetId,
-  priority = "high",
-  type = "upload",
-}: {
-  entity: DeleteEntity;
+export const createDeleteQueueItem = ({ entity, targetId, priority = "high", type = "upload", }: { entity: DeleteEntity;
   targetId: string;
   priority?: SyncPriority;
   type?: SyncDirection;
@@ -172,8 +159,7 @@ export const createDeleteQueueItem = ({
   };
 };
 
-export const createQueueItemFromSyncTask = (task: SyncTask): SyncQueueItem => {
-  const targetId = task.targetId || getTaskPayloadId(task.payload) || "unknown";
+export const createQueueItemFromSyncTask = (task: SyncTask): SyncQueueItem => { const targetId = task.targetId || getTaskPayloadId(task.payload) || "unknown";
   const operationType =
     task.operationType || (task.type === "upload" ? "update" : "create");
   const deterministicId = buildDeterministicQueueId({

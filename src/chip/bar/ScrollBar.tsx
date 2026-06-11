@@ -2,8 +2,7 @@ import React from "react";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 
-export type ScrollBarProps = {
-  value: readonly number[];
+export type ScrollBarProps = { value: readonly number[];
   min: number;
   max: number;
   step?: number;

@@ -10,8 +10,7 @@ import { GoogleCalendarEngineManager } from "./GoogleCalendarEngineManager";
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
-export type GoogleAccountEntry = {
-  id: string;
+export type GoogleAccountEntry = { id: string;
   email: string | null;
   name: string | null;
   photoUrl: string | null;
@@ -26,8 +25,7 @@ export type GoogleAccountEntry = {
   error: string | null;
 };
 
-export type GoogleAccountTokenUpdate = {
-  accountId: string;
+export type GoogleAccountTokenUpdate = { accountId: string;
   accessToken: string;
   refreshToken?: string | null;
   accountName?: string | null;
@@ -149,10 +147,7 @@ const getErrorCode = (error: unknown): string | undefined => {
 const normalizeErrorCode = (code: string | undefined): string | undefined =>
   code?.replace(/^functions\//, "");
 
-export const getGoogleOAuthErrorReason = (error: unknown): GoogleOAuthCallableErrorReason | undefined => {
-  const wrappedReason = error instanceof Error
-    ? (error as Error & { googleOAuthReason?: GoogleOAuthCallableErrorReason }).googleOAuthReason
-    : undefined;
+export const getGoogleOAuthErrorReason = (error: unknown): GoogleOAuthCallableErrorReason | undefined => { const wrappedReason = error instanceof Error ? (error as Error & { googleOAuthReason?: GoogleOAuthCallableErrorReason }).googleOAuthReason : undefined;
 
   return wrappedReason ?? getGoogleOAuthCallableErrorReason(error);
 };
@@ -183,8 +178,7 @@ const toErrorMessage = (error: unknown): string =>
       : error.message
     : String(error);
 
-export const toGoogleCalendarAuthErrorMessage = (error: unknown): string => {
-  const reason = getGoogleOAuthErrorReason(error);
+export const toGoogleCalendarAuthErrorMessage = (error: unknown): string => { const reason = getGoogleOAuthErrorReason(error);
 
   if (reason === "invalid_grant" || reason === "stored_refresh_token_missing") {
     return "Google 連携トークンが無効です。Google アカウントのサードパーティ連携からこのアプリを削除してから再連携してください。";
@@ -201,13 +195,9 @@ export const toGoogleCalendarAuthErrorMessage = (error: unknown): string => {
   return `Google Calendar token refresh failed: ${toErrorMessage(error)}`;
 };
 
-export const shouldCooldownGoogleOAuthError = (error: unknown): boolean =>
-  isGoogleOAuthDeterministicErrorReason(getGoogleOAuthErrorReason(error)) ||
-  normalizeErrorCode(getErrorCode(error)) === "auto-recovery-pending" ||
-  normalizeErrorCode(getErrorCode(error)) === "internal";
+export const shouldCooldownGoogleOAuthError = (error: unknown): boolean => isGoogleOAuthDeterministicErrorReason(getGoogleOAuthErrorReason(error)) || normalizeErrorCode(getErrorCode(error)) === "auto-recovery-pending" || normalizeErrorCode(getErrorCode(error)) === "internal";
 
-export const createGoogleOAuthCooldownError = (entry: GoogleOAuthCooldownEntry): Error => {
-  const error = new Error(entry.message);
+export const createGoogleOAuthCooldownError = (entry: GoogleOAuthCooldownEntry): Error => { const error = new Error(entry.message);
   (error as Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason }).code = "google-oauth-deterministic-cooldown";
 
   if (entry.reason !== "auto_recovery_pending" && entry.reason !== "internal") {
@@ -498,12 +488,7 @@ const storedToEntry = (stored: StoredGoogleAccount): GoogleAccountEntry => {
   };
 };
 
-export const useMultiAccountGoogleCalendar = () => {
-  const [accounts, dispatchAccounts] = useReducer(
-    reduceAccounts,
-    undefined,
-    () => readStoredAccounts().map(storedToEntry),
-  );
+export const useMultiAccountGoogleCalendar = () => { const [accounts, dispatchAccounts] = useReducer( reduceAccounts, undefined, () => readStoredAccounts().map(storedToEntry), );
   const [eventsState, dispatchEvents] = useReducer(
     reduceEvents,
     new Map() as EventsState,

@@ -11,32 +11,5 @@ type OverlayToolbarButtonProps = {
   children: ReactNode;
 };
 
-export const OverlayToolbarButton = ({
-  onClick,
-  label,
-  disabled = false,
-  active = false,
-  className,
-  children,
-}: OverlayToolbarButtonProps) => {
-  return (
-    <button
-      type="button"
-      className={cn(
-        overlayGlassActionButtonClassName,
-        "relative",
-        active && !disabled && overlayGlassActionButtonActiveClassName,
-        disabled && overlayGlassActionButtonDisabledClassName,
-        className,
-      )}
-      onClick={onClick}
-      aria-label={label}
-      title={label}
-      aria-pressed={active}
-      aria-disabled={disabled}
-      disabled={disabled}
-    >
-      {children}
-    </button>
-  );
+export const OverlayToolbarButton = ({ onClick, label, disabled = false, active = false, className, children, }: OverlayToolbarButtonProps) => { return ( <button type="button" className={cn( overlayGlassActionButtonClassName, "relative", active && !disabled && overlayGlassActionButtonActiveClassName, disabled && overlayGlassActionButtonDisabledClassName, className, )} onClick={onClick} aria-label={label} title={label} aria-pressed={active} aria-disabled={disabled} disabled={disabled} > {children} </button> );
 };

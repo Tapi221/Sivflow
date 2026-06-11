@@ -24,7 +24,4 @@ const increment = (): number => {
   return next;
 };
 
-export const localGenerationCounterStore: GenerationCounterStorePort = {
-  get,
-  increment,
-};
+export const localGenerationCounterStore: GenerationCounterStorePort = { get, increment, };

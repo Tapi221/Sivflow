@@ -37,26 +37,7 @@ type FlushDraftOptions = {
   showSuccessToast?: boolean;
 };
 
-export const useCardEditorSession = ({
-  selectedCardId,
-  selectedCardSnapshot = null,
-  resolveCardFromEntity = true,
-  folderId,
-  cardSetId,
-  autoEdit,
-  updateCard,
-  createCard,
-  addTag,
-  tagById,
-  toastSuccess,
-  toastError,
-  onCardUpdated,
-  onSelectCardId,
-  resetDialogs,
-}: UseCardEditorSessionParams) => {
-  const [localSelectedCardId, setLocalSelectedCardId] = useState<string | null>(
-    null,
-  );
+export const useCardEditorSession = ({ selectedCardId, selectedCardSnapshot = null, resolveCardFromEntity = true, folderId, cardSetId, autoEdit, updateCard, createCard, addTag, tagById, toastSuccess, toastError, onCardUpdated, onSelectCardId, resetDialogs, }: UseCardEditorSessionParams) => { const [localSelectedCardId, setLocalSelectedCardId] = useState<string | null>( null, );
   const [isFlipped, setIsFlipped] = useState(false);
   const [isEditing, setIsEditingState] = useState(false);
   const [isAutosaving, setIsAutosaving] = useState(false);

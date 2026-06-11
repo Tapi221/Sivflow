@@ -10,8 +10,7 @@ const isQuotaExceededError = (error: unknown): boolean => {
   );
 };
 
-export class SafeIndexedDBWriter {
-  private static readonly quotaWarningShown = new Set<string>();
+export class SafeIndexedDBWriter { private static readonly quotaWarningShown = new Set<string>();
 
   static readonly write = async <T>(
     userId: string,

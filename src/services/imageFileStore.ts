@@ -8,13 +8,11 @@ type StoredImageFile = {
   updatedAt: number;
 };
 
-export type PutImageBlobOptions = {
-  userId: string;
+export type PutImageBlobOptions = { userId: string;
   assetId: string;
 };
 
-export type ImageBlobRecord = {
-  localBlobId: string;
+export type ImageBlobRecord = { localBlobId: string;
   size: number;
   mime: string;
 };
@@ -80,11 +78,7 @@ const putScopedImageBlob = async (id: string, blob: Blob): Promise<void> => {
   });
 };
 
-export const putImageBlob = async (
-  blob: Blob,
-  options: PutImageBlobOptions,
-): Promise<ImageBlobRecord> => {
-  const localBlobId = options.assetId;
+export const putImageBlob = async ( blob: Blob, options: PutImageBlobOptions, ): Promise<ImageBlobRecord> => { const localBlobId = options.assetId;
   await putScopedImageBlob(makeScopedId(localBlobId, options), blob);
   return {
     localBlobId,
@@ -93,11 +87,7 @@ export const putImageBlob = async (
   };
 };
 
-export const getImageBlob = async (
-  id: string,
-  options?: BlobScopeOptions,
-): Promise<Blob | null> => {
-  const scopedId = makeScopedId(id, options);
+export const getImageBlob = async ( id: string, options?: BlobScopeOptions, ): Promise<Blob | null> => { const scopedId = makeScopedId(id, options);
   const scoped = await getStoredImageFile(scopedId);
   if (scoped?.blob) return scoped.blob;
 
@@ -111,11 +101,7 @@ export const getImageBlob = async (
   return legacy.blob;
 };
 
-export const deleteImageBlob = async (
-  id: string,
-  options?: BlobScopeOptions,
-): Promise<void> => {
-  const db = await openImageFileDb();
+export const deleteImageBlob = async ( id: string, options?: BlobScopeOptions, ): Promise<void> => { const db = await openImageFileDb();
   const scopedId = makeScopedId(id, options);
   await new Promise<void>((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, "readwrite");
@@ -132,8 +118,7 @@ export const deleteImageBlob = async (
   });
 };
 
-export const deleteImageBlobsByUser = async (userId: string): Promise<void> => {
-  const prefix = `${userId.trim()}:`;
+export const deleteImageBlobsByUser = async (userId: string): Promise<void> => { const prefix = `${userId.trim()}:`;
   if (!userId.trim()) return;
   const db = await openImageFileDb();
   await new Promise<void>((resolve, reject) => {

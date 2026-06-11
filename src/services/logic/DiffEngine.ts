@@ -21,12 +21,7 @@ const asDiffableEntity = (value: unknown): DiffableEntity | null => {
   return isPlainObject(value) ? (value as DiffableEntity) : null;
 };
 
-export class DiffEngine implements IDiffEngine {
-  public readonly calculateDiff = (
-    local: unknown,
-    remote: unknown,
-  ): PlainObject | null => {
-    const localObj = asDiffableEntity(local);
+export class DiffEngine implements IDiffEngine { public readonly calculateDiff = ( local: unknown, remote: unknown, ): PlainObject | null => { const localObj = asDiffableEntity(local);
     const remoteObj = asDiffableEntity(remote);
 
     if (!localObj || !remoteObj) return null;

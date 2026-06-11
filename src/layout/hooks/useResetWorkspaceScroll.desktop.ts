@@ -29,12 +29,7 @@ const resetWorkspaceScrollPosition = (mainRef: WorkspaceScrollRef) => {
   document.body.scrollTop = 0;
 };
 
-export const useResetWorkspaceScrollDesktop = (
-  mainRef: WorkspaceScrollRef,
-  pathname: string,
-) => {
-  useLayoutEffect(() => {
-    resetWorkspaceScrollPosition(mainRef);
+export const useResetWorkspaceScrollDesktop = ( mainRef: WorkspaceScrollRef, pathname: string, ) => { useLayoutEffect(() => { resetWorkspaceScrollPosition(mainRef);
 
     const animationFrameId = window.requestAnimationFrame(() => {
       resetWorkspaceScrollPosition(mainRef);

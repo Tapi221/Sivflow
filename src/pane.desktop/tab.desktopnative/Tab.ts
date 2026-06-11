@@ -5,23 +5,14 @@ export const WORKSPACE_DEFAULT_EXPLORER_TAB_ID = "explorer:default" as const;
 /**
  * サイドバーのセクション定義
  */
-export type WorkspaceSidebarSection =
-  | "home"
-  | "review"
-  | "library"
-  | "schedule"
-  | "settings";
+export type WorkspaceSidebarSection = | "home" | "review" | "library" | "schedule" | "settings";
 
 export type WorkspaceRouteSection = Exclude<WorkspaceSidebarSection, "library">;
 
 /**
  * ルートタブID（固定ページ）
  */
-export type WorkspaceRouteTabId =
-  | "route:home"
-  | "route:review"
-  | "route:schedule"
-  | "route:settings";
+export type WorkspaceRouteTabId = | "route:home" | "route:review" | "route:schedule" | "route:settings";
 
 /**
  * タブ種別
@@ -40,8 +31,7 @@ type WorkspaceTabBase = {
 /**
  * ルートタブ（画面遷移系）
  */
-export type WorkspaceRouteTab = Omit<WorkspaceTabBase, "sectionKey"> & {
-  id: WorkspaceRouteTabId;
+export type WorkspaceRouteTab = Omit<WorkspaceTabBase, "sectionKey"> & { id: WorkspaceRouteTabId;
   kind: "route";
   routePath: string;
   sectionKey: WorkspaceRouteSection;
@@ -50,8 +40,7 @@ export type WorkspaceRouteTab = Omit<WorkspaceTabBase, "sectionKey"> & {
 /**
  * エクスプローラタブ（状態保持型）
  */
-export type WorkspaceExplorerTab = WorkspaceTabBase & {
-  id: `explorer:${string}`;
+export type WorkspaceExplorerTab = WorkspaceTabBase & { id: `explorer:${string}`;
   kind: "explorer";
   explorerState: ExplorerRouteState;
 };
@@ -59,8 +48,7 @@ export type WorkspaceExplorerTab = WorkspaceTabBase & {
 /**
  * ドキュメントタブ
  */
-export type WorkspaceDocumentTab = WorkspaceTabBase & {
-  id: `document:${string}`;
+export type WorkspaceDocumentTab = WorkspaceTabBase & { id: `document:${string}`;
   kind: "document";
   documentId: string;
   folderId: string | null;
@@ -69,8 +57,7 @@ export type WorkspaceDocumentTab = WorkspaceTabBase & {
 /**
  * カードタブ
  */
-export type WorkspaceCardTab = WorkspaceTabBase & {
-  id: `card:${string}`;
+export type WorkspaceCardTab = WorkspaceTabBase & { id: `card:${string}`;
   kind: "card";
   cardId: string;
   folderId: string | null;
@@ -79,8 +66,7 @@ export type WorkspaceCardTab = WorkspaceTabBase & {
 /**
  * ノートタブ
  */
-export type WorkspaceNoteTab = WorkspaceTabBase & {
-  id: `note:${string}`;
+export type WorkspaceNoteTab = WorkspaceTabBase & { id: `note:${string}`;
   kind: "note";
   noteId: string;
   folderId: string | null;
@@ -89,78 +75,27 @@ export type WorkspaceNoteTab = WorkspaceTabBase & {
 /**
  * 全タブユニオン
  */
-export type WorkspaceTab =
-  | WorkspaceRouteTab
-  | WorkspaceExplorerTab
-  | WorkspaceDocumentTab
-  | WorkspaceCardTab
-  | WorkspaceNoteTab;
+export type WorkspaceTab = | WorkspaceRouteTab | WorkspaceExplorerTab | WorkspaceDocumentTab | WorkspaceCardTab | WorkspaceNoteTab;
 
 /**
  * エンティティ系タブ（ルート・explorer除外）
  */
-export type WorkspaceEntityTab = Exclude<
-  WorkspaceTab,
-  WorkspaceExplorerTab | WorkspaceRouteTab
->;
+export type WorkspaceEntityTab = Exclude< WorkspaceTab, WorkspaceExplorerTab | WorkspaceRouteTab >;
 
 /**
  * ルートタブ定義
  */
-export const WORKSPACE_ROUTE_TABS = [
-  {
-    id: "route:home",
-    kind: "route",
-    title: "Home",
-    routePath: "/schedule",
-    isClosable: true,
-    sectionKey: "home",
-  },
-  {
-    id: "route:review",
-    kind: "route",
-    title: "Review",
-    routePath: "/study",
-    isClosable: true,
-    sectionKey: "review",
-  },
-  {
-    id: "route:schedule",
-    kind: "route",
-    title: "Schedule",
-    routePath: "/schedule",
-    isClosable: true,
-    sectionKey: "schedule",
-  },
-  {
-    id: "route:settings",
-    kind: "route",
-    title: "設定",
-    routePath: "/settings",
-    isClosable: true,
-    sectionKey: "settings",
-  },
-] as const satisfies readonly WorkspaceRouteTab[];
+export const WORKSPACE_ROUTE_TABS = [ { id: "route:home", kind: "route", title: "Home", routePath: "/schedule", isClosable: true, sectionKey: "home", }, { id: "route:review", kind: "route", title: "Review", routePath: "/study", isClosable: true, sectionKey: "review", }, { id: "route:schedule", kind: "route", title: "Schedule", routePath: "/schedule", isClosable: true, sectionKey: "schedule", }, { id: "route:settings", kind: "route", title: "設定", routePath: "/settings", isClosable: true, sectionKey: "settings", }, ] as const satisfies readonly WorkspaceRouteTab[];
 
 /**
  * Explorer初期状態
  */
-export const createDefaultExplorerRouteState = (): ExplorerRouteState => ({
-  isHomeOnlyMode: false,
-  isSectionListMode: true,
-  selectedFolderId: null,
-  selectedItem: null,
-});
+export const createDefaultExplorerRouteState = (): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null, });
 
 /**
  * section → routeタブ解決
  */
-export const resolveRouteTabBySection = (
-  sectionKey: WorkspaceRouteSection,
-): WorkspaceRouteTab => {
-  const matchedTab = WORKSPACE_ROUTE_TABS.find(
-    (tab) => tab.sectionKey === sectionKey,
-  );
+export const resolveRouteTabBySection = ( sectionKey: WorkspaceRouteSection, ): WorkspaceRouteTab => { const matchedTab = WORKSPACE_ROUTE_TABS.find( (tab) => tab.sectionKey === sectionKey, );
 
   if (!matchedTab) {
     throw new Error(`Unknown workspace route section: ${sectionKey}`);

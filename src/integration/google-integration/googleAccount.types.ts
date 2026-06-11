@@ -1,7 +1,6 @@
 import type { GCalConnectionStatus, GCalSyncState, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 
-export type GoogleConnectedServiceAccountEntry = {
-  id: string;
+export type GoogleConnectedServiceAccountEntry = { id: string;
   email: string | null;
   name: string | null;
   photoUrl: string | null;
@@ -16,8 +15,7 @@ export type GoogleConnectedServiceAccountEntry = {
   error: string | null;
 };
 
-export type GoogleConnectedServiceAccountTokenUpdate = {
-  accountId: string;
+export type GoogleConnectedServiceAccountTokenUpdate = { accountId: string;
   accessToken: string;
   refreshToken?: string | null;
   accountName?: string | null;

@@ -1,10 +1,7 @@
 import * as React from 'react';
 
 import type { OurFileRouter } from '@/components/uploadthing';
-import type {
-  ClientUploadedFileData,
-  UploadFilesOptions,
-} from 'uploadthing/types';
+import type { ClientUploadedFileData, UploadFilesOptions, } from 'uploadthing/types';
 
 import { generateReactHelpers } from '@uploadthing/react';
 import { toast } from 'sonner';
@@ -21,12 +18,7 @@ interface UseUploadFileProps
   onUploadError?: (error: unknown) => void;
 }
 
-export const useUploadFile = ({
-  onUploadComplete,
-  onUploadError,
-  ...props
-}: UseUploadFileProps = {}) => {
-  const [uploadedFile, setUploadedFile] = React.useState<UploadedFile>();
+export const useUploadFile = ({ onUploadComplete, onUploadError, ...props }: UseUploadFileProps = {}) => { const [uploadedFile, setUploadedFile] = React.useState<UploadedFile>();
   const [uploadingFile, setUploadingFile] = React.useState<File>();
   const [progress, setProgress] = React.useState<number>(0);
   const [isUploading, setIsUploading] = React.useState(false);
@@ -104,11 +96,9 @@ export const useUploadFile = ({
   };
 };
 
-export const { uploadFiles, useUploadThing } =
-  generateReactHelpers<OurFileRouter>();
+export const { uploadFiles, useUploadThing } = generateReactHelpers<OurFileRouter>();
 
-export const getErrorMessage = (err: unknown) => {
-  const unknownError = 'Something went wrong, please try again later.';
+export const getErrorMessage = (err: unknown) => { const unknownError = 'Something went wrong, please try again later.';
 
   if (err instanceof z.ZodError) {
     const errors = err.issues.map((issue) => issue.message);
@@ -121,8 +111,7 @@ export const getErrorMessage = (err: unknown) => {
   return unknownError;
 };
 
-export const showErrorToast = (err: unknown) => {
-  const errorMessage = getErrorMessage(err);
+export const showErrorToast = (err: unknown) => { const errorMessage = getErrorMessage(err);
 
   return toast.error(errorMessage);
 };

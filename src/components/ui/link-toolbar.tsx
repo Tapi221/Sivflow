@@ -4,29 +4,13 @@ import * as React from 'react';
 
 import type { TLinkElement } from 'platejs';
 
-import {
-  type UseVirtualFloatingOptions,
-  flip,
-  offset,
-} from '@platejs/floating';
+import { type UseVirtualFloatingOptions, flip, offset, } from '@platejs/floating';
 import { getLinkAttributes } from '@platejs/link';
-import {
-  type LinkFloatingToolbarState,
-  FloatingLinkUrlInput,
-  useFloatingLinkEdit,
-  useFloatingLinkEditState,
-  useFloatingLinkInsert,
-  useFloatingLinkInsertState,
-} from '@platejs/link/react';
+import { type LinkFloatingToolbarState, FloatingLinkUrlInput, useFloatingLinkEdit, useFloatingLinkEditState, useFloatingLinkInsert, useFloatingLinkInsertState, } from '@platejs/link/react';
 import { cva } from 'class-variance-authority';
 import { ExternalLink, Link, Text, Unlink } from 'lucide-react';
 import { KEYS } from 'platejs';
-import {
-  useEditorRef,
-  useEditorSelection,
-  useFormInputProps,
-  usePluginOption,
-} from 'platejs/react';
+import { useEditorRef, useEditorSelection, useFormInputProps, usePluginOption, } from 'platejs/react';
 
 import { buttonVariants } from './button';
 import { Separator } from './separator';
@@ -39,10 +23,7 @@ const inputVariants = cva(
   'flex h-[28px] w-full rounded-md border-none bg-transparent px-1.5 py-1 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-transparent md:text-sm'
 );
 
-export function LinkFloatingToolbar({
-  state,
-}: {
-  state?: LinkFloatingToolbarState;
+export function LinkFloatingToolbar({ state, }: { state?: LinkFloatingToolbarState;
 }) {
   const activeCommentId = usePluginOption({ key: KEYS.comment }, 'activeId');
   const activeSuggestionId = usePluginOption(

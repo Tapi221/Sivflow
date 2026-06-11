@@ -38,8 +38,7 @@ const measureRightClickPanelTextWidth = (text: string): number => {
   return context.measureText(text).width;
 };
 
-export const resolveRightClickPanelTextWidth = (labels: readonly string[], minimumWidth = RIGHT_CLICK_PANEL_MIN_WIDTH): number => {
-  const textWidth = labels.reduce((maxWidth, label) => Math.max(maxWidth, measureRightClickPanelTextWidth(label)), 0);
+export const resolveRightClickPanelTextWidth = (labels: readonly string[], minimumWidth = RIGHT_CLICK_PANEL_MIN_WIDTH): number => { const textWidth = labels.reduce((maxWidth, label) => Math.max(maxWidth, measureRightClickPanelTextWidth(label)), 0);
   return Math.ceil(Math.max(RIGHT_CLICK_PANEL_MIN_WIDTH, minimumWidth, textWidth + RIGHT_CLICK_PANEL_TEXT_HORIZONTAL_EDGE));
 };
 
@@ -49,8 +48,7 @@ const clampRightClickPanelAxis = (value: number, size: number, viewportSize: num
   return Math.min(Math.max(value, min), max);
 };
 
-export const clampRightClickPanelPosition = (x: number, y: number, dimensions: RightClickPanelDimensions): RightClickPanelPosition => {
-  if (typeof window === "undefined") return { x, y };
+export const clampRightClickPanelPosition = (x: number, y: number, dimensions: RightClickPanelDimensions): RightClickPanelPosition => { if (typeof window === "undefined") return { x, y };
 
   return {
     x: clampRightClickPanelAxis(x, dimensions.width, window.innerWidth),
@@ -58,14 +56,7 @@ export const clampRightClickPanelPosition = (x: number, y: number, dimensions: R
   };
 };
 
-export const useRightClickPanelDismiss = (
-  panelId: RightClickPanelId,
-  isOpen: boolean,
-  panelRef: RefObject<HTMLElement | null>,
-  onDismiss: () => void,
-): void => {
-  useEffect(() => {
-    if (!isOpen) return;
+export const useRightClickPanelDismiss = ( panelId: RightClickPanelId, isOpen: boolean, panelRef: RefObject<HTMLElement | null>, onDismiss: () => void, ): void => { useEffect(() => { if (!isOpen) return;
 
     const isPanelEvent = (event: Event): boolean => {
       const panel = panelRef.current;

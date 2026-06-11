@@ -2,8 +2,7 @@ import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useRef,
 import { WEB_STORAGE_KEYS } from "@platform/storage/webStorageKeys.constants";
 import { useTreeViewSidebarHotkey } from "@/features/hotkey/useTreeViewSidebarHotkey";
 
-export const TREE_VIEW_SIDEBAR_TOGGLE_EVENT =
-  "sivflow:treeview-sidebar-toggle";
+export const TREE_VIEW_SIDEBAR_TOGGLE_EVENT = "sivflow:treeview-sidebar-toggle";
 
 const SIDEBAR_WIDTH_LIMITS = {
   min: 260,
@@ -51,8 +50,7 @@ const readStoredSidebarOpen = () => {
   return savedOpen !== null ? savedOpen === "true" : true;
 };
 
-export const useTreeViewSidebar = () => {
-  const [sidebarWidth, setSidebarWidth] = useState(readStoredSidebarWidth);
+export const useTreeViewSidebar = () => { const [sidebarWidth, setSidebarWidth] = useState(readStoredSidebarWidth);
   const [renderedSidebarWidth, setRenderedSidebarWidth] = useState(() =>
     clampSidebarWidth(readStoredSidebarWidth()),
   );

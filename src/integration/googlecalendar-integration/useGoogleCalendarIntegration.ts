@@ -67,12 +67,7 @@ const reduceEvents = (
   }
 };
 
-export const useGoogleCalendarIntegration = ({
-  authInstance = auth,
-}: UseGoogleCalendarIntegrationOptions = {}) => {
-  const [accessToken, setAccessToken] = useState<string | null>(() =>
-    readToken(),
-  );
+export const useGoogleCalendarIntegration = ({ authInstance = auth, }: UseGoogleCalendarIntegrationOptions = {}) => { const [accessToken, setAccessToken] = useState<string | null>(() => readToken(), );
 
   const [accountEmail, setAccountEmail] = useState<string | null>(() =>
     readEmail(),

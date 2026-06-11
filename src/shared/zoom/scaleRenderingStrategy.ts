@@ -1,13 +1,11 @@
 export type ScaleRenderingMode = "none" | "zoom" | "transform";
 
-export interface ResolveScaleRenderingStrategyArgs {
-  readonly disableScale: boolean;
+export interface ResolveScaleRenderingStrategyArgs { readonly disableScale: boolean;
   readonly effectiveScale: number;
   readonly supportsCssZoom: boolean;
 }
 
-export interface ScaleRenderingStrategy {
-  readonly mode: ScaleRenderingMode;
+export interface ScaleRenderingStrategy { readonly mode: ScaleRenderingMode;
   readonly shouldApplyScale: boolean;
   readonly zoom: number | undefined;
   readonly transform: string;
@@ -24,9 +22,7 @@ const normalizeScale = (value: number) => {
   return value;
 };
 
-export const detectCssZoomSupport = () => {
-  if (typeof CSS === "undefined") {
-    return false;
+export const detectCssZoomSupport = () => { if (typeof CSS === "undefined") { return false;
   }
 
   if (typeof CSS.supports !== "function") {
@@ -40,12 +36,7 @@ export const detectCssZoomSupport = () => {
   }
 };
 
-export const resolveScaleRenderingStrategy = ({
-  disableScale,
-  effectiveScale,
-  supportsCssZoom,
-}: ResolveScaleRenderingStrategyArgs): ScaleRenderingStrategy => {
-  const safeScale = normalizeScale(effectiveScale);
+export const resolveScaleRenderingStrategy = ({ disableScale, effectiveScale, supportsCssZoom, }: ResolveScaleRenderingStrategyArgs): ScaleRenderingStrategy => { const safeScale = normalizeScale(effectiveScale);
   const shouldApplyScale =
     !disableScale && Math.abs(safeScale - 1) > SCALE_EPSILON;
 

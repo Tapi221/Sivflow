@@ -9,15 +9,5 @@ type CardFaceWithAttachmentsProps = Readonly<{
   className?: string;
 }>;
 
-export const CardFaceWithAttachments = ({
-  faceNode,
-  attachments,
-  className,
-}: CardFaceWithAttachmentsProps) => {
-  return (
-    <div className={cn("w-full min-w-0", className)}>
-      {faceNode}
-      <SharedCardAttachments attachments={attachments} />
-    </div>
-  );
+export const CardFaceWithAttachments = ({ faceNode, attachments, className, }: CardFaceWithAttachmentsProps) => { return ( <div className={cn("w-full min-w-0", className)}> {faceNode} <SharedCardAttachments attachments={attachments} /> </div> );
 };

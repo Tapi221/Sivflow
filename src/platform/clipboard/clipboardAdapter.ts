@@ -1,3 +1,2 @@
-export interface ClipboardAdapter {
-  writeText(text: string): Promise<void>;
+export interface ClipboardAdapter { writeText(text: string): Promise<void>;
 }

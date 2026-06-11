@@ -13,25 +13,13 @@ const roundDownToStep = (value: number, step: number) => {
   return Math.floor(value / safeStep) * safeStep;
 };
 
-export const zoomPercentToFactor = (zoomPercent: number) => {
-  return (
-    sanitizePositiveNumber(zoomPercent, CARD_VIEW_DEFAULT_ZOOM_PERCENT) / 100
-  );
+export const zoomPercentToFactor = (zoomPercent: number) => { return ( sanitizePositiveNumber(zoomPercent, CARD_VIEW_DEFAULT_ZOOM_PERCENT) / 100 );
 };
 
-export const zoomPercentToFixedCardWidthPx = (zoomPercent: number) => {
-  return Math.max(
-    1,
-    Math.round(CANONICAL_CARD_WIDTH * zoomPercentToFactor(zoomPercent)),
-  );
+export const zoomPercentToFixedCardWidthPx = (zoomPercent: number) => { return Math.max( 1, Math.round(CANONICAL_CARD_WIDTH * zoomPercentToFactor(zoomPercent)), );
 };
 
-export const computeDynamicMaxZoomPercent = ({
-  availableWidthPx,
-  baseCardWidthPx = CANONICAL_CARD_WIDTH,
-  stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT,
-}: {
-  availableWidthPx: number;
+export const computeDynamicMaxZoomPercent = ({ availableWidthPx, baseCardWidthPx = CANONICAL_CARD_WIDTH, stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT, }: { availableWidthPx: number;
   baseCardWidthPx?: number;
   stepPercent?: number;
 }) => {
@@ -49,12 +37,7 @@ export const computeDynamicMaxZoomPercent = ({
   return Math.max(stepPercent, steppedPercent);
 };
 
-export const clampZoomPercent = ({
-  value,
-  minZoomPercent,
-  maxZoomPercent,
-}: {
-  value: number;
+export const clampZoomPercent = ({ value, minZoomPercent, maxZoomPercent, }: { value: number;
   minZoomPercent: number;
   maxZoomPercent: number;
 }) => {
@@ -74,11 +57,7 @@ export const clampZoomPercent = ({
   return Math.min(safeMax, Math.max(safeMin, safeValue));
 };
 
-export const snapZoomPercent = ({
-  value,
-  stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT,
-}: {
-  value: number;
+export const snapZoomPercent = ({ value, stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT, }: { value: number;
   stepPercent?: number;
 }) => {
   const safeStep = sanitizePositiveNumber(
@@ -93,13 +72,7 @@ export const snapZoomPercent = ({
   return Math.round(safeValue / safeStep) * safeStep;
 };
 
-export const normalizeZoomPercent = ({
-  value,
-  minZoomPercent,
-  maxZoomPercent,
-  stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT,
-}: {
-  value: number;
+export const normalizeZoomPercent = ({ value, minZoomPercent, maxZoomPercent, stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT, }: { value: number;
   minZoomPercent: number;
   maxZoomPercent: number;
   stepPercent?: number;

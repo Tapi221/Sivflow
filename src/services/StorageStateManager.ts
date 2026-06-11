@@ -7,11 +7,7 @@
  * NORMAL → QUOTA_EXCEEDED → READ_ONLY
  * READ_ONLY → (cache cleared) → NORMAL
  */
-export class StorageStateManager {
-  private static states = new Map<
-    string,
-    {
-      state: "NORMAL" | "READ_ONLY";
+export class StorageStateManager { private static states = new Map< string, { state: "NORMAL" | "READ_ONLY";
       lastError: Date | null;
     }
   >();

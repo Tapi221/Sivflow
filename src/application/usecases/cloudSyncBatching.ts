@@ -13,10 +13,7 @@ const estimateBytes = (value: unknown) => {
   }
 };
 
-export const chunkCloudSyncChangesBySize = (
-  changes: SyncChange[],
-): SyncChange[][] => {
-  const chunks: SyncChange[][] = [];
+export const chunkCloudSyncChangesBySize = ( changes: SyncChange[], ): SyncChange[][] => { const chunks: SyncChange[][] = [];
   let current: SyncChange[] = [];
   let bytes = 0;
 

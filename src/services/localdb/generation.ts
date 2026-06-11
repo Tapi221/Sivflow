@@ -69,8 +69,7 @@ export const isLocalDbGenerationStorageKey = (key: string): boolean => key.start
 
 export const isLocalDbPersistentDatabaseName = (name: string): boolean => name.startsWith(LOCALDB_NAME_PREFIX) || name.startsWith(LOCALDB_LEGACY_NAME_PREFIX);
 
-export const getKnownLocalDbNamesForUser = (userId: string): string[] => {
-  const names: string[] = [];
+export const getKnownLocalDbNamesForUser = (userId: string): string[] => { const names: string[] = [];
   const generationPrefix = makeGenerationDbPrefix(LOCALDB_NAME_PREFIX, userId);
   const legacyGenerationPrefix = makeGenerationDbPrefix(LOCALDB_LEGACY_NAME_PREFIX, userId);
 
@@ -84,9 +83,7 @@ export const getKnownLocalDbNamesForUser = (userId: string): string[] => {
   return names;
 };
 
-export const bumpGenerationForUser = (userId: string) => {
-  if (generationBumpedUsers.has(userId)) {
-    return getGenerationForUser(userId);
+export const bumpGenerationForUser = (userId: string) => { if (generationBumpedUsers.has(userId)) { return getGenerationForUser(userId);
   }
   generationBumpedUsers.add(userId);
   const current = getGenerationForUser(userId);
@@ -97,17 +94,14 @@ export const bumpGenerationForUser = (userId: string) => {
   return next;
 };
 
-export const getDatabaseNameForUser = (userId: string = "anonymous") => {
-  const generation = getGenerationForUser(userId);
+export const getDatabaseNameForUser = (userId: string = "anonymous") => { const generation = getGenerationForUser(userId);
   return `${LOCALDB_NAME_PREFIX}${userId}_v${LOCALDB_SCHEMA_VERSION_FOR_NAME}_g${generation}`;
 };
 
-export const getFallbackDatabaseNameForUser = (userId: string) => {
-  return `${LOCALDB_NAME_PREFIX}mem_${userId}`;
+export const getFallbackDatabaseNameForUser = (userId: string) => { return `${LOCALDB_NAME_PREFIX}mem_${userId}`;
 };
 
-export const deleteUserPersistentDatabases = async (userId: string) => {
-  const names = await listUserPersistentDbNames(userId);
+export const deleteUserPersistentDatabases = async (userId: string) => { const names = await listUserPersistentDbNames(userId);
   let failureReason: string | null = null;
 
   for (const name of names) {

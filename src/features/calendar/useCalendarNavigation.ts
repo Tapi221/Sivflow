@@ -91,8 +91,7 @@ const createInitialScheduleNavigationState = ({ allowMultiSelectViewMode, weekSt
   };
 };
 
-export const useCalendarNavigation = ({ allowMultiSelectViewMode = true, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY }: CalendarNavigationOptions = {}) => {
-  const contentViewportRef = useRef<HTMLDivElement | null>(null);
+export const useCalendarNavigation = ({ allowMultiSelectViewMode = true, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY }: CalendarNavigationOptions = {}) => { const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
   const initialNavigationStateRef = useRef<ScheduleNavigationState | null>(null);

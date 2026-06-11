@@ -2,12 +2,10 @@ import { generateUploadedImageId } from "./uploadedImageFactory";
 import type { UploadFallbackReason, UploadSource } from "@/types";
 import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 
-export type NormalizeUploadedImageOptions = {
-  onInvalid?: "skip" | "throw";
+export type NormalizeUploadedImageOptions = { onInvalid?: "skip" | "throw";
 };
 
-export type DenormalizeUploadedImageOptions = {
-  case?: "camel" | "snake";
+export type DenormalizeUploadedImageOptions = { case?: "camel" | "snake";
   stripUndefined?: boolean;
 };
 
@@ -157,11 +155,7 @@ const normalizeUploadedImage = (
   };
 };
 
-export const normalizeUploadedImages = (
-  raw: unknown,
-  options: NormalizeUploadedImageOptions = {},
-) => {
-  if (raw == null) return [];
+export const normalizeUploadedImages = ( raw: unknown, options: NormalizeUploadedImageOptions = {}, ) => { if (raw == null) return [];
   const items = Array.isArray(raw) ? raw : [raw];
 
   return items
@@ -235,9 +229,7 @@ const denormalizeUploadedImage = (
   return output;
 };
 
-export const denormalizeUploadedImages = (
-  images: Array<{
-    id: string;
+export const denormalizeUploadedImages = ( images: Array<{ id: string;
     assetId?: string | null;
     localFileId?: string | null;
     localUrl?: string | null;

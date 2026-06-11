@@ -22,12 +22,7 @@ const MAX_INTERVAL_DAYS = 90;
  * 復習直後は 100% に近く、時間が経つにつれて指数関数的に減少します。
  * 実際の想起成功を保証するものではありません。
  */
-export const calculateRetentionProbability = (
-  stabilityInternal: number,
-  intervalDays: number,
-): number => {
-  // 安全策: Stabilityが0以下にならないようにする
-  const S = Math.max(0.01, stabilityInternal);
+export const calculateRetentionProbability = ( stabilityInternal: number, intervalDays: number, ): number => { // 安全策: Stabilityが0以下にならないようにする const S = Math.max(0.01, stabilityInternal);
 
   // 安全策: 日数が負にならないようにする
   const I = Math.max(0, intervalDays);
@@ -53,8 +48,7 @@ export const calculateRetentionProbability = (
  * 記憶の確率（Retention）とは異なり、復習に正解して間隔が伸びるたびに上昇します。
  * 最大間隔（MAX_INTERVAL_DAYS）に達すると 100% になります。
  */
-export const calculateResistanceScore = (intervalDays: number): number => {
-  const I = Math.max(0, intervalDays);
+export const calculateResistanceScore = (intervalDays: number): number => { const I = Math.max(0, intervalDays);
 
   // 対数スケールでスコア化
   // I=1 -> log(2) / log(91) ≈ 0.301 / 1.959 ≈ 15%

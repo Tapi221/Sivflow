@@ -4,8 +4,7 @@ import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 
 const NEW_SENTINEL = "__new__" as const;
 
-export type EditorDraft = {
-  title: string;
+export type EditorDraft = { title: string;
   tags: string[];
   isDraft: boolean;
   frontBlocks: CardBlock[];
@@ -15,43 +14,21 @@ export type EditorDraft = {
   layoutRows: number;
 };
 
-export const makeEmptyCardFaceAttachments = (): CardFaceAttachments => ({
-  images: [],
-  audios: [],
-  references: [],
-});
+export const makeEmptyCardFaceAttachments = (): CardFaceAttachments => ({ images: [], audios: [], references: [], });
 
-export const normalizeSelectedCardId = (raw: string | null) => {
-  if (!raw) return null;
+export const normalizeSelectedCardId = (raw: string | null) => { if (!raw) return null;
   if (raw === NEW_SENTINEL) return NEW_SENTINEL;
   if (raw === "new" || raw === "NEW" || raw === "create") return NEW_SENTINEL;
   return raw;
 };
 
-export const makeNewDraft = () => {
-  return {
-    title: "",
-    tags: [],
-    isDraft: false,
-    frontBlocks: [],
-    backBlocks: [],
-    frontAttachments: makeEmptyCardFaceAttachments(),
-    backAttachments: makeEmptyCardFaceAttachments(),
-    layoutRows: DEFAULT_LAYOUT_ROWS,
-  };
+export const makeNewDraft = () => { return { title: "", tags: [], isDraft: false, frontBlocks: [], backBlocks: [], frontAttachments: makeEmptyCardFaceAttachments(), backAttachments: makeEmptyCardFaceAttachments(), layoutRows: DEFAULT_LAYOUT_ROWS, };
 };
 
-export const sanitizeReferences = (refs: ReferenceBlockData[]) => {
-  return (refs ?? [])
-    .map((r) => ({
-      url: (r?.url ?? "").trim(),
-      name: (r?.name ?? "").trim(),
-    }))
-    .filter((r) => r.url.length > 0 || r.name.length > 0);
+export const sanitizeReferences = (refs: ReferenceBlockData[]) => { return (refs ?? []) .map((r) => ({ url: (r?.url ?? "").trim(), name: (r?.name ?? "").trim(), })) .filter((r) => r.url.length > 0 || r.name.length > 0);
 };
 
-export const normalizeOrderIndex = (blocks: CardBlock[]) => {
-  return (blocks ?? []).map((b, i) => ({ ...b, orderIndex: i }));
+export const normalizeOrderIndex = (blocks: CardBlock[]) => { return (blocks ?? []).map((b, i) => ({ ...b, orderIndex: i }));
 };
 
 const isBlockEmpty = (block: CardBlock) => {
@@ -74,8 +51,7 @@ const hasAttachmentContent = (
   );
 };
 
-export const shouldAutoOpenEditorForCard = (card: unknown) => {
-  if (!card) return false;
+export const shouldAutoOpenEditorForCard = (card: unknown) => { if (!card) return false;
   const safeCard = card as {
     title?: string;
     tagIds?: unknown[];

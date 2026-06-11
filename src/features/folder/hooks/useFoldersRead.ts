@@ -18,8 +18,7 @@ const isDatabaseClosedError = (error: unknown) => {
   );
 };
 
-export const useFoldersRead = () => {
-  const userId = useEffectiveLocalUserId();
+export const useFoldersRead = () => { const userId = useEffectiveLocalUserId();
 
   const folders = useLiveQuery(async () => {
     if (!userId) {
@@ -52,5 +51,4 @@ export const useFoldersRead = () => {
   };
 };
 
-export const normalizeVisibleFolders = (rawFolders: unknown[]): Folder[] =>
-  rawFolders.map(normalizeFolder).filter((folder) => !folder.isDeleted);
+export const normalizeVisibleFolders = (rawFolders: unknown[]): Folder[] => rawFolders.map(normalizeFolder).filter((folder) => !folder.isDeleted);

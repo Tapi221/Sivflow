@@ -26,8 +26,7 @@ const normalizeSyncSettings = (value: unknown): SyncSettings => {
   };
 };
 
-export const useSyncSettings = () => {
-  const { currentUser } = useAuthSession();
+export const useSyncSettings = () => { const { currentUser } = useAuthSession();
   const [settings, setSettings] = useState<SyncSettings>(DEFAULT_SYNC_SETTINGS);
   const [loading, setLoading] = useState(true);
 

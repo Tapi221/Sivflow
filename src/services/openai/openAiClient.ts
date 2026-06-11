@@ -1,14 +1,12 @@
 import { generateTextLocally } from "./localTextGenerator";
 import { DEFAULT_OPEN_AI_SETTINGS, loadOpenAiSettings, type OpenAiSettings } from "./openAiSettings";
 
-export type GenerateTextOptions = {
-  prompt: string;
+export type GenerateTextOptions = { prompt: string;
   systemPrompt?: string;
   settings?: OpenAiSettings;
 };
 
-export type GenerateTextResult = {
-  text: string;
+export type GenerateTextResult = { text: string;
   model: string;
 };
 
@@ -43,16 +41,7 @@ const extractText = (response: OpenAiResponsesApiResponse): string => {
   );
 };
 
-export const generateTextWithOpenAi = async ({
-  prompt,
-  systemPrompt,
-  settings = loadOpenAiSettings(),
-}: GenerateTextOptions): Promise<GenerateTextResult> => {
-  if (settings.providerMode === "local-template") {
-    return {
-      text: generateTextLocally({ prompt, systemPrompt }),
-      model: "local-template",
-    };
+export const generateTextWithOpenAi = async ({ prompt, systemPrompt, settings = loadOpenAiSettings(), }: GenerateTextOptions): Promise<GenerateTextResult> => { if (settings.providerMode === "local-template") { return { text: generateTextLocally({ prompt, systemPrompt }), model: "local-template", };
   }
 
   const apiKey = settings.apiKey.trim();
@@ -108,12 +97,7 @@ export const generateTextWithOpenAi = async ({
   return { text, model };
 };
 
-export const testOpenAiConnection = async (settings = loadOpenAiSettings()) => {
-  if (settings.providerMode === "local-template") {
-    return {
-      text: generateTextLocally({ prompt: "接続テスト" }),
-      model: "local-template",
-    };
+export const testOpenAiConnection = async (settings = loadOpenAiSettings()) => { if (settings.providerMode === "local-template") { return { text: generateTextLocally({ prompt: "接続テスト" }), model: "local-template", };
   }
 
   return generateTextWithOpenAi({

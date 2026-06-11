@@ -2,14 +2,7 @@
 
 import cloneDeep from 'lodash/cloneDeep.js';
 import { BaseAIPlugin, withAIBatch } from '@platejs/ai';
-import {
-  AIChatPlugin,
-  AIPlugin,
-  applyAISuggestions,
-  getInsertPreviewStart,
-  streamInsertChunk,
-  useChatChunk,
-} from '@platejs/ai/react';
+import { AIChatPlugin, AIPlugin, applyAISuggestions, getInsertPreviewStart, streamInsertChunk, useChatChunk, } from '@platejs/ai/react';
 import { ElementApi, getPluginType, KEYS, PathApi } from 'platejs';
 import { usePluginOption } from 'platejs/react';
 
@@ -20,21 +13,7 @@ import { useChat } from '@/components/editor/use-chat';
 import { CursorOverlayKit } from './cursor-overlay-kit';
 import { MarkdownKit } from './markdown-kit';
 
-export const aiChatPlugin = AIChatPlugin.extend({
-  options: {
-    chatOptions: {
-      api: '/api/ai/command',
-      body: {},
-    },
-  },
-  render: {
-    afterContainer: AILoadingBar,
-    afterEditable: AIMenu,
-    node: AIAnchorElement,
-  },
-  shortcuts: { show: { keys: 'mod+j' } },
-  useHooks: ({ editor, getOption }) => {
-    useChat();
+export const aiChatPlugin = AIChatPlugin.extend({ options: { chatOptions: { api: '/api/ai/command', body: {}, }, }, render: { afterContainer: AILoadingBar, afterEditable: AIMenu, node: AIAnchorElement, }, shortcuts: { show: { keys: 'mod+j' } }, useHooks: ({ editor, getOption }) => { useChat();
 
     const mode = usePluginOption(AIChatPlugin, 'mode');
     const toolName = usePluginOption(AIChatPlugin, 'toolName');
@@ -100,9 +79,4 @@ export const aiChatPlugin = AIChatPlugin.extend({
   },
 });
 
-export const AIKit = [
-  ...CursorOverlayKit,
-  ...MarkdownKit,
-  AIPlugin.withComponent(AILeaf),
-  aiChatPlugin,
-];
+export const AIKit = [ ...CursorOverlayKit, ...MarkdownKit, AIPlugin.withComponent(AILeaf), aiChatPlugin, ];

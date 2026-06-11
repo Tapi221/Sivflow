@@ -63,15 +63,7 @@ const PLAIN_MENU_LABEL_CLASS =
 /**
  * エクスプローラーの各種メニュー（追加ボタン、コンテキストメニュー）で共有されるパネルコンポーネント
  */
-export const ExplorerMenuPanel = ({
-  actions,
-  closeMenu,
-  className,
-  variant = "default",
-  style,
-  ...contentProps
-}: ExplorerMenuPanelProps) => {
-  const visibleActions = actions.filter((action) => !action.hidden);
+export const ExplorerMenuPanel = ({ actions, closeMenu, className, variant = "default", style, ...contentProps }: ExplorerMenuPanelProps) => { const visibleActions = actions.filter((action) => !action.hidden);
   const panelPreset = floatingPanelPresets.menu;
   const isCreateVariant = variant === "create";
   const isFolderContextVariant = variant === "folderContext";

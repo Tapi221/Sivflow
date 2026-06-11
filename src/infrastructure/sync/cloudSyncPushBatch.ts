@@ -35,10 +35,7 @@ const buildDeleteTombstone = (id: string, data: unknown): Record<string, unknown
   return tombstone;
 };
 
-export const pushCloudSyncBatch = async (
-  userId: string,
-  changes: SyncChange[],
-): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown }> => {
+export const pushCloudSyncBatch = async ( userId: string, changes: SyncChange[], ): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown }> => {
   console.log(
     `📤 [CloudSyncAdapter] pushBatch START. Count: ${changes.length}`,
   );

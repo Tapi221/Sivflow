@@ -21,11 +21,7 @@ const triggerAssetQueueProcessing = (
   });
 };
 
-export const bindPersistentQueueAutoProcessing = (
-  persistentQueue: AssetQueueProcessor,
-): void => {
-  if (typeof window === "undefined" || typeof document === "undefined") {
-    return;
+export const bindPersistentQueueAutoProcessing = ( persistentQueue: AssetQueueProcessor, ): void => { if (typeof window === "undefined" || typeof document === "undefined") { return;
   }
 
   const target = window as Window & {

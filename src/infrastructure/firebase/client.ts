@@ -113,9 +113,7 @@ export const functionsClient = firebaseClientState.functionsClient as Functions;
 export const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
 export const db: Firestore | null = firebaseClientState.firestoreDb;
 
-export const requireFirebaseClient = (): FirebaseClientState => {
-  if (isFirebaseClientAvailable && firebaseClientState.app) {
-    return firebaseClientState;
+export const requireFirebaseClient = (): FirebaseClientState => { if (isFirebaseClientAvailable && firebaseClientState.app) { return firebaseClientState;
   }
 
   throw new Error(
@@ -123,9 +121,7 @@ export const requireFirebaseClient = (): FirebaseClientState => {
   );
 };
 
-export const requireFirestoreDb = (): Firestore => {
-  if (firestoreDb) {
-    return firestoreDb;
+export const requireFirestoreDb = (): Firestore => { if (firestoreDb) { return firestoreDb;
   }
 
   if (!isFirebaseClientAvailable) {

@@ -1,7 +1,6 @@
 import type { GCalConnectionStatus, GCalSyncState, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 
-export type GoogleAccountEntry = {
-  id: string;
+export type GoogleAccountEntry = { id: string;
   email: string | null;
   name: string | null;
   photoUrl: string | null;
@@ -16,8 +15,7 @@ export type GoogleAccountEntry = {
   error: string | null;
 };
 
-export type GoogleAccountTokenUpdate = {
-  accountId: string;
+export type GoogleAccountTokenUpdate = { accountId: string;
   accessToken: string;
   refreshToken?: string | null;
   accountName?: string | null;
@@ -25,8 +23,7 @@ export type GoogleAccountTokenUpdate = {
   expiresInSeconds?: number | null;
 };
 
-export type GoogleAccountsAction =
-  | { type: "ADD"; account: GoogleAccountEntry }
+export type GoogleAccountsAction = | { type: "ADD"; account: GoogleAccountEntry }
   | { type: "REMOVE"; id: string }
   | { type: "SET_CONNECTING"; id: string; value: boolean }
   | {
@@ -45,17 +42,7 @@ export type GoogleAccountsAction =
   | { type: "NEEDS_RECONNECT"; id: string; error?: string | null }
   | { type: "SET_ERROR"; id: string; error: string | null };
 
-export const reduceGoogleCalendarAccounts = (
-  state: GoogleAccountEntry[],
-  action: GoogleAccountsAction,
-): GoogleAccountEntry[] => {
-  switch (action.type) {
-    case "ADD":
-      return state.some((account) => account.id === action.account.id)
-        ? state.map((account) =>
-          account.id === action.account.id ? action.account : account,
-        )
-        : [...state, action.account];
+export const reduceGoogleCalendarAccounts = ( state: GoogleAccountEntry[], action: GoogleAccountsAction, ): GoogleAccountEntry[] => { switch (action.type) { case "ADD": return state.some((account) => account.id === action.account.id) ? state.map((account) => account.id === action.account.id ? action.account : account, ) : [...state, action.account];
 
     case "REMOVE":
       return state.filter((account) => account.id !== action.id);

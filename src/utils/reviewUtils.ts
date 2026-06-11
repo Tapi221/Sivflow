@@ -3,8 +3,7 @@ import { calculateRetentionProbability } from "./reviewMetrics";
 
 export { normalizeMemoryStability, type SubjectiveScore };
 
-export type StabilityPhase = {
-  key: "unstable" | "fragile" | "growing" | "stable" | "solid";
+export type StabilityPhase = { key: "unstable" | "fragile" | "growing" | "stable" | "solid";
   label: string;
   shortLabel: string;
   colorClass: string;
@@ -64,11 +63,7 @@ const PHASES: Array<{ min: number; phase: StabilityPhase }> = [
   },
 ];
 
-export const getStabilityPhase = (
-  stabilityInternal: number,
-  intervalDays: number = 1,
-): StabilityPhase => {
-  const s = normalizeMemoryStability(stabilityInternal);
+export const getStabilityPhase = ( stabilityInternal: number, intervalDays: number = 1, ): StabilityPhase => { const s = normalizeMemoryStability(stabilityInternal);
   const retention = calculateRetentionProbability(s, intervalDays);
   const matched = [...PHASES].reverse().find((entry) => retention >= entry.min);
   return matched?.phase ?? PHASES[0].phase;

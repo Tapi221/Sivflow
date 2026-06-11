@@ -6,8 +6,7 @@ import { getLocalDb } from "@/services/localDB";
 import type { SyncError } from "@/types";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
-export interface HardDeleteOrphanedCardsResult {
-  targetCardIds: string[];
+export interface HardDeleteOrphanedCardsResult { targetCardIds: string[];
   deletedCardIds: string[];
   failedCardIds: string[];
   skippedCardIds: string[];
@@ -154,17 +153,7 @@ const cleanupSyncErrorsBestEffort = async (
   }
 };
 
-export const createHardDeleteOrphanedCardsUseCase = () => {
-  const execute = async (
-    userId: string,
-    report: IntegrityReport,
-  ): Promise<HardDeleteOrphanedCardsResult> => {
-    const targetCardIds = dedupe(
-      report.issues
-        .filter(isInvalidFolderRefCardIssue)
-        .map((issue) => issue.entityId)
-        .filter((cardId) => cardId.trim().length > 0),
-    );
+export const createHardDeleteOrphanedCardsUseCase = () => { const execute = async ( userId: string, report: IntegrityReport, ): Promise<HardDeleteOrphanedCardsResult> => { const targetCardIds = dedupe( report.issues .filter(isInvalidFolderRefCardIssue) .map((issue) => issue.entityId) .filter((cardId) => cardId.trim().length > 0), );
 
     if (targetCardIds.length === 0) {
       return {

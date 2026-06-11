@@ -11,29 +11,18 @@ const toPx = (value: number) => {
   return `${Number(value.toFixed(3))}px`;
 };
 
-export const normalizeCardSetViewZoom = (zoom?: number) => {
-  const safeZoom = typeof zoom === "number" && Number.isFinite(zoom) ? zoom : 1;
+export const normalizeCardSetViewZoom = (zoom?: number) => { const safeZoom = typeof zoom === "number" && Number.isFinite(zoom) ? zoom : 1;
 
   return clampNumber(safeZoom, MIN_CARD_SET_VIEW_ZOOM, MAX_CARD_SET_VIEW_ZOOM);
 };
 
-export const scaleTypographyValuePx = (basePx: number, zoom?: number) => {
-  return toPx(basePx * normalizeCardSetViewZoom(zoom));
+export const scaleTypographyValuePx = (basePx: number, zoom?: number) => { return toPx(basePx * normalizeCardSetViewZoom(zoom));
 };
 
-export const scaleTypographyNumberPx = (basePx: number, zoom?: number) => {
-  return Math.max(
-    8,
-    Number((basePx * normalizeCardSetViewZoom(zoom)).toFixed(3)),
-  );
+export const scaleTypographyNumberPx = (basePx: number, zoom?: number) => { return Math.max( 8, Number((basePx * normalizeCardSetViewZoom(zoom)).toFixed(3)), );
 };
 
-export const buildTypographyStyle = ({
-  fontSizePx,
-  lineHeightPx,
-  zoom,
-}: {
-  fontSizePx: number;
+export const buildTypographyStyle = ({ fontSizePx, lineHeightPx, zoom, }: { fontSizePx: number;
   lineHeightPx: number;
   zoom?: number;
 }): CSSProperties => {
@@ -43,11 +32,7 @@ export const buildTypographyStyle = ({
   };
 };
 
-export const mergeStyles = (
-  ...styles: Array<CSSProperties | undefined>
-): CSSProperties => {
-  return styles.reduce<CSSProperties>((acc, style) => {
-    if (!style) return acc;
+export const mergeStyles = ( ...styles: Array<CSSProperties | undefined> ): CSSProperties => { return styles.reduce<CSSProperties>((acc, style) => { if (!style) return acc;
     return { ...acc, ...style };
   }, {});
 };

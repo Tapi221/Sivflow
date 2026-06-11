@@ -21,14 +21,7 @@ const normalizeReferences = (
   attachments?: CardFaceAttachments | null,
 ): ReferenceBlockData[] => sanitizeReferences(attachments?.references ?? []);
 
-export const SharedCardAttachments = ({
-  attachments,
-  className,
-}: SharedCardAttachmentsProps) => {
-  const audioUrls = React.useMemo(
-    () => normalizeAudioUrls(attachments),
-    [attachments],
-  );
+export const SharedCardAttachments = ({ attachments, className, }: SharedCardAttachmentsProps) => { const audioUrls = React.useMemo( () => normalizeAudioUrls(attachments), [attachments], );
   const references = React.useMemo(
     () => normalizeReferences(attachments),
     [attachments],

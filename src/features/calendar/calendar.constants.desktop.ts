@@ -16,10 +16,7 @@ export const MONTH_VISIBLE_EVENT_COUNT_MIN = 1;
 export const DEFAULT_MONTH_VISIBLE_EVENT_COUNT = 3;
 export const MONTH_VISIBLE_EVENT_COUNT_MAX = 20;
 
-export const createInitialMonthOffsetRange = () => ({
-  startOffset: -INITIAL_MONTH_BUFFER,
-  endOffset: INITIAL_MONTH_BUFFER,
-});
+export const createInitialMonthOffsetRange = () => ({ startOffset: -INITIAL_MONTH_BUFFER, endOffset: INITIAL_MONTH_BUFFER, });
 
 //Timeline View
 export const TIMELINE_HEADER_HEIGHT = 40;
@@ -44,6 +41,4 @@ export const WEEKDAY_SURFACE_LEFT_INSET_PX = 16;
 
 //
 export const MIN_EVENT_DISPLAY_HEIGHT_PX = 48; // min-h-12 に対応
-export const MIN_LAYOUT_MINUTES = Math.ceil(
-  (MIN_EVENT_DISPLAY_HEIGHT_PX / DEFAULT_HOUR_ROW_HEIGHT) * 60,
-);
+export const MIN_LAYOUT_MINUTES = Math.ceil( (MIN_EVENT_DISPLAY_HEIGHT_PX / DEFAULT_HOUR_ROW_HEIGHT) * 60, );

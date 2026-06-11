@@ -2,8 +2,7 @@ import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 import { type CardLayoutMode, type CardSetInteractionMode, normalizeCardLayoutMode, resolveDefaultCardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-export interface CardLayoutModePreferenceScope {
-  deviceScope: string;
+export interface CardLayoutModePreferenceScope { deviceScope: string;
   cardSetId: string | null | undefined;
   displayMode: CardDisplayMode;
   interactionMode: CardSetInteractionMode;
@@ -49,20 +48,13 @@ const writeStorageValue = (key: string, value: string) => {
   }
 };
 
-export const getCardLayoutModePreference = (
-  scope: CardLayoutModePreferenceScope,
-): CardLayoutMode | null => {
-  if (!scope.cardSetId) return null;
+export const getCardLayoutModePreference = ( scope: CardLayoutModePreferenceScope, ): CardLayoutMode | null => { if (!scope.cardSetId) return null;
 
   const raw = readStorageValue(buildStorageKey(scope));
   return raw == null ? null : normalizeCardLayoutMode(raw);
 };
 
-export const resolveCardLayoutModePreference = (
-  scope: CardLayoutModePreferenceScope,
-  fallbackMode?: CardLayoutMode | null,
-): CardLayoutMode => {
-  const stored = getCardLayoutModePreference(scope);
+export const resolveCardLayoutModePreference = ( scope: CardLayoutModePreferenceScope, fallbackMode?: CardLayoutMode | null, ): CardLayoutMode => { const stored = getCardLayoutModePreference(scope);
   if (stored) return stored;
 
   if (fallbackMode) {
@@ -72,10 +64,6 @@ export const resolveCardLayoutModePreference = (
   return resolveDefaultCardLayoutMode(scope.interactionMode);
 };
 
-export const setCardLayoutModePreference = (
-  scope: CardLayoutModePreferenceScope,
-  mode: CardLayoutMode,
-) => {
-  if (!scope.cardSetId) return;
+export const setCardLayoutModePreference = ( scope: CardLayoutModePreferenceScope, mode: CardLayoutMode, ) => { if (!scope.cardSetId) return;
   writeStorageValue(buildStorageKey(scope), normalizeCardLayoutMode(mode));
 };

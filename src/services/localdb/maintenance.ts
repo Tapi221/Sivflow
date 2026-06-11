@@ -42,12 +42,10 @@ type MaintenanceDb = {
   };
 };
 
-export const clearAllData = async (db: MaintenanceDb): Promise<void> => {
-  await Promise.all(db.tables.map((table) => table.clear()));
+export const clearAllData = async (db: MaintenanceDb): Promise<void> => { await Promise.all(db.tables.map((table) => table.clear()));
 };
 
-export const cleanupSyncHistory = async (db: MaintenanceDb): Promise<void> => {
-  const now = Date.now();
+export const cleanupSyncHistory = async (db: MaintenanceDb): Promise<void> => { const now = Date.now();
   const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 
   await db.syncHistory
@@ -62,8 +60,7 @@ export const cleanupSyncHistory = async (db: MaintenanceDb): Promise<void> => {
   }
 };
 
-export const cleanupSyncErrors = async (db: MaintenanceDb): Promise<void> => {
-  const now = Date.now();
+export const cleanupSyncErrors = async (db: MaintenanceDb): Promise<void> => { const now = Date.now();
   const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
 
   const oldErrors = await db.syncErrors
@@ -75,29 +72,13 @@ export const cleanupSyncErrors = async (db: MaintenanceDb): Promise<void> => {
   await db.syncErrors.bulkDelete(oldErrors.map((item) => item.id));
 };
 
-export const getDeviceMeta = async (
-  db: MaintenanceDb,
-  userId: string,
-): Promise<Record<string, unknown> | undefined> => {
-  return db.deviceMeta.where("userId").equals(userId).first();
+export const getDeviceMeta = async ( db: MaintenanceDb, userId: string, ): Promise<Record<string, unknown> | undefined> => { return db.deviceMeta.where("userId").equals(userId).first();
 };
 
-export const upsertDeviceMeta = async (
-  db: MaintenanceDb,
-  meta: Record<string, unknown>,
-): Promise<void> => {
-  await db.deviceMeta.put(meta);
+export const upsertDeviceMeta = async ( db: MaintenanceDb, meta: Record<string, unknown>, ): Promise<void> => { await db.deviceMeta.put(meta);
 };
 
-export const getSyncEnabledFolders = async (
-  db: MaintenanceDb,
-  userId: string,
-): Promise<Record<string, unknown>[]> => {
-  return db.folders
-    .where("userId")
-    .equals(userId)
-    .and((folder: Record<string, unknown>) => folder.cloudSyncEnabled === true)
-    .toArray();
+export const getSyncEnabledFolders = async ( db: MaintenanceDb, userId: string, ): Promise<Record<string, unknown>[]> => { return db.folders .where("userId") .equals(userId) .and((folder: Record<string, unknown>) => folder.cloudSyncEnabled === true) .toArray();
 };
 
 export { createDeleteQueueItem, createUpsertQueueItem, queueItemToSyncTask } from "@/application/usecases/syncQueueItemFactory";

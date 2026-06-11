@@ -45,8 +45,7 @@ const toNullableFiniteNumber = (value: unknown): number | null => {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 };
 
-export const toSnapshotAsset = (row: SnapshotAssetSource): SnapshotAsset | null => {
-  const assetId = typeof row.id === "string" ? row.id.trim() : "";
+export const toSnapshotAsset = (row: SnapshotAssetSource): SnapshotAsset | null => { const assetId = typeof row.id === "string" ? row.id.trim() : "";
   const storagePath =
     typeof row.remoteKey === "string" ? row.remoteKey.trim() : "";
 
@@ -68,24 +67,5 @@ export const toSnapshotAsset = (row: SnapshotAssetSource): SnapshotAsset | null 
   };
 };
 
-export const toAssetRecordFromSnapshotAsset = (
-  asset: SnapshotAsset,
-  userId: string,
-): AssetRecord => {
-  return {
-    id: asset.assetId,
-    userId,
-    mime: asset.mime,
-    size: 0,
-    createdAt: toValidDate(asset.createdAt),
-    updatedAt: toValidDate(asset.updatedAt),
-    localBlobId: null,
-    localStatus: "missing",
-    remoteKey: asset.storagePath,
-    remoteStatus: "ready",
-    remoteUrlCache: null,
-    width: toNullableFiniteNumber(asset.naturalW),
-    height: toNullableFiniteNumber(asset.naturalH),
-    retryCount: 0,
-  };
+export const toAssetRecordFromSnapshotAsset = ( asset: SnapshotAsset, userId: string, ): AssetRecord => { return { id: asset.assetId, userId, mime: asset.mime, size: 0, createdAt: toValidDate(asset.createdAt), updatedAt: toValidDate(asset.updatedAt), localBlobId: null, localStatus: "missing", remoteKey: asset.storagePath, remoteStatus: "ready", remoteUrlCache: null, width: toNullableFiniteNumber(asset.naturalW), height: toNullableFiniteNumber(asset.naturalH), retryCount: 0, };
 };

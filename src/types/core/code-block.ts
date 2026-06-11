@@ -1,4 +1,3 @@
-export interface CodeBlockData {
-  language: string;
+export interface CodeBlockData { language: string;
   code: string;
 }

@@ -41,8 +41,7 @@ const createDevPreviewUserJson = (): DevPreviewUserJson => ({
   uid: DEV_PREVIEW_USER_ID,
 });
 
-export const isDevPreviewSessionEnabled = (): boolean => {
-  if (!DEV_MODE) return false;
+export const isDevPreviewSessionEnabled = (): boolean => { if (!DEV_MODE) return false;
 
   const url = getCurrentUrl();
   if (!url) return false;
@@ -51,34 +50,11 @@ export const isDevPreviewSessionEnabled = (): boolean => {
   return isLocalDevHost(url.hostname);
 };
 
-export const disableDevPreviewSession = (): void => {
-  const url = getCurrentUrl();
+export const disableDevPreviewSession = (): void => { const url = getCurrentUrl();
   if (!url || typeof window === "undefined") return;
 
   url.searchParams.set(DEV_PREVIEW_DISABLE_PARAM, "true");
   window.history.replaceState(window.history.state, "", url.toString());
 };
 
-export const createDevPreviewUser = (): FirebaseUser => ({
-  ...createDevPreviewUserJson(),
-  metadata: {
-    creationTime: DEV_PREVIEW_TIME,
-    lastSignInTime: DEV_PREVIEW_TIME,
-  },
-  providerData: [],
-  refreshToken: DEV_PREVIEW_TOKEN,
-  tenantId: null,
-  delete: async () => {},
-  getIdToken: async () => DEV_PREVIEW_TOKEN,
-  getIdTokenResult: async () => ({
-    authTime: DEV_PREVIEW_TIME,
-    claims: {},
-    expirationTime: DEV_PREVIEW_TIME,
-    issuedAtTime: DEV_PREVIEW_TIME,
-    signInProvider: DEV_PREVIEW_PROVIDER_ID,
-    signInSecondFactor: null,
-    token: DEV_PREVIEW_TOKEN,
-  }),
-  reload: async () => {},
-  toJSON: createDevPreviewUserJson,
-}) as unknown as FirebaseUser;
+export const createDevPreviewUser = (): FirebaseUser => ({ ...createDevPreviewUserJson(), metadata: { creationTime: DEV_PREVIEW_TIME, lastSignInTime: DEV_PREVIEW_TIME, }, providerData: [], refreshToken: DEV_PREVIEW_TOKEN, tenantId: null, delete: async () => {}, getIdToken: async () => DEV_PREVIEW_TOKEN, getIdTokenResult: async () => ({ authTime: DEV_PREVIEW_TIME, claims: {}, expirationTime: DEV_PREVIEW_TIME, issuedAtTime: DEV_PREVIEW_TIME, signInProvider: DEV_PREVIEW_PROVIDER_ID, signInSecondFactor: null, token: DEV_PREVIEW_TOKEN, }), reload: async () => {}, toJSON: createDevPreviewUserJson, }) as unknown as FirebaseUser;

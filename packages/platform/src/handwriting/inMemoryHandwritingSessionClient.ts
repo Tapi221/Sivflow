@@ -14,8 +14,7 @@ const createHub = (): InMemoryHandwritingSessionHub => ({
   clients: new Set(),
 });
 
-export class InMemoryHandwritingSessionClient implements HandwritingSessionClient {
-  readonly session: HandwritingSession;
+export class InMemoryHandwritingSessionClient implements HandwritingSessionClient { readonly session: HandwritingSession;
 
   private readonly hub: InMemoryHandwritingSessionHub;
   private readonly messageHandlers = new Set<HandwritingSessionMessageHandler>();
@@ -87,7 +86,6 @@ export class InMemoryHandwritingSessionClient implements HandwritingSessionClien
 
 export const createInMemoryHandwritingSessionHub = createHub;
 
-export const createInMemoryHandwritingSessionClientPair = (session: HandwritingSession): readonly [InMemoryHandwritingSessionClient, InMemoryHandwritingSessionClient] => {
-  const hub = createHub();
+export const createInMemoryHandwritingSessionClientPair = (session: HandwritingSession): readonly [InMemoryHandwritingSessionClient, InMemoryHandwritingSessionClient] => { const hub = createHub();
   return [new InMemoryHandwritingSessionClient({ session, hub }), new InMemoryHandwritingSessionClient({ session, hub })];
 };

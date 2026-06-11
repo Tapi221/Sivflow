@@ -5,8 +5,7 @@ type CardTagFields = {
   updatedAt?: Date;
 };
 
-export type TagRepairSummary = {
-  removedOrphanTagRefs: number;
+export type TagRepairSummary = { removedOrphanTagRefs: number;
   dedupedTagRefs: number;
   duplicateNameLowerPairs: Array<{
     userId: string;
@@ -20,10 +19,7 @@ const asStringArray = (value: unknown): string[] => {
   return value.filter((item): item is string => typeof item === "string");
 };
 
-export const auditAndRepairTags = async (
-  userId: string,
-): Promise<TagRepairSummary> => {
-  const db = await getInstance(userId);
+export const auditAndRepairTags = async ( userId: string, ): Promise<TagRepairSummary> => { const db = await getInstance(userId);
   const tagIdsByNameLower = new Map<string, string[]>();
   const knownTagIds = new Set<string>();
   let removedOrphanTagRefs = 0;

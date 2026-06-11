@@ -2,15 +2,13 @@
 export type NotificationLevel = "info" | "warning" | "error";
 
 // 通知アクションの型定義
-export interface NotificationAction {
-  label: string;
+export interface NotificationAction { label: string;
   onClick: () => void;
   primary?: boolean;
 }
 
 // 通知の型定義
-export interface Notification {
-  id: string;
+export interface Notification { id: string;
   level: NotificationLevel;
   title: string;
   message: string;
@@ -23,8 +21,7 @@ export interface Notification {
 }
 
 // 通知オプションの型定義
-export interface NotificationOptions {
-  details?: string;
+export interface NotificationOptions { details?: string;
   autoClose?: boolean;
   closeable?: boolean;
   actions?: NotificationAction[];

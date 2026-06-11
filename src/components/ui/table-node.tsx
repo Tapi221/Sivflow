@@ -3,109 +3,24 @@
 import * as React from 'react';
 
 import { useDraggable, useDropLine } from '@platejs/dnd';
-import {
-  BlockSelectionPlugin,
-  useBlockSelected,
-} from '@platejs/selection/react';
+import { BlockSelectionPlugin, useBlockSelected, } from '@platejs/selection/react';
 import { resizeLengthClampStatic } from '@platejs/resizable';
-import {
-  getTableColumnCount,
-  setCellBackground,
-  setTableColSize,
-  setTableMarginLeft,
-  setTableRowSize,
-} from '@platejs/table';
-import {
-  TablePlugin,
-  TableProvider,
-  roundCellSizeToStep,
-  useCellIndices,
-  useOverrideColSize,
-  useOverrideMarginLeft,
-  useOverrideRowSize,
-  useTableCellBorders,
-  useTableBordersDropdownMenuContentState,
-  useTableColSizes,
-  useTableElement,
-  useTableMergeState,
-  useTableSelectionDom,
-  useTableValue,
-} from '@platejs/table/react';
-import {
-  ArrowDown,
-  ArrowLeft,
-  ArrowRight,
-  ArrowUp,
-  CombineIcon,
-  EraserIcon,
-  Grid2X2Icon,
-  GripVertical,
-  PaintBucketIcon,
-  SquareSplitHorizontalIcon,
-  Trash2Icon,
-  XIcon,
-} from 'lucide-react';
-import {
-  type TElement,
-  type TTableCellElement,
-  type TTableElement,
-  type TTableRowElement,
-  KEYS,
-  PathApi,
-} from 'platejs';
-import {
-  type PlateElementProps,
-  PlateElement,
-  useComposedRef,
-  useEditorPlugin,
-  useEditorRef,
-  useEditorSelector,
-  useElement,
-  useFocusedLast,
-  usePluginOption,
-  useReadOnly,
-  useRemoveNodeButton,
-  useSelected,
-  withHOC,
-} from 'platejs/react';
+import { getTableColumnCount, setCellBackground, setTableColSize, setTableMarginLeft, setTableRowSize, } from '@platejs/table';
+import { TablePlugin, TableProvider, roundCellSizeToStep, useCellIndices, useOverrideColSize, useOverrideMarginLeft, useOverrideRowSize, useTableCellBorders, useTableBordersDropdownMenuContentState, useTableColSizes, useTableElement, useTableMergeState, useTableSelectionDom, useTableValue, } from '@platejs/table/react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, CombineIcon, EraserIcon, Grid2X2Icon, GripVertical, PaintBucketIcon, SquareSplitHorizontalIcon, Trash2Icon, XIcon, } from 'lucide-react';
+import { type TElement, type TTableCellElement, type TTableElement, type TTableRowElement, KEYS, PathApi, } from 'platejs';
+import { type PlateElementProps, PlateElement, useComposedRef, useEditorPlugin, useEditorRef, useEditorSelector, useElement, useFocusedLast, usePluginOption, useReadOnly, useRemoveNodeButton, useSelected, withHOC, } from 'platejs/react';
 import { useElementSelector } from 'platejs/react';
 
 import { Button } from './button';
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuPortal,
-  DropdownMenuTrigger,
-} from './dropdown-menu';
-import {
-  Popover,
-  PopoverAnchor,
-  PopoverContent,
-} from './popover';
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuPortal, DropdownMenuTrigger, } from './dropdown-menu';
+import { Popover, PopoverAnchor, PopoverContent, } from './popover';
 import { cn } from '@/lib/utils';
 
 import { blockSelectionVariants } from './block-selection';
-import {
-  ColorDropdownMenuItems,
-  DEFAULT_COLORS,
-} from './font-color-toolbar-button';
-import {
-  BorderAllIcon,
-  BorderBottomIcon,
-  BorderLeftIcon,
-  BorderNoneIcon,
-  BorderRightIcon,
-  BorderTopIcon,
-} from './table-icons';
-import {
-  Toolbar,
-  ToolbarButton,
-  ToolbarGroup,
-  ToolbarMenuGroup,
-} from './toolbar';
+import { ColorDropdownMenuItems, DEFAULT_COLORS, } from './font-color-toolbar-button';
+import { BorderAllIcon, BorderBottomIcon, BorderLeftIcon, BorderNoneIcon, BorderRightIcon, BorderTopIcon, } from './table-icons';
+import { Toolbar, ToolbarButton, ToolbarGroup, ToolbarMenuGroup, } from './toolbar';
 
 type TableResizeDirection = 'bottom' | 'left' | 'right';
 
@@ -601,13 +516,7 @@ function useTableResizeController({
   );
 }
 
-export const TableElement = withHOC(
-  TableProvider,
-  function TableElement({
-    children,
-    ...props
-  }: PlateElementProps<TTableElement>) {
-    const readOnly = useReadOnly();
+export const TableElement = withHOC( TableProvider, function TableElement({ children, ...props }: PlateElementProps<TTableElement>) { const readOnly = useReadOnly();
     const isSelectionAreaVisible = usePluginOption(
       BlockSelectionPlugin,
       'isSelectionAreaVisible'
@@ -1141,11 +1050,7 @@ function ColorDropdownMenu({
   );
 }
 
-export function TableRowElement({
-  children,
-  ...props
-}: PlateElementProps<TTableRowElement>) {
-  const { element } = props;
+export function TableRowElement({ children, ...props }: PlateElementProps<TTableRowElement>) { const { element } = props;
   const readOnly = useReadOnly();
   const editor = useEditorRef();
   const rowIndex = useElementSelector(([, path]) => path.at(-1) as number, [], {
@@ -1274,11 +1179,7 @@ function RowDropLine() {
   );
 }
 
-export function TableCellElement({
-  isHeader,
-  ...props
-}: PlateElementProps<TTableCellElement> & {
-  isHeader?: boolean;
+export function TableCellElement({ isHeader, ...props }: PlateElementProps<TTableCellElement> & { isHeader?: boolean;
 }) {
   const readOnly = useReadOnly();
   const element = props.element;
@@ -1352,10 +1253,7 @@ export function TableCellElement({
   );
 }
 
-export function TableCellHeaderElement(
-  props: React.ComponentProps<typeof TableCellElement>
-) {
-  return <TableCellElement {...props} isHeader />;
+export function TableCellHeaderElement( props: React.ComponentProps<typeof TableCellElement> ) { return <TableCellElement {...props} isHeader />;
 }
 
 const TableCellResizeControls = React.memo(function TableCellResizeControls({

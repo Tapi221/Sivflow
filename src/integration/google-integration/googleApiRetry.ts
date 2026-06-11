@@ -38,11 +38,7 @@ const parseRetryAfterMs = (value: string | null): number | undefined => {
   return undefined;
 };
 
-export const createGoogleApiError = async (
-  response: Response,
-  prefix: string,
-): Promise<GoogleApiErrorWithMetadata> => {
-  const payload = await response.json().catch(() => null) as GoogleApiErrorPayload | null;
+export const createGoogleApiError = async ( response: Response, prefix: string, ): Promise<GoogleApiErrorWithMetadata> => { const payload = await response.json().catch(() => null) as GoogleApiErrorPayload | null;
   const message = payload?.error?.message;
   const reason = payload?.error?.errors?.[0]?.reason;
   const error = new Error(
@@ -63,11 +59,7 @@ const isRetryableGoogleApiError = (error: unknown): error is GoogleApiErrorWithM
   return status === 429 || (typeof status === "number" && status >= 500 && status < 600);
 };
 
-export const withGoogleApiRetry = async <T,>(
-  operation: () => Promise<T>,
-  context: GoogleApiRetryContext,
-): Promise<T> => {
-  for (let attempt = 0; attempt <= GOOGLE_API_RETRY_DELAYS_MS.length; attempt += 1) {
+export const withGoogleApiRetry = async <T,>( operation: () => Promise<T>, context: GoogleApiRetryContext, ): Promise<T> => { for (let attempt = 0; attempt <= GOOGLE_API_RETRY_DELAYS_MS.length; attempt += 1) {
     try {
       return await operation();
     } catch (error) {

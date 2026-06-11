@@ -12,8 +12,7 @@ type ScrollAnchorSnapshot = {
   relativeTop: number;
 };
 
-export type VerticalCardPagerProps<T> = {
-  cards: T[];
+export type VerticalCardPagerProps<T> = { cards: T[];
   activeIndex: number;
   onActiveIndexChange: (idx: number) => void;
   onRenderRangeChange?: (range: { start: number; end: number } | null) => void;

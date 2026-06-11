@@ -4,8 +4,7 @@ import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLIC
 
 export type DocumentContextMenuActionId = "rename" | "delete";
 
-export type DocumentContextMenuAction = {
-  id: DocumentContextMenuActionId;
+export type DocumentContextMenuAction = { id: DocumentContextMenuActionId;
   label: string;
   danger?: boolean;
   disabled?: boolean;

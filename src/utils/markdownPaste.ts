@@ -40,46 +40,7 @@ turndown.addRule("fencedCode", {
  * @param html - クリップボードから取得したHTML文字列
  * @returns 安全なMarkdown文字列
  */
-export const sanitizeAndConvertToMarkdown = (html: string) => {
-  // 1. DOMPurify でサニタイズ（script/style/event handler等を除去）
-  const clean = DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: [
-      "p",
-      "br",
-      "strong",
-      "b",
-      "em",
-      "i",
-      "u",
-      "a",
-      "ul",
-      "ol",
-      "li",
-      "h1",
-      "h2",
-      "h3",
-      "h4",
-      "h5",
-      "h6",
-      "pre",
-      "code",
-      "blockquote",
-      "hr",
-      "table",
-      "thead",
-      "tbody",
-      "tr",
-      "th",
-      "td",
-      "del",
-      "sup",
-      "sub",
-      "span",
-      "div",
-    ],
-    ALLOWED_ATTR: ["href", "class", "className", "lang"],
-    KEEP_CONTENT: true,
-  });
+export const sanitizeAndConvertToMarkdown = (html: string) => { // 1. DOMPurify でサニタイズ（script/style/event handler等を除去） const clean = DOMPurify.sanitize(html, { ALLOWED_TAGS: [ "p", "br", "strong", "b", "em", "i", "u", "a", "ul", "ol", "li", "h1", "h2", "h3", "h4", "h5", "h6", "pre", "code", "blockquote", "hr", "table", "thead", "tbody", "tr", "th", "td", "del", "sup", "sub", "span", "div", ], ALLOWED_ATTR: ["href", "class", "className", "lang"], KEEP_CONTENT: true, });
 
   // 2. Turndown で Markdown に変換
   let md = turndown.turndown(clean);

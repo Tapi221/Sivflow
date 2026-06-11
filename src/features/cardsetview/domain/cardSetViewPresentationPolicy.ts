@@ -43,41 +43,26 @@ const isMobileCardSetViewDevicePresentation = ({ deviceScope }: ResolveCardSetVi
   return deviceScope === MOBILE_CARD_SET_VIEW_DEVICE_SCOPE;
 };
 
-export const resolveCardSetViewUsesViewportWidth = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => {
-  return isMobileCardSetViewDevicePresentation({ deviceScope });
+export const resolveCardSetViewUsesViewportWidth = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => { return isMobileCardSetViewDevicePresentation({ deviceScope });
 };
 
-export const resolveCardSetViewUsesZoomPreference = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => {
-  return !isMobileCardSetViewDevicePresentation({ deviceScope });
+export const resolveCardSetViewUsesZoomPreference = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => { return !isMobileCardSetViewDevicePresentation({ deviceScope });
 };
 
-export const resolveCardSetViewZoomPercentOverride = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => {
-  return isMobileCardSetViewDevicePresentation({ deviceScope }) ? MOBILE_CARD_SET_VIEW_ZOOM_PERCENT : null;
+export const resolveCardSetViewZoomPercentOverride = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => { return isMobileCardSetViewDevicePresentation({ deviceScope }) ? MOBILE_CARD_SET_VIEW_ZOOM_PERCENT : null;
 };
 
-export const resolveCardSetViewShowsConstraintIndicator = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => {
-  return !isMobileCardSetViewDevicePresentation({ deviceScope });
+export const resolveCardSetViewShowsConstraintIndicator = ({ deviceScope }: ResolveCardSetViewDevicePresentationArgs) => { return !isMobileCardSetViewDevicePresentation({ deviceScope });
 };
 
-export const clampNormalizedZoomPercent = (
-  value: number,
-  stepPercent: number = CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT,
-) => roundToStep(value, stepPercent);
+export const clampNormalizedZoomPercent = ( value: number, stepPercent: number = CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT, ) => roundToStep(value, stepPercent);
 
-export const resolveZoomMinBaseWidthPx = ({
-  cardLayoutMode,
-}: ResolveZoomWidthArgs) => {
-  return CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX[cardLayoutMode];
+export const resolveZoomMinBaseWidthPx = ({ cardLayoutMode, }: ResolveZoomWidthArgs) => { return CARD_SET_VIEW_ZOOM_MIN_BASE_WIDTH_PX[cardLayoutMode];
 };
 
 export const clampZoomPercent = (value: number) => clampZoomPercentRange(value);
 
-export const resolveZoomPercentForPresentationWidthPx = ({
-  targetPresentationWidthPx,
-  cardLayoutMode,
-  maxPresentationWidthPx,
-}: {
-  targetPresentationWidthPx: number;
+export const resolveZoomPercentForPresentationWidthPx = ({ targetPresentationWidthPx, cardLayoutMode, maxPresentationWidthPx, }: { targetPresentationWidthPx: number;
   cardLayoutMode: CardLayoutMode;
   maxPresentationWidthPx: number;
 }) => {
@@ -109,13 +94,7 @@ export const resolveZoomPercentForPresentationWidthPx = ({
   );
 };
 
-export const resolveZoomDefaultPercent = ({
-  cardLayoutMode,
-  maxPresentationWidthPx,
-  canonicalCardWidthPx = CANONICAL_CARD_WIDTH,
-  targetZoomScale = CARD_SET_VIEW_DEFAULT_ZOOM_SCALE,
-}: ResolveZoomWidthArgs & {
-  maxPresentationWidthPx: number;
+export const resolveZoomDefaultPercent = ({ cardLayoutMode, maxPresentationWidthPx, canonicalCardWidthPx = CANONICAL_CARD_WIDTH, targetZoomScale = CARD_SET_VIEW_DEFAULT_ZOOM_SCALE, }: ResolveZoomWidthArgs & { maxPresentationWidthPx: number;
   canonicalCardWidthPx?: number;
   targetZoomScale?: number;
 }) => {
@@ -135,11 +114,7 @@ export const resolveZoomDefaultPercent = ({
   });
 };
 
-export const resolveUsablePresentationWidthPx = ({
-  viewportWidthPx,
-  scrollbarReservePx = CARD_SET_VIEW_SCROLLBAR_RESERVE_PX,
-}: {
-  viewportWidthPx: number;
+export const resolveUsablePresentationWidthPx = ({ viewportWidthPx, scrollbarReservePx = CARD_SET_VIEW_SCROLLBAR_RESERVE_PX, }: { viewportWidthPx: number;
   scrollbarReservePx?: number;
 }) => {
   if (!Number.isFinite(viewportWidthPx) || viewportWidthPx <= 0) {
@@ -149,11 +124,7 @@ export const resolveUsablePresentationWidthPx = ({
   return Math.max(0, Math.floor(viewportWidthPx - scrollbarReservePx));
 };
 
-export const resolveCardSetViewUsablePresentationWidthPx = ({
-  deviceScope,
-  viewportWidthPx,
-}: ResolveCardSetViewDevicePresentationArgs & {
-  viewportWidthPx: number;
+export const resolveCardSetViewUsablePresentationWidthPx = ({ deviceScope, viewportWidthPx, }: ResolveCardSetViewDevicePresentationArgs & { viewportWidthPx: number;
 }) => {
   if (resolveCardSetViewUsesViewportWidth({ deviceScope })) {
     if (!Number.isFinite(viewportWidthPx) || viewportWidthPx <= 0) {
@@ -166,12 +137,7 @@ export const resolveCardSetViewUsablePresentationWidthPx = ({
   return resolveUsablePresentationWidthPx({ viewportWidthPx });
 };
 
-export const resolvePresentationMaxWidthPx = ({
-  usableWidthPx,
-  displayMode,
-  cardLayoutMode,
-}: {
-  usableWidthPx: number;
+export const resolvePresentationMaxWidthPx = ({ usableWidthPx, displayMode, cardLayoutMode, }: { usableWidthPx: number;
   displayMode: CardDisplayMode;
   cardLayoutMode: CardLayoutMode;
 }) => {
@@ -190,13 +156,7 @@ export const resolvePresentationMaxWidthPx = ({
   );
 };
 
-export const resolveCardSetViewMaxPresentationWidthPx = ({
-  deviceScope,
-  usableWidthPx,
-  displayMode,
-  cardLayoutMode,
-}: ResolveCardSetViewDevicePresentationArgs & {
-  usableWidthPx: number;
+export const resolveCardSetViewMaxPresentationWidthPx = ({ deviceScope, usableWidthPx, displayMode, cardLayoutMode, }: ResolveCardSetViewDevicePresentationArgs & { usableWidthPx: number;
   displayMode: CardDisplayMode;
   cardLayoutMode: CardLayoutMode;
 }) => {
@@ -207,13 +167,7 @@ export const resolveCardSetViewMaxPresentationWidthPx = ({
   return resolvePresentationMaxWidthPx({ usableWidthPx, displayMode, cardLayoutMode });
 };
 
-export const resolveCardSetViewDefaultZoomPercent = ({
-  deviceScope,
-  cardLayoutMode,
-  maxPresentationWidthPx,
-  canonicalCardWidthPx = CANONICAL_CARD_WIDTH,
-}: ResolveCardSetViewDevicePresentationArgs & ResolveZoomWidthArgs & {
-  maxPresentationWidthPx: number;
+export const resolveCardSetViewDefaultZoomPercent = ({ deviceScope, cardLayoutMode, maxPresentationWidthPx, canonicalCardWidthPx = CANONICAL_CARD_WIDTH, }: ResolveCardSetViewDevicePresentationArgs & ResolveZoomWidthArgs & { maxPresentationWidthPx: number;
   canonicalCardWidthPx?: number;
 }) => {
   const zoomPercentOverride = resolveCardSetViewZoomPercentOverride({ deviceScope });
@@ -224,10 +178,7 @@ export const resolveCardSetViewDefaultZoomPercent = ({
   return resolveZoomDefaultPercent({ cardLayoutMode, maxPresentationWidthPx, canonicalCardWidthPx });
 };
 
-export const resolveSplitMinimumRequiredWidthPx = ({
-  displayMode,
-}: {
-  displayMode: CardDisplayMode;
+export const resolveSplitMinimumRequiredWidthPx = ({ displayMode, }: { displayMode: CardDisplayMode;
 }) => {
   const fixedAllowancePx =
     displayMode === "fixed"
@@ -241,35 +192,21 @@ export const resolveSplitMinimumRequiredWidthPx = ({
   );
 };
 
-export const resolveCanUseSplitLayout = ({
-  viewportWidthPx,
-  displayMode,
-}: {
-  viewportWidthPx: number;
+export const resolveCanUseSplitLayout = ({ viewportWidthPx, displayMode, }: { viewportWidthPx: number;
   displayMode: CardDisplayMode;
 }) => {
   const usableWidthPx = resolveUsablePresentationWidthPx({ viewportWidthPx });
   return usableWidthPx >= resolveSplitMinimumRequiredWidthPx({ displayMode });
 };
 
-export const resolveCardSetViewCanUseSplitLayout = ({
-  deviceScope,
-  viewportWidthPx,
-  displayMode,
-}: ResolveCardSetViewDevicePresentationArgs & {
-  viewportWidthPx: number;
+export const resolveCardSetViewCanUseSplitLayout = ({ deviceScope, viewportWidthPx, displayMode, }: ResolveCardSetViewDevicePresentationArgs & { viewportWidthPx: number;
   displayMode: CardDisplayMode;
 }) => {
   const usableWidthPx = resolveCardSetViewUsablePresentationWidthPx({ deviceScope, viewportWidthPx });
   return usableWidthPx >= resolveSplitMinimumRequiredWidthPx({ displayMode });
 };
 
-export const resolvePresentationWidthPx = ({
-  zoomPercent,
-  cardLayoutMode,
-  maxPresentationWidthPx,
-}: {
-  zoomPercent: number;
+export const resolvePresentationWidthPx = ({ zoomPercent, cardLayoutMode, maxPresentationWidthPx, }: { zoomPercent: number;
   cardLayoutMode: CardLayoutMode;
   maxPresentationWidthPx: number;
 }) => {
@@ -289,11 +226,7 @@ export const resolvePresentationWidthPx = ({
   return Math.max(1, Math.round(resolvedWidthPx));
 };
 
-export const resolveZoomScaleFromPresentationWidthPx = ({
-  presentationWidthPx,
-  canonicalCardWidthPx,
-}: {
-  presentationWidthPx: number;
+export const resolveZoomScaleFromPresentationWidthPx = ({ presentationWidthPx, canonicalCardWidthPx, }: { presentationWidthPx: number;
   canonicalCardWidthPx: number;
 }) => {
   if (

@@ -56,11 +56,7 @@ const asStringArray = (value: unknown): string[] => {
 const getCardTagIds = (card: Pick<CardTagFields, "tagIds">): string[] =>
   asStringArray(card.tagIds);
 
-export const resolveCardTagNames = (
-  tagIds: unknown,
-  tagById: ReadonlyMap<string, Pick<TagRecord, "name">>,
-): string[] => {
-  const ids = asStringArray(tagIds);
+export const resolveCardTagNames = ( tagIds: unknown, tagById: ReadonlyMap<string, Pick<TagRecord, "name">>, ): string[] => { const ids = asStringArray(tagIds);
   if (ids.length === 0) return [];
   return ids.map((id) => tagById.get(id)?.name ?? "").filter((name) => name);
 };
@@ -127,8 +123,7 @@ const findPathCandidate = (
   );
 };
 
-export const useTags = () => {
-  const { currentUser } = useAuthSession();
+export const useTags = () => { const { currentUser } = useAuthSession();
   const { settings, updateSettings } = useUserSettings();
 
   const rawTags = useLiveQuery(

@@ -4,8 +4,7 @@ export type IosCalendarPermissionStatus = "undetermined" | "granted" | "denied";
 
 export type IosCalendarConnectionStatus = "connected" | "needsPermission" | "unsupported" | "error";
 
-export type IosCalendarListItem = {
-  id: string;
+export type IosCalendarListItem = { id: string;
   title: string;
   color: string;
   sourceName?: string;
@@ -14,17 +13,14 @@ export type IosCalendarListItem = {
   selected: boolean;
 };
 
-export type IosCalendarEvent = GoogleCalendarEvent & {
-  source: "ios";
+export type IosCalendarEvent = GoogleCalendarEvent & { source: "ios";
 };
 
-export type IosCalendarRange = {
-  rangeStart: Date;
+export type IosCalendarRange = { rangeStart: Date;
   rangeEnd: Date;
 };
 
-export type IosCalendarWritableEventInput = {
-  calendarId: string;
+export type IosCalendarWritableEventInput = { calendarId: string;
   title: string;
   description?: string;
   location?: string;
@@ -35,12 +31,10 @@ export type IosCalendarWritableEventInput = {
   recurrenceRule?: CalendarRecurrenceRule | null;
 };
 
-export type IosCalendarWritableEventUpdateInput = Partial<Omit<IosCalendarWritableEventInput, "calendarId">> & {
-  calendarId: string;
+export type IosCalendarWritableEventUpdateInput = Partial<Omit<IosCalendarWritableEventInput, "calendarId">> & { calendarId: string;
   eventId: string;
 };
 
-export type IosCalendarWritableEventDeleteInput = {
-  calendarId: string;
+export type IosCalendarWritableEventDeleteInput = { calendarId: string;
   eventId: string;
 };

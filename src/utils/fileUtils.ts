@@ -24,10 +24,7 @@ const getValidatedExtension = (
   return allAllowed.includes(ext) ? ext : "bin";
 };
 
-export const generateSafeStoragePath = (
-  originalName: string,
-  fileType?: string,
-): { safeName: string; extension: string; id: string } => {
+export const generateSafeStoragePath = ( originalName: string, fileType?: string, ): { safeName: string; extension: string; id: string } => {
   const extension = getValidatedExtension(originalName, fileType);
   const id = nanoid(10);
   const safeName = `${Date.now()}_${id}.${extension}`;
@@ -35,8 +32,7 @@ export const generateSafeStoragePath = (
   return { safeName, extension, id };
 };
 
-export const formatBytes = (bytes: number, decimals = 2) => {
-  if (bytes === 0) return "0 Bytes";
+export const formatBytes = (bytes: number, decimals = 2) => { if (bytes === 0) return "0 Bytes";
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
   const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];

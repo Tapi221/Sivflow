@@ -4,36 +4,23 @@ import { createLatestReviewLogPatch, createReviewPatchFromRating } from "@/servi
 import type { ReviewLog } from "@/types/domain/base";
 import type { Card, UserSettings } from "@/types";
 
-export const META_PANEL_OPEN_STORAGE_KEY =
-  WEB_STORAGE_KEYS.cardEditorMetaPanelOpen;
+export const META_PANEL_OPEN_STORAGE_KEY = WEB_STORAGE_KEYS.cardEditorMetaPanelOpen;
 
-export const buildCardsById = (cards: Card[]) => {
-  const map = new Map<string, Card>();
+export const buildCardsById = (cards: Card[]) => { const map = new Map<string, Card>();
   for (const card of cards) {
     map.set(card.id, card);
   }
   return map;
 };
 
-export const resolveSelectedCardSnapshot = ({
-  selectedCardId,
-  cardsById,
-}: {
-  selectedCardId: string | null;
+export const resolveSelectedCardSnapshot = ({ selectedCardId, cardsById, }: { selectedCardId: string | null;
   cardsById: Map<string, Card>;
 }) => {
   if (!selectedCardId) return null;
   return cardsById.get(selectedCardId) ?? null;
 };
 
-export const applyEditingDraftPatch = ({
-  currentDraft,
-  detail,
-  selectedCardId,
-  isEditing,
-}: {
-  currentDraft: {
-    title: string;
+export const applyEditingDraftPatch = ({ currentDraft, detail, selectedCardId, isEditing, }: { currentDraft: { title: string;
     isDraft: boolean;
     tags: string[];
   } | null;
@@ -70,13 +57,11 @@ export const applyEditingDraftPatch = ({
   };
 };
 
-export const readStoredMetaPanelOpen = () => {
-  if (typeof window === "undefined") return true;
+export const readStoredMetaPanelOpen = () => { if (typeof window === "undefined") return true;
   return window.localStorage.getItem(META_PANEL_OPEN_STORAGE_KEY) !== "false";
 };
 
-export const writeStoredMetaPanelOpen = (isOpen: boolean) => {
-  if (typeof window === "undefined") return;
+export const writeStoredMetaPanelOpen = (isOpen: boolean) => { if (typeof window === "undefined") return;
   window.localStorage.setItem(META_PANEL_OPEN_STORAGE_KEY, String(isOpen));
 };
 
@@ -103,23 +88,7 @@ const normalizeReviewRating = (rating: number): ReviewLog["rating"] => {
   throw new Error("学習評価は 1〜4 の範囲で指定してください");
 };
 
-export const createMetaPanelActions = ({
-  selectedCard,
-  settings,
-  updateCard,
-  onCardUpdated,
-  flushDraft,
-  handleTitleInputChange,
-  handleUpdateTags,
-  handleToggleDraft,
-  handleUpdateTitle,
-}: CreateMetaPanelActionsArgs) => {
-  const onAddReviewLog = ({
-    reviewedAt,
-    rating,
-    durationMinutes,
-  }: {
-    reviewedAt: string | number | Date;
+export const createMetaPanelActions = ({ selectedCard, settings, updateCard, onCardUpdated, flushDraft, handleTitleInputChange, handleUpdateTags, handleToggleDraft, handleUpdateTitle, }: CreateMetaPanelActionsArgs) => { const onAddReviewLog = ({ reviewedAt, rating, durationMinutes, }: { reviewedAt: string | number | Date;
     rating: number;
     durationMinutes?: number | null;
   }) => {

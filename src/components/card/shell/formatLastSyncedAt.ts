@@ -3,9 +3,7 @@ const isSameDay = (left: Date, right: Date) =>
   left.getMonth() === right.getMonth() &&
   left.getDate() === right.getDate();
 
-export const formatLastSyncedAt = (lastSyncedAtMs: number | null) => {
-  if (lastSyncedAtMs == null || !Number.isFinite(lastSyncedAtMs)) {
-    return "未同期";
+export const formatLastSyncedAt = (lastSyncedAtMs: number | null) => { if (lastSyncedAtMs == null || !Number.isFinite(lastSyncedAtMs)) { return "未同期";
   }
 
   const date = new Date(lastSyncedAtMs);

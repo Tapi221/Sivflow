@@ -3,8 +3,7 @@ import type { CalendarEvent, CalendarRecurrenceRule } from "@core/calendar";
 
 export type GoogleCalendarEvent = CalendarEvent;
 
-export type GoogleCalendarListItem = {
-  id: string;
+export type GoogleCalendarListItem = { id: string;
   summary: string;
   summaryOverride?: string;
   description?: string;
@@ -14,22 +13,16 @@ export type GoogleCalendarListItem = {
   selected?: boolean;
 };
 
-export type UseGoogleCalendarIntegrationOptions = {
-  authInstance?: Auth;
+export type UseGoogleCalendarIntegrationOptions = { authInstance?: Auth;
 };
 
 export type GCalSyncState = "idle" | "syncing" | "needsReconnect" | "error";
 
 export type GCalConnectionStatus = "connected" | "needsReconnect" | "error";
 
-export type GCalSilentReconnectResult =
-  | boolean
-  | "reconnected"
-  | "needsReconnect"
-  | "retryLater";
+export type GCalSilentReconnectResult = | boolean | "reconnected" | "needsReconnect" | "retryLater";
 
-export type GCalSyncRange = {
-  rangeStart: Date;
+export type GCalSyncRange = { rangeStart: Date;
   rangeEnd: Date;
 };
 
@@ -37,8 +30,7 @@ export type GCalForceSyncOptions = Partial<GCalSyncRange>;
 
 export type GCalSyncTokenMap = Record<string, string>;
 
-export type GCalWritableEventInput = {
-  calendarId: string;
+export type GCalWritableEventInput = { calendarId: string;
   title: string;
   description?: string;
   location?: string;
@@ -49,18 +41,15 @@ export type GCalWritableEventInput = {
   recurrenceRule?: CalendarRecurrenceRule | null;
 };
 
-export type GCalWritableEventUpdateInput = Partial<Omit<GCalWritableEventInput, "calendarId">> & {
-  calendarId: string;
+export type GCalWritableEventUpdateInput = Partial<Omit<GCalWritableEventInput, "calendarId">> & { calendarId: string;
   eventId: string;
 };
 
-export type GCalWritableEventDeleteInput = {
-  calendarId: string;
+export type GCalWritableEventDeleteInput = { calendarId: string;
   eventId: string;
 };
 
-export type GCalRawIncrementalEvent = {
-  id?: string;
+export type GCalRawIncrementalEvent = { id?: string;
   summary?: string;
   description?: string;
   location?: string;
@@ -76,15 +65,12 @@ export type GCalRawIncrementalEvent = {
   };
 };
 
-export type GCalEventsListResponse = {
-  items?: GCalRawIncrementalEvent[];
+export type GCalEventsListResponse = { items?: GCalRawIncrementalEvent[];
   nextSyncToken?: string;
   nextPageToken?: string;
 };
 
-export type GoogleCalendarApiListResponse = {
-  items?: Array<{
-    id?: string;
+export type GoogleCalendarApiListResponse = { items?: Array<{ id?: string;
     summary?: string;
     summaryOverride?: string;
     description?: string;
@@ -96,19 +82,16 @@ export type GoogleCalendarApiListResponse = {
   nextPageToken?: string;
 };
 
-export type GoogleCalendarApiCalendarResponse = {
-  id?: string;
+export type GoogleCalendarApiCalendarResponse = { id?: string;
   summary?: string;
   description?: string;
 };
 
-export type GoogleCalendarApiEventsResponse = {
-  items?: GCalRawIncrementalEvent[];
+export type GoogleCalendarApiEventsResponse = { items?: GCalRawIncrementalEvent[];
   nextPageToken?: string;
 };
 
-export type GCalSyncEngineOptions = {
-  accountId?: string;
+export type GCalSyncEngineOptions = { accountId?: string;
   onEventAdded: (event: GoogleCalendarEvent) => void;
   onEventUpdated: (event: GoogleCalendarEvent) => void;
   onEventDeleted: (compositeId: string) => void;
@@ -128,8 +111,7 @@ export type GCalSyncEngineOptions = {
   fullSyncFutureDays?: number;
 };
 
-export type GCalSyncStartContext = {
-  accessToken: string;
+export type GCalSyncStartContext = { accessToken: string;
   selectedCalendarIds: Set<string>;
   calendars: GoogleCalendarListItem[];
 };

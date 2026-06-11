@@ -6,56 +6,21 @@ import type { CreatePlateEditorOptions } from 'platejs/react';
 
 import { getCommentKey, getDraftCommentKey } from '@platejs/comment';
 import { CommentPlugin, useCommentId } from '@platejs/comment/react';
-import {
-  differenceInDays,
-  differenceInHours,
-  differenceInMinutes,
-  format,
-} from 'date-fns';
-import {
-  ArrowUpIcon,
-  CheckIcon,
-  MoreHorizontalIcon,
-  PencilIcon,
-  TrashIcon,
-  XIcon,
-} from 'lucide-react';
-import {
-  type NodeEntry,
-  type TCommentText,
-  type Value,
-  KEYS,
-  nanoid,
-  NodeApi,
-} from 'platejs';
-import {
-  Plate,
-  useEditorPlugin,
-  useEditorRef,
-  usePlateEditor,
-  usePluginOption,
-} from 'platejs/react';
+import { differenceInDays, differenceInHours, differenceInMinutes, format, } from 'date-fns';
+import { ArrowUpIcon, CheckIcon, MoreHorizontalIcon, PencilIcon, TrashIcon, XIcon, } from 'lucide-react';
+import { type NodeEntry, type TCommentText, type Value, KEYS, nanoid, NodeApi, } from 'platejs';
+import { Plate, useEditorPlugin, useEditorRef, usePlateEditor, usePluginOption, } from 'platejs/react';
 
 import { Avatar, AvatarFallback, AvatarImage } from './avatar';
 import { Button } from './button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from './dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger, } from './dropdown-menu';
 import { cn } from '@/lib/utils';
 import { BasicMarksKit } from '@/components/editor/plugins/basic-marks-kit';
-import {
-  type TDiscussion,
-  discussionPlugin,
-} from '@/components/editor/plugins/discussion-kit';
+import { type TDiscussion, discussionPlugin, } from '@/components/editor/plugins/discussion-kit';
 
 import { Editor, EditorContainer } from './editor';
 
-export type TComment = {
-  id: string;
+export type TComment = { id: string;
   contentRich: Value;
   createdAt: Date;
   discussionId: string;
@@ -63,8 +28,7 @@ export type TComment = {
   userId: string;
 };
 
-export function Comment(props: {
-  comment: TComment;
+export function Comment(props: { comment: TComment;
   discussionLength: number;
   editingId: string | null;
   index: number;
@@ -412,13 +376,7 @@ const useCommentEditor = (
   return commentEditor;
 };
 
-export function CommentCreateForm({
-  autoFocus = false,
-  className,
-  discussionId: discussionIdProp,
-  focusOnMount = false,
-}: {
-  autoFocus?: boolean;
+export function CommentCreateForm({ autoFocus = false, className, discussionId: discussionIdProp, focusOnMount = false, }: { autoFocus?: boolean;
   className?: string;
   discussionId?: string;
   focusOnMount?: boolean;
@@ -607,8 +565,7 @@ export function CommentCreateForm({
   );
 }
 
-export const formatCommentDate = (date: Date) => {
-  const now = new Date();
+export const formatCommentDate = (date: Date) => { const now = new Date();
   const diffMinutes = differenceInMinutes(now, date);
   const diffHours = differenceInHours(now, date);
   const diffDays = differenceInDays(now, date);

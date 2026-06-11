@@ -25,8 +25,7 @@ const normalizeCardSetRecord = (raw: RawCardSetRecord | undefined | null): CardS
   };
 };
 
-export const useCardSetById = (cardSetId: string | null) => {
-  const userId = useEffectiveLocalUserId();
+export const useCardSetById = (cardSetId: string | null) => { const userId = useEffectiveLocalUserId();
 
   const cardSet = useLiveQuery(async () => {
     if (!cardSetId) {

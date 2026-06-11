@@ -5,47 +5,17 @@ import * as React from 'react';
 
 import type { Emoji } from '@emoji-mart/data';
 
-import {
-  type EmojiCategoryList,
-  type EmojiIconList,
-  type GridRow,
-  EmojiSettings,
-} from '@platejs/emoji';
-import {
-  type EmojiDropdownMenuOptions,
-  type UseEmojiPickerType,
-  useEmojiDropdownMenuState,
-} from '@platejs/emoji/react';
+import { type EmojiCategoryList, type EmojiIconList, type GridRow, EmojiSettings, } from '@platejs/emoji';
+import { type EmojiDropdownMenuOptions, type UseEmojiPickerType, useEmojiDropdownMenuState, } from '@platejs/emoji/react';
 import * as Popover from '@radix-ui/react-popover';
-import {
-  AppleIcon,
-  ClockIcon,
-  CompassIcon,
-  FlagIcon,
-  LeafIcon,
-  LightbulbIcon,
-  MusicIcon,
-  SearchIcon,
-  SmileIcon,
-  StarIcon,
-  XIcon,
-} from 'lucide-react';
+import { AppleIcon, ClockIcon, CompassIcon, FlagIcon, LeafIcon, LightbulbIcon, MusicIcon, SearchIcon, SmileIcon, StarIcon, XIcon, } from 'lucide-react';
 
 import { Button } from './button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from './tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from './tooltip';
 import { cn } from '@/lib/utils';
 import { ToolbarButton } from '@/components/toolbar';
 
-export function EmojiToolbarButton({
-  options,
-  ...props
-}: {
-  options?: EmojiDropdownMenuOptions;
+export function EmojiToolbarButton({ options, ...props }: { options?: EmojiDropdownMenuOptions;
 } & React.ComponentPropsWithoutRef<typeof ToolbarButton>) {
   const { emojiPickerState, isOpen, setIsOpen } =
     useEmojiDropdownMenuState(options);
@@ -70,13 +40,7 @@ export function EmojiToolbarButton({
   );
 }
 
-export function EmojiPopover({
-  children,
-  control,
-  isOpen,
-  setIsOpen,
-}: {
-  children: React.ReactNode;
+export function EmojiPopover({ children, control, isOpen, setIsOpen, }: { children: React.ReactNode;
   control: React.ReactNode;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
@@ -92,29 +56,7 @@ export function EmojiPopover({
   );
 }
 
-export function EmojiPicker({
-  clearSearch,
-  emoji,
-  emojiLibrary,
-  focusedCategory,
-  hasFound,
-  i18n,
-  icons = {
-    categories: emojiCategoryIcons,
-    search: emojiSearchIcons,
-  },
-  isSearching,
-  refs,
-  searchResult,
-  searchValue,
-  setSearch,
-  settings = EmojiSettings,
-  visibleCategories,
-  handleCategoryClick,
-  onMouseOver,
-  onSelectEmoji,
-}: Omit<UseEmojiPickerType, 'icons'> & {
-  icons?: EmojiIconList<React.ReactElement>;
+export function EmojiPicker({ clearSearch, emoji, emojiLibrary, focusedCategory, hasFound, i18n, icons = { categories: emojiCategoryIcons, search: emojiSearchIcons, }, isSearching, refs, searchResult, searchValue, setSearch, settings = EmojiSettings, visibleCategories, handleCategoryClick, onMouseOver, onSelectEmoji, }: Omit<UseEmojiPickerType, 'icons'> & { icons?: EmojiIconList<React.ReactElement>;
 }) {
   return (
     <div

@@ -1,7 +1,6 @@
 import { Timestamp } from "firebase/firestore";
 
-export interface CloudStorageStats {
-  id: "current";
+export interface CloudStorageStats { id: "current";
   userId: string;
   quotaBytes: number;
   totalStorageUsedBytes: number;

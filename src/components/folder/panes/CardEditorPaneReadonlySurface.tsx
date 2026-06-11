@@ -11,8 +11,7 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 type Side = "question" | "answer";
 
-export type CardEditorPaneReadonlySurfaceProps = Readonly<{
-  card: Card;
+export type CardEditorPaneReadonlySurfaceProps = Readonly<{ card: Card;
   isFlipped: boolean;
   onFlip: () => void;
   onToggleUncertainty?: (card: Card) => void | Promise<void>;
@@ -23,29 +22,7 @@ export type CardEditorPaneReadonlySurfaceProps = Readonly<{
   fitScale?: number;
 }>;
 
-export const CardEditorPaneReadonlySurface = ({
-  card,
-  isFlipped,
-  onFlip,
-  onToggleUncertainty,
-  onToggleBookmark,
-  displayMode,
-  cardLayoutMode,
-  zoomScale,
-  fitScale = 1,
-}: CardEditorPaneReadonlySurfaceProps) => {
-  const metrics = React.useMemo(
-    () =>
-      buildCardSurfaceMetrics({
-        displayMode,
-        cardLayoutMode,
-        interactionMode: "view",
-        zoomScale,
-        fitScale,
-        showInk: displayMode === "fixed",
-      }),
-    [cardLayoutMode, displayMode, fitScale, zoomScale],
-  );
+export const CardEditorPaneReadonlySurface = ({ card, isFlipped, onFlip, onToggleUncertainty, onToggleBookmark, displayMode, cardLayoutMode, zoomScale, fitScale = 1, }: CardEditorPaneReadonlySurfaceProps) => { const metrics = React.useMemo( () => buildCardSurfaceMetrics({ displayMode, cardLayoutMode, interactionMode: "view", zoomScale, fitScale, showInk: displayMode === "fixed", }), [cardLayoutMode, displayMode, fitScale, zoomScale], );
 
   const fixedHeightPx = React.useMemo(
     () =>

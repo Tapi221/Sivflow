@@ -39,17 +39,7 @@ const updateTimelineScrollFadeVisibility = (scroller: HTMLDivElement): void => {
   scroller.classList.toggle(CALENDAR_TIMELINE_SCROLLED_CLASS_NAME, scroller.scrollTop > 0);
 };
 
-export const useCalendarScrollController = ({
-  selectedViewMode,
-  visibleDays,
-  virtualRail,
-  calendarBuffer,
-  viewportWidth,
-  calendarDayColumnWidth,
-  onVisibleDateChange,
-  scrollTargetToken,
-}: Props) => {
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+export const useCalendarScrollController = ({ selectedViewMode, visibleDays, virtualRail, calendarBuffer, viewportWidth, calendarDayColumnWidth, onVisibleDateChange, scrollTargetToken, }: Props) => { const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
   const allDayScrollRef = useRef<HTMLDivElement | null>(null);
   const scrollRafRef = useRef<number | null>(null);

@@ -1,17 +1,9 @@
-import type {
-  TElement,
-  TInlineSuggestionData,
-  TSuggestionData,
-  TSuggestionText,
-} from 'platejs';
+import type { TElement, TInlineSuggestionData, TSuggestionData, TSuggestionText, } from 'platejs';
 
 import { BaseSuggestionPlugin } from '@platejs/suggestion';
 import { KEYS, TextApi } from 'platejs';
 
-import {
-  SuggestionLeafStatic,
-  VoidRemoveSuggestionOverlayStatic,
-} from '@/components/suggestion-node-static';
+import { SuggestionLeafStatic, VoidRemoveSuggestionOverlayStatic, } from '@/components/suggestion-node-static';
 
 const INLINE_SUGGESTION_TARGET_PLUGINS = [
   KEYS.date,
@@ -39,15 +31,7 @@ function getInlineSuggestionData(editor: any, element: TElement) {
   }
 }
 
-export const BaseSuggestionKit = [
-  BaseSuggestionPlugin.configure({
-    inject: {
-      isElement: true,
-      nodeProps: {
-        nodeKey: '',
-        styleKey: 'cssText',
-        transformProps: ({ editor, element, props }) => {
-          if (!element) return props;
+export const BaseSuggestionKit = [ BaseSuggestionPlugin.configure({ inject: { isElement: true, nodeProps: { nodeKey: '', styleKey: 'cssText', transformProps: ({ editor, element, props }) => { if (!element) return props;
 
           const suggestionData = getInlineSuggestionData(editor, element);
 

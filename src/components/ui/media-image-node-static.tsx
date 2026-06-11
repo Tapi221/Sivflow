@@ -8,10 +8,7 @@ import { SlateElement } from 'platejs/static';
 
 import { cn } from '@/lib/utils';
 
-export function ImageElementStatic(
-  props: SlateElementProps<TImageElement & TCaptionProps & TResizableProps>
-) {
-  const { align = 'center', caption, url, width } = props.element;
+export function ImageElementStatic( props: SlateElementProps<TImageElement & TCaptionProps & TResizableProps> ) { const { align = 'center', caption, url, width } = props.element;
 
   return (
     <SlateElement {...props} className="py-2.5">

@@ -12,14 +12,12 @@ type LayeredProjectMenuItemDefinition = {
 
 export type LayeredProjectMenuActionId = "change-color" | "rename" | "create-note" | "create-card-set" | "create-folder" | "import-pdf" | "add-to-favorites" | "hide" | "delete";
 
-export type LayeredProjectMenuAction = {
-  id: LayeredProjectMenuActionId;
+export type LayeredProjectMenuAction = { id: LayeredProjectMenuActionId;
   disabled?: boolean;
   onSelect: () => void;
 };
 
-export type LayeredProjectMenuSubmenuAnchor = {
-  itemOffsetY: number;
+export type LayeredProjectMenuSubmenuAnchor = { itemOffsetY: number;
 };
 
 type LayeredProjectMenuProps = {

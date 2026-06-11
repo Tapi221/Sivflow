@@ -7,10 +7,7 @@ type UseReviewCardPagerHotkeysParams = {
   onPrev: () => void;
 };
 
-export const useReviewCardPagerHotkeys = ({ onFlip, onNext, onPrev }: UseReviewCardPagerHotkeysParams) => {
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.defaultPrevented) return;
+export const useReviewCardPagerHotkeys = ({ onFlip, onNext, onPrev }: UseReviewCardPagerHotkeysParams) => { useEffect(() => { const handleKeyDown = (event: KeyboardEvent) => { if (event.defaultPrevented) return;
       if (isTypingTarget(event.target)) return;
       if (hasPrimaryModifier(event)) return;
 

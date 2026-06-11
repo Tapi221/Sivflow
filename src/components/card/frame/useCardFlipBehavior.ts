@@ -2,8 +2,7 @@ import React from "react";
 
 export const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
 
-export const shouldIgnoreFlipTarget = (target: EventTarget | null): boolean => {
-  const element = target as HTMLElement | null;
+export const shouldIgnoreFlipTarget = (target: EventTarget | null): boolean => { const element = target as HTMLElement | null;
   if (!element) return false;
 
   return Boolean(
@@ -32,8 +31,7 @@ type FlipTriggerEvent = Readonly<{
   stopPropagation?: () => void;
 }>;
 
-export type UseCardFlipBehaviorParams = Readonly<{
-  isCardClickable: boolean;
+export type UseCardFlipBehaviorParams = Readonly<{ isCardClickable: boolean;
   previewMode: boolean;
   onFlip?: () => void;
   onPreviewFlip?: () => void;
@@ -41,8 +39,7 @@ export type UseCardFlipBehaviorParams = Readonly<{
   isInkEditingActive: boolean;
 }>;
 
-export type UseCardFlipBehaviorResult = Readonly<{
-  handleFlip: (event?: React.MouseEvent<HTMLDivElement>) => void;
+export type UseCardFlipBehaviorResult = Readonly<{ handleFlip: (event?: React.MouseEvent<HTMLDivElement>) => void;
   handleKeyDown: React.KeyboardEventHandler<HTMLDivElement>;
   handlePointerDownCapture: React.PointerEventHandler<HTMLDivElement>;
   handlePointerMoveCapture: React.PointerEventHandler<HTMLDivElement>;
@@ -50,15 +47,7 @@ export type UseCardFlipBehaviorResult = Readonly<{
   handlePointerCancelCapture: React.PointerEventHandler<HTMLDivElement>;
 }>;
 
-export const useCardFlipBehavior = ({
-  isCardClickable,
-  previewMode,
-  onFlip,
-  onPreviewFlip,
-  isModalBlockingFlip,
-  isInkEditingActive,
-}: UseCardFlipBehaviorParams): UseCardFlipBehaviorResult => {
-  const suppressNextFlipRef = React.useRef(false);
+export const useCardFlipBehavior = ({ isCardClickable, previewMode, onFlip, onPreviewFlip, isModalBlockingFlip, isInkEditingActive, }: UseCardFlipBehaviorParams): UseCardFlipBehaviorResult => { const suppressNextFlipRef = React.useRef(false);
   const pointerGestureRef = React.useRef<PointerGestureState>(
     createInitialPointerGestureState(),
   );

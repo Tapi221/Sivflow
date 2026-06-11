@@ -1,17 +1,14 @@
 import { getLocalAiSettings } from "./localAiSettings";
 
-export type GenerateOllamaAnswerInput = {
-  question: string;
+export type GenerateOllamaAnswerInput = { question: string;
   model?: string;
 };
 
-export type GenerateOllamaAnswerResult = {
-  answer: string;
+export type GenerateOllamaAnswerResult = { answer: string;
   model: string;
 };
 
-export type TestOllamaConnectionResult = {
-  ok: boolean;
+export type TestOllamaConnectionResult = { ok: boolean;
   modelAvailable: boolean;
   model: string;
   baseUrl: string;
@@ -114,8 +111,7 @@ const listOllamaModelsWithBrowserFetch = async (baseUrl: string): Promise<string
   }
 };
 
-export const generateOllamaAnswer = async ({ question, model }: GenerateOllamaAnswerInput): Promise<GenerateOllamaAnswerResult> => {
-  const settings = getLocalAiSettings();
+export const generateOllamaAnswer = async ({ question, model }: GenerateOllamaAnswerInput): Promise<GenerateOllamaAnswerResult> => { const settings = getLocalAiSettings();
   if (!settings.enabled) throw new Error("LOCAL_AI_DISABLED");
 
   const normalizedQuestion = normalizeQuestion(question);
@@ -129,8 +125,7 @@ export const generateOllamaAnswer = async ({ question, model }: GenerateOllamaAn
   return { answer, model: selectedModel };
 };
 
-export const testOllamaConnection = async (): Promise<TestOllamaConnectionResult> => {
-  const settings = getLocalAiSettings();
+export const testOllamaConnection = async (): Promise<TestOllamaConnectionResult> => { const settings = getLocalAiSettings();
   const models = window.desktop?.ai ? await window.desktop.ai.listOllamaModels({ baseUrl: settings.baseUrl }) : await listOllamaModelsWithBrowserFetch(settings.baseUrl);
 
   return {

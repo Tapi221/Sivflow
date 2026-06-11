@@ -3,18 +3,15 @@ import { compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/f
 import { eventChipDesign } from "./eventChipDesign.generated";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
-export type CalendarMonthDayEvents = {
-  visibleEvents: GoogleCalendarEvent[];
+export type CalendarMonthDayEvents = { visibleEvents: GoogleCalendarEvent[];
   totalCount: number;
   color: string | null;
 };
 
-export type CalendarMonthPlacementDay = {
-  key: string;
+export type CalendarMonthPlacementDay = { key: string;
 };
 
-export type CalendarMonthPlacementWeek = {
-  days: CalendarMonthPlacementDay[];
+export type CalendarMonthPlacementWeek = { days: CalendarMonthPlacementDay[];
 };
 
 export type CalendarMonthEventIndex = Map<string, GoogleCalendarEvent[]>;
@@ -30,11 +27,7 @@ const MONTH_EVENT_OVERFLOW_TEXT_HEIGHT_PX = 11;
 const MONTH_EVENT_BOTTOM_PADDING_PX = 0;
 const MONTH_EVENT_CONTENT_TOP_PX = 32;
 
-export const EMPTY_MONTH_DAY_EVENTS: CalendarMonthDayEvents = {
-  visibleEvents: [],
-  totalCount: 0,
-  color: null,
-};
+export const EMPTY_MONTH_DAY_EVENTS: CalendarMonthDayEvents = { visibleEvents: [], totalCount: 0, color: null, };
 
 const toValidDateOrNull = (value: Date): Date | null => {
   const date = value instanceof Date ? value : new Date(value);
@@ -137,11 +130,7 @@ const getMonthVisibleEventLimit = (
   return Math.max(0, Math.min(visibleChipCount, Math.floor(maxVisibleEventCount)));
 };
 
-export const createMonthEventIndex = (
-  visibleEvents: GoogleCalendarEvent[],
-  allowedDayKeys?: ReadonlySet<string>,
-): CalendarMonthEventIndex => {
-  const eventIndex = new Map<string, GoogleCalendarEvent[]>();
+export const createMonthEventIndex = ( visibleEvents: GoogleCalendarEvent[], allowedDayKeys?: ReadonlySet<string>, ): CalendarMonthEventIndex => { const eventIndex = new Map<string, GoogleCalendarEvent[]>();
   const allowedRange = allowedDayKeys ? getAllowedDayKeyRange(allowedDayKeys) : null;
 
   if (allowedDayKeys && !allowedRange) return eventIndex;
@@ -221,14 +210,7 @@ const getVisibleMonthEvents = (
   return visibleEvents;
 };
 
-export const getVisibleMonthEventChipCount = (
-  eventCount: number,
-  monthRowHeight: number,
-) => {
-  const contentHeight =
-    monthRowHeight -
-    MONTH_EVENT_CONTENT_TOP_PX -
-    MONTH_EVENT_BOTTOM_PADDING_PX;
+export const getVisibleMonthEventChipCount = ( eventCount: number, monthRowHeight: number, ) => { const contentHeight = monthRowHeight - MONTH_EVENT_CONTENT_TOP_PX - MONTH_EVENT_BOTTOM_PADDING_PX;
 
   const maxChipsWithoutOverflow = getMonthEventChipCount(contentHeight);
 
@@ -240,14 +222,7 @@ export const getVisibleMonthEventChipCount = (
   return getMonthEventChipCount(contentHeight - overflowReservedHeight);
 };
 
-export const computeMonthEventsByDay = ({
-  visibleEvents,
-  eventIndex,
-  monthWeeks,
-  monthRowHeight,
-  maxVisibleEventCount,
-}: {
-  visibleEvents?: GoogleCalendarEvent[];
+export const computeMonthEventsByDay = ({ visibleEvents, eventIndex, monthWeeks, monthRowHeight, maxVisibleEventCount, }: { visibleEvents?: GoogleCalendarEvent[];
   eventIndex?: CalendarMonthEventIndex;
   monthWeeks: CalendarMonthPlacementWeek[];
   monthRowHeight: number;

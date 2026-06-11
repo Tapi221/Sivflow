@@ -13,16 +13,14 @@ export type SyncPriority = "critical" | "high" | "medium" | "low";
 export type SyncOperationType = "create" | "update" | "delete";
 export type MergeStrategy = "server_wins" | "client_wins" | "manual";
 export type CloudDeviceStatus = "active" | "revoked" | "unknown";
-export type SyncConflict = Pick<DomainSyncConflict, "id"> & {
-  entity: DomainSyncConflict["entityType"];
+export type SyncConflict = Pick<DomainSyncConflict, "id"> & { entity: DomainSyncConflict["entityType"];
   targetId: DomainSyncConflict["entityId"];
   local: unknown;
   remote: unknown;
   createdAt: DomainSyncConflict["detectedAt"];
 };
 
-export interface SyncTask<TPayload = unknown> {
-  id: string;
+export interface SyncTask<TPayload = unknown> { id: string;
   idempotencyKey?: string;
   targetId?: string;
   operationType?: SyncOperationType;
@@ -33,35 +31,30 @@ export interface SyncTask<TPayload = unknown> {
   createdAt: number;
 }
 
-export interface BatchConstraint {
-  maxSize: number;
+export interface BatchConstraint { maxSize: number;
   concurrency: number;
   timeoutMs: number;
 }
 
-export interface INetworkMonitor {
-  readonly status: NetworkStatus;
+export interface INetworkMonitor { readonly status: NetworkStatus;
   getBatchConstraint(context: SyncContextSource): BatchConstraint;
   reportResult(success: boolean, durationMs: number): void;
   subscribe(callback: (status: NetworkStatus) => void): () => void;
 }
 
-export interface IQueueManager {
-  enqueue(task: SyncTask): Promise<void>;
+export interface IQueueManager { enqueue(task: SyncTask): Promise<void>;
   peekBatch(constraint: BatchConstraint): Promise<SyncTask[]>;
   complete(taskIds: string[]): Promise<void>;
   fail(taskIds: string[], reason: string, retryable: boolean): Promise<void>;
   getQueueDepth(): Promise<number>;
 }
 
-export interface FolderLike {
-  id: string;
+export interface FolderLike { id: string;
   parentId?: string | null;
   parentFolderId?: string | null;
 }
 
-export interface IDiffEngine {
-  calculateDiff(local: unknown, remote: unknown): unknown | null;
+export interface IDiffEngine { calculateDiff(local: unknown, remote: unknown): unknown | null;
   merge(
     local: unknown,
     remote: unknown,
@@ -80,10 +73,7 @@ export interface IDiffEngine {
 
 export type SyncChange = Record<string, unknown>;
 
-export interface ICloudSyncAdapter {
-  pullDiff(
-    since: number,
-  ): Promise<{ changes: SyncChange[]; serverTime: number }>;
+export interface ICloudSyncAdapter { pullDiff( since: number, ): Promise<{ changes: SyncChange[]; serverTime: number }>;
   pushBatch(
     changes: SyncChange[],
   ): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown }>;
@@ -94,8 +84,7 @@ export interface ICloudSyncAdapter {
   cleanupInactiveDevices(): Promise<number>;
 }
 
-export interface SyncStats {
-  isSyncing?: boolean;
+export interface SyncStats { isSyncing?: boolean;
   lastAttemptAt?: number;
   lastSuccessAt?: number;
   lastServerTime?: number;
@@ -106,35 +95,30 @@ export interface SyncStats {
   queueDepth?: number;
 }
 
-export interface UserSettingsSnapshot {
-  version?: number;
+export interface UserSettingsSnapshot { version?: number;
   updatedAt?: number;
   data: Record<string, unknown>;
 }
 
-export interface SyncProcessingError {
-  taskId?: string;
+export interface SyncProcessingError { taskId?: string;
   message: string;
   retryable?: boolean;
   cause?: unknown;
 }
 
-export interface SecurityAlert {
-  id: string;
+export interface SecurityAlert { id: string;
   type: string;
   createdAt: number;
   message?: string;
   data?: Record<string, unknown>;
 }
 
-export interface SecurityState {
-  isLocked: boolean;
+export interface SecurityState { isLocked: boolean;
   requires2FA: boolean;
   alerts: SecurityAlert[];
 }
 
-export interface ISyncService {
-  synchronize(onProgress?: (msg: string) => void): Promise<SyncResult>;
+export interface ISyncService { synchronize(onProgress?: (msg: string) => void): Promise<SyncResult>;
   sync(source: SyncContextSource): Promise<void>;
   performStartupSync(): Promise<void>;
   getQueueStatus(): Promise<{ pending: number; isSyncing: boolean }>;

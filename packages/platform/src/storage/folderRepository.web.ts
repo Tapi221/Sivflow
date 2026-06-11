@@ -12,10 +12,7 @@ const generateFolderId = () => {
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 };
 
-export const createWebFolderRepository = (): FolderCommandRepository<Folder> & FolderDeleteRepository<Folder, CardSet, Card, Document> => ({
-  generateFolderId,
-  listFolders: async (userId) => {
-    const db = await getLocalDb(userId);
+export const createWebFolderRepository = (): FolderCommandRepository<Folder> & FolderDeleteRepository<Folder, CardSet, Card, Document> => ({ generateFolderId, listFolders: async (userId) => { const db = await getLocalDb(userId);
     return (await db.folders.toArray()).map(normalizeFolder);
   },
   addFolder: async (userId, folder) => {

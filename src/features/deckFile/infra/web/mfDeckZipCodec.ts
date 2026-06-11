@@ -116,8 +116,7 @@ const collectMediaEntries = (
   return Object.keys(media).length > 0 ? media : undefined;
 };
 
-export const encodeMfDeckArchive = (archive: MfDeckArchiveV1): Uint8Array => {
-  const validation = validateMfDeckArchive(archive);
+export const encodeMfDeckArchive = (archive: MfDeckArchiveV1): Uint8Array => { const validation = validateMfDeckArchive(archive);
 
   if (!validation.ok) {
     throw new MfDeckValidationError(
@@ -191,15 +190,7 @@ export const encodeMfDeckArchive = (archive: MfDeckArchiveV1): Uint8Array => {
   });
 };
 
-export const decodeMfDeckArchive = (buffer: ArrayBuffer): MfDeckArchiveV1 => {
-  if (buffer.byteLength > MF_DECK_MAX_FILE_BYTES) {
-    throw new MfDeckValidationError("mfdeck ファイルが大きすぎます。", [
-      {
-        level: "error",
-        code: "file_too_large",
-        message: "mfdeck ファイルが大きすぎます。",
-      },
-    ]);
+export const decodeMfDeckArchive = (buffer: ArrayBuffer): MfDeckArchiveV1 => { if (buffer.byteLength > MF_DECK_MAX_FILE_BYTES) { throw new MfDeckValidationError("mfdeck ファイルが大きすぎます。", [ { level: "error", code: "file_too_large", message: "mfdeck ファイルが大きすぎます。", }, ]);
   }
 
   let entries: Record<string, Uint8Array>;

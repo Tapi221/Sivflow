@@ -6,14 +6,12 @@ import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
 import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
 import type { AppCalendarItem } from "./scheduleScreen.types";
 
-export type CreateRootFolderProjectInput = {
-  label: string;
+export type CreateRootFolderProjectInput = { label: string;
   color?: string;
   checked?: boolean;
 };
 
-export type UseRootFolderProjectsResult = {
-  appProjects: AppCalendarItem[];
+export type UseRootFolderProjectsResult = { appProjects: AppCalendarItem[];
   rootFolders: FolderTreeNode[];
   loading: boolean;
   error: string | null;
@@ -84,8 +82,7 @@ const persistProjectVisibilityMap = (visibility: ProjectVisibilityMap) => {
   }
 };
 
-export const readLegacyStoredAppProjects = (): LegacyStoredAppProject[] => {
-  if (typeof window === "undefined") return [];
+export const readLegacyStoredAppProjects = (): LegacyStoredAppProject[] => { if (typeof window === "undefined") return [];
 
   try {
     const raw = window.localStorage.getItem(LEGACY_APP_PROJECTS_STORAGE_KEY);
@@ -116,8 +113,7 @@ export const readLegacyStoredAppProjects = (): LegacyStoredAppProject[] => {
   }
 };
 
-export const clearLegacyStoredAppProjects = () => {
-  if (typeof window === "undefined") return;
+export const clearLegacyStoredAppProjects = () => { if (typeof window === "undefined") return;
 
   try {
     window.localStorage.removeItem(LEGACY_APP_PROJECTS_STORAGE_KEY);
@@ -126,8 +122,7 @@ export const clearLegacyStoredAppProjects = () => {
   }
 };
 
-export const useRootFolderProjects = (): UseRootFolderProjectsResult => {
-  const { folders, loading, error } = useFoldersRead();
+export const useRootFolderProjects = (): UseRootFolderProjectsResult => { const { folders, loading, error } = useFoldersRead();
   const { createFolder, updateFolder } = useFolderCommands();
   const [visibilityByProjectId, setVisibilityByProjectId] = useState<ProjectVisibilityMap>(readProjectVisibilityMap);
   const treeFolders = useMemo(() => folders as unknown as FolderTreeNode[], [folders]);

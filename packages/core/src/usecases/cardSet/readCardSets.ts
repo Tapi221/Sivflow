@@ -1,5 +1,4 @@
-export type CardSetQueryEntity = {
-  id: string;
+export type CardSetQueryEntity = { id: string;
   folderId: string | null;
   isDeleted?: boolean;
   is_deleted?: boolean;
@@ -9,8 +8,7 @@ export type CardSetQueryEntity = {
   name?: string | null;
 };
 
-export type CardSetQueryRepository<TCardSet extends CardSetQueryEntity = CardSetQueryEntity> = {
-  listCardSets: (userId: string) => Promise<TCardSet[]>;
+export type CardSetQueryRepository<TCardSet extends CardSetQueryEntity = CardSetQueryEntity> = { listCardSets: (userId: string) => Promise<TCardSet[]>;
 };
 
 const isDeletedEntity = (entity: { isDeleted?: boolean; is_deleted?: boolean }) => {
@@ -73,12 +71,7 @@ const compareCardSets = <TCardSet extends CardSetQueryEntity>(left: TCardSet, ri
   return left.id.localeCompare(right.id, "ja");
 };
 
-export const listCardSetsForFolder = async <TCardSet extends CardSetQueryEntity>({
-  userId,
-  folderId,
-  repository,
-}: {
-  userId: string;
+export const listCardSetsForFolder = async <TCardSet extends CardSetQueryEntity>({ userId, folderId, repository, }: { userId: string;
   folderId?: string | null;
   repository: CardSetQueryRepository<TCardSet>;
 }): Promise<TCardSet[]> => {

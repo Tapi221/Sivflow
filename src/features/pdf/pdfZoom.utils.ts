@@ -5,21 +5,12 @@ const SIOYEK_ZOOM_INC_FACTOR = 1.2;
 
 export const normalizeScale = (value: number): number => Number(value.toFixed(3));
 
-export const clampScale = (value: number, minScale: number, maxScale: number): number => {
-  const lower = Math.min(minScale, maxScale);
+export const clampScale = (value: number, minScale: number, maxScale: number): number => { const lower = Math.min(minScale, maxScale);
   const upper = Math.max(minScale, maxScale);
   return Math.min(Math.max(value, lower), upper);
 };
 
-export const computeNextScaleFromWheel = ({
-  currentScale,
-  deltaY,
-  zoomStep,
-  minScale,
-  maxScale,
-  deltaPerStep = DEFAULT_PDF_WHEEL_DELTA_PER_ZOOM_STEP,
-}: {
-  currentScale: number;
+export const computeNextScaleFromWheel = ({ currentScale, deltaY, zoomStep, minScale, maxScale, deltaPerStep = DEFAULT_PDF_WHEEL_DELTA_PER_ZOOM_STEP, }: { currentScale: number;
   deltaY: number;
   zoomStep: number;
   minScale: number;
@@ -38,14 +29,7 @@ export const computeNextScaleFromWheel = ({
   return normalizeScale(clampScale(rawNextScale, minScale, maxScale));
 };
 
-export const computeNextScaleFromGesture = ({
-  currentScale,
-  baseScale,
-  gestureScale,
-  minScale,
-  maxScale,
-}: {
-  currentScale: number;
+export const computeNextScaleFromGesture = ({ currentScale, baseScale, gestureScale, minScale, maxScale, }: { currentScale: number;
   baseScale: number | null;
   gestureScale: number;
   minScale: number;

@@ -77,8 +77,7 @@ const toNonEmptyString = (value: unknown): string | null => {
   return typeof value === "string" && value.trim().length > 0 ? value : null;
 };
 
-export class IndexedDBRebuildOrchestrator {
-  private static isRebuilding = false;
+export class IndexedDBRebuildOrchestrator { private static isRebuilding = false;
 
   static readonly isSupportedType = (type: string): type is RebuildSupportedType => {
     return isRebuildSupportedType(type);

@@ -76,8 +76,7 @@ const visitObject = (
   Object.values(record).forEach((item) => visitObject(item, visitor));
 };
 
-export const collectMfDeckExportIssues = (cards: Card[]): MfDeckIssue[] => {
-  const issues: MfDeckIssue[] = [];
+export const collectMfDeckExportIssues = (cards: Card[]): MfDeckIssue[] => { const issues: MfDeckIssue[] = [];
 
   cards.forEach((card) => {
     const faces = [card.front, card.back];
@@ -102,11 +101,7 @@ export const collectMfDeckExportIssues = (cards: Card[]): MfDeckIssue[] => {
   return issues;
 };
 
-export const mapCardToMfDeckCard = ({
-  card,
-  tagById,
-}: {
-  card: Card;
+export const mapCardToMfDeckCard = ({ card, tagById, }: { card: Card;
   tagById?: MfDeckTagLookup;
 }): MfDeckCardV1 => {
   return {
@@ -136,13 +131,7 @@ export const mapCardToMfDeckCard = ({
   };
 };
 
-export const buildMfDeckArchive = async ({
-  cardSet,
-  cards,
-  tagById,
-  appVersion,
-}: {
-  cardSet: CardSet;
+export const buildMfDeckArchive = async ({ cardSet, cards, tagById, appVersion, }: { cardSet: CardSet;
   cards: Card[];
   tagById?: MfDeckTagLookup;
   appVersion?: string;

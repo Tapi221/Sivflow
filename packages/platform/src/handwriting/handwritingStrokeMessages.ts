@@ -1,15 +1,13 @@
 import { INK_DOCUMENT_VERSION, normalizeInkDocument, type InkDocument, type InkSide, type InkStroke } from "@core/domain/card/ink/inkDocument";
 import type { HandwritingStrokeDeltaMessage } from "./handwritingSession.types";
 
-export type CreateHandwritingStrokeDeltaInput = {
-  sessionId: string;
+export type CreateHandwritingStrokeDeltaInput = { sessionId: string;
   cardId: string;
   side: InkSide;
   stroke: InkStroke;
 };
 
-export type ApplyHandwritingStrokeDeltaInput = {
-  document: InkDocument | null | undefined;
+export type ApplyHandwritingStrokeDeltaInput = { document: InkDocument | null | undefined;
   message: HandwritingStrokeDeltaMessage;
   expectedSessionId?: string;
   expectedCardId?: string;
@@ -17,8 +15,7 @@ export type ApplyHandwritingStrokeDeltaInput = {
   now?: number;
 };
 
-export type ApplyHandwritingStrokeDeltaResult = {
-  document: InkDocument;
+export type ApplyHandwritingStrokeDeltaResult = { document: InkDocument;
   applied: boolean;
   reason?: "session-mismatch" | "card-mismatch" | "side-mismatch" | "invalid-stroke" | "duplicate-stroke";
 };
@@ -38,8 +35,7 @@ const hasStroke = (document: InkDocument, strokeId: string): boolean => {
   return document.strokes.some((stroke) => stroke.id === strokeId);
 };
 
-export const createHandwritingStrokeDeltaMessage = ({ sessionId, cardId, side, stroke }: CreateHandwritingStrokeDeltaInput): HandwritingStrokeDeltaMessage => {
-  const normalizedStroke = normalizeStroke(stroke);
+export const createHandwritingStrokeDeltaMessage = ({ sessionId, cardId, side, stroke }: CreateHandwritingStrokeDeltaInput): HandwritingStrokeDeltaMessage => { const normalizedStroke = normalizeStroke(stroke);
 
   if (!normalizedStroke) {
     throw new Error("Invalid handwriting stroke delta payload.");
@@ -54,8 +50,7 @@ export const createHandwritingStrokeDeltaMessage = ({ sessionId, cardId, side, s
   };
 };
 
-export const applyHandwritingStrokeDelta = ({ document, message, expectedSessionId, expectedCardId, expectedSide, now = Date.now() }: ApplyHandwritingStrokeDeltaInput): ApplyHandwritingStrokeDeltaResult => {
-  const currentDocument = normalizeInkDocument(document);
+export const applyHandwritingStrokeDelta = ({ document, message, expectedSessionId, expectedCardId, expectedSide, now = Date.now() }: ApplyHandwritingStrokeDeltaInput): ApplyHandwritingStrokeDeltaResult => { const currentDocument = normalizeInkDocument(document);
 
   if (expectedSessionId && message.sessionId !== expectedSessionId) {
     return { document: currentDocument, applied: false, reason: "session-mismatch" };

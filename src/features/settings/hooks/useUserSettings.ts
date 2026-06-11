@@ -24,26 +24,7 @@ const toLocale = (language: UserSettings["language"] | undefined): Locale => {
   return "ja";
 };
 
-export const DEFAULT_SETTINGS: Partial<UserSettings> = {
-  language: "ja",
-  weekStartDay: "monday",
-  notificationsEnabled: false,
-  soundEnabled: true,
-  showReviewHard: true,
-  showReviewEasy: true,
-  autoCarryOver: true,
-  delayBonusEnabled: false,
-  reviewStartNextDay: true,
-  defaultPreviewEnabled: false,
-  autoDraftEnabled: true,
-  autoSaveEnabled: true,
-  autoVoiceQuestion: false,
-  autoVoiceAnswer: false,
-  cardEditorHeightPx: null,
-  questionDisplayMode: "tap_to_reveal" as const,
-  markdownTabSize: 2,
-  editorBlockSettings: createDefaultEditorBlockSettings(),
-};
+export const DEFAULT_SETTINGS: Partial<UserSettings> = { language: "ja", weekStartDay: "monday", notificationsEnabled: false, soundEnabled: true, showReviewHard: true, showReviewEasy: true, autoCarryOver: true, delayBonusEnabled: false, reviewStartNextDay: true, defaultPreviewEnabled: false, autoDraftEnabled: true, autoSaveEnabled: true, autoVoiceQuestion: false, autoVoiceAnswer: false, cardEditorHeightPx: null, questionDisplayMode: "tap_to_reveal" as const, markdownTabSize: 2, editorBlockSettings: createDefaultEditorBlockSettings(), };
 
 const buildBootSettingsSnapshot = (): Partial<UserSettings> => ({
   ...DEFAULT_SETTINGS,
@@ -97,8 +78,7 @@ const areSettingsRecordsEquivalent = (
   return toComparableRecordJson(left) === toComparableRecordJson(right);
 };
 
-export const useUserSettings = () => {
-  const { currentUser } = useAuthSession();
+export const useUserSettings = () => { const { currentUser } = useAuthSession();
   const currentUserId = currentUser?.uid ?? null;
   const bootSettings = useMemo(() => buildBootSettingsSnapshot(), []);
   const setLocale = useLocaleStore((state) => state.setLocale);

@@ -213,12 +213,7 @@ const TagFilterSelectionSwitch = ({ label, checked, onToggle }: TagFilterSelecti
   );
 };
 
-export const TagFilterPanel = ({
-  allTags,
-  isOpen = false,
-  className,
-}: TagFilterPanelProps) => {
-  const { tags: tagRecords } = useTags();
+export const TagFilterPanel = ({ allTags, isOpen = false, className, }: TagFilterPanelProps) => { const { tags: tagRecords } = useTags();
   const {
     tagFilter,
     tagMatchMode,

@@ -15,8 +15,7 @@ type CalendarEventDragRepeatActionControls = {
   getSnapshot: () => CalendarEventDragPointerSnapshot | null;
 };
 
-export type CalendarEventDragPointerSnapshot = {
-  pointerId: number;
+export type CalendarEventDragPointerSnapshot = { pointerId: number;
   buttons: number;
   clientX: number;
   clientY: number;

@@ -11,9 +11,7 @@ import type { Card, Folder } from "@/types";
 import type { CardSet } from "./cardSet";
 
 /** スナップショットのメタデータ */
-export interface SnapshotMetadata {
-  /** スキーマバージョン（マイグレーション用） */
-  schemaVersion: number;
+export interface SnapshotMetadata { /** スキーマバージョン（マイグレーション用） */ schemaVersion: number;
 
   /** 世代カウンター（単調増加、正本判定に使用） */
   generationCounter: number;
@@ -29,8 +27,7 @@ export interface SnapshotMetadata {
 }
 
 /** 学習ログ */
-export interface ReviewLog {
-  id: string;
+export interface ReviewLog { id: string;
   cardId: string;
   folderId: string;
   reviewedAt: string;
@@ -41,14 +38,12 @@ export interface ReviewLog {
 }
 
 /** ユーザー設定 */
-export interface UserSettings {
-  dailyGoal: number;
+export interface UserSettings { dailyGoal: number;
   notificationsEnabled: boolean;
 }
 
 /** スナップショットに含める画像アセット manifest */
-export interface SnapshotAsset {
-  assetId: string;
+export interface SnapshotAsset { assetId: string;
   storagePath: string;
   mime: string;
   naturalW: number | null;
@@ -58,8 +53,7 @@ export interface SnapshotAsset {
 }
 
 /** スナップショットのデータ本体 */
-export interface SnapshotData {
-  cards: Card[];
+export interface SnapshotData { cards: Card[];
   cardSets: CardSet[];
   folders: Folder[];
   reviews: ReviewLog[];
@@ -68,15 +62,12 @@ export interface SnapshotData {
 }
 
 /** アプリケーション全体のスナップショット */
-export interface AppSnapshot {
-  metadata: SnapshotMetadata;
+export interface AppSnapshot { metadata: SnapshotMetadata;
   data: SnapshotData;
 }
 
 /** スナップショット比較結果 */
-export interface SnapshotComparison {
-  /** どちらが新しいか */
-  newerSnapshot: "local" | "imported" | "same";
+export interface SnapshotComparison { /** どちらが新しいか */ newerSnapshot: "local" | "imported" | "same";
 
   /** ローカルの世代 */
   localGeneration: number;

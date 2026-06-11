@@ -16,28 +16,9 @@ import { PlateElement, useEditorMounted, withHOC } from 'platejs/react';
 import { cn } from '@/lib/utils';
 
 import { Caption, CaptionTextarea } from './caption';
-import {
-  mediaResizeHandleVariants,
-  Resizable,
-  ResizeHandle,
-} from './resize-handle';
+import { mediaResizeHandleVariants, Resizable, ResizeHandle, } from './resize-handle';
 
-export const VideoElement = withHOC(
-  ResizableProvider,
-  function VideoElement(
-    props: PlateElementProps<TVideoElement & TResizableProps>
-  ) {
-    const {
-      align = 'center',
-      embed,
-      isVideo,
-      isUpload,
-      isYoutube,
-      readOnly,
-      unsafeUrl,
-    } = useMediaState({
-      urlParsers: [parseTwitterUrl, parseVideoUrl],
-    });
+export const VideoElement = withHOC( ResizableProvider, function VideoElement( props: PlateElementProps<TVideoElement & TResizableProps> ) { const { align = 'center', embed, isVideo, isUpload, isYoutube, readOnly, unsafeUrl, } = useMediaState({ urlParsers: [parseTwitterUrl, parseVideoUrl], });
     const width = useResizableValue('width');
 
     const isEditorMounted = useEditorMounted();
