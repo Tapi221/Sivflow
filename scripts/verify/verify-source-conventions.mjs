@@ -27,10 +27,10 @@ const ORDER_RANKS = {
 };
 const ORDER_LABELS = {
   import: "import",
-  type: "type definition",
-  constant: "constant",
-  helper: "helper function",
-  component: "component body",
+  type: "型定義",
+  constant: "定数",
+  helper: "helper 関数",
+  component: "component 本体",
   postComponent: "memo / displayName / export",
 };
 
@@ -151,7 +151,6 @@ const isComponentVariableStatement = (statement) => statement.declarationList.de
   if (!isPascalCaseName(declaration.name.text)) return false;
   if (!declaration.initializer) return false;
   if (isMemoCall(declaration.initializer)) return false;
-  if (!isFunctionLikeInitializer(declaration.initializer)) return containsJsx(declaration.initializer);
 
   return containsJsx(declaration.initializer);
 });
@@ -164,18 +163,8 @@ const getStatementOrderCategory = (statement) => {
   if (ts.isExportDeclaration(statement) || ts.isExportAssignment(statement)) return "postComponent";
   if (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement) || ts.isModuleDeclaration(statement)) return "type";
   if (isDisplayNameAssignment(statement)) return "postComponent";
-
-  if (ts.isClassDeclaration(statement)) {
-    if (statement.name && isPascalCaseName(statement.name.text) && containsJsx(statement)) return "component";
-
-    return "helper";
-  }
-
-  if (ts.isFunctionDeclaration(statement)) {
-    if (statement.name && isPascalCaseName(statement.name.text) && containsJsx(statement)) return "component";
-
-    return "helper";
-  }
+  if (ts.isClassDeclaration(statement)) return statement.name && isPascalCaseName(statement.name.text) && containsJsx(statement) ? "component" : "helper";
+  if (ts.isFunctionDeclaration(statement)) return statement.name && isPascalCaseName(statement.name.text) && containsJsx(statement) ? "component" : "helper";
 
   if (ts.isVariableStatement(statement)) {
     if (isComponentVariableStatement(statement)) return "component";
@@ -211,19 +200,19 @@ const checkModuleSpecifier = (filePath, sourceFile, node, specifier) => {
   const targetPath = resolveSpecifierPath(filePath, specifier);
 
   if (specifier.startsWith("../")) {
-    violations.push({ filePath, line, message: `Use an alias for cross-folder imports instead of ${specifier}.` });
+    violations.push({ filePath, line, message: `同一階層以外の import では ${specifier} ではなくエイリアスを使ってください。` });
   }
 
   if (/^\.\/[^/]+\//.test(specifier)) {
-    violations.push({ filePath, line, message: `Use an alias for child-folder imports instead of ${specifier}.` });
+    violations.push({ filePath, line, message: `子階層への import では ${specifier} ではなくエイリアスを使ってください。` });
   }
 
   if (specifier.startsWith("@") && targetPath && path.dirname(targetPath) === path.dirname(filePath)) {
-    violations.push({ filePath, line, message: `Use a same-directory relative import instead of ${specifier}.` });
+    violations.push({ filePath, line, message: `同一階層の import では ${specifier} ではなく相対パスを使ってください。` });
   }
 
   if (specifier === "@constants" || specifier.startsWith("@constants/")) {
-    violations.push({ filePath, line, message: "Do not import from @constants. Move values to their responsibility module." });
+    violations.push({ filePath, line, message: "@constants から import しないでください。値は責務を持つ module に移動してください。" });
   }
 
   return violations;
@@ -235,7 +224,7 @@ const checkSingleLineImportExport = (filePath, sourceFile, node) => {
 
   if (startLine === endLine) return [];
 
-  return [{ filePath, line: startLine, message: "Keep each import/export-from declaration on one line." }];
+  return [{ filePath, line: startLine, message: "各 import/export-from 宣言は1行にまとめてください。" }];
 };
 
 const canAppearInExportBlock = (statement) => hasExportModifier(statement) && !ts.isImportDeclaration(statement) && !ts.isImportEqualsDeclaration(statement);
@@ -274,22 +263,7 @@ const checkStatementOrder = (filePath, source, sourceFile) => {
     const rank = ORDER_RANKS[category];
 
     if (rank < highestRank) {
-      if (isTypeOnlyExportDeclaration(statement)) {
-        previousStatements.push(statement);
-        continue;
-      }
-
-      if (canAppearInExportBlock(statement)) {
-        previousStatements.push(statement);
-        continue;
-      }
-
-      if (isConstDependentTypeStatement(source, statement, highestRank)) {
-        previousStatements.push(statement);
-        continue;
-      }
-
-      if (statementReferencesPreviousHigherRankDeclaration(source, sourceFile, statement, previousStatements, rank)) {
+      if (isTypeOnlyExportDeclaration(statement) || canAppearInExportBlock(statement) || isConstDependentTypeStatement(source, statement, highestRank) || statementReferencesPreviousHigherRankDeclaration(source, sourceFile, statement, previousStatements, rank)) {
         previousStatements.push(statement);
         continue;
       }
@@ -297,15 +271,13 @@ const checkStatementOrder = (filePath, source, sourceFile) => {
       violations.push({
         filePath,
         line: getLineNumber(sourceFile, statement.getStart(sourceFile)),
-        message: `Move ${ORDER_LABELS[category]} before ${ORDER_LABELS[highestCategory]}: ${getStatementPreview(source, statement)}`,
+        message: `${ORDER_LABELS[category]} を ${ORDER_LABELS[highestCategory]} より前に移動してください: ${getStatementPreview(source, statement)}`,
       });
       previousStatements.push(statement);
       continue;
     }
 
-    if (rank > highestRank) {
-      highestCategory = category;
-    }
+    if (rank > highestRank) highestCategory = category;
 
     highestRank = rank;
     previousStatements.push(statement);
@@ -336,7 +308,7 @@ const checkBlockSpacing = (filePath, source, sourceFile) => {
     const blankLineCount = getBlankLineCountBetweenStatements(source, sourceFile, previousStatement, statement);
     if (blankLineCount === 2) return [];
 
-    return [{ filePath, line: getLineNumber(sourceFile, statement.getStart(sourceFile)), message: `Put exactly one blank line between ${ORDER_LABELS[previousCategory]} and ${ORDER_LABELS[category]} blocks.` }];
+    return [{ filePath, line: getLineNumber(sourceFile, statement.getStart(sourceFile)), message: `${ORDER_LABELS[previousCategory]} と ${ORDER_LABELS[category]} のブロック間は空行1行だけにしてください。` }];
   });
 };
 
@@ -376,21 +348,13 @@ const checkExplicitFragmentUsage = (filePath, sourceFile, node, tagName, attribu
   if (!isExplicitFragmentTagName(tagName)) return [];
   if (isWithinMapCall(node) && hasKeyAttribute(attributes)) return [];
 
-  return [{
-    filePath,
-    line: getLineNumber(sourceFile, node.getStart(sourceFile)),
-    message: "Use <>...</> instead of explicit Fragment. Explicit Fragment is only allowed with key inside map.",
-  }];
+  return [{ filePath, line: getLineNumber(sourceFile, node.getStart(sourceFile)), message: "明示的な Fragment ではなく <>...</> を使ってください。明示的な Fragment は map 内で key が必要な場合だけ許可します。" }];
 };
 
 const checkShorthandFragmentUsage = (filePath, sourceFile, node) => {
   if (getMeaningfulJsxChildCount(node.children) > 1) return [];
 
-  return [{
-    filePath,
-    line: getLineNumber(sourceFile, node.getStart(sourceFile)),
-    message: "Do not wrap a single child in <>...</>. Return the child directly.",
-  }];
+  return [{ filePath, line: getLineNumber(sourceFile, node.getStart(sourceFile)), message: "単一の子要素を <>...</> で包まないでください。子要素をそのまま返してください。" }];
 };
 
 const checkMeaninglessDivUsage = (filePath, sourceFile, node) => {
@@ -398,11 +362,7 @@ const checkMeaninglessDivUsage = (filePath, sourceFile, node) => {
   if (!isJsxTagNamed(opening.tagName, "div")) return [];
   if (!hasNoRuntimeAttributes(opening.attributes)) return [];
 
-  return [{
-    filePath,
-    line: getLineNumber(sourceFile, node.getStart(sourceFile)),
-    message: "Do not use a div only as a wrapper. Use <>...</> unless a real DOM node is needed.",
-  }];
+  return [{ filePath, line: getLineNumber(sourceFile, node.getStart(sourceFile)), message: "ラッパーだけの div を使わないでください。実 DOM が必要ない場合は <>...</> を使ってください。" }];
 };
 
 const checkJsxWrapperConventions = (filePath, sourceFile) => {
@@ -449,7 +409,7 @@ const sourceFiles = SOURCE_DIRECTORIES.flatMap(walkSourceFiles);
 const violations = sourceFiles.flatMap(checkSourceFile);
 
 if (violations.length > 0) {
-  console.error("Source convention violations:");
+  console.error("ソース規約違反:");
   for (const violation of violations) {
     console.error(`- ${formatViolation(violation)}`);
   }
