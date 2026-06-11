@@ -159,7 +159,6 @@ const isTypeOnlyExportDeclaration = (statement) => ts.isExportDeclaration(statem
 
 const getStatementOrderCategory = (statement) => {
   if (ts.isImportDeclaration(statement) || ts.isImportEqualsDeclaration(statement)) return "import";
-  if (isTypeOnlyExportDeclaration(statement)) return "type";
   if (ts.isExportDeclaration(statement) || ts.isExportAssignment(statement)) return "postComponent";
   if (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement) || ts.isModuleDeclaration(statement)) return "type";
   if (isDisplayNameAssignment(statement)) return "postComponent";
@@ -245,7 +244,7 @@ const statementReferencesPreviousHigherRankDeclaration = (source, sourceFile, st
   });
   const statementText = source.slice(statement.getStart(sourceFile), statement.getEnd());
 
-  return higherRankNames.some((name) => new RegExp(`\\b${escapeRegExp(name)}\\b`).test(statementText));
+  return higherRankNames.some((name) => new RegExp(`\b${escapeRegExp(name)}\b`).test(statementText));
 };
 
 const checkStatementOrder = (filePath, source, sourceFile) => {
