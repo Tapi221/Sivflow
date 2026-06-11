@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 
 const ROOT_DIR = process.cwd();
 const FIX_IMPORT_SPACING_SCRIPT = path.join(ROOT_DIR, "scripts/verify/fix-import-spacing.mjs");
+const FIX_KNOWN_LINT_ERRORS_SCRIPT = path.join(ROOT_DIR, "scripts/verify/fix-known-lint-errors.mjs");
 const FIX_REPEATED_BLANK_LINES_SCRIPT = path.join(ROOT_DIR, "scripts/verify/fix-repeated-blank-lines.mjs");
 
 const runFormatterOnSource = (source: string, scriptPath = FIX_IMPORT_SPACING_SCRIPT) => {
@@ -51,5 +52,11 @@ describe("source convention formatter", () => {
     const formatted = runFormatterOnSource(`import * as React from "react";\n\n\n\nconst useValue = () => React.useState(false);\n\n\n\nexport { useValue };\n`, FIX_REPEATED_BLANK_LINES_SCRIPT);
 
     expect(formatted).toBe(`import * as React from "react";\n\nconst useValue = () => React.useState(false);\n\nexport { useValue };\n`);
+  });
+
+  it("既知 lint の constant nullish fallback を自動修正する", () => {
+    const formatted = runFormatterOnSource(`const path = folderPath.join(" / ") ?? "未分類";\nconst orderIndex = Number(cardSet.orderIndex) ?? 0;\n`, FIX_KNOWN_LINT_ERRORS_SCRIPT);
+
+    expect(formatted).toBe(`const path = folderPath.length > 0 ? folderPath.join(" / ") : "未分類";\nconst orderIndex = Number.isFinite(Number(cardSet.orderIndex)) ? Number(cardSet.orderIndex) : 0;\n`);
   });
 });
