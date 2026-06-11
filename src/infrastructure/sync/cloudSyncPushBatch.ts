@@ -6,13 +6,9 @@ import { getChangeId, getChangeParts, sanitizeSyncDataForCloud } from "@/applica
 import type { SyncChange } from "@/services/interfaces/ISyncService";
 import { getPushDocumentRef, requireCloudSyncFirestore } from "./cloudSyncFirestoreRefs";
 
-
-
 type SyncChangeWithOperation = SyncChange & {
   operationType?: unknown;
 };
-
-
 
 const cloudUpdatedAt = (): FieldValue | Timestamp => {
   const fn = (Firestore as Record<string, unknown>).serverTimestamp;
@@ -131,7 +127,5 @@ const pushCloudSyncBatch = async (userId: string, changes: SyncChange[]): Promis
     };
   }
 };
-
-
 
 export { pushCloudSyncBatch };
