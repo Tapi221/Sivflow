@@ -19,6 +19,13 @@ type CreatePanelCardParams = {
   isEditing: boolean;
 };
 type CardToggleField = "isBookmarked" | "hasUncertainty";
+type TagNameLookup = Parameters<typeof resolveCardTagNames>[1];
+type PersistOperation = "created" | "updated" | "noop";
+type PersistResult = | { ok: true; operation: PersistOperation; saved: boolean; }
+  | { ok: false; message: string; };
+
+const NEW_SENTINEL = "__new__" as const;
+const AUTOSAVE_DELAY_MS = 700;
 
 const createDraftPanelBaseCard = (): Card => {
   const now = new Date();
@@ -75,15 +82,6 @@ const resolveTagIdsForSave = async (
 
   return tagIds;
 };
-
-const NEW_SENTINEL = "__new__" as const;
-const AUTOSAVE_DELAY_MS = 700;
-
-type TagNameLookup = Parameters<typeof resolveCardTagNames>[1];
-type PersistOperation = "created" | "updated" | "noop";
-type PersistResult = | { ok: true; operation: PersistOperation; saved: boolean; }
-  | { ok: false; message: string; };
-
 const cloneBlock = (block: CardBlock): CardBlock => { return { ...block, images: block.images?.map((image) => ({ ...image })), audios: block.audios?.map((audio) => ({ ...audio })), references: block.references?.map((reference) => ({ ...reference })), code: block.code ? { ...block.code } : undefined, math: block.math ? { ...block.math } : undefined, pdf: block.pdf ? { ...block.pdf } : block.pdf };
 };
 const cloneAttachments = (attachments: CardFaceAttachments | null | undefined): CardFaceAttachments => { return { images: attachments?.images?.map((image) => ({ ...image })) ?? [], audios: attachments?.audios?.map((audio) => ({ ...audio })) ?? [], references: attachments?.references?.map((reference) => ({ ...reference })) ?? [] };

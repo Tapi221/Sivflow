@@ -10,6 +10,20 @@ type FlipTriggerEvent = Readonly<{
   target: EventTarget | null;
   stopPropagation?: () => void;
 }>;
+type UseCardFlipBehaviorParams = Readonly<{ isCardClickable: boolean;
+  previewMode: boolean;
+  onFlip?: () => void;
+  onPreviewFlip?: () => void;
+  isModalBlockingFlip: boolean;
+  isInkEditingActive: boolean;
+}>;
+type UseCardFlipBehaviorResult = Readonly<{ handleFlip: (event?: React.MouseEvent<HTMLDivElement>) => void;
+  handleKeyDown: React.KeyboardEventHandler<HTMLDivElement>;
+  handlePointerDownCapture: React.PointerEventHandler<HTMLDivElement>;
+  handlePointerMoveCapture: React.PointerEventHandler<HTMLDivElement>;
+  handlePointerUpCapture: React.PointerEventHandler<HTMLDivElement>;
+  handlePointerCancelCapture: React.PointerEventHandler<HTMLDivElement>;
+}>;
 
 const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
 
@@ -28,22 +42,6 @@ const createInitialPointerGestureState = (): PointerGestureState => ({
   startY: 0,
   moved: false,
 });
-
-type UseCardFlipBehaviorParams = Readonly<{ isCardClickable: boolean;
-  previewMode: boolean;
-  onFlip?: () => void;
-  onPreviewFlip?: () => void;
-  isModalBlockingFlip: boolean;
-  isInkEditingActive: boolean;
-}>;
-type UseCardFlipBehaviorResult = Readonly<{ handleFlip: (event?: React.MouseEvent<HTMLDivElement>) => void;
-  handleKeyDown: React.KeyboardEventHandler<HTMLDivElement>;
-  handlePointerDownCapture: React.PointerEventHandler<HTMLDivElement>;
-  handlePointerMoveCapture: React.PointerEventHandler<HTMLDivElement>;
-  handlePointerUpCapture: React.PointerEventHandler<HTMLDivElement>;
-  handlePointerCancelCapture: React.PointerEventHandler<HTMLDivElement>;
-}>;
-
 const useCardFlipBehavior = ({ isCardClickable, previewMode, onFlip, onPreviewFlip, isModalBlockingFlip, isInkEditingActive }: UseCardFlipBehaviorParams): UseCardFlipBehaviorResult => { const suppressNextFlipRef = React.useRef(false);
   const pointerGestureRef = React.useRef<PointerGestureState>(
     createInitialPointerGestureState(),

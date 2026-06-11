@@ -2,8 +2,6 @@ import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 
-const NEW_SENTINEL = "__new__" as const;
-
 type EditorDraft = { title: string;
   tags: string[];
   isDraft: boolean;
@@ -13,6 +11,8 @@ type EditorDraft = { title: string;
   backAttachments: CardFaceAttachments;
   layoutRows: number;
 };
+
+const NEW_SENTINEL = "__new__" as const;
 
 const makeEmptyCardFaceAttachments = (): CardFaceAttachments => ({ images: [], audios: [], references: [] });
 const normalizeSelectedCardId = (raw: string | null) => { if (!raw) return null;

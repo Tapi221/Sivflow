@@ -1,6 +1,23 @@
 import { clearCachedGoogleCalendarAccount } from "./googleCalendarEventCache";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
+// ─────────────────────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────────────────────
+type StoredGoogleAccount = { /** メールアドレス or ランダムUUID（メール不明時） */ id: string;
+  email: string | null;
+  name?: string | null;
+  photoUrl?: string | null;
+  accessToken: string | null;
+  accessTokenExpiry: number | null;
+  refreshToken: string | null;
+  selectedCalendarIds: string[];
+  cachedCalendars?: { id: string; summary: string; backgroundColor?: string; }[];
+};
+type StoredGoogleAccountProfile = { name?: string | null;
+  photoUrl?: string | null;
+};
+
 /**
  * gcal.multi-storage.ts
  *
@@ -23,23 +40,6 @@ const LEGACY_EMAIL_KEY = "flashcard-master.gcal.account_email";
 const LEGACY_CALENDAR_IDS_KEY = "flashcard-master.gcal.selected_calendar_ids";
 const LEGACY_WAS_CONNECTED_KEY = "flashcard-master.gcal.was_connected";
 const pendingLegacyDesktopRefreshTokens = new Map<string, string>();
-
-// ─────────────────────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────────────────────
-type StoredGoogleAccount = { /** メールアドレス or ランダムUUID（メール不明時） */ id: string;
-  email: string | null;
-  name?: string | null;
-  photoUrl?: string | null;
-  accessToken: string | null;
-  accessTokenExpiry: number | null;
-  refreshToken: string | null;
-  selectedCalendarIds: string[];
-  cachedCalendars?: { id: string; summary: string; backgroundColor?: string; }[];
-};
-type StoredGoogleAccountProfile = { name?: string | null;
-  photoUrl?: string | null;
-};
 
 // ─────────────────────────────────────────────────────────────
 // Token validity

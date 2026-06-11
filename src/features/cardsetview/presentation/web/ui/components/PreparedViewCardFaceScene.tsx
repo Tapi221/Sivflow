@@ -11,20 +11,6 @@ import { useFlashcardMediaState } from "@/components/card/frame/useFlashcardMedi
 import type { Card } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
-  id: card.id,
-  cardId: card.cardId,
-  hasUncertainty: card.hasUncertainty,
-  has_uncertainty: card.hasUncertainty,
-  isBookmarked: card.isBookmarked ?? false,
-  is_bookmarked: card.isBookmarked ?? false,
-  front: card.front,
-  back: card.back,
-  layoutRows: card.layoutRows,
-  inkQuestion: card.front.ink ?? null,
-  inkAnswer: card.back.ink ?? null,
-});
-
 type PreparedViewCardFaceSceneProps = Readonly<{ card: Card;
   sharedDerived: FlashcardSharedDerivedSnapshot;
   sideDerived: FlashcardSideDerivedSnapshot;
@@ -42,6 +28,20 @@ type PreparedViewCardFaceSceneProps = Readonly<{ card: Card;
   onToggleUncertainty?: (card: Card) => void | Promise<void>;
   onToggleBookmark?: (card: Card) => void | Promise<void>;
 }>;
+
+const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
+  id: card.id,
+  cardId: card.cardId,
+  hasUncertainty: card.hasUncertainty,
+  has_uncertainty: card.hasUncertainty,
+  isBookmarked: card.isBookmarked ?? false,
+  is_bookmarked: card.isBookmarked ?? false,
+  front: card.front,
+  back: card.back,
+  layoutRows: card.layoutRows,
+  inkQuestion: card.front.ink ?? null,
+  inkAnswer: card.back.ink ?? null,
+});
 
 const PreparedViewCardFaceScene = ({ card, sharedDerived, sideDerived, displayMode, fixedScale, fixedHeightPx = null, contentZoom, headerIconVisualScale, previewMode, showInkLayer, drawMode = false, inkEditingEnabled, fillHeight = false, onFlip, onToggleUncertainty, onToggleBookmark }: PreparedViewCardFaceSceneProps) => { const contentRef = React.useRef<HTMLDivElement | null>(null);
 

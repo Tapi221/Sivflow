@@ -117,6 +117,11 @@ const glyphByIconName: Record<string, GlyphKind> = {
   X: "x",
   XCircle: "x",
 };
+const FolderIcon = Folder;
+const ImageIcon = Image;
+const CircleHelp = HelpCircle;
+const Sigma = SigmaIcon;
+const NotebookPen = NotebookPenIcon;
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 const isStratisDataIcon = (value: unknown): value is StratisDataIcon => isRecord(value) && typeof value.data === "string";
@@ -329,12 +334,7 @@ const X = makeStratisIcon("suIconX01", "X");
 const XCircle = makeStratisIcon("suIconXCircleContained", "XCircle");
 const Zap = makeIcon("Zap");
 const Code = makeStratisIcon("suIconCode01", "Code");
-const FolderIcon = Folder;
 const FolderOutlineIcon = ExplorerFolderOutlineIcon;
-const ImageIcon = Image;
-const CircleHelp = HelpCircle;
-const Sigma = SigmaIcon;
-const NotebookPen = NotebookPenIcon;
 
 export { AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, ArrowUpDown, BookOpen, Brain, Calendar, Camera, Check, CheckCheck, CheckCircle, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, Clock, Cloud, CloudOff, Construction, Copy, Database, Download, Edit, Eraser, ExternalLink, FileAudio, FileEdit, FileJson, FileText, FileWarning, FileX, Filter, Flame, Folder, FolderInput, FolderTree, GitMerge, Globe, GripVertical, HardDrive, HelpCircle, History, Image, Info, Keyboard, Layers, Link, List, Loader2, LogOut, Merge, MessageSquare, Minus, MoreVertical, Move, Palette, Pause, PenLine, Pencil, Pin, Play, Plus, Redo2, RefreshCw, RotateCcw, Search, SearchX, Settings2, Shield, Smartphone, Sparkles, Star, Tag, Trash2, Trophy, Type, Undo2, Upload, User, Volume2, X, XCircle, Zap, Code, FolderIcon, FolderOutlineIcon, ImageIcon, CircleHelp, Sigma, NotebookPen };
 export type { IconProps };
