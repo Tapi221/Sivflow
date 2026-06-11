@@ -18,9 +18,11 @@ const DEFAULT_PDF_PAGE_WINDOW_OVERSCAN = 1;
 
 
 
-const getSafePdfPageNumber = (pageNumber: number | null | undefined, pageCount: number): number => {
+const getSafePdfPageNumber = (pageNumber: number | null | undefined, pageCount?: number | null): number => {
   const normalizedPageNumber = Math.floor(pageNumber ?? DEFAULT_PDF_PAGE);
-  return Math.min(Math.max(normalizedPageNumber, DEFAULT_PDF_PAGE), Math.max(pageCount, DEFAULT_PDF_PAGE));
+  const safePageNumber = Number.isFinite(normalizedPageNumber) ? normalizedPageNumber : DEFAULT_PDF_PAGE;
+  const safePageCount = typeof pageCount === "number" && Number.isFinite(pageCount) ? Math.max(Math.floor(pageCount), DEFAULT_PDF_PAGE) : Number.MAX_SAFE_INTEGER;
+  return Math.min(Math.max(safePageNumber, DEFAULT_PDF_PAGE), safePageCount);
 };
 
 const getNormalizedPdfPageWindowOverscan = (overscanPageCount: number | null | undefined): number => {
