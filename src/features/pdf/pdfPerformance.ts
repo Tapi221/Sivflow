@@ -29,8 +29,12 @@ const PDF_ZOOMING_CLASS_NAME = "pdf-pane--zooming";
 
 let pdfPerformanceTraceCounter = 0;
 
+const isPdfViewerZooming = (pdfViewer: PatchedPdfViewerPrototype): boolean => {
+  return Boolean(pdfViewer.container?.classList.contains(PDF_ZOOMING_CLASS_NAME));
+};
+
 const shouldSuppressPdfViewerScaleScroll = (pdfViewer: PatchedPdfViewerPrototype): boolean => {
-  return Boolean(pdfViewer.__sivflowIsSettingScale && pdfViewer.container?.classList.contains(PDF_ZOOMING_CLASS_NAME));
+  return Boolean(pdfViewer.__sivflowIsSettingScale || isPdfViewerZooming(pdfViewer));
 };
 
 const patchPdfViewerScaleSetter = (prototype: PatchedPdfViewerPrototype, propertyName: (typeof PDF_VIEWER_SCALE_PROPERTY_NAMES)[number]): void => {
