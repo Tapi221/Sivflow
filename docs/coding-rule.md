@@ -102,7 +102,7 @@ const enabled = inputEnabled ?? true;
 const title = inputTitle.trim() === "" ? "Untitled" : inputTitle;
 ```
 
-`npm run verify:nullish-fallback` は、`||` の右辺が string / number / boolean / object / array literal で、値を返す文脈にあるものだけを検出する。boolean 合成の `isReady || isLoading` のような式は対象にしない。`npm run verify:source-conventions` はこの検査を含めて実行する。
+`npm run verify:nullish-fallback` は、`||` の右辺が string / number / boolean / object / array literal で、値を返す文脈にあるものだけを検出する。boolean 合成の `isReady || isLoading` のような式は対象にしない。`npm run fix:nullish-fallback` は同じ対象を `??` へ自動修正する。`npm run fix:source-conventions` と `npm run verify:source-conventions` はこの検査を含めて実行する。
 
 ## export
 
