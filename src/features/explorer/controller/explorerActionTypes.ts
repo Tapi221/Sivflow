@@ -1,3 +1,3 @@
+import type { ExplorerAction } from "./explorerAction.types";
 
-
-export * from "./explorerAction.types";
+export type { ExplorerAction };
