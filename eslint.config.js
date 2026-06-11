@@ -52,7 +52,7 @@ const UI_RESTRICTED_IMPORT_PATTERNS = [
 ];
 
 export default defineConfig([
-  globalIgnores(["dist"]),
+  globalIgnores(["dist", "apps/desktop/src-tauri/target"]),
 
   {
     files: TYPESCRIPT_SOURCE_FILES,
