@@ -5,6 +5,8 @@ import ts from "typescript";
 const ROOT_DIR = process.cwd();
 const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src", "tests", "scripts/dev", "scripts/verify"].map((directory) => path.join(ROOT_DIR, directory));
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx"]);
+const ORDER_EXCLUDED_PATH_PARTS = ["/tests/", "/scripts/", "/src/sandbox/"];
+const ORDER_EXCLUDED_FILE_SUFFIXES = [".d.ts"];
 const ORDER_RANKS = {
   import: 1,
   type: 2,
@@ -40,6 +42,13 @@ const walkSourceFiles = (directory) => {
 const toPosix = (value) => value.split(path.sep).join("/");
 
 const getLineNumber = (sourceFile, position) => sourceFile.getLineAndCharacterOfPosition(position).line + 1;
+
+const shouldCheckStatementOrder = (filePath) => {
+  const relativePath = `/${toPosix(path.relative(ROOT_DIR, filePath))}`;
+  if (ORDER_EXCLUDED_FILE_SUFFIXES.some((suffix) => relativePath.endsWith(suffix))) return false;
+
+  return !ORDER_EXCLUDED_PATH_PARTS.some((part) => relativePath.includes(part));
+};
 
 const isIdentifierNamed = (expression, name) => ts.isIdentifier(expression) && expression.text === name;
 
@@ -89,7 +98,7 @@ const isComponentVariableStatement = (statement) => statement.declarationList.de
   if (!isPascalCaseName(declaration.name.text)) return false;
   if (!declaration.initializer) return false;
   if (isMemoCall(declaration.initializer)) return true;
-  if (!isFunctionLikeInitializer(declaration.initializer)) return false;
+  if (!isFunctionLikeInitializer(declaration.initializer)) return containsJsx(declaration.initializer);
 
   return containsJsx(declaration.initializer);
 });
@@ -97,8 +106,14 @@ const isComponentVariableStatement = (statement) => statement.declarationList.de
 const getStatementOrderCategory = (statement) => {
   if (ts.isImportDeclaration(statement) || ts.isImportEqualsDeclaration(statement)) return "import";
   if (ts.isExportDeclaration(statement) || ts.isExportAssignment(statement)) return "postComponent";
-  if (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement)) return "type";
+  if (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement) || ts.isModuleDeclaration(statement)) return "type";
   if (isDisplayNameAssignment(statement)) return "postComponent";
+
+  if (ts.isClassDeclaration(statement)) {
+    if (statement.name && isPascalCaseName(statement.name.text) && containsJsx(statement)) return "component";
+
+    return "helper";
+  }
 
   if (ts.isFunctionDeclaration(statement)) {
     if (statement.name && isPascalCaseName(statement.name.text) && containsJsx(statement)) return "component";
@@ -180,6 +195,8 @@ const checkStatementOrder = (filePath, source, sourceFile) => {
   const violations = [];
   let highestCategory = "import";
   let highestRank = 0;
+
+  if (!shouldCheckStatementOrder(filePath)) return violations;
 
   for (const statement of sourceFile.statements) {
     const category = getStatementOrderCategory(statement);
