@@ -4,9 +4,8 @@ import type { MfDeckArchiveV1, MfDeckCardV1, MfDeckIssue } from "@/features/deck
 import type { Card, CardBlock, CardSet } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-
-
-export type CreateMfDeckCardSet = (name: string, targetFolderId?: string | null, opts?: { description?: string;
+export type CreateMfDeckCardSet = (name: string, targetFolderId?: string | null, opts?: {
+  description?: string;
   id?: string;
   orderIndex?: number;
 },
@@ -14,7 +13,8 @@ export type CreateMfDeckCardSet = (name: string, targetFolderId?: string | null,
 export type UpdateMfDeckCardSet = (id: string, data: Partial<Pick<CardSet, "name" | "description" | "orderIndex" | "defaultDisplayMode">>) => Promise<void>;
 export type CreateMfDeckCard = (cardData: Partial<Card> & { cardSetId?: string; }) => Promise<Card>;
 export type EnsureMfDeckTagByName = (name: string) => Promise<string | null>;
-export type MfDeckImportDestination = | { kind: "new-card-set";
+export type MfDeckImportDestination = | {
+  kind: "new-card-set";
   cardSetName?: string;
 }
   | {
@@ -22,7 +22,8 @@ export type MfDeckImportDestination = | { kind: "new-card-set";
     cardSetId: string;
     cardSetName: string;
   };
-export type ImportMfDeckArchiveParams = { archive: MfDeckArchiveV1;
+export type ImportMfDeckArchiveParams = {
+  archive: MfDeckArchiveV1;
   folderId: string;
   createCardSet: CreateMfDeckCardSet;
   updateCardSet?: UpdateMfDeckCardSet;
@@ -30,14 +31,13 @@ export type ImportMfDeckArchiveParams = { archive: MfDeckArchiveV1;
   ensureTagByName?: EnsureMfDeckTagByName;
   destination: MfDeckImportDestination;
 };
-export type ImportMfDeckArchiveResult = { createdCardSetId: string;
+export type ImportMfDeckArchiveResult = {
+  createdCardSetId: string;
   createdCardSetName: string;
   folderId: string;
   createdCount: number;
   issues: MfDeckIssue[];
 };
-
-
 
 const cloneJson = <T>(value: T): T => {
   if (value === undefined) return value;
@@ -179,7 +179,8 @@ const buildCardInput = async ({
     isBookmarked: false,
   };
 };
-export const importMfDeckArchive = async ({ archive, folderId, createCardSet, updateCardSet, createCard, ensureTagByName, destination }: ImportMfDeckArchiveParams): Promise<ImportMfDeckArchiveResult> => { const issues: MfDeckIssue[] = [];
+export const importMfDeckArchive = async ({ archive, folderId, createCardSet, updateCardSet, createCard, ensureTagByName, destination }: ImportMfDeckArchiveParams): Promise<ImportMfDeckArchiveResult> => {
+  const issues: MfDeckIssue[] = [];
   const manifestDeck = archive.manifest.deck;
 
   const targetCardSet =

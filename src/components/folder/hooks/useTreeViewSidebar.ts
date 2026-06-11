@@ -2,8 +2,6 @@ import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useRef,
 import { WEB_STORAGE_KEYS } from "@platform/storage/webStorageKeys.constants";
 import { useTreeViewSidebarHotkey } from "@/features/hotkey/useTreeViewSidebarHotkey";
 
-
-
 export const TREE_VIEW_SIDEBAR_TOGGLE_EVENT = "sivflow:treeview-sidebar-toggle";
 const SIDEBAR_WIDTH_LIMITS = {
   min: 260,
@@ -11,8 +9,6 @@ const SIDEBAR_WIDTH_LIMITS = {
   default: 292,
 } as const;
 const SECTION_LIST_PANE_LEFT_VAR = "--sivflow-section-list-pane-left";
-
-
 
 const clampSidebarWidth = (width: number) =>
   Math.min(Math.max(width, SIDEBAR_WIDTH_LIMITS.min), SIDEBAR_WIDTH_LIMITS.max);
@@ -49,7 +45,8 @@ const readStoredSidebarOpen = () => {
   const savedOpen = window.localStorage.getItem(WEB_STORAGE_KEYS.sidebarOpen);
   return savedOpen !== null ? savedOpen === "true" : true;
 };
-export const useTreeViewSidebar = () => { const [sidebarWidth, setSidebarWidth] = useState(readStoredSidebarWidth);
+export const useTreeViewSidebar = () => {
+  const [sidebarWidth, setSidebarWidth] = useState(readStoredSidebarWidth);
   const [renderedSidebarWidth, setRenderedSidebarWidth] = useState(() =>
     clampSidebarWidth(readStoredSidebarWidth()),
   );

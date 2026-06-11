@@ -4,8 +4,6 @@ import { buildCardSetViewBreadcrumbs } from "@/features/breadcrumbs/builders";
 import type { Card } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 
-
-
 type FolderLike = {
   id: string;
   folderName: string;
@@ -19,9 +17,8 @@ interface UseCardSetViewBreadcrumbsOptions {
   setExtraCrumbs: (crumbs: BreadcrumbCrumb[]) => void;
 }
 
-
-
-export const useCardSetViewBreadcrumbs = ({ selectedCardSet, selectedCard, sortedCards, folders, setExtraCrumbs }: UseCardSetViewBreadcrumbsOptions) => { const folderById = useMemo(() => new Map<string, FolderLike>(folders.map((folder) => [folder.id, folder])), [folders]);
+export const useCardSetViewBreadcrumbs = ({ selectedCardSet, selectedCard, sortedCards, folders, setExtraCrumbs }: UseCardSetViewBreadcrumbsOptions) => {
+  const folderById = useMemo(() => new Map<string, FolderLike>(folders.map((folder) => [folder.id, folder])), [folders]);
 
   const resolvedFolderId = selectedCardSet?.folderId ?? null;
 

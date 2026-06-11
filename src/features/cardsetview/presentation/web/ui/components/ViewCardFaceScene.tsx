@@ -11,10 +11,9 @@ import { useFlashcardMediaState } from "@/components/card/frame/useFlashcardMedi
 import type { Card } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-
-
 type Side = "question" | "answer";
-export type ViewCardFaceSceneProps = Readonly<{ card: Card;
+export type ViewCardFaceSceneProps = Readonly<{
+  card: Card;
   side: Side;
   displayMode: CardDisplayMode;
   fixedScale?: number;
@@ -31,8 +30,6 @@ export type ViewCardFaceSceneProps = Readonly<{ card: Card;
   onToggleBookmark?: (card: Card) => void | Promise<void>;
 }>;
 
-
-
 const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   id: card.id,
   cardId: card.cardId,
@@ -47,9 +44,8 @@ const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   inkAnswer: card.back.ink ?? null,
 });
 
-
-
-export const ViewCardFaceScene = ({ card, side, displayMode, fixedScale, fixedHeightPx = null, contentZoom, headerIconVisualScale, previewMode, showInkLayer, drawMode = false, inkEditingEnabled, fillHeight = false, onFlip, onToggleUncertainty, onToggleBookmark }: ViewCardFaceSceneProps) => { const contentRef = React.useRef<HTMLDivElement | null>(null);
+export const ViewCardFaceScene = ({ card, side, displayMode, fixedScale, fixedHeightPx = null, contentZoom, headerIconVisualScale, previewMode, showInkLayer, drawMode = false, inkEditingEnabled, fillHeight = false, onFlip, onToggleUncertainty, onToggleBookmark }: ViewCardFaceSceneProps) => {
+  const contentRef = React.useRef<HTMLDivElement | null>(null);
 
   const flashcardCard = React.useMemo<FlashcardCardLike>(
     () => toFlashcardCardLike(card),

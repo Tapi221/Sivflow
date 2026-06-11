@@ -1,8 +1,7 @@
 import type { CardBlock } from "@/types/domain/card";
 
-
-
-export const sortBlocksByOrderIndex = (blocks: CardBlock[] = []) => { if (blocks.length <= 1) return blocks;
+export const sortBlocksByOrderIndex = (blocks: CardBlock[] = []) => {
+  if (blocks.length <= 1) return blocks;
 
   let previous = blocks[0]?.orderIndex ?? 0;
   for (let index = 1; index < blocks.length; index += 1) {

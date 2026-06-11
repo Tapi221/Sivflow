@@ -1,61 +1,44 @@
 "use client";
 
 import * as React from "react";
-
 import { type UseChatHelpers, useChat as useBaseChat } from "@ai-sdk/react";
-
 import { faker } from "@faker-js/faker";
-
 import { AIChatPlugin, aiCommentToRange, applyTableCellSuggestion } from "@platejs/ai/react";
-
 import { getCommentKey, getTransientCommentKey } from "@platejs/comment";
-
 import { deserializeMd } from "@platejs/markdown";
-
 import { BlockSelectionPlugin } from "@platejs/selection/react";
-
 import { type UIMessage, DefaultChatTransport } from "ai";
-
 import { type TNode, KEYS, nanoid, NodeApi, TextApi } from "platejs";
-
 import { type PlateEditor, useEditorRef, usePluginOption } from "platejs/react";
-
 import { aiChatPlugin } from "@/components/editor/plugins/ai-kit";
-
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
-
 import { withAIBatch } from "@platejs/ai";
 
-
-
 export type ToolName = "comment" | "edit" | "generate";
-
-export type TComment = { comment: { blockId: string;
+export type TComment = {
+  comment: {
+    blockId: string;
     comment: string;
     content: string;
   } | null;
   status: "finished" | "streaming";
 };
-
-export type TTableCellUpdate = { cellUpdate: { content: string;
+export type TTableCellUpdate = {
+  cellUpdate: {
+    content: string;
     id: string;
   } | null;
   status: "finished" | "streaming";
 };
-
-export type MessageDataPart = { toolName: ToolName;
+export type MessageDataPart = {
+  toolName: ToolName;
   comment?: TComment;
   table?: TTableCellUpdate;
 };
-
 export type Chat = UseChatHelpers<ChatMessage>;
-
 export type ChatMessage = UIMessage<{}, MessageDataPart>;
 
-
-
 const delay = faker.number.int({ max: 20, min: 5 });
-
 const markdownChunks = [
   [
     { delay, texts: "Make text " },
@@ -225,7 +208,6 @@ const markdownChunks = [
     { delay, texts: " |" },
   ],
 ];
-
 const mdxChunks = [
   [
     {
@@ -1155,8 +1137,6 @@ const mdxChunks = [
   ],
 ];
 
-
-
 function createChatTransport({
   api,
   abortControllerRef,
@@ -1263,8 +1243,8 @@ function createChatTransport({
     }) as typeof fetch,
   });
 }
-
-export const useChat = () => { const editor = useEditorRef();
+export const useChat = () => {
+  const editor = useEditorRef();
   const options = usePluginOption(aiChatPlugin, "chatOptions");
 
   // remove when you implement the route /api/ai/command
@@ -1393,7 +1373,6 @@ export const useChat = () => { const editor = useEditorRef();
 
   return chat;
 };
-
 // Used for testing. Remove it after implementing useChat api.
 const fakeStreamText = ({
   chunkCount = 10,
@@ -1557,7 +1536,6 @@ const fakeStreamText = ({
     },
   });
 };
-
 const createCommentChunks = (editor: PlateEditor) => {
   const selectedBlocksApi = editor.getApi(BlockSelectionPlugin).blockSelection;
 
@@ -1619,7 +1597,6 @@ const createCommentChunks = (editor: PlateEditor) => {
 
   return result_chunks;
 };
-
 const createTableCellChunks = (editor: PlateEditor) => {
   // Get selected table cells from the TablePlugin
   const selectedCells =

@@ -6,8 +6,6 @@ import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 import type { CalendarPrintRangeState } from "./calendarPrint.types";
 
-
-
 type CalendarPrintRangeInput = {
   printRange: CalendarPrintRangeState;
   primaryViewMode: CalendarViewMode;
@@ -17,8 +15,6 @@ type CalendarPrintRangeInput = {
   currentDisplayRange: CalendarDateRange;
   weekStartDay?: CalendarWeekStartDay;
 };
-
-
 
 const normalizeRange = (left: Date, right: Date): CalendarDateRange => {
   if (left.getTime() <= right.getTime()) {
@@ -46,7 +42,8 @@ const getCurrentRangeLabel = (primaryViewMode: CalendarViewMode): string => {
   return "表示中";
 };
 export const createCalendarPrintDateInputValue = (date: Date): string => format(date, "yyyy-MM-dd");
-export const getCalendarPrintRange = ({ printRange, primaryViewMode, currentDate, selectedDate, visibleDays, currentDisplayRange, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY }: CalendarPrintRangeInput): CalendarDateRange => { if (printRange.mode === "day") return normalizeRange(selectedDate, selectedDate);
+export const getCalendarPrintRange = ({ printRange, primaryViewMode, currentDate, selectedDate, visibleDays, currentDisplayRange, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY }: CalendarPrintRangeInput): CalendarDateRange => {
+  if (printRange.mode === "day") return normalizeRange(selectedDate, selectedDate);
 
   if (printRange.mode === "week") {
     const weekStartsOn = getCalendarWeekStartsOn(weekStartDay);
@@ -71,7 +68,8 @@ export const getCalendarPrintRange = ({ printRange, primaryViewMode, currentDate
 
   return currentDisplayRange;
 };
-export const getCalendarPrintRangeLabel = (range: CalendarDateRange, mode: CalendarPrintRangeState["mode"], primaryViewMode: CalendarViewMode): string => { const startLabel = format(range.start, "yyyy年M月d日");
+export const getCalendarPrintRangeLabel = (range: CalendarDateRange, mode: CalendarPrintRangeState["mode"], primaryViewMode: CalendarViewMode): string => {
+  const startLabel = format(range.start, "yyyy年M月d日");
   const endLabel = format(range.end, "yyyy年M月d日");
 
   if (startLabel === endLabel) return startLabel;

@@ -2,23 +2,17 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 import type { CalendarYearEventDisplay, CalendarYearEventDisplayResolver } from "@/features/calendar/grid/CalendarView.year";
 import type { AppCalendarItem, GoogleAccountDisplay, ProjectCalendarLink } from "./scheduleScreen.types";
 
-
-
 type CalendarEventSourcePriorityInput = {
   appProjects: AppCalendarItem[];
   projectCalendarLinks: ProjectCalendarLink[];
   googleAccounts: GoogleAccountDisplay[];
 };
 
-
-
 const PROJECT_EVENT_PRIORITY_GROUP = 0;
 const GOOGLE_CALENDAR_EVENT_PRIORITY_GROUP = 1;
 const FALLBACK_EVENT_PRIORITY_GROUP = 2;
 const FALLBACK_EVENT_PRIORITY_INDEX = Number.MAX_SAFE_INTEGER;
 const GOOGLE_CALENDAR_KEY_SEPARATOR = "\u001f";
-
-
 
 const createGoogleCalendarSourceKey = (accountId: string, calendarId: string): string => `${accountId}${GOOGLE_CALENDAR_KEY_SEPARATOR}${calendarId}`;
 const setUnambiguousValue = <T>(map: Map<string, T | null>, key: string, value: T): void => {
@@ -67,7 +61,8 @@ const resolveGoogleCalendarIndex = (event: GoogleCalendarEvent, googleCalendarIn
 
   return googleCalendarIndexes.fallback.get(event.calendarId) ?? FALLBACK_EVENT_PRIORITY_INDEX;
 };
-export const createCalendarYearEventDisplayResolver = ({ appProjects, projectCalendarLinks, googleAccounts }: CalendarEventSourcePriorityInput): CalendarYearEventDisplayResolver => { const projectById = new Map(appProjects.map((project) => [project.id, project]));
+export const createCalendarYearEventDisplayResolver = ({ appProjects, projectCalendarLinks, googleAccounts }: CalendarEventSourcePriorityInput): CalendarYearEventDisplayResolver => {
+  const projectById = new Map(appProjects.map((project) => [project.id, project]));
   const projectIndexById = buildProjectIndexById(appProjects);
   const googleCalendarIndexes = buildGoogleCalendarIndexMaps(googleAccounts);
 

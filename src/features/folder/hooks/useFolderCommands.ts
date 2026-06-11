@@ -3,8 +3,6 @@ import { createWebFolderRepository } from "@platform/storage/folderRepository.we
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { Folder } from "@/types";
 
-
-
 type CreateFolderOptions = {
   color?: string;
   cloudSyncEnabled?: boolean;
@@ -12,9 +10,8 @@ type CreateFolderOptions = {
   orderIndex?: number;
 };
 
-
-
-export const useFolderCommands = () => { const { currentUser } = useAuthSession();
+export const useFolderCommands = () => {
+  const { currentUser } = useAuthSession();
 
   const createFolder = async (
     name: string,

@@ -2,11 +2,10 @@ import { toVirtualMfCardDisplayName, toVirtualMfDeckDisplayName } from "@/featur
 import { type FolderTreeNode, getEntityTime, getFolderId, getParentFolderId, normalizeFolderId } from "./utils";
 import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem, SyncEntity } from "@/types";
 
-
-
 export type ExplorerDetailRowKind = "folder" | "cardSet" | "card" | "document";
 export type ExplorerDetailLocalSyncState = | "pending" | "synced" | "error" | "conflict";
-export type ExplorerDetailRow = { key: string;
+export type ExplorerDetailRow = {
+  key: string;
   kind: ExplorerDetailRowKind;
   id: string;
   name: string;
@@ -46,11 +45,7 @@ type LegacyEntityFields = {
   card_set_id?: string | null;
 };
 
-
-
 const EXPLORER_ROOT_PATH_SEGMENTS = ["ホーム", "エクスプローラー"];
-
-
 
 const withLegacy = <TEntity extends object>(
   entity: TEntity,
@@ -301,7 +296,8 @@ const buildCardRows = ({
     })
     .sort(compareDetailRowsWithinKind);
 };
-export const buildExplorerDetailRows = ({ folders, cards, cardSets, documents, currentFolderId, currentCardSetId = null }: BuildExplorerDetailRowsParams): ExplorerDetailRow[] => { const folderById = buildFolderById(folders);
+export const buildExplorerDetailRows = ({ folders, cards, cardSets, documents, currentFolderId, currentCardSetId = null }: BuildExplorerDetailRowsParams): ExplorerDetailRow[] => {
+  const folderById = buildFolderById(folders);
   const activeCardSet = currentCardSetId
     ? (cardSets.find((cardSet) => cardSet.id === currentCardSetId) ?? null)
     : null;
