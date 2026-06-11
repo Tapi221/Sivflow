@@ -511,4 +511,7 @@ const DropLine = React.memo(function DropLine({
         dropLine === 'top' && '-top-px',
         dropLine === 'bottom' && '-bottom-px',
         className
-  
+      )}
+    />
+  );
+});

@@ -566,3 +566,6 @@ function CodeDrawingPreviewArea({
           {/* Placeholder to maintain height */}
         </div>
       )}
+    </div>
+  );
+}

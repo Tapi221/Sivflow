@@ -6,4 +6,4 @@ import { DateElement } from '@/components/ui/date-node';
 
 
 
-export const DateKit = [DatePlugin.withComponent(DateElement)
+export const DateKit = [DatePlugin.withComponent(DateElement)];

@@ -102,3 +102,4 @@ export const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions
       />
     </DropdownMenu>
   );
+};

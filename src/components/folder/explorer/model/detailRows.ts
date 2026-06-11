@@ -392,3 +392,4 @@ export const buildExplorerDetailRows = ({ folders, cards, cardSets, documents, c
     });
 
   return groupRows([...folderRows, ...cardSetRows, ...documentRows]);
+};

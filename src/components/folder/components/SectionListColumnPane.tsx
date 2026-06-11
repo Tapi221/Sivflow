@@ -496,4 +496,4 @@ const SectionListColumnPane = ({
 
 
 
-export { SectionListColum
+export { SectionListColumnPane };

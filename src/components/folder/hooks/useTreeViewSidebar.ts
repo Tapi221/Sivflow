@@ -294,3 +294,4 @@ export const useTreeViewSidebar = () => { const [sidebarWidth, setSidebarWidth] 
     isResizing,
     startResizing,
   };
+};

@@ -36,3 +36,4 @@ export const useTreeViewActions = ({ selectedFolderId, onFolderSelect, }: UseTre
     handleViewCards,
     handleOpenCreateCard,
   };
+};

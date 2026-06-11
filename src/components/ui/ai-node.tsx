@@ -29,4 +29,5 @@ export function AILeaf(props: PlateTextProps) { const streaming = usePluginOptio
   );
 }
 
-export function AIAnchorElement(props: PlateElementProps) { return ( <PlateElement {...props}> <div className="h-[0.1px]" /> </PlateElement> 
+export function AIAnchorElement(props: PlateElementProps) { return ( <PlateElement {...props}> <div className="h-[0.1px]" /> </PlateElement> );
+}

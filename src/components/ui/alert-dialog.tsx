@@ -131,4 +131,5 @@ export {
   AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogAction,
-  AlertDialogCanc
+  AlertDialogCancel,
+}

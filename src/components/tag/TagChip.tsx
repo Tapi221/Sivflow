@@ -44,4 +44,4 @@ export { TagChip };
 
 
 
-export type { TagChipPr
+export type { TagChipProps };

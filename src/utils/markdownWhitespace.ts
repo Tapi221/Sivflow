@@ -16,9 +16,15 @@ type InlineCodeRange = {
   end: number;
 };
 
+
+
 const MARKDOWN_TAB_SIZE_VALUES = [2, 4, 8] as const;
 
+
+
 export type MarkdownTabSize = 2 | 4 | 8;
+
+
 
 const NBSP_REGEX = /\u00A0/g;
 const HTML_BLOCK_TAGS = [
@@ -92,6 +98,8 @@ const HTML_BLOCK_START_RE = new RegExp(
   `^\\s{0,3}(?:</?(?:${HTML_BLOCK_TAGS})(?:\\s|/?>)|<!--|<![A-Z]|<\\?)`,
   "i",
 );
+
+
 
 const createScannerState = (): MarkdownScannerState => {
   return {

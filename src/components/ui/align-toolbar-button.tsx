@@ -77,4 +77,6 @@ export function AlignToolbarButton(props: DropdownMenuProps) { const { editor, t
           ))}
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
-    </DropdownMe
+    </DropdownMenu>
+  );
+}

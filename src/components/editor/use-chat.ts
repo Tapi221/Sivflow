@@ -1672,3 +1672,6 @@ const createTableCellChunks = (editor: PlateEditor) => {
     [{ delay: 50, texts: '{"data":"edit","type":"data-toolName"}' }],
     ...chunks,
   ];
+
+  return result_chunks;
+};

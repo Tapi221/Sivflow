@@ -409,4 +409,5 @@ export const TagFilterPanel = ({ allTags, isOpen = false, className, }: TagFilte
         </div>
       )}
     </FilterPanelShell>
-  
+  );
+};

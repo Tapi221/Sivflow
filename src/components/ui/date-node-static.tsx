@@ -27,3 +27,4 @@ export function DateElementStatic(props: SlateElementProps<TDateElement>) { cons
       {props.children}
     </SlateElement>
   );
+}

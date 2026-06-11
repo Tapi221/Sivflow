@@ -111,4 +111,4 @@ const NoteDocumentEditor = ({ note, onChange }: NoteDocumentEditorProps) => {
 
 
 
-export { NoteDocumentE
+export { NoteDocumentEditor };

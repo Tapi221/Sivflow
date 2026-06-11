@@ -25,4 +25,5 @@ export function OutdentToolbarButton( props: React.ComponentProps<typeof Toolbar
     <ToolbarButton {...props} {...buttonProps} tooltip="Outdent">
       <OutdentIcon />
     </ToolbarButton>
- 
+  );
+}

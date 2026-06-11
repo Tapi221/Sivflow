@@ -2,8 +2,12 @@ export type LocalTextGenerationOptions = { prompt: string;
   systemPrompt?: string;
 };
 
+
+
 const MAX_SOURCE_CHARS = 1_200;
 const MAX_SENTENCES = 6;
+
+
 
 const normalizePrompt = (value: string) =>
   value

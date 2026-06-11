@@ -92,4 +92,6 @@ function TodoLi(
     >
       {props.children}
       {props.lineBreakBadge}
-    
+    </li>
+  );
+}

@@ -26,4 +26,4 @@ const BaseMediaKit = [
 
 
 
-export { BaseMediaKit 
+export { BaseMediaKit };

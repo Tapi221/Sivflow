@@ -1,5 +1,7 @@
 import type { BaseEntity } from "./base";
 
+
+
 export type NoteEditor = "plate";
 export type NoteContentVersion = 2;
 export type NoteBlockContent = Record<string, unknown>[];

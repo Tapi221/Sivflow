@@ -153,4 +153,6 @@ export function FontSizeToolbarButton() { const [inputValue, setInputValue] = Re
       <ToolbarButton onClick={() => handleFontSizeChange(1)}>
         <Plus />
       </ToolbarButton>
-   
+    </div>
+  );
+}

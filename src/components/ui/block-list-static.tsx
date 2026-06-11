@@ -79,4 +79,5 @@ function TodoLiStatic(props: SlateRenderElementProps) {
     >
       {props.children}
     </li>
-  )
+  );
+}
