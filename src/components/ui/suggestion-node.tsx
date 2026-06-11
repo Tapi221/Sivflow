@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 
 import type { SuggestionConfig } from '@/components/editor/plugins/suggestion-kit';
 
-import { voidRemoveSuggestionOverlayVariants } from '@/components/ui/suggestion-node-static';
+import { voidRemoveSuggestionOverlayVariants } from './suggestion-node-static';
 
 const suggestionPlugin = SuggestionPlugin as WithRequiredKey<SuggestionConfig>;
 
