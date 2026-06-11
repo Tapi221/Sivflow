@@ -105,8 +105,11 @@ const isComponentVariableStatement = (statement) => statement.declarationList.de
   return containsJsx(declaration.initializer);
 });
 
+const isTypeOnlyExportDeclaration = (statement) => ts.isExportDeclaration(statement) && statement.isTypeOnly;
+
 const getStatementOrderCategory = (statement) => {
   if (ts.isImportDeclaration(statement) || ts.isImportEqualsDeclaration(statement)) return "import";
+  if (isTypeOnlyExportDeclaration(statement)) return "type";
   if (ts.isExportDeclaration(statement) || ts.isExportAssignment(statement)) return "postComponent";
   if (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement) || ts.isModuleDeclaration(statement)) return "type";
   if (isDisplayNameAssignment(statement)) return "component";
@@ -143,25 +146,11 @@ const getStatementOrderCategory = (statement) => {
 const getModuleSpecifier = (node) => {
   if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) return node.moduleSpecifier.text;
   if (ts.isExportDeclaration(node) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) return node.moduleSpecifier.text;
-  if (ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword && node.arguments.length === 1 && ts.isStringLiteral(node.arguments[0])) return node.arguments[0].text;
 
   return null;
 };
 
-const getImportExportNodes = (sourceFile) => {
-  const nodes = [];
-
-  const visit = (node) => {
-    if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node) || ts.isCallExpression(node)) {
-      if (getModuleSpecifier(node)) nodes.push(node);
-    }
-
-    ts.forEachChild(node, visit);
-  };
-
-  visit(sourceFile);
-  return nodes;
-};
+const getImportExportNodes = (sourceFile) => sourceFile.statements.filter((statement) => ts.isImportDeclaration(statement) || ts.isExportDeclaration(statement));
 
 const getStatementPreview = (source, statement) => source.slice(statement.getStart(), statement.getEnd()).split("\n")[0].trim();
 
@@ -214,6 +203,7 @@ const checkStatementOrder = (filePath, source, sourceFile) => {
     const rank = ORDER_RANKS[category];
 
     if (rank < highestRank) {
+      if (isTypeOnlyExportDeclaration(statement)) continue;
       if (canAppearInExportBlock(statement)) continue;
       if (isConstDependentTypeStatement(source, statement, highestRank)) continue;
 
@@ -330,6 +320,7 @@ const checkSourceFile = (filePath) => {
   const importExportNodes = getImportExportNodes(sourceFile);
   const importViolations = importExportNodes.flatMap((node) => {
     const specifier = getModuleSpecifier(node);
+    if (!specifier) return [];
 
     return [...checkSingleLineImportExport(filePath, sourceFile, node), ...checkModuleSpecifier(filePath, sourceFile, node, specifier)];
   });
