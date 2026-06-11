@@ -7,28 +7,6 @@ const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 const ORDER_EXCLUDED_PATH_PARTS = ["/tests/", "/scripts/", "/src/sandbox/"];
 const ORDER_EXCLUDED_FILE_SUFFIXES = [".d.ts"];
-const FORMAT_OPTIONS = {
-  convertTabsToSpaces: true,
-  indentSize: 2,
-  insertSpaceAfterCommaDelimiter: true,
-  insertSpaceAfterConstructor: false,
-  insertSpaceAfterFunctionKeywordForAnonymousFunctions: true,
-  insertSpaceAfterKeywordsInControlFlowStatements: true,
-  insertSpaceAfterOpeningAndBeforeClosingEmptyBraces: false,
-  insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces: false,
-  insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces: true,
-  insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets: false,
-  insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis: false,
-  insertSpaceAfterSemicolonInForStatements: true,
-  insertSpaceAfterTypeAssertion: false,
-  insertSpaceBeforeAndAfterBinaryOperators: true,
-  insertSpaceBeforeFunctionParenthesis: false,
-  newLineCharacter: "\n",
-  placeOpenBraceOnNewLineForControlBlocks: false,
-  placeOpenBraceOnNewLineForFunctions: false,
-  semicolons: ts.SemicolonPreference.Insert,
-  tabSize: 2,
-};
 
 const walkSourceFiles = (directory) => {
   if (!existsSync(directory)) return [];
@@ -65,28 +43,6 @@ const getScriptKind = (filePath) => {
 
 const createSourceFile = (filePath, source) => ts.createSourceFile(filePath, source, ts.ScriptTarget.Latest, true, getScriptKind(filePath));
 
-const createLanguageServiceHost = (filePath, source) => ({
-  fileExists: ts.sys.fileExists,
-  getCompilationSettings: () => ({ allowJs: true, jsx: ts.JsxEmit.ReactJSX }),
-  getCurrentDirectory: () => ROOT_DIR,
-  getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options),
-  getScriptFileNames: () => [filePath],
-  getScriptSnapshot: (scriptPath) => scriptPath === filePath ? ts.ScriptSnapshot.fromString(source) : undefined,
-  getScriptVersion: () => "0",
-  readDirectory: ts.sys.readDirectory,
-  readFile: ts.sys.readFile,
-});
-
-const applyFormattingEdits = (source, edits) => edits.sort((left, right) => right.span.start - left.span.start).reduce((nextSource, edit) => `${nextSource.slice(0, edit.span.start)}${edit.newText}${nextSource.slice(edit.span.start + edit.span.length)}`, source);
-
-const applyDocumentFormatting = (filePath, source) => {
-  const languageService = ts.createLanguageService(createLanguageServiceHost(filePath, source));
-  const edits = languageService.getFormattingEditsForDocument(filePath, { ...FORMAT_OPTIONS, newLineCharacter: getNewline(source) });
-
-  languageService.dispose();
-  return edits.length === 0 ? source : applyFormattingEdits(source, edits);
-};
-
 const getNewline = (source) => source.includes("\r\n") ? "\r\n" : "\n";
 
 const collapseRepeatedBlankLines = (source) => {
@@ -96,7 +52,7 @@ const collapseRepeatedBlankLines = (source) => {
   return source.replace(repeatedBlankLinePattern, `${newline}${newline}`);
 };
 
-const isSingleLineImportText = (line) => /^\s*import(?:\s+type)?\s.+;\s*$/u.test(line);
+const isSingleLineImportText = (line) => /^\s*import(?:\s+type)?\s.+;?\s*$/u.test(line);
 
 const normalizeImportBlankLines = (source) => {
   const newline = getNewline(source);
@@ -280,8 +236,7 @@ const applyTopLevelSpacingFix = (filePath, source) => {
 };
 
 const applySourceConventionFix = (filePath, source) => {
-  const formattedSource = applyDocumentFormatting(filePath, source);
-  const importNormalizedSource = normalizeImportBlankLines(formattedSource);
+  const importNormalizedSource = normalizeImportBlankLines(source);
   const topLevelNormalizedSource = applyTopLevelSpacingFix(filePath, importNormalizedSource);
 
   return normalizeImportBlankLines(collapseRepeatedBlankLines(topLevelNormalizedSource));
