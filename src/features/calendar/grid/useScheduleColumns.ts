@@ -8,12 +8,16 @@ import { buildScheduleDisplayDays, buildScheduleInteractionDays, buildScheduleVi
 
 
 
+
+
 type UseScheduleDaysParams = {
   anchorDate: Date;
   viewMode: CalendarViewMode;
   buffer: ScheduleColumnBuffer;
   weekStartDay: CalendarWeekStartDay;
 };
+
+
 
 
 
@@ -27,6 +31,8 @@ const VIRTUAL_RAIL_VIEW_MODES = new Set<CalendarViewMode>([
   "list",
   "pieChart",
 ]);
+
+
 
 
 

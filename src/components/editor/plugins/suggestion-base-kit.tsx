@@ -9,12 +9,16 @@ import { SuggestionLeafStatic, VoidRemoveSuggestionOverlayStatic, } from '@/comp
 
 
 
+
+
 const INLINE_SUGGESTION_TARGET_PLUGINS = [
   KEYS.date,
   KEYS.inlineEquation,
   KEYS.link,
   KEYS.mention,
 ];
+
+
 
 
 
@@ -38,6 +42,8 @@ function getInlineSuggestionData(editor: any, element: TElement) {
     if (childData) return childData;
   }
 }
+
+
 
 
 

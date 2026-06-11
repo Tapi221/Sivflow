@@ -7,6 +7,8 @@ import { EXPLORER_ROW_CONTENT_CLASS, EXPLORER_ROW_ICON_SLOT_CLASS, EXPLORER_ROW_
 import { SidebarEntityRow } from "./SidebarEntityRow";
 
 
+
+
 type ExplorerItemType = "folder" | "cardSet" | "card" | "document";
 
 interface RenameTarget { id: string; type: ExplorerItemType; }
@@ -17,6 +19,8 @@ type TreeNode = {
 };
 
 interface DocumentRowProps { treeNode: TreeNode & { kind: "document" }; style: React.CSSProperties; depth: number; isSelected: boolean; editingId: string | null; editingName: string; renameCancelledRef: React.MutableRefObject<boolean>; editInputRef: React.MutableRefObject<HTMLInputElement | null>; setEditingId: React.Dispatch<React.SetStateAction<string | null>>; setEditingName: React.Dispatch<React.SetStateAction<string>>; openRowMenuId: string | null; setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>; onItemSelect: (item: { type: "card" | "cardSet" | "document"; id: string }) => void; canRename: boolean; canDelete: boolean; handleDelete: (id: string, type: ExplorerItemType) => void; handleRenameConfirm: (target?: RenameTarget) => Promise<void>; setRowRef: (id: string, node: HTMLElement | null) => void; }
+
+
 
 
 export const DocumentRow = ({ treeNode, style, depth, isSelected, editingId, editingName, renameCancelledRef, editInputRef, setEditingId, setEditingName, openRowMenuId, setOpenRowMenuId, onItemSelect, canRename, canDelete, handleDelete, handleRenameConfirm, setRowRef }: DocumentRowProps) => { const rowMenuId = `document:${treeNode.rawId}`;

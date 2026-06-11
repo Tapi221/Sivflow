@@ -6,6 +6,8 @@ import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLIC
 
 
 
+
+
 export type CardSetContextMenuActionId = "rename" | "delete";
 
 export type CardSetContextMenuAction = { id: CardSetContextMenuActionId;
@@ -23,6 +25,8 @@ type CardSetContextMenuProps = {
   noDragStyle: CSSProperties;
   panelId?: RightClickPanelId;
 };
+
+
 
 
 
@@ -49,6 +53,8 @@ const CARD_SET_CONTEXT_MENU_STYLE = `
   background: #fef2f2;
 }
 `;
+
+
 
 
 
@@ -89,6 +95,8 @@ const CardSetContextMenuBase = ({
     </>
   );
 };
+
+
 
 
 

@@ -5,11 +5,15 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 interface PanelEmptyStateProps {
   icon?: ReactNode;
   message: ReactNode;
   className?: string;
 }
+
+
 
 
 

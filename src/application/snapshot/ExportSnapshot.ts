@@ -6,8 +6,12 @@ import { localGenerationCounterStore } from "@/infrastructure/browser-storage/Lo
 
 
 
+
+
 export interface ExportSnapshotDependencies { fileExporter: JsonFileExportPort;
 }
+
+
 
 
 
@@ -16,6 +20,8 @@ export interface ExportSnapshotDependencies { fileExporter: JsonFileExportPort;
 const createSnapshotUseCase = createCreateSnapshotUseCase({
   generationCounterStore: localGenerationCounterStore,
 });
+
+
 
 
 

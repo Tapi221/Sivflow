@@ -4,9 +4,13 @@ import type { SVGProps } from "react";
 
 
 
+
+
 export type MetaPanelToggleIconProps = Readonly< SVGProps<SVGSVGElement> & { open?: boolean;
   }
 >;
+
+
 
 
 

@@ -8,9 +8,13 @@ import { sanitizeForLog } from "@/utils/logSanitizer";
 
 
 
+
+
 export interface RunStartupTasksParams { userId: string;
   isDisposed?: () => boolean;
 }
+
+
 
 
 
@@ -21,6 +25,8 @@ const performAutoBackupUseCase = createPerformAutoBackupUseCase({
 });
 
 const checkDataIntegrityUseCase = createCheckDataIntegrityUseCase();
+
+
 
 
 
