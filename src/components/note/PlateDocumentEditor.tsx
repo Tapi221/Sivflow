@@ -10,17 +10,15 @@ import { MarkdownPlugin, remarkMdx, remarkMention } from '@platejs/markdown';
 import { AudioPlugin, FilePlugin, ImagePlugin, MediaEmbedPlugin, PlaceholderPlugin, VideoPlugin } from '@platejs/media/react';
 import { SlashInputPlugin, SlashPlugin } from '@platejs/slash-command/react';
 import { TableCellHeaderPlugin, TableCellPlugin, TablePlugin, TableRowPlugin } from '@platejs/table/react';
-import { Bold, Code, Heading1, Heading2, Heading3, Highlighter, Italic, List, ListOrdered, Pilcrow, Quote, Strikethrough, Table, Underline } from 'lucide-react';
 import { KEYS, type SlateEditor } from 'platejs';
-import { ParagraphPlugin, Plate, PlateContainer, PlateContent, PlateController, useEditorRef, usePlateEditor } from 'platejs/react';
-import { useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react';
+import { ParagraphPlugin, Plate, PlateContainer, PlateContent, PlateController, usePlateEditor } from 'platejs/react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import remarkEmoji from 'remark-emoji';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 
+import { PlateFixedToolbarKit } from './plateFixedToolbarKit';
 import { PlateSlashInputElement } from './PlateSlashInputElement';
-import { insertBlock } from './plateTransforms';
-import { cn } from '@/lib/utils';
 import type { Note, NoteBlockContent } from '@/types';
 
 type PlateDocumentEditorProps = {
@@ -43,12 +41,6 @@ type PlateNode = PlateElementNode | PlateTextNode;
 
 type PlateChangePayload = unknown[] | {
   value?: unknown;
-};
-
-type PlateToolbarButtonConfig = {
-  icon: ReactNode;
-  label: string;
-  onSelect: () => void;
 };
 
 const NOTE_SAVE_DEBOUNCE_MS = 500;
@@ -86,6 +78,7 @@ const NOTE_PLATE_PLUGINS = [
   MarkdownPlugin.configure({ options: { plainMarks: [KEYS.suggestion, KEYS.comment], remarkPlugins: [remarkMath, remarkGfm, remarkEmoji as any, remarkMdx, remarkMention] } }),
   SlashPlugin.configure({ options: { triggerQuery: (editor: SlateEditor) => !editor.api.some({ match: { type: editor.getType(KEYS.codeBlock) } }) } }),
   SlashInputPlugin.withComponent(PlateSlashInputElement),
+  ...PlateFixedToolbarKit,
 ];
 
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -122,47 +115,6 @@ const getChangeValue = (change: PlateChangePayload): unknown[] | null => {
   if (Array.isArray(change)) return change;
   if (isRecord(change) && Array.isArray(change.value)) return change.value;
   return null;
-};
-
-const PlateToolbarButton = ({ icon, label, onSelect }: PlateToolbarButtonConfig) => (
-  <button aria-label={label} className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4" title={label} type="button" onMouseDown={(event) => { event.preventDefault(); onSelect(); }}>
-    {icon}
-  </button>
-);
-
-const PlateToolbarDivider = () => <div aria-hidden="true" className="mx-1 h-5 w-px bg-border" />;
-
-const PlateFixedToolbar = () => {
-  const editor = useEditorRef();
-  const toggleMark = useCallback((type: string) => {
-    editor.tf.toggleMark(type);
-    editor.tf.focus();
-  }, [editor]);
-  const insertPlateBlock = useCallback((type: string) => {
-    insertBlock(editor, type, { upsert: true });
-    editor.tf.focus();
-  }, [editor]);
-
-  return (
-    <div className="sticky top-0 z-10 flex min-h-12 w-full items-center gap-0.5 border-b border-border bg-background/95 px-6 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      <PlateToolbarButton icon={<Pilcrow />} label="Text" onSelect={() => insertPlateBlock(KEYS.p)} />
-      <PlateToolbarButton icon={<Heading1 />} label="Heading 1" onSelect={() => insertPlateBlock(KEYS.h1)} />
-      <PlateToolbarButton icon={<Heading2 />} label="Heading 2" onSelect={() => insertPlateBlock(KEYS.h2)} />
-      <PlateToolbarButton icon={<Heading3 />} label="Heading 3" onSelect={() => insertPlateBlock(KEYS.h3)} />
-      <PlateToolbarDivider />
-      <PlateToolbarButton icon={<Bold />} label="Bold" onSelect={() => toggleMark(KEYS.bold)} />
-      <PlateToolbarButton icon={<Italic />} label="Italic" onSelect={() => toggleMark(KEYS.italic)} />
-      <PlateToolbarButton icon={<Underline />} label="Underline" onSelect={() => toggleMark(KEYS.underline)} />
-      <PlateToolbarButton icon={<Strikethrough />} label="Strikethrough" onSelect={() => toggleMark(KEYS.strikethrough)} />
-      <PlateToolbarButton icon={<Code />} label="Code" onSelect={() => toggleMark(KEYS.code)} />
-      <PlateToolbarButton icon={<Highlighter />} label="Highlight" onSelect={() => toggleMark(KEYS.highlight)} />
-      <PlateToolbarDivider />
-      <PlateToolbarButton icon={<List />} label="Bulleted list" onSelect={() => insertPlateBlock(KEYS.ul)} />
-      <PlateToolbarButton icon={<ListOrdered />} label="Numbered list" onSelect={() => insertPlateBlock(KEYS.ol)} />
-      <PlateToolbarButton icon={<Quote />} label="Blockquote" onSelect={() => insertPlateBlock(KEYS.blockquote)} />
-      <PlateToolbarButton icon={<Table />} label="Table" onSelect={() => insertPlateBlock(KEYS.table)} />
-    </div>
-  );
 };
 
 const PlateDocumentEditor = ({ note, onChange }: PlateDocumentEditorProps) => {
@@ -208,9 +160,8 @@ const PlateDocumentEditor = ({ note, onChange }: PlateDocumentEditorProps) => {
     <div className="h-full min-h-0 w-full bg-background text-foreground">
       <PlateController>
         <Plate editor={editor} onChange={handleChange} primary>
-          <PlateContainer className={cn('flex h-full min-h-0 flex-col')}>
-            <PlateFixedToolbar />
-            <PlateContent className="min-h-full flex-1 px-8 py-6 outline-none" placeholder="本文を入力" spellCheck />
+          <PlateContainer>
+            <PlateContent className="min-h-full px-8 py-6 outline-none" placeholder="本文を入力" spellCheck />
           </PlateContainer>
         </Plate>
       </PlateController>
