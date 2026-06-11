@@ -26,8 +26,8 @@ vi.mock("@/components/card/overlays/ReferencePopup", () => ({
 } satisfies Partial<Record<keyof typeof ReferencePopupModule, unknown>>));
 
 vi.mock("@/components/ui/dialog", () => ({
-  Dialog: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-  DialogContent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Dialog: ({ children }: { children: React.ReactNode }) => children,
+  DialogContent: ({ children }: { children: React.ReactNode }) => children,
 } satisfies Partial<Record<keyof typeof DialogModule, unknown>>));
 
 describe("Flashcard の layoutRows による高さ制御", () => {
