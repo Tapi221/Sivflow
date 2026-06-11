@@ -3,32 +3,20 @@
 import * as React from 'react';
 
 import { AIChatPlugin, AIPlugin, useEditorChat, useLastAssistantMessage } from '@platejs/ai/react';
-
 import { getTransientCommentKey } from '@platejs/comment';
-
 import { BlockSelectionPlugin, useIsSelecting } from '@platejs/selection/react';
-
 import { getTransientSuggestionKey } from '@platejs/suggestion';
-
 import { Command as CommandPrimitive } from 'cmdk';
-
 import { Album, BadgeHelp, BookOpenCheck, Check, CornerUpLeft, FeatherIcon, ListEnd, ListMinus, ListPlus, Loader2Icon, PauseIcon, PenLine, SmileIcon, Wand, X } from 'lucide-react';
-
 import { type NodeEntry, type SlateEditor, isHotkey, KEYS, NodeApi, TextApi } from 'platejs';
-
 import { type PlateEditor, useEditorPlugin, useEditorRef, useFocusedLast, useHotkeys, usePluginOption } from 'platejs/react';
 
-import { Button } from './button';
-
-import { Command, CommandGroup, CommandItem, CommandList } from './command';
-
-import { Popover, PopoverAnchor, PopoverContent } from './popover';
-
-import { cn } from '@/lib/utils';
-
-import { commentPlugin } from '@/components/editor/plugins/comment-kit';
-
 import { AIChatEditor } from './ai-chat-editor';
+import { Button } from './button';
+import { Command, CommandGroup, CommandItem, CommandList } from './command';
+import { Popover, PopoverAnchor, PopoverContent } from './popover';
+import { commentPlugin } from '@/components/editor/plugins/comment-kit';
+import { cn } from '@/lib/utils';
 
 type EditorChatState =
   | 'cursorCommand'
@@ -36,7 +24,7 @@ type EditorChatState =
   | 'selectionCommand'
   | 'selectionSuggestion';
 
-type AIChatMenuItem = {
+type AIChatItem = {
   icon: React.ReactNode;
   label: string;
   value: string;
@@ -53,6 +41,17 @@ type AIChatMenuItem = {
     editor: PlateEditor;
     input: string;
   }) => void;
+};
+
+type MenuStateGroup = {
+  items: AIChatItem[];
+  heading?: string;
+};
+
+type AIMenuItemsProps = {
+  input: string;
+  setInput: (value: string) => void;
+  setValue: (value: string) => void;
 };
 
 const AI_COMMENT_ICON = (
@@ -75,7 +74,7 @@ const AI_COMMENT_ICON = (
   </svg>
 );
 
-const aiChatItems = {
+const AI_CHAT_ITEMS = {
   accept: {
     icon: <Check />,
     label: 'Accept',
@@ -289,52 +288,46 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
       void editor.getApi(AIChatPlugin).aiChat.reload();
     },
   },
-} satisfies Record<string, AIChatMenuItem>;
+} satisfies Record<string, AIChatItem>;
 
-const menuStateItems: Record<
-  EditorChatState,
-  {
-    items: AIChatMenuItem[];
-    heading?: string;
-  }[]
-> = {
+const MENU_STATE_ITEMS: Record<EditorChatState, MenuStateGroup[]> = {
   cursorCommand: [
     {
       items: [
-        aiChatItems.comment,
-        aiChatItems.generateMdxSample,
-        aiChatItems.generateMarkdownSample,
-        aiChatItems.continueWrite,
-        aiChatItems.summarize,
-        aiChatItems.explain,
+        AI_CHAT_ITEMS.comment,
+        AI_CHAT_ITEMS.generateMdxSample,
+        AI_CHAT_ITEMS.generateMarkdownSample,
+        AI_CHAT_ITEMS.continueWrite,
+        AI_CHAT_ITEMS.summarize,
+        AI_CHAT_ITEMS.explain,
       ],
     },
   ],
   cursorSuggestion: [
     {
-      items: [aiChatItems.accept, aiChatItems.discard, aiChatItems.tryAgain],
+      items: [AI_CHAT_ITEMS.accept, AI_CHAT_ITEMS.discard, AI_CHAT_ITEMS.tryAgain],
     },
   ],
   selectionCommand: [
     {
       items: [
-        aiChatItems.improveWriting,
-        aiChatItems.comment,
-        aiChatItems.emojify,
-        aiChatItems.makeLonger,
-        aiChatItems.makeShorter,
-        aiChatItems.fixSpelling,
-        aiChatItems.simplifyLanguage,
+        AI_CHAT_ITEMS.improveWriting,
+        AI_CHAT_ITEMS.comment,
+        AI_CHAT_ITEMS.emojify,
+        AI_CHAT_ITEMS.makeLonger,
+        AI_CHAT_ITEMS.makeShorter,
+        AI_CHAT_ITEMS.fixSpelling,
+        AI_CHAT_ITEMS.simplifyLanguage,
       ],
     },
   ],
   selectionSuggestion: [
     {
       items: [
-        aiChatItems.accept,
-        aiChatItems.discard,
-        aiChatItems.insertBelow,
-        aiChatItems.tryAgain,
+        AI_CHAT_ITEMS.accept,
+        AI_CHAT_ITEMS.discard,
+        AI_CHAT_ITEMS.insertBelow,
+        AI_CHAT_ITEMS.tryAgain,
       ],
     },
   ],
@@ -527,15 +520,7 @@ const AIMenu = () => {
   );
 };
 
-const AIMenuItems = ({
-  input,
-  setInput,
-  setValue,
-}: {
-  input: string;
-  setInput: (value: string) => void;
-  setValue: (value: string) => void;
-}) => {
+const AIMenuItems = ({ input, setInput, setValue }: AIMenuItemsProps) => {
   const editor = useEditorRef();
   const { messages } = usePluginOption(AIChatPlugin, 'chat');
   const aiEditor = usePluginOption(AIChatPlugin, 'aiEditor')!;
@@ -550,7 +535,7 @@ const AIMenuItems = ({
   }, [isSelecting, messages]);
 
   const menuGroups = React.useMemo(() => {
-    const items = menuStateItems[menuState];
+    const items = MENU_STATE_ITEMS[menuState];
 
     return items;
   }, [menuState]);
