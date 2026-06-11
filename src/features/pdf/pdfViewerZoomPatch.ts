@@ -1,5 +1,5 @@
 import { PDFViewer } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
-import { computeNextScaleFromWheel } from "./pdfZoom.utils";
+import { computeNextScaleFromWheel, resolveTrackpadDeltaYForScaleRatio } from "./pdfZoom.utils";
 
 type PatchedPdfViewerConstructor = typeof PDFViewer & {
   __sivflowZoomPatchApplied?: boolean;
@@ -96,9 +96,9 @@ const handlePdfWheelZoomCapture = (event: WheelEvent): void => {
   const nextScale = computeNextScaleFromWheel({ currentScale, deltaY: getNormalizedPdfWheelDeltaY(event, container), zoomStep: PDF_ZOOM_STEP, minScale: PDF_ZOOM_MIN_SCALE, maxScale: PDF_ZOOM_MAX_SCALE });
   if (nextScale === null || Math.abs(nextScale - currentScale) < 0.001) return;
 
-  const scaleRatio = nextScale / currentScale;
-  if (!Number.isFinite(scaleRatio) || scaleRatio <= 0) return;
-  if (!rewritePdfWheelZoomEventDelta(event, -Math.log(scaleRatio) / PDF_TRACKPAD_ZOOM_SENSITIVITY)) return;
+  const deltaY = resolveTrackpadDeltaYForScaleRatio({ scaleRatio: nextScale / currentScale, sensitivity: PDF_TRACKPAD_ZOOM_SENSITIVITY });
+  if (deltaY === null) return;
+  if (!rewritePdfWheelZoomEventDelta(event, deltaY)) return;
 
   markPdfViewerScaleScrollSuppressed(pdfViewer);
 };
