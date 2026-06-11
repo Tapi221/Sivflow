@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import ts from "typescript";
 
 const ROOT_DIR = process.cwd();
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx"]);
@@ -20,6 +21,17 @@ const ALIAS_ROOTS = [
   { directory: path.join(ROOT_DIR, "packages/mobile-renderer/src"), prefix: "@mobile-renderer" },
   { directory: path.join(ROOT_DIR, "shared"), prefix: "@shared" },
 ];
+const EXTRA_SOURCE_DIRECTORIES = ["apps/web/src", "functions/src", "tests", "scripts/dev", "scripts/verify"].map((directory) => path.join(ROOT_DIR, directory));
+const ORDER_EXCLUDED_PATH_PARTS = ["/tests/", "/scripts/", "/src/sandbox/"];
+const ORDER_EXCLUDED_FILE_SUFFIXES = [".d.ts"];
+const ORDER_RANKS = {
+  import: 1,
+  type: 2,
+  constant: 3,
+  helper: 4,
+  component: 5,
+  postComponent: 6,
+};
 
 const walkSourceFiles = (directory) => {
   if (!existsSync(directory)) return [];
@@ -42,6 +54,13 @@ const isInsideDirectory = (filePath, directoryPath) => {
   const relativePath = path.relative(directoryPath, filePath);
 
   return relativePath === "" || (!relativePath.startsWith("..") && !path.isAbsolute(relativePath));
+};
+
+const shouldCheckStatementOrder = (filePath) => {
+  const relativePath = `/${toPosix(path.relative(ROOT_DIR, filePath))}`;
+  if (ORDER_EXCLUDED_FILE_SUFFIXES.some((suffix) => relativePath.endsWith(suffix))) return false;
+
+  return !ORDER_EXCLUDED_PATH_PARTS.some((part) => relativePath.includes(part));
 };
 
 const hasKnownExtension = (modulePath) => RESOLVABLE_EXTENSIONS.some((extension) => modulePath.endsWith(extension));
@@ -125,6 +144,307 @@ const normalizeSpecifier = (filePath, specifier) => {
   return toAliasSpecifier(targetFilePath, aliasRoot, specifier);
 };
 
+const hasExportModifier = (statement) => ts.canHaveModifiers(statement) && Boolean(ts.getModifiers(statement)?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword));
+
+const isDirectiveStatement = (statement) => ts.isExpressionStatement(statement) && ts.isStringLiteral(statement.expression);
+
+const isIdentifierNamed = (expression, name) => ts.isIdentifier(expression) && expression.text === name;
+
+const isPropertyAccessNamed = (expression, name) => ts.isPropertyAccessExpression(expression) && expression.name.text === name;
+
+const isMemoCall = (expression) => ts.isCallExpression(expression) && (isIdentifierNamed(expression.expression, "memo") || isPropertyAccessNamed(expression.expression, "memo"));
+
+const isDisplayNameAssignment = (statement) => {
+  if (!ts.isExpressionStatement(statement)) return false;
+  const expression = statement.expression;
+
+  return ts.isBinaryExpression(expression) && ts.isPropertyAccessExpression(expression.left) && expression.left.name.text === "displayName";
+};
+
+const containsJsx = (node) => {
+  let found = false;
+
+  const visit = (child) => {
+    if (ts.isJsxElement(child) || ts.isJsxFragment(child) || ts.isJsxSelfClosingElement(child)) {
+      found = true;
+      return;
+    }
+
+    if (!found) ts.forEachChild(child, visit);
+  };
+
+  ts.forEachChild(node, visit);
+  return found;
+};
+
+const isPascalCaseName = (name) => /^[A-Z][A-Za-z0-9]*$/.test(name);
+
+const isUpperCaseConstantName = (name) => /^[A-Z0-9_]+$/.test(name);
+
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const getVariableStatementNames = (statement) => statement.declarationList.declarations.flatMap((declaration) => ts.isIdentifier(declaration.name) ? [declaration.name.text] : []);
+
+const getStatementDeclarationNames = (statement) => {
+  if (ts.isVariableStatement(statement)) return getVariableStatementNames(statement);
+  if ((ts.isClassDeclaration(statement) || ts.isFunctionDeclaration(statement) || ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement)) && statement.name) return [statement.name.text];
+  if (ts.isModuleDeclaration(statement) && ts.isIdentifier(statement.name)) return [statement.name.text];
+
+  return [];
+};
+
+const isConstVariableStatement = (statement) => (statement.declarationList.flags & ts.NodeFlags.Const) !== 0;
+
+const isFunctionLikeInitializer = (initializer) => Boolean(initializer && (ts.isArrowFunction(initializer) || ts.isFunctionExpression(initializer)));
+
+const isComponentVariableStatement = (statement) => statement.declarationList.declarations.some((declaration) => {
+  if (!ts.isIdentifier(declaration.name)) return false;
+  if (!isPascalCaseName(declaration.name.text)) return false;
+  if (!declaration.initializer) return false;
+  if (isMemoCall(declaration.initializer)) return false;
+  if (!isFunctionLikeInitializer(declaration.initializer)) return containsJsx(declaration.initializer);
+
+  return containsJsx(declaration.initializer);
+});
+
+const isTypeOnlyExportDeclaration = (statement) => ts.isExportDeclaration(statement) && statement.isTypeOnly;
+
+const getStatementOrderCategory = (statement) => {
+  if (ts.isImportDeclaration(statement) || ts.isImportEqualsDeclaration(statement)) return "import";
+  if (isTypeOnlyExportDeclaration(statement)) return "type";
+  if (ts.isExportDeclaration(statement) || ts.isExportAssignment(statement)) return "postComponent";
+  if (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement) || ts.isModuleDeclaration(statement)) return "type";
+  if (isDisplayNameAssignment(statement)) return "postComponent";
+
+  if (ts.isClassDeclaration(statement)) {
+    if (statement.name && isPascalCaseName(statement.name.text) && containsJsx(statement)) return "component";
+
+    return "helper";
+  }
+
+  if (ts.isFunctionDeclaration(statement)) {
+    if (statement.name && isPascalCaseName(statement.name.text) && containsJsx(statement)) return "component";
+
+    return "helper";
+  }
+
+  if (ts.isVariableStatement(statement)) {
+    if (isComponentVariableStatement(statement)) return "component";
+
+    const names = getVariableStatementNames(statement);
+    const hasMemoName = statement.declarationList.declarations.some((declaration) => declaration.initializer && isMemoCall(declaration.initializer));
+    if (hasMemoName) return "postComponent";
+    if (isConstVariableStatement(statement) && names.length > 0 && names.every(isUpperCaseConstantName)) return "constant";
+
+    const hasFunctionInitializer = statement.declarationList.declarations.some((declaration) => isFunctionLikeInitializer(declaration.initializer));
+    if (hasFunctionInitializer) return "helper";
+
+    return "constant";
+  }
+
+  return "helper";
+};
+
+const canAppearInExportBlock = (statement) => hasExportModifier(statement) && !ts.isImportDeclaration(statement) && !ts.isImportEqualsDeclaration(statement);
+
+const isConstDependentTypeStatement = (source, statement, highestRank) => {
+  if (!ts.isTypeAliasDeclaration(statement) && !ts.isInterfaceDeclaration(statement)) return false;
+  if (highestRank > ORDER_RANKS.constant) return false;
+
+  return source.slice(statement.getStart(), statement.getEnd()).includes("typeof ");
+};
+
+const statementReferencesPreviousHigherRankDeclaration = (source, sourceFile, statement, previousStatements, rank) => {
+  const higherRankNames = previousStatements.flatMap((previousStatement) => {
+    const previousCategory = getStatementOrderCategory(previousStatement);
+    if (ORDER_RANKS[previousCategory] <= rank) return [];
+
+    return getStatementDeclarationNames(previousStatement);
+  });
+  const statementText = source.slice(statement.getStart(sourceFile), statement.getEnd());
+
+  return higherRankNames.some((name) => new RegExp(`\\b${escapeRegExp(name)}\\b`).test(statementText));
+};
+
+const isAllowedOutOfOrderStatement = (source, sourceFile, statement, previousStatements, rank, highestRank) => {
+  if (isTypeOnlyExportDeclaration(statement)) return true;
+  if (canAppearInExportBlock(statement)) return true;
+  if (isConstDependentTypeStatement(source, statement, highestRank)) return true;
+
+  return statementReferencesPreviousHigherRankDeclaration(source, sourceFile, statement, previousStatements, rank);
+};
+
+const getScriptKind = (filePath) => path.extname(filePath).endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
+
+const createSourceFile = (filePath, source) => ts.createSourceFile(filePath, source, ts.ScriptTarget.Latest, true, getScriptKind(filePath));
+
+const getStatementText = (source, statement) => source.slice(statement.getFullStart(), statement.getEnd()).trim();
+
+const getHighestRank = (entries) => entries.reduce((highestRank, entry) => Math.max(highestRank, entry.rank), 0);
+
+const toStatementEntries = (statements) => statements.map((statement) => ({ category: getStatementOrderCategory(statement), rank: ORDER_RANKS[getStatementOrderCategory(statement)], statement }));
+
+const applyOrderedStatementFix = (filePath, source) => {
+  if (!shouldCheckStatementOrder(filePath)) return source;
+
+  const sourceFile = createSourceFile(filePath, source);
+  const statements = [...sourceFile.statements];
+  if (statements.length < 2) return source;
+
+  const orderedEntries = [];
+  let changed = false;
+
+  for (const entry of toStatementEntries(statements)) {
+    if (isDirectiveStatement(entry.statement)) {
+      orderedEntries.push(entry);
+      continue;
+    }
+
+    const previousStatements = orderedEntries.map(({ statement }) => statement);
+    const highestRank = getHighestRank(orderedEntries);
+    const isViolation = entry.rank < highestRank && !isAllowedOutOfOrderStatement(source, sourceFile, entry.statement, previousStatements, entry.rank, highestRank);
+
+    if (!isViolation) {
+      orderedEntries.push(entry);
+      continue;
+    }
+
+    const insertIndex = orderedEntries.findIndex((previousEntry) => !isDirectiveStatement(previousEntry.statement) && previousEntry.rank > entry.rank);
+    orderedEntries.splice(insertIndex === -1 ? orderedEntries.length : insertIndex, 0, entry);
+    changed = true;
+  }
+
+  if (!changed) return source;
+
+  const firstStatement = statements[0];
+  const lastStatement = statements.at(-1);
+  const prefix = source.slice(0, firstStatement.getFullStart());
+  const suffix = source.slice(lastStatement.getEnd()).trimEnd();
+  const nextBody = orderedEntries.map(({ statement }) => getStatementText(source, statement)).filter(Boolean).join("\n\n");
+
+  return `${prefix}${nextBody}${suffix.length > 0 ? `\n${suffix}` : "\n"}`;
+};
+
+const applyStatementOrderFixes = (filePath, source) => {
+  let nextSource = source;
+
+  for (let index = 0; index < 10; index += 1) {
+    const fixedSource = applyOrderedStatementFix(filePath, nextSource);
+    if (fixedSource === nextSource) return nextSource;
+    nextSource = fixedSource;
+  }
+
+  return nextSource;
+};
+
+const isJsxTagNamed = (tagName, name) => ts.isIdentifier(tagName) && tagName.text === name;
+
+const isReactFragmentTagName = (tagName) => ts.isPropertyAccessExpression(tagName) && ts.isIdentifier(tagName.expression) && tagName.expression.text === "React" && tagName.name.text === "Fragment";
+
+const isExplicitFragmentTagName = (tagName) => isJsxTagNamed(tagName, "Fragment") || isReactFragmentTagName(tagName);
+
+const getMeaningfulJsxChildren = (children) => children.filter((child) => {
+  if (ts.isJsxText(child)) return child.getText().trim().length > 0;
+  if (ts.isJsxExpression(child)) return Boolean(child.expression);
+
+  return true;
+});
+
+const hasNoJsxAttributes = (attributes) => attributes.properties.length === 0;
+
+const createTagReplacement = (opening, closing, openingText, closingText) => [
+  { end: opening.getEnd(), start: opening.getStart(), text: openingText },
+  { end: closing.getEnd(), start: closing.getStart(), text: closingText },
+];
+
+const collectJsxWrapperReplacements = (sourceFile, source) => {
+  const replacements = [];
+
+  const visit = (node) => {
+    if (ts.isJsxElement(node)) {
+      const opening = node.openingElement;
+      const closing = node.closingElement;
+
+      if (isJsxTagNamed(opening.tagName, "div") && hasNoJsxAttributes(opening.attributes)) {
+        replacements.push(...createTagReplacement(opening, closing, "<>", "</>"));
+      }
+
+      if (isExplicitFragmentTagName(opening.tagName) && hasNoJsxAttributes(opening.attributes)) {
+        replacements.push(...createTagReplacement(opening, closing, "<>", "</>"));
+      }
+    }
+
+    if (ts.isJsxFragment(node)) {
+      const meaningfulChildren = getMeaningfulJsxChildren(node.children);
+      const onlyChild = meaningfulChildren[0];
+
+      if (meaningfulChildren.length === 1 && (ts.isJsxElement(onlyChild) || ts.isJsxSelfClosingElement(onlyChild))) {
+        replacements.push({ end: node.getEnd(), start: node.getStart(), text: source.slice(onlyChild.getStart(), onlyChild.getEnd()).trim() });
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+  return replacements;
+};
+
+const rangesOverlap = (left, right) => left.start < right.end && right.start < left.end;
+
+const applyNonOverlappingReplacements = (source, replacements) => {
+  const acceptedReplacements = [];
+
+  for (const replacement of [...replacements].sort((left, right) => right.start - left.start)) {
+    if (acceptedReplacements.some((acceptedReplacement) => rangesOverlap(replacement, acceptedReplacement))) continue;
+
+    acceptedReplacements.push(replacement);
+  }
+
+  return acceptedReplacements.reduce((nextSource, replacement) => `${nextSource.slice(0, replacement.start)}${replacement.text}${nextSource.slice(replacement.end)}`, source);
+};
+
+const removeFragmentSpecifier = (namedSpecifiers) => namedSpecifiers.split(",").map((specifier) => specifier.trim()).filter((specifier) => specifier.length > 0 && specifier !== "Fragment" && !specifier.startsWith("Fragment as "));
+
+const removeUnusedFragmentNamedImport = (source) => {
+  const sourceWithoutReactImports = source.replace(/^import\s+[^;]+\s+from\s+["']react["'];\n?/gm, "");
+  if (/\bFragment\b/.test(sourceWithoutReactImports)) return source;
+
+  return source
+    .replace(/^import\s+([A-Za-z_$][\w$]*),\s*\{\s*([^}]+)\s*\}\s+from\s+["']react["'];\n?/gm, (match, defaultImport, namedSpecifiers) => {
+      const nextNamedSpecifiers = removeFragmentSpecifier(namedSpecifiers);
+      if (nextNamedSpecifiers.length === 0) return `import ${defaultImport} from "react";\n`;
+
+      return `import ${defaultImport}, { ${nextNamedSpecifiers.join(", ")} } from "react";\n`;
+    })
+    .replace(/^import\s+\{\s*([^}]+)\s*\}\s+from\s+["']react["'];\n?/gm, (match, namedSpecifiers) => {
+      const nextNamedSpecifiers = removeFragmentSpecifier(namedSpecifiers);
+      if (nextNamedSpecifiers.length === 0) return "";
+
+      return `import { ${nextNamedSpecifiers.join(", ")} } from "react";\n`;
+    });
+};
+
+const applyJsxWrapperFixesOnce = (filePath, source) => {
+  const sourceFile = createSourceFile(filePath, source);
+  const replacements = collectJsxWrapperReplacements(sourceFile, source);
+  if (replacements.length === 0) return source;
+
+  return removeUnusedFragmentNamedImport(applyNonOverlappingReplacements(source, replacements));
+};
+
+const applyJsxWrapperFixes = (filePath, source) => {
+  let nextSource = source;
+
+  for (let index = 0; index < 10; index += 1) {
+    const fixedSource = applyJsxWrapperFixesOnce(filePath, nextSource);
+    if (fixedSource === nextSource) return nextSource;
+    nextSource = fixedSource;
+  }
+
+  return nextSource;
+};
+
 const normalizeImportSpecifiers = (filePath, source) => IMPORT_PATTERNS.reduce((nextSource, pattern) => nextSource.replace(pattern, (match, prefix, specifier, suffix) => {
   const nextSpecifier = normalizeSpecifier(filePath, specifier);
 
@@ -175,11 +495,19 @@ const applyTargetedLintFixes = (filePath, source) => {
   return nextSource;
 };
 
+const applySourceConventionFixes = (filePath, source) => {
+  const normalizedSource = normalizeImportSpecifiers(filePath, source);
+  const collapsedSource = collapseMultilineImportExportDeclarations(normalizedSource);
+  const targetedSource = applyTargetedLintFixes(filePath, collapsedSource);
+  const orderedSource = applyStatementOrderFixes(filePath, targetedSource);
+  const wrapperFixedSource = applyJsxWrapperFixes(filePath, orderedSource);
+
+  return collapseMultilineImportExportDeclarations(wrapperFixedSource);
+};
+
 const updateFile = (filePath) => {
   const originalSource = readFileSync(filePath, "utf8");
-  const normalizedSource = normalizeImportSpecifiers(filePath, originalSource);
-  const collapsedSource = collapseMultilineImportExportDeclarations(normalizedSource);
-  const nextSource = applyTargetedLintFixes(filePath, collapsedSource);
+  const nextSource = applySourceConventionFixes(filePath, originalSource);
 
   if (nextSource === originalSource) return false;
 
@@ -187,10 +515,11 @@ const updateFile = (filePath) => {
   return true;
 };
 
-const updatedFiles = ALIAS_ROOTS.flatMap(({ directory }) => walkSourceFiles(directory)).filter(updateFile);
+const sourceDirectories = [...new Set([...ALIAS_ROOTS.map(({ directory }) => directory), ...EXTRA_SOURCE_DIRECTORIES])];
+const updatedFiles = sourceDirectories.flatMap((directory) => walkSourceFiles(directory)).filter(updateFile);
 
 if (updatedFiles.length > 0) {
-  console.log(`Normalized lint paths in ${updatedFiles.length} file(s).`);
+  console.log(`Normalized source conventions in ${updatedFiles.length} file(s).`);
 }
 
 await import("./verify/verify-source-conventions.mjs");
