@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Info } from "@/ui/icons";
 import type { Notification } from "@/types/notification";
 
@@ -7,30 +7,26 @@ interface InfoToastProps {
   onDismiss: () => void;
 }
 
-/**
- * INFO レベルの通知
- *
- * 特徴:
- * - 自動で消える
- * - 邪魔しない
- * - ユーザーの操作不要
- */
-export const InfoToast: React.FC<InfoToastProps> = ({ notification, onDismiss, }) => { useEffect(() => { // 自動で消える if (notification.autoClose && notification.duration) { const timer = setTimeout(() => { onDismiss();
+const InfoToast = ({ notification, onDismiss }: InfoToastProps) => {
+  useEffect(() => {
+    if (notification.autoClose && notification.duration) {
+      const timer = setTimeout(() => {
+        onDismiss();
       }, notification.duration);
 
       return () => clearTimeout(timer);
     }
+
+    return undefined;
   }, [notification, onDismiss]);
 
   return (
     <div className="bg-white shadow-lg rounded-2xl p-4 max-w-sm border border-slate-200/60 ring-1 ring-slate-100 animate-slide-in-right">
       <div className="flex items-start gap-3">
-        {/* アイコン */}
         <div className="flex-shrink-0">
           <Info className="w-5 h-5 text-primary-500" />
         </div>
 
-        {/* コンテンツ */}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold text-slate-700">
             {notification.title}
@@ -39,7 +35,6 @@ export const InfoToast: React.FC<InfoToastProps> = ({ notification, onDismiss, }
         </div>
       </div>
 
-      {/* プログレスバー（自動で消える場合） */}
       {notification.autoClose && notification.duration && (
         <div className="mt-3 h-1 bg-slate-100 rounded-full overflow-hidden">
           <div
@@ -80,3 +75,5 @@ export const InfoToast: React.FC<InfoToastProps> = ({ notification, onDismiss, }
     </div>
   );
 };
+
+export { InfoToast };
