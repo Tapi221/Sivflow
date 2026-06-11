@@ -84,7 +84,7 @@ const glyphByIconName: Record<string, GlyphKind> = {
 };
 
 const wrapStratisIcon = (BaseIcon: StratisIconComponent, name: string) => {
-  const Icon = forwardRef<SVGSVGElement, IconProps>(function WrappedStratisIcon({ size = 16, className, label, title, style, strokeWidth, ...rest }, ref) {
+  const Icon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, strokeWidth, ...rest }, ref) => {
     const resolvedLabel = label ?? rest["aria-label"];
     const decorative = resolvedLabel == null;
     const pixelSize = typeof size === "number" ? `${size}px` : size;
@@ -99,7 +99,7 @@ const wrapStratisIcon = (BaseIcon: StratisIconComponent, name: string) => {
 const makeIcon = (name: string) => {
   const glyph = glyphByIconName[name] ?? "default";
 
-  const Icon = forwardRef<SVGSVGElement, IconProps>(function Icon({ size = 16, className, label, title, style, strokeWidth = 1.5, ...rest }, ref) {
+  const Icon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, strokeWidth = 1.5, ...rest }, ref) => {
     const resolvedLabel = label ?? rest["aria-label"];
     const decorative = resolvedLabel == null;
     const pixelSize = typeof size === "number" ? `${size}px` : size;
@@ -116,7 +116,7 @@ const makeIcon = (name: string) => {
   return Icon;
 };
 
-const MoreVerticalIcon = forwardRef<SVGSVGElement, IconProps>(function MoreVerticalIcon({ size = 16, className, label, title, style, ...rest }, ref) {
+const MoreVerticalIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, ...rest }, ref) => {
   const resolvedLabel = label ?? rest["aria-label"];
   const decorative = resolvedLabel == null;
   const pixelSize = typeof size === "number" ? `${size}px` : size;
@@ -131,7 +131,7 @@ const MoreVerticalIcon = forwardRef<SVGSVGElement, IconProps>(function MoreVerti
   );
 });
 
-const ExplorerChevronDownIcon = forwardRef<SVGSVGElement, IconProps>(function ExplorerChevronDownIcon({ size = 16, ...props }, ref) {
+const ExplorerChevronDownIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
   return (
     <UiIcon ref={ref} size={size} {...props}>
       <path d="m7 10 5 5 5-5" />
@@ -139,7 +139,7 @@ const ExplorerChevronDownIcon = forwardRef<SVGSVGElement, IconProps>(function Ex
   );
 });
 
-const ExplorerChevronRightIcon = forwardRef<SVGSVGElement, IconProps>(function ExplorerChevronRightIcon({ size = 16, ...props }, ref) {
+const ExplorerChevronRightIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
   return (
     <UiIcon ref={ref} size={size} {...props}>
       <path d="m10 7 5 5-5 5" />
@@ -147,7 +147,7 @@ const ExplorerChevronRightIcon = forwardRef<SVGSVGElement, IconProps>(function E
   );
 });
 
-const ExplorerFileTextIcon = forwardRef<SVGSVGElement, IconProps>(function ExplorerFileTextIcon({ size = 16, ...props }, ref) {
+const ExplorerFileTextIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
   return (
     <UiIcon ref={ref} size={size} {...props}>
       <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z" />
@@ -158,7 +158,7 @@ const ExplorerFileTextIcon = forwardRef<SVGSVGElement, IconProps>(function Explo
   );
 });
 
-const ExplorerFolderOpenIcon = forwardRef<SVGSVGElement, IconProps>(function ExplorerFolderOpenIcon({ size = 16, ...props }, ref) {
+const ExplorerFolderOpenIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
   return (
     <UiIcon ref={ref} size={size} {...props}>
       <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H3z" />
@@ -167,13 +167,20 @@ const ExplorerFolderOpenIcon = forwardRef<SVGSVGElement, IconProps>(function Exp
   );
 });
 
-const ExplorerFolderOutlineIcon = forwardRef<SVGSVGElement, IconProps>(function ExplorerFolderOutlineIcon({ size = 16, ...props }, ref) {
+const ExplorerFolderOutlineIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
   return (
     <UiIcon ref={ref} size={size} {...props}>
       <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
     </UiIcon>
   );
 });
+
+MoreVerticalIcon.displayName = "MoreVerticalIcon";
+ExplorerChevronDownIcon.displayName = "ExplorerChevronDownIcon";
+ExplorerChevronRightIcon.displayName = "ExplorerChevronRightIcon";
+ExplorerFileTextIcon.displayName = "ExplorerFileTextIcon";
+ExplorerFolderOpenIcon.displayName = "ExplorerFolderOpenIcon";
+ExplorerFolderOutlineIcon.displayName = "ExplorerFolderOutlineIcon";
 
 export const AlertCircle = wrapStratisIcon(StratisAlertCircleIcon, "AlertCircle");
 export const AlertTriangle = wrapStratisIcon(StratisAlertTriangleIcon, "AlertTriangle");
