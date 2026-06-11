@@ -8,10 +8,8 @@ import { clampMarkdownTabSize, normalizeMarkdownEditorValue, normalizeMarkdownIn
 
 export type MarkdownReplaceBlock = | { type: "markdown"; markdown: string }
   | { type: "code"; code: { language: string; code: string } };
-
 export type MarkdownReplaceFocus = Readonly<{ relativeIndex: number;
 }>;
-
 type MarkdownBlockContentProps =
   | Readonly<{
     mode: "view";
@@ -31,7 +29,6 @@ type MarkdownBlockContentProps =
     accentColor?: string;
     zoom?: number;
   }>;
-
 type BlockRange = Readonly<{
   start: number;
   end: number;
@@ -54,7 +51,6 @@ const validateBlocksLength = (blocks: MarkdownReplaceBlock[]) => {
   }
   return true;
 };
-
 const htmlToPlainText = (html: string) => {
   if (typeof document === "undefined") return "";
   try {
@@ -65,7 +61,6 @@ const htmlToPlainText = (html: string) => {
     return "";
   }
 };
-
 const restoreCaret = (textarea: HTMLTextAreaElement, pos: number) => {
   requestAnimationFrame(() => {
     try {
@@ -76,7 +71,6 @@ const restoreCaret = (textarea: HTMLTextAreaElement, pos: number) => {
     }
   });
 };
-
 const isProbablyCode = (value: string) => {
   const source = String(value ?? "").trim();
   if (!source) return false;
@@ -92,11 +86,9 @@ const isProbablyCode = (value: string) => {
 
   return false;
 };
-
 const looksLikeHtmlBlockCandidate = (value: string) => {
   return /^\s*<\w+[\s>]/.test(String(value ?? ""));
 };
-
 const detectLang = (plain: string, html: string) => {
   const match = html?.match(/language-([a-z0-9_+-]+)/i);
   if (match?.[1]) return match[1];
@@ -105,7 +97,6 @@ const detectLang = (plain: string, html: string) => {
   if (/\binterface\b|\btype\b|\bimplements\b/.test(plain)) return "ts";
   return "text";
 };
-
 const isFenceStart = (text: string) => {
   const normalized = String(text ?? "").replace(/\r\n/g, "\n");
   const lines = normalized.split("\n");
@@ -118,7 +109,6 @@ const isFenceStart = (text: string) => {
   if (index >= lines.length) return false;
   return /^( {0,3})(`{3,}|~{3,})/.test(lines[index] ?? "");
 };
-
 const computeFocusOffsetInInsertText = (insertText: string) => {
   const normalized = String(insertText ?? "").replace(/\r\n/g, "\n");
   const lines = normalized.split("\n");
@@ -144,7 +134,6 @@ const computeFocusOffsetInInsertText = (insertText: string) => {
 
   return 0;
 };
-
 const normalizeFenceBoundaries = (
   insertText: string,
   ctx: { atLineStart: boolean; atLineEnd: boolean },
@@ -168,14 +157,12 @@ const normalizeFenceBoundaries = (
     focusOffset: computeFocusOffsetInInsertText(nextText),
   };
 };
-
 const wrapFence = (code: string, lang: string) => {
   const normalized = String(code ?? "")
     .replace(/\r\n/g, "\n")
     .replace(/\n+$/g, "");
   return `\`\`\`${lang}\n${normalized}\n\`\`\`\n`;
 };
-
 const extractPreTextFromHtml = (html: string) => {
   if (typeof document === "undefined") return "";
   try {
@@ -193,7 +180,6 @@ const extractPreTextFromHtml = (html: string) => {
     return "";
   }
 };
-
 const pickBlockIndexByPos = (ranges: BlockRange[], pos: number) => {
   for (let index = 0; index < ranges.length; index += 1) {
     const range = ranges[index];
@@ -202,7 +188,6 @@ const pickBlockIndexByPos = (ranges: BlockRange[], pos: number) => {
   }
   return Math.max(0, ranges.length - 1);
 };
-
 const parseAndSplitFencesWithRanges = (
   markdown: string,
 ): { blocks: MarkdownReplaceBlock[]; ranges: BlockRange[] } => {

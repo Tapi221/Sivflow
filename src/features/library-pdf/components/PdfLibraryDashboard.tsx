@@ -7,25 +7,18 @@ import { cn } from "@/lib/utils";
 import type { DocumentItem, Folder } from "@/types";
 import { PdfLibraryWorkspaceToolbar } from "./PdfLibraryWorkspaceToolbar";
 
-
-
 type PdfLibraryDashboardProps = {
   documents: DocumentItem[];
   folders: Folder[];
   onOpenDocument: (documentId: string) => void;
   showToolbar?: boolean;
 };
-
 type IconBadgeProps = {
   label: string;
   tone?: "slate" | "green" | "violet" | "blue" | "rose";
 };
 
-
-
 const cardClassName = "box-border rounded-[10px] border border-[#D1D1D1] bg-[#FFFFFF] p-4 shadow-[0_6px_3px_0_rgba(0,0,0,0.06),0_10px_10px_0_rgba(0,0,0,0.05)]";
-
-
 
 const formatDateTime = (value: Date | null): string => {
   if (!value) return "未記録";
@@ -38,7 +31,6 @@ const formatDateTime = (value: Date | null): string => {
 
   return `${year}/${month}/${day} ${hours}:${minutes}`;
 };
-
 const getIconBadgeToneClassName = (tone: NonNullable<IconBadgeProps["tone"]>): string => {
   if (tone === "green") return "bg-[#f3f4f6] text-[#4b5563]";
   if (tone === "violet") return "bg-[#f5f3ff] text-[#6d5ab3]";
@@ -47,8 +39,6 @@ const getIconBadgeToneClassName = (tone: NonNullable<IconBadgeProps["tone"]>): s
   return "bg-[#f3f4f6] text-[#6b7280]";
 };
 
-
-
 const IconBadge = ({ label, tone = "slate" }: IconBadgeProps) => {
   if (label === "PDF") {
     return <span className="inline-flex h-6 min-w-8 items-center justify-center rounded-md border border-[#f1c7c7] bg-[#fff8f8] px-1.5 text-[10px] font-semibold text-[#E72A2A]" aria-label="PDF">PDF</span>;
@@ -56,7 +46,6 @@ const IconBadge = ({ label, tone = "slate" }: IconBadgeProps) => {
 
   return <span className={cn("inline-flex h-8 w-8 items-center justify-center rounded-[999px] text-[12px] font-semibold", getIconBadgeToneClassName(tone))}>{label}</span>;
 };
-
 const PdfLibraryDashboard = ({ documents, folders, onOpenDocument, showToolbar = true }: PdfLibraryDashboardProps) => {
   const { tagById } = useTags();
   const [, setExpandedFolders] = useState<Set<string>>(() => new Set());
@@ -107,8 +96,6 @@ const PdfLibraryDashboard = ({ documents, folders, onOpenDocument, showToolbar =
     </div>
   );
 };
-
-
 
 export { PdfLibraryDashboard };
 export default PdfLibraryDashboard;

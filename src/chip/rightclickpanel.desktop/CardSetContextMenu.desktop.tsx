@@ -5,14 +5,12 @@ import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLIC
 
 
 export type CardSetContextMenuActionId = "rename" | "delete";
-
 export type CardSetContextMenuAction = { id: CardSetContextMenuActionId;
   label: string;
   danger?: boolean;
   disabled?: boolean;
   onSelect: () => void;
 };
-
 type CardSetContextMenuProps = {
   x: number;
   y: number;
@@ -25,16 +23,13 @@ type CardSetContextMenuProps = {
 
 
 export const CARD_SET_CONTEXT_MENU_PANEL_ID = "card-set-context-menu";
-
 const CARD_SET_CONTEXT_MENU_LABELS = [
   "名前を変更",
   "削除",
 ];
-
 export const CARD_SET_CONTEXT_MENU_WIDTH = resolveRightClickPanelTextWidth(CARD_SET_CONTEXT_MENU_LABELS, 96);
 export const CARD_SET_CONTEXT_MENU_HEIGHT = CARD_SET_CONTEXT_MENU_LABELS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
 export const CARD_SET_CONTEXT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
-
 const CARD_SET_CONTEXT_MENU_STYLE = `
 .card-set-context-menu-item--danger {
   color: #b91c1c;
@@ -87,7 +82,5 @@ const CardSetContextMenuBase = ({
 
 
 const CardSetContextMenu = memo(CardSetContextMenuBase);
-
 CardSetContextMenu.displayName = "CardSetContextMenu";
-
 export { CardSetContextMenu };

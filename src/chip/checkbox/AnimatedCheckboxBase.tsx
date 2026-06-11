@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 
 export type AnimatedCheckboxShape = "circle" | "square";
 export type AnimatedCheckboxVariant = "filled" | "soft" | "outline" | "radio";
-
 export type AnimatedCheckboxBaseProps = { checked: boolean;
   color: string;
   className?: string;

@@ -17,13 +17,11 @@ interface UseFolderDocumentUploadParams {
   getNextOrderIndex: (folderId: string | null) => number;
   setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>;
 }
-
 type LegacyEntityFields = { blobUrl?: string | null };
 
 
 
 const withLegacyFields = <T extends object>(value: T): T & LegacyEntityFields => value as T & LegacyEntityFields;
-
 const getErrorMessage = (error: unknown, fallback: string): string => {
   if (error instanceof Error && error.message) return error.message;
   if (typeof error === "object" && error !== null && "message" in error && typeof (error as { message?: unknown }).message === "string") {
@@ -31,7 +29,6 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
   }
   return fallback;
 };
-
 export const useFolderDocumentUpload = ({ actionFolderId, getNextOrderIndex, setExpandedFolders }: UseFolderDocumentUploadParams) => { const { currentUser } = useAuthSession();
   const { error: toastError, success: toastSuccess } = useToast();
 

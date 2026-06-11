@@ -1,18 +1,13 @@
 import type { GoogleCalendarSyncEngine } from "./GoogleCalendarSyncEngine";
 
-
-
 type Range = {
   start: Date;
   end: Date;
 };
-
 type RangeState = {
   start: Date | null;
   end: Date | null;
 };
-
-
 
 export class RangeController { private engineMap = new Map<string, GoogleCalendarSyncEngine>();
 

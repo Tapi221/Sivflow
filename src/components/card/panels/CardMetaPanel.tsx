@@ -10,7 +10,6 @@ type CardMetaSyncStatus = {
   canRetry?: boolean;
   onRetry?: () => Promise<void> | void;
 };
-
 type CardMetaPanelProps = {
   isLoading?: boolean;
   isVisible?: boolean;

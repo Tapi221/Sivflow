@@ -1,7 +1,6 @@
 type BlobScopeOptions = {
   userId?: string | null;
 };
-
 type CacheEntry = {
   url: string;
   lastAccessAt: number;
@@ -9,18 +8,13 @@ type CacheEntry = {
   staleUrls: string[];
 };
 
-
-
 const MAX_CACHE_ENTRIES = 40;
 const cache = new Map<string, CacheEntry>();
-
-
 
 const makeScopedId = (id: string, options?: BlobScopeOptions): string => {
   const userId = options?.userId?.trim();
   return userId ? `${userId}:${id}` : id;
 };
-
 const revokeBlobUrl = (url: string): void => {
   if (!url.startsWith("blob:")) return;
   if (typeof URL === "undefined" || typeof URL.revokeObjectURL !== "function")
@@ -34,11 +28,9 @@ const revokeBlobUrl = (url: string): void => {
     });
   }
 };
-
 const touch = (entry: CacheEntry): void => {
   entry.lastAccessAt = Date.now();
 };
-
 const cleanupStaleUrls = (entry: CacheEntry): void => {
   if (entry.pinCount > 0 || entry.staleUrls.length === 0) return;
   for (const url of entry.staleUrls) {
@@ -46,7 +38,6 @@ const cleanupStaleUrls = (entry: CacheEntry): void => {
   }
   entry.staleUrls = [];
 };
-
 const evictIfNeeded = (): void => {
   if (cache.size <= MAX_CACHE_ENTRIES) return;
   const candidates = Array.from(cache.entries())
@@ -60,7 +51,6 @@ const evictIfNeeded = (): void => {
     cache.delete(key);
   }
 };
-
 export const getCachedDocumentBlobUrl = ( id: string | null | undefined, options?: BlobScopeOptions, ): string | null => { if (!id) return null;
   const key = makeScopedId(id, options);
   const entry = cache.get(key);
@@ -69,7 +59,6 @@ export const getCachedDocumentBlobUrl = ( id: string | null | undefined, options
   touch(entry);
   return entry.url;
 };
-
 export const cacheDocumentBlobUrl = ( id: string, url: string, options?: BlobScopeOptions, ): void => { if (!id || !url || !url.startsWith("blob:")) return;
   const key = makeScopedId(id, options);
   const now = Date.now();
@@ -92,7 +81,6 @@ export const cacheDocumentBlobUrl = ( id: string, url: string, options?: BlobSco
   cleanupStaleUrls(existing);
   evictIfNeeded();
 };
-
 export const pinDocumentBlobUrl = ( id: string | null | undefined, options?: BlobScopeOptions, ): void => { if (!id) return;
   const key = makeScopedId(id, options);
   const entry = cache.get(key);
@@ -100,7 +88,6 @@ export const pinDocumentBlobUrl = ( id: string | null | undefined, options?: Blo
   entry.pinCount += 1;
   touch(entry);
 };
-
 export const unpinDocumentBlobUrl = ( id: string | null | undefined, options?: BlobScopeOptions, ): void => { if (!id) return;
   const key = makeScopedId(id, options);
   const entry = cache.get(key);
@@ -115,7 +102,6 @@ export const unpinDocumentBlobUrl = ( id: string | null | undefined, options?: B
   cleanupStaleUrls(entry);
   evictIfNeeded();
 };
-
 export const removeDocumentBlobUrl = ( id: string | null | undefined, options?: BlobScopeOptions, ): void => { if (!id) return;
   const key = makeScopedId(id, options);
   const entry = cache.get(key);
@@ -129,7 +115,6 @@ export const removeDocumentBlobUrl = ( id: string | null | undefined, options?: 
   revokeBlobUrl(entry.url);
   cache.delete(key);
 };
-
 export const invalidateDocumentBlobUrl = ( id: string | null | undefined, url: string | null | undefined, options?: BlobScopeOptions, ): void => { if (!id || !url) return;
   const key = makeScopedId(id, options);
   const entry = cache.get(key);

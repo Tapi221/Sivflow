@@ -1,12 +1,9 @@
 export type LocalAiProvider = "ollama";
-
 export type LocalAiSettings = { enabled: boolean;
   provider: LocalAiProvider;
   baseUrl: string;
   model: string;
 };
-
-
 
 const LOCAL_AI_SETTINGS_STORAGE_KEY = "sivflow.localAiSettings.v1";
 const DEFAULT_LOCAL_AI_SETTINGS: LocalAiSettings = {
@@ -16,10 +13,7 @@ const DEFAULT_LOCAL_AI_SETTINGS: LocalAiSettings = {
   model: "llama3.2:3b",
 };
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
-
 const normalizeBaseUrl = (value: unknown): string => {
   if (typeof value !== "string") return DEFAULT_LOCAL_AI_SETTINGS.baseUrl;
 
@@ -28,14 +22,12 @@ const normalizeBaseUrl = (value: unknown): string => {
 
   return trimmed;
 };
-
 const normalizeModel = (value: unknown): string => {
   if (typeof value !== "string") return DEFAULT_LOCAL_AI_SETTINGS.model;
 
   const trimmed = value.trim();
   return trimmed || DEFAULT_LOCAL_AI_SETTINGS.model;
 };
-
 const parseLocalAiSettings = (value: unknown): LocalAiSettings => {
   if (!isRecord(value)) return DEFAULT_LOCAL_AI_SETTINGS;
 
@@ -46,9 +38,7 @@ const parseLocalAiSettings = (value: unknown): LocalAiSettings => {
     model: normalizeModel(value.model),
   };
 };
-
 export const getDefaultLocalAiSettings = (): LocalAiSettings => ({ ...DEFAULT_LOCAL_AI_SETTINGS });
-
 export const getLocalAiSettings = (): LocalAiSettings => { if (typeof window === "undefined") return getDefaultLocalAiSettings();
 
   try {
@@ -60,7 +50,6 @@ export const getLocalAiSettings = (): LocalAiSettings => { if (typeof window ===
     return getDefaultLocalAiSettings();
   }
 };
-
 export const setLocalAiSettings = (settings: LocalAiSettings): LocalAiSettings => { const nextSettings = parseLocalAiSettings(settings);
 
   if (typeof window !== "undefined") {

@@ -14,7 +14,6 @@ export type SharedCardSurfaceMetrics = { renderSpec: CardRenderSpec;
   sideContentZoom: number;
   sideHeaderIconVisualScale: number;
 };
-
 export type BuildCardSurfaceMetricsArgs = Readonly<{ displayMode: CardDisplayMode;
   cardLayoutMode: CardLayoutMode;
   interactionMode?: CardInteractionMode;
@@ -31,7 +30,6 @@ const resolveSafeFitScale = (value?: number) => {
   if (value <= 0) return 1;
   return value;
 };
-
 export const buildCardSurfaceMetrics = ({ displayMode, cardLayoutMode, interactionMode = "view", zoomScale, fitScale = 1, showInk = interactionMode === "view" && displayMode === "fixed", }: BuildCardSurfaceMetricsArgs): SharedCardSurfaceMetrics => { const safeFitScale = resolveSafeFitScale(fitScale);
   const renderSpec = buildCardRenderSpec({
     displayMode,
@@ -86,8 +84,7 @@ export const buildCardSurfaceMetrics = ({ displayMode, cardLayoutMode, interacti
     sideHeaderIconVisualScale,
   };
 };
-
 export const buildSharedCardSurfaceMetrics = ({ displayMode, cardLayoutMode, zoomScale, }: { displayMode: CardDisplayMode;
   cardLayoutMode: CardLayoutMode;
   zoomScale: number;
-}) => buildCardSurfaceMetrics({ displayMode, cardLayoutMode, zoomScale });
+}) => buildCardSurfaceMetrics({ displayMode, cardLayoutMode, zoomScale }

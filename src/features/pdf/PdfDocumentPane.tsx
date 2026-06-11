@@ -11,27 +11,21 @@ import { resolvePdfDocumentSourceUrl } from "./resolvePdfDocumentSourceUrl";
 import type { PdfViewerStateChangeOptions } from "./PdfPane";
 import type { PdfDocumentSource } from "./pdfDocumentSource";
 
-
-
 type PdfDocumentPaneProps = {
   document: DocumentItem;
   className?: string;
   onDocumentUpdate?: (updates: Partial<DocumentItem>) => Promise<void> | void;
 };
-
 type LocalPdfSourceState = {
   documentId: string;
   isResolved: boolean;
   source: PdfDocumentSource | null;
   error: string | null;
 };
-
 type PendingPdfViewerStateSave = {
   viewerState: PdfViewerState;
   onDocumentUpdate: NonNullable<PdfDocumentPaneProps["onDocumentUpdate"]>;
 };
-
-
 
 const PDF_SOURCE_RESOLUTION_TIMEOUT_MS = 15_000;
 const PDF_VIEWER_STATE_SAVE_DEBOUNCE_MS = 800;
@@ -41,30 +35,24 @@ const PDF_SOURCE_MISSING_ERROR_MESSAGE = "表示できるPDFデータが見つ�
 const PDF_DOCUMENT_PANE_CLASS_NAME = "flex h-full min-h-0 w-full min-w-0 flex-1";
 const PDF_DOCUMENT_STATUS_CLASS_NAME = "flex h-full min-h-0 w-full min-w-0 flex-1 items-center justify-center bg-[var(--carvepanel-surface)] px-6 text-center text-[13px] leading-6 text-[#6d6d6d]";
 
-
-
 const createPendingLocalPdfSourceState = (documentId: string): LocalPdfSourceState => ({
   documentId,
   isResolved: false,
   source: null,
   error: null,
 });
-
 const createResolvedLocalPdfSourceState = (documentId: string, source: PdfDocumentSource | null, error: string | null = null): LocalPdfSourceState => ({
   documentId,
   isResolved: true,
   source,
   error,
 });
-
 const createPersistedPdfDocumentSource = (url: string | null): PdfDocumentSource | null => {
   return url ? createPdfDocumentUrlSource(url) : null;
 };
-
 const getErrorMessage = (error: unknown, fallback: string): string => {
   return error instanceof Error && error.message ? error.message : fallback;
 };
-
 const waitForPdfSourceResolution = async <T,>(promise: Promise<T>): Promise<T> => {
   let timeoutId: ReturnType<typeof globalThis.setTimeout> | null = null;
   const timeoutPromise = new Promise<never>((_, reject) => {
@@ -77,29 +65,23 @@ const waitForPdfSourceResolution = async <T,>(promise: Promise<T>): Promise<T> =
     if (timeoutId !== null) globalThis.clearTimeout(timeoutId);
   }
 };
-
 const delay = (durationMs: number): Promise<void> => {
   return new Promise((resolve) => {
     globalThis.setTimeout(resolve, durationMs);
   });
 };
-
 const getPdfViewerStatePersistence = (options?: PdfViewerStateChangeOptions) => {
   return options?.persistence ?? "immediate";
 };
-
 const isBrowserPageHidden = (): boolean => {
   return typeof globalThis.document !== "undefined" && globalThis.document.visibilityState === "hidden";
 };
-
 const hasLocalPdfBlobCandidate = (document: Pick<DocumentItem, "localFileId">): boolean => {
   return Boolean(document.localFileId?.trim());
 };
-
 const isLocalPersistedPdfSource = (source: PdfDocumentSource | null): boolean => {
   return source?.type === "url" && source.locality === "local";
 };
-
 const resolvePreferredPdfBlob = async (document: DocumentItem, currentUserId: string | null, hasPersistedSource: boolean): Promise<Blob | null> => {
   if (!hasPersistedSource) return resolvePdfDocumentBlob(document, currentUserId);
 
@@ -107,8 +89,6 @@ const resolvePreferredPdfBlob = async (document: DocumentItem, currentUserId: st
   if (localBlob) return localBlob;
   return null;
 };
-
-
 
 const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentPaneProps) => {
   const { currentUser } = useAuthSession();
@@ -286,7 +266,5 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
 
   return <PdfPane source={source} className={paneClassName} viewerState={document.viewerState ?? null} onLoadError={handlePdfLoadError} onViewerStateChange={handleViewerStateChange} />;
 };
-
-
 
 export { PdfDocumentPane };

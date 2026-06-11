@@ -3,18 +3,13 @@ import { deleteGoogleCalendarEvent, createGoogleCalendarEvent, updateGoogleCalen
 import { deleteCachedGoogleCalendarEvent, readCachedGoogleCalendarEvents, replaceCachedGoogleCalendarRange, upsertCachedGoogleCalendarEvent } from "@/integration/googlecalendar-integration/googleCalendarEventCache";
 import type { GCalEventsListResponse, GCalForceSyncOptions, GCalRawIncrementalEvent, GCalSyncEngineOptions, GCalSyncRange, GCalSyncStartContext, GCalSyncState, GCalSyncTokenMap, GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritableEventUpdateInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
-
-
 const GCAL_API_BASE = "https://www.googleapis.com/calendar/v3";
 const SYNC_TOKENS_STORAGE_KEY = "flashcard-master.gcal.sync_tokens";
 const DEFAULT_POLL_INTERVAL_MS = 60_000;
 const MAX_BACKOFF_MS = 10 * 60 * 1000;
 const INITIAL_BACKOFF_MS = 60_000;
-
 const DEFAULT_FULL_SYNC_PAST_DAYS = 365;
 const DEFAULT_FULL_SYNC_FUTURE_DAYS = 3650;
-
-
 
 const readSyncTokens = (): GCalSyncTokenMap => {
   try {
@@ -31,7 +26,6 @@ const readSyncTokens = (): GCalSyncTokenMap => {
     return {};
   }
 };
-
 const writeSyncTokens = (map: GCalSyncTokenMap): void => {
   try {
     localStorage.setItem(SYNC_TOKENS_STORAGE_KEY, JSON.stringify(map));
@@ -39,11 +33,8 @@ const writeSyncTokens = (map: GCalSyncTokenMap): void => {
     // ignore
   }
 };
-
 const buildSyncTokenKey = (accountId: string | undefined, calendarId: string) => accountId ? `${accountId}:${calendarId}` : calendarId;
-
 const buildCompositeEventId = (accountId: string | undefined, calendarId: string, eventId: string) => accountId ? `${accountId}:${calendarId}:${eventId}` : `${calendarId}:${eventId}`;
-
 const mergeWriteSyncTokens = (map: GCalSyncTokenMap): GCalSyncTokenMap => {
   const next = {
     ...readSyncTokens(),
@@ -54,7 +45,6 @@ const mergeWriteSyncTokens = (map: GCalSyncTokenMap): GCalSyncTokenMap => {
 
   return next;
 };
-
 const gcalGet = async <T>(accessToken: string, url: string): Promise<T> => {
   const response = await fetch(url, {
     headers: {
@@ -92,7 +82,6 @@ const gcalGet = async <T>(accessToken: string, url: string): Promise<T> => {
 
   return (await response.json()) as T;
 };
-
 const isRecoverableAuthError = (error: unknown): boolean => {
   if (!(error instanceof Error)) return false;
 
@@ -108,7 +97,6 @@ const isRecoverableAuthError = (error: unknown): boolean => {
         googleReason === "insufficientPermissions"))
   );
 };
-
 const parseGoogleDate = (rawValue: string): Date => {
   const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(rawValue);
 
@@ -119,7 +107,6 @@ const parseGoogleDate = (rawValue: string): Date => {
 
   return new Date(rawValue);
 };
-
 const parseEventStart = (start: GCalRawIncrementalEvent["start"]): Date | null => {
   const rawValue = start?.dateTime ?? start?.date;
   if (!rawValue) return null;
@@ -127,7 +114,6 @@ const parseEventStart = (start: GCalRawIncrementalEvent["start"]): Date | null =
   const date = parseGoogleDate(rawValue);
   return Number.isNaN(date.getTime()) ? null : date;
 };
-
 const parseEventEnd = (end: GCalRawIncrementalEvent["end"]): Date | null => {
   const rawValue = end?.dateTime ?? end?.date;
   if (!rawValue) return null;
@@ -135,7 +121,6 @@ const parseEventEnd = (end: GCalRawIncrementalEvent["end"]): Date | null => {
   const date = parseGoogleDate(rawValue);
   return Number.isNaN(date.getTime()) ? null : date;
 };
-
 const toCalendarEvent = (
   raw: GCalRawIncrementalEvent,
   calendarId: string,
@@ -165,7 +150,6 @@ const toCalendarEvent = (
     isAllDay: Boolean(raw.start?.date && !raw.start?.dateTime),
   };
 };
-
 const resolveExternalEventId = (accountId: string | undefined, calendarId: string, eventId: string): string => {
   const accountPrefix = accountId ? `${accountId}:${calendarId}:` : null;
   const calendarPrefix = `${calendarId}:`;
@@ -175,7 +159,6 @@ const resolveExternalEventId = (accountId: string | undefined, calendarId: strin
 
   return eventId;
 };
-
 export class GoogleCalendarSyncEngine { private readonly options: Required<Pick<GCalSyncEngineOptions, "pollIntervalMs" | "fullSyncPastDays" | "fullSyncFutureDays">> & GCalSyncEngineOptions;
 
   private context: GCalSyncStartContext | null = null;

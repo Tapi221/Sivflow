@@ -1,15 +1,11 @@
 import { getLocalAiSettings } from "./localAiSettings";
 
-
-
 export type GenerateOllamaAnswerInput = { question: string;
   model?: string;
 };
-
 export type GenerateOllamaAnswerResult = { answer: string;
   model: string;
 };
-
 export type TestOllamaConnectionResult = { ok: boolean;
   modelAvailable: boolean;
   model: string;
@@ -17,16 +13,10 @@ export type TestOllamaConnectionResult = { ok: boolean;
   models: string[];
 };
 
-
-
 const OLLAMA_REQUEST_TIMEOUT_MS = 60_000;
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
-
 const getString = (value: unknown): string | null => typeof value === "string" ? value : null;
-
 const buildQaPrompt = (question: string): string => {
   return [
     "あなたは学習カード作成を補助するAIです。",
@@ -40,25 +30,19 @@ const buildQaPrompt = (question: string): string => {
     `疑問: ${question}`,
   ].join("\n");
 };
-
 const normalizeQuestion = (value: string): string => value.trim().slice(0, 1000);
-
 const normalizeBaseUrl = (value: string): string => value.trim().replace(/\/+$/, "");
-
 const buildOllamaApiUrl = (baseUrl: string, path: string): string => `${normalizeBaseUrl(baseUrl)}${path}`;
-
 const parseOllamaGenerateResponse = (value: unknown): string => {
   if (!isRecord(value)) return "";
 
   return getString(value.response)?.trim() ?? "";
 };
-
 const parseOllamaTagsResponse = (value: unknown): string[] => {
   if (!isRecord(value) || !Array.isArray(value.models)) return [];
 
   return value.models.map((model) => isRecord(model) ? getString(model.name) : null).filter((name): name is string => Boolean(name));
 };
-
 const createAbortSignal = (): { signal: AbortSignal; cancel: () => void } => {
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), OLLAMA_REQUEST_TIMEOUT_MS);
@@ -68,7 +52,6 @@ const createAbortSignal = (): { signal: AbortSignal; cancel: () => void } => {
     cancel: () => window.clearTimeout(timeoutId),
   };
 };
-
 const generateOllamaAnswerWithBrowserFetch = async (baseUrl: string, model: string, prompt: string): Promise<string> => {
   const abort = createAbortSignal();
 
@@ -96,7 +79,6 @@ const generateOllamaAnswerWithBrowserFetch = async (baseUrl: string, model: stri
     abort.cancel();
   }
 };
-
 const listOllamaModelsWithBrowserFetch = async (baseUrl: string): Promise<string[]> => {
   const abort = createAbortSignal();
 
@@ -116,7 +98,6 @@ const listOllamaModelsWithBrowserFetch = async (baseUrl: string): Promise<string
     abort.cancel();
   }
 };
-
 export const generateOllamaAnswer = async ({ question, model }: GenerateOllamaAnswerInput): Promise<GenerateOllamaAnswerResult> => { const settings = getLocalAiSettings();
   if (!settings.enabled) throw new Error("LOCAL_AI_DISABLED");
 
@@ -130,7 +111,6 @@ export const generateOllamaAnswer = async ({ question, model }: GenerateOllamaAn
 
   return { answer, model: selectedModel };
 };
-
 export const testOllamaConnection = async (): Promise<TestOllamaConnectionResult> => { const settings = getLocalAiSettings();
   const models = window.desktop?.ai ? await window.desktop.ai.listOllamaModels({ baseUrl: settings.baseUrl }) : await listOllamaModelsWithBrowserFetch(settings.baseUrl);
 

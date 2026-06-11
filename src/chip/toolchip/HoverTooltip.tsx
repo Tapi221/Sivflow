@@ -7,12 +7,10 @@ import { TOOLTIP_PRESET_CLASS_NAMES, type TooltipPreset, type TooltipSize } from
 
 type TooltipSide = "top" | "right" | "bottom" | "left";
 type TooltipAlign = "center" | "start" | "end";
-
 type TooltipPosition = {
   x: number;
   y: number;
 };
-
 type HoverTooltipProps = {
   label?: string | null;
   children: ReactNode;
@@ -40,7 +38,6 @@ const getCanUseHoverTooltip = () => {
 
   return window.matchMedia(HOVER_CAPABLE_MEDIA_QUERY).matches;
 };
-
 const getTransform = (side: TooltipSide, align: TooltipAlign) => {
   if (side === "top") {
     if (align === "start") return "translate(0, -100%)";
@@ -64,7 +61,6 @@ const getTransform = (side: TooltipSide, align: TooltipAlign) => {
   if (align === "end") return "translate(0, -100%)";
   return "translate(0, -50%)";
 };
-
 const getPosition = (
   rect: DOMRect,
   side: TooltipSide,
@@ -117,7 +113,6 @@ const getPosition = (
           : rect.top + rect.height / 2,
   };
 };
-
 const getArrowClassName = (side: TooltipSide, align: TooltipAlign) => {
   if (side === "top") {
     return cn(

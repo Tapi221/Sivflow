@@ -3,11 +3,7 @@ import { isServerStoredGoogleOAuthEnabled } from "@/integration/google-integrati
 import { readStoredAccounts, upsertStoredAccount, type StoredGoogleAccount } from "./gcal.multi-storage";
 import { listServerStoredGoogleCalendarAccounts } from "./gcal.server-accounts";
 
-
-
 type ServerStoredGoogleCalendarAccount = Awaited<ReturnType<typeof listServerStoredGoogleCalendarAccounts>>[number];
-
-
 
 const createStoredAccountFromRemote = (remote: ServerStoredGoogleCalendarAccount): StoredGoogleAccount => ({
   id: remote.accountId,
@@ -19,9 +15,7 @@ const createStoredAccountFromRemote = (remote: ServerStoredGoogleCalendarAccount
   refreshToken: null,
   selectedCalendarIds: [],
 });
-
 const serializeStoredAccounts = (): string => JSON.stringify(readStoredAccounts());
-
 const syncServerStoredGoogleAccounts = async (): Promise<boolean> => {
   const remoteAccounts = await listServerStoredGoogleCalendarAccounts();
   if (remoteAccounts.length === 0) return false;
@@ -34,7 +28,6 @@ const syncServerStoredGoogleAccounts = async (): Promise<boolean> => {
 
   return serializeStoredAccounts() !== before;
 };
-
 export const useServerStoredGoogleAccountBootstrap = (): void => { useEffect(() => { if (!isServerStoredGoogleOAuthEnabled()) return;
 
     let cancelled = false;

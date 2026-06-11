@@ -10,7 +10,6 @@ type TabContextMenuAction = {
   disabled?: boolean;
   onSelect: () => void;
 };
-
 type TabContextMenuProps = {
   x: number;
   y: number;
@@ -23,14 +22,12 @@ type TabContextMenuProps = {
 
 
 export const WORKSPACE_TAB_CONTEXT_PANEL_ID = "workspace-tab-context-menu";
-
 const WORKSPACE_TAB_CONTEXT_MENU_LABELS = [
   "閉じる",
   "他を閉じる",
   "このタブ以降を閉じる",
   "すべてを閉じる",
 ];
-
 export const WORKSPACE_TAB_CONTEXT_MENU_WIDTH = resolveRightClickPanelTextWidth(WORKSPACE_TAB_CONTEXT_MENU_LABELS);
 export const WORKSPACE_TAB_CONTEXT_MENU_HEIGHT = WORKSPACE_TAB_CONTEXT_MENU_LABELS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
 export const WORKSPACE_TAB_CONTEXT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;

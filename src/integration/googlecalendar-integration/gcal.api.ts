@@ -2,11 +2,7 @@ import type { GCalRawIncrementalEvent, GCalWritableEventDeleteInput, GCalWritabl
 import { parseGoogleRecurrenceRule, serializeGoogleRecurrenceRule } from "./gcalRecurrence";
 import { createGoogleApiError } from "@/integration/google-integration/googleApiRetry";
 
-
-
 const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
-
-
 
 const getJsonOnce = async <T>(accessToken: string, url: string, errorPrefix = "Google API failed"): Promise<T> => {
   const res = await fetch(url, {
@@ -21,9 +17,7 @@ const getJsonOnce = async <T>(accessToken: string, url: string, errorPrefix = "G
 
   return (await res.json()) as T;
 };
-
 const getJson = async <T>(accessToken: string, url: string): Promise<T> => getJsonOnce<T>(accessToken, url);
-
 const postJson = async <T>(accessToken: string, url: string, body: unknown, errorPrefix = "Google API failed"): Promise<T> => {
   const res = await fetch(url, {
     method: "POST",
@@ -40,7 +34,6 @@ const postJson = async <T>(accessToken: string, url: string, body: unknown, erro
 
   return (await res.json()) as T;
 };
-
 const patchJson = async <T>(accessToken: string, url: string, body: unknown, errorPrefix = "Google API failed"): Promise<T> => {
   const res = await fetch(url, {
     method: "PATCH",
@@ -57,7 +50,6 @@ const patchJson = async <T>(accessToken: string, url: string, body: unknown, err
 
   return (await res.json()) as T;
 };
-
 const deleteJson = async (accessToken: string, url: string, errorPrefix = "Google API failed"): Promise<void> => {
   const res = await fetch(url, {
     method: "DELETE",
@@ -70,7 +62,6 @@ const deleteJson = async (accessToken: string, url: string, errorPrefix = "Googl
     throw await createGoogleApiError(res, errorPrefix);
   }
 };
-
 const parseGoogleDate = (raw: string): Date => {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
 
@@ -79,7 +70,6 @@ const parseGoogleDate = (raw: string): Date => {
   const [, y, m, d] = match;
   return new Date(Number(y), Number(m) - 1, Number(d));
 };
-
 const parseEventDate = (value?: {
   date?: string;
   dateTime?: string;
@@ -90,7 +80,6 @@ const parseEventDate = (value?: {
   const date = parseGoogleDate(raw);
   return Number.isNaN(date.getTime()) ? null : date;
 };
-
 const formatGoogleDateOnly = (date: Date): string => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -98,9 +87,7 @@ const formatGoogleDateOnly = (date: Date): string => {
 
   return `${year}-${month}-${day}`;
 };
-
 const buildCompositeEventId = (accountId: string | undefined, calendarId: string, eventId: string): string => accountId ? `${accountId}:${calendarId}:${eventId}` : `${calendarId}:${eventId}`;
-
 const toGoogleCalendarListItem = (calendar: GoogleCalendarApiCalendarResponse): GoogleCalendarListItem => ({
   id: calendar.id!,
   summary: calendar.summary!,
@@ -108,7 +95,6 @@ const toGoogleCalendarListItem = (calendar: GoogleCalendarApiCalendarResponse): 
   backgroundColor: "#4f7cff",
   selected: true,
 });
-
 const toGoogleCalendarEvent = ({ raw, accountId, calendarId, accentColor, projectId }: { raw: GCalRawIncrementalEvent; accountId?: string; calendarId: string; accentColor: string; projectId?: string }): GoogleCalendarEvent | null => {
   if (!raw.id) return null;
   if (raw.status === "cancelled") return null;
@@ -134,7 +120,6 @@ const toGoogleCalendarEvent = ({ raw, accountId, calendarId, accentColor, projec
     recurrenceRule: parseGoogleRecurrenceRule(raw.recurrence),
   };
 };
-
 const toGoogleEventPayload = (event: Partial<GCalWritableEventInput>): Record<string, unknown> => {
   const payload: Record<string, unknown> = {};
 
@@ -161,7 +146,6 @@ const toGoogleEventPayload = (event: Partial<GCalWritableEventInput>): Record<st
 
   return payload;
 };
-
 export const fetchCalendarList = async (accessToken: string): Promise<GoogleCalendarListItem[]> => { console.info("[GoogleCalendarAPI] カレンダー一覧の取得を開始しました");
 
   try {
@@ -212,7 +196,6 @@ export const fetchCalendarList = async (accessToken: string): Promise<GoogleCale
     throw error;
   }
 };
-
 export const createGoogleCalendar = async ({ accessToken, summary, description }: { accessToken: string; summary: string; description?: string }): Promise<GoogleCalendarListItem> => {
   const trimmedSummary = summary.trim();
   if (!trimmedSummary) throw new Error("Google Calendar name is required");
@@ -233,7 +216,6 @@ export const createGoogleCalendar = async ({ accessToken, summary, description }
 
   return toGoogleCalendarListItem(calendar);
 };
-
 export const fetchEventsForCalendar = async ({ accessToken, accountId, calendarId, accentColor, rangeStart, rangeEnd, }: { accessToken: string;
   accountId?: string;
   calendarId: string;
@@ -295,7 +277,6 @@ export const fetchEventsForCalendar = async ({ accessToken, accountId, calendarI
     throw error;
   }
 };
-
 export const createGoogleCalendarEvent = async ({ accessToken, accountId, accentColor, event }: { accessToken: string; accountId?: string; accentColor: string; event: GCalWritableEventInput }): Promise<GoogleCalendarEvent> => {
   const raw = await postJson<GCalRawIncrementalEvent>(
     accessToken,
@@ -308,7 +289,6 @@ export const createGoogleCalendarEvent = async ({ accessToken, accountId, accent
   if (!created) throw new Error("Google Calendar event creation response was invalid");
   return created;
 };
-
 export const updateGoogleCalendarEvent = async ({ accessToken, accountId, accentColor, event }: { accessToken: string; accountId?: string; accentColor: string; event: GCalWritableEventUpdateInput }): Promise<GoogleCalendarEvent> => {
   const raw = await patchJson<GCalRawIncrementalEvent>(
     accessToken,
@@ -321,7 +301,6 @@ export const updateGoogleCalendarEvent = async ({ accessToken, accountId, accent
   if (!updated) throw new Error("Google Calendar event update response was invalid");
   return updated;
 };
-
 export const deleteGoogleCalendarEvent = async ({ accessToken, event }: { accessToken: string; event: GCalWritableEventDeleteInput }): Promise<void> => {
   await deleteJson(accessToken, `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodeURIComponent(event.calendarId)}/events/${encodeURIComponent(event.eventId)}`, "Google Calendar event deletion failed");
 };

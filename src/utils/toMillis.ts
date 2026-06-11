@@ -4,28 +4,21 @@ type TimestampFieldsLike = {
   nanoseconds?: unknown;
   _nanoseconds?: unknown;
 };
-
 type TimestampMethodLike = {
   toDate?: () => unknown;
   toMillis?: () => unknown;
 };
-
 type TimestampLike = TimestampFieldsLike & TimestampMethodLike;
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
 };
-
 const isFiniteNumber = (value: unknown): value is number => {
   return typeof value === "number" && Number.isFinite(value);
 };
-
 const isValidDate = (value: unknown): value is Date => {
   return value instanceof Date && Number.isFinite(value.getTime());
 };
-
 const normalizeEpochMillis = (value: number): number | null => {
   if (!Number.isFinite(value)) return null;
 
@@ -37,7 +30,6 @@ const normalizeEpochMillis = (value: number): number | null => {
   const normalized = Math.trunc(epochMillis);
   return Number.isFinite(normalized) ? normalized : null;
 };
-
 const toDateFromMillis = (value: number): Date | null => {
   const epochMillis = normalizeEpochMillis(value);
   if (epochMillis === null) return null;
@@ -45,14 +37,12 @@ const toDateFromMillis = (value: number): Date | null => {
   const date = new Date(epochMillis);
   return isValidDate(date) ? date : null;
 };
-
 const toDateFromNumericString = (value: string): Date | null => {
   if (!/^-?\d{10,13}$/.test(value)) return null;
 
   const numeric = Number(value);
   return toDateFromMillis(numeric);
 };
-
 const toDateFromString = (value: string): Date | null => {
   const trimmed = value.trim();
   if (trimmed.length === 0) return null;
@@ -63,7 +53,6 @@ const toDateFromString = (value: string): Date | null => {
   const parsed = new Date(trimmed);
   return isValidDate(parsed) ? parsed : null;
 };
-
 const toDateFromTimestampMethods = (value: TimestampLike): Date | null => {
   if (typeof value.toMillis === "function") {
     const millis = value.toMillis();
@@ -79,7 +68,6 @@ const toDateFromTimestampMethods = (value: TimestampLike): Date | null => {
 
   return null;
 };
-
 const toDateFromTimestampFields = (value: TimestampLike): Date | null => {
   const secondsCandidate = value.seconds ?? value._seconds ?? null;
   const nanosecondsRaw = value.nanoseconds ?? value._nanoseconds ?? 0;
@@ -92,7 +80,6 @@ const toDateFromTimestampFields = (value: TimestampLike): Date | null => {
 
   return toDateFromMillis(millis);
 };
-
 export const toDateOrNull = (value: unknown): Date | null => { if (value === null || value === undefined || value === "") { return null;
   }
 
@@ -119,14 +106,11 @@ export const toDateOrNull = (value: unknown): Date | null => { if (value === nul
     toDateFromTimestampFields(timestampValue)
   );
 };
-
 export const toMillisOrNull = (value: unknown): number | null => { const date = toDateOrNull(value);
   return date ? date.getTime() : null;
 };
-
 export const toMillis = (value: unknown, fallback = 0): number => { return toMillisOrNull(value) ?? fallback;
 };
-
 export const toIsoStringOrNull = (value: unknown): string | null => { const date = toDateOrNull(value);
   return date ? date.toISOString() : null;
 };

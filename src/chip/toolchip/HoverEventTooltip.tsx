@@ -6,7 +6,6 @@ import { emitHoverTooltipOpen, subscribeHoverTooltipOpen } from "./hoverTooltipE
 
 
 type TooltipSide = "top" | "bottom";
-
 type TooltipPosition = {
   x: number;
   y: number;
@@ -14,12 +13,10 @@ type TooltipPosition = {
   arrowX: number;
   measured: boolean;
 };
-
 type TooltipBoundary = {
   top: number;
   bottom: number;
 };
-
 type HoverEventTooltipProps = {
   title: string;
   subtitle?: string | null;
@@ -51,7 +48,6 @@ const clampNumber = (value: number, min: number, max: number) => {
 
   return Math.min(Math.max(value, min), max);
 };
-
 const getScrollBoundary = (element: HTMLElement): TooltipBoundary => {
   let current = element.parentElement;
 
@@ -79,7 +75,6 @@ const getScrollBoundary = (element: HTMLElement): TooltipBoundary => {
     bottom: window.innerHeight - TOOLTIP_VIEWPORT_MARGIN,
   };
 };
-
 const resolveSide = (
   preferredSide: TooltipSide,
   anchorRect: DOMRect,
@@ -101,7 +96,6 @@ const resolveSide = (
 
   return "top";
 };
-
 const resolvePosition = (
   anchorRect: DOMRect,
   tooltipRect: DOMRect,
@@ -129,7 +123,6 @@ const resolvePosition = (
 
   return { x, y, side, arrowX, measured: true };
 };
-
 const getInitialPosition = (
   anchorRect: DOMRect,
   preferredSide: TooltipSide,
@@ -140,7 +133,6 @@ const getInitialPosition = (
 
   return { x, y, side: preferredSide, arrowX: 0, measured: false };
 };
-
 const getArrowClassName = (side: TooltipSide) => {
   if (side === "bottom") return "top-[-4px] -translate-x-1/2 border-l border-t";
 
@@ -351,5 +343,4 @@ const HoverEventTooltip = ({
 
 
 HoverEventTooltip.displayName = "HoverEventTooltip";
-
 export { HoverEventTooltip };

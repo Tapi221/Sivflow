@@ -30,6 +30,8 @@ type WeekdayHourLabelMode = "full" | "integer";
 
 
 
+
+
 //Month
 export const MONTH_GRID_WEEKDAY_HEADER_HEIGHT_CLASS = "h-8";
 export const MONTH_GRID_DAY_HEADER_POSITION_CLASS = "left-0 top-0 md:left-3 md:top-1";
@@ -53,13 +55,11 @@ export const DAY_DETAIL_CURRENT_TIME_LABEL_CLASS = "-translate-y-1/2 text-[10px]
 const WEEKDAY_DESKTOP_HOUR_LABEL_MODE: WeekdayHourLabelMode = "full";
 const WEEKDAY_MOBILE_WEB_HOUR_LABEL_MODE: WeekdayHourLabelMode = "integer";
 const IS_MOBILE_WEB_VIEWPORT = typeof window !== "undefined" && window.innerWidth <= 767;
-
 export const WEEKDAY_HOURS = 24;
 export const WEEKDAY_MINUTES_PER_HOUR = 60;
 export const WEEKDAY_HOUR_LABEL_MODE = hasDesktopRuntime() || !IS_MOBILE_WEB_VIEWPORT ? WEEKDAY_DESKTOP_HOUR_LABEL_MODE : WEEKDAY_MOBILE_WEB_HOUR_LABEL_MODE;
 export const WEEKDAY_DAY_FORMAT = "E";
 export const WEEKDAY_DATE_FORMAT = "d";
-
 export const WEEKDAY_GRID_TIME_COLUMN_Z_INDEX = 20;
 
 // timing (current time hook)
@@ -79,4 +79,4 @@ export const WEEKDAY_HOUR_LABEL_PADDING_RIGHT = "0.625rem";
 export const WEEKDAY_HOUR_LABEL_FONT_SIZE = "11px";
 
 // misc layout
-export const WEEKDAY_EVENT_CHIP_PADDING_X = 2;
+export const WEEKDAY_EVENT_CHIP_PADDING_X = 

@@ -13,7 +13,6 @@ interface MarkdownBlockViewProps {
   style?: React.CSSProperties;
   zoom?: number;
 }
-
 export type MarkdownBlockPreviewProps = { markdown: string;
   align?: "left" | "center";
   className?: string;
@@ -21,7 +20,6 @@ export type MarkdownBlockPreviewProps = { markdown: string;
   style?: React.CSSProperties;
   zoom?: number;
 };
-
 interface MarkdownBlockPreviewSurfaceProps extends MarkdownBlockPreviewProps {
   contentClassName?: string;
 }
@@ -57,6 +55,5 @@ const MarkdownBlockPreviewSurface: React.FC<
     </BlockSurface>
   );
 };
-
 export const MarkdownBlockView: React.FC<MarkdownBlockViewProps> = ({ md, ...rest }) => { return <MarkdownBlockPreviewSurface markdown={md} {...rest} />;
 };

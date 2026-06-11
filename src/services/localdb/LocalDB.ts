@@ -17,23 +17,17 @@ import type { AssetRecord, Card, CardSet, Document, Folder, Note, SyncConflict, 
 import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
 import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 
-
-
 declare global {
   interface GlobalThis {
     __ALLOW_LOCAL_DB_CONSTRUCTION?: boolean;
   }
 }
-
 type LocalDbGlobal = typeof globalThis & {
   __ALLOW_LOCAL_DB_CONSTRUCTION?: boolean;
 };
-
 type SyncDirection = "upload" | "download";
 type CrudPayload = Record<string, unknown>;
 type SyncableTableName = "cards" | "folders" | "cardSets" | "documents" | typeof CURRENT_TAG_STORE | "userSettings" | "images" | "projectMaps";
-
-
 
 const syncableTables: readonly SyncableTableName[] = ["cards", "folders", "cardSets", "documents", CURRENT_TAG_STORE, "userSettings", "images", "projectMaps"];
 const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
@@ -47,20 +41,14 @@ const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
   projectMaps: "projectMap",
 };
 
-
-
 const isSyncableTableName = (tableName: string): tableName is SyncableTableName => (syncableTables as readonly string[]).includes(tableName);
-
 const getLocalDbGlobal = (): LocalDbGlobal => globalThis as LocalDbGlobal;
-
 const getPayloadId = (payload: unknown): string | null => {
   if (!payload || typeof payload !== "object") return null;
   const id = (payload as Record<string, unknown>).id;
   return typeof id === "string" && id.length > 0 ? id : null;
 };
-
 const toCrudPayload = (value: unknown): CrudPayload => value && typeof value === "object" ? { ...(value as Record<string, unknown>) } : {};
-
 const toTimestamp = (value: unknown): number => {
   if (value instanceof Date) return value.getTime();
   if (typeof value === "number") return Number.isFinite(value) ? value : 0;
@@ -77,17 +65,13 @@ const toTimestamp = (value: unknown): number => {
   }
   return 0;
 };
-
 const compareSyncHistoryNewestFirst = (left: SyncHistory, right: SyncHistory): number => right.startedAt - left.startedAt;
-
 const compareSyncQueueOldestFirst = (left: SyncQueueItem, right: SyncQueueItem): number => left.createdAt - right.createdAt;
-
 if (import.meta.env.DEV && typeof window !== "undefined") {
   import("./devtools")
     .then((m) => m.installLocalDbDevtools?.())
     .catch(() => {});
 }
-
 export class LocalDB extends Dexie { users!: Dexie.Table<User, string>;
   folders!: Dexie.Table<Folder, string>;
   cardSets!: Dexie.Table<CardSet, string>;
@@ -419,10 +403,6 @@ export class LocalDB extends Dexie { users!: Dexie.Table<User, string>;
   }
 }
 
-
-
 export type { CardRelation, LocalDBInstance, LocalDBLike, LocalDBTableMap, ProjectMap, SyncableEntityTable, TagRecord } from "./types";
-
-
 
 export { getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout };

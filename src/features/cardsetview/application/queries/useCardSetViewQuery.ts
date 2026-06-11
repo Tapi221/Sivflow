@@ -8,11 +8,9 @@ import type { CardSet } from "@/types/domain/cardSet";
 
 
 type ReorderCardsInCardSet = (cardSetId: string, cardIds: string[]) => Promise<void>;
-
 interface UseCardSetViewQueryOptions {
   cardSetId: string | null;
 }
-
 interface UseCardSetViewQueryResult {
   folders: Folder[];
   cardSetById: ReadonlyMap<string, Pick<CardSet, "id" | "folderId">>;
@@ -102,4 +100,3 @@ export const useCardSetViewQuery = ({ cardSetId, }: UseCardSetViewQueryOptions):
     reorderCardsInCardSet,
     isLoading: cardSetLoading || foldersLoading || cardsLoading,
   };
-};

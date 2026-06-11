@@ -224,7 +224,6 @@ const getCommentTool = (
       });
     },
   });
-
 const getTableTool = (
   editor: SlateEditor,
   {

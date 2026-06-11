@@ -9,25 +9,19 @@ import { getLocalDb, getLocalDBTelemetrySnapshot, telemetryOncePerSession } from
 import type { LocalDBLike } from "./localDB";
 import { SyncServiceV2 } from "./SyncServiceV2";
 
-
-
 type SyncServiceInternals = {
   cloudAdapter: ICloudSyncAdapter;
   localDB: LocalDBLike;
   userId: string;
 };
 
-
-
 const isProjectMapChange = (change: SyncChange): boolean => change.type === "projectMap";
-
 const toProjectMapRecord = (userId: string, change: SyncChange): Record<string, unknown> => {
   const data = change.data && typeof change.data === "object" ? { ...(change.data as Record<string, unknown>) } : {};
   data.id = typeof data.id === "string" && data.id.length > 0 ? data.id : change.id;
   data.userId = typeof data.userId === "string" && data.userId.length > 0 ? data.userId : userId;
   return data;
 };
-
 class ResilientSyncService extends SyncServiceV2 {
   private isSyncRunActive = false;
   private shouldRunAgain = false;
@@ -80,7 +74,6 @@ class ResilientSyncService extends SyncServiceV2 {
     }
   }
 }
-
 export class SyncServiceFactory { private static instances = new Map<string, ISyncService>();
   private static pendingInstances = new Map<string, Promise<ISyncService>>();
 

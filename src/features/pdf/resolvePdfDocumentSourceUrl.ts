@@ -1,10 +1,6 @@
 import type { DocumentItem } from "@/types";
 
-
-
 type PdfDocumentSourceFields = Pick<DocumentItem, "blobUrl" | "downloadUrl" | "googleDriveWebContentLink" | "googleDriveWebViewLink" | "localUrl" | "remoteUrl">;
-
-
 
 const isGoogleDriveViewUrl = (url: string): boolean => {
   try {
@@ -15,14 +11,12 @@ const isGoogleDriveViewUrl = (url: string): boolean => {
     return false;
   }
 };
-
 const normalizePdfSourceUrl = (url: string | null | undefined): string | null => {
   const trimmedUrl = url?.trim();
   if (!trimmedUrl || trimmedUrl.length === 0) return null;
   if (isGoogleDriveViewUrl(trimmedUrl)) return null;
   return trimmedUrl;
 };
-
 const getPdfDocumentSourceUrlCandidates = (document: PdfDocumentSourceFields): Array<string | null | undefined> => [
   document.localUrl,
   document.blobUrl,
@@ -31,7 +25,6 @@ const getPdfDocumentSourceUrlCandidates = (document: PdfDocumentSourceFields): A
   document.googleDriveWebContentLink,
   document.googleDriveWebViewLink,
 ];
-
 const resolvePdfDocumentSourceUrl = (document: PdfDocumentSourceFields): string | null => {
   for (const url of getPdfDocumentSourceUrlCandidates(document)) {
     const normalizedUrl = normalizePdfSourceUrl(url);
@@ -40,7 +33,5 @@ const resolvePdfDocumentSourceUrl = (document: PdfDocumentSourceFields): string 
 
   return null;
 };
-
-
 
 export { resolvePdfDocumentSourceUrl };

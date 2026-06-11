@@ -3,11 +3,9 @@ const CONTEXT_STORAGE_KEY_PREFIXES = {
   errorFlag: "error_flag_",
   lastSync: "last_sync_",
 } as const;
-
 const CONTEXT_SYNC_THRESHOLDS = {
   offlineRecoveryMs: 60 * 60 * 1000,
 } as const;
-
 const ContextService = class {
   private buildLastInitKey = (userId: string) => {
     return `${CONTEXT_STORAGE_KEY_PREFIXES.lastInit}${userId}`;
@@ -70,5 +68,4 @@ const ContextService = class {
     localStorage.setItem(this.buildLastSyncKey(userId), Date.now().toString());
   };
 };
-
 export const contextService = new ContextService();

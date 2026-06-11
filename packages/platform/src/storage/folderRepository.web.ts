@@ -4,8 +4,6 @@ import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { getLocalDb } from "@/services/localDB";
 import type { Card, CardSet, Document, Folder } from "@/types";
 
-
-
 const generateFolderId = () => {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
@@ -13,7 +11,6 @@ const generateFolderId = () => {
 
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 };
-
 export const createWebFolderRepository = (): FolderCommandRepository<Folder> & FolderDeleteRepository<Folder, CardSet, Card, Document> => ({ generateFolderId, listFolders: async (userId) => { const db = await getLocalDb(userId);
     return (await db.folders.toArray()).map(normalizeFolder);
   },

@@ -2,8 +2,6 @@ import { buildCardSetById, resolveCardFolderId } from "@/domain/card/selectors/c
 import type { SearchItem } from "@/features/search/model/search.types";
 import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
-
-
 type BuildExplorerSearchItemsParams = {
   folders: Folder[];
   cards: Card[];
@@ -13,13 +11,10 @@ type BuildExplorerSearchItemsParams = {
   onItemSelect: (item: SelectedExplorerItem) => void;
 };
 
-
-
 const normalizeLabel = (value: string | null | undefined, fallback: string) => {
   const trimmed = value?.trim();
   return trimmed && trimmed.length > 0 ? trimmed : fallback;
 };
-
 const uniqueKeywords = (...values: Array<string | null | undefined>) => {
   return Array.from(
     new Set(
@@ -30,7 +25,6 @@ const uniqueKeywords = (...values: Array<string | null | undefined>) => {
     ),
   );
 };
-
 export const buildExplorerSearchItems = ({ folders, cards, cardSets, documents, onFolderSelect, onItemSelect, }: BuildExplorerSearchItemsParams) => { const activeFolders = folders.filter( (folder) => !folder.isDeleted && !folder.isHidden, );
   const activeCardSets = cardSets.filter((cardSet) => !cardSet.isDeleted);
   const activeCards = cards.filter((card) => !card.isDeleted);

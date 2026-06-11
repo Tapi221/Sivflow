@@ -7,7 +7,6 @@ type FolderDashboardHandlers = {
   onViewCards: () => void;
   onCreateCard: () => void;
 };
-
 interface FolderDashboardProps {
   folderId: string;
   folderName: string;

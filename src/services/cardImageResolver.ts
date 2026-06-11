@@ -5,8 +5,6 @@ import { getCachedRemoteUrl, setCachedRemoteUrl } from "./imagePreloadCache";
 import { getLocalDb } from "@/services/localdb";
 import type { AssetRecord, ResolvableImageRef, UploadedImage } from "@/types";
 
-
-
 type ImageRecordLike =
   | {
     remoteUrlCache?: string | null;
@@ -19,15 +17,11 @@ type ImageRecordLike =
     status?: "pending" | "uploading" | "ready" | "failed" | null;
   }
   | undefined;
-
 type ImageUpdateCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   updateItem: (table: "images", id: string, changes: Record<string, unknown>) => Promise<number>;
 };
 
-
-
 const isNonEmptyString = (value: unknown): value is string => typeof value === "string" && value.trim().length > 0;
-
 const getRemoteUrlFromRecord = (record: ImageRecordLike): string | null => {
   if (isNonEmptyString(record?.remoteUrlCache)) {
     return record.remoteUrlCache.trim();
@@ -39,7 +33,6 @@ const getRemoteUrlFromRecord = (record: ImageRecordLike): string | null => {
 
   return null;
 };
-
 const getRemoteKeyFromRecord = (record: ImageRecordLike): string | null => {
   if (isNonEmptyString(record?.remoteKey)) {
     return record.remoteKey.trim();
@@ -51,7 +44,6 @@ const getRemoteKeyFromRecord = (record: ImageRecordLike): string | null => {
 
   return null;
 };
-
 const getLocalBlobIdFromRecord = (record: ImageRecordLike): string | null => {
   if (isNonEmptyString(record?.localBlobId)) {
     return record.localBlobId.trim();
@@ -63,7 +55,6 @@ const getLocalBlobIdFromRecord = (record: ImageRecordLike): string | null => {
 
   return null;
 };
-
 const getResolvedStatusFromRecord = (record: ImageRecordLike): "pending" | "uploading" | "ready" | "failed" => {
   if (!record) return "pending";
 
@@ -82,14 +73,10 @@ const getResolvedStatusFromRecord = (record: ImageRecordLike): "pending" | "uplo
   return "pending";
 };
 
-
-
 export type ResolvedCardImage = ResolvableImageRef & { url: string | null;
   source: "local_blob" | "cache" | "storage" | "none";
   status: "pending" | "uploading" | "ready" | "failed";
 };
-
-
 
 const resolveImageAssetId = (image: ResolvableImageRef): string | null => {
   for (const value of [image.assetId, image.id, image.localFileId]) {
@@ -100,7 +87,6 @@ const resolveImageAssetId = (image: ResolvableImageRef): string | null => {
 
   return null;
 };
-
 const resolveDirectUrl = (image: ResolvableImageRef): string | null => {
   for (const value of [image.url, image.remoteUrl, image.localUrl]) {
     if (isNonEmptyString(value)) {
@@ -110,7 +96,6 @@ const resolveDirectUrl = (image: ResolvableImageRef): string | null => {
 
   return null;
 };
-
 export const resolveCardImageUrl = async (image: ResolvableImageRef, userId?: string | null): Promise<ResolvedCardImage> => { const directUrl = resolveDirectUrl(image);
   if (directUrl) {
     return {

@@ -3,20 +3,17 @@ import { useCallback, useEffect, useRef } from "react";
 
 
 type CalendarEventDragRepeatActionStep<TDirection extends string> = (direction: TDirection, snapshot: CalendarEventDragPointerSnapshot) => boolean | void;
-
 type CalendarEventDragRepeatActionOptions<TDirection extends string> = {
   repeatIntervalMs: number;
   getDirection: (snapshot: CalendarEventDragPointerSnapshot) => TDirection | null;
   onStep: CalendarEventDragRepeatActionStep<TDirection>;
 };
-
 type CalendarEventDragRepeatActionControls = {
   begin: (snapshot: CalendarEventDragPointerSnapshot) => void;
   update: (snapshot: CalendarEventDragPointerSnapshot) => void;
   stop: (pointerId?: number) => void;
   getSnapshot: () => CalendarEventDragPointerSnapshot | null;
 };
-
 export type CalendarEventDragPointerSnapshot = { pointerId: number;
   buttons: number;
   clientX: number;
@@ -30,15 +27,12 @@ const PRIMARY_BUTTONS_MASK = 1;
 
 
 const isPrimaryButtonDragSnapshot = (snapshot: CalendarEventDragPointerSnapshot): boolean => (snapshot.buttons & PRIMARY_BUTTONS_MASK) === PRIMARY_BUTTONS_MASK;
-
 const cancelAnimationFrameIfNeeded = (frameId: number | null): void => {
   if (frameId === null || typeof window === "undefined") return;
 
   window.cancelAnimationFrame(frameId);
 };
-
 const createCalendarEventDragPointerSnapshot = (pointerId: number, buttons: number, clientX: number, clientY: number): CalendarEventDragPointerSnapshot => ({ pointerId, buttons, clientX, clientY });
-
 const useCalendarEventDragRepeatAction = <TDirection extends string>({ repeatIntervalMs, getDirection, onStep }: CalendarEventDragRepeatActionOptions<TDirection>): CalendarEventDragRepeatActionControls => {
   const optionsRef = useRef<CalendarEventDragRepeatActionOptions<TDirection>>({ repeatIntervalMs, getDirection, onStep });
   const pointerIdRef = useRef<number | null>(null);
@@ -136,4 +130,4 @@ const useCalendarEventDragRepeatAction = <TDirection extends string>({ repeatInt
 
 
 
-export { createCalendarEventDragPointerSnapshot, useCalendarEventDragRepeatAction };
+export { createCalendarEventDragPointerSnapshot, useCalendarEventDragRepeatAct

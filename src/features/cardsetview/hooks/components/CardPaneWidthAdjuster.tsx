@@ -101,4 +101,3 @@ export const CardPaneWidthAdjuster = ({ modeLabel, value, min, max, defaultValue
       </button>
     </div>
   );
-};

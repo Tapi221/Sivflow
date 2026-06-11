@@ -8,7 +8,6 @@ import type { MathBlockData } from "@/types/domain/base";
 
 
 type CSSCustomProperties = React.CSSProperties & Record<`--${string}`, string>;
-
 interface MathEditorDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -21,11 +20,8 @@ interface MathEditorDialogProps {
 
 
 const EDITOR_LINE_HEIGHT = 24;
-
 const EDITOR_MIN_ROWS = 8;
-
 const EDITOR_MAX_HEIGHT = 420;
-
 const MAX_LATEX_LENGTH = 10000;
 
 

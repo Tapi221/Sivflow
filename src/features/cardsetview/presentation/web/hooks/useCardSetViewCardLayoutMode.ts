@@ -12,7 +12,6 @@ interface UseCardSetViewCardLayoutModeOptions {
   interactionMode: CardSetInteractionMode;
   defaultCardLayoutMode?: CardLayoutMode | null;
 }
-
 type CardLayoutModeOverrideState = {
   scopeKey: string;
   mode: CardLayoutMode;
@@ -74,4 +73,3 @@ export const useCardSetViewCardLayoutMode = ({ deviceScope, cardSetId, displayMo
     currentCardLayoutMode,
     setCurrentCardLayoutMode,
   };
-};

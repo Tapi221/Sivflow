@@ -1,7 +1,5 @@
 import type { SelectionCaptureRect } from "./selectionCapture.types";
 
-
-
 const toBlob = (canvas: HTMLCanvasElement): Promise<Blob> => {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -14,7 +12,6 @@ const toBlob = (canvas: HTMLCanvasElement): Promise<Blob> => {
     }, "image/png");
   });
 };
-
 const inlineComputedStyles = (source: Element, clone: Element): void => {
   if (source instanceof HTMLElement && clone instanceof HTMLElement) {
     const computedStyle = window.getComputedStyle(source);
@@ -37,7 +34,6 @@ const inlineComputedStyles = (source: Element, clone: Element): void => {
     }
   });
 };
-
 const cloneElementForCapture = (element: HTMLElement): HTMLElement => {
   const clone = element.cloneNode(true) as HTMLElement;
   inlineComputedStyles(element, clone);
@@ -46,7 +42,6 @@ const cloneElementForCapture = (element: HTMLElement): HTMLElement => {
   });
   return clone;
 };
-
 export const captureElementRectToBlob = async ( element: HTMLElement, rect: SelectionCaptureRect, ): Promise<Blob> => { const bounds = element.getBoundingClientRect();
   const clone = cloneElementForCapture(element);
   const wrapper = document.createElement("div");

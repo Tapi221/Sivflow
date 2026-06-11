@@ -6,7 +6,6 @@ import type { SnapshotAsset } from "@/types/domain/snapshot";
 type FirestoreTimestampLike = {
   toDate: () => Date;
 };
-
 type SnapshotAssetSource = {
   id: string;
   remoteKey?: string | null;
@@ -27,7 +26,6 @@ const isFirestoreTimestampLike = (value: unknown): value is FirestoreTimestampLi
     typeof (value as { toDate?: unknown }).toDate === "function"
   );
 };
-
 const toValidDate = (value: unknown): Date => {
   if (value instanceof Date && Number.isFinite(value.getTime())) {
     return value;
@@ -44,11 +42,9 @@ const toValidDate = (value: unknown): Date => {
 
   return new Date(0);
 };
-
 const toNullableFiniteNumber = (value: unknown): number | null => {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 };
-
 export const toSnapshotAsset = (row: SnapshotAssetSource): SnapshotAsset | null => { const assetId = typeof row.id === "string" ? row.id.trim() : "";
   const storagePath =
     typeof row.remoteKey === "string" ? row.remoteKey.trim() : "";
@@ -70,6 +66,5 @@ export const toSnapshotAsset = (row: SnapshotAssetSource): SnapshotAsset | null 
     updatedAt: toValidDate(row.updatedAt).toISOString(),
   };
 };
-
 export const toAssetRecordFromSnapshotAsset = ( asset: SnapshotAsset, userId: string, ): AssetRecord => { return { id: asset.assetId, userId, mime: asset.mime, size: 0, createdAt: toValidDate(asset.createdAt), updatedAt: toValidDate(asset.updatedAt), localBlobId: null, localStatus: "missing", remoteKey: asset.storagePath, remoteStatus: "ready", remoteUrlCache: null, width: toNullableFiniteNumber(asset.naturalW), height: toNullableFiniteNumber(asset.naturalH), retryCount: 0, };
 };

@@ -1,10 +1,7 @@
 type ConsoleMethodName = "debug" | "log" | "info" | "warn" | "error";
 type ConsoleMethod = (...data: unknown[]) => void;
 
-
-
 const JAPANESE_CONSOLE_LABELS_INSTALLED_KEY = "__sivflowJapaneseConsoleLabelsInstalled";
-
 const CONSOLE_MESSAGE_LABELS: Record<string, string> = {
   "[GoogleCalendarOAuth] reconnect diagnosis": "[GoogleCalendarOAuth] 再接続診断",
   "[GoogleCalendarOAuth] token endpoint failed": "[GoogleCalendarOAuth] トークンエンドポイントで失敗しました",
@@ -19,13 +16,9 @@ const CONSOLE_MESSAGE_LABELS: Record<string, string> = {
   "[GoogleCalendar] connect failed": "[GoogleCalendar] 接続に失敗しました",
 };
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
-
 const noop = () => undefined;
-
 const getLocalizedErrorMessage = (message: string): string => {
   const normalizedMessage = message.toLowerCase();
 
@@ -99,7 +92,6 @@ const getLocalizedErrorMessage = (message: string): string => {
 
   return message;
 };
-
 const translateErrorPayload = (error: Error): Record<string, unknown> => {
   const errorWithMetadata = error as Error & {
     code?: unknown;
@@ -123,7 +115,6 @@ const translateErrorPayload = (error: Error): Record<string, unknown> => {
 
   return translated;
 };
-
 const translateNestedPayload = (payload: unknown): unknown => {
   if (payload instanceof Error) return translateErrorPayload(payload);
 
@@ -133,7 +124,6 @@ const translateNestedPayload = (payload: unknown): unknown => {
     Object.entries(payload).map(([key, value]) => [key, translateNestedPayload(value)]),
   );
 };
-
 const translateGoogleCalendarConsolePayload = (
   message: string,
   payload: unknown,
@@ -191,7 +181,6 @@ const translateGoogleCalendarConsolePayload = (
       return translateNestedPayload(payload);
   }
 };
-
 const translateConsolePayload = (
   message: string,
   payload: unknown,
@@ -199,7 +188,6 @@ const translateConsolePayload = (
 ): unknown => index === 0
   ? translateGoogleCalendarConsolePayload(message, payload)
   : translateNestedPayload(payload);
-
 const translateConsoleArguments = (data: unknown[]): unknown[] => {
   const [message, ...rest] = data;
 
@@ -210,7 +198,6 @@ const translateConsoleArguments = (data: unknown[]): unknown[] => {
     ...rest.map((payload, index) => translateConsolePayload(message, payload, index)),
   ];
 };
-
 const wrapConsoleMethod = (method: ConsoleMethodName): void => {
   const original = console[method].bind(console) as ConsoleMethod;
 
@@ -218,7 +205,6 @@ const wrapConsoleMethod = (method: ConsoleMethodName): void => {
     original(...translateConsoleArguments(data));
   }) as Console[ConsoleMethodName];
 };
-
 const installJapaneseConsoleLabels = (): void => {
   const globalConsoleState = globalThis as typeof globalThis & {
     [JAPANESE_CONSOLE_LABELS_INSTALLED_KEY]?: boolean;
@@ -230,7 +216,6 @@ const installJapaneseConsoleLabels = (): void => {
   wrapConsoleMethod("warn");
   wrapConsoleMethod("error");
 };
-
 if (import.meta.env.PROD) {
   const originalDebug = console.debug.bind(console);
   const originalInfo = console.info.bind(console);

@@ -1,5 +1,4 @@
 type ImportSheetName = "blocks";
-
 type ImportColumnKey =
   | "cardId"
   | "side"
@@ -10,33 +9,26 @@ type ImportColumnKey =
   | "image"
   | "title"
   | "note";
-
 type ImportBlockType = "text" | "markdown" | "math" | "code" | "image";
-
 type ImportSide = "front" | "back";
-
 type ImportBlock = {
   type: ImportBlockType;
   order: number;
   content?: string;
   language?: string;
 };
-
 type ImportCard = {
   cardId: string;
   title?: string;
   frontBlocks: ImportBlock[];
   backBlocks: ImportBlock[];
 };
-
 type ImportPayload = {
   version: 1;
   source: "xlsx";
   cards: ImportCard[];
 };
-
 type ImportIssueLevel = "error" | "warning";
-
 type ImportIssueCode =
   | "missing_sheet"
   | "missing_required_header"
@@ -49,7 +41,6 @@ type ImportIssueCode =
   | "mixed_title_in_same_card"
   | "unsupported_image_cell"
   | "unexpected_value";
-
 type ImportIssue = {
   level: ImportIssueLevel;
   code: ImportIssueCode;
@@ -58,12 +49,10 @@ type ImportIssue = {
   columnKey?: ImportColumnKey;
   message: string;
 };
-
 type ImportParseResult = {
   payload: ImportPayload | null;
   issues: ImportIssue[];
 };
-
 type ParsedImportRow = {
   sheetName: ImportSheetName;
   rowNumber: number;
@@ -76,7 +65,6 @@ type ParsedImportRow = {
 
 
 const IMPORT_SHEET_NAME: ImportSheetName = "blocks";
-
 const IMPORT_BLOCK_TYPES: ImportBlockType[] = [
   "text",
   "markdown",
@@ -84,7 +72,6 @@ const IMPORT_BLOCK_TYPES: ImportBlockType[] = [
   "code",
   "image",
 ];
-
 const IMPORT_SIDES: ImportSide[] = ["front", "back"];
 
 
@@ -92,11 +79,9 @@ const IMPORT_SIDES: ImportSide[] = ["front", "back"];
 const isImportBlockType = (value: string): value is ImportBlockType => {
   return IMPORT_BLOCK_TYPES.includes(value as ImportBlockType);
 };
-
 const isImportSide = (value: string): value is ImportSide => {
   return IMPORT_SIDES.includes(value as ImportSide);
 };
-
 const formatImportCellLabel = (issue: ImportIssue) => {
   const locationParts = [issue.sheetName];
 
@@ -110,7 +95,6 @@ const formatImportCellLabel = (issue: ImportIssue) => {
 
   return locationParts.join(":");
 };
-
 const hasImportBlockingError = (result: ImportParseResult | null) => {
   if (!result) return true;
   return result.issues.some((issue) => issue.level === "error");
@@ -122,4 +106,4 @@ export { IMPORT_BLOCK_TYPES, IMPORT_SHEET_NAME, IMPORT_SIDES, formatImportCellLa
 
 
 
-export type { ImportBlock, ImportBlockType, ImportCard, ImportColumnKey, ImportIssue, ImportIssueCode, ImportIssueLevel, ImportParseResult, ImportPayload, ImportSheetName, ImportSide, ParsedImportRow };
+export type { ImportBlock, ImportBlockType, ImportCard, ImportColumnKey, ImportIssue, ImportIssueCode, ImportIssueLevel, ImportParseResult, ImportPayload, ImportSheetName, ImportSide, ParsedImport

@@ -11,7 +11,6 @@ export const MF_CARD_MIME_TYPE = "application/vnd.sivflow.card+json" as const;
 
 
 export type MfCardIssue = MfDeckIssue;
-
 export type MfCardFileV1 = { format: typeof MF_CARD_FORMAT;
   version: typeof MF_CARD_VERSION;
   exportedAt: string;
@@ -26,7 +25,6 @@ export type MfCardFileV1 = { format: typeof MF_CARD_FORMAT;
     reviewProgressIncluded: boolean;
   };
 };
-
 export type MfCardValidationResult = | { ok: true;
       value: MfCardFileV1;
       issues: MfCardIssue[];
@@ -46,12 +44,10 @@ export class MfCardValidationError extends Error { readonly issues: MfCardIssue[
     this.issues = issues;
   }
 }
-
 export class MfCardExportError extends Error { readonly issues: MfCardIssue[];
 
   constructor(message: string, issues: MfCardIssue[]) {
     super(message);
     this.name = "MfCardExportError";
     this.issues = issues;
-  }
-}
+  

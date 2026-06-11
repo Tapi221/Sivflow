@@ -21,11 +21,9 @@ const isNotePdf = (value: unknown): value is NotePdf => {
     typeof record.storagePath === "string"
   );
 };
-
 const normalizeNotePdfs = (raw: unknown): NotePdf[] => {
   return toArrayOr(raw, []).filter(isNotePdf);
 };
-
 export const normalizeFolder = (raw: unknown): Folder => { const record = asRecord(raw) ?? {};
   const id =
     toStringOr(pick(record.id, record.folderId, record.folder_id), "") ||
@@ -86,7 +84,6 @@ export const normalizeFolder = (raw: unknown): Folder => { const record = asReco
       normalizeDate(pick(record.updatedAt, record.updated_at)) ?? new Date(),
   };
 };
-
 export const normalizeFolderWithSilent = (raw: unknown) => { if (!raw) return raw;
   const record = asRecord(raw);
   if (!record) return normalizeFolder(raw);
@@ -98,4 +95,3 @@ export const normalizeFolderWithSilent = (raw: unknown) => { if (!raw) return ra
     !hasIsSilent && hasSilent ? { ...record, isSilent: record.silent } : raw;
 
   return normalizeFolder(normalizedInput);
-};

@@ -15,12 +15,10 @@ export const RIGHT_CLICK_PANEL_SURFACE_PADDING = 4;
 export const RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE = RIGHT_CLICK_PANEL_SURFACE_PADDING * 2;
 export const RIGHT_CLICK_PANEL_OPEN_EVENT = "open";
 export const RIGHT_CLICK_PANEL_NO_DRAG_STYLE: RightClickPanelNoDragStyle = { WebkitAppRegion: "no-drag" };
-
 const RIGHT_CLICK_PANEL_MIN_WIDTH = 112;
 const RIGHT_CLICK_PANEL_TEXT_HORIZONTAL_EDGE = 32;
 const RIGHT_CLICK_PANEL_FALLBACK_TEXT_WIDTH = 8;
 const RIGHT_CLICK_PANEL_FONT = "13px system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif";
-
 let rightClickPanelMeasureContext: CanvasRenderingContext2D | null | undefined;
 
 
@@ -35,7 +33,6 @@ const getRightClickPanelMeasureContext = (): CanvasRenderingContext2D | null => 
   rightClickPanelMeasureContext = document.createElement("canvas").getContext("2d");
   return rightClickPanelMeasureContext;
 };
-
 const measureRightClickPanelTextWidth = (text: string): number => {
   const context = getRightClickPanelMeasureContext();
   if (!context) return text.length * RIGHT_CLICK_PANEL_FALLBACK_TEXT_WIDTH;
@@ -43,17 +40,14 @@ const measureRightClickPanelTextWidth = (text: string): number => {
   context.font = RIGHT_CLICK_PANEL_FONT;
   return context.measureText(text).width;
 };
-
 export const resolveRightClickPanelTextWidth = (labels: readonly string[], minimumWidth = RIGHT_CLICK_PANEL_MIN_WIDTH): number => { const textWidth = labels.reduce((maxWidth, label) => Math.max(maxWidth, measureRightClickPanelTextWidth(label)), 0);
   return Math.ceil(Math.max(RIGHT_CLICK_PANEL_MIN_WIDTH, minimumWidth, textWidth + RIGHT_CLICK_PANEL_TEXT_HORIZONTAL_EDGE));
 };
-
 const clampRightClickPanelAxis = (value: number, size: number, viewportSize: number): number => {
   const min = RIGHT_CLICK_PANEL_MARGIN;
   const max = Math.max(min, viewportSize - size - RIGHT_CLICK_PANEL_MARGIN);
   return Math.min(Math.max(value, min), max);
 };
-
 export const clampRightClickPanelPosition = (x: number, y: number, dimensions: RightClickPanelDimensions): RightClickPanelPosition => { if (typeof window === "undefined") return { x, y };
 
   return {
@@ -61,7 +55,6 @@ export const clampRightClickPanelPosition = (x: number, y: number, dimensions: R
     y: clampRightClickPanelAxis(y, dimensions.height, window.innerHeight),
   };
 };
-
 export const useRightClickPanelDismiss = ( panelId: RightClickPanelId, isOpen: boolean, panelRef: RefObject<HTMLElement | null>, onDismiss: () => void, ): void => { useEffect(() => { if (!isOpen) return;
 
     const isPanelEvent = (event: Event): boolean => {

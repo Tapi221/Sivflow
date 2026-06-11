@@ -6,11 +6,8 @@ import { cn } from "@/lib/utils"
 
 
 const Dialog = DialogPrimitive.Root
-
 const DialogTrigger = DialogPrimitive.Trigger
-
 const DialogPortal = DialogPrimitive.Portal
-
 const DialogClose = DialogPrimitive.Close
 
 
@@ -28,7 +25,6 @@ const DialogOverlay = React.forwardRef<
     {...props}
   />
 ))
-
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
@@ -51,7 +47,6 @@ const DialogContent = React.forwardRef<
     </DialogPrimitive.Content>
   </DialogPortal>
 ))
-
 const DialogHeader = ({
   className,
   ...props
@@ -64,7 +59,6 @@ const DialogHeader = ({
     {...props}
   />
 )
-
 const DialogFooter = ({
   className,
   ...props
@@ -77,7 +71,6 @@ const DialogFooter = ({
     {...props}
   />
 )
-
 const DialogTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
@@ -91,7 +84,6 @@ const DialogTitle = React.forwardRef<
     {...props}
   />
 ))
-
 const DialogDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
@@ -106,17 +98,11 @@ const DialogDescription = React.forwardRef<
 
 
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
-
 DialogContent.displayName = DialogPrimitive.Content.displayName
-
 DialogHeader.displayName = "DialogHeader"
-
 DialogFooter.displayName = "DialogFooter"
-
 DialogTitle.displayName = DialogPrimitive.Title.displayName
-
 DialogDescription.displayName = DialogPrimitive.Description.displayName
-
 export {
   Dialog,
   DialogPortal,
@@ -127,5 +113,4 @@ export {
   DialogHeader,
   DialogFooter,
   DialogTitle,
-  DialogDescription,
-}
+  DialogDescripti

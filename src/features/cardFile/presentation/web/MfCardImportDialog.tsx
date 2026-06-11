@@ -17,7 +17,6 @@ export type MfCardImportCompletedPayload = { cardSetId: string;
   folderId: string;
   createdCount: number;
 };
-
 type MfCardImportDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -380,5 +379,4 @@ export const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, c
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-};
+  

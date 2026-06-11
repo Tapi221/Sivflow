@@ -14,15 +14,12 @@ const isDeletedCard = (card: CalendarCardLike) => {
     card.deleted_at,
   );
 };
-
 const isDraftCard = (card: CalendarCardLike) => {
   return Boolean(card.isDraft ?? card.is_draft);
 };
-
 const isSilentCard = (card: CalendarCardLike) => {
   return Boolean(card.isSilent ?? card.is_silent);
 };
-
 const buildFolderMap = (folders: CalendarFolderLike[]) => {
   const folderMap = new Map<string, CalendarFolderLike>();
 
@@ -35,7 +32,6 @@ const buildFolderMap = (folders: CalendarFolderLike[]) => {
 
   return folderMap;
 };
-
 export const buildCardsByDate = ({ cards, cardSets, folders, foldersLoading, autoCarryOver, }: { cards: CalendarCardLike[];
   cardSets: CalendarCardSetLike[];
   folders: CalendarFolderLike[];
@@ -91,7 +87,6 @@ export const buildCardsByDate = ({ cards, cardSets, folders, foldersLoading, aut
 
   return grouped;
 };
-
 export const buildTodaySummary = ( cardsByDate: CalendarCardsByDate, ): CalendarSummaryViewModel => { const todayKey = toDateKey(new Date());
   const todayDueCount = (cardsByDate[todayKey] ?? []).length;
 
@@ -101,10 +96,8 @@ export const buildTodaySummary = ( cardsByDate: CalendarCardsByDate, ): Calendar
     isTodaySelected: false,
   };
 };
-
 export const buildStreak = ( remoteLogs: CalendarStudyLogLike[], localLogs: CalendarStudyLogLike[], ) => { return getStreakFromLogs([...remoteLogs, ...localLogs]);
 };
-
 export const buildCalendarGridViewModel = ({ currentDate, selectedDate, cardsByDate, weekStartDay, }: { currentDate: Date;
   selectedDate: Date;
   cardsByDate: CalendarCardsByDate;
@@ -142,7 +135,6 @@ export const buildCalendarGridViewModel = ({ currentDate, selectedDate, cardsByD
     days,
   };
 };
-
 export const buildCalendarScreenViewModel = ({ currentDate, selectedDate, cardsByDate, weekStartDay, remoteLogs, localLogs, }: { currentDate: Date;
   selectedDate: Date;
   cardsByDate: CalendarCardsByDate;

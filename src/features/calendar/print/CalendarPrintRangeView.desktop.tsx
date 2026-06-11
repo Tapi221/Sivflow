@@ -12,7 +12,6 @@ type CalendarPrintRangeDay = {
   date: Date;
   key: string;
 };
-
 type CalendarPrintRangeViewProps = {
   titleLabel: string;
   rangeLabel: string;
@@ -20,11 +19,9 @@ type CalendarPrintRangeViewProps = {
   range: CalendarDateRange;
   events: GoogleCalendarEvent[];
 };
-
 type CalendarPrintRangeGridStyle = CSSProperties & {
   "--calendar-print-range-column-count": number;
 };
-
 type CalendarPrintDocumentPortalProps = {
   children: ReactNode;
 };
@@ -39,7 +36,6 @@ const CALENDAR_PRINT_RANGE_EMPTY_EVENTS: GoogleCalendarEvent[] = [];
 
 
 const createPrintDateKey = (date: Date): string => format(date, "yyyy-MM-dd");
-
 const createPrintRangeDays = (range: CalendarDateRange): CalendarPrintRangeDay[] => {
   const start = startOfDay(range.start);
   const dayCount = Math.max(1, differenceInCalendarDays(startOfDay(range.end), start) + 1);
@@ -53,18 +49,15 @@ const createPrintRangeDays = (range: CalendarDateRange): CalendarPrintRangeDay[]
     };
   });
 };
-
 const createPrintGridStyle = (days: CalendarPrintRangeDay[]): CalendarPrintRangeGridStyle => ({
   "--calendar-print-range-column-count": Math.min(CALENDAR_PRINT_RANGE_MAX_COLUMNS, Math.max(1, days.length)),
 });
-
 const eventOverlapsDay = (event: GoogleCalendarEvent, date: Date): boolean => {
   const dayStart = startOfDay(date);
   const nextDayStart = addDays(dayStart, 1);
 
   return event.startsAt < nextDayStart && event.endsAt > dayStart;
 };
-
 const getEventsForDay = (events: GoogleCalendarEvent[], date: Date): GoogleCalendarEvent[] => {
   return events.filter((event) => eventOverlapsDay(event, date));
 };
@@ -81,7 +74,6 @@ const CalendarPrintDocumentPortal = ({ children }: CalendarPrintDocumentPortalPr
     document.body,
   );
 };
-
 const CalendarPrintRangeView = ({ titleLabel, rangeLabel, focusDate, range, events }: CalendarPrintRangeViewProps) => {
   const days = createPrintRangeDays(range);
   const gridStyle = createPrintGridStyle(days);
@@ -122,4 +114,4 @@ const CalendarPrintRangeView = ({ titleLabel, rangeLabel, focusDate, range, even
 
 
 
-export { CalendarPrintRangeView };
+export { CalendarPrintRang

@@ -1,25 +1,19 @@
 import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 import { DEFAULT_SPLIT_FALLBACK_CARD_LAYOUT_MODE, normalizeSplitFallbackCardLayoutMode, type SplitFallbackCardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 
-
-
 interface SplitFallbackPreferencesStore {
   version: 1;
   byDeviceScope: Record<string, SplitFallbackCardLayoutMode>;
 }
 
-
-
 const emptyStore = (): SplitFallbackPreferencesStore => ({
   version: 1,
   byDeviceScope: {},
 });
-
 const normalizeDeviceScope = (value: string | null | undefined) => {
   const trimmed = typeof value === "string" ? value.trim() : "";
   return trimmed.length > 0 ? trimmed : "unknown";
 };
-
 const parseStore = (raw: string | null) => {
   if (!raw) {
     return null;
@@ -43,7 +37,6 @@ const parseStore = (raw: string | null) => {
 
   return null;
 };
-
 const readStore = () => {
   if (typeof window === "undefined") {
     return emptyStore();
@@ -61,7 +54,6 @@ const readStore = () => {
     return emptyStore();
   }
 };
-
 const writeStore = (store: SplitFallbackPreferencesStore) => {
   if (typeof window === "undefined") {
     return;
@@ -76,12 +68,10 @@ const writeStore = (store: SplitFallbackPreferencesStore) => {
     // ignore local persistence failures
   }
 };
-
 export const resolveSplitFallbackLayoutModePreference = ( deviceScope: string, fallbackMode: SplitFallbackCardLayoutMode = DEFAULT_SPLIT_FALLBACK_CARD_LAYOUT_MODE, ) => { const store = readStore();
   const stored = store.byDeviceScope[normalizeDeviceScope(deviceScope)];
   return stored ? normalizeSplitFallbackCardLayoutMode(stored) : fallbackMode;
 };
-
 export const setSplitFallbackLayoutModePreference = ( deviceScope: string, mode: SplitFallbackCardLayoutMode, ) => { const store = readStore();
   store.byDeviceScope[normalizeDeviceScope(deviceScope)] =
     normalizeSplitFallbackCardLayoutMode(mode);

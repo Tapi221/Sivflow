@@ -1,10 +1,8 @@
 export type NotificationLevel = "info" | "warning" | "error";
-
 export type NotificationAction = { label: string;
   onClick: () => void;
   primary?: boolean;
 };
-
 export interface Notification { id: string;
   level: NotificationLevel;
   title: string;
@@ -16,7 +14,6 @@ export interface Notification { id: string;
   duration?: number;
   actions?: NotificationAction[];
 }
-
 export interface NotificationOptions { details?: string;
   autoClose?: boolean;
   closeable?: boolean;

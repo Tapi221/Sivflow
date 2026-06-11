@@ -1,8 +1,6 @@
 import { normalizeDate } from "@/shared/codec/date";
 import type { DocumentItem, Folder } from "@/types";
 
-
-
 export type PdfDashboardRow = { id: string;
   title: string;
   fileName: string;
@@ -18,27 +16,21 @@ export type PdfDashboardRow = { id: string;
   tags: string[];
   orderIndex: number;
 };
-
 type ViewerStateWithLastOpenedAt = NonNullable<DocumentItem["viewerState"]> & {
   lastOpenedAt?: unknown;
 };
-
 type BuildPdfDashboardRowsParams = {
   documents: DocumentItem[];
   folders: Folder[];
   tagById: ReadonlyMap<string, { name: string }>;
 };
 
-
-
 const toDate = (value: unknown): Date | null => {
   return normalizeDate(value);
 };
-
 const resolveFolderName = (folder: Folder | undefined): string => {
   return folder?.folderName?.trim() || "未分類";
 };
-
 const resolveCurrentPage = (document: DocumentItem): number | null => {
   const currentPage = document.viewerState?.currentPage;
 
@@ -52,7 +44,6 @@ const resolveCurrentPage = (document: DocumentItem): number | null => {
 
   return Math.floor(currentPage);
 };
-
 const resolveProgressPercent = (document: DocumentItem): number | null => {
   const currentPage = resolveCurrentPage(document);
   const pageCount = document.pageCount ?? null;
@@ -66,7 +57,6 @@ const resolveProgressPercent = (document: DocumentItem): number | null => {
     Math.min(100, Math.round((currentPage / pageCount) * 100)),
   );
 };
-
 const buildFolderPath = (
   folderId: string,
   folderById: Map<string, Folder>,
@@ -89,7 +79,6 @@ const buildFolderPath = (
 
   return path;
 };
-
 const resolveCategoryLabel = (
   folderId: string,
   folderById: Map<string, Folder>,
@@ -97,7 +86,6 @@ const resolveCategoryLabel = (
   const path = buildFolderPath(folderId, folderById);
   return path[0] ?? "未分類";
 };
-
 const resolveDisplayTags = (
   document: DocumentItem,
   tagById: ReadonlyMap<string, { name: string }>,
@@ -111,7 +99,6 @@ const resolveDisplayTags = (
 
   return Array.from(new Set(explicitTags)).slice(0, 3);
 };
-
 export const buildPdfDashboardRows = ({ documents, folders, tagById, }: BuildPdfDashboardRowsParams): PdfDashboardRow[] => { const folderById = new Map(folders.map((folder) => [folder.id, folder]));
 
   return documents

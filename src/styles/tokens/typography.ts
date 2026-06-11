@@ -1,16 +1,11 @@
 import { designTokens } from "@/presentation/design-tokens";
 
-
-
 export const UI_TYPO = "font-sans";
 export const CONTENT_TYPO = "font-serif";
 export const NUMERIC_TYPO = "tabular-nums";
-
 export const TYPOGRAPHY_FONT_SIZE_PX = designTokens.typography.fontSize;
 export const TYPOGRAPHY_LINE_HEIGHT = designTokens.typography.lineHeight;
-
 export const TYPOGRAPHY_TEXT_SIZE_CLASS = { xs: "text-[var(--ds-typography-font-size-xs)]", sm: "text-[var(--ds-typography-font-size-sm)]", smPlus: "text-[var(--ds-typography-font-size-sm-plus)]", md: "text-[var(--ds-typography-font-size-md)]", mdPlus: "text-[var(--ds-typography-font-size-md-plus)]", lg: "text-[var(--ds-typography-font-size-lg)]", "2xl": "text-[var(--ds-typography-font-size-2xl)]", } as const;
-
 export const TYPOGRAPHY_LINE_HEIGHT_CLASS = { tight: "leading-[var(--ds-typography-line-height-tight)]", body: "leading-[var(--ds-typography-line-height-body)]", comfortable: "leading-[var(--ds-typography-line-height-comfortable)]", } as const;
 
 // Product chrome typography is anchored to the completed calendar month view.

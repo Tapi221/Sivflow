@@ -25,8 +25,6 @@ import { MobileCalendarSidebar, MobileCalendarSidebarOpenButton } from "./Mobile
 import { ScheduleScreen as CalendarScheduleScreen } from "./ScheduleScreen.desktop";
 import { WorkspaceActionToolbar } from "./WorkspaceActionToolbar";
 
-
-
 type ExplorerWorkspaceContentProps = {
   explorerState: ExplorerRouteState;
   explorerTabId: WorkspaceExplorerTab["id"] | null;
@@ -34,34 +32,27 @@ type ExplorerWorkspaceContentProps = {
   onOpenSettings: () => void;
   onToggleLeftPanel: () => void;
 };
-
 type NoteWorkspaceContentProps = {
   noteTab: WorkspaceNoteTab;
   isLeftPanelCollapsed: boolean;
   onOpenSettings: () => void;
   onToggleLeftPanel: () => void;
 };
-
 type SidebarInteractionRegionStyle = CSSProperties & {
   WebkitAppRegion?: "no-drag";
 };
-
 type SidebarInteractionRegionProps = {
   children: ReactNode;
 };
-
 type CollapsedSidebarToggleProps = {
   isVisible: boolean;
   onToggleLeftPanel: () => void;
 };
-
 type SettingsDialogHostProps = {
   children: ReactNode;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
-
-
 
 const MOBILE_WORKSPACE_MEDIA_QUERY = "(max-width: 767px)";
 const MOBILE_WORKSPACE_SIDEBAR_OPEN_BUTTON_CLASS_NAME = "pointer-events-auto absolute left-3 top-3 z-[90] flex h-10 w-10 items-center justify-center bg-transparent p-0 text-[#111111] outline-none transition hover:text-[#111111] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]";
@@ -76,12 +67,8 @@ const WORKSPACE_DOCUMENT_BREADCRUMBS_CLASS_NAME = "max-w-[calc(100%-96px)]";
 const WORKSPACE_MAIN_PANEL_CLASS_NAME = "relative z-0 isolate min-w-0";
 const SIDEBAR_INTERACTION_REGION_STYLE: SidebarInteractionRegionStyle = { WebkitAppRegion: "no-drag" };
 
-
-
 const getDocumentBreadcrumbLabel = (document: DocumentItem): string => document.title.trim() || document.fileName.trim() || "PDF";
-
 const getNoteBreadcrumbLabel = (note: Note): string => note.title.trim() || "ノート";
-
 const buildWorkspaceBreadcrumbCrumbs = (context: ExplorerBreadcrumbContext, folders: Folder[], selectedDocument: DocumentItem | null): BreadcrumbCrumb[] => {
   const folderById = new Map(folders.map((folder) => [folder.id, folder]));
   const crumbs = buildFolderPathCrumbs({ folderId: context.folderId, folderById });
@@ -96,7 +83,6 @@ const buildWorkspaceBreadcrumbCrumbs = (context: ExplorerBreadcrumbContext, fold
 
   return crumbs;
 };
-
 const buildNoteBreadcrumbCrumbs = (folders: Folder[], note: Note | null): BreadcrumbCrumb[] => {
   const folderById = new Map(folders.map((folder) => [folder.id, folder]));
   const crumbs = buildFolderPathCrumbs({ folderId: note?.folderId ?? null, folderById });
@@ -107,19 +93,12 @@ const buildNoteBreadcrumbCrumbs = (folders: Folder[], note: Note | null): Breadc
 
   return crumbs;
 };
-
 const createFolderRouteState = (folderId: string | null): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: folderId, selectedItem: null });
-
 const createItemRouteState = (current: ExplorerRouteState, item: SelectedExplorerItem): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: current.selectedFolderId, selectedItem: item });
-
 const getSelectedCardId = (item: SelectedExplorerItem): string | null => item?.type === "card" ? item.id : null;
-
 const getSelectedDocumentId = (item: SelectedExplorerItem): string | null => item?.type === "document" ? item.id : null;
-
 const createDocumentRouteState = (tab: Extract<WorkspaceTab, { kind: "document" }>): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: tab.folderId, selectedItem: { type: "document", id: tab.documentId } });
-
 const createCardRouteState = (tab: Extract<WorkspaceTab, { kind: "card" }>): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: tab.folderId, selectedItem: { type: "card", id: tab.cardId } });
-
 const getLibraryExplorerState = (tab: WorkspaceTab | null): ExplorerRouteState | null => {
   if (!tab || tab.sectionKey !== "library") return null;
   if (tab.kind === "note") return null;
@@ -128,22 +107,17 @@ const getLibraryExplorerState = (tab: WorkspaceTab | null): ExplorerRouteState |
   if (tab.kind === "card") return createCardRouteState(tab);
   return createFolderRouteState(null);
 };
-
 const getExplorerTabId = (tab: WorkspaceTab | null): WorkspaceExplorerTab["id"] | null => {
   return tab?.kind === "explorer" ? tab.id : null;
 };
-
 const getNoteTab = (tab: WorkspaceTab | null): WorkspaceNoteTab | null => {
   return tab?.kind === "note" ? tab : null;
 };
-
 const readIsMobileWorkspaceViewport = (): boolean => {
   if (typeof window === "undefined") return false;
   return window.matchMedia(MOBILE_WORKSPACE_MEDIA_QUERY).matches;
 };
-
 const joinClassNames = (...classNames: Array<string | false | null | undefined>): string => classNames.filter(Boolean).join(" ");
-
 const useIsMobileWorkspaceViewport = (): boolean => {
   const [isMobileWorkspaceViewport, setIsMobileWorkspaceViewport] = useState(readIsMobileWorkspaceViewport);
 
@@ -164,8 +138,6 @@ const useIsMobileWorkspaceViewport = (): boolean => {
   return isMobileWorkspaceViewport;
 };
 
-
-
 const SidebarInteractionRegion = ({ children }: SidebarInteractionRegionProps) => {
   return (
     <div className="pointer-events-auto relative z-[80] flex h-full min-h-0 shrink-0" style={SIDEBAR_INTERACTION_REGION_STYLE}>
@@ -173,7 +145,6 @@ const SidebarInteractionRegion = ({ children }: SidebarInteractionRegionProps) =
     </div>
   );
 };
-
 const CollapsedSidebarToggle = ({ isVisible, onToggleLeftPanel }: CollapsedSidebarToggleProps) => {
   if (!isVisible) return null;
 
@@ -183,7 +154,6 @@ const CollapsedSidebarToggle = ({ isVisible, onToggleLeftPanel }: CollapsedSideb
     </button>
   );
 };
-
 const SettingsDialogHost = ({ children, open, onOpenChange }: SettingsDialogHostProps) => {
   return (
     <>
@@ -192,7 +162,6 @@ const SettingsDialogHost = ({ children, open, onOpenChange }: SettingsDialogHost
     </>
   );
 };
-
 const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCollapsed, onOpenSettings, onToggleLeftPanel }: ExplorerWorkspaceContentProps) => {
   const { folders, loading, error } = useFoldersRead();
   const isMobileWorkspace = useIsMobileWorkspaceViewport();
@@ -292,7 +261,6 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
     </div>
   );
 };
-
 const NoteWorkspaceContent = ({ noteTab, isLeftPanelCollapsed, onOpenSettings, onToggleLeftPanel }: NoteWorkspaceContentProps) => {
   const { folders, loading: foldersLoading, error: foldersError } = useFoldersRead();
   const { notes, loading: notesLoading, updateNote } = useNotes();
@@ -361,7 +329,6 @@ const NoteWorkspaceContent = ({ noteTab, isLeftPanelCollapsed, onOpenSettings, o
     </div>
   );
 };
-
 const WorkspaceScreen = () => {
   const { isLeftPanelCollapsed = false, onToggleLeftPanel } = useOutletContext<AppLayoutOutletContext>();
   const navigate = useNavigate();
@@ -396,7 +363,5 @@ const WorkspaceScreen = () => {
     </SettingsDialogHost>
   );
 };
-
-
 
 export { WorkspaceScreen };

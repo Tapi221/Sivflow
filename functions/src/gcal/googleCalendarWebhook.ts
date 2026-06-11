@@ -1,13 +1,10 @@
 import { onRequest } from "firebase-functions/v2/https";
 import { getDb, serverTimestamp } from "#src/firebaseAdmin.js";
 
-
-
 type GoogleCalendarWebhookToken = {
   userId: string;
   calendarId: string;
 };
-
 type StoredGoogleCalendarWatchChannel = {
   channelId?: unknown;
   resourceId?: unknown;
@@ -15,12 +12,8 @@ type StoredGoogleCalendarWatchChannel = {
   userId?: unknown;
 };
 
-
-
 const REGION = "asia-northeast1";
 const INITIAL_SYNC_RESOURCE_STATE = "sync";
-
-
 
 const getHeader = (
   request: { get: (name: string) => string | undefined },
@@ -29,7 +22,6 @@ const getHeader = (
   const value = request.get(name);
   return value?.trim() || null;
 };
-
 const parseWebhookToken = (token: string | null): GoogleCalendarWebhookToken | null => {
   if (!token) return null;
 
@@ -43,7 +35,6 @@ const parseWebhookToken = (token: string | null): GoogleCalendarWebhookToken | n
 
   return { userId, calendarId };
 };
-
 const isMatchingWatchChannel = (
   data: StoredGoogleCalendarWatchChannel | undefined,
   expected: {
@@ -60,8 +51,6 @@ const isMatchingWatchChannel = (
     data.calendarId === expected.calendarId
   );
 };
-
-
 
 export const googleCalendarWebhook = onRequest( { region: REGION, }, async (request, response) => { if (request.method !== "POST") { response.status(405).send("Method Not Allowed");
       return;

@@ -17,18 +17,15 @@ const isRowPositionableType = (type: CardBlock["type"]) =>
   type === "pdf" ||
   type === "math" ||
   type === "markdown";
-
 const getNormalizedRowOffset = (block: CardBlock): number => {
   const n = Number(block.rowOffset ?? 0);
   if (!Number.isFinite(n)) return 0;
   return Math.max(ROW_OFFSET_MIN, Math.min(ROW_OFFSET_MAX, Math.round(n)));
 };
-
 const getRowOffsetPx = (block: CardBlock): number => {
   if (!isRowPositionableType(block.type)) return 0;
   return getNormalizedRowOffset(block) * CARD_ROW_PX;
 };
-
 const getRowOffsetStyle = (
   block: CardBlock,
 ): CSSProperties | undefined => {

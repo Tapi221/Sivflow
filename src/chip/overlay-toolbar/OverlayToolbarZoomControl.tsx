@@ -21,12 +21,10 @@ type OverlayToolbarZoomControlBaseProps = {
   thumbClassName?: string;
   formatValue?: (value: number) => string;
 };
-
 type OverlayToolbarZoomControlWithoutStepButtonsProps =
   OverlayToolbarZoomControlBaseProps & {
     showStepButtons?: false;
   };
-
 type OverlayToolbarZoomControlWithStepButtonsProps =
   OverlayToolbarZoomControlBaseProps & {
     showStepButtons: true;
@@ -35,7 +33,6 @@ type OverlayToolbarZoomControlWithStepButtonsProps =
     decreaseLabel: string;
     increaseLabel: string;
   };
-
 export type OverlayToolbarZoomControlProps = | OverlayToolbarZoomControlWithoutStepButtonsProps | OverlayToolbarZoomControlWithStepButtonsProps;
 
 

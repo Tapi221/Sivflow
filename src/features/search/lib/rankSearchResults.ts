@@ -1,33 +1,26 @@
 import type { SearchItem } from "@/features/search/model/search.types";
 import { toMillis } from "@/utils/toMillis";
 
-
-
 type RankSearchResultsParams = {
   items: SearchItem[];
   query: string;
   limit?: number;
 };
-
 type RankedSearchItem = {
   item: SearchItem;
   score: number;
   timestampMillis: number;
 };
 
-
-
 const normalizeText = (value: string) => {
   return value.normalize("NFKC").trim().toLocaleLowerCase("ja-JP");
 };
-
 const splitQueryTokens = (value: string) => {
   return normalizeText(value)
     .split(/\s+/)
     .map((token) => token.trim())
     .filter(Boolean);
 };
-
 const buildSearchHaystack = (item: SearchItem) => {
   return normalizeText(
     [item.title, item.subtitle ?? "", ...item.keywords]
@@ -35,11 +28,9 @@ const buildSearchHaystack = (item: SearchItem) => {
       .join(" "),
   );
 };
-
 const buildKeywordSet = (item: SearchItem) => {
   return item.keywords.map((keyword) => normalizeText(keyword)).filter(Boolean);
 };
-
 const scoreRecentness = (timestampMillis: number) => {
   if (timestampMillis <= 0) {
     return 0;
@@ -66,7 +57,6 @@ const scoreRecentness = (timestampMillis: number) => {
 
   return 0;
 };
-
 const compareRankedItems = (
   left: RankedSearchItem,
   right: RankedSearchItem,
@@ -85,7 +75,6 @@ const compareRankedItems = (
 
   return left.item.title.localeCompare(right.item.title, "ja-JP");
 };
-
 const rankItemForQuery = (
   item: SearchItem,
   normalizedQuery: string,
@@ -175,7 +164,6 @@ const rankItemForQuery = (
     timestampMillis,
   };
 };
-
 export const rankSearchResults = ({ items, query, limit = 24, }: RankSearchResultsParams) => { const normalizedQuery = normalizeText(query);
   const tokens = splitQueryTokens(query);
 

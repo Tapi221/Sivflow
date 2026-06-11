@@ -3,27 +3,18 @@ import { forwardRef } from "react";
 import * as stratisIcons from "stratis-ui-icons";
 import { UiIcon } from "./UiIcon";
 
-
-
 export type IconProps = SVGProps<SVGSVGElement> & { size?: number;
   label?: string;
   title?: string;
 };
-
 type StratisIconComponent = ForwardRefExoticComponent<SVGProps<SVGSVGElement> & RefAttributes<SVGSVGElement>>;
-
 type StratisDataIcon = {
   data: string;
 };
-
 type StratisIconExport = StratisDataIcon | StratisIconComponent;
-
 type GlyphKind = "alert-circle" | "alert-triangle" | "arrow-left" | "arrow-right" | "arrow-up-down" | "calendar" | "check" | "chevron-down" | "chevron-left" | "chevron-right" | "chevron-up" | "circle" | "clock" | "code" | "copy" | "download" | "edit" | "external-link" | "file-edit" | "filter" | "globe" | "help" | "image" | "info" | "keyboard" | "link" | "logout" | "minus" | "pin" | "plus" | "refresh" | "search" | "settings" | "shield" | "star" | "tag" | "trash" | "type" | "user" | "volume" | "wrench" | "x" | "default";
 
-
-
 const stratisIconRegistry = stratisIcons as unknown as Record<string, StratisIconExport | undefined>;
-
 const svgTextEscapes: Record<string, string> = {
   "&": "&amp;",
   "<": "&lt;",
@@ -31,7 +22,6 @@ const svgTextEscapes: Record<string, string> = {
   '"': "&quot;",
   "'": "&apos;",
 };
-
 const glyphPaths: Record<GlyphKind, string[]> = {
   "alert-circle": ["M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z", "M12 8v5", "M12 16h.01"],
   "alert-triangle": ["M10.3 4.2 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0Z", "M12 9v4", "M12 17h.01"],
@@ -77,7 +67,6 @@ const glyphPaths: Record<GlyphKind, string[]> = {
   x: ["m6 6 12 12", "m18 6-12 12"],
   default: ["M6 6h12v12H6z"],
 };
-
 const glyphByIconName: Record<string, GlyphKind> = {
   AlertCircle: "alert-circle",
   AlertTriangle: "alert-triangle",
@@ -129,20 +118,12 @@ const glyphByIconName: Record<string, GlyphKind> = {
   XCircle: "x",
 };
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
-
 const isStratisDataIcon = (value: unknown): value is StratisDataIcon => isRecord(value) && typeof value.data === "string";
-
 const isStratisIconComponent = (value: unknown): value is StratisIconComponent => typeof value === "function" || (isRecord(value) && "$$typeof" in value);
-
 const escapeSvgText = (value: string): string => value.replace(/[&<>"']/g, (char) => svgTextEscapes[char] ?? char);
-
 const getStratisSvgViewBox = (source: string): string => source.match(/\sviewBox="([^"]+)"/)?.[1] ?? "0 0 24 24";
-
 const normalizeStratisSvgBody = (source: string): string => source.replace(/^[\s\S]*?<svg\b[^>]*>/, "").replace(/<\/svg>[\s\S]*$/, "").replace(/\s(width|height)="[^"]*"/g, "").replace(/\sstroke="(?!none|currentColor)[^"]*"/g, " stroke=\"currentColor\"").replace(/\sfill="(?!none|currentColor|url\()[^"]*"/g, " fill=\"currentColor\"");
-
 const wrapStratisIcon = (BaseIcon: StratisIconComponent, name: string) => {
   const Icon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, strokeWidth, ...rest }, ref) => {
     const resolvedLabel = label ?? rest["aria-label"];
@@ -155,7 +136,6 @@ const wrapStratisIcon = (BaseIcon: StratisIconComponent, name: string) => {
   Icon.displayName = name;
   return Icon;
 };
-
 const wrapStratisDataIcon = (source: StratisDataIcon, name: string) => {
   const viewBox = getStratisSvgViewBox(source.data);
   const body = normalizeStratisSvgBody(source.data);
@@ -172,7 +152,6 @@ const wrapStratisDataIcon = (source: StratisDataIcon, name: string) => {
   Icon.displayName = name;
   return Icon;
 };
-
 const makeIcon = (name: string) => {
   const glyph = glyphByIconName[name] ?? "default";
 
@@ -192,7 +171,6 @@ const makeIcon = (name: string) => {
   Icon.displayName = name;
   return Icon;
 };
-
 const makeStratisIcon = (exportName: string, name: string) => {
   const candidate = stratisIconRegistry[exportName];
 
@@ -200,8 +178,6 @@ const makeStratisIcon = (exportName: string, name: string) => {
   if (isStratisIconComponent(candidate)) return wrapStratisIcon(candidate, name);
   return makeIcon(name);
 };
-
-
 
 const MoreVerticalIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, ...rest }, ref) => {
   const resolvedLabel = label ?? rest["aria-label"];
@@ -217,7 +193,6 @@ const MoreVerticalIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, clas
     </svg>
   );
 });
-
 const ExplorerChevronDownIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
   return (
     <UiIcon ref={ref} size={size} {...props}>
@@ -225,7 +200,6 @@ const ExplorerChevronDownIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 1
     </UiIcon>
   );
 });
-
 const ExplorerChevronRightIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
   return (
     <UiIcon ref={ref} size={size} {...props}>
@@ -233,7 +207,6 @@ const ExplorerChevronRightIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 
     </UiIcon>
   );
 });
-
 const ExplorerFileTextIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
   return (
     <UiIcon ref={ref} size={size} {...props}>
@@ -244,7 +217,6 @@ const ExplorerFileTextIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, 
     </UiIcon>
   );
 });
-
 const ExplorerFolderOpenIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
   return (
     <UiIcon ref={ref} size={size} {...props}>
@@ -253,7 +225,6 @@ const ExplorerFolderOpenIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16
     </UiIcon>
   );
 });
-
 const ExplorerFolderOutlineIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
   return (
     <UiIcon ref={ref} size={size} {...props}>
@@ -262,16 +233,12 @@ const ExplorerFolderOutlineIcon = forwardRef<SVGSVGElement, IconProps>(({ size =
   );
 });
 
-
-
 MoreVerticalIcon.displayName = "MoreVerticalIcon";
 ExplorerChevronDownIcon.displayName = "ExplorerChevronDownIcon";
 ExplorerChevronRightIcon.displayName = "ExplorerChevronRightIcon";
 ExplorerFileTextIcon.displayName = "ExplorerFileTextIcon";
 ExplorerFolderOpenIcon.displayName = "ExplorerFolderOpenIcon";
 ExplorerFolderOutlineIcon.displayName = "ExplorerFolderOutlineIcon";
-
-
 
 export const AlertCircle = makeStratisIcon("suIconAlertCircle", "AlertCircle");
 export const AlertTriangle = makeStratisIcon("suIconAlertTriangle", "AlertTriangle");

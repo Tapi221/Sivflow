@@ -18,37 +18,31 @@ type LocalImageRecordLike = {
 
 
 const IMAGE_UPLOAD_SAVE_TIMEOUT_MS = 30_000;
-
 const IMAGE_UPLOAD_SAVE_POLL_MS = 300;
 
 
 
 const sleep = (ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms));
-
 const asTrimmedString = (value: unknown): string | null => {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
 };
-
 const getImageAssetKey = (image: UploadedImage): string | null => {
   return asTrimmedString(image.assetId) ?? asTrimmedString(image.id);
 };
-
 const getRecordRemoteUrl = (record: LocalImageRecordLike | null): string | null => {
   return (
     asTrimmedString(record?.remoteUrlCache) ??
     asTrimmedString(record?.remoteUrl)
   );
 };
-
 const getRecordStoragePath = (
   record: LocalImageRecordLike | null,
 ): string | null => {
   return asTrimmedString(record?.remoteKey) ?? asTrimmedString(record?.storagePath);
 };
-
 const isRecordReady = (record: LocalImageRecordLike | null): boolean => {
   if (!record) return false;
   return (
@@ -57,19 +51,16 @@ const isRecordReady = (record: LocalImageRecordLike | null): boolean => {
     getRecordRemoteUrl(record) !== null
   );
 };
-
 const isRecordFailed = (record: LocalImageRecordLike | null): boolean => {
   if (!record) return false;
   return record.remoteStatus === "failed" || record.status === "failed";
 };
-
 const hasRemotePersistence = (image: UploadedImage): boolean => {
   return (
     asTrimmedString(image.remoteUrl) !== null ||
     asTrimmedString(image.storagePath) !== null
   );
 };
-
 const shouldWaitForImage = (image: UploadedImage): boolean => {
   if (image.status === "failed") {
     throw new Error(
@@ -83,17 +74,14 @@ const shouldWaitForImage = (image: UploadedImage): boolean => {
 
   return !hasRemotePersistence(image);
 };
-
 const collectBlockImages = (blocks: CardBlock[]): UploadedImage[] => {
   return blocks.flatMap((block) => block.images ?? []);
 };
-
 const collectAttachmentImages = (
   attachments: CardFaceAttachments | null | undefined,
 ): UploadedImage[] => {
   return attachments?.images ?? [];
 };
-
 const collectDraftImages = (draft: EditorDraft): UploadedImage[] => {
   return [
     ...collectBlockImages(draft.frontBlocks),
@@ -102,7 +90,6 @@ const collectDraftImages = (draft: EditorDraft): UploadedImage[] => {
     ...collectAttachmentImages(draft.backAttachments),
   ];
 };
-
 const uniqueImagesByAssetKey = (images: UploadedImage[]): UploadedImage[] => {
   const seen = new Set<string>();
   const unique: UploadedImage[] = [];
@@ -116,7 +103,6 @@ const uniqueImagesByAssetKey = (images: UploadedImage[]): UploadedImage[] => {
 
   return unique;
 };
-
 const mergeReadyImage = (
   image: UploadedImage,
   record: LocalImageRecordLike | null,
@@ -134,7 +120,6 @@ const mergeReadyImage = (
     updatedAt: new Date(),
   };
 };
-
 const replaceImages = (
   images: UploadedImage[] | undefined,
   readyImagesByKey: Map<string, UploadedImage>,
@@ -147,7 +132,6 @@ const replaceImages = (
     return readyImagesByKey.get(assetKey) ?? image;
   });
 };
-
 const replaceBlockImages = (
   blocks: CardBlock[],
   readyImagesByKey: Map<string, UploadedImage>,
@@ -160,7 +144,6 @@ const replaceBlockImages = (
     };
   });
 };
-
 const replaceAttachmentImages = (
   attachments: CardFaceAttachments,
   readyImagesByKey: Map<string, UploadedImage>,
@@ -170,7 +153,6 @@ const replaceAttachmentImages = (
     images: replaceImages(attachments.images, readyImagesByKey) ?? [],
   };
 };
-
 const applyReadyImagesToDraft = (
   draft: EditorDraft,
   readyImagesByKey: Map<string, UploadedImage>,
@@ -188,7 +170,6 @@ const applyReadyImagesToDraft = (
     backAttachments: replaceAttachmentImages(draft.backAttachments, readyImagesByKey),
   };
 };
-
 const processAssetQueueBestEffort = async (): Promise<void> => {
   try {
     await persistentQueue.processAssetQueue();
@@ -196,7 +177,6 @@ const processAssetQueueBestEffort = async (): Promise<void> => {
     console.warn("[CardSave] Failed to process image upload queue", error);
   }
 };
-
 export const waitForDraftImageUploads = async ( draft: EditorDraft, ): Promise<EditorDraft> => { const images = uniqueImagesByAssetKey(collectDraftImages(draft));
   const pendingImages = images.filter(shouldWaitForImage);
 

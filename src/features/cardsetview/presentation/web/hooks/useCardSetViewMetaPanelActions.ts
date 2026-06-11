@@ -7,7 +7,6 @@ import type { Card, ReviewLog, UserSettings } from "@/types";
 
 
 type EditingDraftPatch = CardSetViewEditingDraftPatch["patch"];
-
 interface UseCardSetViewMetaPanelActionsOptions {
   selectedCard: Card | null;
   isGlobalEditing: boolean;
@@ -20,7 +19,6 @@ interface UseCardSetViewMetaPanelActionsOptions {
 const normalizeReviewLogs = (reviewLogs: Card["reviewLogs"]): ReviewLog[] => {
   return reviewLogs ?? [];
 };
-
 export const useCardSetViewMetaPanelActions = ({ selectedCard, isGlobalEditing, settings, updateCard, }: UseCardSetViewMetaPanelActionsOptions) => { const delayBonusEnabled = settings?.delayBonusEnabled ?? false;
   const reviewStartNextDay = settings?.reviewStartNextDay ?? true;
   const reviewLogs = selectedCard?.reviewLogs ?? [];
@@ -237,4 +235,3 @@ export const useCardSetViewMetaPanelActions = ({ selectedCard, isGlobalEditing, 
     onTitleInputChange,
     onUpdateTitle,
   };
-};

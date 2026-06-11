@@ -11,8 +11,6 @@ import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 
-
-
 type CalendarListPieChartSplitViewProps = {
   days: Date[];
   virtualRail?: ScheduleVirtualRail;
@@ -27,19 +25,16 @@ type CalendarListPieChartSplitViewProps = {
   onVisibleDateChange?: (date: Date) => void;
   className?: string;
 };
-
 type VirtualRange = {
   start: number;
   end: number;
 };
-
 type PieSegment = {
   id: string;
   label: string;
   color: string;
   minutes: number;
 };
-
 type SplitDay = {
   date: Date;
   key: string;
@@ -49,34 +44,27 @@ type SplitDay = {
   isSelected: boolean;
   isToday: boolean;
 };
-
 type SplitDayEventBucket = {
   eventsByDateKey: Map<string, GoogleCalendarEvent[]>;
   eventCountByIndex: Map<number, number>;
 };
-
 type SplitDaySectionProps = {
   day: SplitDay;
   onSelectDate?: (date: Date) => void;
 };
-
 type SplitDayDateButtonProps = {
   day: SplitDay;
   onSelectDate?: (date: Date) => void;
 };
-
 type SplitVirtualDynamicHeightEntry = {
   index: number;
   extraHeight: number;
   accumulatedExtraHeight: number;
 };
-
 type SplitVirtualMetrics = {
   dynamicHeightEntries: SplitVirtualDynamicHeightEntry[];
   totalHeight: number;
 };
-
-
 
 const SPLIT_DAY_MIN_HEIGHT_PX = LIST_DAY_SECTION_MIN_HEIGHT_PX;
 const SPLIT_DAY_GAP_PX = LIST_DAY_GAP_PX;
@@ -93,12 +81,8 @@ const DATE_KEY_PART_COUNT = 3;
 const DAY_DATE_NUMBER_CLASS_NAME = "flex h-8 w-8 items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-all duration-150";
 const DAY_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 
-
-
 const createRail = (selectedDate: Date): ScheduleVirtualRail => ({ startDate: subDays(startOfMonth(selectedDate), LOCAL_DAYS), anchorIndex: LOCAL_DAYS, totalDayCount: LOCAL_DAYS * 2 + getDaysInMonth(selectedDate) });
-
 const getIndexForDate = (rail: ScheduleVirtualRail, date: Date) => differenceInCalendarDays(date, rail.startDate);
-
 const parseCalendarDateKey = (dateKey: string): Date | null => {
   const parts = dateKey.split("-");
   if (parts.length !== DATE_KEY_PART_COUNT) return null;
@@ -111,19 +95,14 @@ const parseCalendarDateKey = (dateKey: string): Date | null => {
 
   return date;
 };
-
 const getSplitDayEstimatedListHeightFromEventCount = (eventCount: number): number => {
   if (eventCount === 0) return LIST_EMPTY_DAY_HEIGHT_PX;
 
   return eventCount * LIST_EVENT_ROW_HEIGHT_PX + Math.max(0, eventCount - 1) * LIST_EVENT_ROW_GAP_PX;
 };
-
 const getSplitDayHeightFromEventCount = (eventCount: number): number => Math.max(SPLIT_DAY_MIN_HEIGHT_PX, getSplitDayEstimatedListHeightFromEventCount(eventCount));
-
 const getSplitDayHeight = (day: SplitDay): number => getSplitDayHeightFromEventCount(day.events.length);
-
 const createEmptySplitDayEventBucket = (): SplitDayEventBucket => ({ eventsByDateKey: new Map<string, GoogleCalendarEvent[]>(), eventCountByIndex: new Map<number, number>() });
-
 const appendEventToSplitDayBucket = (bucket: SplitDayEventBucket, dateKey: string, dayIndex: number, event: GoogleCalendarEvent) => {
   const dayEvents = bucket.eventsByDateKey.get(dateKey) ?? [];
 
@@ -134,7 +113,6 @@ const appendEventToSplitDayBucket = (bucket: SplitDayEventBucket, dateKey: strin
   dayEvents.push(event);
   bucket.eventCountByIndex.set(dayIndex, (bucket.eventCountByIndex.get(dayIndex) ?? 0) + 1);
 };
-
 const buildSplitDayEventBucket = (rail: ScheduleVirtualRail, totalDayCount: number, events: GoogleCalendarEvent[]): SplitDayEventBucket => {
   const bucket = createEmptySplitDayEventBucket();
   if (totalDayCount <= 0) return bucket;
@@ -163,7 +141,6 @@ const buildSplitDayEventBucket = (rail: ScheduleVirtualRail, totalDayCount: numb
 
   return bucket;
 };
-
 const addExtraHeightForDayIndex = (extraHeightByIndex: Map<number, number>, totalDayCount: number, index: number, height: number) => {
   if (index < 0 || index >= totalDayCount) return;
 
@@ -172,7 +149,6 @@ const addExtraHeightForDayIndex = (extraHeightByIndex: Map<number, number>, tota
 
   extraHeightByIndex.set(index, Math.max(extraHeightByIndex.get(index) ?? 0, extraHeight));
 };
-
 const buildSplitVirtualMetrics = (totalDayCount: number, eventCountByIndex: Map<number, number>): SplitVirtualMetrics => {
   if (totalDayCount <= 0) return { dynamicHeightEntries: [], totalHeight: 0 };
 
@@ -192,7 +168,6 @@ const buildSplitVirtualMetrics = (totalDayCount: number, eventCountByIndex: Map<
 
   return { dynamicHeightEntries, totalHeight: Math.max(0, baseHeight + accumulatedExtraHeight) };
 };
-
 const getAccumulatedExtraHeightBeforeIndex = (metrics: SplitVirtualMetrics, dayIndex: number): number => {
   let low = 0;
   let high = metrics.dynamicHeightEntries.length - 1;
@@ -212,9 +187,7 @@ const getAccumulatedExtraHeightBeforeIndex = (metrics: SplitVirtualMetrics, dayI
 
   return accumulatedExtraHeight;
 };
-
 const getDayTop = (metrics: SplitVirtualMetrics, dayIndex: number): number => dayIndex * SPLIT_DAY_BLOCK_BASE_HEIGHT_PX + getAccumulatedExtraHeightBeforeIndex(metrics, dayIndex);
-
 const getDayIndexAtOffset = (metrics: SplitVirtualMetrics, totalDayCount: number, offset: number): number => {
   if (totalDayCount <= 0) return 0;
 
@@ -237,7 +210,6 @@ const getDayIndexAtOffset = (metrics: SplitVirtualMetrics, totalDayCount: number
 
   return result;
 };
-
 const getRange = (metrics: SplitVirtualMetrics, scrollTop: number, viewportHeight: number, totalDayCount: number): VirtualRange => {
   if (totalDayCount <= 0) return { start: 0, end: 0 };
 
@@ -246,7 +218,6 @@ const getRange = (metrics: SplitVirtualMetrics, scrollTop: number, viewportHeigh
 
   return { start, end: Math.max(start, end) };
 };
-
 const getInitialRange = (rail: ScheduleVirtualRail): VirtualRange => {
   if (rail.totalDayCount <= 0) return { start: 0, end: 0 };
 
@@ -254,27 +225,21 @@ const getInitialRange = (rail: ScheduleVirtualRail): VirtualRange => {
 
   return { start, end: Math.min(rail.totalDayCount, start + 2) };
 };
-
 const sameRange = (left: VirtualRange, right: VirtualRange) => left.start === right.start && left.end === right.end;
-
 const getEventInstanceKey = (dateKey: string, event: GoogleCalendarEvent): string => `${dateKey}:${event.id}:${new Date(event.startsAt).getTime()}:${new Date(event.endsAt).getTime()}`;
-
 const getCalendarLabelMap = (googleAccounts: GoogleAccountDisplay[]) => {
   const labels = new Map<string, string>();
   googleAccounts.forEach((account) => account.calendars.forEach((calendar) => labels.set(calendar.id, calendar.summaryOverride ?? calendar.summary)));
   return labels;
 };
-
 const getSegmentLabel = (event: GoogleCalendarEvent, appProjects: AppCalendarItem[], calendarLabels: Map<string, string>) => {
   const project = appProjects.find((item) => item.id === event.projectId || item.label === event.projectId);
   return project?.label ?? event.projectId ?? calendarLabels.get(event.calendarId) ?? event.title;
 };
-
 const getTimedMinutes = (event: GoogleCalendarEvent) => {
   if (event.isAllDay) return 0;
   return Math.max(0, differenceInMinutes(new Date(event.endsAt), new Date(event.startsAt)));
 };
-
 const buildSegments = (events: GoogleCalendarEvent[], appProjects: AppCalendarItem[], calendarLabels: Map<string, string>) => {
   const segments = new Map<string, PieSegment>();
 
@@ -297,7 +262,6 @@ const buildSegments = (events: GoogleCalendarEvent[], appProjects: AppCalendarIt
 
   return Array.from(segments.values());
 };
-
 const buildDays = (dates: Date[], eventsByDateKey: Map<string, GoogleCalendarEvent[]>, selectedDate: Date, appProjects: AppCalendarItem[], calendarLabels: Map<string, string>): SplitDay[] => {
   const today = new Date();
 
@@ -308,7 +272,6 @@ const buildDays = (dates: Date[], eventsByDateKey: Map<string, GoogleCalendarEve
     return { date, key, events: dayEvents, segments, minutes: segments.reduce((sum, segment) => sum + segment.minutes, 0), isSelected: isSameDay(date, selectedDate), isToday: isSameDay(date, today) };
   });
 };
-
 const buildConicGradient = (segments: PieSegment[]) => {
   const usedMinutes = segments.reduce((sum, segment) => sum + segment.minutes, 0);
   const total = Math.max(1440, usedMinutes);
@@ -322,20 +285,15 @@ const buildConicGradient = (segments: PieSegment[]) => {
   if (cursor < total) stops.push(`${GAP_COLOR} ${(cursor / total) * 360}deg 360deg`);
   return `conic-gradient(${stops.join(", ")})`;
 };
-
 const getSplitDayDateNumberClassName = (day: SplitDay): string => cn(DAY_DATE_NUMBER_CLASS_NAME, day.isSelected ? "bg-[#3a77b2] text-white ring-1 ring-[#3a77b2]" : day.isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]");
 
-
-
 const EmptyDayCard = () => <div className="flex h-[34px] items-center rounded-[10px] border border-dashed border-[#dedede] bg-white px-3 text-[12px] font-semibold text-[#8e8e93]">{EMPTY_DAY_LABEL}</div>;
-
 const SplitDayDateButton = ({ day, onSelectDate }: SplitDayDateButtonProps) => (
   <button type="button" className="mt-0.5 flex h-8 items-center justify-end gap-1 rounded-[10px] pr-0.5 text-right transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25" onClick={() => onSelectDate?.(day.date)}>
     <span className={getSplitDayDateNumberClassName(day)}>{format(day.date, "d")}</span>
     <span className={DAY_WEEKDAY_CLASS_NAME}>{format(day.date, "EEE", { locale: ja })}</span>
   </button>
 );
-
 const SplitDaySectionComponent = ({ day, onSelectDate }: SplitDaySectionProps) => {
   const hours = Math.round(day.minutes / 60 * 10) / 10;
 
@@ -371,13 +329,8 @@ const SplitDaySectionComponent = ({ day, onSelectDate }: SplitDaySectionProps) =
   );
 };
 
-
-
 const SplitDaySection = memo(SplitDaySectionComponent);
-
 SplitDaySection.displayName = "SplitDaySection";
-
-
 
 const CalendarListPieChartSplitViewComponent = ({ virtualRail, selectedDate, events, appProjects, googleAccounts, onSelectDate, onVisibleMonthChange, onVisibleDateChange, className }: CalendarListPieChartSplitViewProps) => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -464,10 +417,6 @@ const CalendarListPieChartSplitViewComponent = ({ virtualRail, selectedDate, eve
   );
 };
 
-
-
 const CalendarListPieChartSplitView = memo(CalendarListPieChartSplitViewComponent);
-
 CalendarListPieChartSplitView.displayName = "CalendarListPieChartSplitView";
-
 export { CalendarListPieChartSplitView };

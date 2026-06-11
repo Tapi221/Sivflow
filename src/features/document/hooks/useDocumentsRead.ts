@@ -10,7 +10,6 @@ import type { DocumentItem } from "@/types";
 type DocumentWithLegacyDelete = DocumentItem & {
   is_deleted?: boolean;
 };
-
 type UseDocumentsReadOptions = {
   enabled?: boolean;
 };
@@ -65,4 +64,3 @@ export const useDocumentsRead = ( folderId?: string, options?: UseDocumentsReadO
     loading: enabled && rawDocuments === undefined,
     error,
   };
-};

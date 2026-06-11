@@ -103,7 +103,5 @@ const CodeBlockItem = React.memo(
   CodeBlockItemInner,
   areCodeBlockItemPropsEqual,
 );
-
 CodeBlockItem.displayName = "CodeBlockItem";
-
 export { CodeBlockItem };

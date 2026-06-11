@@ -1,15 +1,11 @@
 import type { CalendarEvent } from "./calendarEvent.types";
 
-
-
 export type CalendarTimeGridLayoutMode = "overlap" | "no-overlap";
-
 export type CalendarTimeGridStyle = { top: number;
   height: number;
   width: number;
   xOffset: number;
 };
-
 export type CalendarTimeGridLayoutEntry = { event: CalendarEvent;
   style: CalendarTimeGridStyle;
   startsBeforeRange: boolean;
@@ -17,7 +13,6 @@ export type CalendarTimeGridLayoutEntry = { event: CalendarEvent;
   columnIndex?: number;
   columnCount?: number;
 };
-
 export type CalendarTimeGridLayoutOptions = { events: readonly CalendarEvent[];
   rangeStart: Date;
   rangeEnd: Date;
@@ -25,7 +20,6 @@ export type CalendarTimeGridLayoutOptions = { events: readonly CalendarEvent[];
   includeAllDayEvents?: boolean;
   minimumVisibleHeightPercent?: number;
 };
-
 type TimeGridLayoutProxy = {
   event: CalendarEvent;
   startMs: number;
@@ -39,41 +33,31 @@ type TimeGridLayoutProxy = {
   row?: TimeGridLayoutProxy;
   leaves?: TimeGridLayoutProxy[];
 };
-
 type TimeGridLayoutContainerProxy = TimeGridLayoutProxy & {
   rows: TimeGridLayoutProxy[];
 };
-
 type NoOverlapLayoutEntry = CalendarTimeGridLayoutEntry & {
   friends: NoOverlapLayoutEntry[];
   idx?: number;
   size?: number;
 };
-
 type NoOverlapHorizontalFrame = {
   left: number;
   right: number;
 };
 
-
-
 const MINIMUM_EVENT_DURATION_MS = 1;
 const PERCENT_MAX = 100;
 const LAYOUT_EPSILON = 0.000001;
 
-
-
 const getDateTime = (date: Date): number => date instanceof Date ? date.getTime() : Number.NaN;
-
 const isFiniteTime = (value: number): boolean => Number.isFinite(value);
-
 const compareText = (a: string, b: string): number => {
   if (a < b) return -1;
   if (a > b) return 1;
 
   return 0;
 };
-
 const compareEventsForLayout = (a: CalendarEvent, b: CalendarEvent): number => {
   const startDiff = getDateTime(a.startsAt) - getDateTime(b.startsAt);
 
@@ -89,7 +73,6 @@ const compareEventsForLayout = (a: CalendarEvent, b: CalendarEvent): number => {
 
   return compareText(`${a.calendarId}:${a.id}`, `${b.calendarId}:${b.id}`);
 };
-
 const createTimeGridProxy = ({ event, rangeStartMs, rangeEndMs }: { event: CalendarEvent; rangeStartMs: number; rangeEndMs: number }): TimeGridLayoutProxy | null => {
   const rawStartMs = getDateTime(event.startsAt);
   const rawEndMs = getDateTime(event.endsAt);
@@ -116,7 +99,6 @@ const createTimeGridProxy = ({ event, rangeStartMs, rangeEndMs }: { event: Calen
     endsAfterRange: normalizedEndMs > rangeEndMs,
   };
 };
-
 const sortByRenderOrder = (events: TimeGridLayoutProxy[]): TimeGridLayoutProxy[] => {
   const sortedByTime = [...events].sort((a, b) => {
     const startDiff = a.startMs - b.startMs;
@@ -151,9 +133,7 @@ const sortByRenderOrder = (events: TimeGridLayoutProxy[]): TimeGridLayoutProxy[]
 
   return sorted;
 };
-
 const doTimeGridProxiesOverlap = (a: TimeGridLayoutProxy, b: TimeGridLayoutProxy): boolean => a.startMs < b.endMs && b.startMs < a.endMs;
-
 const getBaseWidth = (event: TimeGridLayoutProxy): number => {
   if (event.rows) {
     const columns = event.rows.reduce((max, row) => Math.max(max, (row.leaves?.length ?? 0) + 1), 0) + 1;
@@ -170,7 +150,6 @@ const getBaseWidth = (event: TimeGridLayoutProxy): number => {
 
   return event.row ? getBaseWidth(event.row) : PERCENT_MAX;
 };
-
 const getRenderWidth = (event: TimeGridLayoutProxy): number => {
   const noOverlapWidth = getBaseWidth(event);
   const overlapWidth = Math.min(PERCENT_MAX, noOverlapWidth * 1.7);
@@ -184,7 +163,6 @@ const getRenderWidth = (event: TimeGridLayoutProxy): number => {
 
   return index === leaves.length - 1 ? noOverlapWidth : overlapWidth;
 };
-
 const getXOffset = (event: TimeGridLayoutProxy): number => {
   if (event.rows) return 0;
 
@@ -199,7 +177,6 @@ const getXOffset = (event: TimeGridLayoutProxy): number => {
 
   return getXOffset(row) + index * getBaseWidth(row);
 };
-
 const mapProxyToLayoutEntry = (event: TimeGridLayoutProxy): CalendarTimeGridLayoutEntry => ({
   event: event.event,
   style: {
@@ -211,7 +188,6 @@ const mapProxyToLayoutEntry = (event: TimeGridLayoutProxy): CalendarTimeGridLayo
   startsBeforeRange: event.startsBeforeRange,
   endsAfterRange: event.endsAfterRange,
 });
-
 const layoutOverlapEvents = ({
   proxies,
 }: {
@@ -252,7 +228,6 @@ const layoutOverlapEvents = ({
 
   return eventsInRenderOrder.map(mapProxyToLayoutEntry);
 };
-
 const timeGridEntriesOverlap = (
   a: CalendarTimeGridLayoutEntry,
   b: CalendarTimeGridLayoutEntry,
@@ -268,7 +243,6 @@ const timeGridEntriesOverlap = (
     (bStart >= aStart && bStart < aEnd)
   );
 };
-
 const collectMaxColumnIndex = (
   node: NoOverlapLayoutEntry,
   visited: Set<NoOverlapLayoutEntry>,
@@ -285,7 +259,6 @@ const collectMaxColumnIndex = (
 
   return maxIndex;
 };
-
 const assignNoOverlapColumns = (entries: NoOverlapLayoutEntry[]): NoOverlapLayoutEntry[] => {
   for (const entry of entries) {
     const usedIndexes = new Set(
@@ -312,14 +285,12 @@ const assignNoOverlapColumns = (entries: NoOverlapLayoutEntry[]): NoOverlapLayou
 
   return entries;
 };
-
 const resetNoOverlapColumns = (entries: NoOverlapLayoutEntry[]): void => {
   for (const entry of entries) {
     entry.idx = undefined;
     entry.size = undefined;
   }
 };
-
 const addNoOverlapFriend = (entry: NoOverlapLayoutEntry, friend: NoOverlapLayoutEntry): boolean => {
   if (entry === friend || entry.friends.includes(friend)) return false;
 
@@ -328,7 +299,6 @@ const addNoOverlapFriend = (entry: NoOverlapLayoutEntry, friend: NoOverlapLayout
 
   return true;
 };
-
 const getNoOverlapHorizontalFrame = (entry: NoOverlapLayoutEntry): NoOverlapHorizontalFrame => {
   const width = entry.size ?? entry.style.width;
   const left = entry.idx !== undefined && entry.size !== undefined ? entry.idx * entry.size : entry.style.xOffset;
@@ -338,16 +308,13 @@ const getNoOverlapHorizontalFrame = (entry: NoOverlapLayoutEntry): NoOverlapHori
     right: left + width,
   };
 };
-
 const noOverlapEntriesOverlapHorizontally = (entry: NoOverlapLayoutEntry, nextEntry: NoOverlapLayoutEntry): boolean => {
   const frame = getNoOverlapHorizontalFrame(entry);
   const nextFrame = getNoOverlapHorizontalFrame(nextEntry);
 
   return frame.left < nextFrame.right - LAYOUT_EPSILON && nextFrame.left < frame.right - LAYOUT_EPSILON;
 };
-
 const isMinimumVisibleHeightEntry = (entry: NoOverlapLayoutEntry, minimumVisibleHeightPercent: number): boolean => entry.style.height < minimumVisibleHeightPercent - LAYOUT_EPSILON;
-
 const getNextMinimumVisibleHeightConflictEntry = (entry: NoOverlapLayoutEntry, sortedEntries: NoOverlapLayoutEntry[], startIndex: number, minimumVisibleHeightPercent: number): NoOverlapLayoutEntry | null => {
   const entryVisibleEnd = entry.style.top + minimumVisibleHeightPercent;
 
@@ -363,7 +330,6 @@ const getNextMinimumVisibleHeightConflictEntry = (entry: NoOverlapLayoutEntry, s
 
   return null;
 };
-
 const resolveMinimumVisibleHeightConflicts = (entries: NoOverlapLayoutEntry[], minimumVisibleHeightPercent: number): void => {
   if (minimumVisibleHeightPercent <= 0) return;
 
@@ -389,7 +355,6 @@ const resolveMinimumVisibleHeightConflicts = (entries: NoOverlapLayoutEntry[], m
     if (!changed) return;
   }
 };
-
 const layoutNoOverlapEvents = ({
   proxies,
   minimumVisibleHeightPercent = 0,
@@ -449,7 +414,6 @@ const layoutNoOverlapEvents = ({
     };
   });
 };
-
 export const layoutCalendarTimeGridEvents = ({ events, rangeStart, rangeEnd, layoutMode = "overlap", includeAllDayEvents = false, minimumVisibleHeightPercent = 0, }: CalendarTimeGridLayoutOptions): CalendarTimeGridLayoutEntry[] => { const rangeStartMs = getDateTime(rangeStart);
   const rangeEndMs = getDateTime(rangeEnd);
 

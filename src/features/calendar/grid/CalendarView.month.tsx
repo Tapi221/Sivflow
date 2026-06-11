@@ -24,7 +24,6 @@ type CalendarMonthViewProps = {
   onRenderedRangeChange?: (range: CalendarDateRange) => void;
   onMoveCalendarEvent?: CalendarEventMoveHandler;
 };
-
 type MonthViewStyle = CSSProperties & {
   "--calendar-month-row-height": string;
 };
@@ -43,7 +42,6 @@ const getMonthRowHeight = (monthVisibleEventCount: number): number => {
 
   return C.DEFAULT_MONTH_ROW_HEIGHT + eventCountDelta * MONTH_ROW_HEIGHT_PER_EVENT_COUNT;
 };
-
 const createMonthViewStyle = (monthRowHeight: number): MonthViewStyle => ({
   "--calendar-month-row-height": `${monthRowHeight}px`,
 });
@@ -106,4 +104,4 @@ const CalendarMonthView = ({
 
 
 
-export { CalendarMonthView };
+export { CalendarMont

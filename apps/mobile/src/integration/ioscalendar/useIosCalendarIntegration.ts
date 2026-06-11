@@ -4,15 +4,11 @@ import { createIosCalendarEvent, deleteIosCalendarEvent, fetchIosCalendars, fetc
 import type { GoogleCalendarEvent } from "@core/calendar/calendarEvent.types";
 import type { IosCalendarConnectionStatus, IosCalendarEvent, IosCalendarListItem, IosCalendarPermissionStatus, IosCalendarRange, IosCalendarWritableEventDeleteInput, IosCalendarWritableEventInput, IosCalendarWritableEventUpdateInput } from "./iosCalendar.types";
 
-
-
 type LoadEventsInput = {
   calendarIds: string[];
   calendars: IosCalendarListItem[];
   range: IosCalendarRange | null;
 };
-
-
 
 const IOS_CALENDAR_PERMISSION_ERROR = "iOSカレンダーへのアクセス許可が必要です";
 const IOS_CALENDAR_UNSUPPORTED_ERROR = "iOSカレンダー連携はiOS端末でのみ利用できます";
@@ -20,30 +16,22 @@ const IOS_CALENDAR_CREATE_ERROR = "iOSカレンダー予定の作成に失敗し
 const IOS_CALENDAR_UPDATE_ERROR = "iOSカレンダー予定の更新に失敗しました";
 const IOS_CALENDAR_DELETE_ERROR = "iOSカレンダー予定の削除に失敗しました";
 
-
-
 const normalizeRange = (range: IosCalendarRange): IosCalendarRange => range.rangeStart <= range.rangeEnd
   ? range
   : {
     rangeStart: range.rangeEnd,
     rangeEnd: range.rangeStart,
   };
-
 const isSameRange = (a: IosCalendarRange | null, b: IosCalendarRange): boolean => a?.rangeStart.getTime() === b.rangeStart.getTime() && a.rangeEnd.getTime() === b.rangeEnd.getTime();
-
 const getDefaultSelectedCalendarIds = (calendars: IosCalendarListItem[]): string[] => calendars.filter((calendar) => calendar.selected).map((calendar) => calendar.id);
-
 const getConnectionStatus = ({ error, isEnabled, permissionStatus, supported }: { error: string | null; isEnabled: boolean; permissionStatus: IosCalendarPermissionStatus; supported: boolean }): IosCalendarConnectionStatus => {
   if (!supported) return "unsupported";
   if (permissionStatus !== "granted" || !isEnabled) return "needsPermission";
   if (error) return "error";
   return "connected";
 };
-
 const toErrorMessage = (error: unknown, fallback: string): string => error instanceof Error ? error.message : fallback;
-
 const buildSelectedCalendarIdList = (ids: Set<string>): string[] => Array.from(ids);
-
 export const useIosCalendarIntegration = () => { const supported = isIosCalendarSupported();
   const [permissionStatus, setPermissionStatus] = useState<IosCalendarPermissionStatus>("undetermined");
   const [isEnabled, setIsEnabled] = useState(false);

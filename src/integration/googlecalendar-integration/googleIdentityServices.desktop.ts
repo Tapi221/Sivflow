@@ -10,10 +10,7 @@
  */
 
 const GIS_SCRIPT_URL = "https://accounts.google.com/gsi/client";
-
 let _gisLoaded = false;
-
-
 
 const loadGisScript = (): Promise<void> => {
   return new Promise((resolve, reject) => {
@@ -50,12 +47,10 @@ const loadGisScript = (): Promise<void> => {
     document.head.appendChild(script);
   });
 };
-
 const normalizeLoginHint = (loginHint: string | null | undefined): string | undefined => {
   const normalized = loginHint?.trim();
   return normalized ? normalized : undefined;
 };
-
 export const requestWebAccessTokenViaGis = async ({ clientId, scope, silent = false, loginHint, }: { clientId: string;
   scope: string;
   silent?: boolean;

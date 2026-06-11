@@ -22,10 +22,8 @@ const parseJson = (raw: string): unknown => {
     ]);
   }
 };
-
 export const encodeMfCardFile = (file: MfCardFileV1): Uint8Array => { return textEncoder.encode(`${JSON.stringify(file, null, 2)}\n`);
 };
-
 export const decodeMfCardFile = (buffer: ArrayBuffer): MfCardFileV1 => { const parsed = parseJson(textDecoder.decode(buffer));
   const validation = validateMfCardFile(parsed);
 
@@ -37,4 +35,3 @@ export const decodeMfCardFile = (buffer: ArrayBuffer): MfCardFileV1 => { const p
   }
 
   return validation.value;
-};

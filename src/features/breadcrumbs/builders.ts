@@ -21,7 +21,6 @@ export const areBreadcrumbCrumbsEqual = ( a: BreadcrumbCrumb[], b: BreadcrumbCru
     );
   });
 };
-
 export const buildFolderPathCrumbs = ({ folderId, folderById, }: { folderId: string | null | undefined;
   folderById: Map<string, FolderLike>;
 }): BreadcrumbCrumb[] => {
@@ -45,7 +44,6 @@ export const buildFolderPathCrumbs = ({ folderId, folderById, }: { folderId: str
     folderId: folder.id,
   }));
 };
-
 export const buildExplorerBreadcrumbs = ({ selectedFolderId, explorerBreadcrumbContext, selectedItem, folderById, cardById, documentById, }: { selectedFolderId: string | null;
   explorerBreadcrumbContext: ExplorerBreadcrumbContext;
   selectedItem: SelectedExplorerItem;
@@ -85,7 +83,6 @@ export const buildExplorerBreadcrumbs = ({ selectedFolderId, explorerBreadcrumbC
 
   return crumbs;
 };
-
 export const buildCardSetViewBreadcrumbs = ({ folderId, selectedCardSet, selectedCard, sortedCards, folderById, }: { folderId: string | null;
   selectedCardSet: CardSet | null;
   selectedCard: Card | null;
@@ -126,4 +123,3 @@ export const buildCardSetViewBreadcrumbs = ({ folderId, selectedCardSet, selecte
   }
 
   return crumbs;
-};

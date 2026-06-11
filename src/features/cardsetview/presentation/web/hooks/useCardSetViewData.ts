@@ -9,4 +9,3 @@ interface UseCardSetViewDataOptions {
 
 
 export const useCardSetViewData = ({ cardSetId, }: UseCardSetViewDataOptions) => { return useCardSetViewQuery({ cardSetId, });
-};

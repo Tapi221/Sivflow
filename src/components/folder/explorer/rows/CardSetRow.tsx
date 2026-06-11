@@ -13,7 +13,6 @@ type TreeNode = {
   name: string;
   children?: TreeNode[];
 };
-
 interface CardSetRowProps {
   treeNode: TreeNode & { kind: "cardSet" };
   style: React.CSSProperties;

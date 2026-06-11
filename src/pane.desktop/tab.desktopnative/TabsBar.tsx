@@ -11,71 +11,51 @@ import { cn } from "@/lib/utils";
 import { FileText, Layers, X } from "@/ui/icons";
 import type { WorkspaceSidebarSection, WorkspaceTab } from "./Tab";
 
-
-
 type TabsBarVariant = "workspace" | "titlebar";
-
 type TabsBarProps = {
   variant?: TabsBarVariant;
   className?: string;
   noDragStyle?: CSSProperties;
 };
-
 type AppRegionStyle = CSSProperties & {
   WebkitAppRegion?: "drag" | "no-drag";
 };
-
 type TabIconComponent = ComponentType<{ className?: string }>;
-
 type TabContextMenuState = {
   tabId: WorkspaceTab["id"];
   x: number;
   y: number;
 };
-
 type TabContextMenuTriggerEvent = ReactMouseEvent<HTMLElement> | ReactPointerEvent<HTMLElement>;
-
-
 
 const TABS_NO_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "no-drag",
 };
-
 const TABS_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "drag",
 };
-
 const TABS_DRAG_SPACER_STYLE: AppRegionStyle = {
   ...TABS_DRAG_STYLE,
   marginRight: "var(--desktop-window-controls-width, 138px)",
 };
-
 const ACTIVE_TAB_SURFACE_STYLE: CSSProperties = {
   background: "var(--app-active-tab-bg, #ffffff)",
 };
-
 const ACTIVE_TAB_JOIN_STYLE: CSSProperties = {};
-
 const ACTIVE_TAB_LEFT_CURVE_STYLE: CSSProperties = {
   background: "transparent",
   WebkitMask: "radial-gradient(circle at 0 0, transparent 0 16px, #000 16.5px)",
   mask: "radial-gradient(circle at 0 0, transparent 0 16px, #000 16.5px)",
 };
-
 const ACTIVE_TAB_RIGHT_CURVE_STYLE: CSSProperties = {
   background: "transparent",
   WebkitMask: "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16.5px)",
   mask: "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16.5px)",
 };
-
 const INACTIVE_TAB_TEXT_CLASS_NAME = "text-[#b7b7b7] hover:text-[#8c8c8c]";
-
 const INACTIVE_TAB_ICON_CLASS_NAME = "text-[#b7b7b7] group-hover/tab:text-[#8c8c8c]";
-
 const INACTIVE_TAB_CLOSE_BUTTON_CLASS_NAME = "opacity-100 !text-[#b7b7b7] hover:!text-[#8c8c8c]";
-
 const TAB_OPEN_ANIMATION_MS = 280;
-
 const TAB_OPEN_ANIMATION_STYLE = `
 @keyframes workspace-tab-open {
   from {
@@ -101,7 +81,6 @@ const TAB_OPEN_ANIMATION_STYLE = `
   }
 }
 `;
-
 const SIDEBAR_ROUTE_TAB_ICONS = {
   home: HomeIcon,
   review: InboxIcon,
@@ -109,12 +88,9 @@ const SIDEBAR_ROUTE_TAB_ICONS = {
   settings: SettingIcon,
 } satisfies Partial<Record<WorkspaceSidebarSection, TabIconComponent>>;
 
-
-
 const resolveTabsSurfaceStyle = (isTitlebar: boolean): CSSProperties => ({
   background: isTitlebar ? "var(--app-titlebar-bg, var(--app-sidebar-bg))" : "var(--app-sidebar-bg)",
 });
-
 const resolveCloseButtonClassName = (isTitlebar: boolean): string => {
   if (isTitlebar) {
     return cn(
@@ -128,7 +104,6 @@ const resolveCloseButtonClassName = (isTitlebar: boolean): string => {
     "text-[var(--app-sidebar-icon)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
   );
 };
-
 const resolveAddButtonClassName = (isTitlebar: boolean): string => {
   if (isTitlebar) {
     return cn(
@@ -142,7 +117,6 @@ const resolveAddButtonClassName = (isTitlebar: boolean): string => {
     "text-[var(--app-sidebar-text)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
   );
 };
-
 const resolveTabSlotLayoutStyle = (tab: WorkspaceTab, interactiveStyle: AppRegionStyle): AppRegionStyle => {
   const style: AppRegionStyle = { ...interactiveStyle };
 
@@ -153,7 +127,6 @@ const resolveTabSlotLayoutStyle = (tab: WorkspaceTab, interactiveStyle: AppRegio
 
   return style;
 };
-
 const clampContextMenuPosition = (clientX: number, clientY: number): { x: number; y: number } => {
   const maxX = Math.max(WORKSPACE_TAB_CONTEXT_MENU_MARGIN, window.innerWidth - WORKSPACE_TAB_CONTEXT_MENU_WIDTH - WORKSPACE_TAB_CONTEXT_MENU_MARGIN);
   const maxY = Math.max(WORKSPACE_TAB_CONTEXT_MENU_MARGIN, window.innerHeight - WORKSPACE_TAB_CONTEXT_MENU_HEIGHT - WORKSPACE_TAB_CONTEXT_MENU_MARGIN);
@@ -163,7 +136,6 @@ const clampContextMenuPosition = (clientX: number, clientY: number): { x: number
     y: Math.min(Math.max(clientY, WORKSPACE_TAB_CONTEXT_MENU_MARGIN), maxY),
   };
 };
-
 const resolveTabIcon = (tab: WorkspaceTab): TabIconComponent => {
   if (tab.kind === "route") {
     return SIDEBAR_ROUTE_TAB_ICONS[tab.sectionKey] ?? FileText;
@@ -174,8 +146,6 @@ const resolveTabIcon = (tab: WorkspaceTab): TabIconComponent => {
 
   return FileText;
 };
-
-
 
 const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps) => {
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
@@ -449,7 +419,5 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
     </>
   );
 };
-
-
 
 export { TabsBar };

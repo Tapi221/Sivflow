@@ -3,15 +3,11 @@ import { receiveDesktopHandwritingMessage, type DesktopHandwritingReceiverReason
 import { attachMobileDeviceToHandwritingSession, closeHandwritingSession, createDesktopHandwritingSession, failHandwritingSession } from "./handwritingSessionLifecycle";
 import type { HandwritingDeviceInfo, HandwritingSession, HandwritingSessionMessage } from "./handwritingSession.types";
 
-
-
 export type DesktopHandwritingDocumentKey = `${string}:${InkSide}`;
-
 export type DesktopHandwritingSessionManagerState = { activeSessionId: string | null;
   documents: Record<DesktopHandwritingDocumentKey, InkDocument>;
   sessions: Record<string, HandwritingSession>;
 };
-
 export type StartDesktopHandwritingSessionInput = { state: DesktopHandwritingSessionManagerState;
   id: string;
   userId: string;
@@ -21,37 +17,29 @@ export type StartDesktopHandwritingSessionInput = { state: DesktopHandwritingSes
   document?: InkDocument | null;
   now?: number;
 };
-
 export type AttachMobileDeviceToDesktopHandwritingSessionInput = { state: DesktopHandwritingSessionManagerState;
   sessionId: string;
   mobileDevice: HandwritingDeviceInfo;
   now?: number;
 };
-
 export type ReceiveDesktopHandwritingSessionManagerMessageInput = { state: DesktopHandwritingSessionManagerState;
   message: HandwritingSessionMessage;
   now?: number;
 };
-
 export type ReceiveDesktopHandwritingSessionManagerMessageResult = { state: DesktopHandwritingSessionManagerState;
   applied: boolean;
   reason?: DesktopHandwritingReceiverReason | "session-not-found";
 };
 
-
-
 export const createDesktopHandwritingSessionManagerState = (): DesktopHandwritingSessionManagerState => ({ activeSessionId: null, documents: {}, sessions: {}, });
-
 export const getDesktopHandwritingDocumentKey = (cardId: string, side: InkSide): DesktopHandwritingDocumentKey => { return `${cardId}:${side}`;
 };
-
 const toReceiverSession = (session: HandwritingSession): DesktopHandwritingReceiverSession => ({
   id: session.id,
   cardId: session.cardId,
   side: session.side,
   status: session.status,
 });
-
 const updateSession = (state: DesktopHandwritingSessionManagerState, session: HandwritingSession): DesktopHandwritingSessionManagerState => ({
   ...state,
   sessions: {
@@ -59,7 +47,6 @@ const updateSession = (state: DesktopHandwritingSessionManagerState, session: Ha
     [session.id]: session,
   },
 });
-
 const updateDocument = (state: DesktopHandwritingSessionManagerState, key: DesktopHandwritingDocumentKey, document: InkDocument): DesktopHandwritingSessionManagerState => ({
   ...state,
   documents: {
@@ -67,7 +54,6 @@ const updateDocument = (state: DesktopHandwritingSessionManagerState, key: Deskt
     [key]: document,
   },
 });
-
 export const startDesktopHandwritingSession = ({ state, id, userId, cardId, side, desktopDevice, document, now }: StartDesktopHandwritingSessionInput): DesktopHandwritingSessionManagerState => { const session = createDesktopHandwritingSession({ id, userId, cardId, side, desktopDevice, now });
   const documentKey = getDesktopHandwritingDocumentKey(cardId, side);
   const nextState = updateDocument(state, documentKey, normalizeInkDocument(document));
@@ -81,13 +67,11 @@ export const startDesktopHandwritingSession = ({ state, id, userId, cardId, side
     },
   };
 };
-
 export const attachMobileDeviceToDesktopHandwritingSession = ({ state, sessionId, mobileDevice, now }: AttachMobileDeviceToDesktopHandwritingSessionInput): DesktopHandwritingSessionManagerState => { const session = state.sessions[sessionId];
   if (!session) return state;
 
   return updateSession(state, attachMobileDeviceToHandwritingSession({ session, mobileDevice, now }));
 };
-
 export const receiveDesktopHandwritingSessionManagerMessage = ({ state, message, now }: ReceiveDesktopHandwritingSessionManagerMessageInput): ReceiveDesktopHandwritingSessionManagerMessageResult => { const session = state.sessions[message.sessionId];
 
   if (!session) {
@@ -111,7 +95,6 @@ export const receiveDesktopHandwritingSessionManagerMessage = ({ state, message,
     reason: result.reason,
   };
 };
-
 export const closeDesktopHandwritingSession = (state: DesktopHandwritingSessionManagerState, sessionId: string, now = Date.now()): DesktopHandwritingSessionManagerState => { const session = state.sessions[sessionId];
   if (!session) return state;
 
@@ -123,7 +106,6 @@ export const closeDesktopHandwritingSession = (state: DesktopHandwritingSessionM
     activeSessionId: state.activeSessionId === sessionId ? null : state.activeSessionId,
   };
 };
-
 export const failDesktopHandwritingSession = (state: DesktopHandwritingSessionManagerState, sessionId: string, now = Date.now()): DesktopHandwritingSessionManagerState => { const session = state.sessions[sessionId];
   if (!session) return state;
 

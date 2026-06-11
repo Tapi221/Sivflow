@@ -1,7 +1,5 @@
 import { toMillis } from "@/utils/toMillis";
 
-
-
 type OrderableEntitySelectors<T> = {
   getOrderIndex: (entity: T) => number | null | undefined;
   getUpdatedAt: (entity: T) => unknown;
@@ -10,15 +8,11 @@ type OrderableEntitySelectors<T> = {
   getId: (entity: T) => string | null | undefined;
 };
 
-
-
 const toTimestamp = (value: unknown): number => {
   return toMillis(value);
 };
-
 export const getOrderableOrderIndex = <T>( entity: T, selectors: Pick<OrderableEntitySelectors<T>, "getOrderIndex">, ): number => { return selectors.getOrderIndex(entity) ?? 0;
 };
-
 export const compareOrderableEntities = <T>( left: T, right: T, selectors: OrderableEntitySelectors<T>, ): number => { const orderCompare = getOrderableOrderIndex(left, selectors) - getOrderableOrderIndex(right, selectors);
   if (orderCompare !== 0) return orderCompare;
 

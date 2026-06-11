@@ -14,8 +14,6 @@ import { useT } from "@shared/i18n/useT";
 import "./sidebar.desktop.css";
 import "./sidebar.layered-directory.css";
 
-
-
 type SidebarTranslationKey =
   | "sidebarHome"
   | "sidebarLibrary"
@@ -23,7 +21,6 @@ type SidebarTranslationKey =
   | "sidebarSchedule"
   | "sidebarExplore"
   | "sidebarSettings";
-
 type SidebarNavItem = {
   id: string;
   labelKey: SidebarTranslationKey;
@@ -33,17 +30,13 @@ type SidebarNavItem = {
   onClick?: () => void;
   disabled?: boolean;
 };
-
 type SidebarProps = {
   isLeftPanelCollapsed?: boolean;
   onToggleLeftPanel?: () => void;
   onOpenSettings?: () => void;
 };
 
-
-
 const LIBRARY_EXPLORER_STATE = { isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null };
-
 const mainNavItems: SidebarNavItem[] = [
   {
     id: "home",
@@ -77,8 +70,6 @@ const mainNavItems: SidebarNavItem[] = [
     icon: <GalleryIcon className="app-sidebar__nav-icon" />,
   },
 ];
-
-
 
 const SidebarNavLink = ({ item, disabled }: { item: SidebarNavItem; disabled?: boolean }) => {
   const t = useT();
@@ -126,7 +117,6 @@ const SidebarNavLink = ({ item, disabled }: { item: SidebarNavItem; disabled?: b
     </HoverTooltip>
   );
 };
-
 const Sidebar = ({ isLeftPanelCollapsed = false, onToggleLeftPanel, onOpenSettings }: SidebarProps) => {
   const t = useT();
   const { logout, loading } = useAuthSession();
@@ -193,7 +183,5 @@ const Sidebar = ({ isLeftPanelCollapsed = false, onToggleLeftPanel, onOpenSettin
     </aside>
   );
 };
-
-
 
 export { Sidebar };

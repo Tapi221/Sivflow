@@ -35,8 +35,6 @@ type WorkspaceTabBase = {
   sectionKey: WorkspaceSidebarSection;
 };
 
-
-
 export const WORKSPACE_DEFAULT_EXPLORER_TAB_ID = "explorer:default" as const;
 
 
@@ -65,7 +63,6 @@ export const WORKSPACE_DEFAULT_EXPLORER_TAB_ID = "explorer:default" as const;
  * サイドバーのセクション定義
  */
 export type WorkspaceSidebarSection = | "home" | "review" | "library" | "schedule" | "settings";
-
 export type WorkspaceRouteSection = Exclude<WorkspaceSidebarSection, "library">;
 
 /**

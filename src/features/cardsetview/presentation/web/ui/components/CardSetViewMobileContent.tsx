@@ -32,4 +32,3 @@ export const CardSetViewMobileContent = ({ controller }: CardSetViewContentProps
       onToggleBookmark={state.handleToggleBookmark}
     />
   );
-};

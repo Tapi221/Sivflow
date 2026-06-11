@@ -24,24 +24,18 @@ import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/us
 import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 import { useFolderTagModeStore } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
 
-
-
 type IconProps = {
   className?: string;
 };
-
 type ProjectAddMenuActionId = "create-note" | "create-card-set" | "create-folder" | "import-pdf";
-
 type ProjectAddMenuItemDefinition = {
   id: ProjectAddMenuActionId;
   label: string;
 };
-
 type ProjectAddMenuState = {
   x: number;
   y: number;
 };
-
 type ProjectAddMenuProps = {
   x: number;
   y: number;
@@ -51,77 +45,47 @@ type ProjectAddMenuProps = {
   onCreateFolder: () => void;
   onImportPdf: () => void;
 };
-
 type SidebarLayeredDirectoryProps = {
   calendarContent?: ReactNode;
   onToggleLeftPanel?: () => void;
   onOpenSettings?: () => void;
 };
 
-
-
 const WORKSPACE_OWNER_FALLBACK_NAME = "Akari T";
-
 const WORKSPACE_NAME_SUFFIX = "のWorkspace";
-
 const WORKSPACE_AVATAR_FALLBACK = "A";
-
 const WORKSPACE_HOME_LABEL = "ホーム";
-
 const WORKSPACE_LIBRARY_LABEL = "ライブラリ";
-
 const WORKSPACE_TAGS_LABEL = "タグ";
-
 const WORKSPACE_SCHEDULE_LABEL = "カレンダー";
-
 const WORKSPACE_EXPLORE_LABEL = "Explore";
-
 const WORKSPACE_SETTINGS_LABEL = "設定";
-
 const FAVORITE_SECTION_LABEL = "お気に入り";
-
 const FAVORITE_EMPTY_MESSAGE = "プロジェクトをお気に入りに追加すると、ここからすぐ開けます";
-
 const PROJECT_SECTION_LABEL = "プロジェクト";
-
 const TAG_SECTION_LABEL = "タグツリー";
-
 const DEFAULT_NEW_TAG_NAME = "新規タグ";
-
 const DEFAULT_NEW_NOTE_NAME = "新規ノート";
-
 const ADD_PROJECT_ARIA_LABEL = "プロジェクトを追加";
-
 const ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL = "選択中のフォルダに追加";
-
 const ADD_TAG_ARIA_LABEL = "タグを追加";
-
 const FILTER_ARIA_LABEL = "絞り込みを開く";
-
 const PROJECT_ADD_MENU_PANEL_ID = "layered-project-add-menu";
-
 const PROJECT_ADD_MENU_ITEM_DEFINITIONS: readonly ProjectAddMenuItemDefinition[] = [
   { id: "create-note", label: DEFAULT_NEW_NOTE_NAME },
   { id: "create-card-set", label: DEFAULT_NEW_CARD_SET_NAME },
   { id: "create-folder", label: "新規フォルダ" },
   { id: "import-pdf", label: "PDFを追加" },
 ];
-
 const PROJECT_ADD_MENU_WIDTH = resolveRightClickPanelTextWidth(PROJECT_ADD_MENU_ITEM_DEFINITIONS.map((item) => item.label), 132);
-
 const PROJECT_ADD_MENU_HEIGHT = PROJECT_ADD_MENU_ITEM_DEFINITIONS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
-
 const EMPTY_COLLECTION: never[] = [];
-
 const OPENABLE_ENTITY_SELECTOR = "[data-directory-entity-kind='cardSet'], [data-directory-entity-kind='document'], [data-directory-entity-kind='note']";
-
-
 
 const getFolderName = (folder: FolderTreeNode): string => {
   const name = folder.folderName ?? folder.folder_name;
   return typeof name === "string" && name.trim() ? name.trim() : "無題のフォルダ";
 };
-
 const getUniqueTagName = (baseName: string, tagNames: readonly string[]): string => {
   const usedTagNameSet = new Set(tagNames.map((tagName) => tagName.trim().toLowerCase()).filter((tagName) => tagName.length > 0));
   const normalizedBaseName = baseName.toLowerCase();
@@ -131,7 +95,6 @@ const getUniqueTagName = (baseName: string, tagNames: readonly string[]): string
   while (usedTagNameSet.has(`${normalizedBaseName} ${suffix}`)) suffix += 1;
   return `${baseName} ${suffix}`;
 };
-
 const createFolderLookup = (rootFolders: FolderTreeNode[], getChildFolders: (folderId: string) => FolderTreeNode[]): Map<string, FolderTreeNode> => {
   const map = new Map<string, FolderTreeNode>();
   const stack = [...rootFolders];
@@ -149,7 +112,6 @@ const createFolderLookup = (rootFolders: FolderTreeNode[], getChildFolders: (fol
 
   return map;
 };
-
 const getWorkspaceOwnerName = (displayName: string | null | undefined, email: string | null | undefined): string => {
   const trimmedDisplayName = displayName?.trim();
   if (trimmedDisplayName) return trimmedDisplayName;
@@ -159,39 +121,30 @@ const getWorkspaceOwnerName = (displayName: string | null | undefined, email: st
 
   return WORKSPACE_OWNER_FALLBACK_NAME;
 };
-
 const getWorkspaceInitial = (workspaceOwnerName: string): string => {
   const initial = workspaceOwnerName.trim().charAt(0);
   return initial ? initial.toUpperCase() : WORKSPACE_AVATAR_FALLBACK;
 };
-
 const getProjectAddMenuPosition = (event: ReactMouseEvent<HTMLElement>): ProjectAddMenuState => {
   const rect = event.currentTarget.getBoundingClientRect();
   return clampRightClickPanelPosition(rect.right - PROJECT_ADD_MENU_WIDTH, rect.bottom + 6, { width: PROJECT_ADD_MENU_WIDTH, height: PROJECT_ADD_MENU_HEIGHT });
 };
-
 const getActiveLibraryFolderId = (tab: WorkspaceTab | null): string | null => {
   if (!tab || tab.sectionKey !== "library") return null;
   if (tab.kind === "explorer") return tab.explorerState.selectedFolderId;
   if (tab.kind === "document" || tab.kind === "card" || tab.kind === "note") return tab.folderId;
   return null;
 };
-
 const isOpenableEntityEventTarget = (target: EventTarget | null): boolean => {
   return target instanceof HTMLElement && target.closest(OPENABLE_ENTITY_SELECTOR) !== null;
 };
-
 const scheduleLeftPanelClose = (onToggleLeftPanel?: () => void) => {
   if (!onToggleLeftPanel) return;
   window.setTimeout(onToggleLeftPanel, 0);
 };
 
-
-
 const IconPlus = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
-
 const IconChevronDown = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M4 6.25L8 10.25L12 6.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>);
-
 const ProjectAddMenu = ({ x, y, menuRef, onCreateNote, onCreateCardSet, onCreateFolder, onImportPdf }: ProjectAddMenuProps) => {
   const handleItemClick = (event: ReactMouseEvent<HTMLButtonElement>, id: ProjectAddMenuActionId) => {
     event.preventDefault();
@@ -225,7 +178,6 @@ const ProjectAddMenu = ({ x, y, menuRef, onCreateNote, onCreateCardSet, onCreate
     </RightClickPanelSurface>
   );
 };
-
 const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSettings }: SidebarLayeredDirectoryProps) => {
   const navigate = useNavigate();
   const { onOpenSettings: outletOpenSettings, onToggleLeftPanel: outletToggleLeftPanel } = useOutletContext<AppLayoutOutletContext>();
@@ -432,7 +384,5 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
     </div>
   );
 };
-
-
 
 export { LibraryHierarchySidebar, ProjectListSidebar, SidebarLayeredDirectory, TagTreeSidebar };

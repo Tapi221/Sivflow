@@ -10,7 +10,6 @@ const GRID_OFFSET_TYPES = new Set<CardBlock["type"]>(["math"]);
 
 export const isGridOffsetType = (type: CardBlock["type"]) => { return GRID_OFFSET_TYPES.has(type);
 };
-
 export const getNormalizedGridOffsetRows = (block: CardBlock): number => { if (!isGridOffsetType(block.type)) return 0;
   const value = Number(block.offsetRows ?? block.rowOffset ?? 0);
   if (!Number.isFinite(value)) return 0;
@@ -19,4 +18,3 @@ export const getNormalizedGridOffsetRows = (block: CardBlock): number => { if (!
     GRID_OFFSET_ROWS_MIN,
     Math.min(GRID_OFFSET_ROWS_MAX, Math.round(value)),
   );
-};

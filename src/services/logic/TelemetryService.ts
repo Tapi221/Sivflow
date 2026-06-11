@@ -1,8 +1,6 @@
 import type { ITelemetryService, LogContext, LogLevel, SyncLogEntry, TelemetryEventName } from "@/types/domain/telemetry";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
-
-
 const TELEMETRY_MESSAGE_LABELS: Record<string, string> = {
   "Sync already in progress, skipping": "同期はすでに実行中のためスキップしました",
   "Sync started": "同期を開始しました",
@@ -22,21 +20,17 @@ const TELEMETRY_MESSAGE_LABELS: Record<string, string> = {
   "Could not check device status": "デバイス状態を確認できませんでした",
 };
 
-
-
 const toDisplayMessage = (message: string): string => {
   const backingUpMatch = /^Backing up (\d+) local changes$/.exec(message);
   if (backingUpMatch) return `${backingUpMatch[1]} 件のローカル変更をバックアップしています`;
 
   return TELEMETRY_MESSAGE_LABELS[message] ?? message;
 };
-
 const toDisplayTransactionName = (name: string): string => {
   if (name === "sync") return "同期";
   if (name === "startup_sync") return "起動時同期";
   return name;
 };
-
 const buildConsoleArgs = (prefix: string, context?: LogContext, error?: Error): unknown[] => {
   const args: unknown[] = [prefix];
   const sanitizedContext = sanitizeForLog(context);

@@ -20,27 +20,22 @@ const EVENT_MOVE_TOAST_ID_PREFIX = "calendar-event-move";
 
 
 const cloneDate = (value: Date): Date => new Date(value);
-
 const cloneMoveOverride = ({ startsAt, endsAt, isAllDay }: CalendarEventMoveOverride): CalendarEventMoveOverride => ({
   startsAt: cloneDate(startsAt),
   endsAt: cloneDate(endsAt),
   isAllDay,
 });
-
 const createMoveOverride = (startsAt: Date, endsAt: Date, isAllDay: boolean): CalendarEventMoveOverride => ({
   startsAt: cloneDate(startsAt),
   endsAt: cloneDate(endsAt),
   isAllDay,
 });
-
 const createMoveSnapshot = (event: GoogleCalendarEvent): CalendarEventMoveSnapshot => ({
   startsAt: cloneDate(event.startsAt),
   endsAt: cloneDate(event.endsAt),
   isAllDay: event.isAllDay,
 });
-
 const resolveCalendarEventMoveKey = (event: Pick<GoogleCalendarEvent, "id" | "calendarId" | "accountId">): string => `${event.accountId ?? "unknown"}:${event.calendarId}:${event.id}`;
-
 const removeCalendarEventMoveOverride = (currentOverrides: Map<string, CalendarEventMoveOverride>, eventKey: string): Map<string, CalendarEventMoveOverride> => {
   if (!currentOverrides.has(eventKey)) return currentOverrides;
 
@@ -48,7 +43,6 @@ const removeCalendarEventMoveOverride = (currentOverrides: Map<string, CalendarE
   nextOverrides.delete(eventKey);
   return nextOverrides;
 };
-
 const upsertCalendarEventMoveOverride = (currentOverrides: Map<string, CalendarEventMoveOverride>, eventKey: string, override: CalendarEventMoveOverride): Map<string, CalendarEventMoveOverride> => {
   const currentOverride = currentOverrides.get(eventKey);
 
@@ -65,9 +59,7 @@ const upsertCalendarEventMoveOverride = (currentOverrides: Map<string, CalendarE
   nextOverrides.set(eventKey, cloneMoveOverride(override));
   return nextOverrides;
 };
-
 const getCalendarEventMoveToastId = (eventKey: string): string => `${EVENT_MOVE_TOAST_ID_PREFIX}:${eventKey}`;
-
 const applyCalendarEventMoveOverrides = (events: GoogleCalendarEvent[], overrides: Map<string, CalendarEventMoveOverride>): GoogleCalendarEvent[] => events.map((event) => {
   const override = overrides.get(resolveCalendarEventMoveKey(event));
   if (!override) return event;
@@ -79,7 +71,6 @@ const applyCalendarEventMoveOverrides = (events: GoogleCalendarEvent[], override
     isAllDay: override.isAllDay,
   };
 });
-
 const useCalendarEventMoveController = ({ updateGoogleCalendarEvent }: UseCalendarEventMoveControllerOptions): UseCalendarEventMoveControllerReturn => {
   const [calendarEventMoveOverrides, setCalendarEventMoveOverrides] = useState<Map<string, CalendarEventMoveOverride>>(() => new Map());
   const moveOperationTokenRef = useRef(0);
@@ -209,4 +200,4 @@ export { applyCalendarEventMoveOverrides, useCalendarEventMoveController };
 
 
 
-export type { CalendarEventMoveOverride, UseCalendarEventMoveControllerOptions, UseCalendarEventMoveControllerReturn };
+export type { CalendarEventMoveOverride, UseCalendarEventMoveControllerOptions, UseCalendarEventMoveController

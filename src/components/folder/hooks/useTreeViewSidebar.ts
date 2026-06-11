@@ -5,7 +5,6 @@ import { useTreeViewSidebarHotkey } from "@/features/hotkey/useTreeViewSidebarHo
 
 
 export const TREE_VIEW_SIDEBAR_TOGGLE_EVENT = "sivflow:treeview-sidebar-toggle";
-
 const SIDEBAR_WIDTH_LIMITS = {
   min: 260,
   max: 320,
@@ -17,7 +16,6 @@ const SECTION_LIST_PANE_LEFT_VAR = "--sivflow-section-list-pane-left";
 
 const clampSidebarWidth = (width: number) =>
   Math.min(Math.max(width, SIDEBAR_WIDTH_LIMITS.min), SIDEBAR_WIDTH_LIMITS.max);
-
 const publishSectionListPaneLeft = (width: number) => {
   if (typeof document === "undefined") {
     return;
@@ -29,7 +27,6 @@ const publishSectionListPaneLeft = (width: number) => {
     `${nextWidth}px`,
   );
 };
-
 const readStoredSidebarWidth = () => {
   if (typeof window === "undefined") {
     return SIDEBAR_WIDTH_LIMITS.default;
@@ -44,7 +41,6 @@ const readStoredSidebarWidth = () => {
 
   return clampSidebarWidth(parsedWidth);
 };
-
 const readStoredSidebarOpen = () => {
   if (typeof window === "undefined") {
     return true;
@@ -53,7 +49,6 @@ const readStoredSidebarOpen = () => {
   const savedOpen = window.localStorage.getItem(WEB_STORAGE_KEYS.sidebarOpen);
   return savedOpen !== null ? savedOpen === "true" : true;
 };
-
 export const useTreeViewSidebar = () => { const [sidebarWidth, setSidebarWidth] = useState(readStoredSidebarWidth);
   const [renderedSidebarWidth, setRenderedSidebarWidth] = useState(() =>
     clampSidebarWidth(readStoredSidebarWidth()),

@@ -8,8 +8,6 @@ import { cleanupOutdatedCaches, matchPrecache, precacheAndRoute } from "workbox-
 import { registerRoute, setCatchHandler } from "workbox-routing";
 import { CacheFirst, NetworkFirst } from "workbox-strategies";
 
-
-
 declare global {
   interface ServiceWorkerGlobalScope {
     // Workbox が定義している型に合わせる（TS2717潰し）
@@ -23,30 +21,19 @@ type ViteEnv = {
   GITHUB_SHA?: string;
 };
 
-
-
 declare let self: ServiceWorkerGlobalScope;
-
 const env = (import.meta as ImportMeta & { env?: ViteEnv }).env;
-
 const cacheVersion = env?.VITE_BUILD_VERSION ?? env?.GITHUB_SHA ?? "dev";
-
-
 
 self.addEventListener("message", (event) => {
   if (event.data && (event.data as { type?: string }).type === "SKIP_WAITING") {
     self.skipWaiting();
   }
 });
-
 self.skipWaiting();
-
 clientsClaim();
-
 cleanupOutdatedCaches();
-
 precacheAndRoute(self.__WB_MANIFEST);
-
 registerRoute(
   ({ request }) => request.mode === "navigate",
   new NetworkFirst({
@@ -61,7 +48,6 @@ registerRoute(
     ],
   }),
 );
-
 registerRoute(
   ({ request }) =>
     request.destination === "script" ||
@@ -90,7 +76,5 @@ setCatchHandler(async ({ request }) => {
   }
   return Response.error();
 });
-
-
 
 export {};

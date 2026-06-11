@@ -18,7 +18,6 @@ interface BlockToolbarProps {
   desktopLayout?: "horizontal" | "vertical";
   className?: string;
 }
-
 type ToolbarBlockConfig = {
   type: EditorBlockType;
   label: string;
@@ -79,7 +78,6 @@ const TextBlockGlyph = ({
     </svg>
   );
 };
-
 const QuestionBlockGlyph = ({
   size = 16,
   className,
@@ -120,7 +118,6 @@ const QuestionBlockGlyph = ({
     </svg>
   );
 };
-
 const CodeBlockGlyph = ({
   size = 16,
   className,
@@ -158,7 +155,6 @@ const CodeBlockGlyph = ({
     </svg>
   );
 };
-
 const ImageBlockGlyph = ({
   size = 16,
   className,
@@ -203,7 +199,6 @@ const ImageBlockGlyph = ({
     </svg>
   );
 };
-
 const MathBlockGlyph = ({
   size = 16,
   className,
@@ -241,7 +236,6 @@ const MathBlockGlyph = ({
     </svg>
   );
 };
-
 const MarkdownBlockGlyph = ({
   size = 16,
   className,
@@ -386,7 +380,6 @@ const Tooltip = ({
     </>
   );
 };
-
 const ActionButton = ({
   onClick,
   icon: Icon,
@@ -417,7 +410,6 @@ const ActionButton = ({
     </Tooltip>
   );
 };
-
 const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
   label,
   onAddBlock,
@@ -624,5 +616,4 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
 
 
 export const BlockToolbar = React.memo( BlockToolbarInner, areBlockToolbarPropsEqual, );
-
 BlockToolbar.displayName = "BlockToolbar";

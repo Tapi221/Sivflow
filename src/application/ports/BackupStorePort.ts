@@ -3,7 +3,6 @@ export interface AutoBackupRecord { id: string;
   createdAt: string;
   payload: unknown;
 }
-
 export interface BackupStorePort { isAvailable: () => boolean;
   loadBackups: () => AutoBackupRecord[];
   saveBackups: (backups: AutoBackupRecord[]) => void;

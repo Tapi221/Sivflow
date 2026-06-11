@@ -5,37 +5,27 @@ import { recognizeSelectionCaptureText } from "@/features/selection-capture/sele
 import { capturePdfViewerAreaToBlob } from "@/features/pdf/pdfSelectionCapture";
 import type { SelectionCaptureArea } from "@/features/selection-capture/selectionCapture.types";
 
-
-
 type PdfSelectionCaptureTargetRef = {
   readonly current: HTMLElement | null;
 };
-
 type UsePdfSelectionCaptureParams = {
   targetRef: PdfSelectionCaptureTargetRef;
   selectionCaptureSide: CardSelectionCaptureSide;
   sourceUnavailable: boolean;
   numPages: number;
 };
-
 type UsePdfSelectionCaptureResult = {
   isSelectionCaptureBusy: boolean;
   selectionCaptureMessage: string | null;
   handleCaptureSelection: (area: SelectionCaptureArea) => Promise<void>;
 };
-
 export type { UsePdfSelectionCaptureParams, UsePdfSelectionCaptureResult };
 
-
-
 const PDF_SELECTION_CAPTURE_MESSAGE_TIMEOUT_MS = 1800;
-
-
 
 const resolvePdfSelectionCaptureTaskMessage = (results: CardSelectionCaptureTaskResult[]): string | null => {
   return results.find((result): result is string => typeof result === "string" && result.trim().length > 0) ?? null;
 };
-
 const usePdfSelectionCapture = ({ targetRef, selectionCaptureSide, sourceUnavailable, numPages }: UsePdfSelectionCaptureParams): UsePdfSelectionCaptureResult => {
   const [isSelectionCaptureBusy, setIsSelectionCaptureBusy] = useState(false);
   const [selectionCaptureMessage, setSelectionCaptureMessage] = useState<string | null>(null);
@@ -86,7 +76,5 @@ const usePdfSelectionCapture = ({ targetRef, selectionCaptureSide, sourceUnavail
     handleCaptureSelection,
   };
 };
-
-
 
 export { usePdfSelectionCapture };

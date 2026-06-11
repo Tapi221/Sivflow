@@ -69,7 +69,6 @@ const RIGHT_CLICK_PANEL_COMMON_STYLE = `
 
 
 const getRightClickPanelClassName = (className?: string): string => ["right-click-panel", className].filter(Boolean).join(" ");
-
 const getRightClickPanelStyle = (x: number, y: number, width: number, noDragStyle?: CSSProperties): CSSProperties => ({
   ...noDragStyle,
   left: x,
@@ -115,7 +114,5 @@ const RightClickPanelSurfaceBase = ({
 
 
 const RightClickPanelSurface = memo(RightClickPanelSurfaceBase);
-
 RightClickPanelSurface.displayName = "RightClickPanelSurface";
-
 export { RightClickPanelSurface };

@@ -9,7 +9,6 @@ interface SecurityContextType {
   securityState: SecurityState;
   dismissSecurityAlert: (alertId: string) => Promise<void>;
 }
-
 interface SecurityProviderProps {
   children: ReactNode;
 }
@@ -21,7 +20,6 @@ const defaultSecurityState: SecurityState = {
   requires2FA: false,
   alerts: [],
 };
-
 const SecurityContext = createContext<SecurityContextType>({
   securityState: defaultSecurityState,
   dismissSecurityAlert: async () => {},
@@ -88,5 +86,4 @@ export const SecurityProvider = ({ children }: SecurityProviderProps) => { const
     <SecurityContext.Provider value={value}>
       {children}
     </SecurityContext.Provider>
-  );
-};
+  

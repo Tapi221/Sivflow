@@ -8,7 +8,6 @@ type PointerGestureState = Readonly<{
   startY: number;
   moved: boolean;
 }>;
-
 type FlipTriggerEvent = Readonly<{
   target: EventTarget | null;
   stopPropagation?: () => void;
@@ -29,7 +28,6 @@ export const shouldIgnoreFlipTarget = (target: EventTarget | null): boolean => {
     ),
   );
 };
-
 const createInitialPointerGestureState = (): PointerGestureState => ({
   pointerId: null,
   startX: 0,
@@ -46,7 +44,6 @@ export type UseCardFlipBehaviorParams = Readonly<{ isCardClickable: boolean;
   isModalBlockingFlip: boolean;
   isInkEditingActive: boolean;
 }>;
-
 export type UseCardFlipBehaviorResult = Readonly<{ handleFlip: (event?: React.MouseEvent<HTMLDivElement>) => void;
   handleKeyDown: React.KeyboardEventHandler<HTMLDivElement>;
   handlePointerDownCapture: React.PointerEventHandler<HTMLDivElement>;

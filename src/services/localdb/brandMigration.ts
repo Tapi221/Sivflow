@@ -4,17 +4,10 @@ import { defineSchema } from "./schema";
 import { LOCALDB_BRAND_MIGRATION_KEY_PREFIX, LOCALDB_GENERATION_MAX, LOCALDB_LEGACY_NAME_PREFIX, LOCALDB_NAME_PREFIX, LOCALDB_SCHEMA_VERSION_FOR_NAME } from "./localdb.constants";
 import { warnOncePerSession } from "@/services/localDBRuntimeState";
 
-
-
 type MigratableTableName = (typeof MIGRATABLE_TABLE_NAMES)[number];
-
 type MigratableDexie = Dexie & Record<MigratableTableName, Dexie.Table<unknown, unknown>>;
 
-
-
 const MIGRATABLE_TABLE_NAMES = ["folders", "cardSets", "cards", "documents", "notes", "users", "userSettings", "userStats", "syncMetadata", "levelHistories", "deviceMeta", "syncErrors", "syncHistory", "syncSettings", "syncQueue", "conflicts", "metadata", "images", "cardRelations", "projectMaps", "studyLogs", "tagRecords", "documentFiles"] as const;
-
-
 
 const createMigrationDb = (name: string): MigratableDexie => {
   const db = new Dexie(name) as MigratableDexie;
@@ -22,11 +15,8 @@ const createMigrationDb = (name: string): MigratableDexie => {
   defineNoteSchema(db as never);
   return db;
 };
-
 const getMigrationStorageKey = (userId: string): string => `${LOCALDB_BRAND_MIGRATION_KEY_PREFIX}${userId}`;
-
 const getGenerationDbName = (prefix: string, userId: string, generation: number): string => `${prefix}${userId}_v${LOCALDB_SCHEMA_VERSION_FOR_NAME}_g${generation}`;
-
 const getLegacyDatabaseCandidates = (userId: string): string[] => {
   const names: string[] = [];
 
@@ -37,7 +27,6 @@ const getLegacyDatabaseCandidates = (userId: string): string[] => {
   names.push(`${LOCALDB_LEGACY_NAME_PREFIX}${userId}`);
   return names;
 };
-
 const hasCompletedBrandMigration = (userId: string): boolean => {
   if (typeof window === "undefined") return true;
   try {
@@ -46,7 +35,6 @@ const hasCompletedBrandMigration = (userId: string): boolean => {
     return false;
   }
 };
-
 const markBrandMigrationComplete = (userId: string): void => {
   if (typeof window === "undefined") return;
   try {
@@ -55,7 +43,6 @@ const markBrandMigrationComplete = (userId: string): void => {
     // ignore localStorage write failures
   }
 };
-
 const databaseExists = async (name: string): Promise<boolean> => {
   if (typeof indexedDB === "undefined") return false;
 
@@ -74,7 +61,6 @@ const databaseExists = async (name: string): Promise<boolean> => {
     db.close();
   }
 };
-
 const getFirstExistingDatabaseName = async (names: readonly string[]): Promise<string | null> => {
   for (const name of names) {
     if (await databaseExists(name)) return name;
@@ -82,7 +68,6 @@ const getFirstExistingDatabaseName = async (names: readonly string[]): Promise<s
 
   return null;
 };
-
 const isDestinationEmpty = async (db: MigratableDexie): Promise<boolean> => {
   for (const tableName of MIGRATABLE_TABLE_NAMES) {
     if (!db.tables.some((table) => table.name === tableName)) continue;
@@ -91,7 +76,6 @@ const isDestinationEmpty = async (db: MigratableDexie): Promise<boolean> => {
 
   return true;
 };
-
 const copyTable = async (source: MigratableDexie, destination: MigratableDexie, tableName: MigratableTableName): Promise<void> => {
   if (!source.tables.some((table) => table.name === tableName)) return;
   if (!destination.tables.some((table) => table.name === tableName)) return;
@@ -100,7 +84,6 @@ const copyTable = async (source: MigratableDexie, destination: MigratableDexie, 
   if (rows.length === 0) return;
   await destination.table(tableName).bulkPut(rows);
 };
-
 export const migrateLegacyLocalDbBrandIfNeeded = async (userId: string, destinationDatabaseName: string): Promise<void> => { if (hasCompletedBrandMigration(userId)) return;
   if (!destinationDatabaseName.startsWith(LOCALDB_NAME_PREFIX)) return;
 

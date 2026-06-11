@@ -51,7 +51,6 @@ export function EquationElementStatic( props: SlateElementProps<TEquationElement
     </SlateElement>
   );
 }
-
 export function InlineEquationElementStatic( props: SlateElementProps<TEquationElement> ) { const html = getEquationHtml({ element: props.element, options: { displayMode: true, errorColor: '#cc0000', fleqn: false, leqno: false, macros: { '\f': '#1f(#2)' }, output: 'htmlAndMathml', strict: 'warn', throwOnError: false, trust: false, }, });
 
   return (

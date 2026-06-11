@@ -10,21 +10,16 @@ type KeyedNumberState = {
   sourceKey: string;
   value: number | null;
 };
-
 type KeyedStringState = {
   sourceKey: string;
   value: string | null;
 };
-
 type KeyedFlipState = {
   sourceKey: string;
   ids: Set<string>;
 };
-
 type CardFace = "question" | "answer";
-
 type CardSetViewInteractionMode = "view" | "edit";
-
 interface UseCardSetViewSelectionStateOptions {
   initialIndex: number;
   targetCardId: string | null;
@@ -198,4 +193,3 @@ export const useCardSetViewSelectionState = ({ initialIndex, targetCardId, devic
     handleToggleViewMode,
     handlePagerIndexChange,
   };
-};

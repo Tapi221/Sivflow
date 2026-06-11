@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 
 
 type CSSCustomProperties = React.CSSProperties & Record<`--${string}`, string>;
-
 interface MarkdownEditorDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;

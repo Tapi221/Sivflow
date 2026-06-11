@@ -11,17 +11,14 @@ export type WeekdayTimedEventPositionStyle = CSSProperties & { left: string;
   height: string;
   minHeight: string;
 };
-
 export type WeekdayTimedEventFrame = { leftPercent: number;
   topHours: number;
   widthPercent: number;
   heightHours: number;
 };
-
 export type WeekdayTimedEventPositionOptions = { maxMinHeightHours?: number;
   suppressMinHeight?: boolean;
 };
-
 type WeekdayTimedEventHorizontalInsets = {
   leftPx: number;
   rightPx: number;
@@ -33,7 +30,6 @@ const PERCENT_MAX = 100;
 const SHORT_RANGE_CARRY_OVER_HIDE_THRESHOLD_HOURS = 1;
 const TIME_GRID_DECIMAL_PLACES = 12;
 const TIME_GRID_FLOATING_POINT_EPSILON = Number.EPSILON * 10;
-
 export const WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX = eventChipDesign.weekdayGrid.timedMinHeightPx;
 
 
@@ -43,11 +39,8 @@ const normalizeTimeGridNumber = (value: number): number => {
 
   return Math.abs(value - rounded) <= TIME_GRID_FLOATING_POINT_EPSILON ? rounded : value;
 };
-
 const getPercentAsHourSpan = (percent: number, rangeHours: number): number => normalizeTimeGridNumber((percent / PERCENT_MAX) * rangeHours);
-
 const getTrimmedEventLengthPx = (lengthPx: number): number => Math.max(0, lengthPx - eventChipDesign.weekdayGrid.timedVerticalTrimPx);
-
 const getWeekdayTimedEventHorizontalInsets = (frame: WeekdayTimedEventFrame): WeekdayTimedEventHorizontalInsets => {
   const rightPercent = frame.leftPercent + frame.widthPercent;
   const overlapSideGapPx = eventChipDesign.weekdayGrid.timedOverlapGapPx / 2;
@@ -56,7 +49,6 @@ const getWeekdayTimedEventHorizontalInsets = (frame: WeekdayTimedEventFrame): We
 
   return { leftPx, rightPx };
 };
-
 const createMinHeightStyle = ({ maxMinHeightHours, shouldHideEvent, suppressMinHeight }: { maxMinHeightHours?: number; shouldHideEvent: boolean; suppressMinHeight?: boolean }): string => {
   if (shouldHideEvent || suppressMinHeight) return "0px";
 
@@ -68,11 +60,8 @@ const createMinHeightStyle = ({ maxMinHeightHours, shouldHideEvent, suppressMinH
 
   return `max(0px, min(${minHeightPx}px, calc(${normalizedMaxMinHeightHours} * var(${GRID.WEEKDAY_CSS_VAR_HOUR_ROW_HEIGHT}) - ${eventChipDesign.weekdayGrid.timedVerticalTrimPx}px)))`;
 };
-
 const shouldHideCarryOverEventInShortRange = (entry: CalendarTimeGridLayoutEntry, rangeHours: number): boolean => entry.startsBeforeRange && rangeHours <= SHORT_RANGE_CARRY_OVER_HIDE_THRESHOLD_HOURS;
-
 export const getWeekdayTimedEventFrame = (entry: CalendarTimeGridLayoutEntry, rangeHours = GRID.WEEKDAY_HOURS): WeekdayTimedEventFrame => ({ leftPercent: entry.style.xOffset, topHours: getPercentAsHourSpan(entry.style.top, rangeHours), widthPercent: entry.style.width, heightHours: getPercentAsHourSpan(entry.style.height, rangeHours), });
-
 export const getWeekdayTimedEventPositionStyle = (entry: CalendarTimeGridLayoutEntry, rangeHours = GRID.WEEKDAY_HOURS, options: WeekdayTimedEventPositionOptions = {}): WeekdayTimedEventPositionStyle => { const frame = getWeekdayTimedEventFrame(entry, rangeHours);
   const horizontalInsets = getWeekdayTimedEventHorizontalInsets(frame);
   const shouldHideEvent = shouldHideCarryOverEventInShortRange(entry, rangeHours);
@@ -86,4 +75,3 @@ export const getWeekdayTimedEventPositionStyle = (entry: CalendarTimeGridLayoutE
     overflow: shouldHideEvent ? "hidden" : undefined,
     pointerEvents: shouldHideEvent ? "none" : undefined,
   };
-};

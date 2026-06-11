@@ -6,14 +6,12 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 
 
 type CalendarEventDragAutoScrollDirection = "up" | "down";
-
 type CalendarEventDragPointerSnapshot = {
   pointerId: number;
   buttons: number;
   clientX: number;
   clientY: number;
 };
-
 type CalendarEventDragAutoScrollOptions<TElement extends HTMLElement> = {
   scrollContainerRef?: RefObject<TElement | null>;
   onScroll: (snapshot: CalendarEventDragPointerSnapshot) => void;
@@ -29,23 +27,16 @@ const CALENDAR_EVENT_DRAG_SCROLL_INTERVAL_MS = 16;
 
 
 const createCalendarEventKey = (event: GoogleCalendarEvent): string => `${event.accountId ?? ""}:${event.calendarId}:${event.id}`;
-
 const createCalendarEventDragPointerSnapshot = (pointerId: number, buttons: number, clientX: number, clientY: number): CalendarEventDragPointerSnapshot => ({ pointerId, buttons, clientX, clientY });
-
 const getCalendarEventDateOrNull = (value: Date): Date | null => {
   const date = value instanceof Date ? value : new Date(value);
 
   return Number.isFinite(date.getTime()) ? date : null;
 };
-
 const isCalendarEventDraggable = (event: GoogleCalendarEvent, onMoveCalendarEvent?: CalendarEventMoveHandler): boolean => Boolean(onMoveCalendarEvent && event.accountId);
-
 const areSameCalendarEventTimes = (leftStart: Date, leftEnd: Date, rightStart: Date, rightEnd: Date): boolean => leftStart.getTime() === rightStart.getTime() && leftEnd.getTime() === rightEnd.getTime();
-
 const isSameCalendarEventMove = (event: GoogleCalendarEvent, previewStartsAt: Date, previewEndsAt: Date, previewIsAllDay: boolean): boolean => event.isAllDay === previewIsAllDay && areSameCalendarEventTimes(event.startsAt, event.endsAt, previewStartsAt, previewEndsAt);
-
 const createCalendarEventDragPreview = (event: GoogleCalendarEvent, startsAt: Date, endsAt: Date, isAllDay: boolean): GoogleCalendarEvent => ({ ...event, startsAt, endsAt, isAllDay });
-
 const getCalendarEventDragAutoScrollDirection = (element: HTMLElement, clientY: number): CalendarEventDragAutoScrollDirection | null => {
   const rect = element.getBoundingClientRect();
   const canScrollUp = element.scrollTop > 0;
@@ -56,9 +47,7 @@ const getCalendarEventDragAutoScrollDirection = (element: HTMLElement, clientY: 
 
   return null;
 };
-
 const getCalendarEventDragAutoScrollDelta = (direction: CalendarEventDragAutoScrollDirection): number => direction === "up" ? -CALENDAR_EVENT_DRAG_SCROLL_STEP_PX : CALENDAR_EVENT_DRAG_SCROLL_STEP_PX;
-
 const useCalendarEventDragBodyStyle = (isDragging: boolean) => {
   useEffect(() => {
     if (!isDragging || typeof document === "undefined") return undefined;
@@ -75,7 +64,6 @@ const useCalendarEventDragBodyStyle = (isDragging: boolean) => {
     };
   }, [isDragging]);
 };
-
 const useCalendarEventDragAutoScroll = <TElement extends HTMLElement>({ scrollContainerRef, onScroll }: CalendarEventDragAutoScrollOptions<TElement>) => {
   const dragPointerSnapshotRef = useRef<CalendarEventDragPointerSnapshot | null>(null);
   const dragAutoScrollDirectionRef = useRef<CalendarEventDragAutoScrollDirection | null>(null);
@@ -166,4 +154,4 @@ export { CALENDAR_EVENT_DRAGGING_STYLE, areSameCalendarEventTimes, createCalenda
 
 
 
-export type { CalendarEventDragPointerSnapshot };
+export type { CalendarEventDragPointerSna

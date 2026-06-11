@@ -8,7 +8,6 @@ const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
 
 
 export const isProjectColor = (value: unknown): value is string => typeof value === "string" && HEX_COLOR_PATTERN.test(value);
-
 const hashString = (value: string): number => {
   let hash = 0;
 
@@ -18,9 +17,7 @@ const hashString = (value: string): number => {
 
   return hash;
 };
-
 export const getFallbackProjectColor = (seed: string): string => PROJECT_COLOR_PALETTE[hashString(seed) % PROJECT_COLOR_PALETTE.length];
-
 export const getFolderProjectColor = (folder: FolderTreeNode): string => { const record = folder as { folderColor?: unknown; folder_color?: unknown; color?: unknown };
   const folderColor = record.folderColor ?? record.folder_color ?? record.color;
   if (isProjectColor(folderColor)) return folderColor;

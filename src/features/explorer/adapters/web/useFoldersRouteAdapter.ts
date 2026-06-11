@@ -8,7 +8,6 @@ import { usePresentationTarget } from "@/platform/presentation/usePresentationTa
 
 
 export type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
-
 export type FoldersRouteAdapter = { routeKey: string;
   isDesktop: boolean;
   readRouteState: () => ExplorerRouteState;
@@ -24,7 +23,6 @@ const isLibraryPath = (pathname: string): boolean =>
   pathname.toLowerCase() === "/library" ||
   pathname.toLowerCase() === "/library/pdf" ||
   pathname.toLowerCase() === "/library/flashcard";
-
 const toLibraryAwareSearchParams = (
   pathname: string,
   searchParams: URLSearchParams,
@@ -43,7 +41,6 @@ const toLibraryAwareSearchParams = (
 
   return next;
 };
-
 export const useFoldersRouteAdapter = (): FoldersRouteAdapter => { const [searchParams, setSearchParams] = useSearchParams();
   const { pathname } = useLocation();
 
@@ -100,4 +97,3 @@ export const useFoldersRouteAdapter = (): FoldersRouteAdapter => { const [search
       writeRouteState,
     ],
   );
-};

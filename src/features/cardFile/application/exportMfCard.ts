@@ -38,7 +38,6 @@ export const buildMfCardFile = ({ card, tagById, appVersion, }: { card: Card;
     },
   };
 };
-
 export const exportMfCardBytes = (params: { card: Card;
   tagById?: MfDeckTagLookup;
   appVersion?: string;

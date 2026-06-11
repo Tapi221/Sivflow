@@ -17,7 +17,6 @@ type XlsxImportCompletedPayload = {
   folderId: string;
   createdCount: number;
 };
-
 type XlsxImportDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;

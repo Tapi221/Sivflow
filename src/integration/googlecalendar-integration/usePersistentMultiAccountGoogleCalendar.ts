@@ -2,28 +2,20 @@ import { useEffect, useMemo, useState } from "react";
 import type { GoogleCalendarEvent } from "./gcalSync.types";
 import { useMultiAccountGoogleCalendar } from "./useMultiAccountGoogleCalendar";
 
-
-
 type CachedGoogleCalendarEvent = Omit<GoogleCalendarEvent, "startsAt" | "endsAt"> & {
   startsAt: string;
   endsAt: string;
 };
 
-
-
 const GOOGLE_CALENDAR_EVENTS_CACHE_KEY = "flashcard-master.gcal.events";
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
-
 const parseCachedDate = (value: unknown): Date | null => {
   if (typeof value !== "string") return null;
 
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
 };
-
 const deserializeCachedEvent = (value: unknown): GoogleCalendarEvent | null => {
   if (!isRecord(value)) return null;
 
@@ -48,13 +40,11 @@ const deserializeCachedEvent = (value: unknown): GoogleCalendarEvent | null => {
     ...(typeof value.projectId === "string" ? { projectId: value.projectId } : {}),
   };
 };
-
 const serializeCachedEvent = (event: GoogleCalendarEvent): CachedGoogleCalendarEvent => ({
   ...event,
   startsAt: event.startsAt.toISOString(),
   endsAt: event.endsAt.toISOString(),
 });
-
 const readCachedGoogleCalendarEvents = (): GoogleCalendarEvent[] => {
   if (typeof window === "undefined") return [];
 
@@ -73,7 +63,6 @@ const readCachedGoogleCalendarEvents = (): GoogleCalendarEvent[] => {
     return [];
   }
 };
-
 const writeCachedGoogleCalendarEvents = (events: GoogleCalendarEvent[]): void => {
   if (typeof window === "undefined") return;
 
@@ -86,7 +75,6 @@ const writeCachedGoogleCalendarEvents = (events: GoogleCalendarEvent[]): void =>
     // キャッシュ書き込みに失敗しても、同期済み state の表示は維持する。
   }
 };
-
 const filterEventsBySelectedCalendarIds = (
   events: GoogleCalendarEvent[],
   selectedCalendarIds: Set<string>,
@@ -95,7 +83,6 @@ const filterEventsBySelectedCalendarIds = (
 
   return events.filter((event) => selectedCalendarIds.has(event.calendarId));
 };
-
 const mergeGoogleCalendarEvents = (
   cachedEvents: GoogleCalendarEvent[],
   liveEvents: GoogleCalendarEvent[],
@@ -115,7 +102,6 @@ const mergeGoogleCalendarEvents = (
 
   return Array.from(merged.values());
 };
-
 export const usePersistentMultiAccountGoogleCalendar = () => { const google = useMultiAccountGoogleCalendar();
   const [cachedEvents, setCachedEvents] = useState<GoogleCalendarEvent[]>(readCachedGoogleCalendarEvents);
 

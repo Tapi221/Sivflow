@@ -6,8 +6,6 @@ import { fetchCalendarList } from "./gcal.api";
 import { readCalendarIds, readEmail, readRefreshToken, readToken, readWasConnected, writeCalendarIds, writeEmail, writeRefreshToken, writeToken, writeWasConnected } from "./gcal.storage";
 import type { GCalForceSyncOptions, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem, UseGoogleCalendarIntegrationOptions } from "./gcalSync.types";
 
-
-
 type EventsAction =
   | {
     type: "upsert";
@@ -27,8 +25,6 @@ type EventsAction =
   | {
     type: "clear";
   };
-
-
 
 const reduceEvents = (
   state: GoogleCalendarEvent[],
@@ -70,7 +66,6 @@ const reduceEvents = (
       return state;
   }
 };
-
 export const useGoogleCalendarIntegration = ({ authInstance = auth, }: UseGoogleCalendarIntegrationOptions = {}) => { const [accessToken, setAccessToken] = useState<string | null>(() => readToken(), );
 
   const [accountEmail, setAccountEmail] = useState<string | null>(() =>

@@ -5,10 +5,7 @@ import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { Card, CardSet, Document, Folder } from "@/types";
 import { useTrashItems } from "./useTrashItems";
 
-
-
 type TrashItemKind = "folder" | "card" | "cardSet" | "document";
-
 type TrashItemRow = {
   id: string;
   kind: TrashItemKind;
@@ -16,24 +13,18 @@ type TrashItemRow = {
   subtitle: string;
 };
 
-
-
 const getFolderTitle = (folder: Folder): string => {
   return folder.folderName || "無題のフォルダ";
 };
-
 const getCardTitle = (card: Card): string => {
   return card.title || card.questionNumber || "無題のカード";
 };
-
 const getCardSetTitle = (cardSet: CardSet): string => {
   return cardSet.name || "無題のカードセット";
 };
-
 const getDocumentTitle = (document: Document): string => {
   return document.title || document.fileName || "無題のドキュメント";
 };
-
 const createFolderRows = (folders: Folder[]): TrashItemRow[] => {
   return folders.map((folder) => ({
     id: folder.id,
@@ -42,7 +33,6 @@ const createFolderRows = (folders: Folder[]): TrashItemRow[] => {
     subtitle: "フォルダ",
   }));
 };
-
 const createCardRows = (cards: Card[]): TrashItemRow[] => {
   return cards.map((card) => ({
     id: card.id,
@@ -51,7 +41,6 @@ const createCardRows = (cards: Card[]): TrashItemRow[] => {
     subtitle: "カード",
   }));
 };
-
 const createCardSetRows = (cardSets: CardSet[]): TrashItemRow[] => {
   return cardSets.map((cardSet) => ({
     id: cardSet.id,
@@ -60,7 +49,6 @@ const createCardSetRows = (cardSets: CardSet[]): TrashItemRow[] => {
     subtitle: "カードセット",
   }));
 };
-
 const createDocumentRows = (documents: Document[]): TrashItemRow[] => {
   return documents.map((document) => ({
     id: document.id,
@@ -69,15 +57,12 @@ const createDocumentRows = (documents: Document[]): TrashItemRow[] => {
     subtitle: "ドキュメント",
   }));
 };
-
 const toTrashItemIds = (row: TrashItemRow) => ({
   folderIds: row.kind === "folder" ? [row.id] : [],
   cardIds: row.kind === "card" ? [row.id] : [],
   cardSetIds: row.kind === "cardSet" ? [row.id] : [],
   documentIds: row.kind === "document" ? [row.id] : [],
 });
-
-
 
 const TrashPage = () => {
   const { currentUser, loading } = useAuthSession();
@@ -210,7 +195,5 @@ const TrashPage = () => {
     </main>
   );
 };
-
-
 
 export default TrashPage;

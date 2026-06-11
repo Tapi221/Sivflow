@@ -10,14 +10,11 @@ import type { Card, UploadedImage } from "@/types/domain/card";
 
 
 type IdleHandle = ReturnType<typeof setTimeout>;
-
 type RequestIdleCallback = (
   cb: () => void,
   opts?: { timeout: number },
 ) => IdleHandle;
-
 type CancelIdleCallback = (id: IdleHandle) => void;
-
 type CardCatalogEntry = {
   id: string;
   signature: string;
@@ -27,7 +24,6 @@ type CardCatalogEntry = {
 
 
 const CARD_IMAGE_PRELOAD_DEBUG_STORAGE_KEY = "sivflow_preload_debug";
-
 const CARD_IMAGE_PRELOAD = {
   eagerRadiusFallback: 8,
   eagerBuffer: 2,
@@ -40,18 +36,15 @@ const CARD_IMAGE_PRELOAD = {
 const isDebug = (): boolean =>
   typeof localStorage !== "undefined" &&
   localStorage.getItem(CARD_IMAGE_PRELOAD_DEBUG_STORAGE_KEY) === "1";
-
 const extractImages = (card: Card) => {
   const imgs: UploadedImage[] = [];
   imgs.push(...getCardImages(card, "question"));
   imgs.push(...getCardImages(card, "answer"));
   return imgs;
 };
-
 const cardHasImages = (card: Card) => {
   return extractImages(card).length > 0;
 };
-
 const cardImageSignature = (card: Card) => {
   const imgs = extractImages(card);
   if (imgs.length === 0) return "";
@@ -63,7 +56,6 @@ const cardImageSignature = (card: Card) => {
     )
     .join(",");
 };
-
 const resolveImageUrl = async (img: UploadedImage, userId: string | null) => {
   for (const value of [img.remoteUrl, img.localUrl]) {
     if (
@@ -108,7 +100,6 @@ const resolveImageUrl = async (img: UploadedImage, userId: string | null) => {
 
   return null;
 };
-
 const decodeUrl = async (url: string) => {
   if (isUrlDecoded(url)) return;
 
@@ -122,7 +113,6 @@ const decodeUrl = async (url: string) => {
 
   markUrlDecoded(url);
 };
-
 const preloadCard = async (
   card: Card,
   userId: string | null,
@@ -138,7 +128,6 @@ const preloadCard = async (
     }),
   );
 };
-
 const getRequestIdleCallback = (): RequestIdleCallback | null => {
   if (typeof window === "undefined" || !("requestIdleCallback" in window)) {
     return null;
@@ -147,7 +136,6 @@ const getRequestIdleCallback = (): RequestIdleCallback | null => {
   return (window as unknown as { requestIdleCallback: RequestIdleCallback })
     .requestIdleCallback;
 };
-
 const getCancelIdleCallback = (): CancelIdleCallback | null => {
   if (typeof window === "undefined" || !("cancelIdleCallback" in window)) {
     return null;
@@ -156,7 +144,6 @@ const getCancelIdleCallback = (): CancelIdleCallback | null => {
   return (window as unknown as { cancelIdleCallback: CancelIdleCallback })
     .cancelIdleCallback;
 };
-
 const buildCardCatalog = (cards: Card[]): CardCatalogEntry[] => {
   return cards.map((card) => ({
     id: card.id ?? "",
@@ -164,11 +151,9 @@ const buildCardCatalog = (cards: Card[]): CardCatalogEntry[] => {
     hasImages: cardHasImages(card),
   }));
 };
-
 const buildCatalogSignature = (catalog: CardCatalogEntry[]) => {
   return catalog.map((entry) => `${entry.id}:${entry.signature}`).join("|");
 };
-
 const resolvePreloadWindow = ({
   cardsLength,
   activeIndex,
@@ -205,7 +190,6 @@ const resolvePreloadWindow = ({
     idleEnd,
   };
 };
-
 const useCardImagePreloader = (
   cards: Card[],
   activeIndex: number,

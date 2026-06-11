@@ -14,7 +14,6 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 type Side = "question" | "answer";
-
 export type ViewCardFaceSceneProps = Readonly<{ card: Card;
   side: Side;
   displayMode: CardDisplayMode;
@@ -224,4 +223,3 @@ export const ViewCardFaceScene = ({ card, side, displayMode, fixedScale, fixedHe
       />
     </>
   );
-};

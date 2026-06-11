@@ -1,12 +1,7 @@
 import type { TrashCardBase, TrashCardSetBase, TrashDocumentBase, TrashEntityBase, TrashFolderBase, TrashItemIds, TrashItems, TrashUseCaseInput } from "./trashTypes";
 
-
-
 export const TRASH_RETENTION_DAYS = 30;
-
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
-
 
 const getDeletedAtTime = (value: unknown): number | null => {
   if (value instanceof Date) return value.getTime();
@@ -24,23 +19,18 @@ const getDeletedAtTime = (value: unknown): number | null => {
   }
   return null;
 };
-
 const getStringField = (item: TrashEntityBase, key: string): string | null => {
   const value = item[key];
   return typeof value === "string" && value.length > 0 ? value : null;
 };
-
 const getFolderId = (item: TrashEntityBase): string | null => getStringField(item, "folderId") ?? getStringField(item, "folder_id");
-
 const getCardSetId = (item: TrashEntityBase): string | null => getStringField(item, "cardSetId") ?? getStringField(item, "card_set_id");
-
 const isExpiredTrashItem = (item: TrashEntityBase, retentionDays: number, now: number): boolean => {
   if (item.isDeleted !== true) return false;
   const deletedAt = getDeletedAtTime(item.deletedAt);
   if (deletedAt === null) return false;
   return deletedAt <= now - retentionDays * MS_PER_DAY;
 };
-
 const getDeletedItems = <
   TFolder extends TrashFolderBase,
   TCard extends TrashCardBase,
@@ -84,12 +74,10 @@ const getDeletedItems = <
     documents: deletedDocuments,
   };
 };
-
 export const getTrashItems = async < TFolder extends TrashFolderBase, TCard extends TrashCardBase, TCardSet extends TrashCardSetBase, TDocument extends TrashDocumentBase, >({ userId, repository, }: TrashUseCaseInput<TFolder, TCard, TCardSet, TDocument>): Promise<TrashItems<TFolder, TCard, TCardSet, TDocument>> => { const context = await repository.loadContext(userId);
 
   return getDeletedItems(context);
 };
-
 export const restoreFolderWithParents = async < TFolder extends TrashFolderBase, TCard extends TrashCardBase, TCardSet extends TrashCardSetBase, TDocument extends TrashDocumentBase, >({ userId, folderId, repository, }: TrashUseCaseInput<TFolder, TCard, TCardSet, TDocument> & { folderId: string;
 }): Promise<void> => {
   const { folders } = await repository.loadContext(userId);
@@ -114,7 +102,6 @@ export const restoreFolderWithParents = async < TFolder extends TrashFolderBase,
 
   await repository.restoreFolder(userId, folderId);
 };
-
 export const restoreTrashItems = async < TFolder extends TrashFolderBase, TCard extends TrashCardBase, TCardSet extends TrashCardSetBase, TDocument extends TrashDocumentBase, >({ userId, repository, folderIds = [], cardIds = [], cardSetIds = [], documentIds = [], }: TrashUseCaseInput<TFolder, TCard, TCardSet, TDocument> & TrashItemIds): Promise<void> => { const { folders, cards, cardSets, documents, resolveCardFolderId } = await repository.loadContext(userId);
   const folderById = new Map(folders.map((folder) => [folder.id, folder]));
   const cardById = new Map(cards.map((card) => [card.id, card]));
@@ -183,7 +170,6 @@ export const restoreTrashItems = async < TFolder extends TrashFolderBase, TCard 
     await repository.restoreCard(userId, cardId);
   }
 };
-
 export const permanentlyDeleteTrashItems = async < TFolder extends TrashFolderBase, TCard extends TrashCardBase, TCardSet extends TrashCardSetBase, TDocument extends TrashDocumentBase, >({ userId, repository, folderIds = [], cardIds = [], cardSetIds = [], documentIds = [], }: TrashUseCaseInput<TFolder, TCard, TCardSet, TDocument> & TrashItemIds): Promise<void> => { for (const folderId of folderIds) { await repository.purgeFolder(userId, folderId);
   }
 
@@ -199,7 +185,6 @@ export const permanentlyDeleteTrashItems = async < TFolder extends TrashFolderBa
     await repository.purgeCard(userId, cardId);
   }
 };
-
 export const purgeExpiredTrashItems = async < TFolder extends TrashFolderBase, TCard extends TrashCardBase, TCardSet extends TrashCardSetBase, TDocument extends TrashDocumentBase, >({ userId, repository, retentionDays = TRASH_RETENTION_DAYS, now = Date.now(), }: TrashUseCaseInput<TFolder, TCard, TCardSet, TDocument> & { retentionDays?: number;
   now?: number;
 }): Promise<TrashItems<TFolder, TCard, TCardSet, TDocument>> => {
@@ -238,7 +223,6 @@ export const purgeExpiredTrashItems = async < TFolder extends TrashFolderBase, T
     documents: expiredDocuments,
   };
 };
-
 export const emptyTrash = async < TFolder extends TrashFolderBase, TCard extends TrashCardBase, TCardSet extends TrashCardSetBase, TDocument extends TrashDocumentBase, >({ userId, repository, }: TrashUseCaseInput<TFolder, TCard, TCardSet, TDocument>): Promise<void> => { const { folders, cards, cardSets, documents } = await getTrashItems({ userId, repository });
 
   await permanentlyDeleteTrashItems({

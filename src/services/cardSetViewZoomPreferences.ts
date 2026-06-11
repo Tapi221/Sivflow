@@ -2,25 +2,20 @@ import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 import type { CardLayoutMode, CardSetInteractionMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-
-
 interface CardSetViewZoomPreferencesStore {
   version: 2;
   byScope: Record<string, number>;
 }
-
 interface LegacyCardSetViewZoomPreferencesStore {
   version: 1;
   byCardSet: Record<string, number>;
 }
-
 export interface CardSetViewZoomPreferenceScope { deviceScope: string;
   cardSetId: string | null | undefined;
   displayMode?: CardDisplayMode;
   interactionMode?: CardSetInteractionMode;
   cardLayoutMode?: CardLayoutMode;
 }
-
 type LegacyCardSetViewZoomPreferenceScope = {
   deviceScope: string;
   cardSetId: string | null | undefined;
@@ -29,18 +24,14 @@ type LegacyCardSetViewZoomPreferenceScope = {
   cardLayoutMode: CardLayoutMode;
 };
 
-
-
 const emptyStore = (): CardSetViewZoomPreferencesStore => ({
   version: 2,
   byScope: {},
 });
-
 const normalizeDeviceScope = (value: string | null | undefined) => {
   const trimmed = typeof value === "string" ? value.trim() : "";
   return trimmed.length > 0 ? trimmed : "unknown";
 };
-
 const buildLegacyZoomPreferenceScopeKey = ({
   deviceScope,
   cardSetId,
@@ -56,10 +47,8 @@ const buildLegacyZoomPreferenceScopeKey = ({
     cardLayoutMode,
   ].join("::");
 };
-
 export const buildCardSetViewZoomPreferenceScopeKey = ({ deviceScope, cardSetId, }: CardSetViewZoomPreferenceScope) => { return [ normalizeDeviceScope(deviceScope), cardSetId ?? "__no_card_set__", ].join("::");
 };
-
 const canResolveLegacyScopedKey = (
   scope: CardSetViewZoomPreferenceScope,
 ): scope is LegacyCardSetViewZoomPreferenceScope => {
@@ -69,7 +58,6 @@ const canResolveLegacyScopedKey = (
     scope.cardLayoutMode != null
   );
 };
-
 const parseCurrentStore = (raw: string | null) => {
   if (!raw) {
     return null;
@@ -94,7 +82,6 @@ const parseCurrentStore = (raw: string | null) => {
 
   return null;
 };
-
 const parseLegacyStore = (raw: string | null) => {
   if (!raw) {
     return null;
@@ -119,7 +106,6 @@ const parseLegacyStore = (raw: string | null) => {
 
   return null;
 };
-
 const readStore = (): CardSetViewZoomPreferencesStore => {
   if (typeof window === "undefined") {
     return emptyStore();
@@ -137,7 +123,6 @@ const readStore = (): CardSetViewZoomPreferencesStore => {
     return emptyStore();
   }
 };
-
 const readLegacyCardSetValue = (cardSetId: string) => {
   if (typeof window === "undefined" || !cardSetId) {
     return undefined;
@@ -154,7 +139,6 @@ const readLegacyCardSetValue = (cardSetId: string) => {
 
   return undefined;
 };
-
 const readStoredZoomPercent = ({
   store,
   scope,
@@ -190,7 +174,6 @@ const readStoredZoomPercent = ({
 
   return undefined;
 };
-
 const writeStore = (store: CardSetViewZoomPreferencesStore) => {
   if (typeof window === "undefined") {
     return;
@@ -208,7 +191,6 @@ const writeStore = (store: CardSetViewZoomPreferencesStore) => {
     return;
   }
 };
-
 const migrateLegacyScopedZoomPreference = ({
   store,
   scope,
@@ -221,7 +203,6 @@ const migrateLegacyScopedZoomPreference = ({
   store.byScope[buildCardSetViewZoomPreferenceScopeKey(scope)] = zoomPercent;
   writeStore(store);
 };
-
 export const getCardSetViewZoomPreference = ( scope: CardSetViewZoomPreferenceScope, ) => { if (!scope.cardSetId) { return undefined;
   }
 
@@ -246,7 +227,6 @@ export const getCardSetViewZoomPreference = ( scope: CardSetViewZoomPreferenceSc
 
   return readLegacyCardSetValue(scope.cardSetId);
 };
-
 export const setCardSetViewZoomPreference = ( scope: CardSetViewZoomPreferenceScope, zoomPercent: number, ) => { if (!scope.cardSetId) { return;
   }
 

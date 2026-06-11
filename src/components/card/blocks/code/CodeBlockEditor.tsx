@@ -28,7 +28,6 @@ const canUseLocalStorage = () => {
     return false;
   }
 };
-
 const getRecentLangs = () => {
   if (!canUseLocalStorage()) return [];
 
@@ -50,7 +49,6 @@ const getRecentLangs = () => {
     return [];
   }
 };
-
 const pushRecentLang = (lang: string) => {
   if (!canUseLocalStorage()) return;
 

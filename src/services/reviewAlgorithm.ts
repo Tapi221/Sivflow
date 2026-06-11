@@ -5,8 +5,6 @@ import { normalizeDate as toDate } from "@/shared/codec/date";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import { toMillis } from "@/utils/toMillis";
 
-
-
 export type ReviewAlgorithmInput = { card: { memoryStability?: number | null;
     currentLevel?: number | null;
     level?: number | null;
@@ -20,7 +18,6 @@ export type ReviewAlgorithmInput = { card: { memoryStability?: number | null;
   subjectiveScore: SubjectiveScore;
   now?: Date;
 };
-
 export type ReviewAlgorithmResult = { memoryStability: number;
   nextReviewDate: Date;
   lastReviewAt: Date;
@@ -31,21 +28,17 @@ export type ReviewAlgorithmResult = { memoryStability: number;
   reviewCount: number;
   difficulty: number;
 };
-
 export type MultipleChoiceConfidence = "high" | "mid" | "luck";
-
 export type MultipleChoiceReviewMeta = { isCorrect: boolean;
   isUnknown?: boolean;
   confidence?: MultipleChoiceConfidence;
   choiceTimeMs?: number;
 };
-
 type ReviewHistoryCard = ReviewAlgorithmInput["card"] & {
   createdAt?: Date | Timestamp | null;
   created_at?: Date | Timestamp | string | number | null;
   reviewLogs?: ReviewLog[] | null;
 };
-
 type LatestReviewLogPatchParams =
   | {
     action: "update";
@@ -65,8 +58,6 @@ type LatestReviewLogPatchParams =
     reviewStartNextDay?: boolean;
   };
 
-
-
 const MIN_STABILITY = 0.01;
 const MAX_STABILITY = 1.0;
 const MAX_INTERVAL_DAYS = 90;
@@ -76,12 +67,9 @@ const MAX_DIFFICULTY = 1.0;
 const DIFFICULTY_ALPHA = 0.1;
 const DIFFICULTY_INTERVAL_BRAKE = 0.3;
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
 };
-
 const readNumber = (
   value: Record<string, unknown>,
   key: string,
@@ -99,18 +87,15 @@ const readNumber = (
 
   return null;
 };
-
 const readArray = (value: Record<string, unknown>, key: string): unknown[] => {
   const candidate = value[key];
   return Array.isArray(candidate) ? candidate : [];
 };
-
 const diffDays = (a: Date, b: Date): number => {
   const msA = new Date(a).setHours(0, 0, 0, 0);
   const msB = new Date(b).setHours(0, 0, 0, 0);
   return Math.floor((msA - msB) / (1000 * 60 * 60 * 24));
 };
-
 const normalizeReviewCount = (value: unknown): number => {
   const numeric =
     typeof value === "number"
@@ -122,7 +107,6 @@ const normalizeReviewCount = (value: unknown): number => {
   if (!Number.isFinite(numeric)) return 0;
   return Math.max(0, Math.trunc(numeric));
 };
-
 const getStoredReviewLogCount = (
   card: ReviewAlgorithmInput["card"],
 ): number => {
@@ -134,7 +118,6 @@ const getStoredReviewLogCount = (
 
   return reviewLogs.length;
 };
-
 const getCurrentReviewCount = (card: ReviewAlgorithmInput["card"]): number => {
   const record = isRecord(card) ? card : {};
   const legacyCount = readNumber(record, "review_count");
@@ -144,24 +127,19 @@ const getCurrentReviewCount = (card: ReviewAlgorithmInput["card"]): number => {
     getStoredReviewLogCount(card),
   );
 };
-
 const clampStability = (value: number): number => {
   return Math.max(MIN_STABILITY, Math.min(MAX_STABILITY, value));
 };
-
 const clamp01 = (value: number): number => {
   return Math.max(0, Math.min(1, value));
 };
-
 const clampDifficulty = (value: number): number => {
   return Math.max(MIN_DIFFICULTY, Math.min(MAX_DIFFICULTY, value));
 };
-
 const legacyLevelToStability = (level: number): number => {
   const normalized = 0.1 + (Math.min(5, Math.max(0, level)) / 5) * 0.8;
   return clampStability(normalized);
 };
-
 const getInitialStability = (
   memoryStability?: number | null,
   legacyLevel?: number | null,
@@ -182,7 +160,6 @@ const getInitialStability = (
 
   return 0.3;
 };
-
 const getInitialDifficulty = (
   difficulty?: number | null,
   stability?: number | null,
@@ -197,12 +174,10 @@ const getInitialDifficulty = (
 
   return 0.35;
 };
-
 const calculateIntervalDays = (stability: number): number => {
   const days = 1 + 100 * Math.pow(stability, 2.5);
   return Math.max(1, Math.min(MAX_INTERVAL_DAYS, Math.round(days)));
 };
-
 const updateStability = (
   currentStability: number,
   score: SubjectiveScore,
@@ -226,7 +201,6 @@ const updateStability = (
 
   return clampStability(nextStability);
 };
-
 const scoreToFailish = (score: SubjectiveScore): number => {
   switch (score) {
     case 0:
@@ -241,7 +215,6 @@ const scoreToFailish = (score: SubjectiveScore): number => {
       return 0.2;
   }
 };
-
 const updateDifficulty = (
   currentDifficulty: number,
   score: SubjectiveScore,
@@ -252,7 +225,6 @@ const updateDifficulty = (
 
   return clampDifficulty(next);
 };
-
 const applyDifficultyBrakeToInterval = (
   baseIntervalDays: number,
   difficulty: number,
@@ -263,7 +235,6 @@ const applyDifficultyBrakeToInterval = (
     Math.min(MAX_INTERVAL_DAYS, Math.round(baseIntervalDays * factor)),
   );
 };
-
 const invertUpdatedStability = (
   currentStability: number,
   score: SubjectiveScore,
@@ -281,7 +252,6 @@ const invertUpdatedStability = (
       return clampStability(currentStability);
   }
 };
-
 const invertUpdatedDifficulty = (
   currentDifficulty: number,
   score: SubjectiveScore,
@@ -297,12 +267,10 @@ const invertUpdatedDifficulty = (
     (currentDifficulty - failish * DIFFICULTY_ALPHA) / denominator,
   );
 };
-
 const calculateDelayBonusFactor = (delayDays: number): number => {
   if (delayDays <= 0) return 1;
   return 1 + Math.log2(1 + delayDays);
 };
-
 const estimateIntervalDaysFromResistanceScore = (
   resistanceScore: number,
 ): number => {
@@ -320,14 +288,12 @@ const estimateIntervalDaysFromResistanceScore = (
 
   return bestDays;
 };
-
 const buildNextReviewDate = (reviewedAt: Date, intervalDays: number): Date => {
   const nextReviewDate = new Date(reviewedAt);
   nextReviewDate.setDate(nextReviewDate.getDate() + intervalDays);
   nextReviewDate.setHours(0, 0, 0, 0);
   return nextReviewDate;
 };
-
 const estimateInitialNextReviewDate = ({
   card,
   reviewStartNextDay,
@@ -351,7 +317,6 @@ const estimateInitialNextReviewDate = ({
   nextReviewDate.setHours(0, 0, 0, 0);
   return nextReviewDate;
 };
-
 const buildCardStateBeforeLatestReview = ({
   card,
   reviewLogs,
@@ -433,7 +398,6 @@ const buildCardStateBeforeLatestReview = ({
     reviewLogs: previousLogs,
   };
 };
-
 export const computeNextReview = ({ card, subjectiveScore, now = new Date(), delayBonusEnabled = false, }: ReviewAlgorithmInput & { delayBonusEnabled?: boolean;
 }): ReviewAlgorithmResult => {
   const record = isRecord(card) ? card : {};
@@ -498,10 +462,8 @@ export const computeNextReview = ({ card, subjectiveScore, now = new Date(), del
     difficulty: newDifficulty,
   };
 };
-
 export const ratingToSubjectiveScore = ( rating: ReviewLog["rating"], ): SubjectiveScore => { return Math.max(0, Math.min(3, rating - 1)) as SubjectiveScore;
 };
-
 export const createReviewLogEntry = ({ reviewedAt, rating, intervalDays, durationMinutes = null, }: { reviewedAt: Date;
   rating: ReviewLog["rating"];
   intervalDays: number;
@@ -517,7 +479,6 @@ export const createReviewLogEntry = ({ reviewedAt, rating, intervalDays, duratio
         : null,
   };
 };
-
 export const createReviewPatchFromRating = ({ card, rating, now = new Date(), delayBonusEnabled = false, durationMinutes = null, }: { card: ReviewAlgorithmInput["card"] & { reviewLogs?: ReviewLog[] | null;
   };
   rating: ReviewLog["rating"];
@@ -550,7 +511,6 @@ export const createReviewPatchFromRating = ({ card, rating, now = new Date(), de
     },
   };
 };
-
 export const createLatestReviewLogPatch = ( params: LatestReviewLogPatchParams, ) => { const reviewLogs = [...(params.reviewLogs ?? [])].sort( (left, right) => toMillis(left.reviewedAt) - toMillis(right.reviewedAt), );
 
   if (reviewLogs.length === 0) {

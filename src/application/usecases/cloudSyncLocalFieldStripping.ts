@@ -1,9 +1,7 @@
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
-
 const isObjectUrl = (value: unknown): value is string =>
   typeof value === "string" && value.startsWith("blob") && value[4] === ":";
-
 const stripDocumentLocalFields = (
   record: Record<string, unknown>,
 ): Record<string, unknown> => {
@@ -14,7 +12,6 @@ const stripDocumentLocalFields = (
   }
   return record;
 };
-
 const stripAssetLocalFields = (
   record: Record<string, unknown>,
 ): Record<string, unknown> => {
@@ -22,7 +19,6 @@ const stripAssetLocalFields = (
   delete record.localStatus;
   return record;
 };
-
 const stripCardImageLocalFields = (value: unknown): unknown => {
   if (!isRecord(value)) return value;
   const image = { ...value };
@@ -35,17 +31,14 @@ const stripCardImageLocalFields = (value: unknown): unknown => {
   if (isObjectUrl(image.url)) image.url = null;
   return image;
 };
-
 const stripImageArray = (value: unknown): unknown => {
   if (!Array.isArray(value)) return value;
   return value.map(stripCardImageLocalFields);
 };
-
 const stripBlockImages = (value: unknown): unknown => {
   if (!isRecord(value) || !Array.isArray(value.images)) return value;
   return { ...value, images: stripImageArray(value.images) };
 };
-
 const stripFaceImages = (value: unknown): unknown => {
   if (!isRecord(value)) return value;
   const face = { ...value };
@@ -56,7 +49,6 @@ const stripFaceImages = (value: unknown): unknown => {
   if (Array.isArray(face.images)) face.images = stripImageArray(face.images);
   return face;
 };
-
 const stripCardLocalFields = (
   record: Record<string, unknown>,
 ): Record<string, unknown> => {
@@ -70,7 +62,6 @@ const stripCardLocalFields = (
   }
   return record;
 };
-
 export const stripCloudSyncLocalOnlyFields = ( type: string, record: Record<string, unknown>, ): Record<string, unknown> => { if (type === "card") { return stripCardLocalFields(record);
   }
 

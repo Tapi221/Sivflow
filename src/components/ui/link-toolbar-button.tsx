@@ -17,5 +17,4 @@ export function LinkToolbarButton( props: React.ComponentProps<typeof ToolbarBut
     <ToolbarButton {...props} {...buttonProps} data-plate-focus tooltip="Link">
       <Link />
     </ToolbarButton>
-  );
-}
+  

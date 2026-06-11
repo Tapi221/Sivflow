@@ -1,23 +1,17 @@
 import { INK_PAPER_H, INK_PAPER_W, type InkPoint } from "@core/domain/card/ink/inkDocument";
 
-
-
 export type RectLike = { left: number;
   top: number;
   width: number;
   height: number;
 };
 
-
-
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
-
 const safePressure = (pressure: number | undefined): number => {
   if (typeof pressure !== "number" || !Number.isFinite(pressure)) return 0.5;
   return clamp(pressure, 0, 1);
 };
-
 export const clientPointToPaperPoint = ( clientX: number, clientY: number, rect: RectLike, options?: { pressure?: number;
     now?: number;
     paperWidth?: number;
@@ -44,7 +38,6 @@ export const clientPointToPaperPoint = ( clientX: number, clientY: number, rect:
     p: safePressure(options?.pressure),
   };
 };
-
 export const paperPointToCanvasPoint = ( point: Pick<InkPoint, "x" | "y">, canvasWidth: number, canvasHeight: number, options?: { paperWidth?: number;
     paperHeight?: number;
   },
@@ -60,7 +53,6 @@ export const paperPointToCanvasPoint = ( point: Pick<InkPoint, "x" | "y">, canva
     y: (point.y / paperHeight) * safeCanvasHeight,
   };
 };
-
 export const squaredDistance = ( a: Pick<InkPoint, "x" | "y">, b: Pick<InkPoint, "x" | "y">, ): number => { const dx = a.x - b.x;
   const dy = a.y - b.y;
   return dx * dx + dy * dy;

@@ -1,8 +1,6 @@
 import { getLocalDb } from "./localDB";
 import { StorageStateManager } from "./StorageStateManager";
 
-
-
 interface CompressedHistory {
   id: string;
   userId: string;
@@ -12,7 +10,6 @@ interface CompressedHistory {
   correctCount: number;
   avgInterval: number;
 }
-
 type HistoryEvent = {
   cardId: string;
   changedAt: Date;
@@ -22,12 +19,9 @@ type HistoryEvent = {
   interval?: number;
 };
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
 };
-
 const toFiniteNumber = (value: unknown): number | undefined => {
   if (typeof value === "number" && Number.isFinite(value)) {
     return value;
@@ -40,7 +34,6 @@ const toFiniteNumber = (value: unknown): number | undefined => {
 
   return undefined;
 };
-
 const toDate = (value: unknown): Date | null => {
   if (value instanceof Date) return value;
   if (typeof value === "string" || typeof value === "number") {
@@ -49,7 +42,6 @@ const toDate = (value: unknown): Date | null => {
   }
   return null;
 };
-
 const toHistoryEvent = (value: unknown): HistoryEvent | null => {
   if (!isRecord(value)) return null;
   const cardId = typeof value.cardId === "string" ? value.cardId : null;
@@ -69,7 +61,6 @@ const toHistoryEvent = (value: unknown): HistoryEvent | null => {
     interval: toFiniteNumber(value.interval),
   };
 };
-
 export class HistoryCompressionService { public readonly compress = async (userId: string): Promise<void> => { if (StorageStateManager.isReadOnly(userId)) { console.log(`[Compression:${userId}] Skipped (READ_ONLY mode)`);
       return;
     }

@@ -1,9 +1,6 @@
 import type { LocalDBFallbackReasonCode } from "@/services/localDBRuntimeState";
 
-
-
 type UnknownRecord = Record<string, unknown>;
-
 type ErrorNameMessage = {
   name?: string;
   message?: string;
@@ -11,21 +8,15 @@ type ErrorNameMessage = {
   cause?: unknown;
 };
 
-
-
 const LOCALDB_ERROR_MESSAGE_LIMIT = 400;
 const MAX_ERROR_NESTING_DEPTH = 4;
 
-
-
 const isObject = (value: unknown): value is UnknownRecord =>
   typeof value === "object" && value !== null;
-
 const getStringProp = (obj: UnknownRecord, key: string): string | undefined => {
   const value = obj[key];
   return typeof value === "string" ? value : undefined;
 };
-
 const safeJsonStringify = (value: unknown): string | undefined => {
   try {
     const stringified = JSON.stringify(value);
@@ -34,7 +25,6 @@ const safeJsonStringify = (value: unknown): string | undefined => {
     return undefined;
   }
 };
-
 const getErrorNameMessage = (error: unknown): ErrorNameMessage => {
   if (!error) return {};
 
@@ -59,7 +49,6 @@ const getErrorNameMessage = (error: unknown): ErrorNameMessage => {
 
   return { message: String(error) };
 };
-
 const extractErrorTexts = (
   error: unknown,
   collector: string[],
@@ -77,7 +66,6 @@ const extractErrorTexts = (
   extractErrorTexts(inner, collector, depth + 1);
   extractErrorTexts(cause, collector, depth + 1);
 };
-
 export const safeStringifyError = (error: unknown): string => { try { if (!error) return "unknown error";
 
     const { name, message } = getErrorNameMessage(error);
@@ -95,7 +83,6 @@ export const safeStringifyError = (error: unknown): string => { try { if (!error
     return "unknown error";
   }
 };
-
 export const isBackingStoreOpenError = (error: unknown): boolean => { const texts: string[] = [];
   extractErrorTexts(error, texts);
 
@@ -111,7 +98,6 @@ export const isBackingStoreOpenError = (error: unknown): boolean => { const text
 
   return hasUnknownError && hasBackingStoreToken;
 };
-
 export const classifyFallbackReasonCode = ( error: unknown, ): LocalDBFallbackReasonCode => { if (isBackingStoreOpenError(error)) return "backing_store_open_error";
 
   const texts: string[] = [];

@@ -16,7 +16,6 @@ export type MfDeckImportCompletedPayload = { cardSetId: string;
   folderId: string;
   createdCount: number;
 };
-
 type MfDeckImportDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -38,7 +37,6 @@ const emptyLoadedState = {
   file: null as File | null,
   loaded: null as LoadMfDeckFileResult | null,
 };
-
 const EMPTY_ISSUES: LoadMfDeckFileResult["issues"] = [];
 
 
@@ -434,4 +432,3 @@ export const MfDeckImportDialog = ({ open, onOpenChange, folderId, folderName, c
       </DialogContent>
     </Dialog>
   );
-};

@@ -1,8 +1,6 @@
 import { notificationService } from "./NotificationService";
 import { StorageStateManager } from "./StorageStateManager";
 
-
-
 const isQuotaExceededError = (error: unknown): boolean => {
   if (typeof error !== "object" || error === null) return false;
 
@@ -11,7 +9,6 @@ const isQuotaExceededError = (error: unknown): boolean => {
     record.name === "QuotaExceededError" || record.code === "QuotaExceededError"
   );
 };
-
 export class SafeIndexedDBWriter { private static readonly quotaWarningShown = new Set<string>();
 
   static readonly write = async <T>(

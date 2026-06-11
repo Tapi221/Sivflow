@@ -20,7 +20,6 @@ const normalizeAudioUrls = (
   (attachments?.audios ?? [])
     .map((item) => item?.url?.trim() ?? "")
     .filter((item): item is string => item.length > 0);
-
 const normalizeReferences = (
   attachments?: CardFaceAttachments | null,
 ): ReferenceBlockData[] => sanitizeReferences(attachments?.references ?? []);

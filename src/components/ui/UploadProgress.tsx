@@ -122,4 +122,4 @@ export { UploadProgress };
 
 
 
-export type { UploadProgressProps };
+export type { UploadProgressPr

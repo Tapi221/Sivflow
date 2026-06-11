@@ -27,7 +27,6 @@ interface InkLayerProps {
   onDocumentChange?: (next: InkDocument) => void;
   onHistoryChange?: (state: InkHistoryState) => void;
 }
-
 interface InkToolbarProps {
   tool: InkEditTool | null;
   canUndo: boolean;
@@ -64,13 +63,11 @@ const copyStrokes = (strokes: InkStroke[]): InkStroke[] =>
     ...stroke,
     points: stroke.points.map((point) => ({ ...point })),
   }));
-
 const buildDocumentFromStrokes = (strokes: InkStroke[]): InkDocument => ({
   version: INK_DOCUMENT_VERSION,
   updatedAt: Date.now(),
   strokes: copyStrokes(strokes),
 });
-
 const toDocSignature = (doc: InkDocument): string => {
   return JSON.stringify({
     version: doc.version,
@@ -653,10 +650,7 @@ export const InkLayer = React.memo( React.forwardRef<InkLayerHandle, InkLayerPro
     );
   }),
 );
-
 InkLayer.displayName = "InkLayer";
-
 export const InkToolbar = React.memo(function InkToolbar({ tool, canUndo, canRedo, className, onToolChange, onUndo, onRedo, onClear, }: InkToolbarProps) { return ( <div className={cn( "pointer-events-auto inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white/90 p-1 shadow-sm backdrop-blur", className, )} data-card-no-pan="true" > <Button type="button" size="icon" variant={tool === "pen" ? "default" : "ghost"} className="h-7 w-7" onClick={() => onToolChange(tool === "pen" ? null : "pen")} > <PenLine className="h-3.5 w-3.5" /> </Button> <Button type="button" size="icon" variant={tool === "eraser" ? "default" : "ghost"} className="h-7 w-7" onClick={() => onToolChange(tool === "eraser" ? null : "eraser")} > <Eraser className="h-3.5 w-3.5" /> </Button> <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={onUndo} disabled={!canUndo} > <Undo2 className="h-3.5 w-3.5" /> </Button> <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={onRedo} disabled={!canRedo} > <Redo2 className="h-3.5 w-3.5" /> </Button> <Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-rose-500 hover:text-rose-600" onClick={onClear} disabled={!canUndo} > <Trash2 className="h-3.5 w-3.5" /> </Button> </div> );
 });
-
 InkToolbar.displayName = "InkToolbar";

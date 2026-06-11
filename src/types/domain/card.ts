@@ -4,10 +4,7 @@ import type { UploadedImage, UploadedPdf } from "./assets";
 import type { BaseEntity, CardState, MathBlockData, ReferenceBlockData, ReviewLog, SubjectiveScoreValue } from "./base";
 import type { CodeBlockData } from "@/types/core/code-block";
 
-
-
 export type { UploadedImage };
-
 export type CardBlock = { id: string;
   type:
     | "text"
@@ -35,23 +32,19 @@ export type CardBlock = { id: string;
   math?: MathBlockData;
   markdown?: string;
 };
-
 export type CardFaceAttachmentAudio = { url: string;
   filename: string;
   order: number;
 };
-
 export type CardFaceAttachments = { images?: UploadedImage[];
   audios?: CardFaceAttachmentAudio[];
   references?: ReferenceBlockData[];
 };
-
 export type CardFace = { blocks: CardBlock[];
   ink?: InkDocument | null;
   extraRows?: number;
   attachments?: CardFaceAttachments;
 };
-
 export type Card = BaseEntity & { cardSetId: string;
   folderId?: string;
   orderIndex: number;
@@ -88,7 +81,6 @@ export type Card = BaseEntity & { cardSetId: string;
   lastSyncedByDeviceId?: string | null;
   _rescueRaw?: unknown;
 };
-
 export type CardPatch = Omit< Partial<Card>, "front" | "back" | "cardSetId" | "folderId" > & { front?: Partial<CardFace>;
   back?: Partial<CardFace>;
 };

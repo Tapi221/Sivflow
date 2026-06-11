@@ -20,13 +20,11 @@ const pickNumber = (value: unknown): number | null => {
   }
   return null;
 };
-
 const clampRating = (value: number): 1 | 2 | 3 | 4 | null => {
   const rounded = Math.round(value);
   if (rounded < 1 || rounded > 4) return null;
   return rounded as 1 | 2 | 3 | 4;
 };
-
 const subjectiveScoreToRating = (value: number): 1 | 2 | 3 | 4 | null => {
   const rounded = Math.round(value);
   if (rounded >= 0 && rounded <= 3) {
@@ -35,7 +33,6 @@ const subjectiveScoreToRating = (value: number): 1 | 2 | 3 | 4 | null => {
 
   return clampRating(rounded);
 };
-
 export const normalizeReviewLogs = ( rawLogs: unknown, ): NormalizedReviewLog[] => { if (!Array.isArray(rawLogs)) return [];
 
   return rawLogs
@@ -94,4 +91,3 @@ export const normalizeReviewLogs = ( rawLogs: unknown, ): NormalizedReviewLog[] 
       };
     })
     .filter((value): value is NormalizedReviewLog => value !== null);
-};

@@ -248,11 +248,9 @@ const DesktopCardSurface = React.memo(
   DesktopCardSurfaceInner,
   areDesktopCardSurfacePropsEqual,
 );
-
 DesktopCardSurface.displayName = "DesktopCardSurface";
-
 export { DesktopCardSurface };
 
 
 
-export type { DesktopCardSurfaceProps };
+export type { DesktopCardSurfa

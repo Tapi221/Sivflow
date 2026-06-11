@@ -1,29 +1,21 @@
 import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 
-
-
 export type CardWidthPaneMode = "view" | "edit";
-
 interface CardWidthEntry {
   view?: number;
   edit?: number;
 }
-
 interface CardWidthPreferencesStore {
   version: 1;
   byCardSet: Record<string, CardWidthEntry>;
 }
 
-
-
 const createEmptyStore = (): CardWidthPreferencesStore => ({
   version: 1,
   byCardSet: {},
 });
-
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
-
 const isCardWidthEntry = (value: unknown): value is CardWidthEntry => {
   if (!isRecord(value)) return false;
 
@@ -36,7 +28,6 @@ const isCardWidthEntry = (value: unknown): value is CardWidthEntry => {
 
   return isValidValue(view) && isValidValue(edit);
 };
-
 const normalizeStore = (value: unknown): CardWidthPreferencesStore => {
   if (!isRecord(value) || value.version !== 1 || !isRecord(value.byCardSet)) {
     return createEmptyStore();
@@ -53,7 +44,6 @@ const normalizeStore = (value: unknown): CardWidthPreferencesStore => {
     byCardSet,
   };
 };
-
 const readStore = (): CardWidthPreferencesStore => {
   try {
     if (typeof window === "undefined") return createEmptyStore();
@@ -64,7 +54,6 @@ const readStore = (): CardWidthPreferencesStore => {
     return createEmptyStore();
   }
 };
-
 const writeStore = (store: CardWidthPreferencesStore) => {
   try {
     if (typeof window === "undefined") return;
@@ -76,7 +65,6 @@ const writeStore = (store: CardWidthPreferencesStore) => {
     return;
   }
 };
-
 export const getCardSetWidthPreference = ( cardSetId: string, mode: CardWidthPaneMode, ): number | undefined => { const store = readStore();
   const entry = store.byCardSet[cardSetId];
   if (!entry) return undefined;
@@ -86,7 +74,6 @@ export const getCardSetWidthPreference = ( cardSetId: string, mode: CardWidthPan
   }
   return undefined;
 };
-
 export const setCardSetWidthPreference = ( cardSetId: string, mode: CardWidthPaneMode, widthPx: number, ) => { if (!cardSetId) return;
   const store = readStore();
   const currentEntry = store.byCardSet[cardSetId] ?? {};

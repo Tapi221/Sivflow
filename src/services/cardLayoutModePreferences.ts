@@ -2,21 +2,16 @@ import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 import { type CardLayoutMode, type CardSetInteractionMode, normalizeCardLayoutMode, resolveDefaultCardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-
-
 export interface CardLayoutModePreferenceScope { deviceScope: string;
   cardSetId: string | null | undefined;
   displayMode: CardDisplayMode;
   interactionMode: CardSetInteractionMode;
 }
 
-
-
 const normalizeDeviceScope = (value: string | null | undefined) => {
   const trimmed = typeof value === "string" ? value.trim() : "";
   return trimmed.length > 0 ? trimmed : "unknown";
 };
-
 const buildStorageKey = ({
   deviceScope,
   cardSetId,
@@ -31,7 +26,6 @@ const buildStorageKey = ({
     interactionMode,
   ].join(":");
 };
-
 const readStorageValue = (key: string) => {
   if (typeof window === "undefined") return null;
 
@@ -41,7 +35,6 @@ const readStorageValue = (key: string) => {
     return null;
   }
 };
-
 const writeStorageValue = (key: string, value: string) => {
   if (typeof window === "undefined") return;
 
@@ -51,13 +44,11 @@ const writeStorageValue = (key: string, value: string) => {
     // Ignore local persistence failures and keep the in-memory override path working.
   }
 };
-
 export const getCardLayoutModePreference = ( scope: CardLayoutModePreferenceScope, ): CardLayoutMode | null => { if (!scope.cardSetId) return null;
 
   const raw = readStorageValue(buildStorageKey(scope));
   return raw == null ? null : normalizeCardLayoutMode(raw);
 };
-
 export const resolveCardLayoutModePreference = ( scope: CardLayoutModePreferenceScope, fallbackMode?: CardLayoutMode | null, ): CardLayoutMode => { const stored = getCardLayoutModePreference(scope);
   if (stored) return stored;
 
@@ -67,7 +58,6 @@ export const resolveCardLayoutModePreference = ( scope: CardLayoutModePreference
 
   return resolveDefaultCardLayoutMode(scope.interactionMode);
 };
-
 export const setCardLayoutModePreference = ( scope: CardLayoutModePreferenceScope, mode: CardLayoutMode, ) => { if (!scope.cardSetId) return;
   writeStorageValue(buildStorageKey(scope), normalizeCardLayoutMode(mode));
 };

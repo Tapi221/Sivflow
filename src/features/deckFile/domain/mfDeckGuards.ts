@@ -6,26 +6,21 @@ import { MF_DECK_FORMAT, MF_DECK_MAX_BLOCKS_PER_FACE, MF_DECK_MAX_CARDS, MF_DECK
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 };
-
 const isNonEmptyString = (value: unknown): value is string => {
   return typeof value === "string" && value.trim().length > 0;
 };
-
 const isIsoLikeString = (value: unknown): value is string => {
   if (!isNonEmptyString(value)) return false;
   return !Number.isNaN(Date.parse(value));
 };
-
 const isDisplayMode = (value: unknown): value is "fixed" | "fluid" => {
   return value === "fixed" || value === "fluid";
 };
-
 const isMediaKind = (
   value: unknown,
 ): value is "image" | "audio" | "unknown" => {
   return value === "image" || value === "audio" || value === "unknown";
 };
-
 const isCardBlock = (
   value: unknown,
 ): value is MfDeckCardsJsonV1["cards"][number]["front"]["blocks"][number] => {
@@ -36,7 +31,6 @@ const isCardBlock = (
     typeof value.orderIndex === "number" && Number.isFinite(value.orderIndex)
   );
 };
-
 const isCardFace = (
   value: unknown,
 ): value is MfDeckCardsJsonV1["cards"][number]["front"] => {
@@ -44,13 +38,11 @@ const isCardFace = (
   if (!Array.isArray(value.blocks)) return false;
   return value.blocks.every(isCardBlock);
 };
-
 const isStringArray = (value: unknown): value is string[] => {
   return (
     Array.isArray(value) && value.every((item) => typeof item === "string")
   );
 };
-
 const pushDuplicateBlockIssues = (
   issues: MfDeckIssue[],
   card: MfDeckCardsJsonV1["cards"][number],
@@ -75,7 +67,6 @@ const pushDuplicateBlockIssues = (
     }
   }
 };
-
 const pushCardLimitIssues = (
   issues: MfDeckIssue[],
   cardsJson: MfDeckCardsJsonV1,
@@ -111,7 +102,6 @@ const pushCardLimitIssues = (
     }
   }
 };
-
 const pushDuplicateCardIssues = (
   issues: MfDeckIssue[],
   cardsJson: MfDeckCardsJsonV1,
@@ -135,7 +125,6 @@ const pushDuplicateCardIssues = (
     pushDuplicateBlockIssues(issues, card);
   }
 };
-
 const pushMediaManifestIssues = (
   issues: MfDeckIssue[],
   mediaManifest: MfDeckMediaManifestV1 | undefined,
@@ -200,7 +189,6 @@ const pushMediaManifestIssues = (
     }
   }
 };
-
 export const isMfDeckManifestV1 = ( value: unknown, ): value is MfDeckManifestV1 => { if (!isRecord(value)) return false;
   if (value.format !== MF_DECK_FORMAT) return false;
   if (value.version !== MF_DECK_VERSION) return false;
@@ -250,7 +238,6 @@ export const isMfDeckManifestV1 = ( value: unknown, ): value is MfDeckManifestV1
 
   return true;
 };
-
 export const isMfDeckCardsJsonV1 = ( value: unknown, ): value is MfDeckCardsJsonV1 => { if (!isRecord(value)) return false;
   if (value.format !== "sivflow.deck.cards") return false;
   if (value.version !== MF_DECK_VERSION) return false;
@@ -289,7 +276,6 @@ export const isMfDeckCardsJsonV1 = ( value: unknown, ): value is MfDeckCardsJson
     return true;
   });
 };
-
 export const isMfDeckMediaManifestV1 = ( value: unknown, ): value is MfDeckMediaManifestV1 => { if (value === undefined) return true;
   if (!isRecord(value)) return false;
   if (value.format !== "sivflow.deck.media") return false;
@@ -325,7 +311,6 @@ export const isMfDeckMediaManifestV1 = ( value: unknown, ): value is MfDeckMedia
     return true;
   });
 };
-
 export const validateMfDeckArchive = (input: { manifest: unknown;
   cardsJson: unknown;
   mediaManifest?: unknown;

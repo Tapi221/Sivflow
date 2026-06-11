@@ -16,7 +16,6 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 type CssVars = React.CSSProperties & Record<`--${string}`, string>;
-
 interface BlockEditorProps {
   blocks: CardBlock[];
   onChange: (blocks: CardBlock[]) => void;
@@ -42,7 +41,6 @@ interface BlockEditorProps {
 
 
 const ROW_STEP_PX = CARD_ROW_PX;
-
 const EMPTY_HIDDEN_BLOCK_TYPES: CardBlock["type"][] = [];
 
 

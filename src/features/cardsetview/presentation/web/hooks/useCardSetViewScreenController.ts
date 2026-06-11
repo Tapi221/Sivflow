@@ -23,7 +23,6 @@ import { useCardSetViewZoomInput } from "./useCardSetViewZoomInput";
 
 
 type ScrollAnchorFace = "question" | "answer";
-
 type UseCardSetViewScreenControllerParams = {
   cardSetId?: string | null;
 };
@@ -35,7 +34,6 @@ const buildNavigationScopeKey = ({ deviceScope, cardSetId }: { deviceScope: stri
 
   return [deviceScope, cardSetId].join("::");
 };
-
 export const useCardSetViewScreenController = (params: UseCardSetViewScreenControllerParams = {}) => { const setExtraCrumbs = useSetBreadcrumbCrumbs();
   const { error: toastError } = useToast();
   const presentationTarget = usePresentationTarget();
@@ -244,4 +242,3 @@ export const useCardSetViewScreenController = (params: UseCardSetViewScreenContr
     layoutConstraintIndicatorLabel,
     splitFallbackLayoutMode,
   };
-};

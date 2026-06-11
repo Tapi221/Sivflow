@@ -9,7 +9,6 @@ export type SegmentedOption<T extends string> = { label: ReactNode;
   ariaLabel?: string;
   disabled?: boolean;
 };
-
 interface SegmentedControlGroupProps<T extends string> {
   value: T;
   options: readonly SegmentedOption<T>[];

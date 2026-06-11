@@ -8,14 +8,12 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 type DropPlacement = "before" | "after";
-
 type DragState = {
   draggedCardId: string;
   targetCardId: string;
   placement: DropPlacement;
   sourceCardIds: string[];
 };
-
 type CardSetViewDesktopProps = {
   isLoading: boolean;
   isGlobalEditing: boolean;
@@ -41,14 +39,12 @@ type CardSetViewDesktopProps = {
   onToggleUncertainty: (card: Card) => void | Promise<void>;
   onToggleBookmark: (card: Card) => void | Promise<void>;
 };
-
 type CardSetViewEmptyStateProps = {
   cardSetName: string | null;
   currentDisplayMode: CardDisplayMode;
   effectiveCardWidthPx: number;
   onCreateCard: () => void | Promise<void>;
 };
-
 type ReorderableCardSurfaceProps = {
   card: Card;
   isActive: boolean;
@@ -70,7 +66,6 @@ type ReorderableCardSurfaceProps = {
   onToggleUncertainty: (card: Card) => void | Promise<void>;
   onToggleBookmark: (card: Card) => void | Promise<void>;
 };
-
 type CardReorderDragPayload = {
   cardId: string;
   cardIds: string[];
@@ -95,11 +90,9 @@ const resolveDropPlacement = (event: DragEvent<HTMLElement>): DropPlacement => {
 
   return relativeY < rect.height / 2 ? "before" : "after";
 };
-
 const getCardIds = (cards: Card[]) => {
   return cards.map((card) => card.id).filter((id): id is string => Boolean(id));
 };
-
 const moveCardId = ({ cardIds, draggedCardId, targetCardId, placement }: { cardIds: string[]; draggedCardId: string; targetCardId: string; placement: DropPlacement }) => {
   if (draggedCardId === targetCardId) {
     return cardIds;
@@ -114,7 +107,6 @@ const moveCardId = ({ cardIds, draggedCardId, targetCardId, placement }: { cardI
   const insertIndex = placement === "before" ? targetIndex : targetIndex + 1;
   return [...withoutDragged.slice(0, insertIndex), draggedCardId, ...withoutDragged.slice(insertIndex)];
 };
-
 const normalizeSourceCardIds = (sourceCardIds: string[], currentCardIds: string[]) => {
   const currentCardIdSet = new Set(currentCardIds);
   const sourceCardIdSet = new Set(sourceCardIds);
@@ -123,7 +115,6 @@ const normalizeSourceCardIds = (sourceCardIds: string[], currentCardIds: string[
 
   return [...liveSourceCardIds, ...appendedCardIds];
 };
-
 const orderCardsByIds = (cards: Card[], orderedCardIds: string[]) => {
   const cardById = new Map(cards.map((card) => [card.id, card]));
   const orderedCardIdSet = new Set(orderedCardIds);
@@ -132,7 +123,6 @@ const orderCardsByIds = (cards: Card[], orderedCardIds: string[]) => {
 
   return [...orderedCards, ...remainingCards];
 };
-
 const parseCardReorderDragPayload = (event: DragEvent<HTMLElement>): CardReorderDragPayload | null => {
   const rawPayload = event.dataTransfer.getData(CARD_REORDER_DRAG_MIME_TYPE);
   if (!rawPayload) return null;
@@ -148,11 +138,9 @@ const parseCardReorderDragPayload = (event: DragEvent<HTMLElement>): CardReorder
     return null;
   }
 };
-
 const hasCardReorderDragType = (event: DragEvent<HTMLElement>) => {
   return Array.from(event.dataTransfer.types).includes(CARD_REORDER_DRAG_MIME_TYPE);
 };
-
 const isSameCardOrder = (left: string[], right: string[]) => {
   if (left.length !== right.length) {
     return false;
@@ -160,7 +148,6 @@ const isSameCardOrder = (left: string[], right: string[]) => {
 
   return left.every((cardId, index) => cardId === right[index]);
 };
-
 const buildEmptyStateShellStyle = ({ currentDisplayMode, effectiveCardWidthPx }: { currentDisplayMode: CardDisplayMode; effectiveCardWidthPx: number }): CSSProperties => {
   if (currentDisplayMode === "fluid") {
     return {
@@ -200,7 +187,6 @@ const CardSetViewEmptyState = ({ cardSetName, currentDisplayMode, effectiveCardW
     </div>
   );
 };
-
 const ReorderableCardSurface = ({
   card,
   isActive,
@@ -259,7 +245,6 @@ const ReorderableCardSurface = ({
     </div>
   );
 };
-
 export const CardSetViewDesktop = ({ isLoading, isGlobalEditing, flippedCardIds, cardsForPager, safeCurrentIndex, settings = null, currentDisplayMode, currentCardLayoutMode, folderId, layoutTransitionScrollAnchorRevision, scrollToActiveIndexRequestKey, cardSetId, cardSetName, viewZoomScale, fixedCardWidthPx, fluidAvailableWidthPx, onActiveIndexChange, onFlip, onActiveScrollAnchorFaceChange, onCreateCard, onReorderCards, onToggleUncertainty, onToggleBookmark, }: CardSetViewDesktopProps) => { const [dragState, setDragState] = useState<DragState | null>(null);
   const currentCardIds = useMemo(() => getCardIds(cardsForPager), [cardsForPager]);
   const effectiveCardWidthPx = currentDisplayMode === "fluid" ? Math.max(1, Math.floor(fluidAvailableWidthPx)) : Math.max(1, fixedCardWidthPx);
@@ -452,5 +437,4 @@ export const CardSetViewDesktop = ({ isLoading, isGlobalEditing, flippedCardIds,
       scrollToActiveIndexBehavior="auto"
       renderCard={renderCard}
     />
-  );
-};
+  

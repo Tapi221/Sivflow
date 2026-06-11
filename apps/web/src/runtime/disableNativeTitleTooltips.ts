@@ -2,12 +2,8 @@ type NativeTitleTooltipGlobal = typeof globalThis & {
   __sivflowNativeTitleTooltipDisablerInstalled?: boolean;
 };
 
-
-
 const INSTALL_KEY = "__sivflowNativeTitleTooltipDisablerInstalled";
 const TITLE_BACKUP_ATTRIBUTE = "data-native-title";
-
-
 
 const stripNativeTitle = (element: Element) => {
   const title = element.getAttribute("title");
@@ -19,7 +15,6 @@ const stripNativeTitle = (element: Element) => {
 
   element.removeAttribute("title");
 };
-
 const stripNativeTitles = (root: ParentNode) => {
   if (root instanceof Element) {
     stripNativeTitle(root);
@@ -27,7 +22,6 @@ const stripNativeTitles = (root: ParentNode) => {
 
   root.querySelectorAll("[title]").forEach(stripNativeTitle);
 };
-
 const stripNativeTitleFromEventTarget = (event: Event) => {
   if (!(event.target instanceof Element)) return;
 
@@ -36,7 +30,6 @@ const stripNativeTitleFromEventTarget = (event: Event) => {
 
   stripNativeTitle(titledElement);
 };
-
 const observeNativeTitleChanges = () => {
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
@@ -60,7 +53,6 @@ const observeNativeTitleChanges = () => {
     subtree: true,
   });
 };
-
 const installNativeTitleTooltipDisabler = () => {
   if (typeof document === "undefined" || typeof MutationObserver === "undefined") return;
 
@@ -74,5 +66,4 @@ const installNativeTitleTooltipDisabler = () => {
   document.addEventListener("focusin", stripNativeTitleFromEventTarget, true);
   observeNativeTitleChanges();
 };
-
 installNativeTitleTooltipDisabler();

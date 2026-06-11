@@ -40,7 +40,6 @@ const SharedCardContentRootComponent = ({
     {children}
   </div>
 );
-
 const SharedCardContentSceneComponent = (props: SharedCardContentProps) => {
   return props.mode === "view" ? (
     <SharedCardViewScene {...props} />
@@ -48,7 +47,6 @@ const SharedCardContentSceneComponent = (props: SharedCardContentProps) => {
     <SharedCardEditScene {...props} />
   );
 };
-
 const SharedCardContentInner = (props: SharedCardContentProps) => {
   return (
     <SharedCardContentRoot
@@ -65,11 +63,9 @@ const SharedCardContentInner = (props: SharedCardContentProps) => {
 const SharedCardContentRoot = React.memo(SharedCardContentRootComponent);
 const SharedCardContentScene = React.memo(SharedCardContentSceneComponent);
 const SharedCardContent = React.memo(SharedCardContentInner);
-
 SharedCardContentRoot.displayName = "SharedCardContentRoot";
 SharedCardContentScene.displayName = "SharedCardContentScene";
 SharedCardContent.displayName = "SharedCardContent";
-
 export { SharedCardContent };
 
 

@@ -14,7 +14,6 @@ const normalizeFolderId = (value: string | null | undefined) => {
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
 };
-
 export const useFolderLineage = (folderId: string | null) => { const { currentUser } = useAuthSession();
   const currentUserId = currentUser?.uid ?? null;
 
@@ -47,4 +46,3 @@ export const useFolderLineage = (folderId: string | null) => { const { currentUs
   );
 
   return folders ?? [];
-};

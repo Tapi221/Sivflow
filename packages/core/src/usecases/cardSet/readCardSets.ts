@@ -7,16 +7,12 @@ export type CardSetQueryEntity = { id: string;
   createdAt?: unknown;
   name?: string | null;
 };
-
 export type CardSetQueryRepository<TCardSet extends CardSetQueryEntity = CardSetQueryEntity> = { listCardSets: (userId: string) => Promise<TCardSet[]>;
 };
-
-
 
 const isDeletedEntity = (entity: { isDeleted?: boolean; is_deleted?: boolean }) => {
   return Boolean(entity.isDeleted ?? entity.is_deleted);
 };
-
 const toMillis = (value: unknown): number => {
   if (value instanceof Date && Number.isFinite(value.getTime())) {
     return value.getTime();
@@ -56,7 +52,6 @@ const toMillis = (value: unknown): number => {
 
   return 0;
 };
-
 const compareCardSets = <TCardSet extends CardSetQueryEntity>(left: TCardSet, right: TCardSet) => {
   const orderCompare = (left.orderIndex ?? 0) - (right.orderIndex ?? 0);
   if (orderCompare !== 0) return orderCompare;
@@ -72,7 +67,6 @@ const compareCardSets = <TCardSet extends CardSetQueryEntity>(left: TCardSet, ri
 
   return left.id.localeCompare(right.id, "ja");
 };
-
 export const listCardSetsForFolder = async <TCardSet extends CardSetQueryEntity>({ userId, folderId, repository, }: { userId: string;
   folderId?: string | null;
   repository: CardSetQueryRepository<TCardSet>;

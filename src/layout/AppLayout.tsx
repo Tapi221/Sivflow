@@ -8,14 +8,11 @@ import { WorkspaceLayoutRevisionProvider } from "./WorkspaceLayoutRevisionContex
 import { WorkspaceShell } from "./WorkspaceShell";
 import "./AppLayout.css";
 
-
-
 type AppLayoutOutletContext = {
   isLeftPanelCollapsed: boolean;
   onOpenSettings: () => void;
   onToggleLeftPanel: () => void;
 };
-
 type SidebarLongPressState = {
   pointerId: number;
   target: HTMLElement;
@@ -23,8 +20,6 @@ type SidebarLongPressState = {
   clientY: number;
   timerId: number;
 };
-
-
 
 const LEFT_PANEL_COLLAPSED_STORAGE_KEY = "sivflow:layout:left-panel-collapsed";
 const LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY = "flashcard-master:layout:left-panel-collapsed";
@@ -36,8 +31,6 @@ const MOBILE_SETTINGS_ROUTE_MEDIA_QUERY = "(max-width: 767px)";
 const SIDEBAR_LONG_PRESS_CONTEXT_MENU_TARGET_SELECTOR = ".app-layered-directory [role='treeitem']";
 const SIDEBAR_LONG_PRESS_DELAY_MS = 520;
 const SIDEBAR_LONG_PRESS_MOVE_TOLERANCE_PX = 10;
-
-
 
 const readStoredLeftPanelCollapsed = (): boolean => {
   if (typeof window === "undefined") return false;
@@ -56,12 +49,10 @@ const readStoredLeftPanelCollapsed = (): boolean => {
     return false;
   }
 };
-
 const readIsMobileSettingsRouteViewport = (): boolean => {
   if (typeof window === "undefined") return false;
   return window.matchMedia(MOBILE_SETTINGS_ROUTE_MEDIA_QUERY).matches;
 };
-
 const persistLeftPanelCollapsed = (isCollapsed: boolean) => {
   if (typeof window === "undefined") return;
 
@@ -78,7 +69,6 @@ const persistLeftPanelCollapsed = (isCollapsed: boolean) => {
     // localStorage が使えない環境では React state の状態だけ維持する。
   }
 };
-
 const getMobileCalendarSidebarCloseButton = (target: EventTarget | null): HTMLButtonElement | null => {
   if (!(target instanceof Element)) return null;
   if (!target.closest(MOBILE_CALENDAR_SIDEBAR_TOGGLE_SELECTOR)) return null;
@@ -86,17 +76,13 @@ const getMobileCalendarSidebarCloseButton = (target: EventTarget | null): HTMLBu
   const mobileCalendarSidebar = target.closest(MOBILE_CALENDAR_SIDEBAR_SELECTOR);
   return mobileCalendarSidebar?.parentElement?.querySelector<HTMLButtonElement>(MOBILE_CALENDAR_SIDEBAR_CLOSE_BUTTON_SELECTOR) ?? null;
 };
-
 const getSidebarLongPressContextMenuTarget = (target: EventTarget | null): HTMLElement | null => {
   if (!(target instanceof Element)) return null;
 
   return target.closest<HTMLElement>(SIDEBAR_LONG_PRESS_CONTEXT_MENU_TARGET_SELECTOR);
 };
-
 const isSidebarLongPressPointerEvent = (event: PointerEvent): boolean => (event.pointerType === "touch" || event.pointerType === "pen") && event.button === 0;
-
 const getSidebarLongPressPointerDistance = (event: PointerEvent, state: SidebarLongPressState): number => Math.hypot(event.clientX - state.clientX, event.clientY - state.clientY);
-
 const useIsMobileSettingsRouteViewport = (): boolean => {
   const [isMobileSettingsRouteViewport, setIsMobileSettingsRouteViewport] = useState(readIsMobileSettingsRouteViewport);
 
@@ -116,8 +102,6 @@ const useIsMobileSettingsRouteViewport = (): boolean => {
 
   return isMobileSettingsRouteViewport;
 };
-
-
 
 const AppLayout = () => {
   const { pathname, isScrollLocked } = useLayoutRouteStateDesktop();
@@ -246,10 +230,6 @@ const AppLayout = () => {
   );
 };
 
-
-
 export type { AppLayoutOutletContext };
-
-
 
 export { AppLayout };

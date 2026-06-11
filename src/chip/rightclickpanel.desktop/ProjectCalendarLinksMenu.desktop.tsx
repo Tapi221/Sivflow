@@ -9,7 +9,6 @@ export type ProjectCalendarLinksMenuAction = { id: string;
   disabled?: boolean;
   onSelect: () => void;
 };
-
 type ProjectCalendarLinksMenuProps = {
   x: number;
   y: number;
@@ -22,7 +21,6 @@ type ProjectCalendarLinksMenuProps = {
 
 
 export const PROJECT_CALENDAR_LINKS_MENU_PANEL_ID = "project-calendar-links-context-menu";
-
 const PROJECT_CALENDAR_LINKS_MENU_LABELS = [
   "Googleカレンダーとして追加",
   "既存Googleカレンダーにリンク",
@@ -32,7 +30,6 @@ const PROJECT_CALENDAR_LINKS_MENU_LABELS = [
   "Apple連携を解除",
   "iCloud連携を解除",
 ];
-
 export const PROJECT_CALENDAR_LINKS_MENU_WIDTH = resolveRightClickPanelTextWidth(PROJECT_CALENDAR_LINKS_MENU_LABELS);
 
 

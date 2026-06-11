@@ -1,5 +1,4 @@
 type HoverTooltipOpenListener = (tooltipId: symbol) => void;
-
 type HoverTooltipOpenEventDetail = {
   tooltipId: symbol;
 };
@@ -15,13 +14,11 @@ const isHoverTooltipOpenEvent = (event: Event): event is CustomEvent<HoverToolti
 
   return Boolean(detail && typeof detail.tooltipId === "symbol");
 };
-
 const emitHoverTooltipOpen = (tooltipId: symbol) => {
   if (typeof window === "undefined") return;
 
   window.dispatchEvent(new CustomEvent<HoverTooltipOpenEventDetail>(HOVER_TOOLTIP_OPEN_EVENT, { detail: { tooltipId } }));
 };
-
 const subscribeHoverTooltipOpen = (listener: HoverTooltipOpenListener) => {
   if (typeof window === "undefined") return () => undefined;
 

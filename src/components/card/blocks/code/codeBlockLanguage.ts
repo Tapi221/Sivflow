@@ -19,7 +19,6 @@ const VIEWER_SUPPORTED_LANGS = new Set([
   "yaml",
   "clike",
 ]);
-
 const VIEWER_LANGUAGE_ALIASES: Record<string, string> = {
   "c++": "cpp",
   cplusplus: "cpp",
@@ -32,7 +31,6 @@ const VIEWER_LANGUAGE_ALIASES: Record<string, string> = {
   txt: "clike",
   plain: "clike",
 };
-
 const VIEWER_LANGUAGE_FULL_LABELS: Record<string, string> = {
   javascript: "JavaScript",
   typescript: "TypeScript",
@@ -54,7 +52,6 @@ const VIEWER_LANGUAGE_FULL_LABELS: Record<string, string> = {
   yaml: "YAML",
   clike: "Plain text",
 };
-
 const VIEWER_LANGUAGE_SHORT_LABELS: Record<string, string> = {
   javascript: "JS",
   typescript: "TS",
@@ -83,10 +80,8 @@ export const normalizeViewerLanguage = (input?: string) => { const raw = (input 
   const normalized = VIEWER_LANGUAGE_ALIASES[raw] ?? raw;
   return VIEWER_SUPPORTED_LANGS.has(normalized) ? normalized : "clike";
 };
-
 export const getViewerLanguageLabels = (language: string) => { return { full: VIEWER_LANGUAGE_FULL_LABELS[language] ?? language, short: VIEWER_LANGUAGE_SHORT_LABELS[language] ?? language.toUpperCase(), };
 };
-
 export const normalizeEditorLanguage = (input?: string) => { const lang = (input || "").toLowerCase().trim();
   if (lang === "html") return "markup";
   return lang || "javascript";

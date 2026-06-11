@@ -71,7 +71,6 @@ function buildEditMultiBlockPrompt(editor: SlateEditor, messages: ChatMessage[])
     `,
   });
 }
-
 function buildEditSelectionPrompt(editor: SlateEditor, messages: ChatMessage[]) {
   addSelection(editor);
 
@@ -202,7 +201,6 @@ function buildEditSelectionPrompt(editor: SlateEditor, messages: ChatMessage[]) 
     `,
   });
 }
-
 export function getEditPrompt(editor: SlateEditor, { isSelecting, messages }: { isSelecting: boolean; messages: ChatMessage[] }): [string, 'table' | 'multi-block' | 'selection'] {
   if (!isSelecting) throw new Error('Edit tool is only available when selecting');
 

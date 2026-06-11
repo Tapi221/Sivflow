@@ -33,14 +33,12 @@ export const buildCardsById = (cards: Card[]) => { const map = new Map<string, C
   }
   return map;
 };
-
 export const resolveSelectedCardSnapshot = ({ selectedCardId, cardsById, }: { selectedCardId: string | null;
   cardsById: Map<string, Card>;
 }) => {
   if (!selectedCardId) return null;
   return cardsById.get(selectedCardId) ?? null;
 };
-
 export const applyEditingDraftPatch = ({ currentDraft, detail, selectedCardId, isEditing, }: { currentDraft: { title: string;
     isDraft: boolean;
     tags: string[];
@@ -77,15 +75,12 @@ export const applyEditingDraftPatch = ({ currentDraft, detail, selectedCardId, i
     ...(nextTags !== undefined ? { tags: nextTags } : {}),
   };
 };
-
 export const readStoredMetaPanelOpen = () => { if (typeof window === "undefined") return true;
   return window.localStorage.getItem(META_PANEL_OPEN_STORAGE_KEY) !== "false";
 };
-
 export const writeStoredMetaPanelOpen = (isOpen: boolean) => { if (typeof window === "undefined") return;
   window.localStorage.setItem(META_PANEL_OPEN_STORAGE_KEY, String(isOpen));
 };
-
 const normalizeReviewRating = (rating: number): ReviewLog["rating"] => {
   if (rating === 1 || rating === 2 || rating === 3 || rating === 4) {
     return rating;
@@ -93,7 +88,6 @@ const normalizeReviewRating = (rating: number): ReviewLog["rating"] => {
 
   throw new Error("学習評価は 1〜4 の範囲で指定してください");
 };
-
 export const createMetaPanelActions = ({ selectedCard, settings, updateCard, onCardUpdated, flushDraft, handleTitleInputChange, handleUpdateTags, handleToggleDraft, handleUpdateTitle, }: CreateMetaPanelActionsArgs) => { const onAddReviewLog = ({ reviewedAt, rating, durationMinutes, }: { reviewedAt: string | number | Date;
     rating: number;
     durationMinutes?: number | null;

@@ -55,12 +55,10 @@ const MOBILE_DETAIL_MEDIA_QUERY = "(max-width: 767px)";
 const isExternalFileDragEvent = (event: DragEvent<HTMLDivElement>) => {
   return Array.from(event.dataTransfer.types).includes("Files");
 };
-
 const readIsMobileViewport = (): boolean => {
   if (typeof window === "undefined") return false;
   return window.matchMedia(MOBILE_DETAIL_MEDIA_QUERY).matches;
 };
-
 const useIsMobileViewport = (): boolean => {
   const [isMobileViewport, setIsMobileViewport] = useState(readIsMobileViewport);
 

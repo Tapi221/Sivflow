@@ -2,19 +2,14 @@ export type LocalTextGenerationOptions = { prompt: string;
   systemPrompt?: string;
 };
 
-
-
 const MAX_SOURCE_CHARS = 1_200;
 const MAX_SENTENCES = 6;
-
-
 
 const normalizePrompt = (value: string) =>
   value
     .replace(/\r\n?/g, "\n")
     .replace(/[\t ]+/g, " ")
     .trim();
-
 const toSentences = (value: string) => {
   const normalized = normalizePrompt(value).slice(0, MAX_SOURCE_CHARS);
 
@@ -24,7 +19,6 @@ const toSentences = (value: string) => {
     .filter(Boolean)
     .slice(0, MAX_SENTENCES);
 };
-
 const buildFlashcardDraft = (sentences: string[]) => {
   if (sentences.length === 0) {
     return "入力テキストが空です。カード化したい本文を入力してください。";
@@ -46,7 +40,6 @@ const buildFlashcardDraft = (sentences: string[]) => {
     ...cards,
   ].join("\n");
 };
-
 export const generateTextLocally = ({ prompt, systemPrompt, }: LocalTextGenerationOptions) => { const source = systemPrompt ? `${systemPrompt}\n${prompt}` : prompt;
   const sentences = toSentences(source);
 

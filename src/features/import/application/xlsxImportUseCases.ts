@@ -10,16 +10,12 @@ export type CreateCardSet = ( name: string, targetFolderId?: string | null, opts
     orderIndex?: number;
   },
 ) => Promise<CardSet>;
-
 export type CreateCard = ( cardData: Partial<Card> & { cardSetId?: string }, ) => Promise<Card>;
-
 export type ImportDestinationMode = "new" | "existing";
-
 export type LoadXlsxImportFileResult = { file: File;
   result: ImportParseResult;
   suggestedCardSetName: string;
 };
-
 type ExecuteXlsxImportParams = {
   folderId: string | null;
   file: File | null;
@@ -30,17 +26,14 @@ type ExecuteXlsxImportParams = {
   createCardSet: CreateCardSet;
   createCard: CreateCard;
 };
-
 type ExecuteXlsxImportFailure = {
   ok: false;
   errorMessage: string;
 };
-
 type ExecuteXlsxImportSuccess = {
   ok: true;
   value: Awaited<ReturnType<typeof importCardsFromPayload>>;
 };
-
 export type ExecuteXlsxImportResult = | ExecuteXlsxImportFailure | ExecuteXlsxImportSuccess;
 
 
@@ -88,7 +81,6 @@ const resolveImportDestination = ({
     },
   };
 };
-
 export const loadXlsxImportFile = async ( file: File, ): Promise<LoadXlsxImportFileResult> => { const fileBuffer = await file.arrayBuffer();
   const result = await parseXlsxImport(fileBuffer);
 
@@ -98,7 +90,6 @@ export const loadXlsxImportFile = async ( file: File, ): Promise<LoadXlsxImportF
     suggestedCardSetName: buildImportCardSetName(file.name),
   };
 };
-
 export const executeXlsxImport = async ({ folderId, file, result, destinationMode, newCardSetName, selectedExistingCardSet, createCardSet, createCard, }: ExecuteXlsxImportParams): Promise<ExecuteXlsxImportResult> => { if (!folderId) { return { ok: false, errorMessage: "インポート先フォルダが選択されていません。", };
   }
 
@@ -137,4 +128,3 @@ export const executeXlsxImport = async ({ folderId, file, result, destinationMod
       destination: destination.value,
     }),
   };
-};

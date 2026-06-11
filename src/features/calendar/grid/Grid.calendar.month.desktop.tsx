@@ -20,17 +20,11 @@ import * as GD from "./grid.layout.constants.desktop";
 
 
 type CalendarMonthGridDay = { date: Date; key: string; dayOfMonth: number; isCurrentMonth: boolean };
-
 type CalendarMonthGridWeek = { key: string; days: CalendarMonthGridDay[] };
-
 type MonthEventDragState = { eventKey: string; event: GoogleCalendarEvent; pointerId: number; durationMs: number; sourceDayKey: string; previewStartsAt: Date; previewEndsAt: Date; previewIsAllDay: boolean };
-
 type MonthDayCellHit = { day: CalendarMonthGridDay; element: HTMLDivElement };
-
 type MonthEventDragPreview = { previewStartsAt: Date; previewEndsAt: Date; previewIsAllDay: boolean };
-
 type MonthEventRenderItem = { event: GoogleCalendarEvent; eventKey: string; renderKey: string; isDragPreview: boolean };
-
 type GridCalendarMonthDesktopProps = {
   today: Date;
   selectedDate: Date;
@@ -47,7 +41,6 @@ type GridCalendarMonthDesktopProps = {
   onSelectDate: (date: Date) => void;
   onMoveCalendarEvent?: CalendarEventMoveHandler;
 };
-
 type CalendarMonthDayCellProps = {
   day: CalendarMonthGridDay;
   dayEvents: CalendarMonthDayEvents;
@@ -65,7 +58,6 @@ type CalendarMonthDayCellProps = {
   onEventPointerDown: (event: ReactPointerEvent<HTMLDivElement>, calendarEvent: GoogleCalendarEvent) => void;
   onMoveCalendarEvent?: CalendarEventMoveHandler;
 };
-
 type CalendarMonthWeekRowProps = {
   week: CalendarMonthGridWeek;
   eventsByDay: Map<string, CalendarMonthDayEvents>;
@@ -98,7 +90,6 @@ const getCanUseCalendarEventDragPointer = (): boolean => {
 
   return window.matchMedia(CALENDAR_EVENT_DRAG_FINE_POINTER_QUERY).matches;
 };
-
 const useCalendarEventDragEnabled = (): boolean => {
   const [isEnabled, setIsEnabled] = useState(getCanUseCalendarEventDragPointer);
 
@@ -116,28 +107,21 @@ const useCalendarEventDragEnabled = (): boolean => {
 
   return isEnabled;
 };
-
 const getDayKey = (date: Date): string => {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
 
   return `${date.getFullYear()}-${month}-${day}`;
 };
-
 const getDayAriaLabel = (date: Date): string => `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
-
 const getMonthAnnotation = (date: Date): string | null => {
   if (date.getDate() !== 1) return null;
 
   return format(date, "M月", { locale: ja });
 };
-
 const weekContainsDayKey = (week: CalendarMonthGridWeek, dayKey: string | null) => dayKey !== null && week.days.some((day) => day.key === dayKey);
-
 const isWeekAffectedByDayKeyChange = (week: CalendarMonthGridWeek, previousDayKey: string | null, nextDayKey: string | null) => previousDayKey !== nextDayKey && (weekContainsDayKey(week, previousDayKey) || weekContainsDayKey(week, nextDayKey));
-
 const createMonthWeekRowStyle = (monthRowHeight: number): CSSProperties => ({ ...MONTH_GRID_BORDER_STYLE, minHeight: monthRowHeight });
-
 const getEventDurationMs = (event: GoogleCalendarEvent): number => {
   const startsAt = getCalendarEventDateOrNull(event.startsAt);
   const endsAt = getCalendarEventDateOrNull(event.endsAt);
@@ -147,9 +131,7 @@ const getEventDurationMs = (event: GoogleCalendarEvent): number => {
 
   return event.isAllDay ? DAY_MS : DEFAULT_MONTH_TIMED_EVENT_DURATION_MS;
 };
-
 const getTimedEventStartOnDay = (event: GoogleCalendarEvent, day: Date): Date => new Date(day.getFullYear(), day.getMonth(), day.getDate(), event.startsAt.getHours(), event.startsAt.getMinutes(), event.startsAt.getSeconds(), event.startsAt.getMilliseconds());
-
 const getMovedMonthEventDateRange = (event: GoogleCalendarEvent, targetDay: Date, durationMs: number): MonthEventDragPreview => {
   const targetDayStart = startOfDay(targetDay);
 
@@ -166,28 +148,23 @@ const getMovedMonthEventDateRange = (event: GoogleCalendarEvent, targetDay: Date
 
   return { previewStartsAt, previewEndsAt, previewIsAllDay: false };
 };
-
 const getDistanceToRect = (clientX: number, clientY: number, rect: DOMRect): number => {
   const nearestX = Math.max(rect.left, Math.min(clientX, rect.right));
   const nearestY = Math.max(rect.top, Math.min(clientY, rect.bottom));
 
   return Math.hypot(clientX - nearestX, clientY - nearestY);
 };
-
 const getMonthEventWrapperClassName = (isDraggable: boolean, isDragging: boolean, isPreview = false): string => cn("shrink-0 transition-opacity duration-150 ease-out", isDraggable ? "touch-none cursor-grab select-none active:cursor-grabbing" : null, isDragging ? "opacity-35" : null, isPreview ? "pointer-events-none transition-none" : null);
-
 const createVisibleMonthEventRenderItem = (event: GoogleCalendarEvent): MonthEventRenderItem => {
   const eventKey = createCalendarEventKey(event);
 
   return { event, eventKey, renderKey: eventKey, isDragPreview: false };
 };
-
 const createMonthDragPreviewRenderItem = (event: GoogleCalendarEvent): MonthEventRenderItem => {
   const eventKey = createCalendarEventKey(event);
 
   return { event, eventKey, renderKey: `${eventKey}:preview`, isDragPreview: true };
 };
-
 const createMonthEventRenderItems = (visibleEvents: GoogleCalendarEvent[], dayKey: string, dragState: MonthEventDragState | null, dragPreviewEvent: GoogleCalendarEvent | null, dragPreviewDayKey: string | null): MonthEventRenderItem[] => {
   const visibleItems = visibleEvents.map(createVisibleMonthEventRenderItem);
   const shouldRenderDragPreview = Boolean(dragState && dragPreviewEvent && dragPreviewDayKey === dayKey);
@@ -256,9 +233,7 @@ const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScroll
     </div>
   );
 });
-
 CalendarMonthDayCell.displayName = "CalendarMonthDayCell";
-
 const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDayKey, scrollHoverDayKey, monthRowHeight, dragState, dragPreviewEvent, dragPreviewDayKey, showEventTimeLabel, setDayCellRef, onSelectDate, onEventClick, onEventPointerDown, onMoveCalendarEvent }: CalendarMonthWeekRowProps) => {
   return (
     <div data-calendar-week-key={week.key} className="calendar-month-week-row relative grid grid-cols-7 border-b" style={createMonthWeekRowStyle(monthRowHeight)}>
@@ -278,7 +253,6 @@ const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDay
   if (isWeekAffectedByDayKeyChange(previous.week, previous.scrollHoverDayKey, next.scrollHoverDayKey)) return false;
   return true;
 });
-
 CalendarMonthWeekRow.displayName = "CalendarMonthWeekRow";
 
 
@@ -459,5 +433,4 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, weekStartDay, visibleEv
 
 
 GridCalendarMonthDesktop.displayName = "GridCalendarMonthDesktop";
-
-export { GridCalendarMonthDesktop };
+export { GridCalendarMonth

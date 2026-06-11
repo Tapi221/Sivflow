@@ -15,8 +15,6 @@ import { getPdfPageWindowKeepSet, getSafePdfPageNumber, type PdfPageWindowMetric
 import type { PdfDocumentSource } from "./pdfDocumentSource";
 import "./PdfPane.css";
 
-
-
 type PdfPaneProps = {
   source: PdfDocumentSource | null;
   className?: string;
@@ -31,63 +29,50 @@ type PdfPaneProps = {
   onLoadError?: (error: unknown) => void;
   onViewerStateChange?: (viewerState: PdfViewerState, options?: PdfViewerStateChangeOptions) => Promise<void> | void;
 };
-
 type PdfViewerStateChangePersistence = "immediate" | "deferred" | "none";
-
 type PdfViewerStateChangeOptions = {
   persistence?: PdfViewerStateChangePersistence;
 };
-
 type PdfDocumentProxy = Awaited<ReturnType<typeof pdfjsLib.getDocument>["promise"]>;
 type PdfViewerInstance = InstanceType<typeof PDFViewer>;
 type PdfLinkServiceInstance = InstanceType<typeof PDFLinkService>;
 type PdfEventBusInstance = InstanceType<typeof EventBus>;
-
 type PdfViewerWithScale = PdfViewerInstance & {
   currentScale: number;
   currentScaleValue: string;
 };
-
 type PdfEventBusLike = PdfEventBusInstance & {
   off?: (eventName: string, listener: (event: unknown) => void) => void;
   _off?: (eventName: string, listener: (event: unknown) => void) => void;
 };
-
 type PdfPageChangingEvent = {
   pageNumber?: number;
 };
-
 type PdfScaleChangingEvent = {
   scale?: number;
 };
-
 type PdfPageRenderedEvent = {
   pageNumber?: number;
 };
-
 type PdfGestureEvent = Event & {
   clientX?: number;
   clientY?: number;
   scale?: number;
 };
-
 type NavigatorWithDeviceMemory = Navigator & {
   deviceMemory?: number;
 };
-
 type PdfToolbarState = {
   currentPage: number;
   pageCount: number;
   scale: number;
   isBookmarked: boolean;
 };
-
 type PendingPdfZoom = {
   scale: number;
   clientX?: number;
   clientY?: number;
 };
-
 type PdfScrollAnchor = {
   fallbackContentX: number;
   fallbackContentY: number;
@@ -98,7 +83,6 @@ type PdfScrollAnchor = {
   pageYRatio?: number;
   scale: number;
 };
-
 type PdfZoomPreview = {
   scale: number;
   scaleRatio: number;
@@ -107,16 +91,11 @@ type PdfZoomPreview = {
   clientX?: number;
   clientY?: number;
 };
-
 type PdfZoomCommit = {
   pageNumbers: Set<number>;
 };
-
 type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
-
 type StratisOptionalIconProps = { names: readonly string[]; className?: string; active?: boolean };
-
-
 
 const STRATIS_ICON_COMPONENTS = stratisIcons as Record<string, StratisIconComponent | undefined>;
 const STRATIS_BOOKMARK_ICON_NAMES = ["StratisBookmarkIcon", "StratisBookmark01Icon", "StratisBookOpenBookmarkIcon", "StratisStarIcon", "StratisStar01Icon", "StratisStar02Icon"] as const;
@@ -143,38 +122,29 @@ const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
 
-
-
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
-
 const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
-
 const getTrimmedHistory = (pages: number[]): number[] => {
   return pages.slice(-PDF_HISTORY_LIMIT);
 };
-
 const getPdfViewerPageCount = (pdfViewer: PdfViewerInstance): number => {
   const pageCount = Number(pdfViewer.pagesCount);
   return Number.isFinite(pageCount) ? pageCount : 0;
 };
-
 const getPdfViewerCurrentScale = (pdfViewer: PdfViewerInstance): number => {
   const currentScale = Number((pdfViewer as PdfViewerWithScale).currentScale);
   return Number.isFinite(currentScale) && currentScale > 0 ? currentScale : 1;
 };
-
 const getReportedDeviceMemory = (): number | null => {
   const navigatorLike = globalThis.navigator as NavigatorWithDeviceMemory | undefined;
   const deviceMemory = navigatorLike?.deviceMemory;
   return typeof deviceMemory === "number" && Number.isFinite(deviceMemory) ? deviceMemory : null;
 };
-
 const getPdfMaxCanvasPixels = (): number => {
   const deviceMemory = getReportedDeviceMemory();
   if (hasDesktopRuntime() || deviceMemory === null || deviceMemory > PDF_LOW_MEMORY_DEVICE_MAX_GB) return PDF_STANDARD_MAX_CANVAS_PIXELS;
   return PDF_LOW_MEMORY_MAX_CANVAS_PIXELS;
 };
-
 const createPdfViewerRuntimeOptions = () => {
   return {
     annotationEditorMode: pdfjsLib.AnnotationEditorType.DISABLE,
@@ -188,7 +158,6 @@ const createPdfViewerRuntimeOptions = () => {
     removePageBorders: true,
   };
 };
-
 const createPdfDocumentLoadOptions = (viewerOptions: PdfPaneProps["viewerOptions"], source: PdfDocumentSource | null) => {
   const isRemoteUrlSource = source?.type === "url" && source.locality === "remote";
   return {
@@ -205,12 +174,10 @@ const createPdfDocumentLoadOptions = (viewerOptions: PdfPaneProps["viewerOptions
     rangeChunkSize: isRemoteUrlSource ? PDF_RANGE_CHUNK_SIZE : undefined,
   };
 };
-
 const loadPdfDocument = async (source: PdfDocumentSource | null, viewerOptions: PdfPaneProps["viewerOptions"]): Promise<PdfDocumentProxy> => {
   if (!source) throw new Error("表示できるPDFソースがありません。");
   return waitForPdfLoadingTask(pdfjsLib.getDocument({ ...createPdfDocumentLoadOptions(viewerOptions, source), ...toPdfDocumentLoadSource(source) }));
 };
-
 const releasePdfViewerDocument = (pdfViewer: PdfViewerInstance, linkService: PdfLinkServiceInstance, pdfDocument: PdfDocumentProxy | null): void => {
   try {
     pdfViewer.cleanup();
@@ -226,7 +193,6 @@ const releasePdfViewerDocument = (pdfViewer: PdfViewerInstance, linkService: Pdf
 
   if (pdfDocument) void pdfDocument.destroy();
 };
-
 const addPdfViewerEventListener = (eventBus: PdfEventBusLike, eventName: string, listener: (event: unknown) => void): (() => void) => {
   eventBus.on(eventName, listener);
   return () => {
@@ -238,37 +204,30 @@ const addPdfViewerEventListener = (eventBus: PdfEventBusLike, eventName: string,
     eventBus._off?.(eventName, listener);
   };
 };
-
 const clampPdfViewerScale = (scale: number): number => {
   return Math.min(Math.max(scale, PDF_ZOOM_MIN_SCALE), PDF_ZOOM_MAX_SCALE);
 };
-
 const isCompactPdfViewport = (container: HTMLElement): boolean => {
   return container.clientWidth <= PDF_COMPACT_VIEWPORT_MAX_WIDTH;
 };
-
 const getPdfViewerStateScaleValue = (viewerState: PdfViewerState | null, forcePageWidth: boolean): string => {
   if (!forcePageWidth && viewerState?.fitMode === "manual" && typeof viewerState.scale === "number" && Number.isFinite(viewerState.scale) && viewerState.scale > 0) return String(viewerState.scale);
   return "page-width";
 };
-
 const shouldHandlePdfKeyboardEvent = (event: KeyboardEvent): boolean => {
   const target = event.target as HTMLElement | null;
   if (!target) return true;
   const tagName = target.tagName.toLowerCase();
   return tagName !== "input" && tagName !== "textarea" && !target.isContentEditable;
 };
-
 const getNormalizedPdfWheelDeltaY = (event: WheelEvent, container: HTMLElement): number => {
   if (event.deltaMode === PDF_WHEEL_DELTA_MODE_LINE) return event.deltaY * PDF_WHEEL_DELTA_LINE_HEIGHT_PX;
   if (event.deltaMode === PDF_WHEEL_DELTA_MODE_PAGE) return event.deltaY * Math.max(container.clientHeight, 1);
   return event.deltaY;
 };
-
 const isPdfTrackpadZoomWheelEvent = (event: WheelEvent): boolean => {
   return event.ctrlKey || event.metaKey;
 };
-
 const getPdfZoomClientPoint = (container: HTMLElement, clientX?: number, clientY?: number): { clientX: number; clientY: number } => {
   const containerRect = container.getBoundingClientRect();
   return {
@@ -276,13 +235,11 @@ const getPdfZoomClientPoint = (container: HTMLElement, clientX?: number, clientY
     clientY: typeof clientY === "number" && Number.isFinite(clientY) ? clientY : containerRect.top + container.clientHeight / 2,
   };
 };
-
 const readPdfPageNumber = (pageElement: HTMLElement): number | null => {
   const rawPageNumber = pageElement.dataset.pageNumber ?? pageElement.getAttribute("data-page-number");
   const pageNumber = Number(rawPageNumber);
   return Number.isFinite(pageNumber) ? pageNumber : null;
 };
-
 const getPdfAnchorPageElement = (viewerElement: HTMLElement, clientX: number, clientY: number): HTMLElement | null => {
   let closestPageElement: HTMLElement | null = null;
   let closestDistance = Number.POSITIVE_INFINITY;
@@ -302,7 +259,6 @@ const getPdfAnchorPageElement = (viewerElement: HTMLElement, clientX: number, cl
 
   return closestPageElement;
 };
-
 const createPdfScrollAnchor = (pdfViewer: PdfViewerInstance, container: HTMLElement, viewerElement: HTMLElement, clientX?: number, clientY?: number): PdfScrollAnchor => {
   const containerRect = container.getBoundingClientRect();
   const clientPoint = getPdfZoomClientPoint(container, clientX, clientY);
@@ -325,7 +281,6 @@ const createPdfScrollAnchor = (pdfViewer: PdfViewerInstance, container: HTMLElem
     scale: getPdfViewerCurrentScale(pdfViewer),
   };
 };
-
 const restorePdfScrollAnchor = (pdfViewer: PdfViewerInstance, container: HTMLElement, viewerElement: HTMLElement, anchor: PdfScrollAnchor): void => {
   if (typeof anchor.pageNumber === "number" && typeof anchor.pageXRatio === "number" && typeof anchor.pageYRatio === "number") {
     const pageElement = viewerElement.querySelector<HTMLElement>(`.page[data-page-number="${anchor.pageNumber}"]`);
@@ -342,7 +297,6 @@ const restorePdfScrollAnchor = (pdfViewer: PdfViewerInstance, container: HTMLEle
   container.scrollLeft = Math.max(0, viewerElement.offsetLeft + anchor.fallbackContentX * scaleRatio - anchor.localX);
   container.scrollTop = Math.max(0, viewerElement.offsetTop + anchor.fallbackContentY * scaleRatio - anchor.localY);
 };
-
 const applyPdfViewerScaleValueWithAnchor = (pdfViewer: PdfViewerInstance, container: HTMLElement, viewerElement: HTMLElement, scaleValue: string, clientX?: number, clientY?: number, afterRestore?: () => void): boolean => {
   if (getPdfViewerPageCount(pdfViewer) <= 0) return false;
   const anchor = createPdfScrollAnchor(pdfViewer, container, viewerElement, clientX, clientY);
@@ -353,14 +307,12 @@ const applyPdfViewerScaleValueWithAnchor = (pdfViewer: PdfViewerInstance, contai
   });
   return true;
 };
-
 const applyPdfViewerScaleWithAnchor = (pdfViewer: PdfViewerInstance, container: HTMLElement, viewerElement: HTMLElement, scale: number, clientX?: number, clientY?: number, afterRestore?: () => void): boolean => {
   const nextScale = clampPdfViewerScale(scale);
   const currentScale = getPdfViewerCurrentScale(pdfViewer);
   if (Math.abs(nextScale - currentScale) < PDF_ZOOM_SCALE_EPSILON) return false;
   return applyPdfViewerScaleValueWithAnchor(pdfViewer, container, viewerElement, String(nextScale), clientX, clientY, afterRestore);
 };
-
 const createPdfZoomPreview = (pdfViewer: PdfViewerInstance, container: HTMLElement, viewerElement: HTMLElement, nextScale: number, clientX?: number, clientY?: number): PdfZoomPreview | null => {
   const currentScale = getPdfViewerCurrentScale(pdfViewer);
   if (Math.abs(nextScale - currentScale) < PDF_ZOOM_SCALE_EPSILON) return null;
@@ -378,7 +330,6 @@ const createPdfZoomPreview = (pdfViewer: PdfViewerInstance, container: HTMLEleme
     clientY: clientPoint.clientY,
   };
 };
-
 const findNearestPageNumber = (viewerElement: HTMLElement, pageWindow: Set<number>): number | null => {
   for (const pageElement of viewerElement.querySelectorAll<HTMLElement>(".page")) {
     const pageNumber = readPdfPageNumber(pageElement);
@@ -387,7 +338,6 @@ const findNearestPageNumber = (viewerElement: HTMLElement, pageWindow: Set<numbe
 
   return null;
 };
-
 const showPdfZoomPreview = (container: HTMLElement, viewerElement: HTMLElement, preview: PdfZoomPreview): PdfZoomCommit => {
   const pageNumbers = new Set<number>();
   const viewportRect = container.getBoundingClientRect();
@@ -412,13 +362,11 @@ const showPdfZoomPreview = (container: HTMLElement, viewerElement: HTMLElement, 
 
   return { pageNumbers };
 };
-
 const clearPdfZoomPreview = (container: HTMLElement, viewerElement: HTMLElement): void => {
   container.classList.remove(PDF_ZOOMING_CLASS_NAME);
   viewerElement.style.transformOrigin = "";
   viewerElement.style.transform = "";
 };
-
 const getVisiblePdfPageMetrics = (viewerElement: HTMLElement, container: HTMLElement): PdfPageWindowMetric[] => {
   const containerRect = container.getBoundingClientRect();
   const metrics: PdfPageWindowMetric[] = [];
@@ -436,7 +384,6 @@ const getVisiblePdfPageMetrics = (viewerElement: HTMLElement, container: HTMLEle
 
   return metrics;
 };
-
 const updatePageRenderingWindow = (pdfViewer: PdfViewerInstance, viewerElement: HTMLElement, container: HTMLElement, currentPage: number): void => {
   const pageWindow = getPdfPageWindowKeepSet(currentPage, getPdfViewerPageCount(pdfViewer), PDF_VISIBLE_PAGE_CACHE_OVERSCAN);
   const visibleMetrics = getVisiblePdfPageMetrics(viewerElement, container);
@@ -450,7 +397,6 @@ const updatePageRenderingWindow = (pdfViewer: PdfViewerInstance, viewerElement: 
     }
   }
 };
-
 const createDefaultToolbarState = (): PdfToolbarState => ({
   currentPage: 1,
   pageCount: 0,
@@ -458,19 +404,15 @@ const createDefaultToolbarState = (): PdfToolbarState => ({
   isBookmarked: false,
 });
 
-
-
 const StratisFallbackBookmarkIcon = ({ className, active }: { className?: string; active?: boolean }) => (
   <svg aria-hidden="true" focusable="false" className={className} viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M6.5 4.25C6.5 3.56 7.06 3 7.75 3h8.5c.69 0 1.25.56 1.25 1.25v16.1l-5.5-3.3-5.5 3.3V4.25Z" />
   </svg>
 );
-
 const StratisOptionalIcon = ({ names, className, active = false }: StratisOptionalIconProps) => {
   const Icon = resolveStratisIcon(names);
   return Icon ? <Icon className={className} aria-hidden="true" focusable="false" /> : <StratisFallbackBookmarkIcon className={className} active={active} />;
 };
-
 const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadError, onViewerStateChange }: PdfPaneProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const viewerRef = useRef<HTMLDivElement | null>(null);
@@ -1111,7 +1053,5 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     </section>
   );
 };
-
-
 
 export { PdfPane };

@@ -9,7 +9,6 @@ export type CardSetViewEditingDraftPatch = { cardId: string;
     tags?: string[];
   };
 };
-
 export type CardSetViewWindowEventMap = { [CARD_SET_VIEW_EVENTS.editingChange]: boolean;
   [CARD_SET_VIEW_EVENTS.metaOpenChange]: boolean;
   [CARD_SET_VIEW_EVENTS.editingDraftPatch]: CardSetViewEditingDraftPatch;
@@ -17,7 +16,6 @@ export type CardSetViewWindowEventMap = { [CARD_SET_VIEW_EVENTS.editingChange]: 
   [CARD_SET_VIEW_EVENTS.toggleEditingRequest]: undefined;
   [CARD_SET_VIEW_EVENTS.toggleMetaPanelRequest]: undefined;
 };
-
 type CardSetViewWindowEventName = keyof CardSetViewWindowEventMap;
 
 
@@ -25,7 +23,6 @@ type CardSetViewWindowEventName = keyof CardSetViewWindowEventMap;
 export const dispatchCardSetViewWindowEvent = < TEventName extends CardSetViewWindowEventName, >( eventName: TEventName, detail: CardSetViewWindowEventMap[TEventName], ) => { if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent(eventName, { detail }));
 };
-
 export const subscribeCardSetViewWindowEvent = < TEventName extends CardSetViewWindowEventName, >( eventName: TEventName, listener: (detail: CardSetViewWindowEventMap[TEventName]) => void, ) => { if (typeof window === "undefined") { return () => {};
   }
 
@@ -39,4 +36,3 @@ export const subscribeCardSetViewWindowEvent = < TEventName extends CardSetViewW
   return () => {
     window.removeEventListener(eventName, handler);
   };
-};

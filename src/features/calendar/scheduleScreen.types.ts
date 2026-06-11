@@ -6,22 +6,15 @@ import type { CalendarViewMode, CalendarViewModeSelection } from "./calendar.typ
 
 
 export type { CalendarViewMode, CalendarViewModeSelection };
-
 export type CalendarProvider = "local" | "google" | "appleEventKit" | "appleCalDav";
-
 export type ProjectCalendarSyncDirection = "importOnly" | "exportOnly" | "twoWay";
-
 export type GoogleCalendarColorOverrideMap = Record<string, string>;
-
 export type CalendarAllDayEventOrderMap = Record<string, string[]>;
-
 export type CalendarBufferDays = { before: number;
   after: number;
 };
-
 export type CalendarGridStyle = CSSProperties & { "--calendar-hour-row-height": string;
 };
-
 export type CalendarEventLabelStyle = CSSProperties & { "--calendar-event-start-hour": number;
   "--calendar-event-duration-hours": number;
   backgroundColor: string;
@@ -30,18 +23,15 @@ export type CalendarEventLabelStyle = CSSProperties & { "--calendar-event-start-
   borderLeftWidth: number;
   color: string;
 };
-
 export type ScheduleScreenProps = { isLeftPanelCollapsed?: boolean;
   onClose?: () => void;
   onToggleLeftPanel?: () => void;
 };
-
 export type AppCalendarItem = { id: string;
   label: string;
   color: string;
   checked: boolean;
 };
-
 export type ProjectCalendarLink = { id: string;
   projectId: string;
   provider: CalendarProvider;
@@ -53,7 +43,6 @@ export type ProjectCalendarLink = { id: string;
   color?: string;
   lastSyncedAt?: string;
 };
-
 export type ProjectEventLink = { id: string;
   projectEventId: string;
   provider: CalendarProvider;
@@ -63,7 +52,6 @@ export type ProjectEventLink = { id: string;
   lastSyncedAt: string;
   lastKnownExternalUpdatedAt?: string;
 };
-
 export type GoogleAccountDisplay = { accountId: string;
   email: string | null;
   name: string | null;
@@ -79,27 +67,21 @@ export type GoogleAccountDisplay = { accountId: string;
   connectionStatus: GCalConnectionStatus;
   error: string | null;
 };
-
 export type CalendarSelectionRange = { start: Date;
   end: Date;
 };
-
 export type CalendarEventMoveRequest = { event: GoogleCalendarEvent;
   startsAt: Date;
   endsAt: Date;
   isAllDay: boolean;
 };
-
 export type CalendarEventMoveHandler = (request: CalendarEventMoveRequest) => void | Promise<void>;
-
 export type CalendarAllDayEventReorderRequest = { eventKey: string;
   sourceDayKey: string;
   targetDayKey: string;
   orderedEventKeys: string[];
 };
-
 export type CalendarAllDayEventReorderHandler = (request: CalendarAllDayEventReorderRequest) => void;
-
 export type CalendarSidebarProps = { appProjects: AppCalendarItem[];
   projectCalendarLinks: ProjectCalendarLink[];
   googleCalendarColorOverrides: GoogleCalendarColorOverrideMap;
@@ -117,7 +99,6 @@ export type CalendarSidebarProps = { appProjects: AppCalendarItem[];
   onToggleCalendar: (accountId: string, calendarId: string) => void;
   onToggleLeftPanel?: () => void;
 };
-
 export type CalendarWeekDayGridProps = { headerScrollRef: RefObject<HTMLDivElement | null>;
   allDayScrollRef?: RefObject<HTMLDivElement | null>;
   scrollContainerRef: RefObject<HTMLDivElement | null>;

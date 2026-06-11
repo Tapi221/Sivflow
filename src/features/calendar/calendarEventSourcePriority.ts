@@ -21,7 +21,6 @@ const GOOGLE_CALENDAR_KEY_SEPARATOR = "\u001f";
 
 
 const createGoogleCalendarSourceKey = (accountId: string, calendarId: string): string => `${accountId}${GOOGLE_CALENDAR_KEY_SEPARATOR}${calendarId}`;
-
 const setUnambiguousValue = <T>(map: Map<string, T | null>, key: string, value: T): void => {
   if (!map.has(key)) {
     map.set(key, value);
@@ -32,9 +31,7 @@ const setUnambiguousValue = <T>(map: Map<string, T | null>, key: string, value: 
     map.set(key, null);
   }
 };
-
 const buildProjectIndexById = (appProjects: AppCalendarItem[]): Map<string, number> => new Map(appProjects.map((project, index) => [project.id, index]));
-
 const buildGoogleCalendarIndexMaps = (googleAccounts: GoogleAccountDisplay[]): { exact: Map<string, number>; fallback: Map<string, number | null> } => {
   const exact = new Map<string, number>();
   const fallback = new Map<string, number | null>();
@@ -50,7 +47,6 @@ const buildGoogleCalendarIndexMaps = (googleAccounts: GoogleAccountDisplay[]): {
 
   return { exact, fallback };
 };
-
 const resolveLinkedProjectId = (event: GoogleCalendarEvent, projectCalendarLinks: ProjectCalendarLink[]): string | undefined => {
   const exactLink = event.accountId
     ? projectCalendarLinks.find((link) => link.provider === "google" && link.accountId === event.accountId && link.externalCalendarId === event.calendarId)
@@ -63,7 +59,6 @@ const resolveLinkedProjectId = (event: GoogleCalendarEvent, projectCalendarLinks
 
   return fallbackProjectId && fallbackLinks.every((link) => link.projectId === fallbackProjectId) ? fallbackProjectId : undefined;
 };
-
 const resolveGoogleCalendarIndex = (event: GoogleCalendarEvent, googleCalendarIndexes: { exact: Map<string, number>; fallback: Map<string, number | null> }): number => {
   if (event.accountId) {
     const exactIndex = googleCalendarIndexes.exact.get(createGoogleCalendarSourceKey(event.accountId, event.calendarId));
@@ -72,7 +67,6 @@ const resolveGoogleCalendarIndex = (event: GoogleCalendarEvent, googleCalendarIn
 
   return googleCalendarIndexes.fallback.get(event.calendarId) ?? FALLBACK_EVENT_PRIORITY_INDEX;
 };
-
 export const createCalendarYearEventDisplayResolver = ({ appProjects, projectCalendarLinks, googleAccounts }: CalendarEventSourcePriorityInput): CalendarYearEventDisplayResolver => { const projectById = new Map(appProjects.map((project) => [project.id, project]));
   const projectIndexById = buildProjectIndexById(appProjects);
   const googleCalendarIndexes = buildGoogleCalendarIndexMaps(googleAccounts);
@@ -98,4 +92,3 @@ export const createCalendarYearEventDisplayResolver = ({ appProjects, projectCal
       },
     };
   };
-};

@@ -4,16 +4,12 @@ import { cn } from "@/lib/utils";
 import { isTypingTarget } from "@/utils/isTypingTarget";
 import { buildVerticalCardPagerItemStyle, resolveVerticalCardPagerItemWidthSpec, type VerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";
 
-
-
 type ScrollAnchorFace = "question" | "answer";
-
 type ScrollAnchorSnapshot = {
   preserveKey: string | number | null;
   cardKey: string | null;
   relativeTop: number;
 };
-
 export type VerticalCardPagerProps<T> = { cards: T[];
   activeIndex: number;
   onActiveIndexChange: (idx: number) => void;
@@ -37,10 +33,7 @@ export type VerticalCardPagerProps<T> = { cards: T[];
   scrollToActiveIndexBehavior?: ScrollBehavior;
 };
 
-
-
 export const ACTIVE_INDEX_RENDER_RADIUS = 6;
-
 const DEFAULT_CARD_WIDTH = CANONICAL_CARD_WIDTH;
 const CARD_GAP = 16;
 const SCROLL_PADDING = "50vh";
@@ -49,8 +42,6 @@ const CARD_RADIUS_MD = 40;
 const SCROLL_IDLE_COMMIT_DELAY_MS = 110;
 const SCROLL_ANCHOR_SUPPRESSION_MS = 180;
 
-
-
 const resolveCardBaseRadius = () => {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
     return CARD_RADIUS_MD;
@@ -58,25 +49,20 @@ const resolveCardBaseRadius = () => {
 
   return window.matchMedia("(min-width: 768px)").matches ? CARD_RADIUS_MD : CARD_RADIUS_SM;
 };
-
 const cardBorderRadius = () => `${Math.round(Math.max(0, resolveCardBaseRadius()))}px`;
-
 const clampIndex = (idx: number, count: number) => {
   if (count <= 0) return -1;
   if (!Number.isFinite(idx)) return 0;
   return Math.max(0, Math.min(count - 1, Math.trunc(idx)));
 };
-
 const buildStableCardKey = <T,>(card: T, idx: number, getKey?: (card: T, idx: number) => string | number) => {
   return String(getKey ? getKey(card, idx) : idx);
 };
-
 const resolveScrollAnchorFaceFromElement = (element: HTMLElement | null): ScrollAnchorFace | null => {
   if (!element) return null;
   const face = element.getAttribute("data-card-face");
   return face === "question" || face === "answer" ? face : null;
 };
-
 const getCurrentTimeMs = () => {
   if (typeof performance !== "undefined" && typeof performance.now === "function") {
     return performance.now();
@@ -84,8 +70,6 @@ const getCurrentTimeMs = () => {
 
   return Date.now();
 };
-
-
 
 const VerticalCardPagerFn = <T,>({
   cards,
@@ -356,14 +340,8 @@ const VerticalCardPagerFn = <T,>({
   );
 };
 
-
-
 const VerticalCardPager = React.memo(VerticalCardPagerFn) as typeof VerticalCardPagerFn;
 
-
-
 export { VerticalCardPager };
-
-
 
 export type { VerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";

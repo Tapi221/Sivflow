@@ -11,7 +11,6 @@ type ImageTransform = {
     cropX: number;
   };
 };
-
 type ImageFrameProps = {
   src: string;
   alt: string;
@@ -43,7 +42,6 @@ const DRAG_START_THRESHOLD_PX = 6;
 
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
-
 const inferBaseWidthFromLegacyScale = (
   referenceWidthPx: number,
   legacyScale?: number | null,

@@ -8,7 +8,6 @@ export type AssetLikeRecord = Partial<AssetRecord> & Partial<UploadedImage>;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
-
 const getString = (
   record: Record<string, unknown>,
   key: string,
@@ -18,7 +17,6 @@ const getString = (
     ? value.trim()
     : null;
 };
-
 const getNumber = (
   record: Record<string, unknown>,
   key: string,
@@ -26,12 +24,10 @@ const getNumber = (
   const value = record[key];
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 };
-
 const getDate = (record: Record<string, unknown>, key: string): Date | null => {
   const value = record[key];
   return value instanceof Date ? value : null;
 };
-
 export const toAssetLikeRecord = (value: unknown): AssetLikeRecord | null => { if (!isRecord(value)) return null;
 
   return {
@@ -57,7 +53,6 @@ export const toAssetLikeRecord = (value: unknown): AssetLikeRecord | null => { i
     retryCount: getNumber(value, "retryCount") ?? undefined,
   };
 };
-
 export const makeAssetRecord = ({ existing, itemId, userId, mime, size, localBlobId, remoteKey, remoteStatus, remoteUrlCache, retryCount, }: { existing: AssetLikeRecord | null;
   itemId: string;
   userId: string;

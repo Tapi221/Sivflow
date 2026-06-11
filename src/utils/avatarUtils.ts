@@ -13,7 +13,6 @@ const AVATAR_COLORS = [
   "#FFF8E1", // Amber 50
   "#F1F8E9", // Light Green 50
 ];
-
 const TEXT_COLORS = [
   "#00695C", // Teal 800
   "#1565C0", // Blue 800

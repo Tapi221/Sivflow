@@ -6,7 +6,6 @@ type UseCalendarPrintControllerOptions = {
   onBeforePrint?: () => Promise<void> | void;
   onPrintError?: (error: unknown) => void;
 };
-
 type UseCalendarPrintControllerReturn = {
   isPrintPanelActive: boolean;
   requestPrint: () => void;
@@ -74,4 +73,4 @@ const useCalendarPrintController = ({ onBeforePrint, onPrintError }: UseCalendar
 
 
 
-export { useCalendarPrintController };
+export { useCalendarPrintControl

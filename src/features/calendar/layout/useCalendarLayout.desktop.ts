@@ -14,13 +14,11 @@ const WEEKDAY_GRID_TEMPLATE_ROWS = `${WEEKDAY_HEADER_ROW_HEIGHT_PX}px auto ${WEE
 
 
 const getWeekdayHourRowHeightPx = (selectedViewMode: CalendarViewMode, viewportWidth: number): number => selectedViewMode === "week" && viewportWidth <= MOBILE_WEB_VIEWPORT_MAX_WIDTH_PX ? MOBILE_WEB_WEEK_HOUR_ROW_HEIGHT_PX : C.DEFAULT_HOUR_ROW_HEIGHT;
-
 const isWeekdayRailView = (viewMode: CalendarViewMode) =>
   viewMode === "days" ||
   viewMode === "threeDays" ||
   viewMode === "week" ||
   viewMode === "timetable";
-
 export const useCalendarLayout = ({ viewportWidth, visibleDays, displayDays, selectedViewMode, currentDate, calendarBuffer, }: { viewportWidth: number;
   visibleDays: Date[];
   displayDays: Date[];
@@ -72,4 +70,3 @@ export const useCalendarLayout = ({ viewportWidth, visibleDays, displayDays, sel
     titleDate,
     monthLabel,
   };
-};

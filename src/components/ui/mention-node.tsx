@@ -184,6 +184,4 @@ export function MentionInputElement( props: PlateElementProps<TComboboxInputElem
       </InlineCombobox>
 
       {props.children}
-    </PlateElement>
-  );
-}
+    </PlateE

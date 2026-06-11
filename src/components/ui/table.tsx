@@ -15,7 +15,6 @@ const Table = React.forwardRef<
     />
   </div>
 ));
-
 const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
@@ -26,7 +25,6 @@ const TableHeader = React.forwardRef<
     {...props}
   />
 ));
-
 const TableBody = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
@@ -37,7 +35,6 @@ const TableBody = React.forwardRef<
     {...props}
   />
 ));
-
 const TableFooter = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
@@ -51,7 +48,6 @@ const TableFooter = React.forwardRef<
     {...props}
   />
 ));
-
 const TableRow = React.forwardRef<
   HTMLTableRowElement,
   React.HTMLAttributes<HTMLTableRowElement>
@@ -62,7 +58,6 @@ const TableRow = React.forwardRef<
     {...props}
   />
 ));
-
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
   React.ThHTMLAttributes<HTMLTableCellElement>
@@ -76,7 +71,6 @@ const TableHead = React.forwardRef<
     {...props}
   />
 ));
-
 const TableCell = React.forwardRef<
   HTMLTableCellElement,
   React.TdHTMLAttributes<HTMLTableCellElement>
@@ -90,7 +84,6 @@ const TableCell = React.forwardRef<
     {...props}
   />
 ));
-
 const TableCaption = React.forwardRef<
   HTMLTableCaptionElement,
   React.HTMLAttributes<HTMLTableCaptionElement>
@@ -112,5 +105,4 @@ TableRow.displayName = "TableRow";
 TableHead.displayName = "TableHead";
 TableCell.displayName = "TableCell";
 TableCaption.displayName = "TableCaption";
-
-export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow };
+export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow 

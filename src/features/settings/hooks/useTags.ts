@@ -7,12 +7,8 @@ import { getLocalDb } from "@/services/localDB";
 import { auditAndRepairTags } from "@/services/localdb/audit/tags";
 import type { TagRecord } from "@/services/localdb/types";
 
-
-
 export type TagCategory = string;
-
 export type Tag = TagRecord;
-
 type CardTagFields = {
   id?: string;
   userId?: string;
@@ -21,16 +17,10 @@ type CardTagFields = {
   updatedAt?: Date;
   isDeleted?: boolean;
 };
-
 type LocalDbInstance = Awaited<ReturnType<typeof getLocalDb>>;
 
-
-
 export const DEFAULT_TAG_COLOR_KEYS: TagColorKey[] = [...TAG_COLOR_KEYS];
-
 const MAX_PATH_DEPTH = 12;
-
-
 
 const genId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -38,9 +28,7 @@ const genId = (): string => {
   }
   return `${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
 };
-
 const genCategoryId = (): string => `cat_${genId()}`;
-
 const parseTagPath = (pathStr: string): string[] | { error: string } => {
   const segments = pathStr
     .split("/")
@@ -54,27 +42,22 @@ const parseTagPath = (pathStr: string): string[] | { error: string } => {
 
   return segments;
 };
-
 const asStringArray = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is string => typeof item === "string");
 };
-
 const getCardTagIds = (card: Pick<CardTagFields, "tagIds">): string[] =>
   asStringArray(card.tagIds);
-
 export const resolveCardTagNames = ( tagIds: unknown, tagById: ReadonlyMap<string, Pick<TagRecord, "name">>, ): string[] => { const ids = asStringArray(tagIds);
   if (ids.length === 0) return [];
   return ids.map((id) => tagById.get(id)?.name ?? "").filter((name) => name);
 };
-
 const matchesParent = (
   tag: Pick<TagRecord, "parentId">,
   parentId: string | undefined,
 ): boolean => {
   return parentId === undefined ? !tag.parentId : tag.parentId === parentId;
 };
-
 const queueTagUpsert = async (
   db: LocalDbInstance,
   tagId: string,
@@ -89,7 +72,6 @@ const queueTagUpsert = async (
     payload: tag,
   });
 };
-
 const queueCardUpserts = async (
   db: LocalDbInstance,
   cardIds: Iterable<string>,
@@ -105,7 +87,6 @@ const queueCardUpserts = async (
     });
   }
 };
-
 const queueTagUpserts = async (
   db: LocalDbInstance,
   tagIds: Iterable<string>,
@@ -115,7 +96,6 @@ const queueTagUpserts = async (
     await queueTagUpsert(db, tagId, operationType);
   }
 };
-
 const findPathCandidate = (
   candidates: TagRecord[],
   parentId: string | undefined,
@@ -129,7 +109,6 @@ const findPathCandidate = (
     (tag) => Boolean(tag.isDeleted) && matchesParent(tag, parentId),
   );
 };
-
 export const useTags = () => { const { currentUser } = useAuthSession();
   const { settings, updateSettings } = useUserSettings();
 

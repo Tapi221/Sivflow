@@ -17,7 +17,6 @@ export function FootnoteReferenceElementStatic( props: SlateElementProps<TFootno
     </SlateElement>
   );
 }
-
 export function FootnoteDefinitionElementStatic( props: SlateElementProps<TFootnoteElement> ) { const { element } = props;
 
   return (
@@ -28,4 +27,3 @@ export function FootnoteDefinitionElementStatic( props: SlateElementProps<TFootn
       <div className="min-w-0 flex-1">{props.children}</div>
     </SlateElement>
   );
-}

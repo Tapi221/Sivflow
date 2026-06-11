@@ -12,14 +12,12 @@ type CalendarEventChipWeekdayProps = {
   event: GoogleCalendarEvent;
   tooltipDisabled?: boolean;
 };
-
 type ChipLayoutState = {
   showTimeLabel: boolean;
   titleLineClamp: number;
   useInlineTimeLayout: boolean;
   useLastLineTimeLayout: boolean;
 };
-
 type CalendarEventChipWeekdayStyle = CSSProperties & {
   "--calendar-event-chip-accent": string;
   "--calendar-event-chip-bg": string;
@@ -60,7 +58,6 @@ const getPixelValue = (value: string) => {
 
   return Number.isFinite(parsedValue) ? parsedValue : 0;
 };
-
 const getElementLineHeight = (element: HTMLElement) => {
   const styles = window.getComputedStyle(element);
   const parsedLineHeight = Number.parseFloat(styles.lineHeight);
@@ -71,7 +68,6 @@ const getElementLineHeight = (element: HTMLElement) => {
 
   return Number.isFinite(parsedFontSize) ? parsedFontSize * 1.2 : 16;
 };
-
 const getElementTextWidth = (element: HTMLElement) => {
   const text = element.textContent ?? "";
   const styles = window.getComputedStyle(element);
@@ -84,14 +80,12 @@ const getElementTextWidth = (element: HTMLElement) => {
 
   return context.measureText(text).width;
 };
-
 const calculateTitleLineClamp = (availableHeight: number, fullTitleHeight: number, titleLineHeight: number) => {
   const visibleLineCount = Math.floor((availableHeight + CHIP_MEASUREMENT_TOLERANCE_PX) / titleLineHeight);
   const fullTitleLineCount = Math.ceil(fullTitleHeight / titleLineHeight);
 
   return Math.max(DEFAULT_TITLE_LINE_CLAMP, Math.min(fullTitleLineCount, visibleLineCount));
 };
-
 const calculateChipLayout = (layoutMeasurement: HTMLDivElement, titleMeasurement: HTMLSpanElement, timeMeasurement: HTMLSpanElement, titleWithTimeMeasurement: HTMLSpanElement): ChipLayoutState => {
   const layoutStyles = window.getComputedStyle(layoutMeasurement);
   const contentHeight = Math.max(0, layoutMeasurement.clientHeight - getPixelValue(layoutStyles.paddingTop) - getPixelValue(layoutStyles.paddingBottom));
@@ -115,7 +109,6 @@ const calculateChipLayout = (layoutMeasurement: HTMLDivElement, titleMeasurement
     useLastLineTimeLayout: canUseLastLineTimeLayout,
   };
 };
-
 const createTitleClampStyle = (lineClamp: number): CSSProperties => {
   if (lineClamp <= DEFAULT_TITLE_LINE_CLAMP) {
     return {
@@ -131,7 +124,6 @@ const createTitleClampStyle = (lineClamp: number): CSSProperties => {
     WebkitLineClamp: lineClamp,
   };
 };
-
 const createCalendarEventChipWeekdayStyle = (backgroundColor: string, accentColor: string, textColor: string, useInlineTimeLayout: boolean): CalendarEventChipWeekdayStyle => ({
   "--calendar-event-chip-accent": accentColor,
   "--calendar-event-chip-bg": backgroundColor,
@@ -147,11 +139,9 @@ const createCalendarEventChipWeekdayStyle = (backgroundColor: string, accentColo
   paddingRight: eventChipDesign.weekday.paddingRightPx,
   paddingTop: useInlineTimeLayout ? eventChipDesign.weekday.inlinePaddingYPx : eventChipDesign.weekday.paddingYPx,
 });
-
 const createLineMaskStyle = (): CSSProperties => ({
   borderRadius: eventChipDesign.weekday.radiusPx,
 });
-
 const createMeasurementStyle = (): CSSProperties => ({
   borderRadius: eventChipDesign.weekday.radiusPx,
   gap: eventChipDesign.weekday.gapPx,
@@ -160,28 +150,23 @@ const createMeasurementStyle = (): CSSProperties => ({
   paddingRight: eventChipDesign.weekday.paddingRightPx,
   paddingTop: eventChipDesign.weekday.paddingYPx,
 });
-
 const createTitleStyle = (lineClamp: number): CSSProperties => ({
   ...createTitleClampStyle(lineClamp),
   fontSize: eventChipDesign.weekday.titleFontSizePx,
   lineHeight: `${eventChipDesign.weekday.titleLineHeightPx}px`,
 });
-
 const createTitleMeasurementStyle = (): CSSProperties => ({
   fontSize: eventChipDesign.weekday.titleFontSizePx,
   lineHeight: `${eventChipDesign.weekday.titleLineHeightPx}px`,
 });
-
 const createTimeStyle = (): CSSProperties => ({
   fontSize: eventChipDesign.weekday.timeFontSizePx,
   lineHeight: `${eventChipDesign.weekday.timeLineHeightPx}px`,
 });
-
 const createLastLineTimeStyle = (): CSSProperties => ({
   fontSize: eventChipDesign.weekday.timeFontSizePx,
   lineHeight: `${eventChipDesign.weekday.timeLineHeightPx}px`,
 });
-
 const encodeBase64Url = (value: string): string | null => {
   if (typeof window === "undefined") return null;
 
@@ -194,7 +179,6 @@ const encodeBase64Url = (value: string): string | null => {
 
   return window.btoa(binaryValue).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 };
-
 const createGoogleCalendarEventEditUrl = (event: GoogleCalendarEvent): string | null => {
   const eventId = event.externalId ?? event.id;
   if (!eventId || !event.calendarId) return null;
@@ -204,9 +188,7 @@ const createGoogleCalendarEventEditUrl = (event: GoogleCalendarEvent): string | 
 
   return `${GOOGLE_CALENDAR_EVENT_EDIT_URL}?eid=${encodedEventPayload}`;
 };
-
 const getChipClassName = (useInlineTimeLayout: boolean): string => [CHIP_BASE_CLASS, useInlineTimeLayout ? CHIP_INLINE_CLASS : CHIP_NORMAL_CLASS].join(" ");
-
 const getMeasurementClassName = (): string => [CHIP_MEASUREMENT_BASE_CLASS, CHIP_NORMAL_CLASS].join(" ");
 
 
@@ -317,5 +299,4 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
 
 
 CalendarEventChipWeekday.displayName = "CalendarEventChipWeekday";
-
 export { CalendarEventChipWeekday };

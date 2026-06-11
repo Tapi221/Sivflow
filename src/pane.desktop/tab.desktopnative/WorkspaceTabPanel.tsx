@@ -5,8 +5,6 @@ import { useDocumentCommands } from "@/features/document/hooks/useDocumentComman
 import type { Card, DocumentItem } from "@/types";
 import type { WorkspaceEntityTab } from "./Tab";
 
-
-
 type WorkspaceTabPanelProps = {
   activeTab: WorkspaceEntityTab;
   cards: Card[];
@@ -16,17 +14,11 @@ type WorkspaceTabPanelProps = {
   onCardUpdated: () => void;
 };
 
-
-
 const workspaceTabPanelTextClassName = "text-[18px] leading-6";
-
-
 
 const buildMapById = <TEntity extends { id: string }>(entities: TEntity[]) => {
   return new Map(entities.map((entity) => [entity.id, entity]));
 };
-
-
 
 const WorkspacePanelStatus = ({ title }: { title: string }) => {
   return (
@@ -37,7 +29,6 @@ const WorkspacePanelStatus = ({ title }: { title: string }) => {
     </div>
   );
 };
-
 const WorkspaceTabPanel = ({
   activeTab,
   cards,
@@ -87,7 +78,5 @@ const WorkspaceTabPanel = ({
 
   return null;
 };
-
-
 
 export { WorkspaceTabPanel };

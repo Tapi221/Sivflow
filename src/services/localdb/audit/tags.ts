@@ -1,12 +1,9 @@
 import { getInstance } from "@/services/localdb/instanceManager";
 
-
-
 type CardTagFields = {
   tagIds?: unknown;
   updatedAt?: Date;
 };
-
 export type TagRepairSummary = { removedOrphanTagRefs: number;
   dedupedTagRefs: number;
   duplicateNameLowerPairs: Array<{
@@ -16,13 +13,10 @@ export type TagRepairSummary = { removedOrphanTagRefs: number;
   }>;
 };
 
-
-
 const asStringArray = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is string => typeof item === "string");
 };
-
 export const auditAndRepairTags = async ( userId: string, ): Promise<TagRepairSummary> => { const db = await getInstance(userId);
   const tagIdsByNameLower = new Map<string, string[]>();
   const knownTagIds = new Set<string>();

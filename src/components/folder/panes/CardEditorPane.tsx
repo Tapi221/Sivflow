@@ -35,7 +35,6 @@ type CardEditorPaneSettings = {
   delayBonusEnabled?: boolean;
   reviewStartNextDay?: boolean;
 };
-
 interface CardEditorPaneProps {
   selectedCardId: string | null;
   folderId?: string;
@@ -61,11 +60,9 @@ interface CardEditorPaneProps {
   cardLayoutMode?: CardLayoutMode;
   zoom?: number;
 }
-
 type _OverlayTopRightProps = Readonly<{
   children?: React.ReactNode;
 }>;
-
 type EditorSidePaneProps = {
   side: "question" | "answer";
   blocks: CardBlock[];
@@ -107,24 +104,19 @@ const EMPTY_BLOCKS: CardBlock[] = [];
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
-
 const isCardEntity = (value: unknown): value is Card =>
   isRecord(value) && typeof value.id === "string";
-
 const toTimeMs = (value: unknown): number | null => {
   return toMillisOrNull(value);
 };
-
 const getSettingsAccentColor = (value: unknown): string | undefined =>
   isRecord(value) && typeof value.accentColor === "string"
     ? value.accentColor
     : undefined;
-
 const getSettingsDuplicateToOpposite = (value: unknown): boolean | undefined =>
   isRecord(value) && typeof value.duplicateToOpposite === "boolean"
     ? value.duplicateToOpposite
     : undefined;
-
 const toAudioDialogUrl = (value: unknown): string | null => {
   if (typeof value === "string") {
     return value.trim() === "" ? null : value;
@@ -140,7 +132,6 @@ const toAudioDialogUrl = (value: unknown): string | null => {
 
   return resolved ?? null;
 };
-
 const _OverlayTopRight = ({ children }: _OverlayTopRightProps) => {
   if (!children) return null;
 
@@ -157,7 +148,6 @@ const _OverlayTopRight = ({ children }: _OverlayTopRightProps) => {
     </div>
   );
 };
-
 const areEditorSidePanePropsEqual = (
   prev: EditorSidePaneProps,
   next: EditorSidePaneProps,
@@ -331,7 +321,6 @@ const EditorSidePaneInner = ({
 
 
 const EditorSidePane = memo(EditorSidePaneInner, areEditorSidePanePropsEqual);
-
 EditorSidePane.displayName = "EditorSidePane";
 
 

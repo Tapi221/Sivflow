@@ -8,7 +8,6 @@ interface UseCardSetViewDisplayModeOptions {
   cardSetId: string | null;
   defaultDisplayMode?: CardDisplayMode | null;
 }
-
 type DisplayModeOverrideState = {
   scopeKey: string;
   mode: CardDisplayMode;
@@ -22,7 +21,6 @@ const buildDisplayModeScopeKey = (
 ) => {
   return `${cardSetId ?? "__null__"}::${defaultDisplayMode ?? "__unset__"}`;
 };
-
 export const useCardSetViewDisplayMode = ({ cardSetId, defaultDisplayMode, }: UseCardSetViewDisplayModeOptions) => { const scopeKey = useMemo( () => buildDisplayModeScopeKey(cardSetId, defaultDisplayMode), [cardSetId, defaultDisplayMode], );
 
   const resolvedDisplayMode = useMemo(
@@ -53,4 +51,3 @@ export const useCardSetViewDisplayMode = ({ cardSetId, defaultDisplayMode, }: Us
     currentDisplayMode,
     setCurrentDisplayMode,
   };
-};

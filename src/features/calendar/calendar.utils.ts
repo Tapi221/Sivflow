@@ -6,7 +6,6 @@ import type { Translations } from "@shared/i18n/translations";
 
 
 type CalendarArrowKey = "ArrowLeft" | "ArrowRight" | "ArrowUp" | "ArrowDown";
-
 type CalendarWeekDayLabel = "SUN" | "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT";
 
 
@@ -20,7 +19,6 @@ const CALENDAR_WEEK_DAYS_SUNDAY: CalendarWeekDayLabel[] = [
   "FRI",
   "SAT",
 ];
-
 const CALENDAR_WEEK_DAYS_MONDAY: CalendarWeekDayLabel[] = [
   "MON",
   "TUE",
@@ -30,14 +28,12 @@ const CALENDAR_WEEK_DAYS_MONDAY: CalendarWeekDayLabel[] = [
   "SAT",
   "SUN",
 ];
-
 const CALENDAR_ARROW_DIFF_MAP: Record<CalendarArrowKey, number> = {
   ArrowLeft: -1,
   ArrowRight: 1,
   ArrowUp: -7,
   ArrowDown: 7,
 };
-
 const DEFAULT_TODAY_DESCRIPTION_LABELS: Pick<Translations, "todayDescriptionEmpty" | "todayDescriptionDue"> = {
   todayDescriptionEmpty: "今日の復習はありません",
   todayDescriptionDue: "今日の復習があります",
@@ -48,21 +44,17 @@ const DEFAULT_TODAY_DESCRIPTION_LABELS: Pick<Translations, "todayDescriptionEmpt
 const toDate = (value: CalendarTimestampLike): Date | null => {
   return normalizeDate(value);
 };
-
 const toDateKey = (value: Date) => {
   return format(value, "yyyy-MM-dd");
 };
-
 const normalizeDateOnly = (value: Date) => {
   return new Date(value.getFullYear(), value.getMonth(), value.getDate());
 };
-
 const getWeekDays = (weekStartDay: CalendarWeekStartDay) => {
   return weekStartDay === "sunday"
     ? [...CALENDAR_WEEK_DAYS_SUNDAY]
     : [...CALENDAR_WEEK_DAYS_MONDAY];
 };
-
 const getArrowDayDiff = (key: string): number | null => {
   if (!(key in CALENDAR_ARROW_DIFF_MAP)) {
     return null;
@@ -70,19 +62,16 @@ const getArrowDayDiff = (key: string): number | null => {
 
   return CALENDAR_ARROW_DIFF_MAP[key as CalendarArrowKey];
 };
-
 const getCalendarIntensity = (count: number) => {
   if (count <= 0) return 0;
   return Math.min(5, Math.ceil(count / 5));
 };
-
 const getTodayDescription = (
   todayDueCount: number,
   t: Pick<Translations, "todayDescriptionEmpty" | "todayDescriptionDue"> = DEFAULT_TODAY_DESCRIPTION_LABELS,
 ) => {
   return todayDueCount === 0 ? t.todayDescriptionEmpty : t.todayDescriptionDue;
 };
-
 const isFocusableInputTarget = (target: EventTarget | null) => {
   if (!(target instanceof HTMLElement)) {
     return false;
@@ -93,12 +82,10 @@ const isFocusableInputTarget = (target: EventTarget | null) => {
     tagName === "INPUT" || tagName === "TEXTAREA" || target.isContentEditable
   );
 };
-
 const getLogDate = (log: CalendarStudyLogLike): Date | null => {
   const raw = log.studiedAt ?? log.createdAt;
   return toDate(raw);
 };
-
 const buildStudyDateSet = (logs: CalendarStudyLogLike[]) => {
   return new Set(
     logs
@@ -107,7 +94,6 @@ const buildStudyDateSet = (logs: CalendarStudyLogLike[]) => {
       .map((value) => normalizeDateOnly(value).toDateString()),
   );
 };
-
 const getStreakFromLogs = (logs: CalendarStudyLogLike[]) => {
   if (logs.length === 0) return 0;
 
@@ -135,4 +121,4 @@ const getStreakFromLogs = (logs: CalendarStudyLogLike[]) => {
 
 
 
-export { buildStudyDateSet, getArrowDayDiff, getCalendarIntensity, getLogDate, getStreakFromLogs, getTodayDescription, getWeekDays, isFocusableInputTarget, normalizeDateOnly, toDate, toDateKey };
+export { buildStudyDateSet, getArrowDayDiff, getCalendarIntensity, getLogDate, getStreakFromLogs, getTodayDescription, getWeekDays, isFocusableInputTarget, normalizeDateOnly, toDate, toDate

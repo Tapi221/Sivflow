@@ -7,7 +7,6 @@ import type { CardBlock } from "@/types";
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 };
-
 const bytesToBase64 = (bytes: Uint8Array): string => {
   const maybeBuffer = (
     globalThis as {
@@ -32,7 +31,6 @@ const bytesToBase64 = (bytes: Uint8Array): string => {
 
   return btoa(binary);
 };
-
 const buildMediaLookup = (
   mediaManifest?: MfDeckMediaManifestV1,
 ): Map<string, { mimeType: string }> => {
@@ -44,14 +42,12 @@ const buildMediaLookup = (
 
   return lookup;
 };
-
 const buildDataUrl = (input: {
   bytes: Uint8Array;
   mimeType: string;
 }): string => {
   return `data:${input.mimeType};base64,${bytesToBase64(input.bytes)}`;
 };
-
 const restoreRecordUrl = (input: {
   record: Record<string, unknown>;
   key: string;
@@ -98,7 +94,6 @@ const restoreRecordUrl = (input: {
     mimeType: metadata.mimeType,
   });
 };
-
 const restoreRecordMediaUrls = (input: {
   record: Record<string, unknown>;
   media?: Record<string, Uint8Array>;
@@ -111,7 +106,6 @@ const restoreRecordMediaUrls = (input: {
     restoreRecordUrl({ ...input, key });
   });
 };
-
 const restoreBlockMedia = (input: {
   block: CardBlock;
   media?: Record<string, Uint8Array>;
@@ -149,7 +143,6 @@ const restoreBlockMedia = (input: {
     });
   }
 };
-
 export const restoreMfDeckMediaInBlocks = (input: { blocks: CardBlock[];
   media?: Record<string, Uint8Array>;
   mediaManifest?: MfDeckMediaManifestV1;

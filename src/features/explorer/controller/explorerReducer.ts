@@ -11,7 +11,6 @@ const shouldClearSelectionFolder = (item: SelectedExplorerItem) =>
   item?.type === "gallery" ||
   item?.type === "calendar" ||
   item?.type === "trash";
-
 export const explorerReducer = ( state: ExplorerControllerState, action: ExplorerAction, ): ExplorerControllerState => { switch (action.type) { case "APPLY_ROUTE_STATE": { const next = action.payload;
 
       const nextSelectedFolderId =
@@ -187,4 +186,3 @@ export const explorerReducer = ( state: ExplorerControllerState, action: Explore
     default:
       return state;
   }
-};

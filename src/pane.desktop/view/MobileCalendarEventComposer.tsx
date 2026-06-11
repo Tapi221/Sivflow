@@ -5,8 +5,6 @@ import type { GoogleAccountDisplay, ProjectCalendarLink } from "@/features/calen
 import type { GCalWritableEventInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 
-
-
 type MobileCalendarWritableCalendarOption = { key: string; accountId: string; calendarId: string; label: string; accountLabel: string; calendarLabel: string; color: string; projectId?: string; isSelected: boolean };
 type MobileCalendarEventFormState = { title: string; location: string; isAllDay: boolean; startDate: string; startTime: string; endDate: string; endTime: string; calendarKey: string; description: string };
 type MobileEventDates = { startsAt: Date; endsAt: Date; isAllDay: boolean };
@@ -26,8 +24,6 @@ type MobileCalendarEventComposerProps = {
   onCreateEvent: (accountId: string, event: GCalWritableEventInput) => Promise<GoogleCalendarEvent>;
 };
 
-
-
 const MOBILE_EVENT_COMPOSER_DEFAULT_START_HOUR = 9;
 const MOBILE_EVENT_COMPOSER_DEFAULT_DURATION_HOURS = 1;
 const MOBILE_EVENT_COMPOSER_FALLBACK_CALENDAR_COLOR = "#34c759";
@@ -41,18 +37,11 @@ const MOBILE_EVENT_TIME_WHEEL_MINUTES = Array.from({ length: 60 }, (_, minute) =
 const EMPTY_GOOGLE_ACCOUNTS: GoogleAccountDisplay[] = [];
 const EMPTY_PROJECT_CALENDAR_LINKS: ProjectCalendarLink[] = [];
 
-
-
 const isSameLocalDate = (left: Date, right: Date): boolean => left.getFullYear() === right.getFullYear() && left.getMonth() === right.getMonth() && left.getDate() === right.getDate();
-
 const getGoogleAccountLabel = (account: GoogleAccountDisplay): string => account.name ?? account.email ?? "Google";
-
 const getGoogleCalendarLabel = (calendarLabel: string): string => calendarLabel.trim() || "カレンダー";
-
 const createMobileCalendarOptionKey = (accountId: string, calendarId: string): string => JSON.stringify([accountId, calendarId]);
-
 const findProjectIdForGoogleCalendar = (projectCalendarLinks: ProjectCalendarLink[], accountId: string, calendarId: string): string | undefined => projectCalendarLinks.find((link) => link.provider === "google" && link.accountId === accountId && link.externalCalendarId === calendarId)?.projectId;
-
 const buildMobileCalendarOptions = (accounts: GoogleAccountDisplay[], projectCalendarLinks: ProjectCalendarLink[]): MobileCalendarWritableCalendarOption[] => {
   const includeAccountLabel = accounts.length > 1;
   const options = accounts.flatMap((account) => {
@@ -66,22 +55,18 @@ const buildMobileCalendarOptions = (accounts: GoogleAccountDisplay[], projectCal
   });
   return [...options.filter((option) => option.isSelected), ...options.filter((option) => !option.isSelected)];
 };
-
 const createDateAtTime = (date: Date, hour: number, minute = 0): Date => {
   const nextDate = new Date(date);
   nextDate.setHours(hour, minute, 0, 0);
   return nextDate;
 };
-
 const createDefaultTimedEventStart = (selectedDate: Date): Date => {
   const now = new Date();
   if (isSameLocalDate(now, selectedDate)) return createDateAtTime(selectedDate, now.getHours() + 1, 0);
   return createDateAtTime(selectedDate, MOBILE_EVENT_COMPOSER_DEFAULT_START_HOUR, 0);
 };
-
 const toInputDateValue = (date: Date): string => format(date, "yyyy-MM-dd");
 const toInputTimeValue = (date: Date): string => format(date, "HH:mm");
-
 const parseDateInputValue = (value: string): Date | null => {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (!match) return null;
@@ -89,14 +74,12 @@ const parseDateInputValue = (value: string): Date | null => {
   const date = new Date(Number(year), Number(month) - 1, Number(day));
   return Number.isNaN(date.getTime()) ? null : date;
 };
-
 const parseTimeInputValue = (value: string): { hours: number; minutes: number } | null => {
   const match = /^(\d{2}):(\d{2})$/.exec(value);
   if (!match) return null;
   const [, hours, minutes] = match;
   return { hours: Number(hours), minutes: Number(minutes) };
 };
-
 const buildTimedDate = (dateValue: string, timeValue: string): Date | null => {
   const date = parseDateInputValue(dateValue);
   const time = parseTimeInputValue(timeValue);
@@ -104,7 +87,6 @@ const buildTimedDate = (dateValue: string, timeValue: string): Date | null => {
   date.setHours(time.hours, time.minutes, 0, 0);
   return date;
 };
-
 const buildMobileEventDates = (form: MobileCalendarEventFormState): MobileEventDates | null => {
   const startDate = parseDateInputValue(form.startDate);
   if (!startDate) return null;
@@ -118,45 +100,35 @@ const buildMobileEventDates = (form: MobileCalendarEventFormState): MobileEventD
   if (!startsAt || !rawEndsAt) return null;
   return { startsAt, endsAt: rawEndsAt <= startsAt ? addHours(startsAt, MOBILE_EVENT_COMPOSER_DEFAULT_DURATION_HOURS) : rawEndsAt, isAllDay: false };
 };
-
 const createInitialEventFormState = (selectedDate: Date, calendarOptions: MobileCalendarWritableCalendarOption[]): MobileCalendarEventFormState => {
   const startsAt = createDefaultTimedEventStart(selectedDate);
   const endsAt = addHours(startsAt, MOBILE_EVENT_COMPOSER_DEFAULT_DURATION_HOURS);
   return { title: "", location: "", isAllDay: false, startDate: toInputDateValue(startsAt), startTime: toInputTimeValue(startsAt), endDate: toInputDateValue(endsAt), endTime: toInputTimeValue(endsAt), calendarKey: calendarOptions[0]?.key ?? "", description: "" };
 };
-
 const getErrorMessage = (error: unknown): string => error instanceof Error ? error.message : "予定の追加に失敗しました";
-
 const formatDateButtonValue = (value: string): string => {
   const date = parseDateInputValue(value);
   return date ? format(date, "yyyy/MM/dd") : value;
 };
-
 const formatDateUnit = (value: number): string => String(value).padStart(2, "0");
 const formatTimeUnit = (value: number): string => String(value).padStart(2, "0");
 const createDateInputValue = (year: number, month: number, day: number): string => `${year}-${formatDateUnit(month)}-${formatDateUnit(day)}`;
 const createTimeInputValue = (hours: number, minutes: number): string => `${formatTimeUnit(hours)}:${formatTimeUnit(minutes)}`;
-
 const getDateInputParts = (value: string): { year: number; month: number; day: number } => {
   const date = parseDateInputValue(value) ?? new Date();
   return { year: date.getFullYear(), month: date.getMonth() + 1, day: date.getDate() };
 };
-
 const getTimeInputParts = (value: string): { hours: number; minutes: number } => parseTimeInputValue(value) ?? { hours: 0, minutes: 0 };
-
 const clampTimeWheelIndex = (value: number, max: number): number => Math.max(0, Math.min(max, value));
-
 const createMonthDateGrid = (year: number, month: number): Date[] => {
   const firstDate = new Date(year, month - 1, 1);
   const gridStartDate = addDays(firstDate, -firstDate.getDay());
   return Array.from({ length: MOBILE_EVENT_DATE_GRID_CELL_COUNT }, (_, index) => addDays(gridStartDate, index));
 };
-
 const createShiftedMonthParts = (year: number, month: number, offset: number): { year: number; month: number } => {
   const shiftedDate = new Date(year, month - 1 + offset, 1);
   return { year: shiftedDate.getFullYear(), month: shiftedDate.getMonth() + 1 };
 };
-
 const isDateInMonth = (date: Date, year: number, month: number): boolean => date.getFullYear() === year && date.getMonth() === month - 1;
 
 
@@ -192,21 +164,18 @@ const MobileCalendarSearchIcon = (props: SVGProps<SVGSVGElement>) => (
     <path fill="currentColor" d="M10.8 4.4a6.4 6.4 0 0 1 5.05 10.33l3.51 3.51a.78.78 0 0 1-1.1 1.1l-3.51-3.51A6.4 6.4 0 1 1 10.8 4.4Zm0 1.56a4.84 4.84 0 1 0 0 9.68 4.84 4.84 0 0 0 0-9.68Z" />
   </svg>
 );
-
 const MobileCalendarCurrentLocationIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 40 40" aria-hidden="true" {...props}>
     <circle cx="20" cy="20" r="20" fill="#d8d8dd" />
     <path fill="#007aff" d="M30.44 9.84 11.06 18.1c-1.56.67-1.44 2.94.18 3.42l7.02 2.08 2.08 7.02c.48 1.62 2.75 1.74 3.42.18l8.26-19.38c.47-1.1-.48-2.05-1.58-1.58Z" />
   </svg>
 );
-
 const MobileCalendarFaceTimeIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 600 600" aria-hidden="true" {...props}>
     <path fill="#20d64d" d="M137.7 0h324.6C538.6 0 600 61.4 600 137.7v324.6c0 76.3-61.4 137.7-137.7 137.7H137.7C61.4 600 0 538.6 0 462.3V137.7C0 61.4 61.4 0 137.7 0z" />
     <path fill="#fff" d="M91.5 227.3v146.1c0 31.9 25.9 57.7 57.7 57.7H325c31.9 0 57.7-25.9 57.7-57.7V227.3c0-31.9-25.9-57.7-57.7-57.7H149.3c-31.9-.1-57.8 25.8-57.8 57.7zm379.3-39.1-66.2 54.6c-5.9 4.9-9.3 12.1-9.3 19.7v75.6c0 7.6 3.3 14.7 9.1 19.6l66.2 55.6c15.1 12.6 38 1.9 38-17.7V206c.1-19.5-22.7-30.3-37.8-17.8z" />
   </svg>
 );
-
 const ChevronRightIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
     <path fill="currentColor" d="M9.29 6.71a1 1 0 0 0 0 1.41L13.17 12l-3.88 3.88a1 1 0 1 0 1.41 1.41l4.59-4.59a1 1 0 0 0 0-1.41L10.7 6.71a1 1 0 0 0-1.41 0Z" />
@@ -862,7 +831,5 @@ const MobileCalendarEventComposer = ({
     </>
   );
 };
-
-
 
 export { MobileCalendarEventComposer };

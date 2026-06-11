@@ -24,5 +24,4 @@ export function InlineEquationToolbarButton( props: React.ComponentProps<typeof 
     >
       <RadicalIcon />
     </ToolbarButton>
-  );
-}
+ 

@@ -5,14 +5,12 @@ import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLIC
 
 
 export type DocumentContextMenuActionId = "rename" | "delete";
-
 export type DocumentContextMenuAction = { id: DocumentContextMenuActionId;
   label: string;
   danger?: boolean;
   disabled?: boolean;
   onSelect: () => void;
 };
-
 type DocumentContextMenuProps = {
   x: number;
   y: number;
@@ -25,16 +23,13 @@ type DocumentContextMenuProps = {
 
 
 export const DOCUMENT_CONTEXT_MENU_PANEL_ID = "document-context-menu";
-
 const DOCUMENT_CONTEXT_MENU_LABELS = [
   "名前を変更",
   "削除",
 ];
-
 export const DOCUMENT_CONTEXT_MENU_WIDTH = resolveRightClickPanelTextWidth(DOCUMENT_CONTEXT_MENU_LABELS, 96);
 export const DOCUMENT_CONTEXT_MENU_HEIGHT = DOCUMENT_CONTEXT_MENU_LABELS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
 export const DOCUMENT_CONTEXT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
-
 const DOCUMENT_CONTEXT_MENU_STYLE = `
 .document-context-menu-item--danger {
   color: #b91c1c;
@@ -87,7 +82,5 @@ const DocumentContextMenuBase = ({
 
 
 const DocumentContextMenu = memo(DocumentContextMenuBase);
-
 DocumentContextMenu.displayName = "DocumentContextMenu";
-
 export { DocumentContextMenu };

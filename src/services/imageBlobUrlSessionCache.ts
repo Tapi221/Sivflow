@@ -1,18 +1,14 @@
 import { getImageBlob } from "./imageFileStore";
 
-
-
 type BlobScopeOptions = {
   userId?: string | null;
 };
-
 type CacheEntry = {
   url: string;
   lastAccessAt: number;
   pinCount: number;
   staleUrls: string[];
 };
-
 export interface BlobCacheStats { cacheSize: number;
   cacheMax: number;
   pinnedCount: number;
@@ -20,20 +16,15 @@ export interface BlobCacheStats { cacheSize: number;
   revokeCount: number;
 }
 
-
-
 const MAX_CACHE_ENTRIES = 80;
 const cache = new Map<string, CacheEntry>();
 let _evictCount = 0;
 let _revokeCount = 0;
 
-
-
 const makeScopedId = (id: string, options?: BlobScopeOptions): string => {
   const userId = options?.userId?.trim();
   return userId ? `${userId}:${id}` : id;
 };
-
 const revokeBlobUrl = (url: string): void => {
   if (!url.startsWith("blob:")) return;
   if (typeof URL === "undefined" || typeof URL.revokeObjectURL !== "function") return;
@@ -47,11 +38,9 @@ const revokeBlobUrl = (url: string): void => {
     });
   }
 };
-
 const touch = (entry: CacheEntry): void => {
   entry.lastAccessAt = Date.now();
 };
-
 const cleanupStaleUrls = (entry: CacheEntry): void => {
   if (entry.pinCount > 0 || entry.staleUrls.length === 0) return;
   for (const url of entry.staleUrls) {
@@ -59,7 +48,6 @@ const cleanupStaleUrls = (entry: CacheEntry): void => {
   }
   entry.staleUrls = [];
 };
-
 const evictIfNeeded = (): void => {
   if (cache.size <= MAX_CACHE_ENTRIES) return;
   const candidates = Array.from(cache.entries())
@@ -73,7 +61,6 @@ const evictIfNeeded = (): void => {
     _evictCount++;
   }
 };
-
 const getCachedImageBlobUrl = (
   id: string | null | undefined,
   options?: BlobScopeOptions,
@@ -85,7 +72,6 @@ const getCachedImageBlobUrl = (
   touch(entry);
   return entry.url;
 };
-
 const cacheImageBlobUrl = (
   id: string,
   url: string,
@@ -112,7 +98,6 @@ const cacheImageBlobUrl = (
   cleanupStaleUrls(existing);
   evictIfNeeded();
 };
-
 export const getOrCreateImageBlobUrl = async ( id: string | null | undefined, blobOrOptions?: Blob | BlobScopeOptions, options?: BlobScopeOptions, ): Promise<string | null> => { if (!id) return null;
   const scopeOptions =
     blobOrOptions instanceof Blob || blobOrOptions == null
@@ -127,7 +112,6 @@ export const getOrCreateImageBlobUrl = async ( id: string | null | undefined, bl
   cacheImageBlobUrl(id, url, scopeOptions);
   return url;
 };
-
 export const removeImageBlobUrl = ( id: string | null | undefined, options?: BlobScopeOptions, ): void => { if (!id) return;
   const key = makeScopedId(id, options);
   const entry = cache.get(key);
@@ -141,14 +125,12 @@ export const removeImageBlobUrl = ( id: string | null | undefined, options?: Blo
   revokeBlobUrl(entry.url);
   cache.delete(key);
 };
-
 export const pinImageBlobUrl = ( id: string | null | undefined, options?: BlobScopeOptions, ): void => { if (!id) return;
   const key = makeScopedId(id, options);
   const entry = cache.get(key);
   if (!entry) return;
   entry.pinCount += 1;
 };
-
 export const unpinImageBlobUrl = ( id: string | null | undefined, options?: BlobScopeOptions, ): void => { if (!id) return;
   const key = makeScopedId(id, options);
   const entry = cache.get(key);
@@ -158,7 +140,6 @@ export const unpinImageBlobUrl = ( id: string | null | undefined, options?: Blob
     cleanupStaleUrls(entry);
   }
 };
-
 export const getBlobCacheStats = () => { let pinnedCount = 0;
   for (const entry of cache.values()) {
     if (entry.pinCount > 0) pinnedCount++;

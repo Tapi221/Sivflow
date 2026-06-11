@@ -1,7 +1,5 @@
 export type SearchItemKind = "folder" | "cardSet" | "card" | "document" | "action";
-
 export type SearchIconKind = "folder" | "cardSet" | "card" | "document" | "folders" | "calendar" | "gallery" | "directory" | "trash" | "settings" | "tagMap";
-
 export type SearchItem = { id: string;
   value: string;
   kind: SearchItemKind;
@@ -13,7 +11,6 @@ export type SearchItem = { id: string;
   iconKind?: SearchIconKind;
   onSelect: () => void;
 };
-
 export type SearchSource = { sourceId: string;
   items: SearchItem[];
 };

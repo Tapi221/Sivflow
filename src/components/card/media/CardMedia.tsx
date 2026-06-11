@@ -14,7 +14,6 @@ import type { ResolvableImageRef } from "@/types/domain/assets";
 interface AudioPlayerProps {
   urls: string[];
 }
-
 interface ImageGalleryProps {
   urls: string[];
   items?: ImageGalleryItem[];
@@ -22,7 +21,6 @@ interface ImageGalleryProps {
   displayMode?: "fixed" | "fluid";
   zoom?: number;
 }
-
 type DisplayImage = {
   key: string;
   url: string | null;
@@ -32,16 +30,13 @@ type DisplayImage = {
   naturalW?: number | null;
   naturalH?: number | null;
 };
-
 type NormalizedDisplayImage = DisplayImage & {
   ref?: ResolvableImageRef;
 };
-
 type DisplayImagesState = {
   key: string;
   images: DisplayImage[];
 };
-
 type FailedImagesState = {
   key: string;
   indices: Set<number>;
@@ -61,7 +56,6 @@ const IMAGE_ACTION_ICON_CLASS_NAME = "h-[10px] w-[10px]";
 
 const hasDisplayImageUrl = (url: string | null): url is string =>
   typeof url === "string" && url.trim().length > 0;
-
 const getInlineDisplayImageUrl = (entry: ResolvableImageRef): string | null => {
   for (const value of [entry.url, entry.remoteUrl, entry.localUrl]) {
     if (typeof value === "string" && value.trim().length > 0) {
@@ -71,7 +65,6 @@ const getInlineDisplayImageUrl = (entry: ResolvableImageRef): string | null => {
 
   return null;
 };
-
 const getDisplayImageKey = (
   entry: ResolvableImageRef,
   index: number,
@@ -91,7 +84,6 @@ const getDisplayImageKey = (
 
   return `image-${index}`;
 };
-
 const toDisplayImage = (item: NormalizedDisplayImage): DisplayImage => ({
   key: item.key,
   url: item.url,
@@ -101,7 +93,6 @@ const toDisplayImage = (item: NormalizedDisplayImage): DisplayImage => ({
   naturalW: item.naturalW ?? null,
   naturalH: item.naturalH ?? null,
 });
-
 const getNormalizedItemsKey = (items: NormalizedDisplayImage[]) =>
   items
     .map((item) =>
@@ -170,7 +161,6 @@ export const AudioPlayer = ({ urls }: AudioPlayerProps) => { const [playingIndex
     </div>
   );
 };
-
 export const ImageGallery = ({ items, displayMode = "fixed", zoom = 1, }: ImageGalleryProps) => { const { currentUser } = useAuthSession();
   const [displayImagesState, setDisplayImagesState] =
     useState<DisplayImagesState>(() => ({ key: "", images: [] }));

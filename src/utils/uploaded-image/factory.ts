@@ -1,15 +1,12 @@
 import type { UploadedImage } from "@/types";
 import { createBlobUrl } from "@/types/core/branded";
 
-
-
 const generateUploadedImageId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
   }
   return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 };
-
 export const createUploadedImage = (file: File): UploadedImage => { const id = generateUploadedImageId();
 
   return {
@@ -29,7 +26,6 @@ export const createUploadedImage = (file: File): UploadedImage => { const id = g
     naturalH: null,
   };
 };
-
 export const createFailedUploadedImage = (file: File): UploadedImage => { const id = generateUploadedImageId();
 
   return {
@@ -49,7 +45,5 @@ export const createFailedUploadedImage = (file: File): UploadedImage => { const 
     naturalH: null,
   };
 };
-
-
 
 export { generateUploadedImageId };

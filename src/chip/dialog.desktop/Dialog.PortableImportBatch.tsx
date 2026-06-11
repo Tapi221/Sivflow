@@ -13,7 +13,6 @@ export type PortableImportBatchCompletedPayload = { cardSetId: string;
   folderId: string;
   createdCount: number;
 };
-
 type PortableImportBatchDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -38,7 +37,6 @@ const STATUS_LABELS: Record<PortableImportBatchItem["status"], string> = {
   failed: "失敗",
   skipped: "スキップ",
 };
-
 const STATUS_CLASS_NAMES: Record<PortableImportBatchItem["status"], string> = {
   queued: "bg-slate-100 text-slate-600",
   parsing: "bg-blue-50 text-blue-700",

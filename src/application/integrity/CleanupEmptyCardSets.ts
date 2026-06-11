@@ -7,7 +7,6 @@ import type { Card, CardSet } from "@/types";
 export type CleanupEmptyCardSetsResult = { deletedCardSetIds: string[];
   skippedCardSetIds: string[];
 };
-
 type DeletableRecord = {
   isDeleted?: boolean;
   is_deleted?: boolean;
@@ -18,13 +17,11 @@ type DeletableRecord = {
 const isActiveRecord = (record: DeletableRecord): boolean => {
   return !(record.isDeleted ?? record.is_deleted ?? false);
 };
-
 const getActiveCardSetId = (card: Card): string | null => {
   if (!isActiveRecord(card)) return null;
   const cardSetId = typeof card.cardSetId === "string" ? card.cardSetId.trim() : "";
   return cardSetId.length > 0 ? cardSetId : null;
 };
-
 const shouldDeleteCardSet = (
   cardSet: CardSet,
   activeCardSetIds: ReadonlySet<string>,
@@ -32,7 +29,6 @@ const shouldDeleteCardSet = (
   if (!isActiveRecord(cardSet)) return false;
   return !activeCardSetIds.has(cardSet.id);
 };
-
 const hasActiveCardsInCardSet = async (
   db: LocalDB,
   cardSetId: string,
@@ -40,7 +36,6 @@ const hasActiveCardsInCardSet = async (
   const cards = await db.cards.where("cardSetId").equals(cardSetId).toArray();
   return cards.some(isActiveRecord);
 };
-
 const isCardSetStillEmpty = async (
   db: LocalDB,
   cardSetId: string,
@@ -53,7 +48,6 @@ const isCardSetStillEmpty = async (
 
   return !(await hasActiveCardsInCardSet(db, cardSetId));
 };
-
 export const cleanupEmptyCardSets = async ( db: LocalDB, userId: string, ): Promise<CleanupEmptyCardSetsResult> => { const [cards, cardSets] = await Promise.all([ db.listCardsByUser(userId), db.listCardSetsByUser(userId), ]);
 
   const activeCardSetIds = new Set<string>();

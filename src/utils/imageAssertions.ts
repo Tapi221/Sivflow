@@ -1,8 +1,6 @@
 import type { UploadedImage } from "@/types";
 import { isBase64DataUrl, isBlobUrl, isStorageUrl } from "@/types/core/branded";
 
-
-
 type ImageUrlField = "remoteUrl" | "localUrl" | "thumbnailUrl";
 
 
@@ -39,7 +37,6 @@ export class ImageInvariantViolation extends Error { constructor( message: strin
     this.name = "ImageInvariantViolation";
   }
 }
-
 const assertNoBase64Url = (
   value: string | null | undefined,
   field: ImageUrlField,
@@ -54,7 +51,6 @@ const assertNoBase64Url = (
     );
   }
 };
-
 const assertStorageUrlField = (
   value: string | null | undefined,
   field: "remoteUrl" | "thumbnailUrl",
@@ -69,7 +65,6 @@ const assertStorageUrlField = (
     );
   }
 };
-
 const assertBlobUrlField = (
   value: string | null | undefined,
   imageId?: string,

@@ -8,48 +8,34 @@ import { MessageSquare, Plus, Sparkles } from "@/ui/icons";
 import { generateOllamaAnswer } from "@platform/ai/ollamaClient";
 import { useToast } from "@web-renderer/contexts/ToastContext";
 
-
-
 type QuickQaChatDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
-
 type ChatStep = "question" | "answer";
-
 type ChatMessage = {
   id: string;
   role: "assistant" | "user";
   text: string;
 };
-
 type LoadingStatusPillProps = {
   label: string;
 };
 
-
-
 const MAX_QUESTION_LENGTH = 240;
 const MAX_ANSWER_LENGTH = 3000;
-
-
 
 const createChatMessage = (role: ChatMessage["role"], text: string): ChatMessage => ({
   id: crypto.randomUUID(),
   role,
   text,
 });
-
 const createInitialMessages = (): ChatMessage[] => [createChatMessage("assistant", "疑問を入力してください。入力したら、次に回答を聞きます。")];
-
 const trimMessage = (value: string, maxLength: number): string => value.trim().slice(0, maxLength);
-
 const createCardTitle = (question: string): string => {
   const normalized = question.replace(/\s+/g, " ").trim();
   return normalized.length > 80 ? `${normalized.slice(0, 80)}…` : normalized;
 };
-
-
 
 const LoadingStatusPill = ({ label }: LoadingStatusPillProps) => {
   return (
@@ -61,7 +47,6 @@ const LoadingStatusPill = ({ label }: LoadingStatusPillProps) => {
     </div>
   );
 };
-
 const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogProps) => {
   const toast = useToast();
   const { createCard } = useCardCommands();
@@ -252,13 +237,8 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
   );
 };
 
-
-
 const QuickQaChatDialog = memo(QuickQaChatDialogComponent);
 QuickQaChatDialog.displayName = "QuickQaChatDialog";
-
 export { QuickQaChatDialog };
-
-
 
 export type { QuickQaChatDialogProps };

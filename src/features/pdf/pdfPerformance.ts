@@ -1,30 +1,20 @@
 import { applyPdfViewerZoomPatch } from "./pdfViewerZoomPatch";
 
-
-
 type PdfPerformanceDetail = Record<string, unknown>;
-
 type PdfPerformanceMarkOptions = {
   debugOnly?: boolean;
   detail?: PdfPerformanceDetail;
 };
 
-
-
 const PDF_PERFORMANCE_ENTRY_PREFIX = "sivflow.pdf";
 const PDF_PERFORMANCE_DEBUG_STORAGE_KEY = "sivflow.pdf.debugPerformance";
-
 let pdfPerformanceTraceCounter = 0;
-
-
 
 const createPdfPerformanceTraceName = (scope: string): string => {
   pdfPerformanceTraceCounter += 1;
   return `${scope}.${pdfPerformanceTraceCounter}`;
 };
-
 const getPdfPerformanceEntryName = (name: string): string => `${PDF_PERFORMANCE_ENTRY_PREFIX}.${name}`;
-
 const isPdfPerformanceDebugEnabled = (): boolean => {
   try {
     return globalThis.localStorage?.getItem(PDF_PERFORMANCE_DEBUG_STORAGE_KEY) === "1";
@@ -32,7 +22,6 @@ const isPdfPerformanceDebugEnabled = (): boolean => {
     return false;
   }
 };
-
 const recordPdfPerformanceMark = (name: string, options: PdfPerformanceMarkOptions = {}): void => {
   if (options.debugOnly && !isPdfPerformanceDebugEnabled()) return;
   if (typeof globalThis.performance?.mark !== "function") return;
@@ -54,7 +43,6 @@ const recordPdfPerformanceMark = (name: string, options: PdfPerformanceMarkOptio
     }
   }
 };
-
 const recordPdfPerformanceMeasure = (name: string, startName: string, endName: string, options: Pick<PdfPerformanceMarkOptions, "debugOnly"> = {}): void => {
   if (options.debugOnly && !isPdfPerformanceDebugEnabled()) return;
   if (typeof globalThis.performance?.measure !== "function") return;
@@ -65,9 +53,6 @@ const recordPdfPerformanceMeasure = (name: string, startName: string, endName: s
     // Missing marks or unsupported Performance APIs should not affect the viewer.
   }
 };
-
 applyPdfViewerZoomPatch();
-
-
 
 export { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerformanceMeasure };

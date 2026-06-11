@@ -27,14 +27,12 @@ const normalizeRange = (left: Date, right: Date): CalendarDateRange => {
 
   return { start: startOfDay(right), end: endOfDay(left) };
 };
-
 const parseDateInputValue = (value: string): Date | null => {
   if (!value) return null;
   const parsed = parseISO(value);
 
   return isValid(parsed) ? parsed : null;
 };
-
 const getCurrentRangeLabel = (primaryViewMode: CalendarViewMode): string => {
   if (primaryViewMode === "month") return "表示中の月表示";
   if (primaryViewMode === "week") return "表示中の週表示";
@@ -47,9 +45,7 @@ const getCurrentRangeLabel = (primaryViewMode: CalendarViewMode): string => {
 
   return "表示中";
 };
-
 export const createCalendarPrintDateInputValue = (date: Date): string => format(date, "yyyy-MM-dd");
-
 export const getCalendarPrintRange = ({ printRange, primaryViewMode, currentDate, selectedDate, visibleDays, currentDisplayRange, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY }: CalendarPrintRangeInput): CalendarDateRange => { if (printRange.mode === "day") return normalizeRange(selectedDate, selectedDate);
 
   if (printRange.mode === "week") {
@@ -75,7 +71,6 @@ export const getCalendarPrintRange = ({ printRange, primaryViewMode, currentDate
 
   return currentDisplayRange;
 };
-
 export const getCalendarPrintRangeLabel = (range: CalendarDateRange, mode: CalendarPrintRangeState["mode"], primaryViewMode: CalendarViewMode): string => { const startLabel = format(range.start, "yyyy年M月d日");
   const endLabel = format(range.end, "yyyy年M月d日");
 
@@ -83,4 +78,3 @@ export const getCalendarPrintRangeLabel = (range: CalendarDateRange, mode: Calen
   if (mode === "current") return `${getCurrentRangeLabel(primaryViewMode)} / ${startLabel} - ${endLabel}`;
 
   return `${startLabel} - ${endLabel}`;
-};

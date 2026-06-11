@@ -7,22 +7,18 @@ import type { CardBlock } from "@/types/domain/card";
 
 
 type RowContainerProps = Readonly<Record<string, unknown>>;
-
 type GetRowRef = (
   block: CardBlock,
 ) => ((element: HTMLElement | null) => void) | undefined;
-
 type GetRowContainerProps = (
   block: CardBlock,
   meta: BlockListRowMeta,
 ) => RowContainerProps | undefined;
-
 type SharedSceneProps = Readonly<{
   blocks: CardBlock[];
   getRowRef?: GetRowRef;
   getRowContainerProps?: GetRowContainerProps;
 }>;
-
 type CardBlocksSceneResolvedProps =
   | Readonly<{
     mode: "view";
@@ -32,7 +28,6 @@ type CardBlocksSceneResolvedProps =
     mode: "edit";
     editorProps: EditorProps;
   }>;
-
 type CardBlocksSceneProps = SharedSceneProps &
   Readonly<{
     resolveSceneProps: (
@@ -73,9 +68,7 @@ const CardBlocksSceneInner = ({
 
 
 const CardBlocksScene = React.memo(CardBlocksSceneInner);
-
 CardBlocksScene.displayName = "CardBlocksScene";
-
 export { CardBlocksScene };
 
 

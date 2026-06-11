@@ -22,9 +22,7 @@ export interface HardDeleteOrphanedCardsResult { targetCardIds: string[];
     syncErrors: number;
   };
 }
-
 type LocalCleanupTotals = HardDeleteOrphanedCardsResult["localCleanupTotals"];
-
 type CardRelationRecord = {
   fromCardId?: unknown;
   toCardId?: unknown;
@@ -41,11 +39,9 @@ const isInvalidFolderRefCardIssue = (
 } => {
   return issue.code === "INVALID_FOLDER_REF" && issue.entityType === "card";
 };
-
 const dedupe = <T>(values: readonly T[]): T[] => {
   return Array.from(new Set(values));
 };
-
 const createEmptyTotals = (): LocalCleanupTotals => ({
   syncQueue: 0,
   conflicts: 0,
@@ -54,7 +50,6 @@ const createEmptyTotals = (): LocalCleanupTotals => ({
   cardRelations: 0,
   syncErrors: 0,
 });
-
 const mergeTotals = (
   left: LocalCleanupTotals,
   right: LocalCleanupTotals,
@@ -66,7 +61,6 @@ const mergeTotals = (
   cardRelations: left.cardRelations + right.cardRelations,
   syncErrors: left.syncErrors + right.syncErrors,
 });
-
 const deleteRemoteCard = async (
   userId: string,
   cardId: string,
@@ -75,7 +69,6 @@ const deleteRemoteCard = async (
   const cardRef = doc(db, ...cardDocPathSegments(userId, cardId));
   await deleteDoc(cardRef);
 };
-
 const cleanupLocalCardReferences = async (
   db: Awaited<ReturnType<typeof getLocalDb>>,
   cardId: string,
@@ -123,7 +116,6 @@ const cleanupLocalCardReferences = async (
     };
   });
 };
-
 const cleanupSyncErrorsBestEffort = async (
   db: Awaited<ReturnType<typeof getLocalDb>>,
   cardId: string,
@@ -156,7 +148,6 @@ const cleanupSyncErrorsBestEffort = async (
     return 0;
   }
 };
-
 export const createHardDeleteOrphanedCardsUseCase = () => { const execute = async ( userId: string, report: IntegrityReport, ): Promise<HardDeleteOrphanedCardsResult> => { const targetCardIds = dedupe( report.issues .filter(isInvalidFolderRefCardIssue) .map((issue) => issue.entityId) .filter((cardId) => cardId.trim().length > 0), );
 
     if (targetCardIds.length === 0) {

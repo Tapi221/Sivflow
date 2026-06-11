@@ -5,23 +5,16 @@ import { readStoredAccounts, type StoredGoogleAccount } from "@/integration/goog
 import type { UserSettings } from "@/types";
 import { ChevronRight, Globe, Keyboard, Shield, Trophy, Type, Volume2 } from "@/ui/icons";
 
-
-
 type SettingsSectionId = "account" | "general" | "study" | "editor" | "audio" | "hotkey";
-
 type SettingsLanguage = UserSettings["language"];
-
 type AuthSessionUser = ReturnType<typeof useAuthSession>["currentUser"];
-
 type BooleanSettingsKey = "notificationsEnabled" | "soundEnabled" | "showReviewHard" | "showReviewEasy" | "autoCarryOver" | "delayBonusEnabled" | "reviewStartNextDay" | "defaultPreviewEnabled" | "autoDraftEnabled" | "autoSaveEnabled" | "autoVoiceQuestion" | "autoVoiceAnswer";
-
 type SettingsSectionDefinition = {
   id: SettingsSectionId;
   label: string;
   description: string;
   Icon: (props: { className?: string; size?: number }) => ReactNode;
 };
-
 type SettingRouteCopy = {
   title: string;
   emailUnset: string;
@@ -62,7 +55,6 @@ type SettingRouteCopy = {
   weekStartOptions: Record<UserSettings["weekStartDay"], string>;
   sections: readonly SettingsSectionDefinition[];
 };
-
 type SettingsRouteRowProps = {
   active: boolean;
   description: string;
@@ -70,35 +62,29 @@ type SettingsRouteRowProps = {
   label: string;
   onClick: () => void;
 };
-
 type SettingsDetailCardProps = {
   title: string;
   children: ReactNode;
 };
-
 type SettingSwitchRowProps = {
   checked: boolean;
   label: string;
   onChange: (checked: boolean) => void;
 };
-
 type SettingChoiceOption<T extends string | number> = {
   label: string;
   value: T;
 };
-
 type SettingChoiceRowProps<T extends string | number> = {
   label: string;
   options: readonly SettingChoiceOption<T>[];
   value: T;
   onChange: (value: T) => void;
 };
-
 type SettingValueRowProps = {
   label: string;
   value: ReactNode;
 };
-
 type AccountProfile = {
   displayName: string | null;
   email: string | null;
@@ -106,14 +92,11 @@ type AccountProfile = {
   providerId: string | null;
 };
 
-
-
 const SETTINGS_CARD_CLASS_NAME = "rounded-[18px] bg-white shadow-[0_8px_24px_rgba(16,24,40,0.06)] ring-1 ring-black/[0.03]";
 const SETTINGS_ROW_CLASS_NAME = "flex min-h-[57px] w-full items-center gap-4 px-4 text-left transition active:scale-[0.995]";
 const SETTINGS_ICON_CLASS_NAME = "flex h-8 w-8 shrink-0 items-center justify-center text-[#8b8b91]";
 const SETTINGS_DETAIL_ROW_CLASS_NAME = "flex min-h-[54px] items-center justify-between gap-4 border-b border-[#ececf0] px-4 py-3 last:border-b-0";
 const GOOGLE_PROVIDER_ID = "google.com";
-
 const SETTINGS_COPY: Record<SettingsLanguage, SettingRouteCopy> = {
   ja: {
     title: "設定",
@@ -254,43 +237,35 @@ const SETTINGS_COPY: Record<SettingsLanguage, SettingRouteCopy> = {
     ],
   },
 };
-
 const LANGUAGE_OPTIONS: readonly SettingChoiceOption<SettingsLanguage>[] = [
   { value: "ja", label: "日本語" },
   { value: "en", label: "English" },
   { value: "zh", label: "中文" },
 ];
-
 const WEEK_START_OPTIONS: readonly SettingChoiceOption<UserSettings["weekStartDay"]>[] = [
   { value: "monday", label: "月" },
   { value: "sunday", label: "日" },
 ];
-
 const QUESTION_DISPLAY_OPTIONS: readonly SettingChoiceOption<NonNullable<UserSettings["questionDisplayMode"]>>[] = [
   { value: "tap_to_reveal", label: "Tap" },
   { value: "always", label: "Always" },
 ];
-
 const MARKDOWN_TAB_OPTIONS: readonly SettingChoiceOption<NonNullable<UserSettings["markdownTabSize"]>>[] = [
   { value: 2, label: "2" },
   { value: 4, label: "4" },
   { value: 8, label: "8" },
 ];
 
-
-
 const normalizeAccountEmail = (email: string | null | undefined): string | null => {
   const normalizedEmail = email?.trim().toLowerCase();
   return normalizedEmail ? normalizedEmail : null;
 };
-
 const getStoredSignedInGoogleAccount = (currentUser: AuthSessionUser, storedAccounts: readonly StoredGoogleAccount[]): StoredGoogleAccount | null => {
   const userEmail = normalizeAccountEmail(currentUser?.email);
   if (!userEmail) return storedAccounts[0] ?? null;
 
   return storedAccounts.find((account) => normalizeAccountEmail(account.email) === userEmail) ?? null;
 };
-
 const getAccountProfile = (currentUser: AuthSessionUser, storedAccounts: readonly StoredGoogleAccount[]): AccountProfile => {
   const providerProfile = currentUser?.providerData.find((profile) => profile.providerId === GOOGLE_PROVIDER_ID) ?? currentUser?.providerData.at(0) ?? null;
   const storedAccount = getStoredSignedInGoogleAccount(currentUser, storedAccounts);
@@ -302,7 +277,6 @@ const getAccountProfile = (currentUser: AuthSessionUser, storedAccounts: readonl
     providerId: providerProfile?.providerId ?? null,
   };
 };
-
 const getAccountDisplayName = (displayName: string | null | undefined, email: string | null | undefined, fallbackLabel: string): string => {
   const trimmedDisplayName = displayName?.trim();
   if (trimmedDisplayName) return trimmedDisplayName;
@@ -312,13 +286,10 @@ const getAccountDisplayName = (displayName: string | null | undefined, email: st
 
   return fallbackLabel;
 };
-
 const getAccountInitial = (displayName: string): string => {
   const initial = displayName.trim().charAt(0);
   return initial ? initial.toUpperCase() : "M";
 };
-
-
 
 const SettingsRouteRow = ({ active, description, icon, label, onClick }: SettingsRouteRowProps) => (
   <button type="button" className={`${SETTINGS_ROW_CLASS_NAME}${active ? " bg-[#fafafa]" : ""}`} onClick={onClick} aria-current={active ? "page" : undefined}>
@@ -330,14 +301,12 @@ const SettingsRouteRow = ({ active, description, icon, label, onClick }: Setting
     <ChevronRight className="shrink-0 text-[#a7a7ad]" size={19} />
   </button>
 );
-
 const SettingsDetailCard = ({ title, children }: SettingsDetailCardProps) => (
   <section className={`${SETTINGS_CARD_CLASS_NAME} overflow-hidden`} aria-label={title}>
     <h2 className="border-b border-[#ececf0] px-4 py-3 text-[13px] font-semibold tracking-[-0.01em] text-[#8c8c92]">{title}</h2>
     {children}
   </section>
 );
-
 const SettingSwitchRow = ({ checked, label, onChange }: SettingSwitchRowProps) => (
   <div className={SETTINGS_DETAIL_ROW_CLASS_NAME}>
     <span className="min-w-0 truncate text-[15px] font-medium tracking-[-0.02em] text-[#1c1c1e]">{label}</span>
@@ -346,7 +315,6 @@ const SettingSwitchRow = ({ checked, label, onChange }: SettingSwitchRowProps) =
     </button>
   </div>
 );
-
 const SettingChoiceRow = <T extends string | number>({ label, options, value, onChange }: SettingChoiceRowProps<T>) => (
   <div className={`${SETTINGS_DETAIL_ROW_CLASS_NAME} items-start`}>
     <span className="pt-1 text-[15px] font-medium tracking-[-0.02em] text-[#1c1c1e]">{label}</span>
@@ -362,14 +330,12 @@ const SettingChoiceRow = <T extends string | number>({ label, options, value, on
     </div>
   </div>
 );
-
 const SettingValueRow = ({ label, value }: SettingValueRowProps) => (
   <div className={SETTINGS_DETAIL_ROW_CLASS_NAME}>
     <span className="text-[15px] font-medium tracking-[-0.02em] text-[#1c1c1e]">{label}</span>
     <span className="min-w-0 max-w-[58%] truncate text-right text-[13px] font-semibold text-[#8c8c92]">{value}</span>
   </div>
 );
-
 const SettingScreen = () => {
   const { currentUser, loading, logout } = useAuthSession();
   const { settings, updateSettings } = useUserSettings();
@@ -488,7 +454,5 @@ const SettingScreen = () => {
     </main>
   );
 };
-
-
 
 export default SettingScreen;

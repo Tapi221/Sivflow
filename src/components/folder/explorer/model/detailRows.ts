@@ -5,9 +5,7 @@ import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem, SyncEnt
 
 
 export type ExplorerDetailRowKind = "folder" | "cardSet" | "card" | "document";
-
 export type ExplorerDetailLocalSyncState = | "pending" | "synced" | "error" | "conflict";
-
 export type ExplorerDetailRow = { key: string;
   kind: ExplorerDetailRowKind;
   id: string;
@@ -27,7 +25,6 @@ export type ExplorerDetailRow = { key: string;
   localSyncState?: ExplorerDetailLocalSyncState;
   lastSyncedAt?: unknown;
 };
-
 type BuildExplorerDetailRowsParams = {
   folders: Folder[];
   cards: Card[];
@@ -36,7 +33,6 @@ type BuildExplorerDetailRowsParams = {
   currentFolderId: string | null;
   currentCardSetId?: string | null;
 };
-
 type LegacyEntityFields = {
   folder_id?: string | null;
   parent_folder_id?: string | null;
@@ -61,41 +57,33 @@ const withLegacy = <TEntity extends object>(
 ): TEntity & LegacyEntityFields => {
   return entity as TEntity & LegacyEntityFields;
 };
-
 const isSoftDeleted = (
   entity?: { isDeleted?: boolean; is_deleted?: boolean } | null,
 ): boolean => {
   return Boolean(entity?.isDeleted ?? entity?.is_deleted);
 };
-
 const isHiddenFolder = (folder: FolderTreeNode): boolean => {
   return Boolean(folder.isHidden ?? folder.is_hidden);
 };
-
 const getFolderName = (folder: Folder | FolderTreeNode): string => {
   const folderLike = folder as FolderTreeNode;
   return folderLike.folderName ?? folderLike.folder_name ?? "無題のフォルダ";
 };
-
 const getFolderOrderIndex = (folder: Folder | FolderTreeNode): number => {
   const folderLike = folder as FolderTreeNode;
   return (
     folderLike.orderIndex ?? folderLike.order_index ?? Number.MAX_SAFE_INTEGER
   );
 };
-
 const getCardSetFolderId = (cardSet: CardSet): string | null => {
   return cardSet.folderId ?? withLegacy(cardSet).folder_id ?? null;
 };
-
 const getDocumentFolderId = (document: DocumentItem): string | null => {
   return document.folderId ?? withLegacy(document).folder_id ?? null;
 };
-
 const getDocumentDisplayName = (document: DocumentItem): string => {
   return document.title?.trim() || document.fileName?.trim() || "無題の文書";
 };
-
 const getStringArray = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
   return value.filter(
@@ -103,30 +91,24 @@ const getStringArray = (value: unknown): string[] => {
       typeof entry === "string" && entry.trim().length > 0,
   );
 };
-
 const getEntityTags = (entity: object): string[] => {
   const legacy = withLegacy(entity);
   return getStringArray(legacy.tags ?? legacy.tagIds ?? legacy.tag_ids);
 };
-
 const getDocumentTags = (document: DocumentItem): string[] => {
   return getStringArray(document.tags);
 };
-
 const getCardCardSetId = (card: Card): string | null => {
   return card.cardSetId ?? withLegacy(card).card_set_id ?? null;
 };
-
 const getCardDisplayName = (card: Card): string => {
   return toVirtualMfCardDisplayName(
     card.title?.trim() || card.questionNumber?.trim() || "無題のカード",
   );
 };
-
 const getCardTags = (card: Card): string[] => {
   return getStringArray(card.tagIds);
 };
-
 const getCardLocalSyncState = (
   card: Card,
 ): ExplorerDetailLocalSyncState | undefined => {
@@ -142,7 +124,6 @@ const getCardLocalSyncState = (
 
   return undefined;
 };
-
 const buildFolderById = (folders: Folder[]): Map<string, Folder> => {
   const map = new Map<string, Folder>();
 
@@ -161,7 +142,6 @@ const buildFolderById = (folders: Folder[]): Map<string, Folder> => {
 
   return map;
 };
-
 const buildFolderPathSegments = (
   folderId: string | null,
   folderById: Map<string, Folder>,
@@ -183,11 +163,9 @@ const buildFolderPathSegments = (
 
   return segments;
 };
-
 const joinExplorerPath = (segments: string[]): string => {
   return segments.join("/");
 };
-
 const compareDetailRowsWithinKind = (
   left: ExplorerDetailRow,
   right: ExplorerDetailRow,
@@ -205,7 +183,6 @@ const compareDetailRowsWithinKind = (
 
   return left.id.localeCompare(right.id);
 };
-
 const groupRows = (rows: ExplorerDetailRow[]): ExplorerDetailRow[] => {
   const kindOrder: Record<ExplorerDetailRowKind, number> = {
     folder: 0,
@@ -220,7 +197,6 @@ const groupRows = (rows: ExplorerDetailRow[]): ExplorerDetailRow[] => {
     return compareDetailRowsWithinKind(left, right);
   });
 };
-
 const buildCardSetRows = ({
   cardSets,
   cards,
@@ -278,7 +254,6 @@ const buildCardSetRows = ({
       };
     });
 };
-
 const buildCardRows = ({
   cards,
   cardSet,
@@ -326,7 +301,6 @@ const buildCardRows = ({
     })
     .sort(compareDetailRowsWithinKind);
 };
-
 export const buildExplorerDetailRows = ({ folders, cards, cardSets, documents, currentFolderId, currentCardSetId = null, }: BuildExplorerDetailRowsParams): ExplorerDetailRow[] => { const folderById = buildFolderById(folders);
   const activeCardSet = currentCardSetId
     ? (cardSets.find((cardSet) => cardSet.id === currentCardSetId) ?? null)

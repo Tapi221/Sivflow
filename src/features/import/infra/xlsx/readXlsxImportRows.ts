@@ -27,7 +27,6 @@ const buildIssue = ({
     message,
   };
 };
-
 export const readXlsxImportRows = ( fileBuffer: ArrayBuffer, ): ReadXlsxImportRowsResult => { const workbook = XLSX.read(fileBuffer, { type: "array", raw: false, dense: false, });
 
   const sheetName = IMPORT_SHEET_NAME;
@@ -56,4 +55,3 @@ export const readXlsxImportRows = ( fileBuffer: ArrayBuffer, ): ReadXlsxImportRo
       blankrows: false,
     }) as unknown[][],
   };
-};

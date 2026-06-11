@@ -28,7 +28,6 @@ type QuestionBlockContentProps =
     onContainerBlur?: (e: React.FocusEvent<HTMLDivElement>) => void;
     zoom?: number;
   };
-
 type QuestionFieldProps =
   | Readonly<{
     mode: "view";
@@ -45,7 +44,6 @@ type QuestionFieldProps =
     placeholder: string;
     zoom?: number;
   }>;
-
 type QuestionBlockViewContentProps = {
   questionTitle?: string;
   questionAnswer?: string;
@@ -62,10 +60,8 @@ const buildQuestionFieldStyle = (zoom?: number) =>
     lineHeightPx: QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX,
     zoom,
   });
-
 const resolveQuestionFieldLineHeight = (zoom?: number) =>
   scaleTypographyNumberPx(QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX, zoom);
-
 const buildViewResetKey = ({
   questionTitle,
   questionAnswer,
@@ -108,7 +104,6 @@ const QuestionField = (props: QuestionFieldProps) => {
     />
   );
 };
-
 export const QuestionBlockContent = (props: QuestionBlockContentProps) => { if (props.mode === "view") { const answerDisplayMode = props.answerDisplayMode ?? "tap_to_reveal";
     const viewResetKey = buildViewResetKey({
       questionTitle: props.questionTitle,
@@ -161,7 +156,6 @@ export const QuestionBlockContent = (props: QuestionBlockContentProps) => { if (
     />
   );
 };
-
 const QuestionBlockViewContent = ({
   questionTitle,
   questionAnswer,

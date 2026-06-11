@@ -24,7 +24,6 @@ type UseCardEditorSessionParams = {
   onSelectCardId?: (cardId: string) => void;
   resetDialogs: () => void;
 };
-
 type FlushReason =
   | "autosave"
   | "manual"
@@ -32,7 +31,6 @@ type FlushReason =
   | "edit-end"
   | "unmount"
   | "visibility";
-
 type FlushDraftOptions = {
   reason?: FlushReason;
   exitEditing?: boolean;
