@@ -9,6 +9,8 @@ import { resetBreadcrumbContext } from "./explorerState";
 
 
 
+
+
 const shouldClearSelectionFolder = (item: SelectedExplorerItem) =>
   item?.type === "gallery" ||
   item?.type === "calendar" ||

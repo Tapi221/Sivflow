@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type FadeSkeletonProps = {
   ariaLabel?: string;
   className?: string;
@@ -19,7 +21,11 @@ type FadeSkeletonProps = {
 
 
 
+
+
 const DEFAULT_WIDTHS = [80, 70, 60];
+
+
 
 
 

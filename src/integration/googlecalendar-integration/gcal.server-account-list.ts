@@ -7,6 +7,8 @@ import { buildTokenExpiry, readStoredAccounts, type StoredGoogleAccount, writeSt
 
 
 
+
+
 export type ServerStoredGoogleCalendarAccount = { accountId: string;
   email: string | null;
   name: string | null;
@@ -21,7 +23,11 @@ type ListGoogleCalendarAccountsOutput = {
 
 
 
+
+
 const listGoogleCalendarAccountsCallable = httpsCallable<undefined, ListGoogleCalendarAccountsOutput>(functionsClient, "listGoogleCalendarAccounts");
+
+
 
 
 

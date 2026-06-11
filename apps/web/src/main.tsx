@@ -12,6 +12,8 @@ import { ErrorBoundary } from "@/components/common/ErrorScreen";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { renderGoogleOAuthCallback } from "@/integration/google-integration/google.oauth-callback";
 
+
+
 type AppBootstrapState =
   | { status: "loading" }
   | { status: "ready"; App: ComponentType }
@@ -31,6 +33,8 @@ declare global {
     __sivflowReactRootStore?: SivflowReactRootStore;
   }
 }
+
+
 
 const FIREBASE_ENV_FAILURE_MARKER = "[env] Missing required Firebase env vars";
 const STARTUP_FAILURE_TITLE = "起動設定が不足しています";
@@ -93,6 +97,8 @@ const STARTUP_LOGO_STYLE = `
 }
 `;
 
+
+
 const getStartupFailureMessage = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
 
@@ -154,6 +160,8 @@ const getSivflowReactRoot = (): Root => {
 
   return root;
 };
+
+
 
 const StartupLogoMark = () => {
   return (
@@ -264,6 +272,8 @@ const AppBootstrap = () => {
   const LoadedApp = state.App;
   return <LoadedApp />;
 };
+
+
 
 if (!renderGoogleOAuthCallback()) {
   getSivflowReactRoot().render(

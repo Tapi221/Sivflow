@@ -11,6 +11,8 @@ import { z } from 'zod';
 
 
 
+
+
 export type UploadedFile<T = unknown> = ClientUploadedFileData<T>;
 
 interface UseUploadFileProps
@@ -21,6 +23,8 @@ interface UseUploadFileProps
   onUploadComplete?: (file: UploadedFile) => void;
   onUploadError?: (error: unknown) => void;
 }
+
+
 
 
 
@@ -108,7 +112,11 @@ export const useUploadFile = ({ onUploadComplete, onUploadError, ...props }: Use
 
 
 
+
+
 export const { uploadFiles, useUploadThing } = generateReactHelpers<OurFileRouter>();
+
+
 
 
 

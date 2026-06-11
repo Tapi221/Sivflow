@@ -5,6 +5,8 @@ import { StorageStateManager } from "./StorageStateManager";
 
 
 
+
+
 interface CompressedHistory {
   id: string;
   userId: string;
@@ -23,6 +25,8 @@ type HistoryEvent = {
   oldLevel?: number;
   interval?: number;
 };
+
+
 
 
 
