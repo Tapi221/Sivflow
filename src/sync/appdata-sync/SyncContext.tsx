@@ -9,8 +9,6 @@ import { DEFAULT_SYNC_SETTINGS } from "@/types/domain/sync";
 import type { SyncContextType, SyncNotice, SyncProviderProps, SyncStatus } from "./SyncContextCore";
 import { SyncContext } from "./SyncContextCore";
 
-
-
 const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, SyncableEntityTable> = {
   card: "cards",
   folder: "folders",
@@ -20,8 +18,6 @@ const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, SyncableEntityTable> = {
   userSetting: "userSettings",
   asset: "images",
 };
-
-
 
 const isSyncIntervalMinutes = (value: unknown): value is SyncSettings["intervalMinutes"] => {
   return value === 5 || value === 15 || value === 30 || value === 60;
@@ -46,8 +42,6 @@ const buildResolvedConflictRecord = (conflict: SyncConflict, resolvedData: unkno
     id: conflict.entityId,
   };
 };
-
-
 
 const SyncProvider = ({ children }: SyncProviderProps) => {
   const { currentUser } = useAuthSession();
@@ -260,7 +254,5 @@ const SyncProvider = ({ children }: SyncProviderProps) => {
 
   return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>;
 };
-
-
 
 export { SyncProvider };

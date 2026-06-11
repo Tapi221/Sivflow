@@ -29,6 +29,4 @@ const hasDesktopBridge = (): boolean => {
 };
 const hasDesktopRuntime = (): boolean => hasDesktopBridge() || hasTauriInternals();
 
-
-
 export { hasWindowDesktopBridge, hasDesktopBridge, hasDesktopRuntime };
