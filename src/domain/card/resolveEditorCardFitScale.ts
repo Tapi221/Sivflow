@@ -2,12 +2,16 @@ import { CARD_PANE_AUTO_MAX_SCALE } from "@/components/card/frame/cardPane.const
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { CANONICAL_CARD_WIDTH } from "./cardGeometry.constants";
 
+
+
 type ResolveEditorCardFitScaleArgs = Readonly<{
   availablePaneWidthPx: number;
   canonicalCardWidth?: number;
   cardLayoutMode: CardLayoutMode;
   splitGapPx?: number;
 }>;
+
+
 
 const resolveEditorCardFitScale = ({ availablePaneWidthPx, canonicalCardWidth = CANONICAL_CARD_WIDTH, cardLayoutMode, splitGapPx = 0 }: ResolveEditorCardFitScaleArgs) => {
   if (!Number.isFinite(availablePaneWidthPx) || availablePaneWidthPx <= 0) {
@@ -27,5 +31,7 @@ const resolveEditorCardFitScale = ({ availablePaneWidthPx, canonicalCardWidth = 
     ),
   );
 };
+
+
 
 export { resolveEditorCardFitScale };

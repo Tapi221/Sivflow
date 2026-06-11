@@ -7,6 +7,8 @@ import { CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX } from "@/features/cardse
 import { getCardSetWidthPreference, setCardSetWidthPreference } from "@/services/cardWidthPreferences";
 import type { UserSettings } from "@/types";
 
+
+
 interface UseCardEditorPaneWidthParams {
   settings?: Partial<UserSettings> | null;
   dockToolbarsToTop: boolean;
@@ -23,9 +25,13 @@ interface UseCardEditorPaneWidthParams {
   cardLayoutMode: CardLayoutMode;
 }
 
+
+
 const CARD_EDITOR_PAIR_GAP_PX = 0;
 const CARD_EDITOR_TWO_COLUMN_MIN_WIDTH_PX =
   CARD_SET_VIEW_SPLIT_MIN_PRESENTATION_WIDTH_PX;
+
+
 
 const measureViewportWidth = (element: HTMLDivElement) =>
   Math.max(
@@ -191,6 +197,8 @@ const useCardEditorPaneWidth = ({ settings, dockToolbarsToTop, embeddedInPager, 
     resetActivePaneWidth,
   };
 };
+
+
 
 export { CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX, CARD_PANE_WIDTH_STEP_PX };
 export { useCardEditorPaneWidth };
