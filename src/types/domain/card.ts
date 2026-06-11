@@ -6,12 +6,6 @@ import type { CodeBlockData } from "@/types/core/code-block";
 
 
 
-
-
-
-
-
-
 export type { UploadedImage };
 export type CardBlock = { id: string;
   type:

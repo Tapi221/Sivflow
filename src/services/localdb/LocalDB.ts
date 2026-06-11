@@ -19,12 +19,6 @@ import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 
 
 
-
-
-
-
-
-
 declare global {
   interface GlobalThis {
     __ALLOW_LOCAL_DB_CONSTRUCTION?: boolean;
@@ -39,12 +33,6 @@ type SyncableTableName = "cards" | "folders" | "cardSets" | "documents" | typeof
 
 
 
-
-
-
-
-
-
 const syncableTables: readonly SyncableTableName[] = ["cards", "folders", "cardSets", "documents", CURRENT_TAG_STORE, "userSettings", "images", "projectMaps"];
 const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
   cards: "card",
@@ -56,12 +44,6 @@ const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
   images: "asset",
   projectMaps: "projectMap",
 };
-
-
-
-
-
-
 
 
 
@@ -429,19 +411,7 @@ export class LocalDB extends Dexie { users!: Dexie.Table<User, string>;
 
 
 
-
-
-
-
-
-
 export type { CardRelation, LocalDBInstance, LocalDBLike, LocalDBTableMap, ProjectMap, SyncableEntityTable, TagRecord } from "./types";
-
-
-
-
-
-
 
 
 

@@ -7,21 +7,9 @@ import { InMemoryLocalDB } from "@/services/InMemoryLocalDB";
 
 
 
-
-
-
-
-
-
 type LocalDbGlobal = typeof globalThis & {
   __ALLOW_LOCAL_DB_CONSTRUCTION?: boolean;
 };
-
-
-
-
-
-
 
 
 
@@ -32,12 +20,6 @@ let persistentOpenDisabled = false;
 let resettingPromise: Promise<void> | null = null;
 const fallbackInstances = new Map<string, InMemoryLocalDB>();
 const generationBumps = new Map<string, number>();
-
-
-
-
-
-
 
 
 

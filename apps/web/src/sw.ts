@@ -8,22 +8,27 @@ import { cleanupOutdatedCaches, matchPrecache, precacheAndRoute } from "workbox-
 import { registerRoute, setCatchHandler } from "workbox-routing";
 import { CacheFirst, NetworkFirst } from "workbox-strategies";
 
+
+
 declare global {
   interface ServiceWorkerGlobalScope {
     // Workbox が定義している型に合わせる（TS2717潰し）
     __WB_MANIFEST: Array<string | PrecacheEntry>;
   }
 }
-
 // Vite の import.meta.env を any なしで読む（ESLint no-explicit-any潰し）
 type ViteEnv = {
   VITE_BUILD_VERSION?: string;
   GITHUB_SHA?: string;
 };
 
+
+
 declare let self: ServiceWorkerGlobalScope;
 const env = (import.meta as ImportMeta & { env?: ViteEnv; }).env;
 const cacheVersion = env?.VITE_BUILD_VERSION ?? env?.GITHUB_SHA ?? "dev";
+
+
 
 self.addEventListener("message", (event) => {
   if (event.data && (event.data as { type?: string; }).type === "SKIP_WAITING") {
@@ -64,7 +69,6 @@ registerRoute(
     ],
   }),
 );
-
 // setCatchHandler の event は型が広くて request が無い扱いになることがあるので、
 // Workbox のコールバック引数にある request を使う（TS2339潰し）
 setCatchHandler(async ({ request }) => {
@@ -76,5 +80,7 @@ setCatchHandler(async ({ request }) => {
   }
   return Response.error();
 });
+
+
 
 export {};

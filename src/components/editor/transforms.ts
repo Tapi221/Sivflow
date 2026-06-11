@@ -1,28 +1,49 @@
 "use client";
 
 import type { PlateEditor } from "platejs/react";
+
 import { insertCallout } from "@platejs/callout";
+
 import { insertCodeBlock, toggleCodeBlock } from "@platejs/code-block";
+
 import { insertCodeDrawing } from "@platejs/code-drawing";
+
 import { insertDate } from "@platejs/date";
+
 import { insertExcalidraw } from "@platejs/excalidraw";
+
 import { insertFootnote } from "@platejs/footnote";
+
 import { insertColumnGroup, toggleColumnGroup } from "@platejs/layout";
+
 import { triggerFloatingLink } from "@platejs/link/react";
+
 import { insertEquation, insertInlineEquation } from "@platejs/math";
+
 import { insertAudioPlaceholder, insertFilePlaceholder, insertMedia, insertVideoPlaceholder } from "@platejs/media";
+
 import { SuggestionPlugin } from "@platejs/suggestion/react";
+
 import { TablePlugin } from "@platejs/table/react";
+
 import { insertToc } from "@platejs/toc";
+
 import { KEYS, PathApi } from "platejs";
+
 import type { NodeEntry, Path, TElement } from "platejs";
+
+
 
 type InsertBlockOptions = {
   upsert?: boolean;
 };
 
+
+
 const ACTION_THREE_COLUMNS = "action_three_columns";
+
 const ACTION_FOOTNOTE = "action_footnote";
+
 const insertInlineMap: Record<
   string,
   (editor: PlateEditor, type: string) => void
@@ -34,6 +55,8 @@ const insertInlineMap: Record<
   [KEYS.link]: (editor) => triggerFloatingLink(editor, { focused: true }),
 };
 
+
+
 const insertList = (editor: PlateEditor, type: string) => {
   editor.tf.insertNodes(
     editor.api.create.block({
@@ -43,10 +66,12 @@ const insertList = (editor: PlateEditor, type: string) => {
     { select: true },
   );
 };
+
 const createBlockquote = (editor: PlateEditor) => ({
   children: [editor.api.create.block({ type: KEYS.p })],
   type: KEYS.blockquote,
 });
+
 const selectBlockquoteStart = (editor: PlateEditor, path: Path) => {
   const start = editor.api.start(path.concat([0]));
 
@@ -54,6 +79,8 @@ const selectBlockquoteStart = (editor: PlateEditor, path: Path) => {
     editor.tf.select(start);
   }
 };
+
+
 
 const insertBlockMap: Record<
   string,
@@ -88,8 +115,9 @@ const insertBlockMap: Record<
   [KEYS.video]: (editor) => insertVideoPlaceholder(editor, { select: true }),
 };
 
-export const insertBlock = (editor: PlateEditor, type: string, options: InsertBlockOptions = {}) => {
-  const { upsert = false } = options;
+
+
+export const insertBlock = (editor: PlateEditor, type: string, options: InsertBlockOptions = {}) => { const { upsert = false } = options;
 
   editor.tf.withoutNormalizing(() => {
     const block = editor.api.block();
@@ -140,11 +168,11 @@ export const insertBlock = (editor: PlateEditor, type: string, options: InsertBl
     }
   });
 };
-export const insertInlineElement = (editor: PlateEditor, type: string) => {
-  if (insertInlineMap[type]) {
-    insertInlineMap[type](editor, type);
+
+export const insertInlineElement = (editor: PlateEditor, type: string) => { if (insertInlineMap[type]) { insertInlineMap[type](editor, type);
   }
 };
+
 const setList = (
   editor: PlateEditor,
   type: string,
@@ -161,6 +189,8 @@ const setList = (
   );
 };
 
+
+
 const setBlockMap: Record<
   string,
   (editor: PlateEditor, type: string, entry: NodeEntry<TElement>) => void
@@ -171,6 +201,8 @@ const setBlockMap: Record<
   [ACTION_THREE_COLUMNS]: (editor) => toggleColumnGroup(editor, { columns: 3 }),
   [KEYS.codeBlock]: (editor) => toggleCodeBlock(editor),
 };
+
+
 
 export const setBlockType = (editor: PlateEditor, type: string, { at }: { at?: Path; } = {}) => {
   editor.tf.withoutNormalizing(() => {
@@ -220,10 +252,8 @@ export const setBlockType = (editor: PlateEditor, type: string, { at }: { at?: P
     });
   });
 };
-export const getBlockType = (block: TElement) => {
-  if (block[KEYS.listType]) {
-    if (block[KEYS.listType] === KEYS.ol) {
-      return KEYS.ol;
+
+export const getBlockType = (block: TElement) => { if (block[KEYS.listType]) { if (block[KEYS.listType] === KEYS.ol) { return KEYS.ol;
     }
     if (block[KEYS.listType] === KEYS.listTodo) {
       return KEYS.listTodo;

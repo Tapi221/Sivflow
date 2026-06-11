@@ -5,23 +5,11 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
-
-
-
-
-
-
 export interface CardLayoutModePreferenceScope { deviceScope: string;
   cardSetId: string | null | undefined;
   displayMode: CardDisplayMode;
   interactionMode: CardSetInteractionMode;
 }
-
-
-
-
-
-
 
 
 

@@ -2,14 +2,6 @@ import type { GCalConnectionStatus, GCalSyncState, GoogleCalendarListItem } from
 
 
 
-
-
-
-
-
-
-
-
 export type GoogleAccountEntry = { id: string;
   email: string | null;
   name: string | null;
@@ -49,14 +41,6 @@ export type GoogleAccountsAction = | { type: "ADD"; account: GoogleAccountEntry;
   | { type: "SET_LAST_SYNCED_AT"; id: string; at: Date; }
   | { type: "NEEDS_RECONNECT"; id: string; error?: string | null; }
   | { type: "SET_ERROR"; id: string; error: string | null; };
-
-
-
-
-
-
-
-
 
 
 

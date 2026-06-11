@@ -2,48 +2,6 @@ import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerR
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * 全タブ共通ベース
  */
@@ -55,51 +13,7 @@ type WorkspaceTabBase = {
 
 
 
-
-
-
-
-
-
 export const WORKSPACE_DEFAULT_EXPLORER_TAB_ID = "explorer:default" as const;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -108,17 +22,14 @@ export const WORKSPACE_DEFAULT_EXPLORER_TAB_ID = "explorer:default" as const;
  */
 export type WorkspaceSidebarSection = | "home" | "review" | "library" | "schedule" | "settings";
 export type WorkspaceRouteSection = Exclude<WorkspaceSidebarSection, "library">;
-
 /**
  * ルートタブID（固定ページ）
  */
 export type WorkspaceRouteTabId = | "route:home" | "route:review" | "route:schedule" | "route:settings";
-
 /**
  * タブ種別
  */
 export type WorkspaceTabKind = "route" | "explorer" | "document" | "card" | "note";
-
 /**
  * ルートタブ（画面遷移系）
  */
@@ -127,7 +38,6 @@ export type WorkspaceRouteTab = Omit<WorkspaceTabBase, "sectionKey"> & { id: Wor
   routePath: string;
   sectionKey: WorkspaceRouteSection;
 };
-
 /**
  * エクスプローラタブ（状態保持型）
  */
@@ -135,7 +45,6 @@ export type WorkspaceExplorerTab = WorkspaceTabBase & { id: `explorer:${string}`
   kind: "explorer";
   explorerState: ExplorerRouteState;
 };
-
 /**
  * ドキュメントタブ
  */
@@ -144,7 +53,6 @@ export type WorkspaceDocumentTab = WorkspaceTabBase & { id: `document:${string}`
   documentId: string;
   folderId: string | null;
 };
-
 /**
  * カードタブ
  */
@@ -153,7 +61,6 @@ export type WorkspaceCardTab = WorkspaceTabBase & { id: `card:${string}`;
   cardId: string;
   folderId: string | null;
 };
-
 /**
  * ノートタブ
  */
@@ -162,58 +69,14 @@ export type WorkspaceNoteTab = WorkspaceTabBase & { id: `note:${string}`;
   noteId: string;
   folderId: string | null;
 };
-
 /**
  * 全タブユニオン
  */
 export type WorkspaceTab = | WorkspaceRouteTab | WorkspaceExplorerTab | WorkspaceDocumentTab | WorkspaceCardTab | WorkspaceNoteTab;
-
 /**
  * エンティティ系タブ（ルート・explorer除外）
  */
 export type WorkspaceEntityTab = Exclude<WorkspaceTab, WorkspaceExplorerTab | WorkspaceRouteTab>;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -224,53 +87,10 @@ export const WORKSPACE_ROUTE_TABS = [{ id: "route:home", kind: "route", title: "
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * Explorer初期状態
  */
 export const createDefaultExplorerRouteState = (): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null });
-
 /**
  * section → routeタブ解決
  */

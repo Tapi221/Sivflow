@@ -4,14 +4,6 @@ import { getLocalDb } from "@/infrastructure/localdb/client";
 
 
 
-
-
-
-
-
-
-
-
 export const handleQueuedDocumentUploadFailure = async (item: QueueItem): Promise<void> => { try { const localDb = await getLocalDb();
   const existingDoc = await localDb.documents.get(item.id);
   if (!existingDoc) {

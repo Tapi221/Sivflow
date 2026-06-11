@@ -4,35 +4,11 @@ import type { LayeredTreeDragState, LayeredTreeDropInstruction, LayeredTreeDropP
 
 
 
-
-
-
-
-
-
-
-
 type LayeredTreeEventDropTarget = { id: string; rowElement: HTMLElement; };
 
 
 
-
-
-
-
-
-
-
-
 const LAYERED_TREE_ITEM_ID_ATTRIBUTES = [LAYERED_TREE_FOLDER_ID_ATTRIBUTE, LAYERED_TREE_TAG_ID_ATTRIBUTE] as const;
-
-
-
-
-
-
-
-
 
 
 

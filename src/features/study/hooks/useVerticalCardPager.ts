@@ -3,23 +3,7 @@ import { useReviewCardPagerHotkeys } from "@/features/hotkey/useReviewCardPagerH
 
 
 
-
-
-
-
-
-
-
-
 const SCROLL_IDLE_COMMIT_DELAY_MS = 110;
-
-
-
-
-
-
-
-
 
 
 
@@ -48,14 +32,6 @@ export type UseVerticalCardPagerReturn = { /** 各カード要素への ref 配�
   goNext: () => void;
   goPrev: () => void;
 };
-
-
-
-
-
-
-
-
 
 
 

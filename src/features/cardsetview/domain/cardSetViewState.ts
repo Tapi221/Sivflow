@@ -1,5 +1,7 @@
 import type { Card } from "@/types";
 
+
+
 type CardIndexMap = Map<string, number>;
 type ResolveCurrentIndexBaseArgs = {
   pendingFocusIndex: number | null;
@@ -13,11 +15,11 @@ type ResolveCardsForPagerArgs = {
   cardIndexById: CardIndexMap;
 };
 
-export const createCardSetViewSourceKey = (cardSetId: string | null) => {
-  return `${cardSetId ?? ""}`;
+
+
+export const createCardSetViewSourceKey = (cardSetId: string | null) => { return `${cardSetId ?? ""}`;
 };
-export const resolveCardIndexById = ({ cardId, cardIndexById }: {
-  cardId: string | null;
+export const resolveCardIndexById = ({ cardId, cardIndexById }: { cardId: string | null;
   cardIndexById: CardIndexMap;
 }) => {
   if (!cardId) {
@@ -27,12 +29,9 @@ export const resolveCardIndexById = ({ cardId, cardIndexById }: {
   const found = cardIndexById.get(cardId);
   return typeof found === "number" ? found : null;
 };
-export const resolveCurrentIndexBase = ({ pendingFocusIndex, currentIndex, targetResolvedIndex, initialIndex }: ResolveCurrentIndexBaseArgs) => {
-  return (pendingFocusIndex ?? currentIndex ?? targetResolvedIndex ?? initialIndex);
+export const resolveCurrentIndexBase = ({ pendingFocusIndex, currentIndex, targetResolvedIndex, initialIndex }: ResolveCurrentIndexBaseArgs) => { return (pendingFocusIndex ?? currentIndex ?? targetResolvedIndex ?? initialIndex);
 };
-export const clampCardIndex = (index: number, cardCount: number) => {
-  if (cardCount <= 0) {
-    return 0;
+export const clampCardIndex = (index: number, cardCount: number) => { if (cardCount <= 0) { return 0;
   }
 
   const numericIndex = Number.isFinite(index) ? index : 0;
@@ -40,9 +39,7 @@ export const clampCardIndex = (index: number, cardCount: number) => {
 
   return Math.min(Math.max(integerIndex, 0), cardCount - 1);
 };
-export const resolveCardsForPager = ({ sortedCards, selectedCard, cardIndexById }: ResolveCardsForPagerArgs) => {
-  if (!selectedCard) {
-    return sortedCards;
+export const resolveCardsForPager = ({ sortedCards, selectedCard, cardIndexById }: ResolveCardsForPagerArgs) => { if (!selectedCard) { return sortedCards;
   }
 
   const idx = cardIndexById.get(selectedCard.id);
@@ -60,8 +57,7 @@ export const resolveCardsForPager = ({ sortedCards, selectedCard, cardIndexById 
 
   return next;
 };
-export const toggleFlippedCardId = ({ ids, cardId }: {
-  ids: Set<string>;
+export const toggleFlippedCardId = ({ ids, cardId }: { ids: Set<string>;
   cardId: string | null;
 }) => {
   const next = new Set(ids);

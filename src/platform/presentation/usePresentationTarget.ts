@@ -4,12 +4,6 @@ import type { PresentationTarget } from "./getPresentationTarget";
 
 
 
-
-
-
-
-
-
 const bindMediaQueryChange = (
   mediaQueryList: MediaQueryList,
   handler: () => void,

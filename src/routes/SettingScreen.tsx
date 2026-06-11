@@ -9,12 +9,6 @@ import { ChevronRight, Globe, Keyboard, Shield, Trophy, Type, Volume2 } from "@/
 
 
 
-
-
-
-
-
-
 type SettingsSectionId = "account" | "general" | "study" | "editor" | "audio" | "hotkey";
 type SettingsLanguage = UserSettings["language"];
 type AuthSessionUser = ReturnType<typeof useAuthSession>["currentUser"];
@@ -101,12 +95,6 @@ type AccountProfile = {
   photoUrl: string | null;
   providerId: string | null;
 };
-
-
-
-
-
-
 
 
 
@@ -276,12 +264,6 @@ const MARKDOWN_TAB_OPTIONS: readonly SettingChoiceOption<NonNullable<UserSetting
 
 
 
-
-
-
-
-
-
 const normalizeAccountEmail = (email: string | null | undefined): string | null => {
   const normalizedEmail = email?.trim().toLowerCase();
   return normalizedEmail ? normalizedEmail : null;
@@ -316,12 +298,6 @@ const getAccountInitial = (displayName: string): string => {
   const initial = displayName.trim().charAt(0);
   return initial ? initial.toUpperCase() : "M";
 };
-
-
-
-
-
-
 
 
 
@@ -488,12 +464,6 @@ const SettingScreen = () => {
     </main>
   );
 };
-
-
-
-
-
-
 
 
 

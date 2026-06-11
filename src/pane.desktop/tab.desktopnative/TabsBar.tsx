@@ -14,12 +14,6 @@ import type { WorkspaceSidebarSection, WorkspaceTab } from "./Tab";
 
 
 
-
-
-
-
-
-
 type TabsBarVariant = "workspace" | "titlebar";
 type TabsBarProps = {
   variant?: TabsBarVariant;
@@ -36,12 +30,6 @@ type TabContextMenuState = {
   y: number;
 };
 type TabContextMenuTriggerEvent = ReactMouseEvent<HTMLElement> | ReactPointerEvent<HTMLElement>;
-
-
-
-
-
-
 
 
 
@@ -107,12 +95,6 @@ const SIDEBAR_ROUTE_TAB_ICONS = {
 
 
 
-
-
-
-
-
-
 const resolveTabsSurfaceStyle = (isTitlebar: boolean): CSSProperties => ({
   background: isTitlebar ? "var(--app-titlebar-bg, var(--app-sidebar-bg))" : "var(--app-sidebar-bg)",
 });
@@ -171,12 +153,6 @@ const resolveTabIcon = (tab: WorkspaceTab): TabIconComponent => {
 
   return FileText;
 };
-
-
-
-
-
-
 
 
 
@@ -452,12 +428,6 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
     </>
   );
 };
-
-
-
-
-
-
 
 
 

@@ -7,19 +7,12 @@ import type { SecurityEventType, SecurityLog, SecurityMetadata } from "@/types/d
 
 
 
-
-
-
-
-
-
 interface SecurityAlert {
   id: string;
   type: string;
   createdAt: number;
   [key: string]: unknown;
 }
-
 /**
  * セキュリティ状態の定義
  */
@@ -27,48 +20,6 @@ export interface SecurityState { isLocked: boolean;
   requires2FA: boolean;
   alerts: SecurityAlert[];
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

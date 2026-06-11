@@ -3,23 +3,11 @@ import type { InkPoint } from "@core/domain/card/ink/inkDocument";
 
 
 
-
-
-
-
-
-
 export type RectLike = { left: number;
   top: number;
   width: number;
   height: number;
 };
-
-
-
-
-
-
 
 
 

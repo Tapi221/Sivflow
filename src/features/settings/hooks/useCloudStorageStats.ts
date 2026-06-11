@@ -4,14 +4,6 @@ import type { CloudStorageStats } from "@/types";
 
 
 
-
-
-
-
-
-
-
-
 type UseCloudStorageStatsResult = {
   stats: CloudStorageStats | null;
   loading: boolean;
@@ -19,14 +11,6 @@ type UseCloudStorageStatsResult = {
   rebuilding: boolean;
   refresh: () => Promise<void>;
 };
-
-
-
-
-
-
-
-
 
 
 

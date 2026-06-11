@@ -6,14 +6,6 @@ import type { StoredGoogleAccount } from "./gcal.multi-storage";
 
 
 
-
-
-
-
-
-
-
-
 export type ServerStoredGoogleCalendarAccount = { accountId: string;
   email: string | null;
   name: string | null;
@@ -25,23 +17,7 @@ type ListGoogleCalendarAccountsOutput = {
 
 
 
-
-
-
-
-
-
-
-
 const listGoogleCalendarAccountsCallable = httpsCallable<undefined, ListGoogleCalendarAccountsOutput>(functionsClient, "listGoogleCalendarAccounts");
-
-
-
-
-
-
-
-
 
 
 

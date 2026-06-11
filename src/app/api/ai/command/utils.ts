@@ -6,8 +6,9 @@ import dedent from "dedent";
 import { KEYS, RangeApi } from "platejs";
 import type { SlateEditor } from "platejs";
 
-export type StructuredPromptSections = {
-  context?: string;
+
+
+export type StructuredPromptSections = { context?: string;
   examples?: string[] | string;
   history?: string;
   instruction?: string;
@@ -20,24 +21,24 @@ export type StructuredPromptSections = {
   tone?: string;
 };
 
+
+
 const SELECTION_START = "<Selection>";
 const SELECTION_END = "</Selection>";
 
-export const tag = (tag: string, content?: string | null) => {
-  if (!content) return "";
+
+
+export const tag = (tag: string, content?: string | null) => { if (!content) return "";
 
   return [`<${tag}>`, content, `</${tag}>`].join("\n");
 };
-export const inlineTag = (tag: string, content?: string | null) => {
-  if (!content) return "";
+export const inlineTag = (tag: string, content?: string | null) => { if (!content) return "";
 
   return [`<${tag}>`, content, `</${tag}>`].join("");
 };
 export const sections = (sections: (boolean | string | null | undefined)[]) => sections.filter(Boolean).join("\n\n");
 export const list = (items: string[] | undefined) => items ? items.filter(Boolean).map((item) => `- ${item}`).join("\n") : "";
-export const buildStructuredPrompt = ({ context, examples, history, instruction, outputFormatting, prefilledResponse, rules, task, taskContext, thinking, tone }: StructuredPromptSections) => {
-  const formattedExamples = Array.isArray(examples) ? examples.map((example) => {
-    const indentedContent = example.split("\n").map((line) => (line ? ` ${line}` : "")).join("\n");
+export const buildStructuredPrompt = ({ context, examples, history, instruction, outputFormatting, prefilledResponse, rules, task, taskContext, thinking, tone }: StructuredPromptSections) => { const formattedExamples = Array.isArray(examples) ? examples.map((example) => { const indentedContent = example.split("\n").map((line) => (line ? ` ${line}` : "")).join("\n");
 
     return ["  <example>", indentedContent, "  </example>"].join("\n");
   })
@@ -72,8 +73,7 @@ export const buildStructuredPrompt = ({ context, examples, history, instruction,
     (prefilledResponse ?? null) !== null && tag("prefilledResponse", prefilledResponse ?? ""),
   ]);
 };
-export const getTextFromMessage = (message: UIMessage): string => {
-  return message.parts.filter((part) => part.type === "text").map((part) => part.text).join("");
+export const getTextFromMessage = (message: UIMessage): string => { return message.parts.filter((part) => part.type === "text").map((part) => part.text).join("");
 };
 export const formatTextFromMessages = (messages: ChatMessage[], options?: { limit?: number; }): string => {
   if (!messages || messages.length <= 1) return "";
@@ -93,8 +93,7 @@ export const formatTextFromMessages = (messages: ChatMessage[], options?: { limi
     .filter(Boolean)
     .join("\n");
 };
-export const getLastUserInstruction = (messages: ChatMessage[]): string => {
-  if (!messages || messages.length === 0) return "";
+export const getLastUserInstruction = (messages: ChatMessage[]): string => { if (!messages || messages.length === 0) return "";
 
   const lastUserMessage = [...messages].reverse().find((m) => m.role === "user");
 
@@ -102,8 +101,7 @@ export const getLastUserInstruction = (messages: ChatMessage[]): string => {
 
   return getTextFromMessage(lastUserMessage).trim();
 };
-export const addSelection = (editor: SlateEditor) => {
-  if (!editor.selection) return;
+export const addSelection = (editor: SlateEditor) => { if (!editor.selection) return;
   if (editor.api.isExpanded()) {
     const [start, end] = RangeApi.edges(editor.selection);
 
@@ -146,14 +144,12 @@ const removeEscapeSelection = (editor: SlateEditor, text: string) => {
 
   return newText;
 };
-export const isMultiBlocks = (editor: SlateEditor) => {
-  const blocks = editor.api.blocks({ mode: "lowest" });
+export const isMultiBlocks = (editor: SlateEditor) => { const blocks = editor.api.blocks({ mode: "lowest" });
 
   return blocks.length > 1;
 };
 export const getMarkdownWithSelection = (editor: SlateEditor) => removeEscapeSelection(editor, getMarkdown(editor, { type: "block" }));
-export const isSelectionInTable = (editor: SlateEditor): boolean => {
-  if (!editor.selection) return false;
+export const isSelectionInTable = (editor: SlateEditor): boolean => { if (!editor.selection) return false;
 
   const tableEntry = editor.api.block({
     at: editor.selection,
@@ -162,8 +158,7 @@ export const isSelectionInTable = (editor: SlateEditor): boolean => {
 
   return !!tableEntry;
 };
-export const isSingleCellSelection = (editor: SlateEditor): boolean => {
-  if (!editor.selection) return false;
+export const isSingleCellSelection = (editor: SlateEditor): boolean => { if (!editor.selection) return false;
 
   const cells = Array.from(
     editor.api.nodes({

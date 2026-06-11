@@ -6,8 +6,9 @@ import { CardFrame } from "@/components/card/frame/CardFrame";
 import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-export type CardFaceSceneProps = Readonly<{
-  displayMode: CardDisplayMode;
+
+
+export type CardFaceSceneProps = Readonly<{ displayMode: CardDisplayMode;
   fixedScale?: number;
   contentZoom: number;
   contentProps: SharedCardContentProps;
@@ -37,8 +38,9 @@ export type CardFaceSceneProps = Readonly<{
   onResizeEnd?: () => void;
 }>;
 
-export const CardFaceScene = ({ displayMode, fixedScale, contentZoom, contentProps, actionsTopLeft, actionsTopRight, overlay, topAttachment, contentWrapperRef, frameClassName, role, tabIndex, onClick, onKeyDown, onPointerDownCapture, onPointerMoveCapture, onPointerUpCapture, onPointerCancelCapture, resizable = false, showResizeHandle = false, resizeStepPx, heightPx = null, lockHeight = false, fillHeight = false, onHeightChange, onMinHeightChange, onResizeStart, onResizeEnd }: CardFaceSceneProps) => {
-  const isFluidDisplay = displayMode === "fluid";
+
+
+export const CardFaceScene = ({ displayMode, fixedScale, contentZoom, contentProps, actionsTopLeft, actionsTopRight, overlay, topAttachment, contentWrapperRef, frameClassName, role, tabIndex, onClick, onKeyDown, onPointerDownCapture, onPointerMoveCapture, onPointerUpCapture, onPointerCancelCapture, resizable = false, showResizeHandle = false, resizeStepPx, heightPx = null, lockHeight = false, fillHeight = false, onHeightChange, onMinHeightChange, onResizeStart, onResizeEnd }: CardFaceSceneProps) => { const isFluidDisplay = displayMode === "fluid";
   const shouldFillHeight = isFluidDisplay && fillHeight;
   const resolvedFrameClassName = cn(
     isFluidDisplay &&

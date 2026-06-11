@@ -2,14 +2,6 @@ import type { GCalConnectionStatus, GCalSyncState, GoogleCalendarListItem } from
 
 
 
-
-
-
-
-
-
-
-
 export type GoogleConnectedServiceAccountEntry = { id: string;
   email: string | null;
   name: string | null;

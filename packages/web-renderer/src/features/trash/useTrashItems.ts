@@ -5,12 +5,6 @@ import type { Card, CardSet, Document, Folder } from "@/types";
 
 
 
-
-
-
-
-
-
 export type TrashLoadState = "idle" | "loading" | "ready" | "error";
 export type TrashItemsState = { folders: Folder[];
   cards: Card[];
@@ -25,24 +19,12 @@ export type TrashItemIdInput = { folderIds?: string[];
 
 
 
-
-
-
-
-
-
 const EMPTY_TRASH_ITEMS: TrashItemsState = {
   folders: [],
   cards: [],
   cardSets: [],
   documents: [],
 };
-
-
-
-
-
-
 
 
 

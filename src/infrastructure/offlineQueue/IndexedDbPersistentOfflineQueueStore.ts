@@ -4,14 +4,6 @@ import { warnOncePerSession } from "@/infrastructure/localdb/runtimeState";
 
 
 
-
-
-
-
-
-
-
-
 export class IndexedDbPersistentOfflineQueueStore { private readonly dbName: string;
   private readonly storeName: string;
   private idbUnavailable = false;

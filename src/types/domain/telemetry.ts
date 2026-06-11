@@ -11,13 +11,11 @@ export interface LogContext { userId?: string;
   isBackground?: boolean;
   [key: string]: unknown;
 }
-
 // System SLIs (Technical Health)
 export interface SystemMetrics { syncAvailability: number; // 1 = success, 0 = 5xx error
   throughput: number; // records / sec
   memoryUsage?: number; // MB
 }
-
 // User Experience SLIs (Perceived Quality)
 export interface UserMetrics { perceivedLatency: number; // ms (Action to UI feedback)
   consistencyRate: number; // 1 = consistent, 0 = inconsistent

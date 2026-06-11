@@ -4,6 +4,8 @@ import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
 import { getLocalDb } from "@/services/localDB";
 import type { Folder } from "@/types";
 
+
+
 const isDatabaseClosedError = (error: unknown) => {
   if (!error || typeof error !== "object") {
     return false;
@@ -17,8 +19,7 @@ const isDatabaseClosedError = (error: unknown) => {
       candidate.message.includes("DatabaseClosedError"))
   );
 };
-export const useFoldersRead = () => {
-  const userId = useEffectiveLocalUserId();
+export const useFoldersRead = () => { const userId = useEffectiveLocalUserId();
 
   const folders = useLiveQuery(async () => {
     if (!userId) {

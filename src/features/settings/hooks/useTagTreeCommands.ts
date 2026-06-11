@@ -5,14 +5,6 @@ import type { TagRecord } from "@/services/localdb/types";
 
 
 
-
-
-
-
-
-
-
-
 type TagTreePositionPatch = {
   parentId: string | null;
   orderIndex: number;
@@ -20,14 +12,6 @@ type TagTreePositionPatch = {
 type TagUpdateCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   updateItem: (table: "tagRecords", id: string, changes: Record<string, unknown>) => Promise<number>;
 };
-
-
-
-
-
-
-
-
 
 
 

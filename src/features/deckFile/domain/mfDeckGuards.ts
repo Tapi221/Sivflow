@@ -2,6 +2,8 @@ import { isMfDeckMediaPath } from "./mfDeckMedia";
 import { MF_DECK_FORMAT, MF_DECK_MAX_BLOCKS_PER_FACE, MF_DECK_MAX_CARDS, MF_DECK_MAX_MEDIA_ENTRIES, MF_DECK_MEDIA_MANIFEST_PATH, MF_DECK_VERSION } from "./mfDeck.types";
 import type { MfDeckArchiveV1, MfDeckCardsJsonV1, MfDeckIssue, MfDeckManifestV1, MfDeckMediaManifestV1, MfDeckValidationResult } from "./mfDeck.types";
 
+
+
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 };
@@ -188,8 +190,7 @@ const pushMediaManifestIssues = (
     }
   }
 };
-export const isMfDeckManifestV1 = (value: unknown): value is MfDeckManifestV1 => {
-  if (!isRecord(value)) return false;
+export const isMfDeckManifestV1 = (value: unknown): value is MfDeckManifestV1 => { if (!isRecord(value)) return false;
   if (value.format !== MF_DECK_FORMAT) return false;
   if (value.version !== MF_DECK_VERSION) return false;
   if (!isIsoLikeString(value.exportedAt)) return false;
@@ -238,8 +239,7 @@ export const isMfDeckManifestV1 = (value: unknown): value is MfDeckManifestV1 =>
 
   return true;
 };
-export const isMfDeckCardsJsonV1 = (value: unknown): value is MfDeckCardsJsonV1 => {
-  if (!isRecord(value)) return false;
+export const isMfDeckCardsJsonV1 = (value: unknown): value is MfDeckCardsJsonV1 => { if (!isRecord(value)) return false;
   if (value.format !== "sivflow.deck.cards") return false;
   if (value.version !== MF_DECK_VERSION) return false;
   if (!Array.isArray(value.cards)) return false;
@@ -277,8 +277,7 @@ export const isMfDeckCardsJsonV1 = (value: unknown): value is MfDeckCardsJsonV1 
     return true;
   });
 };
-export const isMfDeckMediaManifestV1 = (value: unknown): value is MfDeckMediaManifestV1 => {
-  if (value === undefined) return true;
+export const isMfDeckMediaManifestV1 = (value: unknown): value is MfDeckMediaManifestV1 => { if (value === undefined) return true;
   if (!isRecord(value)) return false;
   if (value.format !== "sivflow.deck.media") return false;
   if (value.version !== MF_DECK_VERSION) return false;
@@ -313,8 +312,7 @@ export const isMfDeckMediaManifestV1 = (value: unknown): value is MfDeckMediaMan
     return true;
   });
 };
-export const validateMfDeckArchive = (input: {
-  manifest: unknown;
+export const validateMfDeckArchive = (input: { manifest: unknown;
   cardsJson: unknown;
   mediaManifest?: unknown;
   media?: Record<string, Uint8Array>;
