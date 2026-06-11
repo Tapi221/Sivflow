@@ -39,4 +39,10 @@ describe("source convention formatter", () => {
 
     expect(formatted).toBe(`const getValue = () => {\n  const value = 1;\n\n  return value;\n};\n`);
   });
+
+  it("同じ行で入れ子になったブロック開始直後の文を反復修正する", () => {
+    const formatted = runFormatterOnSource(`const getValue = () => { try { const value = 1;\n\n  return value;\n} catch { return 0;\n}\n};\n`);
+
+    expect(formatted).toBe(`const getValue = () => {\n  try {\n    const value = 1;\n\n  return value;\n} catch {\n  return 0;\n}\n};\n`);
+  });
 });
