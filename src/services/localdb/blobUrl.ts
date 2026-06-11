@@ -1,37 +1,6 @@
 import { telemetryOncePerSession } from "@/services/localDBRuntimeState";
 import { findBlobUrlFixesDeep } from "@/utils/blobUrlSanitizer";
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
-
-const toIdString = (value: unknown): string | undefined => {
-  if (typeof value === "string" || typeof value === "number")
-    return String(value);
-  return undefined;
-};
-
-const getIdFromUnknownEntity = (entity: unknown): string | undefined => {
-  if (!isRecord(entity)) return undefined;
-  if (!("id" in entity)) return undefined;
-  return toIdString(entity.id);
-};
-
-export const safeRevokeBlobUrl = (url: unknown, context: string): void => {
-  if (typeof url !== "string" || !url.startsWith("blob:")) return;
-  if (typeof URL === "undefined" || typeof URL.revokeObjectURL !== "function")
-    return;
-
-  try {
-    URL.revokeObjectURL(url);
-  } catch (error) {
-    console.warn(`[LocalDB] Failed to revoke blob URL (${context})`, error);
-  }
-};
-
-export const hasBlobUrlDeep = (value: unknown): boolean => {
-  return findBlobUrlFixesDeep(value).length > 0;
-};
-
 type InvalidImageUrlErrorParams = {
   entityType?: string;
   entityId?: string;
@@ -39,7 +8,7 @@ type InvalidImageUrlErrorParams = {
   message?: string;
 };
 
-class InvalidImageUrlError extends Error {
+const InvalidImageUrlError = class extends Error {
   entityType?: string;
   entityId?: string;
   path?: string;
@@ -63,7 +32,60 @@ class InvalidImageUrlError extends Error {
     this.entityId = params.entityId;
     this.path = params.path;
   }
-}
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const toIdString = (value: unknown): string | undefined => {
+  if (typeof value === "string" || typeof value === "number") return String(value);
+  return undefined;
+};
+
+const getIdFromUnknownEntity = (entity: unknown): string | undefined => {
+  if (!isRecord(entity)) return undefined;
+  if (!("id" in entity)) return undefined;
+  return toIdString(entity.id);
+};
+
+const setNestedPath = (
+  target: Record<string, unknown>,
+  path: string,
+  value: unknown,
+): void => {
+  const keys = path.split(".").filter((k) => k.length > 0);
+  if (keys.length === 0) return;
+
+  let cursor: Record<string, unknown> = target;
+
+  for (let i = 0; i < keys.length - 1; i += 1) {
+    const key = keys[i];
+    const current = cursor[key];
+
+    if (!isRecord(current)) {
+      cursor[key] = {};
+    }
+
+    cursor = cursor[key] as Record<string, unknown>;
+  }
+
+  cursor[keys[keys.length - 1]] = value;
+};
+
+export const safeRevokeBlobUrl = (url: unknown, context: string): void => {
+  if (typeof url !== "string" || !url.startsWith("blob:")) return;
+  if (typeof URL === "undefined" || typeof URL.revokeObjectURL !== "function") return;
+
+  try {
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.warn(`[LocalDB] Failed to revoke blob URL (${context})`, error);
+  }
+};
+
+export const hasBlobUrlDeep = (value: unknown): boolean => {
+  return findBlobUrlFixesDeep(value).length > 0;
+};
 
 export const assertNoBlobUrlInCardPayload = (
   cardLike: unknown,
@@ -108,30 +130,6 @@ export const scrubBlobUrlsDeep = (value: unknown): unknown => {
   }
 
   return value;
-};
-
-const setNestedPath = (
-  target: Record<string, unknown>,
-  path: string,
-  value: unknown,
-): void => {
-  const keys = path.split(".").filter((k) => k.length > 0);
-  if (keys.length === 0) return;
-
-  let cursor: Record<string, unknown> = target;
-
-  for (let i = 0; i < keys.length - 1; i += 1) {
-    const key = keys[i];
-    const current = cursor[key];
-
-    if (!isRecord(current)) {
-      cursor[key] = {};
-    }
-
-    cursor = cursor[key] as Record<string, unknown>;
-  }
-
-  cursor[keys[keys.length - 1]] = value;
 };
 
 export const buildCardCandidateFromMods = (
