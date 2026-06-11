@@ -19,25 +19,21 @@ const PositionalRuledLayer = ({
   const left = typeof insetX === "number" ? `${insetX}px` : insetX;
   const right = typeof insetX === "number" ? `${insetX}px` : insetX;
 
-  return (
-    <>
-      {visibleRules.map((y) => (
-        <div
-          key={y}
-          aria-hidden
-          className="pointer-events-none absolute"
-          style={{
-            top: y,
-            left,
-            right,
-            height: 1,
-            background: color,
-            opacity,
-          }}
-        />
-      ))}
-    </>
-  );
+  return visibleRules.map((y) => (
+    <div
+      key={y}
+      aria-hidden
+      className="pointer-events-none absolute"
+      style={{
+        top: y,
+        left,
+        right,
+        height: 1,
+        background: color,
+        opacity,
+      }}
+    />
+  ));
 };
 
 export { PositionalRuledLayer };
