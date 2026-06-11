@@ -107,10 +107,9 @@ const isComponentVariableStatement = (statement) => statement.declarationList.de
 
 const getStatementOrderCategory = (statement) => {
   if (ts.isImportDeclaration(statement) || ts.isImportEqualsDeclaration(statement)) return "import";
-  if (ts.isExportDeclaration(statement)) return statement.isTypeOnly ? "type" : "postComponent";
-  if (ts.isExportAssignment(statement)) return "postComponent";
+  if (ts.isExportDeclaration(statement) || ts.isExportAssignment(statement)) return "postComponent";
   if (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isEnumDeclaration(statement) || ts.isModuleDeclaration(statement)) return "type";
-  if (isDisplayNameAssignment(statement)) return "postComponent";
+  if (isDisplayNameAssignment(statement)) return "component";
 
   if (ts.isClassDeclaration(statement)) {
     if (statement.name && isPascalCaseName(statement.name.text) && containsJsx(statement)) return "component";
@@ -129,7 +128,7 @@ const getStatementOrderCategory = (statement) => {
 
     const names = getVariableStatementNames(statement);
     const hasMemoName = statement.declarationList.declarations.some((declaration) => declaration.initializer && isMemoCall(declaration.initializer));
-    if (hasMemoName) return "postComponent";
+    if (hasMemoName) return "component";
     if (isConstVariableStatement(statement) && names.length > 0 && names.every(isUpperCaseConstantName)) return "constant";
 
     const hasFunctionInitializer = statement.declarationList.declarations.some((declaration) => isFunctionLikeInitializer(declaration.initializer));
