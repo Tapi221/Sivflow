@@ -86,10 +86,13 @@ type PendingPdfZoom = {
 };
 
 type PdfScrollAnchor = {
-  anchorX: number;
-  anchorY: number;
+  fallbackContentX: number;
+  fallbackContentY: number;
   localX: number;
   localY: number;
+  pageNumber?: number;
+  pageXRatio?: number;
+  pageYRatio?: number;
   scale: number;
 };
 
@@ -266,38 +269,81 @@ const getPdfZoomClientPoint = (container: HTMLElement, clientX?: number, clientY
   };
 };
 
-const createPdfScrollAnchor = (pdfViewer: PdfViewerInstance, container: HTMLElement, clientX?: number, clientY?: number): PdfScrollAnchor => {
+const readPdfPageNumber = (pageElement: HTMLElement): number | null => {
+  const rawPageNumber = pageElement.dataset.pageNumber ?? pageElement.getAttribute("data-page-number");
+  const pageNumber = Number(rawPageNumber);
+  return Number.isFinite(pageNumber) ? pageNumber : null;
+};
+
+const getPdfAnchorPageElement = (viewerElement: HTMLElement, clientX: number, clientY: number): HTMLElement | null => {
+  let closestPageElement: HTMLElement | null = null;
+  let closestDistance = Number.POSITIVE_INFINITY;
+
+  for (const pageElement of viewerElement.querySelectorAll<HTMLElement>(".page")) {
+    const rect = pageElement.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) continue;
+    if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) return pageElement;
+
+    const distanceX = clientX < rect.left ? rect.left - clientX : Math.max(clientX - rect.right, 0);
+    const distanceY = clientY < rect.top ? rect.top - clientY : Math.max(clientY - rect.bottom, 0);
+    const distance = distanceX + distanceY;
+    if (distance >= closestDistance) continue;
+    closestDistance = distance;
+    closestPageElement = pageElement;
+  }
+
+  return closestPageElement;
+};
+
+const createPdfScrollAnchor = (pdfViewer: PdfViewerInstance, container: HTMLElement, viewerElement: HTMLElement, clientX?: number, clientY?: number): PdfScrollAnchor => {
   const containerRect = container.getBoundingClientRect();
   const clientPoint = getPdfZoomClientPoint(container, clientX, clientY);
   const localX = Math.min(Math.max(clientPoint.clientX - containerRect.left, 0), container.clientWidth);
   const localY = Math.min(Math.max(clientPoint.clientY - containerRect.top, 0), container.clientHeight);
+  const pageElement = getPdfAnchorPageElement(viewerElement, clientPoint.clientX, clientPoint.clientY);
+  const pageNumber = pageElement ? readPdfPageNumber(pageElement) : null;
+  const pageRect = pageElement?.getBoundingClientRect();
+  const pageXRatio = pageElement && pageRect && pageRect.width > 0 ? Math.min(Math.max((clientPoint.clientX - pageRect.left) / pageRect.width, 0), 1) : undefined;
+  const pageYRatio = pageElement && pageRect && pageRect.height > 0 ? Math.min(Math.max((clientPoint.clientY - pageRect.top) / pageRect.height, 0), 1) : undefined;
 
   return {
-    anchorX: container.scrollLeft + localX,
-    anchorY: container.scrollTop + localY,
+    fallbackContentX: container.scrollLeft + localX - viewerElement.offsetLeft,
+    fallbackContentY: container.scrollTop + localY - viewerElement.offsetTop,
     localX,
     localY,
+    pageNumber: pageNumber ?? undefined,
+    pageXRatio,
+    pageYRatio,
     scale: getPdfViewerCurrentScale(pdfViewer),
   };
 };
 
-const restorePdfScrollAnchor = (pdfViewer: PdfViewerInstance, container: HTMLElement, anchor: PdfScrollAnchor): void => {
+const restorePdfScrollAnchor = (pdfViewer: PdfViewerInstance, container: HTMLElement, viewerElement: HTMLElement, anchor: PdfScrollAnchor): void => {
+  if (typeof anchor.pageNumber === "number" && typeof anchor.pageXRatio === "number" && typeof anchor.pageYRatio === "number") {
+    const pageElement = viewerElement.querySelector<HTMLElement>(`.page[data-page-number="${anchor.pageNumber}"]`);
+    if (pageElement) {
+      container.scrollLeft = Math.max(0, viewerElement.offsetLeft + pageElement.offsetLeft + pageElement.offsetWidth * anchor.pageXRatio - anchor.localX);
+      container.scrollTop = Math.max(0, viewerElement.offsetTop + pageElement.offsetTop + pageElement.offsetHeight * anchor.pageYRatio - anchor.localY);
+      return;
+    }
+  }
+
   const nextScale = getPdfViewerCurrentScale(pdfViewer);
   const scaleRatio = nextScale / anchor.scale;
   if (!Number.isFinite(scaleRatio) || scaleRatio <= 0) return;
-  container.scrollLeft = Math.max(0, anchor.anchorX * scaleRatio - anchor.localX);
-  container.scrollTop = Math.max(0, anchor.anchorY * scaleRatio - anchor.localY);
+  container.scrollLeft = Math.max(0, viewerElement.offsetLeft + anchor.fallbackContentX * scaleRatio - anchor.localX);
+  container.scrollTop = Math.max(0, viewerElement.offsetTop + anchor.fallbackContentY * scaleRatio - anchor.localY);
 };
 
-const applyPdfViewerScaleValueWithAnchor = (pdfViewer: PdfViewerInstance, container: HTMLElement, scaleValue: string, clientX?: number, clientY?: number, afterRestore?: () => void): boolean => {
+const applyPdfViewerScaleValueWithAnchor = (pdfViewer: PdfViewerInstance, container: HTMLElement, viewerElement: HTMLElement, scaleValue: string, clientX?: number, clientY?: number, afterRestore?: () => void): boolean => {
   if (getPdfViewerPageCount(pdfViewer) <= 0) return false;
-  const anchor = createPdfScrollAnchor(pdfViewer, container, clientX, clientY);
+  const anchor = createPdfScrollAnchor(pdfViewer, container, viewerElement, clientX, clientY);
   (pdfViewer as PdfViewerWithScale).currentScaleValue = scaleValue;
 
   window.requestAnimationFrame(() => {
-    restorePdfScrollAnchor(pdfViewer, container, anchor);
+    restorePdfScrollAnchor(pdfViewer, container, viewerElement, anchor);
     window.requestAnimationFrame(() => {
-      restorePdfScrollAnchor(pdfViewer, container, anchor);
+      restorePdfScrollAnchor(pdfViewer, container, viewerElement, anchor);
       afterRestore?.();
     });
   });
@@ -305,11 +351,11 @@ const applyPdfViewerScaleValueWithAnchor = (pdfViewer: PdfViewerInstance, contai
   return true;
 };
 
-const applyPdfViewerNumericScaleWithAnchor = (pdfViewer: PdfViewerInstance, container: HTMLElement, scale: number, clientX?: number, clientY?: number, afterRestore?: () => void): boolean => {
+const applyPdfViewerNumericScaleWithAnchor = (pdfViewer: PdfViewerInstance, container: HTMLElement, viewerElement: HTMLElement, scale: number, clientX?: number, clientY?: number, afterRestore?: () => void): boolean => {
   const currentScale = getPdfViewerCurrentScale(pdfViewer);
   const nextScale = clampPdfViewerScale(scale);
   if (Math.abs(nextScale - currentScale) < PDF_SCALE_EPSILON) return false;
-  return applyPdfViewerScaleValueWithAnchor(pdfViewer, container, String(nextScale), clientX, clientY, afterRestore);
+  return applyPdfViewerScaleValueWithAnchor(pdfViewer, container, viewerElement, String(nextScale), clientX, clientY, afterRestore);
 };
 
 const createPdfZoomPreview = (pdfViewer: PdfViewerInstance, container: HTMLElement, viewerElement: HTMLElement, scale: number, clientX?: number, clientY?: number): PdfZoomPreview | null => {
@@ -414,12 +460,6 @@ const clearPdfZoomPreview = (container: HTMLElement, viewerElement: HTMLElement)
   viewerElement.style.removeProperty("transform");
   viewerElement.style.removeProperty("transform-origin");
   container.querySelectorAll(".pdf-pane__zoom-snapshot").forEach((snapshotElement) => snapshotElement.remove());
-};
-
-const readPdfPageNumber = (pageElement: HTMLElement): number | null => {
-  const rawPageNumber = pageElement.dataset.pageNumber ?? pageElement.getAttribute("data-page-number");
-  const pageNumber = Number(rawPageNumber);
-  return Number.isFinite(pageNumber) ? pageNumber : null;
 };
 
 const collectPdfPageWindowMetrics = (viewerElement: HTMLElement): PdfPageWindowMetric[] => {
@@ -542,14 +582,15 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
   const applyZoomScale = useCallback((scale: number, clientX?: number, clientY?: number) => {
     const pdfViewer = pdfViewerRef.current;
     const container = scrollContainerRef.current;
-    if (!pdfViewer || !container) return;
+    const viewerElement = pdfViewerElementRef.current;
+    if (!pdfViewer || !container || !viewerElement) return;
     if (requestPdfZoomRef.current) {
       requestPdfZoomRef.current(scale, clientX, clientY);
       return;
     }
 
     lastExplicitZoomAtRef.current = Date.now();
-    if (!applyPdfViewerNumericScaleWithAnchor(pdfViewer, container, scale, clientX, clientY, updateActivePdfPageWindow)) refreshPdfToolbarState();
+    if (!applyPdfViewerNumericScaleWithAnchor(pdfViewer, container, viewerElement, scale, clientX, clientY, updateActivePdfPageWindow)) refreshPdfToolbarState();
   }, [refreshPdfToolbarState, updateActivePdfPageWindow]);
 
   const handleZoomIn = useCallback(() => {
@@ -567,7 +608,8 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
   const handleFitWidth = useCallback(() => {
     const pdfViewer = pdfViewerRef.current;
     const container = scrollContainerRef.current;
-    if (!pdfViewer || !container) return;
+    const viewerElement = pdfViewerElementRef.current;
+    if (!pdfViewer || !container || !viewerElement) return;
     if (requestPdfFitWidthRef.current) {
       requestPdfFitWidthRef.current();
       return;
@@ -575,7 +617,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
 
     isApplyingFitScaleRef.current = true;
     lastExplicitZoomAtRef.current = Date.now();
-    if (!applyPdfViewerScaleValueWithAnchor(pdfViewer, container, "page-width", undefined, undefined, updateActivePdfPageWindow)) refreshPdfToolbarState();
+    if (!applyPdfViewerScaleValueWithAnchor(pdfViewer, container, viewerElement, "page-width", undefined, undefined, updateActivePdfPageWindow)) refreshPdfToolbarState();
   }, [refreshPdfToolbarState, updateActivePdfPageWindow]);
 
   const handleToggleBookmark = useCallback(() => {
@@ -752,7 +794,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
 
       lastExplicitZoomAtRef.current = Date.now();
       beginActiveZoomCommit();
-      if (applyPdfViewerNumericScaleWithAnchor(pdfViewer, container, zoomPreview.scale, zoomPreview.clientX, zoomPreview.clientY, updateAfterZoomScaleCommit)) return;
+      if (applyPdfViewerNumericScaleWithAnchor(pdfViewer, container, viewerElement, zoomPreview.scale, zoomPreview.clientX, zoomPreview.clientY, updateAfterZoomScaleCommit)) return;
       clearActiveZoomPreview();
       refreshPdfToolbarState();
     };
@@ -776,7 +818,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         clearZoomCommitTimer();
         clearScrollRenderingMode();
         isApplyingFitScaleRef.current = true;
-        applyPdfViewerScaleValueWithAnchor(pdfViewer, container, "page-width", undefined, undefined, () => updateVisiblePageWindow());
+        applyPdfViewerScaleValueWithAnchor(pdfViewer, container, viewerElement, "page-width", undefined, undefined, () => updateVisiblePageWindow());
       });
     };
 
@@ -818,7 +860,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       preparePdfZoomScaleCommit(viewerElement, snapshotElement);
       isApplyingFitScaleRef.current = true;
       lastExplicitZoomAtRef.current = Date.now();
-      if (applyPdfViewerScaleValueWithAnchor(pdfViewer, container, "page-width", undefined, undefined, updateAfterZoomScaleCommit)) return;
+      if (applyPdfViewerScaleValueWithAnchor(pdfViewer, container, viewerElement, "page-width", undefined, undefined, updateAfterZoomScaleCommit)) return;
       clearActiveZoomPreview();
       refreshPdfToolbarState();
     };
