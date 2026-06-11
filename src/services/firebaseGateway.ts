@@ -4,6 +4,8 @@ import { firestoreDb, requireFirestoreDb, storage } from "@/infrastructure/fireb
 
 
 
+
+
 export const getFirestoreDb = (): Firestore | null => firestoreDb;
 
 export const requireAppFirestoreDb = (): Firestore => requireFirestoreDb();

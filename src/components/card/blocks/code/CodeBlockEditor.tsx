@@ -8,12 +8,16 @@ import type { CodeBlockData } from "@/types/core/code-block";
 
 
 
+
+
 interface CodeBlockEditorProps {
   value?: CodeBlockData;
   onChange: (value: CodeBlockData) => void;
   className?: string;
   zoom?: number;
 }
+
+
 
 
 
@@ -70,6 +74,8 @@ const pushRecentLang = (lang: string) => {
     // noop
   }
 };
+
+
 
 
 

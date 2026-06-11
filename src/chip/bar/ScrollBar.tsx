@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 export type ScrollBarProps = { value: readonly number[];
   min: number;
   max: number;
@@ -17,6 +19,8 @@ export type ScrollBarProps = { value: readonly number[];
   rangeClassName?: string;
   thumbClassName?: string;
 };
+
+
 
 
 
@@ -58,6 +62,8 @@ const ScrollBar = React.forwardRef<HTMLInputElement, ScrollBarProps>(
     );
   },
 );
+
+
 
 
 

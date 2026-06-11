@@ -4,6 +4,8 @@ import { createGoogleApiError, withGoogleApiRetry } from "@/integration/google-i
 
 
 
+
+
 type GoogleTaskPatch = {
   title?: string;
   notes?: string | null;
@@ -23,7 +25,11 @@ type RawGoogleTask = NonNullable<GoogleTasksApiTasksResponse["items"]>[number];
 
 
 
+
+
 const GOOGLE_TASKS_API_BASE = "https://tasks.googleapis.com/tasks/v1";
+
+
 
 
 

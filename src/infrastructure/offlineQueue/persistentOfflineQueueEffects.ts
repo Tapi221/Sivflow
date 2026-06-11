@@ -8,6 +8,8 @@ import type { UploadedImage } from "@/types";
 
 
 
+
+
 const isAssetLikeImageQueueItem = (item: QueueItem): boolean =>
   !isDocumentQueueItem(item) && item.fileType.startsWith("image/");
 
@@ -35,6 +37,8 @@ const handleQueuedUploadPermanentFailure = async (
     await handleQueuedAssetUploadFailure(item);
   }
 };
+
+
 
 
 

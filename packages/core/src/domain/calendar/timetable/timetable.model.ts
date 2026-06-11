@@ -2,6 +2,8 @@ import type { CalendarTimetablePeriod, CalendarTimetableSlot, CalendarTimetableV
 
 
 
+
+
 const TIMETABLE_MIN_VISIBLE_DAY_COUNT: CalendarTimetableVisibleDayCount = 5;
 const TIMETABLE_MAX_WEEKDAY_INDEX = 6;
 const DEFAULT_CALENDAR_TIMETABLE_PERIODS: readonly CalendarTimetablePeriod[] = [
@@ -13,6 +15,8 @@ const DEFAULT_CALENDAR_TIMETABLE_PERIODS: readonly CalendarTimetablePeriod[] = [
   { id: "period-6", label: "6", startTime: "18:00", endTime: "19:30", order: 5 },
   { id: "period-7", label: "7", startTime: "19:40", endTime: "21:10", order: 6 },
 ];
+
+
 
 
 
@@ -51,6 +55,8 @@ const normalizeCalendarTimetableSlots = (slots: CalendarTimetableSlot[], periods
 
   return normalizedSlots;
 };
+
+
 
 
 

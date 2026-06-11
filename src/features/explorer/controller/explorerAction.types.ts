@@ -4,6 +4,8 @@ import type { SelectedExplorerItem } from "@/types";
 
 
 
+
+
 export type ExplorerAction = | { type: "APPLY_ROUTE_STATE"; payload: ExplorerRouteState }
   | { type: "SELECT_FOLDER"; payload: { folderId: string | null } }
   | { type: "SELECT_ITEM"; payload: { item: SelectedExplorerItem } }

@@ -9,6 +9,8 @@ import { VideoElementStatic } from '@/components/ui/media-video-node-static';
 
 
 
+
+
 const BaseMediaKit = [
   BaseImagePlugin.withComponent(ImageElementStatic),
   BaseVideoPlugin.withComponent(VideoElementStatic),
@@ -24,6 +26,8 @@ const BaseMediaKit = [
   BaseMediaEmbedPlugin,
   BasePlaceholderPlugin,
 ];
+
+
 
 
 

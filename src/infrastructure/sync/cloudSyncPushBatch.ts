@@ -8,9 +8,13 @@ import type { SyncChange } from "@/services/interfaces/ISyncService";
 
 
 
+
+
 type SyncChangeWithOperation = SyncChange & {
   operationType?: unknown;
 };
+
+
 
 
 

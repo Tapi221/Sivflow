@@ -11,6 +11,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 interface DesktopCardSurfaceProps {
   card: Card;
   isActive: boolean;
@@ -27,6 +29,8 @@ interface DesktopCardSurfaceProps {
   onToggleUncertainty: (card: Card) => void | Promise<void>;
   onToggleBookmark: (card: Card) => void | Promise<void>;
 }
+
+
 
 
 
@@ -64,6 +68,8 @@ const areDesktopCardSurfacePropsEqual = (
 
   return true;
 };
+
+
 
 
 
@@ -244,6 +250,8 @@ const DesktopCardSurfaceInner = ({
 
 
 
+
+
 const DesktopCardSurface = React.memo(
   DesktopCardSurfaceInner,
   areDesktopCardSurfacePropsEqual,
@@ -252,6 +260,8 @@ const DesktopCardSurface = React.memo(
 DesktopCardSurface.displayName = "DesktopCardSurface";
 
 export { DesktopCardSurface };
+
+
 
 
 

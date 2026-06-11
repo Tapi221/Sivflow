@@ -10,6 +10,8 @@ import type { EditorDraft } from "./cardEditorUtils";
 
 
 
+
+
 type LocalImageRecordLike = {
   remoteStatus?: "none" | "uploading" | "ready" | "failed" | null;
   status?: "pending" | "uploading" | "ready" | "failed" | null;
@@ -21,9 +23,13 @@ type LocalImageRecordLike = {
 
 
 
+
+
 const IMAGE_UPLOAD_SAVE_TIMEOUT_MS = 30_000;
 
 const IMAGE_UPLOAD_SAVE_POLL_MS = 300;
+
+
 
 
 

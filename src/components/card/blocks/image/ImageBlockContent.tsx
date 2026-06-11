@@ -5,6 +5,8 @@ import type { UploadedImage } from "@/types/domain/assets";
 
 
 
+
+
 type ImageBlockContentProps =
   | {
     mode: "view";
@@ -25,6 +27,8 @@ type ImageBlockContentProps =
     displayMode?: "fixed" | "fluid";
     zoom?: number;
   };
+
+
 
 
 

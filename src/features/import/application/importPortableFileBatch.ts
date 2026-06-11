@@ -6,6 +6,8 @@ import { detectImportFileKind, IMPORT_FILE_LABELS, isPortableImportFileKind, typ
 
 
 
+
+
 export type PortableImportBatchItemStatus = | "queued" | "parsing" | "importing" | "imported" | "failed" | "skipped";
 
 export type PortableImportBatchItem = { id: string;
@@ -38,6 +40,8 @@ export type ImportPortableFileBatchParams = { files: File[];
   ensureTagByName?: EnsureMfDeckTagByName;
   onItemChange?: (item: PortableImportBatchItem) => void;
 };
+
+
 
 
 

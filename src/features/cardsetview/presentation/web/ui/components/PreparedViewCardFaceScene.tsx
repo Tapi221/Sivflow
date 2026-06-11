@@ -13,6 +13,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   id: card.id,
   cardId: card.cardId,
@@ -26,6 +28,8 @@ const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   inkQuestion: card.front.ink ?? null,
   inkAnswer: card.back.ink ?? null,
 });
+
+
 
 
 
@@ -46,6 +50,8 @@ export type PreparedViewCardFaceSceneProps = Readonly<{ card: Card;
   onToggleUncertainty?: (card: Card) => void | Promise<void>;
   onToggleBookmark?: (card: Card) => void | Promise<void>;
 }>;
+
+
 
 
 

@@ -6,7 +6,11 @@ type HoverTooltipOpenEventDetail = {
 
 
 
+
+
 const HOVER_TOOLTIP_OPEN_EVENT = "sivflow:hover-tooltip-open";
+
+
 
 
 
@@ -37,6 +41,8 @@ const subscribeHoverTooltipOpen = (listener: HoverTooltipOpenListener) => {
     window.removeEventListener(HOVER_TOOLTIP_OPEN_EVENT, handleTooltipOpen);
   };
 };
+
+
 
 
 

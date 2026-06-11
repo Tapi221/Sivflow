@@ -4,8 +4,12 @@ type NativeTitleTooltipGlobal = typeof globalThis & {
 
 
 
+
+
 const INSTALL_KEY = "__sivflowNativeTitleTooltipDisablerInstalled";
 const TITLE_BACKUP_ATTRIBUTE = "data-native-title";
+
+
 
 
 
