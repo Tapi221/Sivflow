@@ -1,8 +1,10 @@
 const appFontFamily = {
-  ui: ["var(--app-font-family-ui)"],
+    darkMode: ["class"],
+    ui: ["var(--app-font-family-ui)"],
   content: ["var(--app-font-family-content)"],
   numeric: ["var(--app-font-family-numeric)"],
   code: ["var(--app-font-family-code)"],
+    plugins: [tailwind-scrollbar-hide]
 };
 
 /** @type {import('tailwindcss').Config} */
