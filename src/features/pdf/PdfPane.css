@@ -16,7 +16,9 @@
 /* ビューア要素最適化 */
 .pdf-pane__viewer {
   contain: layout paint style;
+  min-width: 100%;
   overflow-anchor: none;
+  width: max-content;
 }
 
 .pdf-pane__viewer.pdf-pane--zooming {
