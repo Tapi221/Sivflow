@@ -7,10 +7,6 @@ import type { UploadedImage } from "@/types";
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardFaceAttachmentAudio } from "@/types/domain/card";
 
-
-
-
-
 type Side = "question" | "answer";
 type DialogAudioItem = string | CardFaceAttachmentAudio;
 interface MediaDialogProps {
@@ -34,10 +30,6 @@ interface CardEditorPaneMediaDialogsProps {
   getReferenceItems: (side: Side) => ReferenceBlockData[];
   setReferenceItems: (side: Side, next: ReferenceBlockData[]) => void;
 }
-
-
-
-
 
 const toAudioUrl = (item: DialogAudioItem): string => {
   return typeof item === "string" ? item : item.url;
@@ -63,10 +55,6 @@ const areMediaDialogsPropsEqual = (
   if (prevClosed && nextClosed) return true;
   return false;
 };
-
-
-
-
 
 const MediaDialog = ({
   title,
@@ -150,10 +138,6 @@ const CardEditorPaneMediaDialogsInner = ({
     </>
   );
 };
-
-
-
-
 
 const CardEditorPaneMediaDialogs = memo(CardEditorPaneMediaDialogsInner, areMediaDialogsPropsEqual);
 CardEditorPaneMediaDialogs.displayName = "CardEditorPaneMediaDialogs";

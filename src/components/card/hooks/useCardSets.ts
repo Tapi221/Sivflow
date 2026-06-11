@@ -5,17 +5,9 @@ import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { CardSet } from "@/types";
 import { DEFAULT_CARD_DISPLAY_MODE } from "@/types/domain/cardSet";
 
-
-
-
-
 type UseCardSetsOptions = {
   enabled?: boolean;
 };
-
-
-
-
 
 const useCardSets = (folderId?: string | null, options?: UseCardSetsOptions) => {
   const { currentUser } = useAuthSession();
@@ -113,9 +105,5 @@ const useCardSets = (folderId?: string | null, options?: UseCardSetsOptions) => 
     deleteCardSet,
   };
 };
-
-
-
-
 
 export { useCardSets };

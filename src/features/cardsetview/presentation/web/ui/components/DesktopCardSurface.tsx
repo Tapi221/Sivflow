@@ -9,10 +9,6 @@ import { buildCardSurfaceMetrics } from "./cardSurfacePresentation";
 import { DesktopEmbeddedCardEditorSurface } from "./DesktopEmbeddedCardEditorSurface";
 import { PreparedViewCardFaceScene } from "./PreparedViewCardFaceScene";
 
-
-
-
-
 interface DesktopCardSurfaceProps {
   card: Card;
   isActive: boolean;
@@ -29,10 +25,6 @@ interface DesktopCardSurfaceProps {
   onToggleUncertainty: (card: Card) => void | Promise<void>;
   onToggleBookmark: (card: Card) => void | Promise<void>;
 }
-
-
-
-
 
 const areDesktopCardSurfacePropsEqual = (
   prev: DesktopCardSurfaceProps,
@@ -68,10 +60,6 @@ const areDesktopCardSurfacePropsEqual = (
 
   return true;
 };
-
-
-
-
 
 const DesktopCardSurfaceInner = ({
   card,
@@ -248,18 +236,10 @@ const DesktopCardSurfaceInner = ({
   );
 };
 
-
-
-
-
 const DesktopCardSurface = React.memo(
   DesktopCardSurfaceInner,
   areDesktopCardSurfacePropsEqual,
 );
 DesktopCardSurface.displayName = "DesktopCardSurface";
 export { DesktopCardSurface };
-
-
-
-
 export type { DesktopCardSurfaceProps };

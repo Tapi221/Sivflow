@@ -10,8 +10,6 @@ type TimestampMethodLike = {
 };
 type TimestampLike = TimestampFieldsLike & TimestampMethodLike;
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
 };
@@ -121,7 +119,5 @@ const toIsoStringOrNull = (value: unknown): string | null => {
   const date = toDateOrNull(value);
   return date ? date.toISOString() : null;
 };
-
-
 
 export { toDateOrNull, toMillisOrNull, toMillis, toIsoStringOrNull };

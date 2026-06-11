@@ -1,10 +1,6 @@
 import React, { useMemo } from "react";
 import { cn } from "@/lib/utils";
 
-
-
-
-
 type CSSVars = React.CSSProperties & Record<`--${string}`, string>;
 type CardSurfaceProps = {
   children: React.ReactNode;
@@ -19,15 +15,7 @@ type CardSurfaceProps = {
   ruledPhasePx?: number;
 };
 
-
-
-
-
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
-
-
-
-
 
 const CardSurface = ({ children, className, style, overlay, ruled = true, ruledOpacity = 1, ruledRowPx = 24, ruledOffsetPx = 0, ruledBottomOffsetPx = 0, ruledPhasePx: _ruledPhasePx = 0 }: CardSurfaceProps) => {
   void _ruledPhasePx;
@@ -97,9 +85,5 @@ const CardSurface = ({ children, className, style, overlay, ruled = true, ruledO
     </div>
   );
 };
-
-
-
-
 
 export { CardSurface };

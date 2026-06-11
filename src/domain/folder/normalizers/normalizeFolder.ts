@@ -4,15 +4,7 @@ import { makeFallbackId } from "@/shared/lib/fallbackId";
 import { asRecord, pick } from "@/shared/lib/records";
 import type { Folder } from "@/types/domain/folder";
 
-
-
-
-
 type NotePdf = NonNullable<Folder["notePdfs"]>[number];
-
-
-
-
 
 const isNotePdf = (value: unknown): value is NotePdf => {
   const record = asRecord(value);
@@ -102,9 +94,5 @@ const normalizeFolderWithSilent = (raw: unknown) => {
 
   return normalizeFolder(normalizedInput);
 };
-
-
-
-
 
 export { normalizeFolder, normalizeFolderWithSilent };

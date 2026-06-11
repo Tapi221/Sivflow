@@ -1,10 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-
-
-
-
 type SliderProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
   "value" | "defaultValue" | "onChange"
@@ -17,10 +13,6 @@ type SliderProps = Omit<
   rangeClassName?: string;
   thumbClassName?: string;
 };
-
-
-
-
 
 const toSingleValue = (
   source: readonly number[] | undefined,
@@ -57,10 +49,6 @@ const clampValue = (value: number, min: number, max: number) => {
 
   return Math.min(safeMax, Math.max(safeMin, value));
 };
-
-
-
-
 
 const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
   (
@@ -238,10 +226,6 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
     );
   },
 );
-
-
-
-
 
 Slider.displayName = "Slider";
 export { Slider };

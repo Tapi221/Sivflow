@@ -19,10 +19,4 @@ const deepStripUndefined = (input: unknown): unknown => {
   return input;
 };
 
-
-
-
-
-
-
 export { deepStripUndefined };
