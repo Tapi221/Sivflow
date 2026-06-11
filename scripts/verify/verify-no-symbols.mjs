@@ -6,7 +6,7 @@ const SOURCE_DIRECTORIES = ["src", "apps", "packages", "shared", "functions/src"
 const TEXT_EXTENSIONS = new Set([".cjs", ".css", ".html", ".js", ".jsx", ".json", ".md", ".mjs", ".scss", ".ts", ".tsx"]);
 const EXCLUDED_PATH_PARTS = ["/node_modules/", "/dist/", "/build/", "/coverage/", "/.git/", "/.turbo/", "/target/", "/src/components/ui/"];
 const DISALLOWED_SYMBOL_PATTERN = new RegExp("[\\u{1F000}-\\u{1FAFF}\\u{2600}-\\u{27BF}]", "gu");
-const ESLINT_ERROR_SYMBOL = "\u2716";
+const ESLINT_ERROR_SYMBOL = String.fromCodePoint(0x2716);
 const ALLOWED_SYMBOLS_BY_FILE = new Map([["scripts/lint-eslint-ja.mjs", new Set([ESLINT_ERROR_SYMBOL])]]);
 
 const toPosix = (value) => value.split(path.sep).join("/");
@@ -19,6 +19,11 @@ const isExcludedPath = (filePath) => {
 const isAllowedSymbol = (filePath, symbol) => {
   const relativePath = toPosix(path.relative(ROOT_DIR, filePath));
   return ALLOWED_SYMBOLS_BY_FILE.get(relativePath)?.has(symbol) ?? false;
+};
+
+const getDisallowedSymbols = (filePath, line) => {
+  const symbols = [...line.matchAll(DISALLOWED_SYMBOL_PATTERN)].map((match) => match[0]).filter((symbol) => !isAllowedSymbol(filePath, symbol));
+  return [...new Set(symbols)];
 };
 
 const walkTextFiles = (directory) => {
@@ -37,20 +42,19 @@ const walkTextFiles = (directory) => {
   });
 };
 
-const hasDisallowedSymbol = (filePath, line) => {
-  return [...line.matchAll(DISALLOWED_SYMBOL_PATTERN)].some((match) => !isAllowedSymbol(filePath, match[0]));
-};
-
 const getLineViolations = (filePath) => {
   const source = readFileSync(filePath, "utf8");
   return source.split(/\r?\n/).flatMap((line, index) => {
-    if (!hasDisallowedSymbol(filePath, line)) return [];
+    const symbols = getDisallowedSymbols(filePath, line);
+    if (symbols.length === 0) return [];
 
-    return [{ filePath, line: index + 1 }];
+    return [{ filePath, line: index + 1, symbols }];
   });
 };
 
-const formatViolation = ({ filePath, line }) => `${toPosix(path.relative(ROOT_DIR, filePath))}:${line} Do not use pictographic symbols in source files.`;
+const formatSymbol = (symbol) => `U+${symbol.codePointAt(0).toString(16).toUpperCase()}`;
+
+const formatViolation = ({ filePath, line, symbols }) => `${toPosix(path.relative(ROOT_DIR, filePath))}:${line} Do not use pictographic symbols in source files. Found: ${symbols.map(formatSymbol).join(", ")}.`;
 
 const sourceFiles = SOURCE_DIRECTORIES.flatMap(walkTextFiles);
 const violations = sourceFiles.flatMap(getLineViolations);
