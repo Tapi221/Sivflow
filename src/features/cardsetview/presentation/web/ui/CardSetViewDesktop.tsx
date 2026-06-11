@@ -214,7 +214,7 @@ const ReorderableCardSurface = ({
       ) : null}
 
       {isDropTarget ? (
-        <div aria-hidden className={`pointer-events-none absolute left-[-18px] right-[-18px] z-30 h-[3px] rounded-full bg-current text-[var(--app-sidebar-text-muted,#777777)] opacity-35 ${dragState?.placement === "before" ? "top-[-10px]" : "bottom-[-10px]"}`} />
+        <div aria-hidden className={`pointer-events-none absolute left-[-18px] right-[-18px] z-30 h-[3px] rounded-full bg-current text-[var(--app-sidebar-text-muted,#777)] opacity-35 ${dragState?.placement === "before" ? "top-[-10px]" : "bottom-[-10px]"}`} />
       ) : null}
 
       <div className={isDragged ? "opacity-45" : undefined}>

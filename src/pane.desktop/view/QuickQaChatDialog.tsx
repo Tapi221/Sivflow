@@ -211,7 +211,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
           ) : null}
           <div className="flex items-end gap-2">
             <textarea ref={inputRef} value={inputValue} onChange={(event) => setInputValue(event.target.value.slice(0, inputMaxLength))} onKeyDown={handleInputKeyDown} placeholder={placeholder} rows={step === "question" ? 2 : 4} className="max-h-[160px] min-h-[42px] min-w-0 flex-1 resize-none rounded-[14px] border border-[#dddcd5] bg-white px-3 py-2 text-[13px] leading-relaxed text-[#343434] outline-none transition placeholder:text-[#aaa49d] focus:border-[#c8c6bf]" />
-            <button type="button" className="inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-[#343434] bg-[#343434] px-4 text-[12px] font-semibold text-white transition hover:bg-[#1f1f1f] disabled:border-[#dddcd5] disabled:bg-[#eeeeee] disabled:text-[#aaa49d]" onClick={handleSend} disabled={!canSend}>
+            <button type="button" className="inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-[#343434] bg-[#343434] px-4 text-[12px] font-semibold text-white transition hover:bg-[#1f1f1f] disabled:border-[#dddcd5] disabled:bg-[#eee] disabled:text-[#aaa49d]" onClick={handleSend} disabled={!canSend}>
               {isCreating ? <LoadingSpinner iconClassName="h-4 w-4" label="送信中" /> : "送信"}
             </button>
           </div>

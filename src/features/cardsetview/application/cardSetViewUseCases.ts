@@ -40,27 +40,27 @@ const buildNewCardPayload = ({
   };
 };
 const extractCreatedCardId = (created: unknown): string | null => { if (typeof created === "string") { return created;
-  }
+}
 
-  if (
-    typeof created === "object" &&
+if (
+  typeof created === "object" &&
     created !== null &&
     "id" in created &&
     typeof (created as { id?: unknown; }).id === "string"
-  ) {
-    return (created as { id: string; }).id;
-  }
+) {
+  return (created as { id: string; }).id;
+}
 
-  if (
-    typeof created === "object" &&
+if (
+  typeof created === "object" &&
     created !== null &&
     "cardId" in created &&
     typeof (created as { cardId?: unknown; }).cardId === "string"
-  ) {
-    return (created as { cardId: string; }).cardId;
-  }
+) {
+  return (created as { cardId: string; }).cardId;
+}
 
-  return null;
+return null;
 };
 const createAndFocusCard = async ({ targetCardSetId, targetFolderId, createCard }: CreateAndFocusCardOptions): Promise<string | null> => { const created = await createCard(buildNewCardPayload({ cardSetId: targetCardSetId, targetFolderId }));
 

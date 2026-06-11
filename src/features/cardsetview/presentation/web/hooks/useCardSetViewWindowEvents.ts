@@ -8,18 +8,18 @@ interface UseCardSetViewWindowEventsOptions {
 }
 
 const useCardSetViewWindowEvents = ({ handleToggleViewMode, createAndFocusCard }: UseCardSetViewWindowEventsOptions) => { useEffect(() => { return subscribeCardSetViewWindowEvent(CARD_SET_VIEW_EVENTS.toggleEditingRequest, () => { handleToggleViewMode();
-    },
-    );
-  }, [handleToggleViewMode]);
+},
+);
+}, [handleToggleViewMode]);
 
-  useEffect(() => {
-    return subscribeCardSetViewWindowEvent(
-      CARD_SET_VIEW_EVENTS.createCardRequest,
-      () => {
-        void createAndFocusCard();
-      },
-    );
-  }, [createAndFocusCard]);
+useEffect(() => {
+  return subscribeCardSetViewWindowEvent(
+    CARD_SET_VIEW_EVENTS.createCardRequest,
+    () => {
+      void createAndFocusCard();
+    },
+  );
+}, [createAndFocusCard]);
 };
 
 export { useCardSetViewWindowEvents };

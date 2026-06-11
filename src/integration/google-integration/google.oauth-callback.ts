@@ -59,7 +59,7 @@ const renderMessage = (text: OAuthCallbackText): void => {
   if (!root) return;
 
   document.body.style.margin = "0";
-  document.body.style.background = "#ffffff";
+  document.body.style.background = "#fff";
 
   const main = document.createElement("main");
   applyStyles(main, {

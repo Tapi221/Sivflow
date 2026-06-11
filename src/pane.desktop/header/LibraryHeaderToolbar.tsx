@@ -98,7 +98,7 @@ const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions
                 {isActive && (
                   <motion.span
                     layoutId={indicatorId}
-                    className="absolute inset-0 -z-10 rounded-lg border border-[#eeeeee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+                    className="absolute inset-0 -z-10 rounded-lg border border-[#eee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
                     transition={WORKSPACE_TAB_MOTION_TRANSITION}
                   />
                 )}

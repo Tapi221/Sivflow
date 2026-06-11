@@ -3,7 +3,7 @@ import type { FeatureFlags, LegacyFlagName } from "@platform/feature-flags/featu
 import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 
 const flags = { isEnabled: (name: LegacyFlagName): boolean => { return featureFlags.getFlag(LEGACY_FEATURE_FLAG_MAP[name]);
-  },
+},
 };
 const featureFlags = new FeatureFlagService();
 

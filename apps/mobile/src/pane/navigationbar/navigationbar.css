@@ -46,7 +46,7 @@
   height: var(--mobile-navigation-bar-active-size);
   border-radius: 999px;
   background: var(--mobile-navigation-bar-green);
-  color: #ffffff;
+  color: #fff;
   place-items: center;
   transform: translateX(-50%);
   transition: left 220ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 180ms ease;

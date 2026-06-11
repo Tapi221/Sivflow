@@ -21,14 +21,14 @@
       <stop offset="1" stop-color="#effcff" />
     </linearGradient>
     <radialGradient id="sivflowOfficialTopGlow" cx="79%" cy="12%" r="48%">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.78" />
+      <stop offset="0" stop-color="#fff" stop-opacity="0.78" />
       <stop offset="0.35" stop-color="#b9efff" stop-opacity="0.36" />
-      <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+      <stop offset="1" stop-color="#fff" stop-opacity="0" />
     </radialGradient>
     <radialGradient id="sivflowOfficialBottomGlow" cx="78%" cy="76%" r="46%">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.5" />
+      <stop offset="0" stop-color="#fff" stop-opacity="0.5" />
       <stop offset="0.44" stop-color="#6edcff" stop-opacity="0.2" />
-      <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
+      <stop offset="1" stop-color="#fff" stop-opacity="0" />
     </radialGradient>
     <filter id="sivflowOfficialShadow" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
       <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#001a38" flood-opacity="0.12" />

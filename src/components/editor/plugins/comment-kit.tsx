@@ -18,24 +18,24 @@ type CommentConfig = ExtendConfig<
 
 const commentPlugin = toTPlatePlugin<CommentConfig>(BaseCommentPlugin, { handlers: { onClick: ({ api, event, setOption, type }) => { const activeTarget = getDiscussionClickTarget({ selector: `.slate-${type}`, target: event.target });
 
-      if (!activeTarget) {
-        setOption("activeId", null);
-        return;
-      }
+  if (!activeTarget) {
+    setOption("activeId", null);
+    return;
+  }
 
-      const commentEntry = api.comment?.node();
+  const commentEntry = api.comment?.node();
 
-      setOption(
-        "activeId",
-        commentEntry ? (api.comment?.nodeId(commentEntry[0]) ?? null) : null,
-      );
-    },
-  },
-  options: {
-    activeId: null,
-    commentingBlock: null,
-    hoverId: null,
-  },
+  setOption(
+    "activeId",
+    commentEntry ? (api.comment?.nodeId(commentEntry[0]) ?? null) : null,
+  );
+},
+},
+options: {
+  activeId: null,
+  commentingBlock: null,
+  hoverId: null,
+},
 })
   .extendTransforms(
     ({

@@ -22,81 +22,81 @@ interface UseCardSetViewActionsOptions {
 
 const useCardSetViewActions = ({ cardSetId, cardSetById, selectedCardSet, selectedCard, currentCard, createCard, updateCard, toastError, beginGlobalEditing, setPendingFocusCardId, clearFlippedCards }: UseCardSetViewActionsOptions) => { const createAndFocusCard = useCallback(async (): Promise<boolean> => { const { targetCardSetId, targetFolderId } = resolveCardMutationTarget({ cardSetId, cardSetById, selectedCardSet, selectedCard, currentCard });
 
-    if (!targetCardSetId) {
-      toastError("新規カードの追加先カードセットが見つかりません");
-      return false;
-    }
+  if (!targetCardSetId) {
+    toastError("新規カードの追加先カードセットが見つかりません");
+    return false;
+  }
 
-    try {
-      clearFlippedCards();
-      beginGlobalEditing();
-
-      const createdId = await createAndFocusCardUseCase({
-        targetCardSetId,
-        targetFolderId,
-        createCard,
-      });
-
-      if (!createdId) {
-        toastError("新規カードの作成結果を取得できませんでした");
-        return false;
-      }
-
-      setPendingFocusCardId(createdId);
-
-      return true;
-    } catch (error) {
-      console.error("[CardSetView] Failed to create new card:", error);
-      toastError(
-        error instanceof Error
-          ? error.message
-          : "新規カードの作成に失敗しました",
-      );
-      return false;
-    }
-  }, [
-    beginGlobalEditing,
-    cardSetId,
-    clearFlippedCards,
-    createCard,
-    currentCard,
-    cardSetById,
-    selectedCard,
-    selectedCardSet,
-    setPendingFocusCardId,
-    toastError,
-  ]);
-
-  const handleEdit = useCallback(() => {
+  try {
+    clearFlippedCards();
     beginGlobalEditing();
-  }, [beginGlobalEditing]);
 
-  const handleToggleUncertainty = useCallback(
-    async (card: Card) => {
-      await toggleCardUncertainty({
-        card,
-        updateCard,
-      });
-    },
-    [updateCard],
-  );
+    const createdId = await createAndFocusCardUseCase({
+      targetCardSetId,
+      targetFolderId,
+      createCard,
+    });
 
-  const handleToggleBookmark = useCallback(
-    async (card: Card) => {
-      await toggleCardBookmark({
-        card,
-        updateCard,
-      });
-    },
-    [updateCard],
-  );
+    if (!createdId) {
+      toastError("新規カードの作成結果を取得できませんでした");
+      return false;
+    }
 
-  return {
-    createAndFocusCard,
-    handleEdit,
-    handleToggleUncertainty,
-    handleToggleBookmark,
-  };
+    setPendingFocusCardId(createdId);
+
+    return true;
+  } catch (error) {
+    console.error("[CardSetView] Failed to create new card:", error);
+    toastError(
+      error instanceof Error
+        ? error.message
+        : "新規カードの作成に失敗しました",
+    );
+    return false;
+  }
+}, [
+  beginGlobalEditing,
+  cardSetId,
+  clearFlippedCards,
+  createCard,
+  currentCard,
+  cardSetById,
+  selectedCard,
+  selectedCardSet,
+  setPendingFocusCardId,
+  toastError,
+]);
+
+const handleEdit = useCallback(() => {
+  beginGlobalEditing();
+}, [beginGlobalEditing]);
+
+const handleToggleUncertainty = useCallback(
+  async (card: Card) => {
+    await toggleCardUncertainty({
+      card,
+      updateCard,
+    });
+  },
+  [updateCard],
+);
+
+const handleToggleBookmark = useCallback(
+  async (card: Card) => {
+    await toggleCardBookmark({
+      card,
+      updateCard,
+    });
+  },
+  [updateCard],
+);
+
+return {
+  createAndFocusCard,
+  handleEdit,
+  handleToggleUncertainty,
+  handleToggleBookmark,
+};
 };
 
 export { useCardSetViewActions };

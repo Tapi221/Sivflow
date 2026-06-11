@@ -48,7 +48,7 @@ const createEvent = (calendarId: string, accountId?: string): GoogleCalendarEven
   id: `${accountId ?? "local"}:${calendarId}:event`,
   accountId,
   calendarId,
-  accentColor: "#999999",
+  accentColor: "#999",
   title: "event",
   startsAt: new Date(2026, 0, 1),
   endsAt: new Date(2026, 0, 1, 1),
@@ -57,9 +57,9 @@ const createEvent = (calendarId: string, accountId?: string): GoogleCalendarEven
 
 describe("createCalendarYearEventDisplayResolver", () => {
   it("プロジェクトに紐づく予定はカレンダー予定より優先し、プロジェクト色を使う", () => {
-    const topProject = createProject("project-top", "Top", "#111111");
-    const linkedProject = createProject("project-linked", "Linked", "#222222");
-    const calendar = createCalendar("calendar-linked", "Linked", "#999999");
+    const topProject = createProject("project-top", "Top", "#111");
+    const linkedProject = createProject("project-linked", "Linked", "#222");
+    const calendar = createCalendar("calendar-linked", "Linked", "#999");
     const account = createAccount("account", [calendar]);
     const resolver = createCalendarYearEventDisplayResolver({
       appProjects: [topProject, linkedProject],
@@ -75,8 +75,8 @@ describe("createCalendarYearEventDisplayResolver", () => {
   });
 
   it("複数のプロジェクト予定では sidebar の上にあるプロジェクトを優先する", () => {
-    const topProject = createProject("project-top", "Top", "#111111");
-    const bottomProject = createProject("project-bottom", "Bottom", "#222222");
+    const topProject = createProject("project-top", "Top", "#111");
+    const bottomProject = createProject("project-bottom", "Bottom", "#222");
     const resolver = createCalendarYearEventDisplayResolver({
       appProjects: [topProject, bottomProject],
       projectCalendarLinks: [],

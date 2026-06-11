@@ -51,50 +51,50 @@ const resetStartupTasks = async (): Promise<void> => { return Promise.resolve();
 };
 const runStartupTasks = async ({ userId, isDisposed = isDisposedDefault }: RunStartupTasksParams): Promise<void> => { try { const { migrateLegacyImagesToAssets } = await import("./MigrateLegacyImagesToAssets");
 
-    const migrationSummary = await migrateLegacyImagesToAssets({ userId });
+  const migrationSummary = await migrateLegacyImagesToAssets({ userId });
 
-    if (isDisposed()) {
-      return;
-    }
-
-    console.log(
-      "[レガシー画像移行] 起動時移行が完了しました",
-      migrationSummary,
-    );
-
-    const didBackup = await performAutoBackupUseCase.execute(userId);
-
-    if (isDisposed()) {
-      return;
-    }
-
-    if (didBackup) {
-      console.log("起動時の自動バックアップが完了しました");
-    }
-
-    const syncService = await SyncServiceFactory.getInstance(userId);
-
-    if (isDisposed()) {
-      return;
-    }
-
-    console.log("[同期] 起動時同期を開始しました");
-    await syncService.performStartupSync();
-
-    if (isDisposed()) {
-      return;
-    }
-
-    const report = await checkDataIntegrityUseCase.execute();
-
-    if (isDisposed()) {
-      return;
-    }
-
-    logIntegrityReport(report);
-  } catch (error) {
-    console.error("[重大] 起動時タスクに失敗しました:", sanitizeForLog(error));
+  if (isDisposed()) {
+    return;
   }
+
+  console.log(
+    "[レガシー画像移行] 起動時移行が完了しました",
+    migrationSummary,
+  );
+
+  const didBackup = await performAutoBackupUseCase.execute(userId);
+
+  if (isDisposed()) {
+    return;
+  }
+
+  if (didBackup) {
+    console.log("起動時の自動バックアップが完了しました");
+  }
+
+  const syncService = await SyncServiceFactory.getInstance(userId);
+
+  if (isDisposed()) {
+    return;
+  }
+
+  console.log("[同期] 起動時同期を開始しました");
+  await syncService.performStartupSync();
+
+  if (isDisposed()) {
+    return;
+  }
+
+  const report = await checkDataIntegrityUseCase.execute();
+
+  if (isDisposed()) {
+    return;
+  }
+
+  logIntegrityReport(report);
+} catch (error) {
+  console.error("[重大] 起動時タスクに失敗しました:", sanitizeForLog(error));
+}
 };
 
 export { resetStartupTasks, runStartupTasks };

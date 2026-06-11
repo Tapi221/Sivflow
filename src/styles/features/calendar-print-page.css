@@ -24,12 +24,12 @@
       height: auto !important;
       min-height: 0 !important;
       overflow: visible !important;
-      background: #ffffff !important;
+      background: #fff !important;
     }
 
     body.calendar-printing {
       margin: 0 !important;
-      background: #ffffff !important;
+      background: #fff !important;
     }
 
     body.calendar-printing #root {
@@ -44,7 +44,7 @@
       overflow: visible !important;
       pointer-events: auto !important;
       visibility: visible !important;
-      background: #ffffff !important;
+      background: #fff !important;
     }
 
     body.calendar-printing .calendar-print-range-view {
@@ -52,7 +52,7 @@
       width: 100% !important;
       min-height: 0 !important;
       padding: 10mm !important;
-      background: #ffffff !important;
+      background: #fff !important;
       color: #1c1c1e !important;
       print-color-adjust: exact;
       -webkit-print-color-adjust: exact;
@@ -90,7 +90,7 @@
       overflow: hidden;
       border: 0.5px solid #d8dce2;
       border-radius: 3mm;
-      background: #ffffff;
+      background: #fff;
       padding: 2mm;
       print-color-adjust: exact;
       -webkit-print-color-adjust: exact;

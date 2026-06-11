@@ -300,7 +300,7 @@ const SplitDaySectionComponent = ({ day, onSelectDate }: SplitDaySectionProps) =
 
   return (
     <section className="grid h-full grid-cols-2" aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}>
-      <div className="h-full min-h-0 min-w-0 border-r border-[#eeeeee] px-4">
+      <div className="h-full min-h-0 min-w-0 border-r border-[#eee] px-4">
         <div className="grid grid-cols-[58px_minmax(0,1fr)] gap-2">
           <SplitDayDateButton day={day} onSelectDate={onSelectDate} />
           <div className="space-y-1.5 overflow-hidden">
@@ -321,7 +321,7 @@ const SplitDaySectionComponent = ({ day, onSelectDate }: SplitDaySectionProps) =
             ))}
             {day.segments.length === 0 ? <div className="text-[13px] font-semibold text-[#8e8e93]">時間指定なし</div> : null}
           </div>
-          <div className="mx-auto flex aspect-square w-full max-w-[180px] items-center justify-center rounded-full border border-[#eeeeee]" style={{ background: buildConicGradient(day.segments) }}>
+          <div className="mx-auto flex aspect-square w-full max-w-[180px] items-center justify-center rounded-full border border-[#eee]" style={{ background: buildConicGradient(day.segments) }}>
             <div className="flex h-[44%] w-[44%] items-center justify-center rounded-full bg-white text-[12px] font-semibold text-[#3a3a3c] shadow-sm">{hours}h</div>
           </div>
         </div>

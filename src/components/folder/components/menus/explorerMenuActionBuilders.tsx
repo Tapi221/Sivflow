@@ -65,13 +65,13 @@ const buildRenameDeleteMenuActions = ({ renameLabel = "名前を変更", deleteL
   return actions;
 };
 const buildEntityRenameDeleteMenuActions = ({ id, name, type, beforeRename, closeMenu, setEditingId, setEditingName, canRename = true, onDelete, renameLabel = "名前を変更", deleteLabel = "削除" }: BuildEntityRenameDeleteMenuActionsParams): MenuAction[] => buildRenameDeleteMenuActions({ renameLabel, deleteLabel, onRename: canRename ? () => { beginInlineRename({ id, name, closeMenu, setEditingId, setEditingName, beforeStart: beforeRename });
+}
+  : undefined,
+onDelete: onDelete
+  ? () => {
+    onDelete(id, type);
   }
-    : undefined,
-  onDelete: onDelete
-    ? () => {
-      onDelete(id, type);
-    }
-    : undefined,
+  : undefined,
 });
 /**
  * フォルダ用コンテキストメニューのアクション定義をビルド
@@ -130,56 +130,56 @@ const buildFolderMenuActions = ({ onCreateSubfolder, onCreateCardSet, onRename, 
  * 追加ボタン（＋）メニューのアクション定義をビルド
  */
 const buildExplorerCreateMenuActions = ({ canCreateCardSet = false, canCreateCard = false, canAddDocuments = false, canBulkImport = false, onCreateRootFolder, onCreateCardSet, onCreateCard, onAddDocument, onBulkImport }: BuildExplorerCreateMenuActionsParams): MenuAction[] => { const actions: MenuAction[] = [{ id: "create-root-folder", label: "新規プロジェクト", icon: <CreateFolderIcon />, onSelect: () => { void onCreateRootFolder?.();
+},
+},
+];
+
+if (canCreateCardSet) {
+  actions.push({
+    id: "create-card-set",
+    label: "新規カードセット",
+    icon: <CreateCardSetIcon />,
+    onSelect: () => {
+      void onCreateCardSet?.();
     },
-  },
-  ];
+  });
+}
 
-  if (canCreateCardSet) {
-    actions.push({
-      id: "create-card-set",
-      label: "新規カードセット",
-      icon: <CreateCardSetIcon />,
-      onSelect: () => {
-        void onCreateCardSet?.();
-      },
-    });
-  }
+if (canCreateCard) {
+  actions.push({
+    id: "create-card",
+    label: "新規暗記カード",
+    icon: <CreateCardIcon />,
+    onSelect: () => {
+      void onCreateCard?.();
+    },
+  });
+}
 
-  if (canCreateCard) {
-    actions.push({
-      id: "create-card",
-      label: "新規暗記カード",
-      icon: <CreateCardIcon />,
-      onSelect: () => {
-        void onCreateCard?.();
-      },
-    });
-  }
+if (canAddDocuments) {
+  actions.push({
+    id: "add-document",
+    label: "文書追加",
+    icon: <AddDocumentIcon />,
+    onSelect: () => {
+      void onAddDocument?.();
+    },
+  });
+}
 
-  if (canAddDocuments) {
-    actions.push({
-      id: "add-document",
-      label: "文書追加",
-      icon: <AddDocumentIcon />,
-      onSelect: () => {
-        void onAddDocument?.();
-      },
-    });
-  }
+if (canBulkImport) {
+  actions.push({
+    id: "bulk-import",
+    label: "一括インポート",
+    icon: <BulkImportIcon />,
+    separatorBefore: true,
+    onSelect: () => {
+      void onBulkImport?.();
+    },
+  });
+}
 
-  if (canBulkImport) {
-    actions.push({
-      id: "bulk-import",
-      label: "一括インポート",
-      icon: <BulkImportIcon />,
-      separatorBefore: true,
-      onSelect: () => {
-        void onBulkImport?.();
-      },
-    });
-  }
-
-  return actions;
+return actions;
 };
 
 export { buildRenameDeleteMenuActions, buildEntityRenameDeleteMenuActions, buildFolderMenuActions, buildExplorerCreateMenuActions };

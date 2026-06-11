@@ -9,12 +9,12 @@ const normalizePathname = (pathname: string): string => {
   return normalized || "/";
 };
 const resolveLibraryTypeFromPathname = (pathname: string): LibraryContentType | null => { switch (normalizePathname(pathname)) { case LIBRARY_PDF_PATH: return "pdf";
-    case LIBRARY_FLASHCARD_PATH:
-    case "/library/flashcards":
-      return "flashcards";
-    default:
-      return null;
-  }
+  case LIBRARY_FLASHCARD_PATH:
+  case "/library/flashcards":
+    return "flashcards";
+  default:
+    return null;
+}
 };
 const resolveLibraryTypeFromSearchParams = (searchParams: URLSearchParams): LibraryContentType | null => { const libraryType = searchParams.get("libraryType");
 

@@ -146,67 +146,67 @@ const cleanupSyncErrorsBestEffort = async (
 };
 const createHardDeleteOrphanedCardsUseCase = () => { const execute = async (userId: string, report: IntegrityReport): Promise<HardDeleteOrphanedCardsResult> => { const targetCardIds = dedupe(report.issues.filter(isInvalidFolderRefCardIssue).map((issue) => issue.entityId).filter((cardId) => cardId.trim().length > 0));
 
-    if (targetCardIds.length === 0) {
-      return {
-        targetCardIds: [],
-        deletedCardIds: [],
-        failedCardIds: [],
-        skippedCardIds: [],
-        deletedRemoteCardIds: [],
-        localCleanupTotals: createEmptyTotals(),
-      };
-    }
-
-    const deletedCardIds: string[] = [];
-    const failedCardIds: string[] = [];
-    const skippedCardIds: string[] = [];
-    const deletedRemoteCardIds: string[] = [];
-    let localCleanupTotals = createEmptyTotals();
-
-    for (const cardId of targetCardIds) {
-      try {
-        const db = await getLocalDb(userId);
-        const currentCard = await db.cards.get(cardId);
-
-        if (!currentCard) {
-          skippedCardIds.push(cardId);
-          continue;
-        }
-
-        await deleteRemoteCard(userId, cardId);
-        deletedRemoteCardIds.push(cardId);
-
-        const cleanupTotals = await cleanupLocalCardReferences(db, cardId);
-        const deletedSyncErrors = await cleanupSyncErrorsBestEffort(db, cardId);
-
-        localCleanupTotals = mergeTotals(localCleanupTotals, {
-          ...cleanupTotals,
-          syncErrors: deletedSyncErrors,
-        });
-
-        deletedCardIds.push(cardId);
-      } catch (error) {
-        failedCardIds.push(cardId);
-        console.error(
-          "[Integrity] hard delete orphaned card failed",
-          sanitizeForLog({ userId, cardId, error }),
-        );
-      }
-    }
-
+  if (targetCardIds.length === 0) {
     return {
-      targetCardIds,
-      deletedCardIds,
-      failedCardIds,
-      skippedCardIds,
-      deletedRemoteCardIds,
-      localCleanupTotals,
+      targetCardIds: [],
+      deletedCardIds: [],
+      failedCardIds: [],
+      skippedCardIds: [],
+      deletedRemoteCardIds: [],
+      localCleanupTotals: createEmptyTotals(),
     };
-  };
+  }
+
+  const deletedCardIds: string[] = [];
+  const failedCardIds: string[] = [];
+  const skippedCardIds: string[] = [];
+  const deletedRemoteCardIds: string[] = [];
+  let localCleanupTotals = createEmptyTotals();
+
+  for (const cardId of targetCardIds) {
+    try {
+      const db = await getLocalDb(userId);
+      const currentCard = await db.cards.get(cardId);
+
+      if (!currentCard) {
+        skippedCardIds.push(cardId);
+        continue;
+      }
+
+      await deleteRemoteCard(userId, cardId);
+      deletedRemoteCardIds.push(cardId);
+
+      const cleanupTotals = await cleanupLocalCardReferences(db, cardId);
+      const deletedSyncErrors = await cleanupSyncErrorsBestEffort(db, cardId);
+
+      localCleanupTotals = mergeTotals(localCleanupTotals, {
+        ...cleanupTotals,
+        syncErrors: deletedSyncErrors,
+      });
+
+      deletedCardIds.push(cardId);
+    } catch (error) {
+      failedCardIds.push(cardId);
+      console.error(
+        "[Integrity] hard delete orphaned card failed",
+        sanitizeForLog({ userId, cardId, error }),
+      );
+    }
+  }
 
   return {
-    execute,
+    targetCardIds,
+    deletedCardIds,
+    failedCardIds,
+    skippedCardIds,
+    deletedRemoteCardIds,
+    localCleanupTotals,
   };
+};
+
+return {
+  execute,
+};
 };
 
 export { createHardDeleteOrphanedCardsUseCase };

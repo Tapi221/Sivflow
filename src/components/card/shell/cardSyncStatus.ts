@@ -11,14 +11,14 @@ type CardSyncStatusSnapshot = Readonly<{ lastSyncedAtMs: number | null;
 }>;
 
 const toCardSyncStatusSnapshot = (status: CardSyncStatus | null): CardSyncStatusSnapshot | null => { if (!status) { return null;
-  }
+}
 
-  return {
-    lastSyncedAtMs: status.lastSyncedAtMs,
-    hasError: status.hasError,
-    isRetrying: status.isRetrying,
-    canRetry: status.retry != null,
-  };
+return {
+  lastSyncedAtMs: status.lastSyncedAtMs,
+  hasError: status.hasError,
+  isRetrying: status.isRetrying,
+  canRetry: status.retry != null,
+};
 };
 const areCardSyncStatusSnapshotsEqual = (left: CardSyncStatusSnapshot | null, right: CardSyncStatusSnapshot | null): boolean => left?.lastSyncedAtMs === right?.lastSyncedAtMs && left?.hasError === right?.hasError && left?.isRetrying === right?.isRetrying && left?.canRetry === right?.canRetry;
 

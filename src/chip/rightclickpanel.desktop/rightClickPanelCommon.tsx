@@ -26,7 +26,7 @@ const RIGHT_CLICK_PANEL_COMMON_STYLE = `
   padding: ${RIGHT_CLICK_PANEL_SURFACE_PADDING}px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 8px;
-  background: #ffffff;
+  background: #fff;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
   contain: layout paint style;
   overflow: hidden;
@@ -55,7 +55,7 @@ const RIGHT_CLICK_PANEL_COMMON_STYLE = `
 
 .right-click-panel-item:not(:disabled):hover,
 .right-click-panel-item:not(:disabled):focus-visible {
-  background: #eeeeee;
+  background: #eee;
   outline: none;
 }
 

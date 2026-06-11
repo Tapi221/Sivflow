@@ -89,43 +89,43 @@ const loadXlsxImportFile = async (file: File): Promise<LoadXlsxImportFileResult>
   };
 };
 const executeXlsxImport = async ({ folderId, file, result, destinationMode, newCardSetName, selectedExistingCardSet, createCardSet, createCard }: ExecuteXlsxImportParams): Promise<ExecuteXlsxImportResult> => { if (!folderId) { return { ok: false, errorMessage: "インポート先フォルダが選択されていません。" };
-  }
+}
 
-  if (!file || !result?.payload) {
-    return {
-      ok: false,
-      errorMessage: "先に有効な XLSX ファイルを読み込んでください。",
-    };
-  }
-
-  if (hasImportBlockingError(result)) {
-    return {
-      ok: false,
-      errorMessage: "エラーが残っているためインポートできません。",
-    };
-  }
-
-  const destination = resolveImportDestination({
-    destinationMode,
-    newCardSetName,
-    selectedExistingCardSet,
-  });
-
-  if (!destination.ok) {
-    return destination;
-  }
-
+if (!file || !result?.payload) {
   return {
-    ok: true,
-    value: await importCardsFromPayload({
-      payload: result.payload,
-      folderId,
-      fileName: file.name,
-      createCardSet,
-      createCard,
-      destination: destination.value,
-    }),
+    ok: false,
+    errorMessage: "先に有効な XLSX ファイルを読み込んでください。",
   };
+}
+
+if (hasImportBlockingError(result)) {
+  return {
+    ok: false,
+    errorMessage: "エラーが残っているためインポートできません。",
+  };
+}
+
+const destination = resolveImportDestination({
+  destinationMode,
+  newCardSetName,
+  selectedExistingCardSet,
+});
+
+if (!destination.ok) {
+  return destination;
+}
+
+return {
+  ok: true,
+  value: await importCardsFromPayload({
+    payload: result.payload,
+    folderId,
+    fileName: file.name,
+    createCardSet,
+    createCard,
+    destination: destination.value,
+  }),
+};
 };
 
 export { loadXlsxImportFile, executeXlsxImport };

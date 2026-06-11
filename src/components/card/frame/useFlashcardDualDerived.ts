@@ -100,23 +100,23 @@ const buildSideSnapshot = ({
 };
 const useFlashcardDualDerived = (cardData: FlashcardCardLike | null | undefined) => { return React.useMemo<FlashcardDualDerivedSnapshot>(() => { const cardId = cardData ? resolveCardId(cardData) : null;
 
-    return {
+  return {
+    cardId,
+    hasUncertainty: cardData ? resolveHasUncertainty(cardData) : false,
+    isBookmarked: cardData ? resolveIsBookmarked(cardData) : false,
+    layoutRows: cardData ? resolveLayoutRows(cardData) : 0,
+    question: buildSideSnapshot({
+      cardData,
       cardId,
-      hasUncertainty: cardData ? resolveHasUncertainty(cardData) : false,
-      isBookmarked: cardData ? resolveIsBookmarked(cardData) : false,
-      layoutRows: cardData ? resolveLayoutRows(cardData) : 0,
-      question: buildSideSnapshot({
-        cardData,
-        cardId,
-        side: "question",
-      }),
-      answer: buildSideSnapshot({
-        cardData,
-        cardId,
-        side: "answer",
-      }),
-    };
-  }, [cardData]);
+      side: "question",
+    }),
+    answer: buildSideSnapshot({
+      cardData,
+      cardId,
+      side: "answer",
+    }),
+  };
+}, [cardData]);
 };
 
 export { useFlashcardDualDerived };

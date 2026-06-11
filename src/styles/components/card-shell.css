@@ -176,7 +176,7 @@
   }
 
   .premium-paper-depth {
-    background: #ffffff;
+    background: #fff;
     border: 1px solid var(--card-border-default, rgba(15, 23, 42, 0.08));
     position: relative;
     box-shadow:

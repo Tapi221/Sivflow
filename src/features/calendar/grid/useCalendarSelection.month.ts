@@ -6,7 +6,7 @@ type CalendarSelection = { selectedKey: string;
 };
 
 const useCalendarSelection = (selectedDate: Date, today: Date): CalendarSelection => { return useMemo(() => { return { selectedKey: toDateKey(selectedDate), todayKey: toDateKey(today) };
-  }, [selectedDate, today]);
+}, [selectedDate, today]);
 };
 
 export { useCalendarSelection };

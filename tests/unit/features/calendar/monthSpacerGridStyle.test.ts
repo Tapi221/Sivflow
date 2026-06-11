@@ -46,7 +46,7 @@ describe("month calendar spacer grid style", () => {
     expect(spacerRule).toContain("var(--calendar-month-spacer-column-width)");
     expect(spacerRule).toContain("var(--calendar-month-spacer-line-width)");
     expect(spacerRule).toContain("var(--calendar-month-spacer-line-color)");
-    expect(spacerRule).not.toContain("#eeeeee");
+    expect(spacerRule).not.toContain("#eee");
     expect(spacerRule).not.toContain(" 1px");
   });
 });

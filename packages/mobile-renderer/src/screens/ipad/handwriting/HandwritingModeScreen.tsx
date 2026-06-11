@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     fontWeight: "800",
   },
   container: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#fff",
     flex: 1,
     gap: 16,
     padding: 20,

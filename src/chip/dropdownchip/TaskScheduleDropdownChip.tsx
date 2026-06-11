@@ -136,9 +136,9 @@ const MultiSelectDropdown = ({ value, onChange, options, placeholder = "Select" 
                     transition
 
                     ${isSelected
-                      ? "bg-[#25272d] border-[#25272d]"
-                      : "bg-white"
-                    }
+                ? "bg-[#25272d] border-[#25272d]"
+                : "bg-white"
+              }
                   `}
                 />
               </button>

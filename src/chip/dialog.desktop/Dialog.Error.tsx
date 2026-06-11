@@ -81,7 +81,7 @@ const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification, onDismiss }) =>
               className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${action.primary
                 ? "bg-red-500 text-white hover:bg-red-600"
                 : "bg-slate-100 text-slate-900 hover:bg-slate-200"
-                }`}
+              }`}
             >
               {action.label}
             </button>

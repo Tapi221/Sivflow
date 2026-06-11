@@ -21,7 +21,7 @@
         "decorations": false,
         "visible": true,
         "center": true,
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#fff"
       }
     ],
     "security": {

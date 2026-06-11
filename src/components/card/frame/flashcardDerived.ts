@@ -21,54 +21,54 @@ const resolveHasUncertainty = (card: FlashcardCardLike) => { return card.has_unc
 const resolveIsBookmarked = (card: FlashcardCardLike) => { return card.is_bookmarked ?? card.isBookmarked ?? false;
 };
 const resolveQuestionText = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.blocks)) { return extractCardTextFromBlocks(card.front.blocks);
-  }
-  return card.question_text ?? card.questionText ?? "";
+}
+return card.question_text ?? card.questionText ?? "";
 };
 const resolveAnswerText = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.blocks)) { return extractCardTextFromBlocks(card.back.blocks);
-  }
-  return card.answer_text ?? card.answerText ?? "";
+}
+return card.answer_text ?? card.answerText ?? "";
 };
 const resolveQuestionImages = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.blocks)) { return card.front.blocks.filter((block) => block.type === "image").flatMap((block) => block.images ?? []);
-  }
-  return card.question_images ?? card.questionImages ?? [];
+}
+return card.question_images ?? card.questionImages ?? [];
 };
 const resolveAnswerImages = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.blocks)) { return card.back.blocks.filter((block) => block.type === "image").flatMap((block) => block.images ?? []);
-  }
-  return card.answer_images ?? card.answerImages ?? [];
+}
+return card.answer_images ?? card.answerImages ?? [];
 };
 const resolveQuestionAttachmentImages = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.attachments?.images)) { return card.front.attachments.images;
-  }
-  return card.question_images ?? card.questionImages ?? [];
+}
+return card.question_images ?? card.questionImages ?? [];
 };
 const resolveAnswerAttachmentImages = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.attachments?.images)) { return card.back.attachments.images;
-  }
-  return card.answer_images ?? card.answerImages ?? [];
+}
+return card.answer_images ?? card.answerImages ?? [];
 };
 const resolveQuestionAudios = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.blocks)) { return card.front.blocks.filter((block) => block.type === "audio").flatMap((block) => block.audios ?? []);
-  }
-  return card.question_audios ?? card.questionAudios ?? [];
+}
+return card.question_audios ?? card.questionAudios ?? [];
 };
 const resolveAnswerAudios = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.blocks)) { return card.back.blocks.filter((block) => block.type === "audio").flatMap((block) => block.audios ?? []);
-  }
-  return card.answer_audios ?? card.answerAudios ?? [];
+}
+return card.answer_audios ?? card.answerAudios ?? [];
 };
 const resolveQuestionAttachmentAudios = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.attachments?.audios)) { return card.front.attachments.audios;
-  }
-  return card.question_audios ?? card.questionAudios ?? [];
+}
+return card.question_audios ?? card.questionAudios ?? [];
 };
 const resolveAnswerAttachmentAudios = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.attachments?.audios)) { return card.back.attachments.audios;
-  }
-  return card.answer_audios ?? card.answerAudios ?? [];
+}
+return card.answer_audios ?? card.answerAudios ?? [];
 };
 const resolveQuestionCode = (card: FlashcardCardLike) => { if (Array.isArray(card.front?.blocks)) { const codeBlock = card.front.blocks.find((block) => block.type === "code");
-    if (codeBlock?.type === "code") return codeBlock.code ?? null;
-  }
-  return card.questionCode ?? card.question_code ?? null;
+  if (codeBlock?.type === "code") return codeBlock.code ?? null;
+}
+return card.questionCode ?? card.question_code ?? null;
 };
 const resolveAnswerCode = (card: FlashcardCardLike) => { if (Array.isArray(card.back?.blocks)) { const codeBlock = card.back.blocks.find((block) => block.type === "code");
-    if (codeBlock?.type === "code") return codeBlock.code ?? null;
-  }
-  return card.answerCode ?? card.answer_code ?? null;
+  if (codeBlock?.type === "code") return codeBlock.code ?? null;
+}
+return card.answerCode ?? card.answer_code ?? null;
 };
 // ---------------------------------------------------------------------------
 // Layout rows

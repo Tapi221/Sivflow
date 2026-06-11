@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   },
   monthItem: {
     alignItems: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#fff",
     paddingBottom: 12,
     paddingHorizontal: 16,
     paddingTop: 12,
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   selectedDayText: {
-    color: "#ffffff",
+    color: "#fff",
   },
   todayDayText: {
     color: "#3478f6",
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   yearSection: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#fff",
     minWidth: 0,
   },
 });
