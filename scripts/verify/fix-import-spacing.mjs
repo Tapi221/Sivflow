@@ -7,6 +7,28 @@ const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 const ORDER_EXCLUDED_PATH_PARTS = ["/tests/", "/scripts/", "/src/sandbox/"];
 const ORDER_EXCLUDED_FILE_SUFFIXES = [".d.ts"];
+const FORMAT_OPTIONS = {
+  convertTabsToSpaces: true,
+  indentSize: 2,
+  insertSpaceAfterCommaDelimiter: true,
+  insertSpaceAfterConstructor: false,
+  insertSpaceAfterFunctionKeywordForAnonymousFunctions: true,
+  insertSpaceAfterKeywordsInControlFlowStatements: true,
+  insertSpaceAfterOpeningAndBeforeClosingEmptyBraces: false,
+  insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces: false,
+  insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces: true,
+  insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets: false,
+  insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis: false,
+  insertSpaceAfterSemicolonInForStatements: true,
+  insertSpaceAfterTypeAssertion: false,
+  insertSpaceBeforeAndAfterBinaryOperators: true,
+  insertSpaceBeforeFunctionParenthesis: false,
+  newLineCharacter: "\n",
+  placeOpenBraceOnNewLineForControlBlocks: false,
+  placeOpenBraceOnNewLineForFunctions: false,
+  semicolons: ts.SemicolonPreference.Insert,
+  tabSize: 2,
+};
 const ORDER_RANKS = {
   import: 1,
   type: 2,
@@ -40,9 +62,38 @@ const shouldFixBlockSpacing = (filePath) => {
   return !ORDER_EXCLUDED_PATH_PARTS.some((part) => relativePath.includes(part));
 };
 
-const getScriptKind = (filePath) => path.extname(filePath).endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
+const getScriptKind = (filePath) => {
+  const extension = path.extname(filePath);
+  if (extension === ".tsx") return ts.ScriptKind.TSX;
+  if (extension === ".jsx") return ts.ScriptKind.JSX;
+  if (extension === ".js" || extension === ".mjs") return ts.ScriptKind.JS;
+
+  return ts.ScriptKind.TS;
+};
 
 const createSourceFile = (filePath, source) => ts.createSourceFile(filePath, source, ts.ScriptTarget.Latest, true, getScriptKind(filePath));
+
+const createLanguageServiceHost = (filePath, source) => ({
+  fileExists: ts.sys.fileExists,
+  getCompilationSettings: () => ({ allowJs: true, jsx: ts.JsxEmit.ReactJSX }),
+  getCurrentDirectory: () => ROOT_DIR,
+  getDefaultLibFileName: (options) => ts.getDefaultLibFilePath(options),
+  getScriptFileNames: () => [filePath],
+  getScriptSnapshot: (scriptPath) => scriptPath === filePath ? ts.ScriptSnapshot.fromString(source) : undefined,
+  getScriptVersion: () => "0",
+  readDirectory: ts.sys.readDirectory,
+  readFile: ts.sys.readFile,
+});
+
+const applyFormattingEdits = (source, edits) => edits.sort((left, right) => right.span.start - left.span.start).reduce((nextSource, edit) => `${nextSource.slice(0, edit.span.start)}${edit.newText}${nextSource.slice(edit.span.start + edit.span.length)}`, source);
+
+const applyDocumentFormatting = (filePath, source) => {
+  const languageService = ts.createLanguageService(createLanguageServiceHost(filePath, source));
+  const edits = languageService.getFormattingEditsForDocument(filePath, { ...FORMAT_OPTIONS, newLineCharacter: getNewline(source) });
+
+  languageService.dispose();
+  return edits.length === 0 ? source : applyFormattingEdits(source, edits);
+};
 
 const getNewline = (source) => source.includes("\r\n") ? "\r\n" : "\n";
 
@@ -179,16 +230,18 @@ const collectTopLevelSpacingReplacements = (filePath, source, sourceFile) => {
   return replacements;
 };
 
-const applySourceConventionSpacingFix = (filePath, source) => {
+const applyTopLevelSpacingFix = (filePath, source) => {
   const sourceFile = createSourceFile(filePath, source);
   const replacements = collectTopLevelSpacingReplacements(filePath, source, sourceFile);
 
   return replacements.length === 0 ? source : applyNonOverlappingReplacements(source, replacements);
 };
 
+const applySourceConventionFix = (filePath, source) => applyTopLevelSpacingFix(filePath, applyDocumentFormatting(filePath, source));
+
 const updateFile = (filePath) => {
   const originalSource = readFileSync(filePath, "utf8");
-  const nextSource = applySourceConventionSpacingFix(filePath, originalSource);
+  const nextSource = applySourceConventionFix(filePath, originalSource);
 
   if (nextSource === originalSource) return false;
 
@@ -199,5 +252,5 @@ const updateFile = (filePath) => {
 const updatedFiles = SOURCE_DIRECTORIES.flatMap(walkSourceFiles).filter(updateFile);
 
 if (updatedFiles.length > 0) {
-  console.log(`source 規約の空行を ${updatedFiles.length} file(s) 修正しました。`);
+  console.log(`source 規約の整形を ${updatedFiles.length} file(s) 修正しました。`);
 }
