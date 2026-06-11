@@ -22,6 +22,7 @@ const KNOWN_RULE_MESSAGES = new Map([
   ["no-empty", "空のブロック文です。処理が不要な場合は理由をコメントで明示してください。"],
   ["no-var", "`var` は使用禁止です。再代入が不要なら `const`、再代入が必要なら `let` を使ってください。"],
   ["prefer-const", "再代入されない `let` は使わず、`const` を使ってください。"],
+  ["simple-import-sort/imports", "import の並び順が規約と一致していません。npm run lint:fix で自動修正してください。"],
   ["react-hooks/preserve-manual-memoization", "React Compiler が最適化をスキップしました。手動 memo 化の依存配列が推論結果と一致していません。依存配列を実際に参照している値に合わせてください。"],
 ]);
 
@@ -121,6 +122,38 @@ const translateReactCompilerMessage = (message) => {
   return `${KNOWN_RULE_MESSAGES.get("react-hooks/preserve-manual-memoization")}${dependencySuffix}`;
 };
 
+const translateReactHooksDepsMessage = (message, ruleId) => {
+  if (ruleId !== "react-hooks/exhaustive-deps") return null;
+
+  const missingSingleMatch = message.match(/^React Hook (.+) has a missing dependency: '(.+)'\. Either include it or remove the dependency array\.$/u);
+  if (missingSingleMatch) return `React Hook ${missingSingleMatch[1]} の依存配列に \`${missingSingleMatch[2]}\` が不足しています。依存配列へ追加するか、依存配列を削除してください。`;
+
+  const missingMultipleMatch = message.match(/^React Hook (.+) has missing dependencies: (.+)\. Either include them or remove the dependency array\.$/u);
+  if (missingMultipleMatch) return `React Hook ${missingMultipleMatch[1]} の依存配列に ${missingMultipleMatch[2]} が不足しています。依存配列へ追加するか、依存配列を削除してください。`;
+
+  const unnecessarySingleMatch = message.match(/^React Hook (.+) has an unnecessary dependency: '(.+)'\. Either exclude it or remove the dependency array\.$/u);
+  if (unnecessarySingleMatch) return `React Hook ${unnecessarySingleMatch[1]} の依存配列に不要な \`${unnecessarySingleMatch[2]}\` が含まれています。依存配列から除外するか、依存配列を削除してください。`;
+
+  const unnecessaryMultipleMatch = message.match(/^React Hook (.+) has unnecessary dependencies: (.+)\. Either exclude them or remove the dependency array\.$/u);
+  if (unnecessaryMultipleMatch) return `React Hook ${unnecessaryMultipleMatch[1]} の依存配列に不要な ${unnecessaryMultipleMatch[2]} が含まれています。依存配列から除外するか、依存配列を削除してください。`;
+
+  const refCleanupMatch = message.match(/^The ref value '(.+)' will likely have changed by the time this effect cleanup function runs\. If this ref points to a node rendered by React, copy '(.+)' to a variable inside the effect, and use that variable in the cleanup function\.$/u);
+  if (refCleanupMatch) return `effect の cleanup 実行時には ref 値 \`${refCleanupMatch[1]}\` が変わっている可能性があります。effect 内で変数にコピーし、cleanup ではその変数を使ってください。`;
+
+  return "React Hook の依存配列が実際に参照している値と一致していません。依存配列を修正してください。";
+};
+
+const translateConstantBinaryExpressionMessage = (message, ruleId) => {
+  if (ruleId !== "no-constant-binary-expression") return null;
+
+  if (message === "Unexpected constant nullishness on the left-hand side of a `??` expression.") return "`??` の左辺が常に nullish 判定として固定されています。不要な `??` を削除するか、式を見直してください。";
+  if (message === "Unexpected constant truthiness on the left-hand side of a `||` expression.") return "`||` の左辺が常に truthy と判定されます。不要な `||` を削除するか、式を見直してください。";
+  if (message === "Unexpected constant truthiness on the left-hand side of a `&&` expression.") return "`&&` の左辺が常に truthy と判定されます。不要な `&&` を削除するか、式を見直してください。";
+  if (message === "Unexpected constant truthiness on the left-hand side of a logical expression.") return "論理式の左辺が常に truthy と判定されます。不要な論理式を削除するか、式を見直してください。";
+
+  return "常に同じ結果になる二項式です。不要な演算を削除するか、式を見直してください。";
+};
+
 export const translateLintMessage = (message, ruleId = null) => {
   const normalizedMessage = normalizeWhitespace(message);
 
@@ -129,6 +162,8 @@ export const translateLintMessage = (message, ruleId = null) => {
     ?? translateUnusedImportMessage(normalizedMessage)
     ?? translateRestrictedPropertyMessage(normalizedMessage)
     ?? translateReactCompilerMessage(normalizedMessage)
+    ?? translateReactHooksDepsMessage(normalizedMessage, ruleId)
+    ?? translateConstantBinaryExpressionMessage(normalizedMessage, ruleId)
     ?? KNOWN_RULE_MESSAGES.get(ruleId)
     ?? translateKnownCustomMessage(normalizedMessage)
     ?? `未翻訳の lint メッセージです。原文: ${normalizedMessage}`;
