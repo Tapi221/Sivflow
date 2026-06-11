@@ -202,6 +202,97 @@ const checkStatementOrder = (filePath, source, sourceFile) => {
   return violations;
 };
 
+const isJsxTagNamed = (tagName, name) => ts.isIdentifier(tagName) && tagName.text === name;
+
+const isReactFragmentTagName = (tagName) => ts.isPropertyAccessExpression(tagName) && ts.isIdentifier(tagName.expression) && tagName.expression.text === "React" && tagName.name.text === "Fragment";
+
+const isExplicitFragmentTagName = (tagName) => isJsxTagNamed(tagName, "Fragment") || isReactFragmentTagName(tagName);
+
+const isKeyAttribute = (property) => ts.isJsxAttribute(property) && property.name.text === "key";
+
+const hasKeyAttribute = (attributes) => attributes.properties.some(isKeyAttribute);
+
+const hasOnlyKeyAttributes = (attributes) => attributes.properties.length > 0 && attributes.properties.every(isKeyAttribute);
+
+const hasNoRuntimeAttributes = (attributes) => attributes.properties.length === 0 || hasOnlyKeyAttributes(attributes);
+
+const getMeaningfulJsxChildCount = (children) => children.filter((child) => {
+  if (ts.isJsxText(child)) return child.getText().trim().length > 0;
+  if (ts.isJsxExpression(child)) return Boolean(child.expression);
+
+  return true;
+}).length;
+
+const isWithinMapCall = (node) => {
+  let current = node.parent;
+
+  while (current) {
+    if (ts.isCallExpression(current) && isPropertyAccessNamed(current.expression, "map")) return true;
+    current = current.parent;
+  }
+
+  return false;
+};
+
+const checkExplicitFragmentUsage = (filePath, sourceFile, node, tagName, attributes) => {
+  if (!isExplicitFragmentTagName(tagName)) return [];
+  if (isWithinMapCall(node) && hasKeyAttribute(attributes)) return [];
+
+  return [{
+    filePath,
+    line: getLineNumber(sourceFile, node.getStart(sourceFile)),
+    message: "Use <>...</> instead of explicit Fragment. Explicit Fragment is only allowed with key inside map.",
+  }];
+};
+
+const checkShorthandFragmentUsage = (filePath, sourceFile, node) => {
+  if (getMeaningfulJsxChildCount(node.children) > 1) return [];
+
+  return [{
+    filePath,
+    line: getLineNumber(sourceFile, node.getStart(sourceFile)),
+    message: "Do not wrap a single child in <>...</>. Return the child directly.",
+  }];
+};
+
+const checkMeaninglessDivUsage = (filePath, sourceFile, node) => {
+  const opening = node.openingElement;
+  if (!isJsxTagNamed(opening.tagName, "div")) return [];
+  if (!hasNoRuntimeAttributes(opening.attributes)) return [];
+
+  return [{
+    filePath,
+    line: getLineNumber(sourceFile, node.getStart(sourceFile)),
+    message: "Do not use a div only as a wrapper. Use <>...</> unless a real DOM node is needed.",
+  }];
+};
+
+const checkJsxWrapperConventions = (filePath, sourceFile) => {
+  const violations = [];
+
+  const visit = (node) => {
+    if (ts.isJsxElement(node)) {
+      violations.push(
+        ...checkExplicitFragmentUsage(filePath, sourceFile, node, node.openingElement.tagName, node.openingElement.attributes),
+        ...checkMeaninglessDivUsage(filePath, sourceFile, node),
+      );
+    }
+
+    if (ts.isJsxSelfClosingElement(node)) {
+      violations.push(...checkExplicitFragmentUsage(filePath, sourceFile, node, node.tagName, node.attributes));
+    }
+
+    if (ts.isJsxFragment(node)) {
+      violations.push(...checkShorthandFragmentUsage(filePath, sourceFile, node));
+    }
+
+    ts.forEachChild(node, visit);
+  };
+
+  visit(sourceFile);
+  return violations;
+};
+
 const checkSourceFile = (filePath) => {
   const source = readFileSync(filePath, "utf8");
   const scriptKind = path.extname(filePath).endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
@@ -213,7 +304,7 @@ const checkSourceFile = (filePath) => {
     return [...checkSingleLineImportExport(filePath, sourceFile, node), ...checkModuleSpecifier(filePath, sourceFile, node, specifier)];
   });
 
-  return [...importViolations, ...checkStatementOrder(filePath, source, sourceFile)];
+  return [...importViolations, ...checkStatementOrder(filePath, source, sourceFile), ...checkJsxWrapperConventions(filePath, sourceFile)];
 };
 
 const formatViolation = ({ filePath, line, message }) => `${toPosix(path.relative(ROOT_DIR, filePath))}:${line} ${message}`;
