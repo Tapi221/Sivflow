@@ -1,6 +1,10 @@
 import type { ComponentType, CSSProperties } from "react";
 import type { PdfDashboardRow } from "@/features/library-pdf/model/pdfLibraryRow";
 
+
+
+
+
 type IconBadgeTone = "slate" | "green" | "violet" | "blue" | "rose";
 type IconBadgeComponent = ComponentType<{
   label: string;
@@ -14,11 +18,19 @@ type PdfLibraryContinueSectionProps = {
   IconBadge: IconBadgeComponent;
 };
 
+
+
+
+
 const dateTimeTextStyle: CSSProperties = {
   fontFamily:
     "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Hiragino Sans\", \"Noto Sans JP\", system-ui, sans-serif",
   fontVariantNumeric: "tabular-nums",
 };
+
+
+
+
 
 const PdfLibraryContinueSection = ({ cardClassName, continueRows, formatDateTime, onSelectDocument, IconBadge }: PdfLibraryContinueSectionProps) => {
   if (continueRows.length === 0) {
@@ -77,4 +89,8 @@ const PdfLibraryContinueSection = ({ cardClassName, continueRows, formatDateTime
   );
 };
 
-export { PdfLibraryContinueSection };
+
+
+
+
+export { PdfLibraryContinueSect

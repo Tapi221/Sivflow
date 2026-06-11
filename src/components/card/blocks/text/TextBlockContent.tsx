@@ -5,6 +5,10 @@ import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/co
 import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { TEXT_BLOCK_CONTENT_CLASS, TEXT_BLOCK_LINE_HEIGHT_PX } from "./textBlockStyles";
 
+
+
+
+
 type TextBlockContentProps =
   | {
     mode: "view";
@@ -19,6 +23,10 @@ type TextBlockContentProps =
     autoFocus?: boolean;
     zoom?: number;
   };
+
+
+
+
 
 const normalizeTextBlockContent = (content: string) =>
   String(content ?? "").replace(/\r\n/g, "\n");
@@ -39,6 +47,10 @@ const buildTextBlockPresentation = (zoom?: number) => {
     ),
   };
 };
+
+
+
+
 
 const TextBlockContent = (props: TextBlockContentProps) => {
   const normalizedContent = normalizeTextBlockContent(props.content);
@@ -81,5 +93,9 @@ const TextBlockContent = (props: TextBlockContentProps) => {
     />
   );
 };
+
+
+
+
 
 export { TextBlockContent };

@@ -2,12 +2,16 @@ import type { SubjectiveScore } from "@/domain/card/review/stability";
 import { normalizeMemoryStability } from "@/domain/card/review/stability";
 import { calculateRetentionProbability } from "./reviewMetrics";
 
+
+
 type StabilityPhase = { key: "unstable" | "fragile" | "growing" | "stable" | "solid";
   label: string;
   shortLabel: string;
   colorClass: string;
   calendarClass: string;
 };
+
+
 
 const PHASES: Array<{ min: number; phase: StabilityPhase; }> = [
   {
@@ -62,6 +66,8 @@ const PHASES: Array<{ min: number; phase: StabilityPhase; }> = [
   },
 ];
 
+
+
 const getStabilityPhase = (stabilityInternal: number, intervalDays: number = 1): StabilityPhase => {
   const s = normalizeMemoryStability(stabilityInternal);
   const retention = calculateRetentionProbability(s, intervalDays);
@@ -69,6 +75,10 @@ const getStabilityPhase = (stabilityInternal: number, intervalDays: number = 1):
   return matched?.phase ?? PHASES[0].phase;
 };
 
+
+
 export { normalizeMemoryStability, type SubjectiveScore };
 export { getStabilityPhase };
+
+
 export type { StabilityPhase };

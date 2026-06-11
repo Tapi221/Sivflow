@@ -14,6 +14,10 @@ import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
 import { useCalendarWeekStartSetting } from "./useCalendarWeekStartSetting";
 import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
 
+
+
+
+
 type UseScheduleScreenOptions = { allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay; };
 type UseScheduleScreenReturn = { contentViewportRef: RefObject<HTMLDivElement | null>;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
@@ -76,6 +80,10 @@ type MonthRenderedRangeSnapshot = CalendarDateRange & {
   scrollTargetToken: number;
   weekStartDay: CalendarWeekStartDay;
 };
+
+
+
+
 
 const getGoogleCalendarEventDedupeKey = (event: GoogleCalendarEvent): string => event.id;
 const isSameCalendarDateRange = (left: CalendarDateRange | null, right: CalendarDateRange): boolean => left?.start.getTime() === right.start.getTime() && left.end.getTime() === right.end.getTime();
@@ -246,5 +254,13 @@ const useScheduleScreen = ({ allowMultiSelectViewMode = true, weekStartDay }: Us
   };
 };
 
+
+
+
+
 export { useScheduleScreen };
-export type { UseScheduleScreenReturn };
+
+
+
+
+export type { UseScheduleScreenRet

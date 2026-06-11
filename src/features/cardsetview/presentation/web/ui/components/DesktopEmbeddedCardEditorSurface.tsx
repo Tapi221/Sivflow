@@ -15,6 +15,10 @@ import { CardFaceScene } from "./CardFaceScene";
 import { CardSurfaceLayout } from "./CardSurfaceLayout";
 import { buildCardSurfaceMetrics } from "./cardSurfacePresentation";
 
+
+
+
+
 type Side = "question" | "answer";
 type EditorSettings = Partial<UserSettings> | null | undefined;
 interface DesktopEmbeddedCardEditorSurfaceProps { selectedCardId: string;
@@ -53,6 +57,10 @@ type EmbeddedEditorFaceProps = Readonly<{
   onResizeEnd: () => void;
 }>;
 
+
+
+
+
 const isCardEntity = (value: unknown): value is Card =>
   typeof value === "object" &&
   value !== null &&
@@ -67,6 +75,10 @@ const measureSurfaceViewportWidth = (element: HTMLDivElement) =>
       Math.max(element.clientWidth, element.parentElement?.clientWidth ?? 0),
     ),
   );
+
+
+
+
 
 const EmbeddedEditorHeaderRight = ({
   mediaActions,
@@ -473,5 +485,13 @@ const DesktopEmbeddedCardEditorSurface = ({ selectedCardId, folderId, cardSetId,
   );
 };
 
+
+
+
+
 export { DesktopEmbeddedCardEditorSurface };
-export type { DesktopEmbeddedCardEditorSurfaceProps };
+
+
+
+
+export type { DesktopEmbeddedCardEditorSurface

@@ -2,6 +2,10 @@ import type { SyncChange } from "@/services/interfaces/ISyncService";
 import { lookupCloudSyncEntityById } from "./cloudSyncEntityLookup";
 import { requireCloudSyncFirestore } from "./cloudSyncFirestoreRefs";
 
+
+
+
+
 const pullCloudSyncFull = async (userId: string, entityIds: string[]): Promise<SyncChange[]> => {
   const results: SyncChange[] = [];
   const firestore = requireCloudSyncFirestore();
@@ -16,4 +20,8 @@ const pullCloudSyncFull = async (userId: string, entityIds: string[]): Promise<S
   return results;
 };
 
-export { pullCloudSyncFull };
+
+
+
+
+export { pullCloudSyncFull 

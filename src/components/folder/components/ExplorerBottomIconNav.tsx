@@ -3,12 +3,20 @@ import { NavLink, useLocation } from "react-router-dom";
 import { ExplorerDictionaryNavIcon, ExplorerFolderNavIcon, ExplorerQuestionNavIcon } from "@/components/explorer/ExplorerNavIcons";
 import { cn } from "@/lib/utils";
 
+
+
+
+
 type BottomNavItem = {
   to: string;
   label: string;
   matcher: RegExp;
   Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 };
+
+
+
+
 
 const NAV_ITEMS: BottomNavItem[] = [
   {
@@ -30,6 +38,10 @@ const NAV_ITEMS: BottomNavItem[] = [
     Icon: ExplorerQuestionNavIcon,
   },
 ];
+
+
+
+
 
 const ExplorerBottomIconNav = () => {
   const { pathname } = useLocation();
@@ -70,5 +82,9 @@ const ExplorerBottomIconNav = () => {
     </nav>
   );
 };
+
+
+
+
 
 export { ExplorerBottomIconNav };

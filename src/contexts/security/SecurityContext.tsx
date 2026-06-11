@@ -4,6 +4,10 @@ import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { SecurityState } from "@/services/interfaces/ISyncService";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 
+
+
+
+
 interface SecurityContextType {
   securityState: SecurityState;
   dismissSecurityAlert: (alertId: string) => Promise<void>;
@@ -11,6 +15,10 @@ interface SecurityContextType {
 interface SecurityProviderProps {
   children: ReactNode;
 }
+
+
+
+
 
 const defaultSecurityState: SecurityState = {
   isLocked: false,
@@ -22,9 +30,17 @@ const SecurityContext = createContext<SecurityContextType>({
   dismissSecurityAlert: async () => {},
 });
 
+
+
+
+
 const useSecurity = () => {
   return useContext(SecurityContext);
 };
+
+
+
+
 
 const SecurityProvider = ({ children }: SecurityProviderProps) => {
   const { currentUser } = useAuthSession();
@@ -84,4 +100,8 @@ const SecurityProvider = ({ children }: SecurityProviderProps) => {
   );
 };
 
-export { useSecurity, SecurityProvider };
+
+
+
+
+export { useSecurity, SecurityPro

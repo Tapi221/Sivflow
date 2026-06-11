@@ -2,6 +2,10 @@ import { useMemo } from "react";
 import { resolveCardTagNames } from "@/features/settings/hooks/useTags";
 import type { Card, DocumentItem } from "@/types";
 
+
+
+
+
 type TagMapLike = Parameters<typeof resolveCardTagNames>[1];
 type ContentTypeFilter = "card" | "pdf";
 interface UseTreeViewFiltersParams {
@@ -15,6 +19,10 @@ interface UseTreeViewFiltersParams {
   contentTypeFilter: ContentTypeFilter[];
   tagById: TagMapLike;
 }
+
+
+
+
 
 const useTreeViewFilters = ({ cards, documents, tagFilter, tagMatchMode, uncertaintyFilter, bookmarkedFilter, draftFilter, contentTypeFilter, tagById }: UseTreeViewFiltersParams) => {
   const isFilterActive = tagFilter.length > 0 || uncertaintyFilter !== "any" || bookmarkedFilter !== "any" || draftFilter !== "any" || contentTypeFilter.length < 2;
@@ -95,5 +103,9 @@ const useTreeViewFilters = ({ cards, documents, tagFilter, tagMatchMode, uncerta
     isFiltering,
   };
 };
+
+
+
+
 
 export { useTreeViewFilters };

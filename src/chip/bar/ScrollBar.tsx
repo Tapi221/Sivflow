@@ -2,6 +2,10 @@ import React from "react";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 
+
+
+
+
 type ScrollBarProps = { value: readonly number[];
   min: number;
   max: number;
@@ -15,6 +19,10 @@ type ScrollBarProps = { value: readonly number[];
   rangeClassName?: string;
   thumbClassName?: string;
 };
+
+
+
+
 
 const ScrollBar = React.forwardRef<HTMLInputElement, ScrollBarProps>(
   (
@@ -55,6 +63,14 @@ const ScrollBar = React.forwardRef<HTMLInputElement, ScrollBarProps>(
   },
 );
 
+
+
+
+
 ScrollBar.displayName = "ScrollBar";
 export { ScrollBar };
+
+
+
+
 export type { ScrollBarProps };

@@ -4,6 +4,10 @@ import { filterRenderableCardBlocks } from "@/components/card/blocks/shared/isRe
 import { useViewerSceneProps } from "@/components/card/blocks/shared/useViewerSceneProps";
 import type { SharedCardContentViewProps } from "./SharedCardContent.types";
 
+
+
+
+
 const SharedCardViewScene = ({ blocks, onGalleryFullscreenChange, displayMode, zoom }: SharedCardContentViewProps) => {
   const viewerProps = useViewerSceneProps({ onGalleryFullscreenChange, displayMode, zoom });
 
@@ -26,5 +30,9 @@ const SharedCardViewScene = ({ blocks, onGalleryFullscreenChange, displayMode, z
     />
   );
 };
+
+
+
+
 
 export { SharedCardViewScene };

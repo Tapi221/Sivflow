@@ -6,6 +6,10 @@ import { CardShell } from "./CardShell";
 import { CardSurface } from "./CardSurface";
 import { ScaleToFitFrame } from "./ScaleToFitFrame";
 
+
+
+
+
 type CardShellProps = React.ComponentProps<typeof CardShell>;
 interface CardFrameProps extends Omit<CardShellProps, "children" | "className" | "ref"> { children: React.ReactNode;
   baseWidth?: number;
@@ -27,6 +31,10 @@ interface CardFrameProps extends Omit<CardShellProps, "children" | "className" |
   overlay?: React.ReactNode;
   topAttachment?: React.ReactNode;
 }
+
+
+
+
 
 const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
   (
@@ -144,6 +152,14 @@ const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
   },
 );
 
+
+
+
+
 CardFrame.displayName = "CardFrame";
 export { CardFrame };
+
+
+
+
 export type { CardFrameProps };

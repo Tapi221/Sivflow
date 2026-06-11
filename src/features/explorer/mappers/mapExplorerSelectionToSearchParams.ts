@@ -1,11 +1,19 @@
 import type { SelectedExplorerItem } from "@/types";
 
+
+
+
+
 type Params = {
   isHomeOnlyMode: boolean;
   isSectionListMode: boolean;
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
 };
+
+
+
+
 
 const mapExplorerSelectionToSearchParams = ({ isHomeOnlyMode, isSectionListMode, selectedFolderId, selectedItem }: Params): URLSearchParams => {
   const next = new URLSearchParams();
@@ -35,4 +43,8 @@ const mapExplorerSelectionToSearchParams = ({ isHomeOnlyMode, isSectionListMode,
   return next;
 };
 
-export { mapExplorerSelectionToSearchParams };
+
+
+
+
+export { mapExplorerSelectionToSearchParam
