@@ -3,7 +3,8 @@ import { defineSecret } from "firebase-functions/params";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { getAdminAuth, getDb, serverTimestamp } from "#src/firebaseAdmin.js";
 import { cacheGoogleProfileImageUrl } from "#src/gcal/profileImageCache.js";
-import { classifyGoogleTokenEndpointFailure, type GoogleOAuthServerErrorReason } from "#src/gcal/tokenErrors.js";
+import { classifyGoogleTokenEndpointFailure } from "#src/gcal/tokenErrors.js";
+import type { GoogleOAuthServerErrorReason } from "#src/gcal/tokenErrors.js";
 
 
 

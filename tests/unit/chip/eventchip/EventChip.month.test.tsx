@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
-import React, { type ReactNode } from "react";
+import React from "react";
+import type { ReactNode } from "react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";

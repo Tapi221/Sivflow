@@ -1,4 +1,5 @@
-import { type SVGProps, type UIEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { SVGProps, UIEvent } from "react";
 import { addDays, addHours, format, startOfDay } from "date-fns";
 import { Switch } from "@/components/ui/switch";
 import type { GoogleAccountDisplay, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";

@@ -1,10 +1,13 @@
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
-import { readStoredAccounts, type StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
+import { readStoredAccounts } from "@/integration/googlecalendar-integration/gcal.multi-storage";
+import type { StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
 import type { UserSettings } from "@/types";
 import { Brain, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/ui/icons";
-import { getLocalAiSettings, setLocalAiSettings, type LocalAiSettings } from "@platform/ai/localAiSettings";
+import { getLocalAiSettings, setLocalAiSettings } from "@platform/ai/localAiSettings";
+import type { LocalAiSettings } from "@platform/ai/localAiSettings";
 import { testOllamaConnection } from "@platform/ai/ollamaClient";
 import "./SettingsWorkspaceScreen.css";
 

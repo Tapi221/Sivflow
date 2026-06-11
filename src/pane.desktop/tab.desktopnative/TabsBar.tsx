@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type ComponentType, type CSSProperties, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { ComponentType, CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
 import { PlusLineIcon } from "@/chip/icons/icons.schedule";
 import { ClockIcon, HomeIcon, InboxIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";

@@ -1,10 +1,9 @@
-import { type SetStateAction, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { SetStateAction } from "react";
 import { clampCardIndex, createCardSetViewSourceKey, resolveCardIndexById, resolveCardsForPager, toggleFlippedCardId } from "@/features/cardsetview/domain/cardSetViewState";
 import { useCardEntity } from "@/components/card/hooks/useCardEntity";
 import { getCardSetViewFlippedCardIds, setCardSetViewFlippedCardIds } from "@/services/cardSetViewFlippedFacePreferences";
 import type { Card } from "@/types";
-
-
 
 type KeyedNumberState = {
   sourceKey: string;
@@ -29,9 +28,8 @@ interface UseCardSetViewSelectionStateOptions {
   cardIndexById: Map<string, number>;
 }
 
-
-
-export const useCardSetViewSelectionState = ({ initialIndex, targetCardId, deviceScope, cardSetId, sortedCards, cardIndexById }: UseCardSetViewSelectionStateOptions) => { const sourceKey = useMemo(() => createCardSetViewSourceKey(cardSetId), [cardSetId]);
+export const useCardSetViewSelectionState = ({ initialIndex, targetCardId, deviceScope, cardSetId, sortedCards, cardIndexById }: UseCardSetViewSelectionStateOptions) => {
+  const sourceKey = useMemo(() => createCardSetViewSourceKey(cardSetId), [cardSetId]);
   const [currentIndexState, setCurrentIndexState] = useState<KeyedNumberState>(() => ({ sourceKey, value: null }));
   const [pendingFocusCardIdState, setPendingFocusCardIdState] = useState<KeyedStringState>(() => ({ sourceKey, value: null }));
   const [flippedCardIdsState, setFlippedCardIdsState] = useState<KeyedFlipState>(() => ({ sourceKey, ids: getCardSetViewFlippedCardIds({ deviceScope, cardSetId }) }));

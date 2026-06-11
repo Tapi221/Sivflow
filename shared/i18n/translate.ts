@@ -1,5 +1,6 @@
 import type { Locale } from "./locale.store";
-import { RAW_TRANSLATIONS, type RawTranslations } from "./translations";
+import { RAW_TRANSLATIONS } from "./translations";
+import type { RawTranslations } from "./translations";
 
 
 

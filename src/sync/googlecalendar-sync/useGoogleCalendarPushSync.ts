@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
-import { collection, onSnapshot, query, type Unsubscribe } from "firebase/firestore";
+import { collection, onSnapshot, query } from "firebase/firestore";
+import type { Unsubscribe } from "firebase/firestore";
 import { firestoreDb } from "@/services/firebase";
 
 

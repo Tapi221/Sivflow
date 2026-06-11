@@ -3,8 +3,6 @@ import { assertDeletePayload, assertUpsertPayload } from "./syncQueuePayloadGuar
 import type { SyncTask } from "@/services/interfaces/ISyncService";
 import type { SyncDirection, SyncOperationType, SyncPriority, SyncQueueItem } from "@/types/domain/sync";
 
-
-
 const normalizeForStableHash = (value: unknown): unknown => {
   if (value instanceof Date) {
     return { $date: value.toISOString() };
@@ -108,7 +106,8 @@ const createBaseQueueFields = ({
     nextRetryAt: now,
   };
 };
-export const createUpsertQueueItem = <TEntity extends UpsertEntity>({ entity, operationType, payload, priority = "high", type = "upload" }: { entity: TEntity;
+export const createUpsertQueueItem = <TEntity extends UpsertEntity>({ entity, operationType, payload, priority = "high", type = "upload" }: {
+  entity: TEntity;
   operationType: Extract<SyncOperationType, "create" | "update">;
   payload: unknown;
   priority?: SyncPriority;
@@ -131,7 +130,8 @@ export const createUpsertQueueItem = <TEntity extends UpsertEntity>({ entity, op
     payload: checkedPayload,
   } as UpsertQueueItem<TEntity>;
 };
-export const createDeleteQueueItem = ({ entity, targetId, priority = "high", type = "upload" }: { entity: DeleteEntity;
+export const createDeleteQueueItem = ({ entity, targetId, priority = "high", type = "upload" }: {
+  entity: DeleteEntity;
   targetId: string;
   priority?: SyncPriority;
   type?: SyncDirection;
@@ -153,7 +153,8 @@ export const createDeleteQueueItem = ({ entity, targetId, priority = "high", typ
     payload: deletePayload,
   };
 };
-export const createQueueItemFromSyncTask = (task: SyncTask): SyncQueueItem => { const targetId = task.targetId || getTaskPayloadId(task.payload) || "unknown";
+export const createQueueItemFromSyncTask = (task: SyncTask): SyncQueueItem => {
+  const targetId = task.targetId || getTaskPayloadId(task.payload) || "unknown";
   const operationType =
     task.operationType || (task.type === "upload" ? "update" : "create");
   const deterministicId = buildDeterministicQueueId({

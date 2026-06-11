@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { MF_CARD_FORMAT, MF_CARD_VERSION, type MfCardFileV1, MfCardValidationError } from "@/features/cardFile/domain/mfCard.types";
+import { MF_CARD_FORMAT, MF_CARD_VERSION, MfCardValidationError } from "@/features/cardFile/domain/mfCard.types";
+import type { MfCardFileV1 } from "@/features/cardFile/domain/mfCard.types";
 import { decodeMfCardFile, encodeMfCardFile } from "@/features/cardFile/infra/web/mfCardJsonCodec";
 
 const createCardFile = (): MfCardFileV1 => ({

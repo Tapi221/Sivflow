@@ -1,7 +1,8 @@
 import React from "react";
 import { CARD_SET_VIEW_EVENTS } from "@/features/cardsetview/events/cardSetViewEvents.constants";
 import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
-import { type CardSetViewEditingDraftPatch, subscribeCardSetViewWindowEvent } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
+import { subscribeCardSetViewWindowEvent } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
+import type { CardSetViewEditingDraftPatch } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 import { useCardEditorContentController } from "@/components/card/editor/useCardEditorContentController";
 import { useCardEditorSession } from "@/components/card/editor/useCardEditorSession";
 import { useCardEditorTags } from "@/components/card/editor/useCardEditorTags";
@@ -9,14 +10,13 @@ import { useLayoutRowsController } from "@/components/card/editor/useLayoutRowsC
 import { applyEditingDraftPatch, buildCardsById, createMetaPanelActions, resolveSelectedCardSnapshot } from "./cardEditorPaneControllerCore";
 import { appendSelectionCaptureBlocks, normalizeSelectionCaptureOcrText } from "@/features/selection-capture/applyCardSelectionCapture";
 import { createSelectionCaptureImageAsset } from "@/features/selection-capture/createSelectionCaptureImageAsset";
-import { CARD_SELECTION_CAPTURE_EVENT, type CardSelectionCaptureEventDetail } from "@/features/selection-capture/cardSelectionCaptureEvents";
+import { CARD_SELECTION_CAPTURE_EVENT } from "@/features/selection-capture/cardSelectionCaptureEvents";
+import type { CardSelectionCaptureEventDetail } from "@/features/selection-capture/cardSelectionCaptureEvents";
 import { useToast } from "@/contexts/ToastContext";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useCards } from "@/components/card/hooks/useCards";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { Card, CardPatch, UserSettings } from "@/types";
-
-
 
 type UseCardsResult = {
   cards: Card[];
@@ -34,9 +34,8 @@ type UseCardEditorPaneControllerParams = {
   settingsOverride?: Partial<UserSettings> | null;
 };
 
-
-
-export const useCardEditorPaneController = ({ selectedCardId, folderId, cardSetId, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, settingsOverride }: UseCardEditorPaneControllerParams) => { const { settings: settingsFromHook } = useUserSettings();
+export const useCardEditorPaneController = ({ selectedCardId, folderId, cardSetId, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, settingsOverride }: UseCardEditorPaneControllerParams) => {
+  const { settings: settingsFromHook } = useUserSettings();
   const settings = settingsOverride ?? settingsFromHook;
   const { currentUser } = useAuthSession();
   const { success: toastSuccess, error: toastError } = useToast();

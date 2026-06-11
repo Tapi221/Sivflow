@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 
 import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
 import { cn } from "@/lib/utils";
 import { isTypingTarget } from "@/utils/isTypingTarget";
-import { buildVerticalCardPagerItemStyle, resolveVerticalCardPagerItemWidthSpec, type VerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";
+import { buildVerticalCardPagerItemStyle, resolveVerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";
+import type { VerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";
 
 
 

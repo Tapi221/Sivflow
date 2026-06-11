@@ -1,7 +1,9 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
-import { readStoredAccounts, type StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
+import { readStoredAccounts } from "@/integration/googlecalendar-integration/gcal.multi-storage";
+import type { StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
 import type { UserSettings } from "@/types";
 import { ChevronRight, Globe, Keyboard, Shield, Trophy, Type, Volume2 } from "@/ui/icons";
 

@@ -11,8 +11,6 @@ import { useFlashcardMediaState } from "@/components/card/frame/useFlashcardMedi
 import type { Card } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-
-
 const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   id: card.id,
   cardId: card.cardId,
@@ -27,9 +25,8 @@ const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   inkAnswer: card.back.ink ?? null,
 });
 
-
-
-export type PreparedViewCardFaceSceneProps = Readonly<{ card: Card;
+export type PreparedViewCardFaceSceneProps = Readonly<{
+  card: Card;
   sharedDerived: FlashcardSharedDerivedSnapshot;
   sideDerived: FlashcardSideDerivedSnapshot;
   displayMode: CardDisplayMode;
@@ -47,9 +44,8 @@ export type PreparedViewCardFaceSceneProps = Readonly<{ card: Card;
   onToggleBookmark?: (card: Card) => void | Promise<void>;
 }>;
 
-
-
-export const PreparedViewCardFaceScene = ({ card, sharedDerived, sideDerived, displayMode, fixedScale, fixedHeightPx = null, contentZoom, headerIconVisualScale, previewMode, showInkLayer, drawMode = false, inkEditingEnabled, fillHeight = false, onFlip, onToggleUncertainty, onToggleBookmark }: PreparedViewCardFaceSceneProps) => { const contentRef = React.useRef<HTMLDivElement | null>(null);
+export const PreparedViewCardFaceScene = ({ card, sharedDerived, sideDerived, displayMode, fixedScale, fixedHeightPx = null, contentZoom, headerIconVisualScale, previewMode, showInkLayer, drawMode = false, inkEditingEnabled, fillHeight = false, onFlip, onToggleUncertainty, onToggleBookmark }: PreparedViewCardFaceSceneProps) => {
+  const contentRef = React.useRef<HTMLDivElement | null>(null);
 
   const flashcardCard = React.useMemo<FlashcardCardLike>(
     () => toFlashcardCardLike(card),

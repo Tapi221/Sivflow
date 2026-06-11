@@ -1,7 +1,5 @@
 import { resolveWheelZoomStepCount } from "@/shared/zoom/wheelZoomMath";
 
-
-
 type ComputeNextScaleFromWheelInput = {
   currentScale: number;
   deltaY: number;
@@ -22,20 +20,18 @@ type ResolveTrackpadDeltaYForScaleRatioInput = {
   sensitivity: number;
 };
 
-
-
 const DEFAULT_PDF_WHEEL_DELTA_PER_ZOOM_STEP = 120;
 const SIOYEK_ZOOM_INC_FACTOR = 1.2;
 
-
-
 export const normalizeScale = (value: number): number => Number(value.toFixed(3));
-export const clampScale = (value: number, minScale: number, maxScale: number): number => { const lower = Math.min(minScale, maxScale);
+export const clampScale = (value: number, minScale: number, maxScale: number): number => {
+  const lower = Math.min(minScale, maxScale);
   const upper = Math.max(minScale, maxScale);
 
   return Math.min(Math.max(value, lower), upper);
 };
-export const computeNextScaleFromWheel = ({ currentScale, deltaY, zoomStep, minScale, maxScale, deltaPerStep = DEFAULT_PDF_WHEEL_DELTA_PER_ZOOM_STEP }: ComputeNextScaleFromWheelInput): number | null => { if (!Number.isFinite(currentScale) || currentScale <= 0 || !Number.isFinite(deltaY)) return null;
+export const computeNextScaleFromWheel = ({ currentScale, deltaY, zoomStep, minScale, maxScale, deltaPerStep = DEFAULT_PDF_WHEEL_DELTA_PER_ZOOM_STEP }: ComputeNextScaleFromWheelInput): number | null => {
+  if (!Number.isFinite(currentScale) || currentScale <= 0 || !Number.isFinite(deltaY)) return null;
   const direction = Math.sign(deltaY);
   if (!direction) return null;
 
@@ -46,7 +42,8 @@ export const computeNextScaleFromWheel = ({ currentScale, deltaY, zoomStep, minS
 
   return normalizeScale(clampScale(rawNextScale, minScale, maxScale));
 };
-export const computeNextScaleFromGesture = ({ currentScale, baseScale, gestureScale, minScale, maxScale }: ComputeNextScaleFromGestureInput): number | null => { if (!Number.isFinite(currentScale)) return null;
+export const computeNextScaleFromGesture = ({ currentScale, baseScale, gestureScale, minScale, maxScale }: ComputeNextScaleFromGestureInput): number | null => {
+  if (!Number.isFinite(currentScale)) return null;
   if (!Number.isFinite(gestureScale) || gestureScale <= 0) return null;
 
   const effectiveBaseScale = typeof baseScale === "number" && Number.isFinite(baseScale) ? baseScale : currentScale;
@@ -55,7 +52,8 @@ export const computeNextScaleFromGesture = ({ currentScale, baseScale, gestureSc
 
   return normalizeScale(clampScale(rawNextScale, minScale, maxScale));
 };
-export const resolveTrackpadDeltaYForScaleRatio = ({ scaleRatio, sensitivity }: ResolveTrackpadDeltaYForScaleRatioInput): number | null => { if (!Number.isFinite(scaleRatio) || scaleRatio <= 0) return null;
+export const resolveTrackpadDeltaYForScaleRatio = ({ scaleRatio, sensitivity }: ResolveTrackpadDeltaYForScaleRatioInput): number | null => {
+  if (!Number.isFinite(scaleRatio) || scaleRatio <= 0) return null;
   if (!Number.isFinite(sensitivity) || sensitivity <= 0) return null;
 
   return -Math.log(scaleRatio) / sensitivity;

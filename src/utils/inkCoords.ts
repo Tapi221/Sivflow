@@ -1,4 +1,5 @@
-import { INK_PAPER_H, INK_PAPER_W, type InkPoint } from "@core/domain/card/ink/inkDocument";
+import { INK_PAPER_H, INK_PAPER_W } from "@core/domain/card/ink/inkDocument";
+import type { InkPoint } from "@core/domain/card/ink/inkDocument";
 
 
 

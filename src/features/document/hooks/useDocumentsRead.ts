@@ -5,8 +5,6 @@ import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/us
 import { getLocalDb } from "@/services/localdb";
 import type { DocumentItem } from "@/types";
 
-
-
 type DocumentWithLegacyDelete = DocumentItem & {
   is_deleted?: boolean;
 };
@@ -14,9 +12,8 @@ type UseDocumentsReadOptions = {
   enabled?: boolean;
 };
 
-
-
-export const useDocumentsRead = (folderId?: string, options?: UseDocumentsReadOptions) => { const { currentUser } = useAuthSession();
+export const useDocumentsRead = (folderId?: string, options?: UseDocumentsReadOptions) => {
+  const { currentUser } = useAuthSession();
   const userId = currentUser?.uid ?? null;
   const [error, setError] = useState<string | null>(null);
   const isActiveWorkspaceCardSetSelected = useWorkspaceTabsStore((state) => {

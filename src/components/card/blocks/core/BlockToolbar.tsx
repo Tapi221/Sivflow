@@ -4,11 +4,10 @@ import { overlayGlassActionButtonClassName, overlayGlassPillClassName, overlayGl
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { IconProps } from "@/ui/icons";
 import { Plus } from "@/ui/icons";
-import { type EditorBlockIconName, type EditorBlockType, getEditorBlockDefinition, parseEditorBlockSettings } from "@/lib/editorBlockSettings";
+import { getEditorBlockDefinition, parseEditorBlockSettings } from "@/lib/editorBlockSettings";
+import type { EditorBlockIconName, EditorBlockType } from "@/lib/editorBlockSettings";
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
-
-
 
 interface BlockToolbarProps {
   label: string;
@@ -26,8 +25,6 @@ type ToolbarBlockConfig = {
   orderIndex: number;
 };
 
-
-
 const areBlockToolbarPropsEqual = (
   prev: BlockToolbarProps,
   next: BlockToolbarProps,
@@ -38,8 +35,6 @@ const areBlockToolbarPropsEqual = (
   prev.hiddenBlockTypes === next.hiddenBlockTypes &&
   prev.desktopLayout === next.desktopLayout &&
   prev.className === next.className;
-
-
 
 const TextBlockGlyph = ({
   size = 16,
@@ -279,8 +274,6 @@ const MarkdownBlockGlyph = ({
   );
 };
 
-
-
 const getIcon = (
   iconName: EditorBlockIconName,
 ): React.ComponentType<IconProps> => {
@@ -295,8 +288,6 @@ const getIcon = (
 
   return map[iconName];
 };
-
-
 
 const Tooltip = ({
   label,
@@ -612,8 +603,6 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
 
   return renderToolbarShell();
 };
-
-
 
 export const BlockToolbar = React.memo(BlockToolbarInner, areBlockToolbarPropsEqual);
 BlockToolbar.displayName = "BlockToolbar";

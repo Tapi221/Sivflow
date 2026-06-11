@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { getPresentationTargetFromWindow, type PresentationTarget } from "./getPresentationTarget";
+import { getPresentationTargetFromWindow } from "./getPresentationTarget";
+import type { PresentationTarget } from "./getPresentationTarget";
 
 
 

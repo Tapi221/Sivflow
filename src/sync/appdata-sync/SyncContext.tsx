@@ -4,8 +4,10 @@ import type { ISyncService, UserSettingsSnapshot } from "@/services/interfaces/I
 import { getLocalDb } from "@/services/localdb";
 import type { LocalDBTableMap, SyncableEntityTable } from "@/services/localdb/types";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
-import { DEFAULT_SYNC_SETTINGS, type SyncConflict, type SyncEntity, type SyncSettings } from "@/types/domain/sync";
-import { SyncContext, type SyncContextType, type SyncNotice, type SyncProviderProps, type SyncStatus } from "./SyncContextCore";
+import { DEFAULT_SYNC_SETTINGS } from "@/types/domain/sync";
+import type { SyncConflict, SyncEntity, SyncSettings } from "@/types/domain/sync";
+import { SyncContext } from "./SyncContextCore";
+import type { SyncContextType, SyncNotice, SyncProviderProps, SyncStatus } from "./SyncContextCore";
 
 
 

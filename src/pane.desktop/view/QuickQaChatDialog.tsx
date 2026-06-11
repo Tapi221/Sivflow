@@ -1,4 +1,5 @@
-import { memo, useCallback, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Dialog, DialogContent } from "@/components/ui/dialog";

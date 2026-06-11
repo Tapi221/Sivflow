@@ -1,26 +1,17 @@
 "use client";
 
 import * as React from "react";
-
 import type { PlateElementProps } from "platejs/react";
-
 import { EmojiInlineIndexSearch, insertEmoji } from "@platejs/emoji";
-
 import { EmojiPlugin } from "@platejs/emoji/react";
-
 import { PlateElement, usePluginOption } from "platejs/react";
-
 import { useDebounce } from "@/hooks/use-debounce";
-
 import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem } from "./inline-combobox";
-
-
 
 const TRAILING_COLON_REGEX = /:$/;
 
-
-
-export const EmojiInputElement = (props: PlateElementProps) => { const { children, editor, element } = props;
+export const EmojiInputElement = (props: PlateElementProps) => {
+  const { children, editor, element } = props;
   const data = usePluginOption(EmojiPlugin, "data")!;
   const [value, setValue] = React.useState("");
   const debouncedValue = useDebounce(value, 100);

@@ -1,10 +1,9 @@
 import { useCallback } from "react";
 import { CARD_SET_VIEW_EVENTS } from "@/features/cardsetview/events/cardSetViewEvents.constants";
-import { type CardSetViewEditingDraftPatch, dispatchCardSetViewWindowEvent } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
+import { dispatchCardSetViewWindowEvent } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
+import type { CardSetViewEditingDraftPatch } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 import { createLatestReviewLogPatch, createReviewPatchFromRating } from "@/services/reviewAlgorithm";
 import type { Card, ReviewLog, UserSettings } from "@/types";
-
-
 
 type EditingDraftPatch = CardSetViewEditingDraftPatch["patch"];
 interface UseCardSetViewMetaPanelActionsOptions {
@@ -14,12 +13,11 @@ interface UseCardSetViewMetaPanelActionsOptions {
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
 }
 
-
-
 const normalizeReviewLogs = (reviewLogs: Card["reviewLogs"]): ReviewLog[] => {
   return reviewLogs ?? [];
 };
-export const useCardSetViewMetaPanelActions = ({ selectedCard, isGlobalEditing, settings, updateCard }: UseCardSetViewMetaPanelActionsOptions) => { const delayBonusEnabled = settings?.delayBonusEnabled ?? false;
+export const useCardSetViewMetaPanelActions = ({ selectedCard, isGlobalEditing, settings, updateCard }: UseCardSetViewMetaPanelActionsOptions) => {
+  const delayBonusEnabled = settings?.delayBonusEnabled ?? false;
   const reviewStartNextDay = settings?.reviewStartNextDay ?? true;
   const reviewLogs = selectedCard?.reviewLogs ?? [];
   const selectedCardId = selectedCard?.id ?? null;

@@ -10,8 +10,6 @@ import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrder
 import type { FlashcardMediaLike } from "./flashcard.types";
 import type { CardBlock } from "@/types/domain/card";
 
-
-
 interface SideData {
   blocks: CardBlock[];
   text: string;
@@ -19,9 +17,9 @@ interface SideData {
   code: { code?: string; language?: string; } | null;
 }
 
-
-
-export const resolveSideBlocks = (side: "question" | "answer", data: SideData) => { if (data.blocks.length > 0) { return sortBlocksByOrderIndex(data.blocks);
+export const resolveSideBlocks = (side: "question" | "answer", data: SideData) => {
+  if (data.blocks.length > 0) {
+    return sortBlocksByOrderIndex(data.blocks);
   }
 
   const fallbackBlocks: CardBlock[] = [];

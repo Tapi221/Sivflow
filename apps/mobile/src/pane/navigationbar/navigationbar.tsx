@@ -1,4 +1,5 @@
-import { memo, useCallback, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { GalleryIcon, HomeIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import type { WorkspaceSidebarSection } from "@/pane.desktop/tab.desktopnative/Tab";

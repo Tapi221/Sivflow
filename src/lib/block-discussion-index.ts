@@ -12,11 +12,13 @@ import { getSuggestionKey, keyId2SuggestionId } from "@platejs/suggestion";
 
 import { SuggestionPlugin } from "@platejs/suggestion/react";
 
-import { type NodeEntry, NodeApi, type Path, type TCommentText, type TElement, type TSuggestionText, ElementApi, KEYS, PathApi, TextApi } from "platejs";
+import { NodeApi, ElementApi, KEYS, PathApi, TextApi } from "platejs";
+import type { NodeEntry, Path, TCommentText, TElement, TSuggestionText } from "platejs";
 
 import { useEditorRef, useEditorVersion, usePluginOption } from "platejs/react";
 
-import { type TDiscussion, discussionPlugin } from "@/components/editor/plugins/discussion-kit";
+import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
+import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
 
 import type { TComment } from "@/components/ui/comment";
 

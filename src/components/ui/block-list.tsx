@@ -1,20 +1,13 @@
 "use client";
 
 import React from "react";
-
 import type { TListElement } from "platejs";
-
 import { isOrderedList } from "@platejs/list";
-
 import { useTodoListElement, useTodoListElementState } from "@platejs/list/react";
-
-import { type PlateElementProps, type RenderNodeWrapper, useReadOnly } from "platejs/react";
-
+import { useReadOnly } from "platejs/react";
+import type { PlateElementProps, RenderNodeWrapper } from "platejs/react";
 import { Checkbox } from "./checkbox";
-
 import { cn } from "@/lib/utils";
-
-
 
 const config: Record<
   string,
@@ -29,14 +22,12 @@ const config: Record<
   },
 };
 
-
-
-export const BlockList: RenderNodeWrapper = (props) => { if (!props.element.listStyleType) return;
+export const BlockList: RenderNodeWrapper = (props) => {
+  if (!props.element.listStyleType) return;
   if (!isOrderedList(props.element)) return;
 
   return (props) => <List {...props} />;
 };
-
 function List(props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }) {
   const { listStart, listStyleType } = props.element as TListElement;
   const { Li, Marker } = config[listStyleType] ?? {};
@@ -60,7 +51,6 @@ function List(props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }) 
     </List>
   );
 }
-
 function TodoMarker(props: PlateElementProps) {
   const state = useTodoListElementState({ element: props.element });
   const { checkboxProps } = useTodoListElement(state);
@@ -78,7 +68,6 @@ function TodoMarker(props: PlateElementProps) {
     </div>
   );
 }
-
 function TodoLi(
   props: PlateElementProps & { lineBreakBadge?: React.ReactNode; },
 ) {

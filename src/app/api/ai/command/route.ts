@@ -1,16 +1,17 @@
 import type { ChatMessage, ToolName } from "./types";
 import type { NextRequest } from "next/server";
 import { createGateway } from "@ai-sdk/gateway";
-import { type LanguageModel, type UIMessageStreamWriter, createUIMessageStream, createUIMessageStreamResponse, generateText, Output, streamText, tool } from "ai";
+import { createUIMessageStream, createUIMessageStreamResponse, generateText, Output, streamText, tool } from "ai";
+import type { LanguageModel, UIMessageStreamWriter } from "ai";
 import { NextResponse } from "next/server";
-import { type SlateEditor, createSlateEditor, nanoid } from "platejs";
+import { createSlateEditor, nanoid } from "platejs";
+import type { SlateEditor } from "platejs";
 import { z } from "zod";
 import { AI_COMMAND_PLATE_PLUGINS } from "./editorKit";
 import { buildEditTableMultiCellPrompt, getChooseToolPrompt, getCommentPrompt, getEditPrompt, getGeneratePrompt } from "@/app/api/ai/command/prompt";
 
-
-
-export const POST = async (req: NextRequest) => { const { apiKey: key, ctx, messages: messagesRaw, model } = await req.json();
+export const POST = async (req: NextRequest) => {
+  const { apiKey: key, ctx, messages: messagesRaw, model } = await req.json();
 
   const { children, selection, toolName: toolNameParam } = ctx;
 
@@ -150,8 +151,6 @@ export const POST = async (req: NextRequest) => { const { apiKey: key, ctx, mess
     );
   }
 };
-
-
 
 const getCommentTool = (
   editor: SlateEditor,

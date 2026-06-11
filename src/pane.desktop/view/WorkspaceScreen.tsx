@@ -1,11 +1,13 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { NoteDocumentEditor } from "@/components/note/NoteDocumentEditor";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
 import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
-import { areExplorerBreadcrumbContextsEqual, EMPTY_EXPLORER_BREADCRUMB_CONTEXT, type BreadcrumbCrumb, type ExplorerBreadcrumbContext } from "@/features/breadcrumbs/breadcrumbs.types";
+import { areExplorerBreadcrumbContextsEqual, EMPTY_EXPLORER_BREADCRUMB_CONTEXT } from "@/features/breadcrumbs/breadcrumbs.types";
+import type { BreadcrumbCrumb, ExplorerBreadcrumbContext } from "@/features/breadcrumbs/breadcrumbs.types";
 import { buildFolderPathCrumbs } from "@/features/breadcrumbs/builders";
 import { WorkspaceBreadcrumbs } from "@/features/breadcrumbs/components/WorkspaceBreadcrumbs";
 import { useDocumentsRead } from "@/features/document/hooks/useDocumentsRead";

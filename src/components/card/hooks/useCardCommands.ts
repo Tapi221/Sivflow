@@ -6,15 +6,11 @@ import { DEFAULT_SETTINGS, useUserSettings } from "@/features/settings/hooks/use
 import { getLocalDb } from "@/services/localdb";
 import type { Card, CardPatch } from "@/types";
 
-
-
 type TimestampLike = { toDate?: () => Date; seconds?: number; nanoseconds?: number; };
 type SortableTimestamp = Date | TimestampLike | string | number | undefined | null;
 type CardSetAddCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   addItem: (table: "cardSets", item: Record<string, unknown>) => Promise<string>;
 };
-
-
 
 const toDateMillis = (value: SortableTimestamp): number => {
   if (!value) return 0;
@@ -27,7 +23,8 @@ const toDateMillis = (value: SortableTimestamp): number => {
   if (typeof value.seconds === "number") return value.seconds * 1000 + Math.floor((value.nanoseconds ?? 0) / 1_000_000);
   return 0;
 };
-export const useCardCommands = (folderId?: string) => { const { currentUser } = useAuthSession();
+export const useCardCommands = (folderId?: string) => {
+  const { currentUser } = useAuthSession();
   const { settings } = useUserSettings();
 
   const createCard = async (cardData: Partial<Card> & { cardSetId?: string; }) => {

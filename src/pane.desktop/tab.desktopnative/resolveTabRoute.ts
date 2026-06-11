@@ -1,4 +1,4 @@
-import { type WorkspaceTab as T } from "./Tab";
+import type { WorkspaceTab as T } from "./Tab";
 
 
 

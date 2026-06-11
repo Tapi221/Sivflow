@@ -1,9 +1,11 @@
-import { type Auth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import type { Auth } from "firebase/auth";
 import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI } from "@platform/auth/google/desktopOAuth.constants";
 import { readEmail } from "@/integration/googlecalendar-integration/gcal.storage";
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
-import { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, isGoogleOAuthCallbackPayload, type GoogleOAuthCallbackPayload } from "./google.oauth-callback";
+import { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, isGoogleOAuthCallbackPayload } from "./google.oauth-callback";
+import type { GoogleOAuthCallbackPayload } from "./google.oauth-callback";
 
 
 

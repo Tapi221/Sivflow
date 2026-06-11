@@ -1,4 +1,5 @@
-import { getDocumentKindLabel, type QueueItem, toDocumentLike } from "@/application/usecases/persistentOfflineQueueModels";
+import { getDocumentKindLabel, toDocumentLike } from "@/application/usecases/persistentOfflineQueueModels";
+import type { QueueItem } from "@/application/usecases/persistentOfflineQueueModels";
 import { getLocalDb } from "@/infrastructure/localdb/client";
 import type { UploadedImage } from "@/types";
 

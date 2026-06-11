@@ -1,4 +1,5 @@
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
+import type { CSSProperties } from "react";
 import { QuickQaChatDialog } from "./QuickQaChatDialog";
 import { MessageSquare } from "@/ui/icons";
 
