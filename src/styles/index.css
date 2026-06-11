@@ -15,7 +15,6 @@
 @import "./base/base.css";
 @import "./tokens/font.css";
 @import "./components/index.css";
-@import "./features/layered-directory-active-tone.css";
 @import "./base/utilities.css";
 
 @import "./tokens/code-theme.css";
