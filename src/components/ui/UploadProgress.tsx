@@ -113,5 +113,4 @@ const UploadProgress = ({
 };
 
 export { UploadProgress };
-
 export type { UploadProgressProps };

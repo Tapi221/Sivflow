@@ -4,6 +4,7 @@ import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/
 import type { CalendarViewMode, CalendarViewModeSelection } from "./calendar.types";
 
 export type { CalendarViewMode, CalendarViewModeSelection };
+
 export type CalendarProvider = "local" | "google" | "appleEventKit" | "appleCalDav";
 export type ProjectCalendarSyncDirection = "importOnly" | "exportOnly" | "twoWay";
 export type GoogleCalendarColorOverrideMap = Record<string, string>;

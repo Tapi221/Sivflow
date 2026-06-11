@@ -97,5 +97,4 @@ const WorkspaceBreadcrumbs = ({ className, isLeftPanelCollapsed = false }: Works
 };
 
 export { WorkspaceBreadcrumbs };
-
 export type { WorkspaceBreadcrumbsProps };

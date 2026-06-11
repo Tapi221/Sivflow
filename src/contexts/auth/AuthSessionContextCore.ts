@@ -20,5 +20,4 @@ const AuthSessionContext = createContext<AuthSessionContextType>({
 });
 
 export { AuthSessionContext };
-
 export type { AuthSessionContextType, AuthSessionProviderProps };

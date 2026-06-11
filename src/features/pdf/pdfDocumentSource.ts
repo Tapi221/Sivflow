@@ -18,6 +18,7 @@ type PdfDocumentLoadSource = {
   url: string;
 };
 type PdfWorkerConstructor = new (options?: WorkerOptions) => Worker;
+
 export type { PdfDocumentSource };
 
 let pdfWorkerPort: Worker | null = null;
