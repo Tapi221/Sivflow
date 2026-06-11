@@ -5,6 +5,8 @@ import { mapExplorerSelectionToSearchParams } from "@/features/explorer/mappers/
 import { isSameSelectedExplorerItem } from "@/features/explorer/utils/isSameSelectedExplorerItem";
 import type { SelectedExplorerItem } from "@/types";
 
+
+
 type Params = {
   route: FoldersRouteAdapter;
   isHomeOnlyMode: boolean;
@@ -13,6 +15,8 @@ type Params = {
   selectedItem: SelectedExplorerItem;
   applyRouteState: (next: ExplorerRouteState) => void;
 };
+
+
 
 const areRouteStatesEqual = (
   a: ExplorerRouteState,
@@ -147,5 +151,7 @@ const useExplorerRouteSync = ({ route, isHomeOnlyMode, isSectionListMode, select
     selectedItem,
   ]);
 };
+
+
 
 export { useExplorerRouteSync };

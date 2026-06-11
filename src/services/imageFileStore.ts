@@ -14,10 +14,14 @@ type ImageBlobRecord = { localBlobId: string;
   mime: string;
 };
 
+
+
 const DB_NAME = "image_file_store";
 const STORE_NAME = "image_files";
 const DB_VERSION = 1;
 let dbPromise: Promise<IDBDatabase> | null = null;
+
+
 
 const makeScopedId = (id: string, options?: BlobScopeOptions): string => {
   const userId = options?.userId?.trim();
@@ -138,5 +142,9 @@ const deleteImageBlobsByUser = async (userId: string): Promise<void> => {
   });
 };
 
+
+
 export { putImageBlob, getImageBlob, deleteImageBlob, deleteImageBlobsByUser };
+
+
 export type { PutImageBlobOptions, ImageBlobRecord };
