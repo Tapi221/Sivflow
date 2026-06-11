@@ -82,13 +82,11 @@ export function EquationElement(props: PlateElementProps<TEquationElement>) { co
 
         <EquationPopoverContent
           open={open}
-          placeholder={
-            'f(x) = \begin{cases}
+          placeholder={String.raw`f(x) = \begin{cases}
   x^2, &\quad x > 0 \\
   0, &\quad x = 0 \\
   -x^2, &\quad x < 0
-\end{cases}'
-          }
+\end{cases}`}
           isInline={false}
           setOpen={setOpen}
         />
