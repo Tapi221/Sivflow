@@ -8,12 +8,6 @@ import { all, createLowlight } from 'lowlight';
 
 import { CodeBlockElement, CodeLineElement, CodeSyntaxLeaf } from '@/components/ui/code-block-node';
 
-
-
-
-
-
-
 const lowlight = createLowlight(all);
 
 const CodeBlockKit = [
@@ -26,11 +20,5 @@ const CodeBlockKit = [
   CodeLinePlugin.withComponent(CodeLineElement),
   CodeSyntaxPlugin.withComponent(CodeSyntaxLeaf),
 ];
-
-
-
-
-
-
 
 export { CodeBlockKit };

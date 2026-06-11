@@ -18,12 +18,6 @@ import { Calendar } from './calendar';
 
 import { Popover, PopoverContent, PopoverTrigger } from './popover';
 
-
-
-
-
-
-
 export const DateElement = (props: PlateElementProps<TDateElement>) => { const { editor, element } = props;
   const readOnly = useReadOnly();
 

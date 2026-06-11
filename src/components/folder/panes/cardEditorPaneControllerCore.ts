@@ -8,12 +8,6 @@ import type { ReviewLog } from "@/types/domain/base";
 
 import type { Card, UserSettings } from "@/types";
 
-
-
-
-
-
-
 type CreateMetaPanelActionsArgs = {
   selectedCard: Card | null;
   settings?: Partial<UserSettings> | null;
@@ -29,19 +23,7 @@ type CreateMetaPanelActionsArgs = {
   handleUpdateTitle: (nextTitle: string) => Promise<void>;
 };
 
-
-
-
-
-
-
 export const META_PANEL_OPEN_STORAGE_KEY = WEB_STORAGE_KEYS.cardEditorMetaPanelOpen;
-
-
-
-
-
-
 
 export const buildCardsById = (cards: Card[]) => { const map = new Map<string, Card>();
   for (const card of cards) {

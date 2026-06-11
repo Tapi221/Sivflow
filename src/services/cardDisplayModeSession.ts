@@ -1,18 +1,6 @@
 import { type CardDisplayMode, DEFAULT_CARD_DISPLAY_MODE, normalizeCardDisplayMode } from "@/types/domain/cardSet";
 
-
-
-
-
-
-
 const currentDisplayModeByCardSet = new Map<string, CardDisplayMode>();
-
-
-
-
-
-
 
 export const getCardSetSessionDisplayMode = ( cardSetId: string | null | undefined, ) => { if (!cardSetId) return null;
   return currentDisplayModeByCardSet.get(cardSetId) ?? null;

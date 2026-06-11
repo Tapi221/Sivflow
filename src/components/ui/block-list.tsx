@@ -14,12 +14,6 @@ import { Checkbox } from './checkbox';
 
 import { cn } from '@/lib/utils';
 
-
-
-
-
-
-
 const config: Record<
   string,
   {
@@ -32,12 +26,6 @@ const config: Record<
     Marker: TodoMarker,
   },
 };
-
-
-
-
-
-
 
 export const BlockList: RenderNodeWrapper = (props) => { if (!props.element.listStyleType) return;
   if (!isOrderedList(props.element)) return;

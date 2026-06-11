@@ -1,12 +1,6 @@
 import React from "react";
 import "./index.css";
 
-
-
-
-
-
-
 const Breadcrumb = () => {
   return (
     <nav
@@ -43,11 +37,5 @@ const Main = () => {
     </main>
   );
 };
-
-
-
-
-
-
 
 export default Main;

@@ -1,11 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
 
-
-
-
-
-
-
 type OrderedOptimisticCreateParams<T> = {
   entities: T[];
   setOptimisticEntities: Dispatch<SetStateAction<T[]>>;
@@ -30,12 +24,6 @@ type OrderedOptimisticCreateParams<T> = {
   newEntityId: string;
   onAfterOptimisticCreate?: (entity: T) => void;
 };
-
-
-
-
-
-
 
 export const createOrderedOptimistically = async <T>({ entities, setOptimisticEntities, getEntityId, getParentId, getOrderIndex, setOrderIndex, createTempEntity, persistCreate, targetParentId, newEntityName, newEntityId, onAfterOptimisticCreate, }: OrderedOptimisticCreateParams<T>) => { const siblingIds = new Set<string>();
   const originalOrderIndexes = new Map<string, number>();

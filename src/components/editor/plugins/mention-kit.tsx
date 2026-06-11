@@ -4,12 +4,6 @@ import { MentionInputPlugin, MentionPlugin } from '@platejs/mention/react';
 
 import { MentionElement, MentionInputElement } from '@/components/ui/mention-node';
 
-
-
-
-
-
-
 const MentionKit = [
   MentionPlugin.configure({
     options: {
@@ -18,11 +12,5 @@ const MentionKit = [
   }).withComponent(MentionElement),
   MentionInputPlugin.withComponent(MentionInputElement),
 ];
-
-
-
-
-
-
 
 export { MentionKit };

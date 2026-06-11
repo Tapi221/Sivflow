@@ -12,12 +12,6 @@ import { PlateElement } from 'platejs/react';
 
 import { Button } from './button';
 
-
-
-
-
-
-
 const headingItemVariants = cva(
   'block h-auto w-full cursor-pointer truncate rounded-none px-0.5 py-1.5 text-left font-medium underline decoration-[0.5px] underline-offset-4',
   {
@@ -34,12 +28,6 @@ const headingItemVariants = cva(
     },
   }
 );
-
-
-
-
-
-
 
 export const TocElement = (props: PlateElementProps) => { const state = useTocElementState();
   const { props: btnProps } = useTocElement(state);

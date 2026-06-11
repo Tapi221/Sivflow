@@ -4,12 +4,6 @@ import { type EditorDraft, makeNewDraft, normalizeSelectedCardId, shouldAutoOpen
 import { useCardEntity } from "@/components/card/hooks/useCardEntity";
 import type { Card, CardPatch } from "@/types/domain/card";
 
-
-
-
-
-
-
 type UseCardEditorSessionParams = {
   selectedCardId: string | null;
   selectedCardSnapshot?: Card | null;
@@ -42,12 +36,6 @@ type FlushDraftOptions = {
   exitEditing?: boolean;
   showSuccessToast?: boolean;
 };
-
-
-
-
-
-
 
 export const useCardEditorSession = ({ selectedCardId, selectedCardSnapshot = null, resolveCardFromEntity = true, folderId, cardSetId, autoEdit, updateCard, createCard, addTag, tagById, toastSuccess, toastError, onCardUpdated, onSelectCardId, resetDialogs, }: UseCardEditorSessionParams) => { const [localSelectedCardId, setLocalSelectedCardId] = useState<string | null>( null, );
   const [isFlipped, setIsFlipped] = useState(false);

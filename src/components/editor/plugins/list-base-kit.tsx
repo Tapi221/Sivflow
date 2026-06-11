@@ -5,12 +5,6 @@ import { BlockListStatic } from '@/components/ui/block-list-static';
 
 import { BaseIndentKit } from './indent-base-kit';
 
-
-
-
-
-
-
 const BaseListKit = [
   ...BaseIndentKit,
   BaseListPlugin.configure({
@@ -44,11 +38,5 @@ const BaseListKit = [
     },
   }),
 ];
-
-
-
-
-
-
 
 export { BaseListKit };

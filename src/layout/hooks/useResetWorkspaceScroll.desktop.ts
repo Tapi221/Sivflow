@@ -1,18 +1,6 @@
 import { type RefObject, useLayoutEffect } from "react";
 
-
-
-
-
-
-
 type WorkspaceScrollRef = RefObject<HTMLElement | null> | undefined;
-
-
-
-
-
-
 
 const resetWorkspaceScrollPosition = (mainRef: WorkspaceScrollRef) => {
   const containers = document.querySelectorAll<HTMLElement>(

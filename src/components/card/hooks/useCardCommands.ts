@@ -6,12 +6,6 @@ import { DEFAULT_SETTINGS, useUserSettings } from "@/features/settings/hooks/use
 import { getLocalDb } from "@/services/localdb";
 import type { Card, CardPatch } from "@/types";
 
-
-
-
-
-
-
 type TimestampLike = { toDate?: () => Date; seconds?: number; nanoseconds?: number };
 
 type SortableTimestamp = Date | TimestampLike | string | number | undefined | null;
@@ -19,12 +13,6 @@ type SortableTimestamp = Date | TimestampLike | string | number | undefined | nu
 type CardSetAddCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   addItem: (table: "cardSets", item: Record<string, unknown>) => Promise<string>;
 };
-
-
-
-
-
-
 
 const toDateMillis = (value: SortableTimestamp): number => {
   if (!value) return 0;

@@ -2,12 +2,6 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 
-
-
-
-
-
-
 type TooltipSide = "top" | "right" | "bottom" | "left";
 
 type TooltipPosition = {
@@ -34,12 +28,6 @@ type HoverSuggestionTooltipProps = {
   tooltipClassName?: string;
   disabled?: boolean;
 };
-
-
-
-
-
-
 
 const getTransform = (side: TooltipSide) => {
   if (side === "top") return "translate(-50%, -100%)";
@@ -76,12 +64,6 @@ const getArrowClassName = (side: TooltipSide) => {
 
   return "left-[-3px] top-1/2 -translate-y-1/2";
 };
-
-
-
-
-
-
 
 export const HoverSuggestionTooltip = ({ children, items, side = "right", offset = 10, title, emptyLabel, className, tooltipClassName, disabled = false, }: HoverSuggestionTooltipProps) => { const anchorRef = useRef<HTMLDivElement | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

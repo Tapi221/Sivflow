@@ -1,18 +1,6 @@
 import { cloneInkDocument, createEmptyInkDocument, type InkDocument, type InkSide, normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
 
-
-
-
-
-
-
 const INK_STORAGE_PREFIX = "ink:";
-
-
-
-
-
-
 
 const getStorage = (): Storage | null => {
   if (typeof window === "undefined") return null;

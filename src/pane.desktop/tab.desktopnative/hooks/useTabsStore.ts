@@ -4,12 +4,6 @@ import { WEB_STORAGE_KEYS } from "@platform/storage/webStorageKeys.constants";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import { createDefaultExplorerRouteState, resolveRouteTabBySection, WORKSPACE_DEFAULT_EXPLORER_TAB_ID, type WorkspaceCardTab, type WorkspaceDocumentTab, type WorkspaceExplorerTab, type WorkspaceNoteTab, type WorkspaceRouteTab, type WorkspaceSidebarSection, type WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 
-
-
-
-
-
-
 type OpenExplorerTabParams = {
   id?: WorkspaceExplorerTab["id"];
   title?: string;
@@ -54,19 +48,7 @@ type WorkspaceTabsState = {
 
 type WorkspaceTabsPersistedState = Pick<WorkspaceTabsState, "tabs" | "activeTabId" | "lastOpenedTabId">;
 
-
-
-
-
-
-
 const EXPLORER_TAB_TITLE = "Library";
-
-
-
-
-
-
 
 const createRandomIdSegment = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -207,8 +189,6 @@ const createRouteTabFromSection = (
 ): WorkspaceRouteTab => {
   return { ...resolveRouteTabBySection(sectionKey) };
 };
-
-
 
 export const useWorkspaceTabsStore = create<WorkspaceTabsState>()( persist( (set, get) => ({ tabs: [], activeTabId: null, lastOpenedTabId: null, openExplorerTab: (params = {}) => { const id = params.id ?? WORKSPACE_DEFAULT_EXPLORER_TAB_ID;
         const existing = get().tabs.find((tab) => tab.id === id);

@@ -12,12 +12,6 @@ import { SuggestionLeaf, SuggestionLineBreak, VoidRemoveSuggestionOverlay } from
 
 import { discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarget } from './discussion-kit';
 
-
-
-
-
-
-
 type SuggestionConfig = ExtendConfig<
   BaseSuggestionConfig,
   {
@@ -25,12 +19,6 @@ type SuggestionConfig = ExtendConfig<
     hoverId: string | null;
   }
 >;
-
-
-
-
-
-
 
 const INLINE_SUGGESTION_TARGET_PLUGINS = [KEYS.date, KEYS.inlineEquation, KEYS.link, KEYS.mention];
 
@@ -104,12 +92,6 @@ const trailingBlockPlugin = TrailingBlockPlugin.configure({
 
 const SuggestionKit = [suggestionPlugin, trailingBlockPlugin];
 
-
-
-
-
-
-
 function getInlineSuggestionData(editor: any, element: TElement) {
   const suggestionApi = editor.getApi(BaseSuggestionPlugin).suggestion;
   const data = suggestionApi.suggestionData(element) as TSuggestionData | TInlineSuggestionData | undefined;
@@ -126,14 +108,6 @@ function getInlineSuggestionData(editor: any, element: TElement) {
   }
 }
 
-
-
 export type { SuggestionConfig };
-
-
-
-
-
-
 
 export { SuggestionKit, suggestionPlugin };

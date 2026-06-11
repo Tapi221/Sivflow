@@ -2,12 +2,6 @@ export type ImageNaturalSize = { naturalW: number;
   naturalH: number;
 };
 
-
-
-
-
-
-
 const hasNaturalSize = (image: {
   naturalWidth: number;
   naturalHeight: number;

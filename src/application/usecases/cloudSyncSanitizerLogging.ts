@@ -1,11 +1,5 @@
 type FirestoreRecord = Record<string, unknown>;
 
-
-
-
-
-
-
 const isRecord = (value: unknown): value is FirestoreRecord =>
   typeof value === "object" && value !== null;
 

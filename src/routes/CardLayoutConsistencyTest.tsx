@@ -7,12 +7,6 @@ import { Flashcard } from "@/components/card/frame/Flashcard";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
 import type { CardBlock } from "@/types/domain/card";
 
-
-
-
-
-
-
 const FIXTURE_BLOCKS: CardBlock[] = [
   {
     id: "fixture-code-1",
@@ -37,12 +31,6 @@ const FIXTURE_CARD = {
   questionExtraRows: 2,
   answerExtraRows: 2,
 };
-
-
-
-
-
-
 
 const CardLayoutConsistencyTest = () => {
   const [editBlocks, setEditBlocks] =
@@ -93,11 +81,5 @@ const CardLayoutConsistencyTest = () => {
     </div>
   );
 };
-
-
-
-
-
-
 
 export default CardLayoutConsistencyTest;

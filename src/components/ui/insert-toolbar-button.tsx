@@ -16,12 +16,6 @@ import { insertBlock, insertInlineElement, } from '@/components/editor/transform
 
 import { ToolbarButton, ToolbarMenuGroup } from './toolbar';
 
-
-
-
-
-
-
 type Group = {
   group: string;
   items: Item[];
@@ -34,12 +28,6 @@ type Item = {
   focusEditor?: boolean;
   label?: string;
 };
-
-
-
-
-
-
 
 const groups: Group[] = [
   {
@@ -212,12 +200,6 @@ const groups: Group[] = [
     })),
   },
 ];
-
-
-
-
-
-
 
 export function InsertToolbarButton(props: DropdownMenuProps) { const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);

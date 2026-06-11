@@ -1,11 +1,5 @@
 import type { GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 
-
-
-
-
-
-
 export type GoogleCalendarEventsState = Map<string, Map<string, GoogleCalendarEvent>>;
 
 export type GoogleCalendarEventsAction = | { type: "UPSERT"; accountId: string; event: GoogleCalendarEvent }
@@ -24,12 +18,6 @@ export type GoogleCalendarEventsAction = | { type: "UPSERT"; accountId: string; 
     calendars: GoogleCalendarListItem[];
   }
   | { type: "CLEAR_ACCOUNT"; accountId: string };
-
-
-
-
-
-
 
 const overlapsRange = (
   event: GoogleCalendarEvent,

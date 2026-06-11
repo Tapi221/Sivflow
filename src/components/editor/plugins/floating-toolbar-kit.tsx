@@ -6,12 +6,6 @@ import { FloatingToolbar } from '@/components/ui/floating-toolbar';
 
 import { FloatingToolbarButtons } from '@/components/ui/floating-toolbar-buttons';
 
-
-
-
-
-
-
 const FloatingToolbarKit = [
   createPlatePlugin({
     key: 'floating-toolbar',
@@ -24,11 +18,5 @@ const FloatingToolbarKit = [
     },
   }),
 ];
-
-
-
-
-
-
 
 export { FloatingToolbarKit };

@@ -3,24 +3,12 @@ import { createWebFolderRepository } from "@platform/storage/folderRepository.we
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { Folder } from "@/types";
 
-
-
-
-
-
-
 type CreateFolderOptions = {
   color?: string;
   cloudSyncEnabled?: boolean;
   id?: string;
   orderIndex?: number;
 };
-
-
-
-
-
-
 
 export const useFolderCommands = () => { const { currentUser } = useAuthSession();
 

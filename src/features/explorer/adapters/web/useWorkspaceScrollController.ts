@@ -1,11 +1,5 @@
 import { useCallback } from "react";
 
-
-
-
-
-
-
 type Params = {
   isDesktop: boolean;
 };

@@ -6,23 +6,11 @@ import { cn } from "@/lib/utils"
 
 import { buttonVariants } from "./button"
 
-
-
-
-
-
-
 const AlertDialog = AlertDialogPrimitive.Root
 
 const AlertDialogTrigger = AlertDialogPrimitive.Trigger
 
 const AlertDialogPortal = AlertDialogPrimitive.Portal
-
-
-
-
-
-
 
 const AlertDialogOverlay = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Overlay>,
@@ -128,12 +116,6 @@ const AlertDialogCancel = React.forwardRef<
     {...props}
   />
 ))
-
-
-
-
-
-
 
 AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName
 

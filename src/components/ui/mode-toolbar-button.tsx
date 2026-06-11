@@ -14,12 +14,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenu
 
 import { ToolbarButton } from './toolbar';
 
-
-
-
-
-
-
 export function ModeToolbarButton(props: DropdownMenuProps) { const editor = useEditorRef();
   const readOnly = useEditorReadOnly();
   const [open, setOpen] = React.useState(false);

@@ -1,11 +1,5 @@
 const DEFAULT_WHEEL_DELTA_PER_ZOOM_STEP = 120;
 
-
-
-
-
-
-
 export const resolveWheelZoomStepCount = ({ deltaY, deltaPerStep = DEFAULT_WHEEL_DELTA_PER_ZOOM_STEP, }: { deltaY: number;
   deltaPerStep?: number;
 }) => {

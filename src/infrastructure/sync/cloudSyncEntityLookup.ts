@@ -3,12 +3,6 @@ import { getUserSettingsRef, queryEntityById } from "./cloudSyncFirestoreRefs";
 import { type CloudEntityType, COLLECTION_BY_TYPE, type PullableEntityType, sanitizeSyncDataFromCloud } from "@/application/usecases/cloudSyncShared";
 import type { SyncChange } from "@/services/interfaces/ISyncService";
 
-
-
-
-
-
-
 type LookupContext = {
   firestore: Firestore;
   userId: string;
@@ -20,12 +14,6 @@ type CloudSyncLookupDescriptor = {
   resolveData: (context: LookupContext) => Promise<DocumentData | null>;
   resolveSyncId: (context: LookupContext) => string;
 };
-
-
-
-
-
-
 
 const createPullableLookupDescriptor = (
   type: PullableEntityType,
@@ -57,8 +45,6 @@ const lookupUserSettingData = async (
   return snap.exists() ? snap.data() : null;
 };
 
-
-
 const PULL_FULL_LOOKUP_ORDER: readonly CloudSyncLookupDescriptor[] = [
   createPullableLookupDescriptor("card"),
   createPullableLookupDescriptor("cardSet"),
@@ -73,12 +59,6 @@ const PULL_FULL_LOOKUP_ORDER: readonly CloudSyncLookupDescriptor[] = [
     resolveSyncId: ({ userId }) => userId,
   },
 ];
-
-
-
-
-
-
 
 export const lookupCloudSyncEntityById = async ( firestore: Firestore, userId: string, id: string, ): Promise<SyncChange | null> => { for (const descriptor of PULL_FULL_LOOKUP_ORDER) { const context = { firestore, userId, id };
     const data = await descriptor.resolveData(context);

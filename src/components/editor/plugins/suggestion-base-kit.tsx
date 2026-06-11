@@ -5,24 +5,12 @@ import { KEYS, TextApi } from 'platejs';
 
 import { SuggestionLeafStatic, VoidRemoveSuggestionOverlayStatic, } from '@/components/ui/suggestion-node-static';
 
-
-
-
-
-
-
 const INLINE_SUGGESTION_TARGET_PLUGINS = [
   KEYS.date,
   KEYS.inlineEquation,
   KEYS.link,
   KEYS.mention,
 ];
-
-
-
-
-
-
 
 function getInlineSuggestionData(editor: any, element: TElement) {
   const suggestionApi = editor.getApi(BaseSuggestionPlugin).suggestion;
@@ -42,8 +30,6 @@ function getInlineSuggestionData(editor: any, element: TElement) {
     if (childData) return childData;
   }
 }
-
-
 
 export const BaseSuggestionKit = [ BaseSuggestionPlugin.configure({ inject: { isElement: true, nodeProps: { nodeKey: '', styleKey: 'cssText', transformProps: ({ editor, element, props }) => { if (!element) return props;
 

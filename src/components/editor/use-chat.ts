@@ -28,12 +28,6 @@ import { discussionPlugin } from '@/components/editor/plugins/discussion-kit';
 
 import { withAIBatch } from '@platejs/ai';
 
-
-
-
-
-
-
 export type ToolName = 'comment' | 'edit' | 'generate';
 
 export type TComment = { comment: { blockId: string;
@@ -57,12 +51,6 @@ export type MessageDataPart = { toolName: ToolName;
 export type Chat = UseChatHelpers<ChatMessage>;
 
 export type ChatMessage = UIMessage<{}, MessageDataPart>;
-
-
-
-
-
-
 
 const delay = faker.number.int({ max: 20, min: 5 });
 
@@ -1164,12 +1152,6 @@ const mdxChunks = [
     },
   ],
 ];
-
-
-
-
-
-
 
 function createChatTransport({
   api,

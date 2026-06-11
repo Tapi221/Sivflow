@@ -8,12 +8,6 @@ import { Link } from 'lucide-react';
 
 import { ToolbarButton } from './toolbar';
 
-
-
-
-
-
-
 export function LinkToolbarButton( props: React.ComponentProps<typeof ToolbarButton> ) { const state = useLinkToolbarButtonState();
   const { props: buttonProps } = useLinkToolbarButton(state);
 

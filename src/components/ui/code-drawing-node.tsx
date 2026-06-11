@@ -22,12 +22,6 @@ import { Popover, PopoverAnchor, PopoverContent, } from './popover';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from './select';
 
-
-
-
-
-
-
 function createDebouncedCodeDrawingRenderer(
   setImage: React.Dispatch<React.SetStateAction<string>>,
   setLoading: React.Dispatch<React.SetStateAction<boolean>>,
@@ -111,12 +105,6 @@ function useCodeDrawingElement({ element }: { element: TCodeDrawingElement }) {
     removeNode,
   };
 }
-
-
-
-
-
-
 
 export function CodeDrawingElement( props: PlateElementProps<TCodeDrawingElement> ) { const { children } = props;
   const isMobile = useIsMobile();
