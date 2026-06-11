@@ -38,7 +38,7 @@ export function FileElementStatic(props: SlateElementProps<TFileElement>) { cons
           )}
         >
           <FileUp className="size-5" />
-          <>{name}</>
+          {name}
         </div>
       </a>
       {props.children}
