@@ -6,6 +6,10 @@ import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { eventChipDesign } from "./eventChipDesign.generated";
 
+
+
+
+
 type CalendarEventChipWeekdayProps = {
   event: GoogleCalendarEvent;
   tooltipDisabled?: boolean;
@@ -22,6 +26,10 @@ type CalendarEventChipWeekdayStyle = CSSProperties & {
   WebkitPrintColorAdjust: "exact";
   printColorAdjust: "exact";
 };
+
+
+
+
 
 const CHIP_ROOT_CLASS = "relative isolate h-full min-h-0 w-full";
 const CHIP_LINE_MASK_CLASS = "pointer-events-none absolute inset-0 rounded-md bg-white";
@@ -46,6 +54,10 @@ const DEFAULT_CHIP_LAYOUT_STATE: ChipLayoutState = {
   useInlineTimeLayout: false,
   useLastLineTimeLayout: false,
 };
+
+
+
+
 
 const getPixelValue = (value: string) => {
   const parsedValue = Number.parseFloat(value);
@@ -185,6 +197,10 @@ const createGoogleCalendarEventEditUrl = (event: GoogleCalendarEvent): string | 
 const getChipClassName = (useInlineTimeLayout: boolean): string => [CHIP_BASE_CLASS, useInlineTimeLayout ? CHIP_INLINE_CLASS : CHIP_NORMAL_CLASS].join(" ");
 const getMeasurementClassName = (): string => [CHIP_MEASUREMENT_BASE_CLASS, CHIP_NORMAL_CLASS].join(" ");
 
+
+
+
+
 const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEventChipWeekdayProps) => {
   const layoutMeasurementRef = useRef<HTMLDivElement>(null);
   const titleMeasurementRef = useRef<HTMLSpanElement>(null);
@@ -288,6 +304,10 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
     </HoverEventTooltip>
   );
 };
+
+
+
+
 
 CalendarEventChipWeekday.displayName = "CalendarEventChipWeekday";
 export { CalendarEventChipWeekday };

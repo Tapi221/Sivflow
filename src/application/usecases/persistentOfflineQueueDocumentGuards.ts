@@ -1,5 +1,9 @@
 import type { QueueItem } from "./persistentOfflineQueueTypes";
 
+
+
+
+
 type DocumentLike = {
   uploadStatus?: string | null;
   remoteUrl?: string | null;
@@ -8,6 +12,10 @@ type DocumentLike = {
   localUrl?: string | null;
   blobUrl?: string | null;
 };
+
+
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -53,5 +61,9 @@ const isDocumentUploadReady = (doc: unknown): boolean => {
       snapshot.downloadUrl !== snapshot.blobUrl)
   );
 };
+
+
+
+
 
 export { toDocumentLike, isPdfQueueItem, isDocumentQueueItem, getDocumentKindLabel, isDocumentUploadReady };

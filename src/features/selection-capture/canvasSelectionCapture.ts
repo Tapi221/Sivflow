@@ -1,5 +1,9 @@
 import type { SelectionCaptureRect } from "./selectionCapture.types";
 
+
+
+
+
 const toBlob = (canvas: HTMLCanvasElement): Promise<Blob> => {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -37,4 +41,8 @@ const cropCanvasToBlob = async (sourceCanvas: HTMLCanvasElement, sourceRect: Sel
   return toBlob(outputCanvas);
 };
 
-export { cropCanvasToBlob };
+
+
+
+
+export { cropCanvasToBlob 

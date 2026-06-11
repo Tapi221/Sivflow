@@ -5,6 +5,10 @@ import { addSelection, buildStructuredPrompt, formatTextFromMessages, getLastUse
 import { commonEditRules } from "./common";
 import { buildEditTableMultiCellPrompt } from "./getEditTablePrompt";
 
+
+
+
+
 const buildEditMultiBlockPrompt = (editor: SlateEditor, messages: ChatMessage[]) => {
   const selectingMarkdown = getMarkdownWithSelection(editor);
 
@@ -212,5 +216,9 @@ const getEditPrompt = (editor: SlateEditor, { isSelecting, messages }: { isSelec
 
   return [buildEditSelectionPrompt(editor, messages), "selection"];
 };
+
+
+
+
 
 export { getEditPrompt };

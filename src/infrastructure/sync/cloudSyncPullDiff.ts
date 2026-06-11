@@ -6,6 +6,10 @@ import { getUpdatedAtMillis, PULLABLE_ENTITY_TYPES, sanitizeSyncDataFromCloud } 
 import type { SyncChange } from "@/services/interfaces/ISyncService";
 import { getPullableCollectionRef, getUserSettingsRef, requireCloudSyncFirestore } from "./cloudSyncFirestoreRefs";
 
+
+
+
+
 type PullDiffChange = SyncChange & {
   type: PullableEntityType | "userSetting";
   id: string;
@@ -13,7 +17,15 @@ type PullDiffChange = SyncChange & {
   updatedAt: number;
 };
 
+
+
+
+
 const PAGE_SIZE = 500;
+
+
+
+
 
 const getStartAfterConstraint = (snapshot: QueryDocumentSnapshot<DocumentData>): QueryConstraint | null => {
   const fn = (Firestore as Record<string, unknown>).startAfter;
@@ -124,4 +136,8 @@ const pullCloudSyncDiff = async (userId: string, since: number): Promise<{ chang
   };
 };
 
-export { pullCloudSyncDiff };
+
+
+
+
+export { pullCloudSyncD

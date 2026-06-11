@@ -4,6 +4,10 @@ import { createLatestReviewLogPatch, createReviewPatchFromRating } from "@/servi
 import type { Card, UserSettings } from "@/types";
 import type { ReviewLog } from "@/types/domain/base";
 
+
+
+
+
 type CreateMetaPanelActionsArgs = {
   selectedCard: Card | null;
   settings?: Partial<UserSettings> | null;
@@ -19,7 +23,15 @@ type CreateMetaPanelActionsArgs = {
   handleUpdateTitle: (nextTitle: string) => Promise<void>;
 };
 
+
+
+
+
 const META_PANEL_OPEN_STORAGE_KEY = WEB_STORAGE_KEYS.cardEditorMetaPanelOpen;
+
+
+
+
 
 const buildCardsById = (cards: Card[]) => {
   const map = new Map<string, Card>();
@@ -194,5 +206,9 @@ const createMetaPanelActions = ({ selectedCard, settings, updateCard, onCardUpda
     onUpdateTitle: handleUpdateTitle,
   };
 };
+
+
+
+
 
 export { META_PANEL_OPEN_STORAGE_KEY, buildCardsById, resolveSelectedCardSnapshot, applyEditingDraftPatch, readStoredMetaPanelOpen, writeStoredMetaPanelOpen, createMetaPanelActions };

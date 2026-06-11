@@ -2,6 +2,10 @@ import { buildCardSetById, resolveCardFolderId } from "@/domain/card/selectors/c
 import type { SearchItem } from "@/features/search/model/search.types";
 import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
+
+
+
+
 type BuildExplorerSearchItemsParams = {
   folders: Folder[];
   cards: Card[];
@@ -10,6 +14,10 @@ type BuildExplorerSearchItemsParams = {
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
 };
+
+
+
+
 
 const normalizeLabel = (value: string | null | undefined, fallback: string) => {
   const trimmed = value?.trim();
@@ -176,4 +184,8 @@ const buildExplorerSearchItems = ({ folders, cards, cardSets, documents, onFolde
   return [...folderItems, ...cardSetItems, ...cardItems, ...documentItems];
 };
 
-export { buildExplorerSearchItems };
+
+
+
+
+export { buildExplorerSearchItem

@@ -3,9 +3,17 @@ import { AuthSessionProvider } from "@/contexts/auth/AuthSessionContext";
 import { SecurityProvider } from "@/contexts/security/SecurityContext";
 import { SyncProvider } from "@/sync/appdata-sync/SyncContext";
 
+
+
+
+
 type AuthProviderProps = {
   children: ReactNode;
 };
+
+
+
+
 
 const AuthProvider = ({ children }: AuthProviderProps) => {
   return (
@@ -17,5 +25,13 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   );
 };
 
+
+
+
+
 export { AuthProvider };
-export type { AuthProviderProps };
+
+
+
+
+export type { AuthProviderPr

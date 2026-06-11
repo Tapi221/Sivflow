@@ -28,6 +28,10 @@ import { Check, Copy } from "@/ui/icons";
 import { CodeBlockFrame } from "./CodeBlockFrame";
 import { getViewerLanguageLabels, normalizeEditorLanguage, normalizeViewerLanguage } from "./codeBlockLanguage";
 
+
+
+
+
 type CodeBlockContentProps =
   | {
     mode: "viewer";
@@ -51,7 +55,15 @@ type EditorTextSelection = {
 };
 type PrismGrammar = Parameters<typeof Prism.highlight>[1];
 
+
+
+
+
 const CODE_EDITOR_TAB_TEXT = "  ";
+
+
+
+
 
 const clampTextOffset = (offset: number, textLength: number) => {
   return Math.max(0, Math.min(offset, textLength));
@@ -144,6 +156,10 @@ const setHighlightedEditorCode = (
     editor.innerHTML = nextHtml;
   }
 };
+
+
+
+
 
 const CodeBlockContent = (props: CodeBlockContentProps) => {
   const [copied, setCopied] = useState(false);
@@ -421,5 +437,9 @@ const CodeBlockContent = (props: CodeBlockContentProps) => {
     </div>
   );
 };
+
+
+
+
 
 export { CodeBlockContent };

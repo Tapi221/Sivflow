@@ -2,9 +2,15 @@ import type { DragEvent as ReactDragEvent } from "react";
 import { LAYERED_TREE_AUTO_SCROLL_EDGE_PX, LAYERED_TREE_AUTO_SCROLL_MAX_STEP, LAYERED_TREE_DRAG_IMAGE_OFFSET_X, LAYERED_TREE_DRAG_IMAGE_OFFSET_Y, LAYERED_TREE_DROP_EDGE_RATIO, LAYERED_TREE_DROP_HIT_TEST_VERTICAL_TOLERANCE_PX, LAYERED_TREE_DROP_INDICATOR_BASE_LEFT_PX, LAYERED_TREE_DROP_INSIDE_INTENT_OFFSET_PX, LAYERED_TREE_FOLDER_ID_ATTRIBUTE, LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_LEVEL, LAYERED_TREE_ROW_SELECTOR, LAYERED_TREE_TAG_ID_ATTRIBUTE } from "./layeredTreeDnd.constants";
 import type { LayeredTreeDragState, LayeredTreeDropInstruction, LayeredTreeDropPosition, LayeredTreeItem } from "./layeredTreeDnd.types";
 
+
+
 type LayeredTreeEventDropTarget = { id: string; rowElement: HTMLElement; };
 
+
+
 const LAYERED_TREE_ITEM_ID_ATTRIBUTES = [LAYERED_TREE_FOLDER_ID_ATTRIBUTE, LAYERED_TREE_TAG_ID_ATTRIBUTE] as const;
+
+
 
 const getLayeredTreeItemId = (rowElement: HTMLElement): string | null => {
   for (const attributeName of LAYERED_TREE_ITEM_ID_ATTRIBUTES) {
@@ -127,5 +133,7 @@ const resolveLayeredTreeEventDropTarget = (event: ReactDragEvent<HTMLElement>, i
 };
 const getLayeredTreeDropPositionFromTarget = (event: ReactDragEvent<HTMLElement>, target: LayeredTreeEventDropTarget): LayeredTreeDropPosition => getLayeredTreeDropPositionForRow(event, target.rowElement);
 const isLayeredTreeDropInstructionEqual = (left: LayeredTreeDropInstruction | null, right: LayeredTreeDropInstruction | null): boolean => left?.sourceId === right?.sourceId && left?.targetId === right?.targetId && left?.position === right?.position && left?.parentId === right?.parentId;
+
+
 
 export { getLayeredTreeDropIndicatorLeft, isLayeredTreeAppendDropTarget, getLayeredTreeDropPosition, getLayeredTreeDropParentId, createLayeredTreeItemMap, isLayeredTreeItemAncestorOf, createLayeredTreeReorderedSiblingList, applyLayeredTreeDragPreview, getLayeredTreeAutoScrollStep, isLayeredTreeRowEventTarget, resolveLayeredTreeEventDropTarget, getLayeredTreeDropPositionFromTarget, isLayeredTreeDropInstructionEqual };

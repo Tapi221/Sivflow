@@ -2,10 +2,18 @@ import * as XLSX from "xlsx";
 import type { ImportIssue, ImportParseResult, ImportSheetName } from "@/features/import/domain/import.types";
 import { IMPORT_SHEET_NAME } from "@/features/import/domain/import.types";
 
+
+
+
+
 type ReadXlsxImportRowsResult = | { sheetName: ImportSheetName;
   rows: unknown[][];
 }
   | ImportParseResult;
+
+
+
+
 
 const buildIssue = ({
   level,
@@ -55,5 +63,13 @@ const readXlsxImportRows = (fileBuffer: ArrayBuffer): ReadXlsxImportRowsResult =
   };
 };
 
+
+
+
+
 export { readXlsxImportRows };
-export type { ReadXlsxImportRowsResult };
+
+
+
+
+export type { ReadXlsxImportRowsRes

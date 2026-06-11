@@ -3,6 +3,10 @@ import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { getLocalDb } from "@/services/localDB";
 
+
+
+
+
 const useSelectedExplorerCard = (cardId: string | null) => {
   const { currentUser } = useAuthSession();
 
@@ -30,4 +34,8 @@ const useSelectedExplorerCard = (cardId: string | null) => {
   };
 };
 
-export { useSelectedExplorerCard };
+
+
+
+
+export { useSelectedExplorerCard 

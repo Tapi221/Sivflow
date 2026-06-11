@@ -13,6 +13,10 @@ import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import { Tag } from "@/ui/icons";
 
+
+
+
+
 type ContentTypeFilter = "card" | "pdf";
 type ToggleableFlag = "any" | "on" | "off";
 type TagMatchMode = "any" | "all";
@@ -47,6 +51,10 @@ type TagFilterSelectionSwitchProps = {
   onToggle: () => void;
 };
 
+
+
+
+
 const TAG_MATCH_MODE_OPTIONS = [
   { label: "いずれか (OR)", value: "any" },
   { label: "すべて (AND)", value: "all" },
@@ -63,6 +71,10 @@ const CONTENT_TYPE_OPTIONS = [
   label: string;
   value: ContentTypeFilter;
 }>;
+
+
+
+
 
 const normalizeTagParentId = (parentId: string | null | undefined): string | null => {
   return typeof parentId === "string" && parentId.trim().length > 0
@@ -189,6 +201,10 @@ const buildVisibleTagTreeItems = (
 
   return flattenTagTreeNodes(visibleNodes, 0);
 };
+
+
+
+
 
 const TagFilterSelectionSwitch = ({ label, checked, onToggle }: TagFilterSelectionSwitchProps) => {
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
@@ -407,5 +423,9 @@ const TagFilterPanel = ({ allTags, isOpen = false, className }: TagFilterPanelPr
     </FilterPanelShell>
   );
 };
+
+
+
+
 
 export { TagFilterPanel };

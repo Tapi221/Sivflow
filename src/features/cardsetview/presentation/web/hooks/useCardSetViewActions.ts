@@ -4,6 +4,10 @@ import { createAndFocusCard as createAndFocusCardUseCase, toggleCardBookmark, to
 import type { Card } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 
+
+
+
+
 interface UseCardSetViewActionsOptions {
   cardSetId: string | null;
   cardSetById: ReadonlyMap<string, Pick<CardSet, "id" | "folderId">>;
@@ -19,6 +23,10 @@ interface UseCardSetViewActionsOptions {
   setPendingFocusCardId: (cardId: string | null) => void;
   clearFlippedCards: () => void;
 }
+
+
+
+
 
 const useCardSetViewActions = ({ cardSetId, cardSetById, selectedCardSet, selectedCard, currentCard, createCard, updateCard, toastError, beginGlobalEditing, setPendingFocusCardId, clearFlippedCards }: UseCardSetViewActionsOptions) => {
   const createAndFocusCard = useCallback(async (): Promise<boolean> => {
@@ -101,4 +109,8 @@ const useCardSetViewActions = ({ cardSetId, cardSetById, selectedCardSet, select
   };
 };
 
-export { useCardSetViewActions };
+
+
+
+
+export { useCardSetViewAction

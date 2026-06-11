@@ -2,6 +2,10 @@ import { useLayoutEffect, useRef } from "react";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 
+
+
+
+
 type Params = {
   selectedViewMode: CalendarViewMode;
   calendarBufferBefore: number;
@@ -12,6 +16,10 @@ type Params = {
   headerRef?: React.RefObject<HTMLDivElement | null>;
   headerRefs?: React.RefObject<HTMLDivElement | null>[];
 };
+
+
+
+
 
 const isViewportRenderedWeekdayViewMode = (viewMode: CalendarViewMode): boolean =>
   viewMode === "days" ||
@@ -85,4 +93,8 @@ const useCalendarScrollPositionSync = ({ selectedViewMode, calendarBufferBefore,
   }, [selectedViewMode, calendarBufferBefore, calendarDayColumnWidth, viewportWidth, scrollTargetToken, scrollRef, headerRef, headerRefs]);
 };
 
-export { useCalendarScrollPositionSync };
+
+
+
+
+export { useCalendarScrollPositionSyn

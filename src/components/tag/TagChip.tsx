@@ -3,6 +3,10 @@ import type { TagColorKey } from "@/chip/tag/tagColor";
 import { cn } from "@/lib/utils";
 import { TagBadge } from "./TagBadge";
 
+
+
+
+
 interface TagChipProps {
   label: string;
   colorKey?: TagColorKey;
@@ -12,6 +16,10 @@ interface TagChipProps {
   onRemove?: () => void;
   removeAriaLabel?: string;
 }
+
+
+
+
 
 const TagChip = ({
   label,
@@ -34,5 +42,13 @@ const TagChip = ({
   );
 };
 
+
+
+
+
 export { TagChip };
-export type { TagChipProps };
+
+
+
+
+export type { TagChipPr

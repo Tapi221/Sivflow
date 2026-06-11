@@ -3,6 +3,10 @@ import type { QueueItem } from "@/application/usecases/persistentOfflineQueueMod
 import { auth, storage } from "@/infrastructure/firebase/client";
 import type { UploadedImage } from "@/types";
 
+
+
+
+
 const uploadQueuedAsset = async (item: QueueItem): Promise<UploadedImage> => {
   const user = auth.currentUser;
   if (!user) {
@@ -45,4 +49,8 @@ const uploadQueuedAsset = async (item: QueueItem): Promise<UploadedImage> => {
   });
 };
 
-export { uploadQueuedAsset };
+
+
+
+
+export { uploadQueuedAsset 

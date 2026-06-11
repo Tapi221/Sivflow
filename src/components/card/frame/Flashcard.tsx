@@ -16,6 +16,10 @@ import { useFlashcardDerived } from "./useFlashcardDerived";
 import { useFlashcardInk } from "./useFlashcardInk";
 import { useFlashcardMediaState } from "./useFlashcardMediaState";
 
+
+
+
+
 interface FlashcardProps {
   card: FlashcardCardLike | null | undefined;
   isFlipped?: boolean;
@@ -51,6 +55,10 @@ interface FlashcardProps {
   contentZoom?: number;
   headerIconVisualScale?: number;
 }
+
+
+
+
 
 const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
   if (prev.card !== next.card) return false;
@@ -108,6 +116,10 @@ const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
     prev.headerIconVisualScale === next.headerIconVisualScale
   );
 };
+
+
+
+
 
 const FlashcardInner = ({
   card,
@@ -339,7 +351,15 @@ const FlashcardInner = ({
   );
 };
 
+
+
+
+
 const Flashcard = React.memo(FlashcardInner, areFlashcardPropsEqual);
 Flashcard.displayName = "Flashcard";
 export { Flashcard };
+
+
+
+
 export type { FlashcardCardLike };

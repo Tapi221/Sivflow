@@ -1,6 +1,10 @@
 import type { CSSProperties } from "react";
 import { getRuledStyle } from "@/components/card/frame/ruledStyles";
 
+
+
+
+
 type RuledTextareaStyleParams = Readonly<{
   rowPx: number;
   offsetPx?: number;
@@ -9,8 +13,16 @@ type RuledTextareaStyleParams = Readonly<{
   includeBottomLine?: boolean;
 }>;
 
+
+
+
+
 const DEFAULT_RULED_TEXTAREA_COLOR = "rgba(0,0,0,0.05)";
 const DEFAULT_RULED_TEXTAREA_LINE_PX = 1;
+
+
+
+
 
 const toBackgroundOffset = (offsetPx: number) =>
   `0 ${Number(offsetPx.toFixed(3))}px`;
@@ -38,5 +50,9 @@ const buildRuledTextareaStyle = ({
     backgroundAttachment: "local",
   };
 };
+
+
+
+
 
 export { buildRuledTextareaStyle };

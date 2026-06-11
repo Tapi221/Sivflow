@@ -4,6 +4,10 @@ import { cn } from "@/lib/utils";
 import { Type } from "@/ui/icons";
 import { TextBlockContent } from "./TextBlockContent";
 
+
+
+
+
 interface TextBlockProps {
   content: string;
   onChange: (content: string) => void;
@@ -26,6 +30,10 @@ interface TextBlockProps {
   zoom?: number;
 }
 
+
+
+
+
 const areTextBlockPropsEqual = (prev: TextBlockProps, next: TextBlockProps) =>
   prev.content === next.content &&
   prev.dragEnabled === next.dragEnabled &&
@@ -38,6 +46,10 @@ const areTextBlockPropsEqual = (prev: TextBlockProps, next: TextBlockProps) =>
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&
   prev.zoom === next.zoom;
+
+
+
+
 
 const TextBlockInner = ({
   content,
@@ -95,6 +107,10 @@ const TextBlockInner = ({
     </BlockWrapper>
   );
 };
+
+
+
+
 
 const TextBlock = React.memo(TextBlockInner, areTextBlockPropsEqual);
 TextBlock.displayName = "TextBlock";

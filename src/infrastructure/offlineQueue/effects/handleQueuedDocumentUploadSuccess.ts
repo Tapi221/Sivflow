@@ -3,6 +3,10 @@ import { getDocumentKindLabel, toDocumentLike } from "@/application/usecases/per
 import { getLocalDb } from "@/infrastructure/localdb/client";
 import type { UploadedImage } from "@/types";
 
+
+
+
+
 const handleQueuedDocumentUploadSuccess = async (item: QueueItem, updatedImage: UploadedImage): Promise<void> => {
   const localDb = await getLocalDb();
   const existingDoc = await localDb.documents.get(updatedImage.id);
@@ -35,4 +39,8 @@ const handleQueuedDocumentUploadSuccess = async (item: QueueItem, updatedImage: 
   );
 };
 
-export { handleQueuedDocumentUploadSuccess };
+
+
+
+
+export { handleQueuedDocumentUploadSuccess 

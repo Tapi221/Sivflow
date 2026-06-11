@@ -7,6 +7,8 @@
 import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
 import type { Auth } from "firebase/auth";
 
+
+
 // ─────────────────────────────────────────────────────────────
 // カレンダーイベント
 // ─────────────────────────────────────────────────────────────

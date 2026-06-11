@@ -4,12 +4,20 @@ import { useCardPaneWidthState } from "@/components/card/shell/useCardPanewidthS
 import { getCardSetWidthPreference, setCardSetWidthPreference } from "@/services/cardWidthPreferences";
 import type { UserSettings } from "@/types";
 
+
+
+
+
 interface UseCardSetViewPaneWidthOptions {
   isGlobalEditing: boolean;
   isDesktop: boolean;
   settings: Partial<UserSettings> | null | undefined;
   cardSetId?: string | null;
 }
+
+
+
+
 
 const getReservedScrollbarGutterWidthPx = () => {
   if (typeof document === "undefined") return 0;
@@ -87,4 +95,8 @@ const useCardSetViewPaneWidth = ({ isGlobalEditing, isDesktop, settings, cardSet
   });
 };
 
-export { useCardSetViewPaneWidth };
+
+
+
+
+export { useCardSetViewPaneWidt

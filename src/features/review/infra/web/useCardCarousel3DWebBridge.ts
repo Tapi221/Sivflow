@@ -1,7 +1,15 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { clampCardCarouselIndex } from "@/features/review/domain/cardCarouselIndexRules";
 
+
+
+
+
 type CardCarouselScrollBehavior = ScrollBehavior | "instant";
+
+
+
+
 
 const useCardCarousel3DWebBridge = ({ activeIndex, itemCount, itemSpan, scrollDebounceMs, onSettledIndexChange }: { activeIndex: number;
   itemCount: number;
@@ -136,4 +144,8 @@ const useCardCarousel3DWebBridge = ({ activeIndex, itemCount, itemSpan, scrollDe
   };
 };
 
-export { useCardCarousel3DWebBridge };
+
+
+
+
+export { useCardCarousel3DWebBridg

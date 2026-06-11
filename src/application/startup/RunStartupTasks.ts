@@ -4,14 +4,26 @@ import { localStorageBackupStore } from "@/infrastructure/browser-storage/LocalS
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
+
+
+
+
 interface RunStartupTasksParams { userId: string;
   isDisposed?: () => boolean;
 }
+
+
+
+
 
 const performAutoBackupUseCase = createPerformAutoBackupUseCase({
   backupStore: localStorageBackupStore,
 });
 const checkDataIntegrityUseCase = createCheckDataIntegrityUseCase();
+
+
+
+
 
 const isDisposedDefault = (): boolean => false;
 const logIntegrityReport = (report: Awaited<ReturnType<typeof checkDataIntegrityUseCase.execute>>) => {
@@ -100,5 +112,13 @@ const runStartupTasks = async ({ userId, isDisposed = isDisposedDefault }: RunSt
   }
 };
 
+
+
+
+
 export { resetStartupTasks, runStartupTasks };
+
+
+
+
 export type { RunStartupTasksParams };
