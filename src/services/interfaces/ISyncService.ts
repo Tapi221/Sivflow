@@ -2,6 +2,7 @@ import type { SyncConflict as DomainSyncConflict, SyncEntity, SyncResult } from 
 import type { NetworkStatus, SyncContextSource } from "@/types/domain/telemetry";
 
 export type { SyncEntity };
+
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = JsonPrimitive | JsonObject | JsonArray;
 export type JsonObject = { [key: string]: JsonValue; };

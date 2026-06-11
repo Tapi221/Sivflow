@@ -20,6 +20,7 @@ type UsePdfSelectionCaptureResult = {
   selectionCaptureMessage: string | null;
   handleCaptureSelection: (area: SelectionCaptureArea) => Promise<void>;
 };
+
 export type { UsePdfSelectionCaptureParams, UsePdfSelectionCaptureResult };
 
 const PDF_SELECTION_CAPTURE_MESSAGE_TIMEOUT_MS = 1800;

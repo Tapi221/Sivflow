@@ -404,5 +404,4 @@ export class LocalDB extends Dexie { users!: Dexie.Table<User, string>;
 }
 
 export type { CardRelation, LocalDBInstance, LocalDBLike, LocalDBTableMap, ProjectMap, SyncableEntityTable, TagRecord } from "./types";
-
 export { getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout };

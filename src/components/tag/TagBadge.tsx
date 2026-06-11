@@ -163,5 +163,4 @@ const TagBadge = ({
 };
 
 export { TagBadge };
-
 export type { TagBadgeProps };

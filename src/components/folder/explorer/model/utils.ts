@@ -4,7 +4,6 @@ import { isTypingTarget } from "@/features/hotkey/hotkeyGuards";
 import { hasOpenModalDialog } from "@/features/hotkey/modalGuards";
 
 export type { Card, DocumentItem };
-
 export { hasOpenModalDialog };
 
 export type FolderTreeNode = { id?: string;

@@ -6,6 +6,7 @@ import { getLastSelectedFolderId, setLastSelectedFolderId } from "./explorerStor
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 
 export type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
+
 export type FoldersRouteAdapter = { routeKey: string;
   isDesktop: boolean;
   readRouteState: () => ExplorerRouteState;

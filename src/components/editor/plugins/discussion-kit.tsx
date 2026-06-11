@@ -174,5 +174,4 @@ const getDiscussionBlockClickTarget = ({
   });
 
 export type { TDiscussion };
-
 export { DiscussionKit, discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarget };

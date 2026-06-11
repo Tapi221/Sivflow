@@ -112,5 +112,4 @@ const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
 };
 
 export { AuthSessionProvider };
-
 export type { AuthSessionProviderProps };

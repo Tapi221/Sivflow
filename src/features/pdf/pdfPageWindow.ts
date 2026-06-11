@@ -7,6 +7,7 @@ type PdfPageWindowOptions = {
   fallbackPageNumber?: number | null;
   overscanPageCount?: number;
 };
+
 export type { PdfPageWindowMetric, PdfPageWindowOptions };
 
 const DEFAULT_PDF_PAGE = 1;
