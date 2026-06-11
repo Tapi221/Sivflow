@@ -12,8 +12,7 @@ const getEntityId = (obj: unknown): string | undefined => {
       : undefined;
 };
 
-export const attachHooks = (db: LocalDB): void => {
-  const cardsTable = db.table("cards");
+export const attachHooks = (db: LocalDB): void => { const cardsTable = db.table("cards");
   cardsTable.hook("creating", (_primaryKey, obj) => {
     assertNoBlobUrlInCardPayload(obj, {
       entityType: "card",

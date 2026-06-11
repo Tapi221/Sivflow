@@ -77,16 +77,14 @@ const getFallbackInstance = async (userId?: string, reason?: unknown): Promise<I
 
 export const getLocalDb = async (userId?: string): Promise<LocalDBSyncStore> => getInstance(userId);
 
-export const getLocalDbSync = (userId?: string): LocalDBSyncStore => {
-  const targetUserId = userId ?? currentUserId ?? "anonymous";
+export const getLocalDbSync = (userId?: string): LocalDBSyncStore => { const targetUserId = userId ?? currentUserId ?? "anonymous";
   if (cachedInstance && currentUserId === targetUserId) return cachedInstance as unknown as LocalDBSyncStore;
   return createFallbackInstance(targetUserId, "local-db-not-initialized") as unknown as LocalDBSyncStore;
 };
 
 export const getInstanceUserId = (): string | null => currentUserId;
 
-export const getInstance = async (userId?: string): Promise<LocalDBSyncStore> => {
-  const targetUserId = userId ?? "anonymous";
+export const getInstance = async (userId?: string): Promise<LocalDBSyncStore> => { const targetUserId = userId ?? "anonymous";
 
   if (resettingPromise) await resettingPromise;
 
@@ -137,10 +135,7 @@ export const getInstance = async (userId?: string): Promise<LocalDBSyncStore> =>
 
 export const initializeDB = async (userId?: string): Promise<LocalDBSyncStore> => getInstance(userId);
 
-export const clearInstance = (): void => {
-  if (instance) {
-    try {
-      instance.close();
+export const clearInstance = (): void => { if (instance) { try { instance.close();
     } catch {
       // ignore close failure
     }
@@ -160,8 +155,7 @@ export const clearInstance = (): void => {
   fallbackInstances.clear();
 };
 
-export const resetForLogout = async (userId?: string): Promise<void> => {
-  const targetUserId = userId ?? currentUserId ?? "anonymous";
+export const resetForLogout = async (userId?: string): Promise<void> => { const targetUserId = userId ?? currentUserId ?? "anonymous";
 
   if (resettingPromise) {
     await resettingPromise;

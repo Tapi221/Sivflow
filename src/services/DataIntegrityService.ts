@@ -7,9 +7,7 @@ const checkDataIntegrityUseCase = createCheckDataIntegrityUseCase();
 const quarantineOrphanedCardsUseCase = createQuarantineOrphanedCardsUseCase();
 const hardDeleteOrphanedCardsUseCase = createHardDeleteOrphanedCardsUseCase();
 
-export const dataIntegrityService = {
-  checkIntegrity: async () => {
-    return await checkDataIntegrityUseCase.execute();
+export const dataIntegrityService = { checkIntegrity: async () => { return await checkDataIntegrityUseCase.execute();
   },
   quarantineOrphanedCards: async () => {
     return await quarantineOrphanedCardsUseCase.execute();

@@ -11,20 +11,13 @@ import { getEditorDOMFromHtmlString } from 'platejs/static';
 import { useEditorRef } from 'platejs/react';
 import { useFilePicker } from 'use-file-picker';
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from './dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger, } from './dropdown-menu';
 
 import { ToolbarButton } from './toolbar';
 
 type ImportType = 'html' | 'markdown';
 
-export function ImportToolbarButton(props: DropdownMenuProps) {
-  const editor = useEditorRef();
+export function ImportToolbarButton(props: DropdownMenuProps) { const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
 
   const getFileNodes = (text: string, type: ImportType) => {

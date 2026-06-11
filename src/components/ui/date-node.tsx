@@ -2,27 +2,18 @@
 
 import * as React from 'react';
 
-import {
-  formatDateValue,
-  getDateDisplayLabel,
-  parseCanonicalDateValue,
-} from '@platejs/date';
+import { formatDateValue, getDateDisplayLabel, parseCanonicalDateValue, } from '@platejs/date';
 import type { TDateElement } from 'platejs';
 import type { PlateElementProps } from 'platejs/react';
 
 import { PlateElement, useReadOnly } from 'platejs/react';
 
 import { Calendar } from './calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from './popover';
+import { Popover, PopoverContent, PopoverTrigger, } from './popover';
 import { cn } from '@/lib/utils';
 import { inlineSuggestionVariants } from '@/components/suggestion';
 
-export function DateElement(props: PlateElementProps<TDateElement>) {
-  const { editor, element } = props;
+export function DateElement(props: PlateElementProps<TDateElement>) { const { editor, element } = props;
   const readOnly = useReadOnly();
 
   const trigger = (

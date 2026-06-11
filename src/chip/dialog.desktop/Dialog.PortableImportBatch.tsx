@@ -6,8 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { useToast } from "@/contexts/ToastContext";
 import { cn } from "@/lib/utils";
 
-export type PortableImportBatchCompletedPayload = {
-  cardSetId: string;
+export type PortableImportBatchCompletedPayload = { cardSetId: string;
   cardSetName: string;
   folderId: string;
   createdCount: number;
@@ -45,20 +44,7 @@ const STATUS_CLASS_NAMES: Record<PortableImportBatchItem["status"], string> = {
   skipped: "bg-amber-50 text-amber-700",
 };
 
-export const PortableImportBatchDialog = ({
-  open,
-  onOpenChange,
-  folderId,
-  folderName,
-  files,
-  filesRevision = 0,
-  onImported,
-  createCardSet,
-  updateCardSet,
-  createCard,
-  ensureTagByName,
-}: PortableImportBatchDialogProps) => {
-  const toast = useToast();
+export const PortableImportBatchDialog = ({ open, onOpenChange, folderId, folderName, files, filesRevision = 0, onImported, createCardSet, updateCardSet, createCard, ensureTagByName, }: PortableImportBatchDialogProps) => { const toast = useToast();
   const [items, setItems] = useState<PortableImportBatchItem[]>([]);
   const [isImporting, setIsImporting] = useState(false);
 

@@ -10,14 +10,9 @@ const BASE_ZOOM_INPUT_IGNORE_SELECTORS = [
   "[contenteditable]:not([contenteditable='false'])",
 ];
 
-export const DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR =
-  BASE_ZOOM_INPUT_IGNORE_SELECTORS.join(",");
+export const DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR = BASE_ZOOM_INPUT_IGNORE_SELECTORS.join(",");
 
-export const resolveEventTargetElement = (
-  target: EventTarget | null,
-): Element | null => {
-  if (typeof Element !== "undefined" && target instanceof Element) {
-    return target;
+export const resolveEventTargetElement = ( target: EventTarget | null, ): Element | null => { if (typeof Element !== "undefined" && target instanceof Element) { return target;
   }
 
   if (typeof Node !== "undefined" && target instanceof Node) {
@@ -27,12 +22,7 @@ export const resolveEventTargetElement = (
   return null;
 };
 
-export const shouldHandleZoomInputTarget = ({
-  container,
-  target,
-  ignoreSelector = DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR,
-}: {
-  container: HTMLElement | null;
+export const shouldHandleZoomInputTarget = ({ container, target, ignoreSelector = DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR, }: { container: HTMLElement | null;
   target: EventTarget | null;
   ignoreSelector?: string;
 }) => {

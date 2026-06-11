@@ -10,13 +10,11 @@ import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integrati
 import { cn } from "@/lib/utils";
 import { useDateFnsLocale, useT } from "@shared/i18n/useT";
 
-export type CalendarYearEventPriority = {
-  group: number;
+export type CalendarYearEventPriority = { group: number;
   index: number;
 };
 
-export type CalendarYearEventDisplay = {
-  color?: string;
+export type CalendarYearEventDisplay = { color?: string;
   priority: CalendarYearEventPriority;
 };
 

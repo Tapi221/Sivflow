@@ -18,15 +18,7 @@ const resolveFixedWidthSpec = (widthPx: number): VerticalCardPagerItemWidthSpec 
   widthPx: clampWidthPx(widthPx),
 });
 
-export const resolveVerticalCardPagerItemWidthSpec = <T,>({
-  card,
-  idx,
-  isActive,
-  cardWidth,
-  getCardWidth,
-  getCardWidthSpec,
-}: ResolveVerticalCardPagerItemWidthSpecOptions<T>): VerticalCardPagerItemWidthSpec => {
-  const widthSpec = getCardWidthSpec?.(card, idx, isActive);
+export const resolveVerticalCardPagerItemWidthSpec = <T,>({ card, idx, isActive, cardWidth, getCardWidth, getCardWidthSpec, }: ResolveVerticalCardPagerItemWidthSpecOptions<T>): VerticalCardPagerItemWidthSpec => { const widthSpec = getCardWidthSpec?.(card, idx, isActive);
 
   if (widthSpec?.mode === "stretch") {
     return { mode: "stretch" };
@@ -40,14 +32,7 @@ export const resolveVerticalCardPagerItemWidthSpec = <T,>({
   return resolveFixedWidthSpec(resolvedWidth);
 };
 
-export const buildVerticalCardPagerItemStyle = (widthSpec: VerticalCardPagerItemWidthSpec): CSSProperties => {
-  if (widthSpec.mode === "stretch") {
-    return {
-      width: "100%",
-      maxWidth: "100%",
-      minWidth: 0,
-      alignSelf: "stretch",
-    };
+export const buildVerticalCardPagerItemStyle = (widthSpec: VerticalCardPagerItemWidthSpec): CSSProperties => { if (widthSpec.mode === "stretch") { return { width: "100%", maxWidth: "100%", minWidth: 0, alignSelf: "stretch", };
   }
 
   return {

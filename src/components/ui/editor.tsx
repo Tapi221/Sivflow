@@ -35,21 +35,7 @@ const editorContainerVariants = cva(
   }
 );
 
-export function EditorContainer({
-  className,
-  variant,
-  ...props
-}: React.ComponentProps<'div'> & VariantProps<typeof editorContainerVariants>) {
-  return (
-    <PlateContainer
-      className={cn(
-        'ignore-click-outside/toolbar',
-        editorContainerVariants({ variant }),
-        className
-      )}
-      {...props}
-    />
-  );
+export function EditorContainer({ className, variant, ...props }: React.ComponentProps<'div'> & VariantProps<typeof editorContainerVariants>) { return ( <PlateContainer className={cn( 'ignore-click-outside/toolbar', editorContainerVariants({ variant }), className )} {...props} /> );
 }
 
 const editorVariants = cva(
@@ -87,46 +73,13 @@ const editorVariants = cva(
   }
 );
 
-export type EditorProps = PlateContentProps &
-  VariantProps<typeof editorVariants>;
+export type EditorProps = PlateContentProps & VariantProps<typeof editorVariants>;
 
-export const Editor = ({
-  className,
-  disabled,
-  focused,
-  variant,
-  ref,
-  ...props
-}: EditorProps & { ref?: React.RefObject<HTMLDivElement | null> }) => (
-  <PlateContent
-    ref={ref}
-    className={cn(
-      editorVariants({
-        disabled,
-        focused,
-        variant,
-      }),
-      className
-    )}
-    disabled={disabled}
-    disableDefaultStyles
-    {...props}
-  />
-);
+export const Editor = ({ className, disabled, focused, variant, ref, ...props }: EditorProps & { ref?: React.RefObject<HTMLDivElement | null> }) => ( <PlateContent ref={ref} className={cn( editorVariants({ disabled, focused, variant, }), className )} disabled={disabled} disableDefaultStyles {...props} /> );
 
 Editor.displayName = 'Editor';
 
-export function EditorView({
-  className,
-  variant,
-  ...props
-}: PlateViewProps & VariantProps<typeof editorVariants>) {
-  return (
-    <PlateView
-      {...props}
-      className={cn(editorVariants({ variant }), className)}
-    />
-  );
+export function EditorView({ className, variant, ...props }: PlateViewProps & VariantProps<typeof editorVariants>) { return ( <PlateView {...props} className={cn(editorVariants({ variant }), className)} /> );
 }
 
 EditorView.displayName = 'EditorView';

@@ -5,14 +5,9 @@ import { CURRENT_TAG_STORE } from "./tagStoreNames";
 import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueuePayloadGuards";
 import type { Card, Folder } from "@/types";
 
-export type EnqueueSync = (
-  table: string,
-  type: "upload" | "download",
-  payload: unknown,
-) => Promise<void>;
+export type EnqueueSync = ( table: string, type: "upload" | "download", payload: unknown, ) => Promise<void>;
 
-export interface TableLike<T extends object> {
-  add(item: T): PromiseLike<unknown> | unknown;
+export interface TableLike<T extends object> { add(item: T): PromiseLike<unknown> | unknown;
   get(id: unknown): PromiseLike<T | undefined> | T | undefined;
   update(id: unknown, changes: unknown): PromiseLike<number> | number;
   put(item: T): PromiseLike<unknown> | unknown;
@@ -20,8 +15,7 @@ export interface TableLike<T extends object> {
   delete(id: unknown): PromiseLike<void> | void;
 }
 
-export interface DbLike {
-  table<T extends object, _TKey = string>(name: string): TableLike<T>;
+export interface DbLike { table<T extends object, _TKey = string>(name: string): TableLike<T>;
   name?: string;
 }
 
@@ -296,18 +290,7 @@ const enqueueThroughSyncQueueApi = async (
   });
 };
 
-export const addItem: AddItem = async (
-  db: DbLike,
-  table: string,
-  item: unknown,
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<string> => {
-  if (table === "cards") {
-    assertNoBlobUrlInCardPayload(item, {
-      entityType: table,
-      entityId: getId(item),
-    });
+export const addItem: AddItem = async ( db: DbLike, table: string, item: unknown, skipSync: boolean, enqueueSync: EnqueueSync, ): Promise<string> => { if (table === "cards") { assertNoBlobUrlInCardPayload(item, { entityType: table, entityId: getId(item), });
   }
 
   const payload = toStorageRow(item);
@@ -424,19 +407,7 @@ export const addItem: AddItem = async (
   }
 };
 
-export const updateItem: UpdateItem = async (
-  db: DbLike,
-  table: string,
-  id: string,
-  changes: unknown,
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<number> => {
-  if (table === "documents") {
-    if (!isDocDbCtx(db)) {
-      throw new Error(
-        "[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.",
-      );
+export const updateItem: UpdateItem = async ( db: DbLike, table: string, id: string, changes: unknown, skipSync: boolean, enqueueSync: EnqueueSync, ): Promise<number> => { if (table === "documents") { if (!isDocDbCtx(db)) { throw new Error( "[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.", );
     }
 
     await cleanupBeforeDocumentUpdate(db, id, changes as DocumentUpdateChanges);
@@ -491,16 +462,7 @@ export const updateItem: UpdateItem = async (
   return result;
 };
 
-export const deleteItem: DeleteItem = async (
-  db: DbLike,
-  table: string,
-  id: string,
-): Promise<void> => {
-  if (table === "documents") {
-    if (!isDocDbCtx(db)) {
-      throw new Error(
-        "[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.",
-      );
+export const deleteItem: DeleteItem = async ( db: DbLike, table: string, id: string, ): Promise<void> => { if (table === "documents") { if (!isDocDbCtx(db)) { throw new Error( "[LocalDB] documentsLifecycle requires db.documents, but the provided db does not have it.", );
     }
 
     await cleanupBeforeDocumentDelete(db, id);
@@ -510,17 +472,7 @@ export const deleteItem: DeleteItem = async (
   await tableApi.delete(id);
 };
 
-export const softDelete = async (
-  db: DbLike,
-  table: string,
-  id: string,
-  updateItemFn: (
-    table: string,
-    id: string,
-    changes: Record<string, unknown>,
-  ) => Promise<number>,
-): Promise<number> => {
-  const now = new Date();
+export const softDelete = async ( db: DbLike, table: string, id: string, updateItemFn: ( table: string, id: string, changes: Record<string, unknown>, ) => Promise<number>, ): Promise<number> => { const now = new Date();
 
   console.log(`[LocalDB] softDelete -> table=${table} id=${id}`);
 
@@ -547,14 +499,7 @@ export const softDelete = async (
   });
 };
 
-export const bulkUpsert: BulkUpsert = async (
-  db: DbLike,
-  table: string,
-  items: unknown[],
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<void> => {
-  if (items.length === 0) return;
+export const bulkUpsert: BulkUpsert = async ( db: DbLike, table: string, items: unknown[], skipSync: boolean, enqueueSync: EnqueueSync, ): Promise<void> => { if (items.length === 0) return;
 
   if (table === "cards") {
     for (const item of items) {
@@ -586,18 +531,7 @@ export const bulkUpsert: BulkUpsert = async (
   }
 };
 
-export const upsert: Upsert = async (
-  db: DbLike,
-  tableName: string,
-  data: unknown,
-  skipSync: boolean,
-  enqueueSync: EnqueueSync,
-): Promise<void> => {
-  if (tableName === "cards") {
-    assertNoBlobUrlInCardPayload(data, {
-      entityType: tableName,
-      entityId: getId(data),
-    });
+export const upsert: Upsert = async ( db: DbLike, tableName: string, data: unknown, skipSync: boolean, enqueueSync: EnqueueSync, ): Promise<void> => { if (tableName === "cards") { assertNoBlobUrlInCardPayload(data, { entityType: tableName, entityId: getId(data), });
   }
 
   const payload = toStorageRow(data);

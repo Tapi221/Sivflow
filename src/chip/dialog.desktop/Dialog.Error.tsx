@@ -15,8 +15,7 @@ interface ErrorDialogProps {
  * - 続行不可
  * - closeable の場合のみ閉じられる
  */
-export const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification, onDismiss }) => {
-  const [showDetails, setShowDetails] = useState(false);
+export const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification, onDismiss }) => { const [showDetails, setShowDetails] = useState(false);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">

@@ -39,8 +39,7 @@ const resolveDocumentFileId = (documentId: string, document: Pick<DocumentItem, 
   return localFileId.length > 0 ? localFileId : documentId;
 };
 
-export const useDocumentCommands = () => {
-  const { currentUser } = useAuthSession();
+export const useDocumentCommands = () => { const { currentUser } = useAuthSession();
 
   const updateDocument = useCallback(
     async (documentId: string, updates: Partial<DocumentItem>, options: UpdateDocumentOptions = {}): Promise<void> => {

@@ -1,5 +1,4 @@
-export type GoogleDrivePdfDownloadInput = {
-  accessToken: string;
+export type GoogleDrivePdfDownloadInput = { accessToken: string;
   fileId: string;
 };
 
@@ -27,8 +26,7 @@ const normalizePdfBlob = (blob: Blob): Blob => {
   return blob.type === PDF_MIME_TYPE ? blob : new Blob([blob], { type: PDF_MIME_TYPE });
 };
 
-export const downloadPdfFromGoogleDrive = async ({ accessToken, fileId }: GoogleDrivePdfDownloadInput): Promise<Blob> => {
-  if (!accessToken.trim()) throw new Error("Google Drive access token is missing");
+export const downloadPdfFromGoogleDrive = async ({ accessToken, fileId }: GoogleDrivePdfDownloadInput): Promise<Blob> => { if (!accessToken.trim()) throw new Error("Google Drive access token is missing");
   if (!fileId.trim()) throw new Error("Google Drive file id is missing");
 
   const response = await fetch(createGoogleDrivePdfDownloadUrl(fileId), {

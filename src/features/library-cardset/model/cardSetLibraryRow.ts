@@ -1,8 +1,7 @@
 import { normalizeDate } from "@/shared/codec/date";
 import type { Card, CardSet, Folder } from "@/types";
 
-export type CardSetDashboardRow = {
-  id: string;
+export type CardSetDashboardRow = { id: string;
   title: string;
   description: string;
   folderId: string | null;
@@ -88,13 +87,7 @@ const resolveDisplayTags = (
   return Array.from(new Set(explicitTags)).slice(0, 3);
 };
 
-export const buildCardSetDashboardRows = ({
-  cardSets,
-  cards,
-  folders,
-  tagById,
-}: BuildCardSetDashboardRowsParams): CardSetDashboardRow[] => {
-  const folderById = new Map(folders.map((folder) => [folder.id, folder]));
+export const buildCardSetDashboardRows = ({ cardSets, cards, folders, tagById, }: BuildCardSetDashboardRowsParams): CardSetDashboardRow[] => { const folderById = new Map(folders.map((folder) => [folder.id, folder]));
   const cardCountByCardSetId = new Map<string, number>();
 
   cards.forEach((card) => {

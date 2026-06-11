@@ -58,18 +58,7 @@ const buildLegacyZoomMigrationHint = ({
   cardLayoutMode,
 });
 
-export const useCardSetViewZoom = ({
-  deviceScope,
-  cardSetId,
-  viewportRef,
-  displayMode,
-  interactionMode,
-  requestedCardLayoutMode,
-  splitFallbackLayoutMode,
-}: UseCardSetViewZoomOptions) => {
-  const [viewportWidthPx, setViewportWidthPx] = useState<number>(
-    CARD_PANE_VIEW_DEFAULT_WIDTH_PX,
-  );
+export const useCardSetViewZoom = ({ deviceScope, cardSetId, viewportRef, displayMode, interactionMode, requestedCardLayoutMode, splitFallbackLayoutMode, }: UseCardSetViewZoomOptions) => { const [viewportWidthPx, setViewportWidthPx] = useState<number>( CARD_PANE_VIEW_DEFAULT_WIDTH_PX, );
   const [showConstraintIndicator, setShowConstraintIndicator] =
     useState<boolean>(false);
   const [zoomPreferenceState, setZoomPreferenceState] =

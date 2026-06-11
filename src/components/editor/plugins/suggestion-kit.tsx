@@ -1,35 +1,15 @@
 'use client';
 
-import type {
-  ExtendConfig,
-  TElement,
-  TInlineSuggestionData,
-  TSuggestionData,
-  TSuggestionText,
-} from 'platejs';
+import type { ExtendConfig, TElement, TInlineSuggestionData, TSuggestionData, TSuggestionText, } from 'platejs';
 
 import { KEYS, TextApi, TrailingBlockPlugin } from 'platejs';
-import {
-  type BaseSuggestionConfig,
-  BaseSuggestionPlugin,
-} from '@platejs/suggestion';
+import { type BaseSuggestionConfig, BaseSuggestionPlugin, } from '@platejs/suggestion';
 import { toTPlatePlugin } from 'platejs/react';
 
-import {
-  SuggestionLeaf,
-  SuggestionLineBreak,
-  VoidRemoveSuggestionOverlay,
-} from '@/components/suggestion-node';
-import {
-  discussionPlugin,
-  getDiscussionBlockClickTarget,
-  getDiscussionClickTarget,
-} from './discussion-kit';
+import { SuggestionLeaf, SuggestionLineBreak, VoidRemoveSuggestionOverlay, } from '@/components/suggestion-node';
+import { discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarget, } from './discussion-kit';
 
-export type SuggestionConfig = ExtendConfig<
-  BaseSuggestionConfig,
-  {
-    activeId: string | null;
+export type SuggestionConfig = ExtendConfig< BaseSuggestionConfig, { activeId: string | null;
     hoverId: string | null;
   }
 >;
@@ -60,23 +40,7 @@ function getInlineSuggestionData(editor: any, element: TElement) {
   }
 }
 
-export const suggestionPlugin = toTPlatePlugin<SuggestionConfig>(
-  BaseSuggestionPlugin,
-  ({ editor }) => ({
-    options: {
-      activeId: null,
-      currentUserId: editor.getOption(discussionPlugin, 'currentUserId'),
-      hoverId: null,
-    },
-  })
-).configure({
-  handlers: {
-    // unset active suggestion when clicking outside of suggestion
-    onClick: ({ api, event, setOption, type }) => {
-      const markTarget = getDiscussionClickTarget({
-        selector: `.slate-${type}`,
-        target: event.target,
-      });
+export const suggestionPlugin = toTPlatePlugin<SuggestionConfig>( BaseSuggestionPlugin, ({ editor }) => ({ options: { activeId: null, currentUserId: editor.getOption(discussionPlugin, 'currentUserId'), hoverId: null, }, }) ).configure({ handlers: { // unset active suggestion when clicking outside of suggestion onClick: ({ api, event, setOption, type }) => { const markTarget = getDiscussionClickTarget({ selector: `.slate-${type}`, target: event.target, });
       const blockTarget = markTarget
         ? null
         : getDiscussionBlockClickTarget({

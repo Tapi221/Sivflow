@@ -1,3 +1,2 @@
-export interface ExternalNavigationPort {
-  openExternal(url: string): Promise<void>;
+export interface ExternalNavigationPort { openExternal(url: string): Promise<void>;
 }

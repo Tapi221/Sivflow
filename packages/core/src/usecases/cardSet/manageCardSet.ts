@@ -1,5 +1,4 @@
-export type CardSetCommandEntity = {
-  id: string;
+export type CardSetCommandEntity = { id: string;
   folderId: string | null;
   isDeleted?: boolean;
   orderIndex?: number;
@@ -8,14 +7,12 @@ export type CardSetCommandEntity = {
   name?: string;
 };
 
-export type CreateCardSetOptions = {
-  description?: string;
+export type CreateCardSetOptions = { description?: string;
   id?: string;
   orderIndex?: number;
 };
 
-export type CardSetCreateDraft = {
-  id: string;
+export type CardSetCreateDraft = { id: string;
   userId: string;
   deviceId: string;
   folderId: string;
@@ -28,8 +25,7 @@ export type CardSetCreateDraft = {
   updatedAt: Date;
 };
 
-export type CardSetCommandRepository<TCardSet extends CardSetCommandEntity = CardSetCommandEntity> = {
-  generateCardSetId: () => string;
+export type CardSetCommandRepository<TCardSet extends CardSetCommandEntity = CardSetCommandEntity> = { generateCardSetId: () => string;
   listCardSets: (userId: string) => Promise<TCardSet[]>;
   addCardSet: (userId: string, cardSet: CardSetCreateDraft) => Promise<void>;
   updateCardSet: (userId: string, cardSetId: string, changes: Record<string, unknown>) => Promise<void>;
@@ -39,15 +35,7 @@ const isDeletedEntity = (entity: { isDeleted?: boolean; is_deleted?: boolean }) 
   return Boolean(entity.isDeleted ?? entity.is_deleted);
 };
 
-export const createCardSetUseCase = async <TCardSet extends CardSetCommandEntity>({
-  userId,
-  name,
-  targetFolderId,
-  options,
-  defaultDisplayMode,
-  repository,
-}: {
-  userId: string;
+export const createCardSetUseCase = async <TCardSet extends CardSetCommandEntity>({ userId, name, targetFolderId, options, defaultDisplayMode, repository, }: { userId: string;
   name: string;
   targetFolderId?: string | null;
   options?: CreateCardSetOptions;
@@ -92,13 +80,7 @@ export const createCardSetUseCase = async <TCardSet extends CardSetCommandEntity
   return cardSet as unknown as TCardSet;
 };
 
-export const updateCardSetUseCase = async <TCardSet extends CardSetCommandEntity>({
-  userId,
-  cardSetId,
-  data,
-  repository,
-}: {
-  userId: string;
+export const updateCardSetUseCase = async <TCardSet extends CardSetCommandEntity>({ userId, cardSetId, data, repository, }: { userId: string;
   cardSetId: string;
   data: Record<string, unknown>;
   repository: CardSetCommandRepository<TCardSet>;
@@ -109,13 +91,7 @@ export const updateCardSetUseCase = async <TCardSet extends CardSetCommandEntity
   });
 };
 
-export const moveCardSetToFolderUseCase = async <TCardSet extends CardSetCommandEntity>({
-  userId,
-  cardSetId,
-  targetFolderId,
-  repository,
-}: {
-  userId: string;
+export const moveCardSetToFolderUseCase = async <TCardSet extends CardSetCommandEntity>({ userId, cardSetId, targetFolderId, repository, }: { userId: string;
   cardSetId: string;
   targetFolderId?: string | null;
   repository: CardSetCommandRepository<TCardSet>;

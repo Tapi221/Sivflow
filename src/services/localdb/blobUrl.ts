@@ -72,8 +72,7 @@ const setNestedPath = (
   cursor[keys[keys.length - 1]] = value;
 };
 
-export const safeRevokeBlobUrl = (url: unknown, context: string): void => {
-  if (typeof url !== "string" || !url.startsWith("blob:")) return;
+export const safeRevokeBlobUrl = (url: unknown, context: string): void => { if (typeof url !== "string" || !url.startsWith("blob:")) return;
   if (typeof URL === "undefined" || typeof URL.revokeObjectURL !== "function") return;
 
   try {
@@ -83,13 +82,10 @@ export const safeRevokeBlobUrl = (url: unknown, context: string): void => {
   }
 };
 
-export const hasBlobUrlDeep = (value: unknown): boolean => {
-  return findBlobUrlFixesDeep(value).length > 0;
+export const hasBlobUrlDeep = (value: unknown): boolean => { return findBlobUrlFixesDeep(value).length > 0;
 };
 
-export const assertNoBlobUrlInCardPayload = (
-  cardLike: unknown,
-  context?: { entityType?: string; entityId?: string },
+export const assertNoBlobUrlInCardPayload = ( cardLike: unknown, context?: { entityType?: string; entityId?: string },
 ): void => {
   if (!isRecord(cardLike)) return;
 
@@ -112,9 +108,7 @@ export const assertNoBlobUrlInCardPayload = (
   });
 };
 
-export const scrubBlobUrlsDeep = (value: unknown): unknown => {
-  if (typeof value === "string") {
-    return value.startsWith("blob:") ? null : value;
+export const scrubBlobUrlsDeep = (value: unknown): unknown => { if (typeof value === "string") { return value.startsWith("blob:") ? null : value;
   }
 
   if (Array.isArray(value)) {
@@ -132,11 +126,7 @@ export const scrubBlobUrlsDeep = (value: unknown): unknown => {
   return value;
 };
 
-export const buildCardCandidateFromMods = (
-  obj: unknown,
-  mods: unknown,
-): unknown => {
-  if (!isRecord(obj)) return mods;
+export const buildCardCandidateFromMods = ( obj: unknown, mods: unknown, ): unknown => { if (!isRecord(obj)) return mods;
   if (!isRecord(mods)) return obj;
 
   const candidate: Record<string, unknown> = { ...obj };

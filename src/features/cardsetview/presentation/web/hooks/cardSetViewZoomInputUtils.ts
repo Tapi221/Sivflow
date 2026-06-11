@@ -36,11 +36,7 @@ const normalizeZoomPercentWithinBounds = ({
     maxZoomPercent,
   );
 
-export const shouldHandleCardSetViewZoomInputTarget = ({
-  container,
-  target,
-}: {
-  container: HTMLElement | null;
+export const shouldHandleCardSetViewZoomInputTarget = ({ container, target, }: { container: HTMLElement | null;
   target: EventTarget | null;
 }) => {
   return shouldHandleZoomInputTarget({
@@ -50,15 +46,7 @@ export const shouldHandleCardSetViewZoomInputTarget = ({
   });
 };
 
-export const computeNextCardSetViewZoomPercentFromWheel = ({
-  currentZoomPercent,
-  deltaY,
-  minZoomPercent,
-  maxZoomPercent,
-  stepPercent = CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT,
-  deltaPerStep = 80,
-}: {
-  currentZoomPercent: number;
+export const computeNextCardSetViewZoomPercentFromWheel = ({ currentZoomPercent, deltaY, minZoomPercent, maxZoomPercent, stepPercent = CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT, deltaPerStep = 80, }: { currentZoomPercent: number;
   deltaY: number;
   minZoomPercent: number;
   maxZoomPercent: number;
@@ -88,17 +76,7 @@ export const computeNextCardSetViewZoomPercentFromWheel = ({
   });
 };
 
-export const computeNextCardSetViewZoomPercentFromGesture = ({
-  currentZoomPercent,
-  basePresentationWidthPx,
-  gestureScale,
-  cardLayoutMode,
-  maxPresentationWidthPx,
-  minZoomPercent,
-  maxZoomPercent,
-  stepPercent = CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT,
-}: {
-  currentZoomPercent: number;
+export const computeNextCardSetViewZoomPercentFromGesture = ({ currentZoomPercent, basePresentationWidthPx, gestureScale, cardLayoutMode, maxPresentationWidthPx, minZoomPercent, maxZoomPercent, stepPercent = CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT, }: { currentZoomPercent: number;
   basePresentationWidthPx: number;
   gestureScale: number;
   cardLayoutMode: CardLayoutMode;

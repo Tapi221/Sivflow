@@ -7,29 +7,16 @@ import { expandListItemsWithChildren } from '@platejs/list';
 import { BlockSelectionPlugin } from '@platejs/selection/react';
 import { GripVertical } from 'lucide-react';
 import { type TElement, getPluginByType, isType, KEYS } from 'platejs';
-import {
-  type PlateEditor,
-  type PlateElementProps,
-  type RenderNodeWrapper,
-  MemoizedChildren,
-  useEditorRef,
-  useElement,
-  usePluginOption,
-} from 'platejs/react';
+import { type PlateEditor, type PlateElementProps, type RenderNodeWrapper, MemoizedChildren, useEditorRef, useElement, usePluginOption, } from 'platejs/react';
 import { useSelected } from 'platejs/react';
 
 import { Button } from './button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from './tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger, } from './tooltip';
 import { cn } from '@/lib/utils';
 
 const UNDRAGGABLE_KEYS = [KEYS.column, KEYS.tr, KEYS.td];
 
-export const BlockDraggable: RenderNodeWrapper = (props) => {
-  const { editor, element, path } = props;
+export const BlockDraggable: RenderNodeWrapper = (props) => { const { editor, element, path } = props;
 
   const enabled = React.useMemo(() => {
     if (editor.dom.readOnly) return false;

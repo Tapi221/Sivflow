@@ -611,8 +611,5 @@ const areBlockToolbarPropsEqual = (
   prev.desktopLayout === next.desktopLayout &&
   prev.className === next.className;
 
-export const BlockToolbar = React.memo(
-  BlockToolbarInner,
-  areBlockToolbarPropsEqual,
-);
+export const BlockToolbar = React.memo( BlockToolbarInner, areBlockToolbarPropsEqual, );
 BlockToolbar.displayName = "BlockToolbar";

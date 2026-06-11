@@ -25,15 +25,7 @@ const fallbackCopyText = (text: string): boolean => {
   return copied;
 };
 
-export const webClipboardAdapter: ClipboardAdapter = {
-  async writeText(text: string) {
-    if (
-      typeof navigator !== "undefined" &&
-      navigator.clipboard &&
-      typeof navigator.clipboard.writeText === "function"
-    ) {
-      try {
-        await navigator.clipboard.writeText(text);
+export const webClipboardAdapter: ClipboardAdapter = { async writeText(text: string) { if ( typeof navigator !== "undefined" && navigator.clipboard && typeof navigator.clipboard.writeText === "function" ) { try { await navigator.clipboard.writeText(text);
         return;
       } catch {
         // fallback へ

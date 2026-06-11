@@ -5,42 +5,17 @@ import * as React from 'react';
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
 import { PlaceholderPlugin } from '@platejs/media/react';
-import {
-  AudioLinesIcon,
-  FileUpIcon,
-  FilmIcon,
-  ImageIcon,
-  LinkIcon,
-} from 'lucide-react';
+import { AudioLinesIcon, FileUpIcon, FilmIcon, ImageIcon, LinkIcon, } from 'lucide-react';
 import { isUrl, KEYS } from 'platejs';
 import { useEditorRef } from 'platejs/react';
 import { toast } from 'sonner';
 import { useFilePicker } from 'use-file-picker';
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from './alert-dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from './dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, } from './alert-dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger, } from './dropdown-menu';
 import { Input } from './input';
 
-import {
-  ToolbarSplitButton,
-  ToolbarSplitButtonPrimary,
-  ToolbarSplitButtonSecondary,
-} from './toolbar';
+import { ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary, } from './toolbar';
 
 const MEDIA_CONFIG: Record<
   string,
@@ -77,11 +52,7 @@ const MEDIA_CONFIG: Record<
   },
 };
 
-export function MediaToolbarButton({
-  nodeType,
-  ...props
-}: DropdownMenuProps & { nodeType: string }) {
-  const currentConfig = MEDIA_CONFIG[nodeType];
+export function MediaToolbarButton({ nodeType, ...props }: DropdownMenuProps & { nodeType: string }) { const currentConfig = MEDIA_CONFIG[nodeType];
 
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);

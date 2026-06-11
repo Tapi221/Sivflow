@@ -32,15 +32,7 @@ interface UseCardSetViewSelectionStateOptions {
   cardIndexById: Map<string, number>;
 }
 
-export const useCardSetViewSelectionState = ({
-  initialIndex,
-  targetCardId,
-  deviceScope,
-  cardSetId,
-  sortedCards,
-  cardIndexById,
-}: UseCardSetViewSelectionStateOptions) => {
-  const sourceKey = useMemo(() => createCardSetViewSourceKey(cardSetId), [cardSetId]);
+export const useCardSetViewSelectionState = ({ initialIndex, targetCardId, deviceScope, cardSetId, sortedCards, cardIndexById, }: UseCardSetViewSelectionStateOptions) => { const sourceKey = useMemo(() => createCardSetViewSourceKey(cardSetId), [cardSetId]);
   const [currentIndexState, setCurrentIndexState] = useState<KeyedNumberState>(() => ({ sourceKey, value: null }));
   const [pendingFocusCardIdState, setPendingFocusCardIdState] = useState<KeyedStringState>(() => ({ sourceKey, value: null }));
   const [flippedCardIdsState, setFlippedCardIdsState] = useState<KeyedFlipState>(() => ({ sourceKey, ids: getCardSetViewFlippedCardIds({ deviceScope, cardSetId }) }));

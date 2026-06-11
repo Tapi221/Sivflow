@@ -15,15 +15,7 @@ interface InfoToastProps {
  * - 邪魔しない
  * - ユーザーの操作不要
  */
-export const InfoToast: React.FC<InfoToastProps> = ({
-  notification,
-  onDismiss,
-}) => {
-  useEffect(() => {
-    // 自動で消える
-    if (notification.autoClose && notification.duration) {
-      const timer = setTimeout(() => {
-        onDismiss();
+export const InfoToast: React.FC<InfoToastProps> = ({ notification, onDismiss, }) => { useEffect(() => { // 自動で消える if (notification.autoClose && notification.duration) { const timer = setTimeout(() => { onDismiss();
       }, notification.duration);
 
       return () => clearTimeout(timer);

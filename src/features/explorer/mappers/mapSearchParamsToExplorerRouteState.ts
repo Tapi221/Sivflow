@@ -6,11 +6,7 @@ type Params = {
   fallbackFolderId: string | null;
 };
 
-export const mapSearchParamsToExplorerRouteState = ({
-  searchParams,
-  fallbackFolderId,
-}: Params): ExplorerRouteState => {
-  const isHomeOnlyMode = searchParams.get("home") === "1";
+export const mapSearchParamsToExplorerRouteState = ({ searchParams, fallbackFolderId, }: Params): ExplorerRouteState => { const isHomeOnlyMode = searchParams.get("home") === "1";
   const isSectionListMode = searchParams.get("view") === "section-list";
 
   const queryFolderId = searchParams.get("folderId");

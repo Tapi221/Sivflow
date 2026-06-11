@@ -5,10 +5,7 @@ import type { SlateElementProps } from 'platejs/static';
 
 import { SlateElement } from 'platejs/static';
 
-export function FootnoteReferenceElementStatic(
-  props: SlateElementProps<TFootnoteElement>
-) {
-  const { element } = props;
+export function FootnoteReferenceElementStatic( props: SlateElementProps<TFootnoteElement> ) { const { element } = props;
 
   return (
     <SlateElement
@@ -21,10 +18,7 @@ export function FootnoteReferenceElementStatic(
   );
 }
 
-export function FootnoteDefinitionElementStatic(
-  props: SlateElementProps<TFootnoteElement>
-) {
-  const { element } = props;
+export function FootnoteDefinitionElementStatic( props: SlateElementProps<TFootnoteElement> ) { const { element } = props;
 
   return (
     <SlateElement {...props} as="div" className="mt-2 flex items-start gap-2">

@@ -8,11 +8,7 @@ import type { CssVars } from "@/types/style";
 
 type CardShellProps = React.ComponentProps<typeof CardShell>;
 
-export interface CardFrameProps extends Omit<
-  CardShellProps,
-  "children" | "className" | "ref"
-> {
-  children: React.ReactNode;
+export interface CardFrameProps extends Omit< CardShellProps, "children" | "className" | "ref" > { children: React.ReactNode;
   baseWidth?: number;
   contentPaddingPx?: number;
   allowUpscale?: boolean;

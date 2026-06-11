@@ -10,19 +10,11 @@ import { PlateElement, usePluginOption } from 'platejs/react';
 
 import { useDebounce } from '@/components/use-debounce';
 
-import {
-  InlineCombobox,
-  InlineComboboxContent,
-  InlineComboboxEmpty,
-  InlineComboboxGroup,
-  InlineComboboxInput,
-  InlineComboboxItem,
-} from './inline-combobox';
+import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem, } from './inline-combobox';
 
 const TRAILING_COLON_REGEX = /:$/;
 
-export function EmojiInputElement(props: PlateElementProps) {
-  const { children, editor, element } = props;
+export function EmojiInputElement(props: PlateElementProps) { const { children, editor, element } = props;
   const data = usePluginOption(EmojiPlugin, 'data')!;
   const [value, setValue] = React.useState('');
   const debouncedValue = useDebounce(value, 100);

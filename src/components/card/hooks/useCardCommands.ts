@@ -26,8 +26,7 @@ const toDateMillis = (value: SortableTimestamp): number => {
   return 0;
 };
 
-export const useCardCommands = (folderId?: string) => {
-  const { currentUser } = useAuthSession();
+export const useCardCommands = (folderId?: string) => { const { currentUser } = useAuthSession();
   const { settings } = useUserSettings();
 
   const createCard = async (cardData: Partial<Card> & { cardSetId?: string }) => {

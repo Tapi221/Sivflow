@@ -6,8 +6,7 @@ export type HandwritingSessionMessageHandler = (message: HandwritingSessionMessa
 
 export type HandwritingSessionStatusHandler = (status: HandwritingSessionStatus) => void;
 
-export type HandwritingSessionClient = {
-  readonly session: HandwritingSession;
+export type HandwritingSessionClient = { readonly session: HandwritingSession;
   connect(): Promise<void>;
   disconnect(reason?: string): Promise<void>;
   sendStrokeDelta(message: HandwritingStrokeDeltaMessage): Promise<void>;

@@ -1,17 +1,10 @@
-export const foldersPathSegments = (userId: string): [string, string, string] => {
-  if (!userId) {
-    throw new Error("userId is required for foldersPath");
+export const foldersPathSegments = (userId: string): [string, string, string] => { if (!userId) { throw new Error("userId is required for foldersPath");
   }
 
   return ["users", userId, "folders"];
 };
 
-export const folderDocPathSegments = (
-  userId: string,
-  folderId: string,
-): [string, string, string, string] => {
-  if (!userId) {
-    throw new Error("userId is required for folderDocPath");
+export const folderDocPathSegments = ( userId: string, folderId: string, ): [string, string, string, string] => { if (!userId) { throw new Error("userId is required for folderDocPath");
   }
 
   if (!folderId) {
@@ -21,20 +14,13 @@ export const folderDocPathSegments = (
   return ["users", userId, "folders", folderId];
 };
 
-export const cardsPathSegments = (userId: string): [string, string, string] => {
-  if (!userId) {
-    throw new Error("userId is required for cardsPath");
+export const cardsPathSegments = (userId: string): [string, string, string] => { if (!userId) { throw new Error("userId is required for cardsPath");
   }
 
   return ["users", userId, "cards"];
 };
 
-export const cardDocPathSegments = (
-  userId: string,
-  cardId: string,
-): [string, string, string, string] => {
-  if (!userId) {
-    throw new Error("userId is required for cardDocPath");
+export const cardDocPathSegments = ( userId: string, cardId: string, ): [string, string, string, string] => { if (!userId) { throw new Error("userId is required for cardDocPath");
   }
 
   if (!cardId) {
@@ -44,12 +30,7 @@ export const cardDocPathSegments = (
   return ["users", userId, "cards", cardId];
 };
 
-export const imageDocPathSegments = (
-  userId: string,
-  imageId: string,
-): [string, string, string, string] => {
-  if (!userId) {
-    throw new Error("userId is required for imageDocPath");
+export const imageDocPathSegments = ( userId: string, imageId: string, ): [string, string, string, string] => { if (!userId) { throw new Error("userId is required for imageDocPath");
   }
 
   if (!imageId) {
@@ -59,12 +40,7 @@ export const imageDocPathSegments = (
   return ["users", userId, "images", imageId];
 };
 
-export const storageStatsDocPathSegments = (
-  userId: string,
-  docId: string = "current",
-): [string, string, string, string] => {
-  if (!userId) {
-    throw new Error("userId is required for storageStatsDocPath");
+export const storageStatsDocPathSegments = ( userId: string, docId: string = "current", ): [string, string, string, string] => { if (!userId) { throw new Error("userId is required for storageStatsDocPath");
   }
 
   if (!docId) {

@@ -2,8 +2,7 @@ import { type CSSProperties, type RefObject } from "react";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, type RightClickPanelId } from "./rightClickPanel.utils";
 
-export type ProjectCalendarLinksMenuAction = {
-  id: string;
+export type ProjectCalendarLinksMenuAction = { id: string;
   label: string;
   disabled?: boolean;
   onSelect: () => void;

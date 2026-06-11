@@ -17,8 +17,7 @@ const hashString = (value: string): number => {
 
 export const getFallbackProjectColor = (seed: string): string => PROJECT_COLOR_PALETTE[hashString(seed) % PROJECT_COLOR_PALETTE.length];
 
-export const getFolderProjectColor = (folder: FolderTreeNode): string => {
-  const record = folder as { folderColor?: unknown; folder_color?: unknown; color?: unknown };
+export const getFolderProjectColor = (folder: FolderTreeNode): string => { const record = folder as { folderColor?: unknown; folder_color?: unknown; color?: unknown };
   const folderColor = record.folderColor ?? record.folder_color ?? record.color;
   if (isProjectColor(folderColor)) return folderColor;
 

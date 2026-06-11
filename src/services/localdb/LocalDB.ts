@@ -83,8 +83,7 @@ if (import.meta.env.DEV && typeof window !== "undefined") {
     .catch(() => {});
 }
 
-export class LocalDB extends Dexie {
-  users!: Dexie.Table<User, string>;
+export class LocalDB extends Dexie { users!: Dexie.Table<User, string>;
   folders!: Dexie.Table<Folder, string>;
   cardSets!: Dexie.Table<CardSet, string>;
   cards!: Dexie.Table<Card, string>;

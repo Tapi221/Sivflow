@@ -39,8 +39,7 @@ export const getLayeredTreeDropPosition = (event: ReactDragEvent<HTMLElement>): 
 
 export const getLayeredTreeDropParentId = <TItem extends LayeredTreeItem>(targetItem: TItem, targetId: string, position: LayeredTreeDropPosition, getParentId: (item: TItem) => string | null): string | null => position === "inside" ? targetId : getParentId(targetItem);
 
-export const createLayeredTreeItemMap = <TItem extends LayeredTreeItem>(rootItems: TItem[], getChildItems: (itemId: string) => TItem[]): Map<string, TItem> => {
-  const map = new Map<string, TItem>();
+export const createLayeredTreeItemMap = <TItem extends LayeredTreeItem>(rootItems: TItem[], getChildItems: (itemId: string) => TItem[]): Map<string, TItem> => { const map = new Map<string, TItem>();
   const stack = [...rootItems];
 
   while (stack.length > 0) {
@@ -54,8 +53,7 @@ export const createLayeredTreeItemMap = <TItem extends LayeredTreeItem>(rootItem
   return map;
 };
 
-export const isLayeredTreeItemAncestorOf = <TItem extends LayeredTreeItem>(sourceId: string, candidateParentId: string | null, getChildItems: (itemId: string) => TItem[]): boolean => {
-  if (!candidateParentId) return false;
+export const isLayeredTreeItemAncestorOf = <TItem extends LayeredTreeItem>(sourceId: string, candidateParentId: string | null, getChildItems: (itemId: string) => TItem[]): boolean => { if (!candidateParentId) return false;
   if (sourceId === candidateParentId) return true;
 
   const stack = getChildItems(sourceId).map((item) => item.id);
@@ -75,8 +73,7 @@ export const isLayeredTreeItemAncestorOf = <TItem extends LayeredTreeItem>(sourc
 
 const getLayeredTreeSiblings = <TItem extends LayeredTreeItem>(parentId: string | null, rootItems: TItem[], getChildItems: (itemId: string) => TItem[]): TItem[] => parentId ? getChildItems(parentId) : rootItems;
 
-export const createLayeredTreeReorderedSiblingList = <TItem extends LayeredTreeItem>(sourceItem: TItem, targetItem: TItem | null, targetParentId: string | null, position: LayeredTreeDropPosition, rootItems: TItem[], getChildItems: (itemId: string) => TItem[]): TItem[] => {
-  const targetId = targetItem?.id ?? null;
+export const createLayeredTreeReorderedSiblingList = <TItem extends LayeredTreeItem>(sourceItem: TItem, targetItem: TItem | null, targetParentId: string | null, position: LayeredTreeDropPosition, rootItems: TItem[], getChildItems: (itemId: string) => TItem[]): TItem[] => { const targetId = targetItem?.id ?? null;
   const siblings = getLayeredTreeSiblings(targetParentId, rootItems, getChildItems).filter((item) => item.id !== sourceItem.id);
   const insertionIndex = !targetId || position === "append" || position === "inside" ? siblings.length : Math.max(0, siblings.findIndex((item) => item.id === targetId) + (position === "after" ? 1 : 0));
   const nextSiblings = [...siblings];
@@ -107,14 +104,12 @@ const createLayeredTreeDragPreview = (sourceElement: HTMLElement): HTMLElement =
   return preview;
 };
 
-export const applyLayeredTreeDragPreview = (event: ReactDragEvent<HTMLElement>) => {
-  const preview = createLayeredTreeDragPreview(event.currentTarget);
+export const applyLayeredTreeDragPreview = (event: ReactDragEvent<HTMLElement>) => { const preview = createLayeredTreeDragPreview(event.currentTarget);
   event.dataTransfer.setDragImage(preview, LAYERED_TREE_DRAG_IMAGE_OFFSET_X, LAYERED_TREE_DRAG_IMAGE_OFFSET_Y);
   requestAnimationFrame(() => preview.remove());
 };
 
-export const getLayeredTreeAutoScrollStep = (clientY: number, scrollContainer: HTMLDivElement): number => {
-  const rect = scrollContainer.getBoundingClientRect();
+export const getLayeredTreeAutoScrollStep = (clientY: number, scrollContainer: HTMLDivElement): number => { const rect = scrollContainer.getBoundingClientRect();
   const topDistance = clientY - rect.top;
   const bottomDistance = rect.bottom - clientY;
 
@@ -125,8 +120,7 @@ export const getLayeredTreeAutoScrollStep = (clientY: number, scrollContainer: H
 
 export const isLayeredTreeRowEventTarget = (target: EventTarget | null): boolean => target instanceof HTMLElement && target.closest(LAYERED_TREE_ROW_SELECTOR) !== null;
 
-export const resolveLayeredTreeEventDropTarget = (event: ReactDragEvent<HTMLElement>, itemMap: Map<string, LayeredTreeItem>): LayeredTreeEventDropTarget | null => {
-  const targetElement = event.target instanceof HTMLElement ? event.target : null;
+export const resolveLayeredTreeEventDropTarget = (event: ReactDragEvent<HTMLElement>, itemMap: Map<string, LayeredTreeItem>): LayeredTreeEventDropTarget | null => { const targetElement = event.target instanceof HTMLElement ? event.target : null;
   const rows = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(LAYERED_TREE_ROW_SELECTOR));
   const targetRow = targetElement?.closest<HTMLElement>(LAYERED_TREE_ROW_SELECTOR) ?? null;
   const rowElement = targetRow && event.currentTarget.contains(targetRow) ? targetRow : rows.find((row) => {

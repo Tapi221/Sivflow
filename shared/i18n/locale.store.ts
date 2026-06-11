@@ -60,14 +60,4 @@ export const readStoredLocale = (): Locale | null => readStoredLocaleByKey(SIVFL
 
 migrateLegacyLocaleStorage();
 
-export const useLocaleStore = create<LocaleState>()(
-  persist(
-    (set) => ({
-      locale: readStoredLocale() ?? "ja",
-      setLocale: (locale) => set({ locale }),
-    }),
-    {
-      name: SIVFLOW_LOCALE_STORAGE_KEY,
-    },
-  ),
-);
+export const useLocaleStore = create<LocaleState>()( persist( (set) => ({ locale: readStoredLocale() ?? "ja", setLocale: (locale) => set({ locale }), }), { name: SIVFLOW_LOCALE_STORAGE_KEY, }, ), );

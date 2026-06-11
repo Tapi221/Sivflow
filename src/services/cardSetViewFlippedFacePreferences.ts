@@ -10,15 +10,7 @@ const normalizeDeviceScope = (value: string | null | undefined) => {
   return trimmed.length > 0 ? trimmed : "unknown";
 };
 
-export const buildCardSetViewFlippedFaceScopeKey = ({
-  deviceScope,
-  cardSetId,
-}: CardSetViewFlippedFaceScope) => {
-  return [
-    SHARED_STORAGE_KEYS.cardSetViewFlippedFacePrefix,
-    normalizeDeviceScope(deviceScope),
-    cardSetId ?? "__no_card_set__",
-  ].join("::");
+export const buildCardSetViewFlippedFaceScopeKey = ({ deviceScope, cardSetId, }: CardSetViewFlippedFaceScope) => { return [ SHARED_STORAGE_KEYS.cardSetViewFlippedFacePrefix, normalizeDeviceScope(deviceScope), cardSetId ?? "__no_card_set__", ].join("::");
 };
 
 const readLocalValue = (key: string) => {
@@ -55,11 +47,7 @@ const normalizeCardIdList = (value: unknown) => {
   );
 };
 
-export const getCardSetViewFlippedCardIds = ({
-  deviceScope,
-  cardSetId,
-}: CardSetViewFlippedFaceScope) => {
-  if (!cardSetId) return new Set<string>();
+export const getCardSetViewFlippedCardIds = ({ deviceScope, cardSetId, }: CardSetViewFlippedFaceScope) => { if (!cardSetId) return new Set<string>();
 
   const currentStorageKey = buildCardSetViewFlippedFaceScopeKey({
     deviceScope,
@@ -75,12 +63,7 @@ export const getCardSetViewFlippedCardIds = ({
   }
 };
 
-export const setCardSetViewFlippedCardIds = ({
-  deviceScope,
-  cardSetId,
-  ids,
-}: CardSetViewFlippedFaceScope & {
-  ids: ReadonlySet<string>;
+export const setCardSetViewFlippedCardIds = ({ deviceScope, cardSetId, ids, }: CardSetViewFlippedFaceScope & { ids: ReadonlySet<string>;
 }) => {
   if (!cardSetId) return;
 

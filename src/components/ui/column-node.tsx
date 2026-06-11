@@ -13,38 +13,15 @@ import { useComposedRef } from '@udecode/cn';
 import { type LucideProps, Trash2Icon } from 'lucide-react';
 import { GripHorizontal } from 'lucide-react';
 import { PathApi } from 'platejs';
-import {
-  PlateElement,
-  useEditorRef,
-  useEditorSelector,
-  useElement,
-  useFocusedLast,
-  usePluginOption,
-  useReadOnly,
-  useRemoveNodeButton,
-  useSelected,
-  withHOC,
-} from 'platejs/react';
+import { PlateElement, useEditorRef, useEditorSelector, useElement, useFocusedLast, usePluginOption, useReadOnly, useRemoveNodeButton, useSelected, withHOC, } from 'platejs/react';
 
 import { Button } from './button';
-import {
-  Popover,
-  PopoverAnchor,
-  PopoverContent,
-} from './popover';
+import { Popover, PopoverAnchor, PopoverContent, } from './popover';
 import { Separator } from './separator';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from './tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from './tooltip';
 import { cn } from '@/lib/utils';
 
-export const ColumnElement = withHOC(
-  ResizableProvider,
-  function ColumnElement(props: PlateElementProps<TColumnElement>) {
-    const { width } = props.element;
+export const ColumnElement = withHOC( ResizableProvider, function ColumnElement(props: PlateElementProps<TColumnElement>) { const { width } = props.element;
     const readOnly = useReadOnly();
     const isSelectionAreaVisible = usePluginOption(
       BlockSelectionPlugin,
@@ -140,14 +117,7 @@ function DropLine() {
   );
 }
 
-export function ColumnGroupElement(props: PlateElementProps) {
-  return (
-    <PlateElement className="mb-2" {...props}>
-      <ColumnFloatingToolbar>
-        <div className="flex size-full rounded">{props.children}</div>
-      </ColumnFloatingToolbar>
-    </PlateElement>
-  );
+export function ColumnGroupElement(props: PlateElementProps) { return ( <PlateElement className="mb-2" {...props}> <ColumnFloatingToolbar> <div className="flex size-full rounded">{props.children}</div> </ColumnFloatingToolbar> </PlateElement> );
 }
 
 function ColumnFloatingToolbar({ children }: React.PropsWithChildren) {

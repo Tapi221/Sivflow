@@ -40,9 +40,7 @@ const toNonEmptyString = (value: unknown): string | null => {
   return trimmed.length > 0 ? trimmed : null;
 };
 
-export const createCheckDataIntegrityUseCase = () => {
-  const execute = async (): Promise<IntegrityReport> => {
-    const issues: IntegrityIssue[] = [];
+export const createCheckDataIntegrityUseCase = () => { const execute = async (): Promise<IntegrityReport> => { const issues: IntegrityIssue[] = [];
 
     try {
       const db = await getLocalDb();

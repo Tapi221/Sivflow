@@ -5,8 +5,7 @@ import type { NetworkStatus, SyncContextSource } from "@/types/domain/telemetry"
  * NetworkMonitor: ネットワーク状態を監視し、実測値ベースで健全性を判断
  * 状態遷移にヒステリシス（履歴効果）を持たせ、頻繁な揺れを防ぐ
  */
-export class NetworkMonitor implements INetworkMonitor {
-  private _status: NetworkStatus = "good";
+export class NetworkMonitor implements INetworkMonitor { private _status: NetworkStatus = "good";
   private consecutiveSuccesses = 0;
   private consecutiveFailures = 0;
   private recentDurations: number[] = [];

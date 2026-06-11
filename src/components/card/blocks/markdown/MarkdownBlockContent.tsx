@@ -4,12 +4,10 @@ import { MarkdownEditorDialog } from "./MarkdownEditorDialog";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { clampMarkdownTabSize, normalizeMarkdownEditorValue, normalizeMarkdownInsertionText, resolveMarkdownTabKeyText } from "@/utils/markdownWhitespace";
 
-export type MarkdownReplaceBlock =
-  | { type: "markdown"; markdown: string }
+export type MarkdownReplaceBlock = | { type: "markdown"; markdown: string }
   | { type: "code"; code: { language: string; code: string } };
 
-export type MarkdownReplaceFocus = Readonly<{
-  relativeIndex: number;
+export type MarkdownReplaceFocus = Readonly<{ relativeIndex: number;
 }>;
 
 type MarkdownBlockContentProps =
@@ -339,8 +337,7 @@ const parseAndSplitFencesWithRanges = (
   return { blocks, ranges };
 };
 
-export const MarkdownBlockContent = (props: MarkdownBlockContentProps) => {
-  const { settings } = useUserSettings();
+export const MarkdownBlockContent = (props: MarkdownBlockContentProps) => { const { settings } = useUserSettings();
   const [error, setError] = React.useState<string | null>(null);
 
   const markdownTabSize = clampMarkdownTabSize(settings?.markdownTabSize);

@@ -67,8 +67,7 @@ const resolveGoogleCalendarIndex = (event: GoogleCalendarEvent, googleCalendarIn
   return googleCalendarIndexes.fallback.get(event.calendarId) ?? FALLBACK_EVENT_PRIORITY_INDEX;
 };
 
-export const createCalendarYearEventDisplayResolver = ({ appProjects, projectCalendarLinks, googleAccounts }: CalendarEventSourcePriorityInput): CalendarYearEventDisplayResolver => {
-  const projectById = new Map(appProjects.map((project) => [project.id, project]));
+export const createCalendarYearEventDisplayResolver = ({ appProjects, projectCalendarLinks, googleAccounts }: CalendarEventSourcePriorityInput): CalendarYearEventDisplayResolver => { const projectById = new Map(appProjects.map((project) => [project.id, project]));
   const projectIndexById = buildProjectIndexById(appProjects);
   const googleCalendarIndexes = buildGoogleCalendarIndexMaps(googleAccounts);
 

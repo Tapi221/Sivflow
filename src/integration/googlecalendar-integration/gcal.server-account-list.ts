@@ -3,8 +3,7 @@ import { getServerStoredGoogleCalendarAccessToken } from "@/integration/google-i
 import { auth, functionsClient } from "@/services/firebase";
 import { buildTokenExpiry, readStoredAccounts, type StoredGoogleAccount, writeStoredAccounts } from "./gcal.multi-storage";
 
-export type ServerStoredGoogleCalendarAccount = {
-  accountId: string;
+export type ServerStoredGoogleCalendarAccount = { accountId: string;
   email: string | null;
   name: string | null;
   photoUrl: string | null;
@@ -54,14 +53,12 @@ const hydrateServerAccount = async (account: ServerStoredGoogleCalendarAccount):
   }
 };
 
-export const listServerStoredGoogleCalendarAccounts = async (): Promise<ServerStoredGoogleCalendarAccount[]> => {
-  await waitForCallableAuth();
+export const listServerStoredGoogleCalendarAccounts = async (): Promise<ServerStoredGoogleCalendarAccount[]> => { await waitForCallableAuth();
   const result = await listGoogleCalendarAccountsCallable();
   return result.data.accounts;
 };
 
-export const hydrateServerStoredGoogleCalendarAccounts = async (): Promise<number> => {
-  const localAccounts = readStoredAccounts();
+export const hydrateServerStoredGoogleCalendarAccounts = async (): Promise<number> => { const localAccounts = readStoredAccounts();
   const knownAccountIds = new Set(localAccounts.map((account) => account.id));
   const remoteAccounts = await listServerStoredGoogleCalendarAccounts();
   const missingAccounts = remoteAccounts.filter((account) => !knownAccountIds.has(account.accountId));

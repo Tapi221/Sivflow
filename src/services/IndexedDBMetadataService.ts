@@ -59,8 +59,7 @@ const normalizeMetadata = (value: unknown): IndexedDBMetadata | null => {
   };
 };
 
-export class IndexedDBMetadataService {
-  private readonly db: LocalDBLike;
+export class IndexedDBMetadataService { private readonly db: LocalDBLike;
   private readonly userId: string;
 
   constructor(db: LocalDBLike, userId: string) {

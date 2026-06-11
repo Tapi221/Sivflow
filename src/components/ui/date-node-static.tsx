@@ -8,8 +8,7 @@ import { SlateElement } from 'platejs/static';
 import { cn } from '@/lib/utils';
 import { inlineSuggestionVariants } from '@/components/suggestion';
 
-export function DateElementStatic(props: SlateElementProps<TDateElement>) {
-  const { element } = props;
+export function DateElementStatic(props: SlateElementProps<TDateElement>) { const { element } = props;
 
   return (
     <SlateElement as="span" className="inline-block" {...props}>

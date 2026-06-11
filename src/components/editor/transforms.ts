@@ -11,22 +11,11 @@ import { insertFootnote } from '@platejs/footnote';
 import { insertColumnGroup, toggleColumnGroup } from '@platejs/layout';
 import { triggerFloatingLink } from '@platejs/link/react';
 import { insertEquation, insertInlineEquation } from '@platejs/math';
-import {
-  insertAudioPlaceholder,
-  insertFilePlaceholder,
-  insertMedia,
-  insertVideoPlaceholder,
-} from '@platejs/media';
+import { insertAudioPlaceholder, insertFilePlaceholder, insertMedia, insertVideoPlaceholder, } from '@platejs/media';
 import { SuggestionPlugin } from '@platejs/suggestion/react';
 import { TablePlugin } from '@platejs/table/react';
 import { insertToc } from '@platejs/toc';
-import {
-  type NodeEntry,
-  type Path,
-  type TElement,
-  KEYS,
-  PathApi,
-} from 'platejs';
+import { type NodeEntry, type Path, type TElement, KEYS, PathApi, } from 'platejs';
 
 const ACTION_THREE_COLUMNS = 'action_three_columns';
 const ACTION_FOOTNOTE = 'action_footnote';
@@ -102,12 +91,7 @@ type InsertBlockOptions = {
   upsert?: boolean;
 };
 
-export const insertBlock = (
-  editor: PlateEditor,
-  type: string,
-  options: InsertBlockOptions = {}
-) => {
-  const { upsert = false } = options;
+export const insertBlock = ( editor: PlateEditor, type: string, options: InsertBlockOptions = {} ) => { const { upsert = false } = options;
 
   editor.tf.withoutNormalizing(() => {
     const block = editor.api.block();
@@ -159,9 +143,7 @@ export const insertBlock = (
   });
 };
 
-export const insertInlineElement = (editor: PlateEditor, type: string) => {
-  if (insertInlineMap[type]) {
-    insertInlineMap[type](editor, type);
+export const insertInlineElement = (editor: PlateEditor, type: string) => { if (insertInlineMap[type]) { insertInlineMap[type](editor, type);
   }
 };
 
@@ -192,14 +174,7 @@ const setBlockMap: Record<
   [KEYS.codeBlock]: (editor) => toggleCodeBlock(editor),
 };
 
-export const setBlockType = (
-  editor: PlateEditor,
-  type: string,
-  { at }: { at?: Path } = {}
-) => {
-  editor.tf.withoutNormalizing(() => {
-    if (type === KEYS.blockquote) {
-      const target = at ?? editor.selection;
+export const setBlockType = ( editor: PlateEditor, type: string, { at }: { at?: Path } = {} ) => { editor.tf.withoutNormalizing(() => { if (type === KEYS.blockquote) { const target = at ?? editor.selection;
 
       if (!target || editor.api.some({ at: target, match: { type } })) {
         return;
@@ -245,10 +220,7 @@ export const setBlockType = (
   });
 };
 
-export const getBlockType = (block: TElement) => {
-  if (block[KEYS.listType]) {
-    if (block[KEYS.listType] === KEYS.ol) {
-      return KEYS.ol;
+export const getBlockType = (block: TElement) => { if (block[KEYS.listType]) { if (block[KEYS.listType] === KEYS.ol) { return KEYS.ol;
     }
     if (block[KEYS.listType] === KEYS.listTodo) {
       return KEYS.listTodo;

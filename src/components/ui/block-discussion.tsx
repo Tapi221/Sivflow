@@ -8,21 +8,12 @@ import { getDraftCommentKey } from '@platejs/comment';
 import { CommentPlugin } from '@platejs/comment/react';
 import { getTransientSuggestionKey } from '@platejs/suggestion';
 import { SuggestionPlugin } from '@platejs/suggestion/react';
-import {
-  MessageSquareTextIcon,
-  MessagesSquareIcon,
-  PencilLineIcon,
-} from 'lucide-react';
+import { MessageSquareTextIcon, MessagesSquareIcon, PencilLineIcon, } from 'lucide-react';
 import { type AnyPluginConfig, type NodeEntry, PathApi } from 'platejs';
 import { useEditorRef, usePluginOption } from 'platejs/react';
 
 import { Button } from './button';
-import {
-  Popover,
-  PopoverAnchor,
-  PopoverContent,
-  PopoverTrigger,
-} from './popover';
+import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger, } from './popover';
 import { commentPlugin } from '@/components/editor/plugins/comment-kit';
 import type { TDiscussion } from '@/components/editor/plugins/discussion-kit';
 import { useBlockDiscussionItems } from '@/components/block-discussion-index';
@@ -31,8 +22,7 @@ import { suggestionPlugin } from '@/components/editor/plugins/suggestion-kit';
 import { BlockSuggestionCard, isResolvedSuggestion } from './block-suggestion';
 import { Comment, CommentCreateForm } from './comment';
 
-export const BlockDiscussion: RenderNodeWrapper<AnyPluginConfig> =
-  (_props) => (props) => <BlockCommentContent {...props} />;
+export const BlockDiscussion: RenderNodeWrapper<AnyPluginConfig> = (_props) => (props) => <BlockCommentContent {...props} />;
 
 const BlockCommentContent = ({ children, element }: PlateElementProps) => {
   const editor = useEditorRef();

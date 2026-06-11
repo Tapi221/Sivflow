@@ -22,19 +22,7 @@ const getClosestBlockId = (target: EventTarget | null) => {
   return target.closest<HTMLElement>("[data-block-id]")?.dataset.blockId ?? null;
 };
 
-export const BlockFrame = ({
-  children,
-  className,
-  contentClassName,
-  overlay,
-  accentColor,
-  variant = "neutral",
-  raiseZIndex = false,
-  selectionActive = variant === "editor",
-  style,
-  ...props
-}: BlockFrameProps) => {
-  const frameRef = React.useRef<HTMLDivElement | null>(null);
+export const BlockFrame = ({ children, className, contentClassName, overlay, accentColor, variant = "neutral", raiseZIndex = false, selectionActive = variant === "editor", style, ...props }: BlockFrameProps) => { const frameRef = React.useRef<HTMLDivElement | null>(null);
   const [isLatestSelection, setIsLatestSelection] = React.useState(false);
 
   React.useEffect(() => {

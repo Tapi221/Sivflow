@@ -13,8 +13,7 @@ interface UseFlashcardInkOptions {
   onInkDocumentChange?: (side: "question" | "answer", nextDocument: InkDocument) => void;
 }
 
-export interface FlashcardInkResult {
-  previewInkRef: React.RefObject<InkLayerHandle | null>;
+export interface FlashcardInkResult { previewInkRef: React.RefObject<InkLayerHandle | null>;
   previewInkTool: InkEditTool | null;
   setPreviewInkTool: React.Dispatch<React.SetStateAction<InkEditTool | null>>;
   previewInkHistory: InkHistoryState;
@@ -39,8 +38,7 @@ const waitForImages = async (root: HTMLDivElement) => {
   })));
 };
 
-export const useFlashcardInk = ({ cardId, effectiveIsFlipped, showInkLayer, inkEditingEnabled, previewMode, contentRef, onInkDocumentChange }: UseFlashcardInkOptions) => {
-  const { updateCard } = useCards();
+export const useFlashcardInk = ({ cardId, effectiveIsFlipped, showInkLayer, inkEditingEnabled, previewMode, contentRef, onInkDocumentChange }: UseFlashcardInkOptions) => { const { updateCard } = useCards();
   const previewInkRef = useRef<InkLayerHandle | null>(null);
   const [previewInkTool, setPreviewInkTool] = useState<InkEditTool | null>(null);
   const [previewInkHistory, setPreviewInkHistory] = useState<InkHistoryState>({ canUndo: false, canRedo: false, strokeCount: 0 });

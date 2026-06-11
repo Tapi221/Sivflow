@@ -8,26 +8,22 @@ export type CalendarTimetableInstitutionKind = "university" | "vocational" | "co
 
 export type CalendarTimetableCatalogSource = "manual" | "userSubmitted" | "syllabus" | "cloud";
 
-export type CalendarTimetablePeriod = {
-  id: string;
+export type CalendarTimetablePeriod = { id: string;
   label: string;
   startTime: string;
   endTime: string;
   order: number;
 };
 
-export type CalendarTimetableSlot = {
-  dayIndex: CalendarTimetableWeekdayIndex;
+export type CalendarTimetableSlot = { dayIndex: CalendarTimetableWeekdayIndex;
   periodId: string;
 };
 
-export type CalendarTimetableSyllabusSlot = {
-  dayIndex: CalendarTimetableWeekdayIndex;
+export type CalendarTimetableSyllabusSlot = { dayIndex: CalendarTimetableWeekdayIndex;
   periodLabel: string;
 };
 
-export type CalendarTimetableInstitution = {
-  id: string;
+export type CalendarTimetableInstitution = { id: string;
   name: string;
   kind: CalendarTimetableInstitutionKind;
   region: string;
@@ -36,8 +32,7 @@ export type CalendarTimetableInstitution = {
   updatedAt: string;
 };
 
-export type CalendarTimetableDepartment = {
-  id: string;
+export type CalendarTimetableDepartment = { id: string;
   institutionId: string;
   facultyName: string;
   name: string;
@@ -46,8 +41,7 @@ export type CalendarTimetableDepartment = {
   updatedAt: string;
 };
 
-export type CalendarTimetableSyllabusCourse = {
-  id: string;
+export type CalendarTimetableSyllabusCourse = { id: string;
   institutionId: string;
   departmentId: string;
   title: string;
@@ -65,8 +59,7 @@ export type CalendarTimetableSyllabusCourse = {
   updatedAt: string;
 };
 
-export type CalendarTimetableSyllabusCourseDraft = {
-  institutionName: string;
+export type CalendarTimetableSyllabusCourseDraft = { institutionName: string;
   institutionKind: CalendarTimetableInstitutionKind;
   departmentName: string;
   facultyName: string;
@@ -82,8 +75,7 @@ export type CalendarTimetableSyllabusCourseDraft = {
   source?: CalendarTimetableCatalogSource;
 };
 
-export type CalendarTimetableCourse = {
-  id: string;
+export type CalendarTimetableCourse = { id: string;
   semesterId: string;
   syllabusCourseId?: string;
   institutionId?: string;
@@ -98,8 +90,7 @@ export type CalendarTimetableCourse = {
   updatedAt: string;
 };
 
-export type CalendarTimetableCourseDraft = {
-  id?: string;
+export type CalendarTimetableCourseDraft = { id?: string;
   semesterId: string;
   syllabusCourseId?: string;
   institutionId?: string;
@@ -113,15 +104,13 @@ export type CalendarTimetableCourseDraft = {
   createdAt?: string;
 };
 
-export type CalendarTimetableSettings = {
-  id: string;
+export type CalendarTimetableSettings = { id: string;
   activeSemesterId: string;
   visibleDayCount: CalendarTimetableVisibleDayCount;
   updatedAt: string;
 };
 
-export type CalendarTimetableSyllabusCourseDisplay = CalendarTimetableSyllabusCourse & {
-  institutionName: string;
+export type CalendarTimetableSyllabusCourseDisplay = CalendarTimetableSyllabusCourse & { institutionName: string;
   departmentName: string;
   facultyName: string;
 };

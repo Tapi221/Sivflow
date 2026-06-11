@@ -6,11 +6,7 @@ import * as React from 'react';
 
 import { type UseChatHelpers, useChat as useBaseChat } from '@ai-sdk/react';
 import { faker } from '@faker-js/faker';
-import {
-  AIChatPlugin,
-  aiCommentToRange,
-  applyTableCellSuggestion,
-} from '@platejs/ai/react';
+import { AIChatPlugin, aiCommentToRange, applyTableCellSuggestion, } from '@platejs/ai/react';
 import { getCommentKey, getTransientCommentKey } from '@platejs/comment';
 import { deserializeMd } from '@platejs/markdown';
 import { BlockSelectionPlugin } from '@platejs/selection/react';
@@ -25,25 +21,20 @@ import { withAIBatch } from '@platejs/ai';
 
 export type ToolName = 'comment' | 'edit' | 'generate';
 
-export type TComment = {
-  comment: {
-    blockId: string;
+export type TComment = { comment: { blockId: string;
     comment: string;
     content: string;
   } | null;
   status: 'finished' | 'streaming';
 };
 
-export type TTableCellUpdate = {
-  cellUpdate: {
-    content: string;
+export type TTableCellUpdate = { cellUpdate: { content: string;
     id: string;
   } | null;
   status: 'finished' | 'streaming';
 };
 
-export type MessageDataPart = {
-  toolName: ToolName;
+export type MessageDataPart = { toolName: ToolName;
   comment?: TComment;
   table?: TTableCellUpdate;
 };
@@ -159,8 +150,7 @@ function createChatTransport({
   });
 }
 
-export const useChat = () => {
-  const editor = useEditorRef();
+export const useChat = () => { const editor = useEditorRef();
   const options = usePluginOption(aiChatPlugin, 'chatOptions');
 
   // remove when you implement the route /api/ai/command

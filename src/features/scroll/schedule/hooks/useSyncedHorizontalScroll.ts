@@ -23,13 +23,7 @@ const getUniqueElements = (
   return elements;
 };
 
-export const useSyncedHorizontalScroll = ({
-  primaryRef,
-  syncedRefs,
-  syncKey,
-}: Params) => {
-  useEffect(() => {
-    const primary = primaryRef.current;
+export const useSyncedHorizontalScroll = ({ primaryRef, syncedRefs, syncKey, }: Params) => { useEffect(() => { const primary = primaryRef.current;
 
     if (!primary) return;
 

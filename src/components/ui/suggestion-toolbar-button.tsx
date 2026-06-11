@@ -10,8 +10,7 @@ import { cn } from '@/lib/utils';
 
 import { ToolbarButton } from './toolbar';
 
-export function SuggestionToolbarButton() {
-  const { setOption } = useEditorPlugin(SuggestionPlugin);
+export function SuggestionToolbarButton() { const { setOption } = useEditorPlugin(SuggestionPlugin);
   const isSuggesting = usePluginOption(SuggestionPlugin, 'isSuggesting');
 
   return (

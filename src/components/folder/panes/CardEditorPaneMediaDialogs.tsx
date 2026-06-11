@@ -144,8 +144,5 @@ const areMediaDialogsPropsEqual = (
   return false;
 };
 
-export const CardEditorPaneMediaDialogs = memo(
-  CardEditorPaneMediaDialogsInner,
-  areMediaDialogsPropsEqual,
-);
+export const CardEditorPaneMediaDialogs = memo( CardEditorPaneMediaDialogsInner, areMediaDialogsPropsEqual, );
 CardEditorPaneMediaDialogs.displayName = "CardEditorPaneMediaDialogs";

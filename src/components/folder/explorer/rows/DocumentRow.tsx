@@ -38,27 +38,7 @@ interface DocumentRowProps {
   setRowRef: (id: string, node: HTMLElement | null) => void;
 }
 
-export const DocumentRow = ({
-  treeNode,
-  style,
-  depth,
-  isSelected,
-  editingId,
-  editingName,
-  renameCancelledRef,
-  editInputRef,
-  setEditingId,
-  setEditingName,
-  openRowMenuId,
-  setOpenRowMenuId,
-  onItemSelect,
-  canRename,
-  canDelete,
-  handleDelete,
-  handleRenameConfirm,
-  setRowRef,
-}: DocumentRowProps) => {
-  const rowMenuId = `document:${treeNode.rawId}`;
+export const DocumentRow = ({ treeNode, style, depth, isSelected, editingId, editingName, renameCancelledRef, editInputRef, setEditingId, setEditingName, openRowMenuId, setOpenRowMenuId, onItemSelect, canRename, canDelete, handleDelete, handleRenameConfirm, setRowRef, }: DocumentRowProps) => { const rowMenuId = `document:${treeNode.rawId}`;
   const isRowMenuOpen = openRowMenuId === rowMenuId;
   const isEditing = editingId === treeNode.rawId;
 

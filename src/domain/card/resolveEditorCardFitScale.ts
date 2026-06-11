@@ -9,14 +9,7 @@ type ResolveEditorCardFitScaleArgs = Readonly<{
   splitGapPx?: number;
 }>;
 
-export const resolveEditorCardFitScale = ({
-  availablePaneWidthPx,
-  canonicalCardWidth = CANONICAL_CARD_WIDTH,
-  cardLayoutMode,
-  splitGapPx = 0,
-}: ResolveEditorCardFitScaleArgs) => {
-  if (!Number.isFinite(availablePaneWidthPx) || availablePaneWidthPx <= 0) {
-    return 1;
+export const resolveEditorCardFitScale = ({ availablePaneWidthPx, canonicalCardWidth = CANONICAL_CARD_WIDTH, cardLayoutMode, splitGapPx = 0, }: ResolveEditorCardFitScaleArgs) => { if (!Number.isFinite(availablePaneWidthPx) || availablePaneWidthPx <= 0) { return 1;
   }
 
   const editorCardTargetWidthPx =

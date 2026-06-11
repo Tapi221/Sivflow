@@ -107,23 +107,19 @@ const createScannerState = (): MarkdownScannerState => {
   };
 };
 
-export const clampMarkdownTabSize = (input: unknown): MarkdownTabSize => {
-  if (typeof input !== "number" || !Number.isFinite(input)) return MARKDOWN_TAB_SIZE_VALUES[0];
+export const clampMarkdownTabSize = (input: unknown): MarkdownTabSize => { if (typeof input !== "number" || !Number.isFinite(input)) return MARKDOWN_TAB_SIZE_VALUES[0];
   if (input <= 2) return MARKDOWN_TAB_SIZE_VALUES[0];
   if (input <= 4) return MARKDOWN_TAB_SIZE_VALUES[1];
   return MARKDOWN_TAB_SIZE_VALUES[2];
 };
 
-export const normalizeMarkdownLineEndings = (input: string): string => {
-  return String(input ?? "").replace(/\r\n?/g, "\n");
+export const normalizeMarkdownLineEndings = (input: string): string => { return String(input ?? "").replace(/\r\n?/g, "\n");
 };
 
-export const normalizeMarkdownNbsp = (input: string): string => {
-  return normalizeMarkdownLineEndings(input).replace(NBSP_REGEX, " ");
+export const normalizeMarkdownNbsp = (input: string): string => { return normalizeMarkdownLineEndings(input).replace(NBSP_REGEX, " ");
 };
 
-export const stripTrailingMarkdownNewlines = (input: string): string => {
-  return normalizeMarkdownLineEndings(input).replace(/\n+$/g, "");
+export const stripTrailingMarkdownNewlines = (input: string): string => { return normalizeMarkdownLineEndings(input).replace(/\n+$/g, "");
 };
 
 const countLeadingSpaces = (line: string): number => {
@@ -481,21 +477,12 @@ const replaceTabsOutsideInlineCode = (
   return result;
 };
 
-export const isEligibleMarkdownWhitespaceOffset = (
-  input: string,
-  offset: number,
-): boolean => {
-  const analyses = computeMarkdownLineAnalyses(input);
+export const isEligibleMarkdownWhitespaceOffset = ( input: string, offset: number, ): boolean => { const analyses = computeMarkdownLineAnalyses(input);
   const lineIndex = getLineIndexAtOffset(input, offset);
   return analyses[lineIndex]?.kind === "eligible";
 };
 
-export const resolveMarkdownTabKeyText = (
-  input: string,
-  offset: number,
-  tabSize: unknown,
-): string => {
-  const normalized = normalizeMarkdownLineEndings(input);
+export const resolveMarkdownTabKeyText = ( input: string, offset: number, tabSize: unknown, ): string => { const normalized = normalizeMarkdownLineEndings(input);
   const analyses = computeMarkdownLineAnalyses(normalized);
   const lineIndex = getLineIndexAtOffset(normalized, offset);
   const analysis = analyses[lineIndex];
@@ -517,11 +504,7 @@ export const resolveMarkdownTabKeyText = (
   return " ".repeat(clampMarkdownTabSize(tabSize));
 };
 
-export const expandTabsInEligibleMarkdownLines = (
-  input: string,
-  tabSize: unknown,
-): string => {
-  const normalized = normalizeMarkdownNbsp(input);
+export const expandTabsInEligibleMarkdownLines = ( input: string, tabSize: unknown, ): string => { const normalized = normalizeMarkdownNbsp(input);
   if (!normalized.includes("\t")) return normalized;
 
   const effectiveTabSize = clampMarkdownTabSize(tabSize);
@@ -536,17 +519,9 @@ export const expandTabsInEligibleMarkdownLines = (
     .join("\n");
 };
 
-export const normalizeMarkdownInsertionText = (
-  input: string,
-  tabSize: unknown,
-): string => {
-  return expandTabsInEligibleMarkdownLines(input, tabSize);
+export const normalizeMarkdownInsertionText = ( input: string, tabSize: unknown, ): string => { return expandTabsInEligibleMarkdownLines(input, tabSize);
 };
 
-export const normalizeMarkdownEditorValue = (
-  input: string,
-  tabSize: unknown,
-): string => {
-  const normalized = expandTabsInEligibleMarkdownLines(input, tabSize);
+export const normalizeMarkdownEditorValue = ( input: string, tabSize: unknown, ): string => { const normalized = expandTabsInEligibleMarkdownLines(input, tabSize);
   return stripTrailingMarkdownNewlines(normalized);
 };

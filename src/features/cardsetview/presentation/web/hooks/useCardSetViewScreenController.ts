@@ -32,8 +32,7 @@ const buildNavigationScopeKey = ({ deviceScope, cardSetId }: { deviceScope: stri
   return [deviceScope, cardSetId].join("::");
 };
 
-export const useCardSetViewScreenController = (params: UseCardSetViewScreenControllerParams = {}) => {
-  const setExtraCrumbs = useSetBreadcrumbCrumbs();
+export const useCardSetViewScreenController = (params: UseCardSetViewScreenControllerParams = {}) => { const setExtraCrumbs = useSetBreadcrumbCrumbs();
   const { error: toastError } = useToast();
   const presentationTarget = usePresentationTarget();
   const isDesktop = presentationTarget === "desktop";

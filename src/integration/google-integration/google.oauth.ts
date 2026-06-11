@@ -5,8 +5,7 @@ import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, isGoogleOAuthCallbackPayload, type GoogleOAuthCallbackPayload } from "./google.oauth-callback";
 
-export type GoogleCalendarAccess = {
-  accessToken: string;
+export type GoogleCalendarAccess = { accessToken: string;
   accountEmail: string | null;
   accountName: string | null;
   accountPhotoUrl: string | null;
@@ -362,8 +361,7 @@ const requestGoogleOAuthServerCode = async ({ accessType, includeGrantedScopes, 
   return { code, codeVerifier, redirectUri };
 };
 
-export const consumeGoogleCalendarServerCodeVerifier = (): string | null => {
-  const verifier = pendingGoogleCalendarServerCodeVerifier;
+export const consumeGoogleCalendarServerCodeVerifier = (): string | null => { const verifier = pendingGoogleCalendarServerCodeVerifier;
   pendingGoogleCalendarServerCodeVerifier = null;
   return verifier;
 };
@@ -372,14 +370,12 @@ export const consumeGoogleConnectedServiceServerCodeVerifier = consumeGoogleCale
 
 export const requestGoogleSignInServerCode = async (): Promise<GoogleOAuthServerCode> => requestGoogleOAuthServerCode({ prompt: "select_account", scope: GOOGLE_SIGN_IN_SCOPE_PARAM });
 
-export const requestGoogleCalendarServerCode = async (auth: Auth): Promise<GoogleOAuthServerCode> => {
-  const result = await requestGoogleOAuthServerCode({ accessType: "offline", includeGrantedScopes: true, loginHint: auth.currentUser?.email ?? readEmail() ?? undefined, prompt: "consent select_account", scope: GOOGLE_CONNECTED_SERVICE_SCOPE_PARAM });
+export const requestGoogleCalendarServerCode = async (auth: Auth): Promise<GoogleOAuthServerCode> => { const result = await requestGoogleOAuthServerCode({ accessType: "offline", includeGrantedScopes: true, loginHint: auth.currentUser?.email ?? readEmail() ?? undefined, prompt: "consent select_account", scope: GOOGLE_CONNECTED_SERVICE_SCOPE_PARAM });
   pendingGoogleCalendarServerCodeVerifier = result.codeVerifier;
   return result;
 };
 
-export const requestCalendarAccessToken = async (auth: Auth, silent = false): Promise<GoogleCalendarAccess> => {
-  if (isDesktopLikeRuntime()) throw new Error("Desktop Google OAuth must use server-side token exchange.");
+export const requestCalendarAccessToken = async (auth: Auth, silent = false): Promise<GoogleCalendarAccess> => { if (isDesktopLikeRuntime()) throw new Error("Desktop Google OAuth must use server-side token exchange.");
   const provider = new GoogleAuthProvider();
   GOOGLE_SCOPES.forEach((scope) => provider.addScope(scope));
   if (silent) provider.setCustomParameters({ prompt: "none" });
@@ -393,8 +389,7 @@ export const requestCalendarAccessToken = async (auth: Auth, silent = false): Pr
 
 export const requestConnectedServiceAccessToken = requestCalendarAccessToken;
 
-export const refreshCalendarAccessToken = async ({ refreshToken }: { refreshToken: string }): Promise<GoogleCalendarAccess> => {
-  const clientId = getGoogleOAuthClientId();
+export const refreshCalendarAccessToken = async ({ refreshToken }: { refreshToken: string }): Promise<GoogleCalendarAccess> => { const clientId = getGoogleOAuthClientId();
   const response = await fetch(GOOGLE_OAUTH_TOKEN_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ client_id: clientId, refresh_token: refreshToken, grant_type: "refresh_token" }) });
   const json = (await response.json()) as { access_token?: string; expires_in?: number; refresh_token?: string; scope?: string; id_token?: string; error?: string; error_description?: string };
   if (!response.ok || !json.access_token) throw new Error(json.error_description ?? json.error ?? "Google token refresh failed");

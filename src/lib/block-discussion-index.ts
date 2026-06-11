@@ -8,29 +8,14 @@ import type { PlateEditor } from 'platejs/react';
 import { CommentPlugin } from '@platejs/comment/react';
 import { getSuggestionKey, keyId2SuggestionId } from '@platejs/suggestion';
 import { SuggestionPlugin } from '@platejs/suggestion/react';
-import {
-  type NodeEntry,
-  NodeApi,
-  type Path,
-  type TCommentText,
-  type TElement,
-  type TSuggestionText,
-  ElementApi,
-  KEYS,
-  PathApi,
-  TextApi,
-} from 'platejs';
+import { type NodeEntry, NodeApi, type Path, type TCommentText, type TElement, type TSuggestionText, ElementApi, KEYS, PathApi, TextApi, } from 'platejs';
 import { useEditorRef, useEditorVersion, usePluginOption } from 'platejs/react';
 
-import {
-  type TDiscussion,
-  discussionPlugin,
-} from '@/components/editor/plugins/discussion-kit';
+import { type TDiscussion, discussionPlugin, } from '@/components/editor/plugins/discussion-kit';
 
 import type { TComment } from '@/components/comment';
 
-export interface ResolvedSuggestion extends TResolvedSuggestion {
-  comments: TComment[];
+export interface ResolvedSuggestion extends TResolvedSuggestion { comments: TComment[];
 }
 
 export const BLOCK_SUGGESTION_TOKEN = '__block__';
@@ -361,16 +346,7 @@ const toResolvedSuggestion = ({
   return null;
 };
 
-export const buildBlockDiscussionIndex = ({
-  discussions,
-  entries,
-  getCommentId,
-  getSuggestionData,
-  getSuggestionDataList,
-  getSuggestionId,
-  isBlockSuggestion,
-}: BuildBlockDiscussionIndexOptions): BlockDiscussionIndex => {
-  const commentOwnerById = new Map<string, Path>();
+export const buildBlockDiscussionIndex = ({ discussions, entries, getCommentId, getSuggestionData, getSuggestionDataList, getSuggestionId, isBlockSuggestion, }: BuildBlockDiscussionIndexOptions): BlockDiscussionIndex => { const commentOwnerById = new Map<string, Path>();
   const suggestionOwnerById = new Map<string, Path>();
   const commentIds = new Set<string>();
   const suggestionEntriesById = new Map<string, SuggestionEntry[]>();
@@ -485,8 +461,7 @@ const getDiscussionIndex = (
   return index;
 };
 
-export const useBlockDiscussionItems = (blockPath: Path) => {
-  const editor = useEditorRef();
+export const useBlockDiscussionItems = (blockPath: Path) => { const editor = useEditorRef();
   const discussions = usePluginOption(discussionPlugin, 'discussions');
   const version = useEditorVersion() ?? 0;
 

@@ -82,8 +82,7 @@ const parseGoogleDayList = (value: string | undefined): CalendarWeekday[] | unde
   return days.length > 0 ? days : undefined;
 };
 
-export const serializeGoogleRecurrenceRule = (rule: CalendarRecurrenceRule | null | undefined): string | null => {
-  const normalized = normalizeCalendarRecurrenceRule(rule);
+export const serializeGoogleRecurrenceRule = (rule: CalendarRecurrenceRule | null | undefined): string | null => { const normalized = normalizeCalendarRecurrenceRule(rule);
   if (!normalized) return null;
 
   const parts = [`FREQ=${GOOGLE_FREQUENCY_BY_CALENDAR_FREQUENCY[normalized.frequency]}`];
@@ -98,8 +97,7 @@ export const serializeGoogleRecurrenceRule = (rule: CalendarRecurrenceRule | nul
   return `${RRULE_PREFIX}${parts.join(";")}`;
 };
 
-export const parseGoogleRecurrenceRule = (recurrence: readonly string[] | undefined): CalendarRecurrenceRule | undefined => {
-  const rawRRule = recurrence?.find((item) => item.toUpperCase().startsWith(RRULE_PREFIX));
+export const parseGoogleRecurrenceRule = (recurrence: readonly string[] | undefined): CalendarRecurrenceRule | undefined => { const rawRRule = recurrence?.find((item) => item.toUpperCase().startsWith(RRULE_PREFIX));
   if (!rawRRule) return undefined;
 
   const tokens = rawRRule.slice(RRULE_PREFIX.length).split(";");

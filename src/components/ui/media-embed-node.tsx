@@ -16,27 +16,9 @@ import { cn } from '@/lib/utils';
 
 import { Caption, CaptionTextarea } from './caption';
 import { MediaToolbar } from './media-toolbar';
-import {
-  mediaResizeHandleVariants,
-  Resizable,
-  ResizeHandle,
-} from './resize-handle';
+import { mediaResizeHandleVariants, Resizable, ResizeHandle, } from './resize-handle';
 
-export const MediaEmbedElement = withHOC(
-  ResizableProvider,
-  function MediaEmbedElement(props: PlateElementProps<TMediaEmbedElement>) {
-    const {
-      align = 'center',
-      embed,
-      focused,
-      isTweet,
-      isVideo,
-      isYoutube,
-      readOnly,
-      selected,
-    } = useMediaState({
-      urlParsers: [parseTwitterUrl, parseVideoUrl],
-    });
+export const MediaEmbedElement = withHOC( ResizableProvider, function MediaEmbedElement(props: PlateElementProps<TMediaEmbedElement>) { const { align = 'center', embed, focused, isTweet, isVideo, isYoutube, readOnly, selected, } = useMediaState({ urlParsers: [parseTwitterUrl, parseVideoUrl], });
     const width = useResizableValue('width');
     const provider = embed?.provider;
 

@@ -73,11 +73,7 @@ const writeStore = (store: CardWidthPreferencesStore) => {
   }
 };
 
-export const getCardSetWidthPreference = (
-  cardSetId: string,
-  mode: CardWidthPaneMode,
-): number | undefined => {
-  const store = readStore();
+export const getCardSetWidthPreference = ( cardSetId: string, mode: CardWidthPaneMode, ): number | undefined => { const store = readStore();
   const entry = store.byCardSet[cardSetId];
   if (!entry) return undefined;
   const value = entry[mode];
@@ -87,12 +83,7 @@ export const getCardSetWidthPreference = (
   return undefined;
 };
 
-export const setCardSetWidthPreference = (
-  cardSetId: string,
-  mode: CardWidthPaneMode,
-  widthPx: number,
-) => {
-  if (!cardSetId) return;
+export const setCardSetWidthPreference = ( cardSetId: string, mode: CardWidthPaneMode, widthPx: number, ) => { if (!cardSetId) return;
   const store = readStore();
   const currentEntry = store.byCardSet[cardSetId] ?? {};
   store.byCardSet[cardSetId] = {

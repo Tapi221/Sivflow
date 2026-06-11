@@ -1,11 +1,9 @@
 import React from "react";
 
-export type CardOverlayTopRightProps = Readonly<{
-  children?: React.ReactNode;
+export type CardOverlayTopRightProps = Readonly<{ children?: React.ReactNode;
 }>;
 
-export const CardOverlayTopRight = ({ children }: CardOverlayTopRightProps) => {
-  if (!children) return null;
+export const CardOverlayTopRight = ({ children }: CardOverlayTopRightProps) => { if (!children) return null;
 
   return (
     <div className="pointer-events-none absolute right-2 top-2 z-30">

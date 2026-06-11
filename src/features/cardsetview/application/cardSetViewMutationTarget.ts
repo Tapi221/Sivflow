@@ -15,15 +15,7 @@ interface CardMutationTarget {
   targetFolderId: string | null;
 }
 
-export const resolveCardMutationTarget = ({
-  cardSetId,
-  cardSetById,
-  selectedCardSet,
-  selectedCard,
-  currentCard,
-}: ResolveCardMutationTargetOptions): CardMutationTarget => {
-  const resolveTargetFolderId = (card: Card | null) => {
-    if (!card) return null;
+export const resolveCardMutationTarget = ({ cardSetId, cardSetById, selectedCardSet, selectedCard, currentCard, }: ResolveCardMutationTargetOptions): CardMutationTarget => { const resolveTargetFolderId = (card: Card | null) => { if (!card) return null;
     return resolveCardFolderIdStrict(card, cardSetById);
   };
 

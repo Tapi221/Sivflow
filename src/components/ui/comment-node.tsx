@@ -11,8 +11,7 @@ import { PlateLeaf, useEditorPlugin, usePluginOption } from 'platejs/react';
 import { cn } from '@/lib/utils';
 import { commentPlugin } from '@/components/editor/plugins/comment-kit';
 
-export function CommentLeaf(props: PlateLeafProps<TCommentText>) {
-  const { children, leaf } = props;
+export function CommentLeaf(props: PlateLeafProps<TCommentText>) { const { children, leaf } = props;
 
   const { api, setOption } = useEditorPlugin(commentPlugin);
   const hoverId = usePluginOption(commentPlugin, 'hoverId');

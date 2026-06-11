@@ -13,8 +13,7 @@ type CalendarMonthGridWeek = {
   days: CalendarMonthGridDay[];
 };
 
-export type CalendarDayModel = {
-  key: string;
+export type CalendarDayModel = { key: string;
   date: Date;
   dayOfMonth: number;
   isCurrentMonth: boolean;
@@ -23,13 +22,11 @@ export type CalendarDayModel = {
   monthAnnotation: string | null;
 };
 
-export type CalendarWeekModel = {
-  key: string;
+export type CalendarWeekModel = { key: string;
   days: CalendarDayModel[];
 };
 
-export type CalendarGridModel = {
-  weeks: CalendarWeekModel[];
+export type CalendarGridModel = { weeks: CalendarWeekModel[];
 };
 
 type Params = {
@@ -43,17 +40,7 @@ const getMonthAnnotation = (date: Date): string | null => {
   return `${date.getMonth() + 1}月`;
 };
 
-export const useCalendarGrid = ({
-  monthWeeks,
-  selectedKey,
-  todayKey,
-}: Params): CalendarGridModel => {
-  return useMemo(() => {
-    const weeks: CalendarWeekModel[] = monthWeeks.map((week) => {
-      return {
-        key: week.key,
-        days: week.days.map((day: CalendarMonthGridDay) => {
-          const key = toDateKey(day.date);
+export const useCalendarGrid = ({ monthWeeks, selectedKey, todayKey, }: Params): CalendarGridModel => { return useMemo(() => { const weeks: CalendarWeekModel[] = monthWeeks.map((week) => { return { key: week.key, days: week.days.map((day: CalendarMonthGridDay) => { const key = toDateKey(day.date);
 
           return {
             key,

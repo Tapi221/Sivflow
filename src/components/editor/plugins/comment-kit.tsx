@@ -2,11 +2,7 @@
 
 import type { ExtendConfig, Path } from 'platejs';
 
-import {
-  type BaseCommentConfig,
-  BaseCommentPlugin,
-  getDraftCommentKey,
-} from '@platejs/comment';
+import { type BaseCommentConfig, BaseCommentPlugin, getDraftCommentKey, } from '@platejs/comment';
 import { toTPlatePlugin } from 'platejs/react';
 
 import { CommentLeaf } from '@/components/comment-node';
@@ -21,13 +17,7 @@ type CommentConfig = ExtendConfig<
   }
 >;
 
-export const commentPlugin = toTPlatePlugin<CommentConfig>(BaseCommentPlugin, {
-  handlers: {
-    onClick: ({ api, event, setOption, type }) => {
-      const activeTarget = getDiscussionClickTarget({
-        selector: `.slate-${type}`,
-        target: event.target,
-      });
+export const commentPlugin = toTPlatePlugin<CommentConfig>(BaseCommentPlugin, { handlers: { onClick: ({ api, event, setOption, type }) => { const activeTarget = getDiscussionClickTarget({ selector: `.slate-${type}`, target: event.target, });
 
       if (!activeTarget) {
         setOption('activeId', null);

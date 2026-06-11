@@ -7,17 +7,12 @@ export type UploadedImageStatus = "pending" | "uploading" | "ready" | "failed";
 export type UploadState = "pending" | "inProgress" | "completed" | "failed";
 
 export type UploadSource = "cloud" | "local_fallback";
-export type UploadFallbackReason =
-  | "timeout"
-  | "network_error"
-  | "permission_error"
-  | "unknown";
+export type UploadFallbackReason = | "timeout" | "network_error" | "permission_error" | "unknown";
 
 export type AssetRemoteStatus = "none" | "uploading" | "ready" | "failed";
 export type AssetLocalStatus = "present" | "missing";
 
-export interface AssetRecord {
-  id: string;
+export interface AssetRecord { id: string;
   userId: string;
   mime: string;
   size: number;
@@ -34,8 +29,7 @@ export interface AssetRecord {
   sha256?: string | null;
 }
 
-export interface CardImageRef {
-  assetId: string;
+export interface CardImageRef { assetId: string;
   scale?: number | null;
   x?: number | null;
   layout?: ImageBlockLayout | null;
@@ -43,8 +37,7 @@ export interface CardImageRef {
   naturalH?: number | null;
 }
 
-export type ResolvableImageRef = {
-  id?: string | null;
+export type ResolvableImageRef = { id?: string | null;
   assetId?: string | null;
   localFileId?: string | null;
   remoteUrl?: string | null;
@@ -58,14 +51,11 @@ export type ResolvableImageRef = {
   naturalH?: number | null;
 };
 
-export interface ImageBlockLayout {
-  /** fixed 本文座標系での画像論理幅。fixed / fluid 共通の正本。 */
-  baseWidthPx?: number | null;
+export interface ImageBlockLayout { /** fixed 本文座標系での画像論理幅。fixed / fluid 共通の正本。 */ baseWidthPx?: number | null;
   cropX?: number | null;
 }
 
-export interface UploadedImage {
-  id: string;
+export interface UploadedImage { id: string;
   assetId?: string | null;
   localUrl?: BlobUrl | null;
   remoteUrl?: StorageUrl | null;
@@ -94,8 +84,7 @@ export interface UploadedImage {
   updatedAt?: Date | Timestamp | null;
 }
 
-export interface UploadedPdf {
-  id: string;
+export interface UploadedPdf { id: string;
   assetId?: string | null;
   filename: string;
   localUrl?: BlobUrl | null;
@@ -114,8 +103,7 @@ export interface UploadedPdf {
   updatedAt?: Date | Timestamp | null;
 }
 
-export interface UploadedFile {
-  id: string;
+export interface UploadedFile { id: string;
   name: string;
   remoteUrl: string;
   storagePath: string;
@@ -123,8 +111,7 @@ export interface UploadedFile {
   size?: number | null;
 }
 
-export interface UploadMetadata {
-  id: string;
+export interface UploadMetadata { id: string;
   userId: string;
   originalFilename: string;
   storagePath: string;

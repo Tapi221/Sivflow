@@ -13,11 +13,7 @@ const toBlob = (canvas: HTMLCanvasElement): Promise<Blob> => {
   });
 };
 
-export const cropCanvasToBlob = async (
-  sourceCanvas: HTMLCanvasElement,
-  sourceRect: SelectionCaptureRect,
-): Promise<Blob> => {
-  const outputCanvas = document.createElement("canvas");
+export const cropCanvasToBlob = async ( sourceCanvas: HTMLCanvasElement, sourceRect: SelectionCaptureRect, ): Promise<Blob> => { const outputCanvas = document.createElement("canvas");
   outputCanvas.width = Math.max(1, Math.round(sourceRect.width));
   outputCanvas.height = Math.max(1, Math.round(sourceRect.height));
 

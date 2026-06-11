@@ -2,11 +2,7 @@
 
 import type { SlateEditor } from 'platejs';
 
-import {
-  createSlatePlugin,
-  createTextSubstitutionInputRule,
-  KEYS,
-} from 'platejs';
+import { createSlatePlugin, createTextSubstitutionInputRule, KEYS, } from 'platejs';
 
 const isTextSubstitutionBlocked = (editor: SlateEditor) =>
   editor.api.some({

@@ -2,8 +2,7 @@ import type { ReactNode } from "react";
 import { SurfaceButton } from "@/components/ui/surface-button";
 import { cn } from "@/lib/utils";
 
-export type SegmentedOption<T extends string> = {
-  label: ReactNode;
+export type SegmentedOption<T extends string> = { label: ReactNode;
   value: T;
   ariaLabel?: string;
   disabled?: boolean;
@@ -18,18 +17,7 @@ interface SegmentedControlGroupProps<T extends string> {
   buttonClassName?: string;
 }
 
-export const SegmentedControlGroup = <T extends string>({
-  value,
-  options,
-  onChange,
-  size = "xs",
-  className,
-  buttonClassName,
-}: SegmentedControlGroupProps<T>) => {
-  return (
-    <div className={cn("ds-segmented-control", className)}>
-      {options.map((option) => {
-        const isSelected = value === option.value;
+export const SegmentedControlGroup = <T extends string>({ value, options, onChange, size = "xs", className, buttonClassName, }: SegmentedControlGroupProps<T>) => { return ( <div className={cn("ds-segmented-control", className)}> {options.map((option) => { const isSelected = value === option.value;
 
         return (
           <SurfaceButton

@@ -190,10 +190,7 @@ const processAssetQueueBestEffort = async (): Promise<void> => {
   }
 };
 
-export const waitForDraftImageUploads = async (
-  draft: EditorDraft,
-): Promise<EditorDraft> => {
-  const images = uniqueImagesByAssetKey(collectDraftImages(draft));
+export const waitForDraftImageUploads = async ( draft: EditorDraft, ): Promise<EditorDraft> => { const images = uniqueImagesByAssetKey(collectDraftImages(draft));
   const pendingImages = images.filter(shouldWaitForImage);
 
   if (pendingImages.length === 0) {

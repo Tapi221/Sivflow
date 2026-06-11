@@ -47,29 +47,7 @@ type ImageFrameProps = {
   onError?: () => void;
 };
 
-export const ImageFrame = ({
-  src,
-  alt,
-  className,
-  imgClassName,
-  displayMode = "fixed",
-  zoom = 1,
-  scale = 1,
-  x = 0,
-  layoutBaseWidthPx,
-  cropX,
-  fixedReferenceFrameWidthPx,
-  fluidAvailableWidthPx,
-  naturalW,
-  naturalH,
-  editable = false,
-  onImageClick,
-  onTransformChange,
-  onTransformCommit,
-  onNaturalSize,
-  onError,
-}: ImageFrameProps) => {
-  const frameRef = React.useRef<HTMLDivElement | null>(null);
+export const ImageFrame = ({ src, alt, className, imgClassName, displayMode = "fixed", zoom = 1, scale = 1, x = 0, layoutBaseWidthPx, cropX, fixedReferenceFrameWidthPx, fluidAvailableWidthPx, naturalW, naturalH, editable = false, onImageClick, onTransformChange, onTransformCommit, onNaturalSize, onError, }: ImageFrameProps) => { const frameRef = React.useRef<HTMLDivElement | null>(null);
   const imgRef = React.useRef<HTMLImageElement | null>(null);
   const dragRef = React.useRef<{
     pointerId: number;

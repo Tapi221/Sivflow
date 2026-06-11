@@ -35,22 +35,17 @@ export type Base64DataUrl = string & { readonly __brand: "Base64DataUrl" };
 /**
  * Blob URL かどうかを判定
  */
-export const isBlobUrl = (url: string): url is BlobUrl =>
-  url.startsWith("blob:");
+export const isBlobUrl = (url: string): url is BlobUrl => url.startsWith("blob:");
 
 /**
  * Firebase Storage URL かどうかを判定
  */
-export const isStorageUrl = (url: string): url is StorageUrl =>
-  url.startsWith("https://") &&
-  (url.includes("firebasestorage.googleapis.com") ||
-    url.includes("storage.googleapis.com"));
+export const isStorageUrl = (url: string): url is StorageUrl => url.startsWith("https://") && (url.includes("firebasestorage.googleapis.com") || url.includes("storage.googleapis.com"));
 
 /**
  * Base64 Data URL かどうかを判定
  */
-export const isBase64DataUrl = (url: string): url is Base64DataUrl =>
-  url.startsWith("data:");
+export const isBase64DataUrl = (url: string): url is Base64DataUrl => url.startsWith("data:");
 
 // ============================================
 // Constructors（実行時バリデーション付き生成）
@@ -60,9 +55,7 @@ export const isBase64DataUrl = (url: string): url is Base64DataUrl =>
  * Blob URL を生成（実行時バリデーション付き）
  * @throws {Error} 不正な URL の場合
  */
-export const createBlobUrl = (url: string): BlobUrl => {
-  if (!isBlobUrl(url)) {
-    throw new Error(`[BrandedType] Invalid BlobUrl: ${url}`);
+export const createBlobUrl = (url: string): BlobUrl => { if (!isBlobUrl(url)) { throw new Error(`[BrandedType] Invalid BlobUrl: ${url}`);
   }
   return url as BlobUrl;
 };
@@ -71,9 +64,7 @@ export const createBlobUrl = (url: string): BlobUrl => {
  * Storage URL を生成（実行時バリデーション付き）
  * @throws {Error} 不正な URL の場合
  */
-export const createStorageUrl = (url: string): StorageUrl => {
-  if (!isStorageUrl(url)) {
-    throw new Error(`[BrandedType] Invalid StorageUrl: ${url}`);
+export const createStorageUrl = (url: string): StorageUrl => { if (!isStorageUrl(url)) { throw new Error(`[BrandedType] Invalid StorageUrl: ${url}`);
   }
   return url as StorageUrl;
 };
@@ -85,9 +76,7 @@ export const createStorageUrl = (url: string): StorageUrl => {
  * ⚠️ 警告: この関数は内部処理でのみ使用すること
  * DB や UploadedImage に Base64 を保存してはならない
  */
-export const createBase64DataUrl = (url: string): Base64DataUrl => {
-  if (!isBase64DataUrl(url)) {
-    throw new Error(`[BrandedType] Invalid Base64DataUrl: ${url}`);
+export const createBase64DataUrl = (url: string): Base64DataUrl => { if (!isBase64DataUrl(url)) { throw new Error(`[BrandedType] Invalid Base64DataUrl: ${url}`);
   }
   return url as Base64DataUrl;
 };
@@ -98,6 +87,5 @@ export const createBase64DataUrl = (url: string): Base64DataUrl => {
 /**
  * Blob URL を安全に解放
  */
-export const revokeBlobUrl = (url: BlobUrl): void => {
-  URL.revokeObjectURL(url);
+export const revokeBlobUrl = (url: BlobUrl): void => { URL.revokeObjectURL(url);
 };

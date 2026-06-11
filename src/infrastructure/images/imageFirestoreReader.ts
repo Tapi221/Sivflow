@@ -16,11 +16,7 @@ const isImageFirestoreDiagnosticsEnabled = (): boolean => {
   }
 };
 
-export const getImageFromFirestore = async ({
-  imageId,
-  userId,
-}: {
-  imageId: string;
+export const getImageFromFirestore = async ({ imageId, userId, }: { imageId: string;
   userId?: string;
 }): Promise<UploadedImage | null> => {
   const uid = userId?.trim() || auth.currentUser?.uid?.trim() || null;

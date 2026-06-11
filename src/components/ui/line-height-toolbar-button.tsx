@@ -9,18 +9,11 @@ import { DropdownMenuItemIndicator } from '@radix-ui/react-dropdown-menu';
 import { CheckIcon, WrapText } from 'lucide-react';
 import { useEditorRef, useSelectionFragmentProp } from 'platejs/react';
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from './dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger, } from './dropdown-menu';
 
 import { ToolbarButton } from './toolbar';
 
-export function LineHeightToolbarButton(props: DropdownMenuProps) {
-  const editor = useEditorRef();
+export function LineHeightToolbarButton(props: DropdownMenuProps) { const editor = useEditorRef();
   const { defaultNodeValue, validNodeValues: values = [] } =
     editor.getInjectProps(LineHeightPlugin);
 

@@ -6,10 +6,7 @@ import dedent from 'dedent';
 
 import { buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction } from '@/app/api/ai/command/utils';
 
-export function getCommentPrompt(editor: SlateEditor, { messages }: { messages: ChatMessage[] }) {
-  const selectingMarkdown = getMarkdown(editor, {
-    type: 'blockWithBlockId',
-  });
+export function getCommentPrompt(editor: SlateEditor, { messages }: { messages: ChatMessage[] }) { const selectingMarkdown = getMarkdown(editor, { type: 'blockWithBlockId', });
 
   return buildStructuredPrompt({
     context: selectingMarkdown,

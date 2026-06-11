@@ -18,8 +18,7 @@ const buildIssue = ({
   };
 };
 
-export const groupParsedRowsToCards = (rows: ParsedImportRow[]) => {
-  const issues: ImportIssue[] = [];
+export const groupParsedRowsToCards = (rows: ParsedImportRow[]) => { const issues: ImportIssue[] = [];
   const cardMap = new Map<
     string,
     {

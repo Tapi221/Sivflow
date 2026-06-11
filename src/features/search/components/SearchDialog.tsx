@@ -61,8 +61,7 @@ const resolveItemIcon = (item: SearchItem) => {
   }
 };
 
-export const SearchDialog = () => {
-  useSearchHotkey();
+export const SearchDialog = () => { useSearchHotkey();
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const isOpen = useSearchStore((state) => state.isOpen);

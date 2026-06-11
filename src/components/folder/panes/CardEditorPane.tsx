@@ -323,41 +323,7 @@ const areEditorSidePanePropsEqual = (
 const EditorSidePane = memo(EditorSidePaneInner, areEditorSidePanePropsEqual);
 EditorSidePane.displayName = "EditorSidePane";
 
-export const CardEditorPane = ({
-  selectedCardId,
-  folderId,
-  cardSetId,
-  forcedPaneWidthPx = null,
-  cardsOverride,
-  autoEdit,
-  onCardUpdated,
-  onSelectCardId,
-  hideMetaPanel = false,
-  dockToolbarsToTop = false,
-  hideBlockToolbars = false,
-  externalToolbarMountQ = null,
-  externalToolbarMountA = null,
-  settingsOverride = null,
-  embeddedInPager = false,
-  pairGapClassName = "gap-0",
-  presentationContext,
-  showResizeHandle: showResizeHandleProp = true,
-  onSyncStatusChange,
-  overlayTopInsetPx = 0,
-  displayMode = "fixed",
-  cardLayoutMode = "split",
-  zoom = 1,
-}: CardEditorPaneProps) => {
-  const controller = useCardEditorPaneController({
-    selectedCardId,
-    folderId,
-    cardSetId,
-    cardsOverride,
-    autoEdit,
-    onCardUpdated,
-    onSelectCardId,
-    settingsOverride,
-  });
+export const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx = null, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, hideMetaPanel = false, dockToolbarsToTop = false, hideBlockToolbars = false, externalToolbarMountQ = null, externalToolbarMountA = null, settingsOverride = null, embeddedInPager = false, pairGapClassName = "gap-0", presentationContext, showResizeHandle: showResizeHandleProp = true, onSyncStatusChange, overlayTopInsetPx = 0, displayMode = "fixed", cardLayoutMode = "split", zoom = 1, }: CardEditorPaneProps) => { const controller = useCardEditorPaneController({ selectedCardId, folderId, cardSetId, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, settingsOverride, });
 
   const { settings, isMetaOpen, session, layout, content, actions } =
     controller;

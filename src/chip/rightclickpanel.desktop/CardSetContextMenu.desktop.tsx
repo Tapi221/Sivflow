@@ -4,8 +4,7 @@ import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLIC
 
 export type CardSetContextMenuActionId = "rename" | "delete";
 
-export type CardSetContextMenuAction = {
-  id: CardSetContextMenuActionId;
+export type CardSetContextMenuAction = { id: CardSetContextMenuActionId;
   label: string;
   danger?: boolean;
   disabled?: boolean;

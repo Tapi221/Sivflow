@@ -4,25 +4,9 @@ import * as React from 'react';
 
 import type { PointRef, TElement } from 'platejs';
 
-import {
-  type ComboboxItemProps,
-  Combobox,
-  ComboboxGroup,
-  ComboboxGroupLabel,
-  ComboboxItem,
-  ComboboxPopover,
-  ComboboxProvider,
-  ComboboxRow,
-  Portal,
-  useComboboxContext,
-  useComboboxStore,
-} from '@ariakit/react';
+import { type ComboboxItemProps, Combobox, ComboboxGroup, ComboboxGroupLabel, ComboboxItem, ComboboxPopover, ComboboxProvider, ComboboxRow, Portal, useComboboxContext, useComboboxStore, } from '@ariakit/react';
 import { filterWords } from '@platejs/combobox';
-import {
-  type UseComboboxInputResult,
-  useComboboxInput,
-  useHTMLInputCursorState,
-} from '@platejs/combobox/react';
+import { type UseComboboxInputResult, useComboboxInput, useHTMLInputCursorState, } from '@platejs/combobox/react';
 import { cva } from 'class-variance-authority';
 import { useComposedRef, useEditorRef } from 'platejs/react';
 
@@ -431,13 +415,4 @@ function InlineComboboxGroupLabel({
   );
 }
 
-export {
-  InlineCombobox,
-  InlineComboboxContent,
-  InlineComboboxEmpty,
-  InlineComboboxGroup,
-  InlineComboboxGroupLabel,
-  InlineComboboxInput,
-  InlineComboboxItem,
-  InlineComboboxRow,
-};
+export { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxGroupLabel, InlineComboboxInput, InlineComboboxItem, InlineComboboxRow, };

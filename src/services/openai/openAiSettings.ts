@@ -1,7 +1,6 @@
 export type AiProviderMode = "local-template" | "openai-user-api-key";
 
-export type OpenAiSettings = {
-  providerMode: AiProviderMode;
+export type OpenAiSettings = { providerMode: AiProviderMode;
   apiKey: string;
   model: string;
   maxOutputTokens: number;
@@ -10,12 +9,7 @@ export type OpenAiSettings = {
 const STORAGE_KEY = "sivflow.openai.settings.v1";
 const LEGACY_STORAGE_KEY = "flashcard-master.openai.settings.v1";
 
-export const DEFAULT_OPEN_AI_SETTINGS: OpenAiSettings = {
-  providerMode: "local-template",
-  apiKey: "",
-  model: "gpt-5.4-mini",
-  maxOutputTokens: 700,
-};
+export const DEFAULT_OPEN_AI_SETTINGS: OpenAiSettings = { providerMode: "local-template", apiKey: "", model: "gpt-5.4-mini", maxOutputTokens: 700, };
 
 const isAiProviderMode = (value: unknown): value is AiProviderMode =>
   value === "local-template" || value === "openai-user-api-key";
@@ -48,9 +42,7 @@ const readStoredOpenAiSettings = (): string | null => {
   return legacy;
 };
 
-export const loadOpenAiSettings = (): OpenAiSettings => {
-  if (typeof window === "undefined") {
-    return DEFAULT_OPEN_AI_SETTINGS;
+export const loadOpenAiSettings = (): OpenAiSettings => { if (typeof window === "undefined") { return DEFAULT_OPEN_AI_SETTINGS;
   }
 
   try {
@@ -79,9 +71,7 @@ export const loadOpenAiSettings = (): OpenAiSettings => {
   }
 };
 
-export const saveOpenAiSettings = (settings: OpenAiSettings) => {
-  if (typeof window === "undefined") {
-    return;
+export const saveOpenAiSettings = (settings: OpenAiSettings) => { if (typeof window === "undefined") { return;
   }
 
   const normalized: OpenAiSettings = {
@@ -95,9 +85,7 @@ export const saveOpenAiSettings = (settings: OpenAiSettings) => {
   window.localStorage.removeItem(LEGACY_STORAGE_KEY);
 };
 
-export const clearOpenAiSettings = () => {
-  if (typeof window === "undefined") {
-    return;
+export const clearOpenAiSettings = () => { if (typeof window === "undefined") { return;
   }
 
   window.localStorage.removeItem(STORAGE_KEY);

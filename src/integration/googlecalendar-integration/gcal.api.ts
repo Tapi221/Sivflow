@@ -158,8 +158,7 @@ const toGoogleEventPayload = (event: Partial<GCalWritableEventInput>): Record<st
   return payload;
 };
 
-export const fetchCalendarList = async (accessToken: string): Promise<GoogleCalendarListItem[]> => {
-  console.info("[GoogleCalendarAPI] カレンダー一覧の取得を開始しました");
+export const fetchCalendarList = async (accessToken: string): Promise<GoogleCalendarListItem[]> => { console.info("[GoogleCalendarAPI] カレンダー一覧の取得を開始しました");
 
   try {
     const calendars: GoogleCalendarListItem[] = [];
@@ -231,15 +230,7 @@ export const createGoogleCalendar = async ({ accessToken, summary, description }
   return toGoogleCalendarListItem(calendar);
 };
 
-export const fetchEventsForCalendar = async ({
-  accessToken,
-  accountId,
-  calendarId,
-  accentColor,
-  rangeStart,
-  rangeEnd,
-}: {
-  accessToken: string;
+export const fetchEventsForCalendar = async ({ accessToken, accountId, calendarId, accentColor, rangeStart, rangeEnd, }: { accessToken: string;
   accountId?: string;
   calendarId: string;
   accentColor: string;

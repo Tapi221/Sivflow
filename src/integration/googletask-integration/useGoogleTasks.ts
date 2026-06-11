@@ -6,21 +6,18 @@ import type { GoogleConnectedServiceAccountEntry, GoogleConnectedServiceAccountT
 import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
 import type { GoogleTaskListAccountState } from "./useGoogleTaskLists";
 
-export type GoogleTasksAccountState = {
-  tasks: GoogleTaskItem[];
+export type GoogleTasksAccountState = { tasks: GoogleTaskItem[];
   isLoading: boolean;
   error: string | null;
 };
 
-export type GoogleTaskCreateInput = {
-  title: string;
+export type GoogleTaskCreateInput = { title: string;
   notes?: string | null;
   due?: string | null;
   status?: GoogleTaskItem["status"];
 };
 
-export type GoogleTaskPatchInput = {
-  title?: string;
+export type GoogleTaskPatchInput = { title?: string;
   notes?: string | null;
   due?: string | null;
   status?: GoogleTaskItem["status"];
@@ -328,12 +325,7 @@ const buildAccountTokenKey = (
     })
     .join("\n");
 
-export const useGoogleTasks = (
-  accounts: GoogleConnectedServiceAccountEntry[],
-  taskListsByAccount: Record<string, GoogleTaskListAccountState>,
-  onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void,
-) => {
-  const [state, dispatch] = useReducer(reduceGoogleTasks, {});
+export const useGoogleTasks = ( accounts: GoogleConnectedServiceAccountEntry[], taskListsByAccount: Record<string, GoogleTaskListAccountState>, onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void, ) => { const [state, dispatch] = useReducer(reduceGoogleTasks, {});
 
   const accountTokenKey = buildAccountTokenKey(accounts, taskListsByAccount);
 

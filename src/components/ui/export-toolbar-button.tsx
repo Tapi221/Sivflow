@@ -12,13 +12,7 @@ import { createSlateEditor } from 'platejs';
 import { useEditorRef } from 'platejs/react';
 import { serializeHtml } from 'platejs/static';
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from './dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger, } from './dropdown-menu';
 import { BaseEditorKit } from '@/components/editor/editor-base-kit';
 
 import { EditorStatic } from './editor-static';
@@ -27,8 +21,7 @@ import { DocxExportKit } from '@/components/editor/plugins/docx-export-kit';
 
 const siteUrl = 'https://platejs.org';
 
-export function ExportToolbarButton(props: DropdownMenuProps) {
-  const editor = useEditorRef();
+export function ExportToolbarButton(props: DropdownMenuProps) { const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
 
   const getCanvas = async () => {

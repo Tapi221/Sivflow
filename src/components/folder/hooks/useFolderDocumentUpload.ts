@@ -34,12 +34,7 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
   return fallback;
 };
 
-export const useFolderDocumentUpload = ({
-  actionFolderId,
-  getNextOrderIndex,
-  setExpandedFolders,
-}: UseFolderDocumentUploadParams) => {
-  const { currentUser } = useAuthSession();
+export const useFolderDocumentUpload = ({ actionFolderId, getNextOrderIndex, setExpandedFolders, }: UseFolderDocumentUploadParams) => { const { currentUser } = useAuthSession();
   const { error: toastError, success: toastSuccess } = useToast();
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);

@@ -3,23 +3,20 @@ import type { CalendarTimeGridLayoutEntry } from "@core/calendar";
 import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 import * as GRID from "./grid.layout.constants.desktop";
 
-export type WeekdayTimedEventPositionStyle = CSSProperties & {
-  left: string;
+export type WeekdayTimedEventPositionStyle = CSSProperties & { left: string;
   top: string;
   width: string;
   height: string;
   minHeight: string;
 };
 
-export type WeekdayTimedEventFrame = {
-  leftPercent: number;
+export type WeekdayTimedEventFrame = { leftPercent: number;
   topHours: number;
   widthPercent: number;
   heightHours: number;
 };
 
-export type WeekdayTimedEventPositionOptions = {
-  maxMinHeightHours?: number;
+export type WeekdayTimedEventPositionOptions = { maxMinHeightHours?: number;
   suppressMinHeight?: boolean;
 };
 
@@ -68,15 +65,9 @@ const createMinHeightStyle = ({ maxMinHeightHours, shouldHideEvent, suppressMinH
 
 const shouldHideCarryOverEventInShortRange = (entry: CalendarTimeGridLayoutEntry, rangeHours: number): boolean => entry.startsBeforeRange && rangeHours <= SHORT_RANGE_CARRY_OVER_HIDE_THRESHOLD_HOURS;
 
-export const getWeekdayTimedEventFrame = (entry: CalendarTimeGridLayoutEntry, rangeHours = GRID.WEEKDAY_HOURS): WeekdayTimedEventFrame => ({
-  leftPercent: entry.style.xOffset,
-  topHours: getPercentAsHourSpan(entry.style.top, rangeHours),
-  widthPercent: entry.style.width,
-  heightHours: getPercentAsHourSpan(entry.style.height, rangeHours),
-});
+export const getWeekdayTimedEventFrame = (entry: CalendarTimeGridLayoutEntry, rangeHours = GRID.WEEKDAY_HOURS): WeekdayTimedEventFrame => ({ leftPercent: entry.style.xOffset, topHours: getPercentAsHourSpan(entry.style.top, rangeHours), widthPercent: entry.style.width, heightHours: getPercentAsHourSpan(entry.style.height, rangeHours), });
 
-export const getWeekdayTimedEventPositionStyle = (entry: CalendarTimeGridLayoutEntry, rangeHours = GRID.WEEKDAY_HOURS, options: WeekdayTimedEventPositionOptions = {}): WeekdayTimedEventPositionStyle => {
-  const frame = getWeekdayTimedEventFrame(entry, rangeHours);
+export const getWeekdayTimedEventPositionStyle = (entry: CalendarTimeGridLayoutEntry, rangeHours = GRID.WEEKDAY_HOURS, options: WeekdayTimedEventPositionOptions = {}): WeekdayTimedEventPositionStyle => { const frame = getWeekdayTimedEventFrame(entry, rangeHours);
   const horizontalInsets = getWeekdayTimedEventHorizontalInsets(frame);
   const shouldHideEvent = shouldHideCarryOverEventInShortRange(entry, rangeHours);
 

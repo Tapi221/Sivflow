@@ -49,11 +49,7 @@ const resolveGoogleDriveFileId = (
   return trimmed && trimmed.length > 0 ? trimmed : null;
 };
 
-export const findLocalPdfBlob = async (
-  document: Pick<DocumentItem, "id" | "localFileId" | "userId">,
-  currentUserId: string | null | undefined,
-): Promise<Blob | null> => {
-  const fileIds = resolveDocumentFileIds(document);
+export const findLocalPdfBlob = async ( document: Pick<DocumentItem, "id" | "localFileId" | "userId">, currentUserId: string | null | undefined, ): Promise<Blob | null> => { const fileIds = resolveDocumentFileIds(document);
   const userIds = resolveDocumentBlobUserIds(document.userId, currentUserId);
 
   for (const userId of userIds) {
@@ -66,11 +62,7 @@ export const findLocalPdfBlob = async (
   return null;
 };
 
-export const resolvePdfDocumentBlob = async (
-  document: PdfDocumentBlobFields,
-  currentUserId: string | null | undefined,
-): Promise<Blob | null> => {
-  const localBlob = await findLocalPdfBlob(document, currentUserId);
+export const resolvePdfDocumentBlob = async ( document: PdfDocumentBlobFields, currentUserId: string | null | undefined, ): Promise<Blob | null> => { const localBlob = await findLocalPdfBlob(document, currentUserId);
   if (localBlob) return localBlob;
 
   const googleDriveFileId = resolveGoogleDriveFileId(document.googleDriveFileId);

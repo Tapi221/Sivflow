@@ -5,32 +5,15 @@ import * as React from 'react';
 import { formatCodeBlock, isLangSupported } from '@platejs/code-block';
 import { BracesIcon, Check, CheckIcon, CopyIcon } from 'lucide-react';
 import { type TCodeBlockElement, type TCodeSyntaxLeaf, NodeApi } from 'platejs';
-import {
-  type PlateElementProps,
-  type PlateLeafProps,
-  PlateElement,
-  PlateLeaf,
-} from 'platejs/react';
+import { type PlateElementProps, type PlateLeafProps, PlateElement, PlateLeaf, } from 'platejs/react';
 import { useEditorRef, useElement, useReadOnly } from 'platejs/react';
 
 import { Button } from './button';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from './command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from './popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, } from './command';
+import { Popover, PopoverContent, PopoverTrigger, } from './popover';
 import { cn } from '@/lib/utils';
 
-export function CodeBlockElement(props: PlateElementProps<TCodeBlockElement>) {
-  const { editor, element } = props;
+export function CodeBlockElement(props: PlateElementProps<TCodeBlockElement>) { const { editor, element } = props;
 
   return (
     <PlateElement
@@ -186,12 +169,10 @@ function CopyButton({
   );
 }
 
-export function CodeLineElement(props: PlateElementProps) {
-  return <PlateElement {...props} />;
+export function CodeLineElement(props: PlateElementProps) { return <PlateElement {...props} />;
 }
 
-export function CodeSyntaxLeaf(props: PlateLeafProps<TCodeSyntaxLeaf>) {
-  const tokenClassName = props.leaf.className as string;
+export function CodeSyntaxLeaf(props: PlateLeafProps<TCodeSyntaxLeaf>) { const tokenClassName = props.leaf.className as string;
 
   return <PlateLeaf className={tokenClassName} {...props} />;
 }

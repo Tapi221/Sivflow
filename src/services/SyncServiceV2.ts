@@ -237,8 +237,7 @@ const repairMissingCardSetsAfterSync = async (localDB: LocalDBLike, userId: stri
   });
 };
 
-export class SyncServiceV2 implements ISyncService {
-  private queueManager: IQueueManager;
+export class SyncServiceV2 implements ISyncService { private queueManager: IQueueManager;
   private networkMonitor: INetworkMonitor;
   private diffEngine: IDiffEngine;
   private cloudAdapter: ICloudSyncAdapter;

@@ -233,20 +233,17 @@ const fetchIosEventById = async (eventId: string, calendars: IosCalendarListItem
 
 export const isIosCalendarSupported = (): boolean => Platform.OS === "ios";
 
-export const getIosCalendarPermissionStatus = async (): Promise<IosCalendarPermissionStatus> => {
-  if (!isIosCalendarSupported()) return "denied";
+export const getIosCalendarPermissionStatus = async (): Promise<IosCalendarPermissionStatus> => { if (!isIosCalendarSupported()) return "denied";
 
   return normalizePermissionStatus(await ExpoCalendar.getCalendarPermissionsAsync());
 };
 
-export const requestIosCalendarPermission = async (): Promise<IosCalendarPermissionStatus> => {
-  if (!isIosCalendarSupported()) return "denied";
+export const requestIosCalendarPermission = async (): Promise<IosCalendarPermissionStatus> => { if (!isIosCalendarSupported()) return "denied";
 
   return normalizePermissionStatus(await ExpoCalendar.requestCalendarPermissionsAsync());
 };
 
-export const fetchIosCalendars = async (): Promise<IosCalendarListItem[]> => {
-  if (!isIosCalendarSupported()) return [];
+export const fetchIosCalendars = async (): Promise<IosCalendarListItem[]> => { if (!isIosCalendarSupported()) return [];
 
   const [calendars, defaultCalendarId] = await Promise.all([
     ExpoCalendar.getCalendarsAsync(ExpoCalendar.EntityTypes.EVENT),

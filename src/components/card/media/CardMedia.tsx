@@ -112,8 +112,7 @@ const getNormalizedItemsKey = (items: NormalizedDisplayImage[]) =>
     )
     .join("\n");
 
-export const AudioPlayer = ({ urls }: AudioPlayerProps) => {
-  const [playingIndex, setPlayingIndex] = useState<number | null>(null);
+export const AudioPlayer = ({ urls }: AudioPlayerProps) => { const [playingIndex, setPlayingIndex] = useState<number | null>(null);
   const audioRefs = useRef<(HTMLAudioElement | null)[]>([]);
 
   const togglePlay = (index: number) => {
@@ -164,12 +163,7 @@ export const AudioPlayer = ({ urls }: AudioPlayerProps) => {
   );
 };
 
-export const ImageGallery = ({
-  items,
-  displayMode = "fixed",
-  zoom = 1,
-}: ImageGalleryProps) => {
-  const { currentUser } = useAuthSession();
+export const ImageGallery = ({ items, displayMode = "fixed", zoom = 1, }: ImageGalleryProps) => { const { currentUser } = useAuthSession();
   const [displayImagesState, setDisplayImagesState] =
     useState<DisplayImagesState>(() => ({ key: "", images: [] }));
   const [failedImagesState, setFailedImagesState] =

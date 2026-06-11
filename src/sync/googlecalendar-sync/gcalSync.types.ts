@@ -17,8 +17,7 @@ export type GoogleCalendarEvent = CalendarEvent;
 // カレンダー一覧
 // ─────────────────────────────────────────────────────────────
 
-export interface GoogleCalendarListItem {
-  id: string;
+export interface GoogleCalendarListItem { id: string;
 
   summary: string;
 
@@ -37,8 +36,7 @@ export interface GoogleCalendarListItem {
 // Hook options
 // ─────────────────────────────────────────────────────────────
 
-export interface UseGoogleCalendarIntegrationOptions {
-  authInstance?: Auth;
+export interface UseGoogleCalendarIntegrationOptions { authInstance?: Auth;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -50,8 +48,7 @@ export type GCalSyncState = "idle" | "syncing" | "needsReconnect" | "error";
 
 export type GCalConnectionStatus = "connected" | "needsReconnect" | "error";
 
-export type GCalSyncRange = {
-  rangeStart: Date;
+export type GCalSyncRange = { rangeStart: Date;
   rangeEnd: Date;
 };
 
@@ -73,8 +70,7 @@ export type GCalSyncTokenMap = Record<string, string>;
  * インクリメンタル同期では
  * `status: "cancelled"` が削除を表す。
  */
-export interface GCalRawIncrementalEvent {
-  id?: string;
+export interface GCalRawIncrementalEvent { id?: string;
 
   summary?: string;
 
@@ -96,8 +92,7 @@ export interface GCalRawIncrementalEvent {
 }
 
 /** events.list API レスポンス全体 */
-export interface GCalEventsListResponse {
-  items?: GCalRawIncrementalEvent[];
+export interface GCalEventsListResponse { items?: GCalRawIncrementalEvent[];
 
   /**
    * 次回インクリメンタル同期に使う
@@ -117,8 +112,7 @@ export interface GCalEventsListResponse {
 // エンジンのオプション
 // ─────────────────────────────────────────────────────────────
 
-export interface GCalSyncEngineOptions {
-  accountId?: string;
+export interface GCalSyncEngineOptions { accountId?: string;
 
   /**
    * イベント追加
@@ -187,11 +181,7 @@ export interface GCalSyncEngineOptions {
 // Sync start context
 // ─────────────────────────────────────────────────────────────
 
-export interface GCalSyncStartContext {
-  /**
-   * 現在有効な accessToken
-   */
-  accessToken: string;
+export interface GCalSyncStartContext { /** * 現在有効な accessToken */ accessToken: string;
 
   /**
    * 同期対象カレンダー

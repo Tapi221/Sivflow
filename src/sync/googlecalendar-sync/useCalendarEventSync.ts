@@ -12,8 +12,7 @@ type GoogleCalendarSlice = {
   }) => Promise<void> | void;
 };
 
-export type UseCalendarEventSyncOptions = BuildCalendarEventSyncRangeOptions & {
-  googleCalendar: GoogleCalendarSlice;
+export type UseCalendarEventSyncOptions = BuildCalendarEventSyncRangeOptions & { googleCalendar: GoogleCalendarSlice;
 };
 
 const PREFETCH_SYNC_DELAY_MS = 250;
@@ -31,16 +30,7 @@ const fromCalendarEventSyncRangeKey = (key: string): CalendarEventSyncRange => {
   };
 };
 
-export const useCalendarEventSync = ({
-  selectedViewMode,
-  visibleDays,
-  monthTitleDate,
-  weekStartDay,
-  monthRenderedRange,
-  yearSyncRange,
-  googleCalendar,
-}: UseCalendarEventSyncOptions): void => {
-  const { selectedCalendarIds, forceSyncRange } = googleCalendar;
+export const useCalendarEventSync = ({ selectedViewMode, visibleDays, monthTitleDate, weekStartDay, monthRenderedRange, yearSyncRange, googleCalendar, }: UseCalendarEventSyncOptions): void => { const { selectedCalendarIds, forceSyncRange } = googleCalendar;
 
   const [userId, setUserId] = useState<string | null>(
     () => auth.currentUser?.uid ?? null,

@@ -10,8 +10,7 @@ import type { UserSettings } from "./user";
  * 同期システムの型定義
  */
 
-export interface SyncMetadata {
-  userId: string;
+export interface SyncMetadata { userId: string;
   deviceId: string;
   deviceName: string;
   lastSyncTime: Date | Timestamp | null;
@@ -19,8 +18,7 @@ export interface SyncMetadata {
   isActive: boolean;
 }
 
-export interface SyncError {
-  id: string;
+export interface SyncError { id: string;
   occurredAt: number;
   phase: "upload" | "download" | "merge" | "queue_dlq";
   message: string;
@@ -30,8 +28,7 @@ export interface SyncError {
   metadata?: unknown;
 }
 
-export interface SyncHistory {
-  id: string;
+export interface SyncHistory { id: string;
   startedAt: number;
   finishedAt: number;
   result: "success" | "partial" | "failed" | "skipped_wifi";
@@ -39,34 +36,23 @@ export interface SyncHistory {
   downloaded: number;
 }
 
-export interface SyncSettings {
-  id: string;
+export interface SyncSettings { id: string;
   autoSync: boolean;
   intervalMinutes: 5 | 15 | 30 | 60;
   wifiOnly: boolean;
   autoCleanupDevices: boolean;
 }
 
-export type SyncEntity =
-  | "card"
-  | "folder"
-  | "cardSet"
-  | "document"
-  | "tag"
-  | "userSetting"
-  | "asset"
-  | "projectMap";
+export type SyncEntity = | "card" | "folder" | "cardSet" | "document" | "tag" | "userSetting" | "asset" | "projectMap";
 
 export type SyncOperationType = "create" | "update" | "delete";
 export type SyncDirection = "upload" | "download";
 export type SyncPriority = "critical" | "high" | "medium" | "low";
 export type SyncQueueStatus = "pending" | "processing" | "completed" | "failed";
 
-export type AssetSyncPayload = Pick<AssetRecord, "id"> &
-  Partial<Omit<AssetRecord, "id">>;
+export type AssetSyncPayload = Pick<AssetRecord, "id"> & Partial<Omit<AssetRecord, "id">>;
 
-export type ProjectMapSyncPayload = {
-  id: string;
+export type ProjectMapSyncPayload = { id: string;
   userId: string;
   folderId?: string;
   name?: string;
@@ -77,8 +63,7 @@ export type ProjectMapSyncPayload = {
   [key: string]: unknown;
 };
 
-export type TagSyncPayload = {
-  id: string;
+export type TagSyncPayload = { id: string;
   userId: string;
   name: string;
   nameLower: string;
@@ -93,8 +78,7 @@ export type TagSyncPayload = {
   orderIndex?: number;
 };
 
-export type SyncPayloadByEntity = {
-  card: Card;
+export type SyncPayloadByEntity = { card: Card;
   folder: Folder;
   cardSet: CardSet;
   document: Document;
@@ -156,25 +140,9 @@ type SyncDeleteQueueItem<TEntity extends SyncDeleteEntity> = SyncQueueItemBase<
   SyncDeletePayload
 >;
 
-export type SyncQueueItem =
-  | SyncUpsertQueueItem<"card">
-  | SyncUpsertQueueItem<"folder">
-  | SyncUpsertQueueItem<"cardSet">
-  | SyncUpsertQueueItem<"document">
-  | SyncUpsertQueueItem<"tag">
-  | SyncUpsertQueueItem<"userSetting">
-  | SyncUpsertQueueItem<"asset">
-  | SyncUpsertQueueItem<"projectMap">
-  | SyncDeleteQueueItem<"card">
-  | SyncDeleteQueueItem<"folder">
-  | SyncDeleteQueueItem<"cardSet">
-  | SyncDeleteQueueItem<"document">
-  | SyncDeleteQueueItem<"tag">
-  | SyncDeleteQueueItem<"asset">
-  | SyncDeleteQueueItem<"projectMap">;
+export type SyncQueueItem = | SyncUpsertQueueItem<"card"> | SyncUpsertQueueItem<"folder"> | SyncUpsertQueueItem<"cardSet"> | SyncUpsertQueueItem<"document"> | SyncUpsertQueueItem<"tag"> | SyncUpsertQueueItem<"userSetting"> | SyncUpsertQueueItem<"asset"> | SyncUpsertQueueItem<"projectMap"> | SyncDeleteQueueItem<"card"> | SyncDeleteQueueItem<"folder"> | SyncDeleteQueueItem<"cardSet"> | SyncDeleteQueueItem<"document"> | SyncDeleteQueueItem<"tag"> | SyncDeleteQueueItem<"asset"> | SyncDeleteQueueItem<"projectMap">;
 
-export interface SyncConflict {
-  id: string;
+export interface SyncConflict { id: string;
   entityId: string;
   entityType: SyncEntity;
   autoMerged: unknown;
@@ -182,23 +150,15 @@ export interface SyncConflict {
   detectedAt: number;
 }
 
-export interface DiffResult {
-  autoMerged: unknown;
+export interface DiffResult { autoMerged: unknown;
   conflicts: Record<string, { local: unknown; remote: unknown }>;
 }
 
-export interface SyncResult {
-  success: boolean;
+export interface SyncResult { success: boolean;
   uploaded: number;
   downloaded: number;
   conflicts: number;
   errors: string[];
 }
 
-export const DEFAULT_SYNC_SETTINGS: SyncSettings = {
-  id: "default",
-  autoSync: true,
-  intervalMinutes: 5,
-  wifiOnly: false,
-  autoCleanupDevices: true,
-};
+export const DEFAULT_SYNC_SETTINGS: SyncSettings = { id: "default", autoSync: true, intervalMinutes: 5, wifiOnly: false, autoCleanupDevices: true, };

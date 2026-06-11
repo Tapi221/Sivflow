@@ -17,13 +17,7 @@ const normalizeReviewLogs = (reviewLogs: Card["reviewLogs"]): ReviewLog[] => {
   return reviewLogs ?? [];
 };
 
-export const useCardSetViewMetaPanelActions = ({
-  selectedCard,
-  isGlobalEditing,
-  settings,
-  updateCard,
-}: UseCardSetViewMetaPanelActionsOptions) => {
-  const delayBonusEnabled = settings?.delayBonusEnabled ?? false;
+export const useCardSetViewMetaPanelActions = ({ selectedCard, isGlobalEditing, settings, updateCard, }: UseCardSetViewMetaPanelActionsOptions) => { const delayBonusEnabled = settings?.delayBonusEnabled ?? false;
   const reviewStartNextDay = settings?.reviewStartNextDay ?? true;
   const reviewLogs = selectedCard?.reviewLogs ?? [];
   const selectedCardId = selectedCard?.id ?? null;

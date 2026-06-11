@@ -8,8 +8,7 @@ type CardSetViewNavigationPreferenceUpdates = {
   scrollTop?: number;
 };
 
-export type CardSetViewNavigationPreference = {
-  cardId: string | null;
+export type CardSetViewNavigationPreference = { cardId: string | null;
   scrollTop: number;
   updatedAt: number;
 };
@@ -112,17 +111,13 @@ const writeStore = (store: CardSetViewNavigationPreferencesStore) => {
   }
 };
 
-export const getCardSetViewNavigationPreference = (scope: CardSetViewNavigationPreferenceScope) => {
-  if (!scope.cardSetId) {
-    return null;
+export const getCardSetViewNavigationPreference = (scope: CardSetViewNavigationPreferenceScope) => { if (!scope.cardSetId) { return null;
   }
 
   return readStore().byScope[buildPreferenceScopeKey(scope)] ?? null;
 };
 
-export const setCardSetViewNavigationPreference = (scope: CardSetViewNavigationPreferenceScope, updates: CardSetViewNavigationPreferenceUpdates) => {
-  if (!scope.cardSetId) {
-    return;
+export const setCardSetViewNavigationPreference = (scope: CardSetViewNavigationPreferenceScope, updates: CardSetViewNavigationPreferenceUpdates) => { if (!scope.cardSetId) { return;
   }
 
   const store = readStore();

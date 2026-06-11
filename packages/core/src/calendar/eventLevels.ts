@@ -1,8 +1,7 @@
 import { addDays, differenceInCalendarDays, isSameDay, max, min, startOfDay } from "date-fns";
 import type { CalendarEvent } from "./calendarEvent.types";
 
-export type CalendarEventSegment = {
-  event: CalendarEvent;
+export type CalendarEventSegment = { event: CalendarEvent;
   span: number;
   left: number;
   right: number;
@@ -10,8 +9,7 @@ export type CalendarEventSegment = {
   endsAfterRange: boolean;
 };
 
-export type CalendarEventLevelsResult = {
-  levels: CalendarEventSegment[][];
+export type CalendarEventLevelsResult = { levels: CalendarEventSegment[][];
   extra: CalendarEventSegment[];
 };
 
@@ -32,11 +30,7 @@ const compareSegments = (
   return a.event.id.localeCompare(b.event.id);
 };
 
-export const getCalendarEventSegment = (
-  event: CalendarEvent,
-  range: readonly Date[],
-): CalendarEventSegment | null => {
-  if (range.length === 0) return null;
+export const getCalendarEventSegment = ( event: CalendarEvent, range: readonly Date[], ): CalendarEventSegment | null => { if (range.length === 0) return null;
 
   const first = startOfDay(range[0]);
   const last = getExclusiveDayEnd(range[range.length - 1]);
@@ -69,20 +63,9 @@ export const getCalendarEventSegment = (
   };
 };
 
-export const calendarEventSegmentsOverlap = (
-  segment: CalendarEventSegment,
-  otherSegments: readonly CalendarEventSegment[],
-): boolean =>
-  otherSegments.some(
-    (otherSegment) =>
-      otherSegment.left <= segment.right && otherSegment.right >= segment.left,
-  );
+export const calendarEventSegmentsOverlap = ( segment: CalendarEventSegment, otherSegments: readonly CalendarEventSegment[], ): boolean => otherSegments.some( (otherSegment) => otherSegment.left <= segment.right && otherSegment.right >= segment.left, );
 
-export const getCalendarEventLevels = (
-  rowSegments: readonly CalendarEventSegment[],
-  limit = Number.POSITIVE_INFINITY,
-): CalendarEventLevelsResult => {
-  const levels: CalendarEventSegment[][] = [];
+export const getCalendarEventLevels = ( rowSegments: readonly CalendarEventSegment[], limit = Number.POSITIVE_INFINITY, ): CalendarEventLevelsResult => { const levels: CalendarEventSegment[][] = [];
   const extra: CalendarEventSegment[] = [];
 
   for (const segment of [...rowSegments].sort(compareSegments)) {

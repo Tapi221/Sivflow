@@ -12,15 +12,7 @@ type ExplorerSearchSourceBridgeProps = {
   onItemSelect: (item: SelectedExplorerItem) => void;
 };
 
-export const ExplorerSearchSourceBridge = ({
-  folders,
-  cards,
-  cardSets,
-  documents,
-  onFolderSelect,
-  onItemSelect,
-}: ExplorerSearchSourceBridgeProps) => {
-  const registerSource = useSearchStore((state) => state.registerSource);
+export const ExplorerSearchSourceBridge = ({ folders, cards, cardSets, documents, onFolderSelect, onItemSelect, }: ExplorerSearchSourceBridgeProps) => { const registerSource = useSearchStore((state) => state.registerSource);
   const unregisterSource = useSearchStore(
     (state) => state.unregisterSource,
   );

@@ -1,19 +1,16 @@
-export type FolderCommandEntity = {
-  id: string;
+export type FolderCommandEntity = { id: string;
   isDeleted?: boolean;
   parentFolderId?: string | null;
   orderIndex?: number;
 };
 
-export type CreateFolderOptions = {
-  color?: string;
+export type CreateFolderOptions = { color?: string;
   cloudSyncEnabled?: boolean;
   id?: string;
   orderIndex?: number;
 };
 
-export type FolderCreateDraft = {
-  userId: string;
+export type FolderCreateDraft = { userId: string;
   id: string;
   folderId: string;
   folderName: string;
@@ -26,8 +23,7 @@ export type FolderCreateDraft = {
   updatedAt: Date;
 };
 
-export type FolderCommandRepository<TFolder extends FolderCommandEntity = FolderCommandEntity> = {
-  generateFolderId: () => string;
+export type FolderCommandRepository<TFolder extends FolderCommandEntity = FolderCommandEntity> = { generateFolderId: () => string;
   listFolders: (userId: string) => Promise<TFolder[]>;
   addFolder: (userId: string, folder: FolderCreateDraft) => Promise<void>;
   updateFolder: (userId: string, folderId: string, changes: Record<string, unknown>) => Promise<void>;
@@ -35,14 +31,7 @@ export type FolderCommandRepository<TFolder extends FolderCommandEntity = Folder
 
 const toNullableParentId = (parentId?: string | null) => parentId ?? null;
 
-export const createFolderUseCase = async <TFolder extends FolderCommandEntity>({
-  userId,
-  name,
-  parentId,
-  options,
-  repository,
-}: {
-  userId: string;
+export const createFolderUseCase = async <TFolder extends FolderCommandEntity>({ userId, name, parentId, options, repository, }: { userId: string;
   name: string;
   parentId?: string;
   options?: CreateFolderOptions;
@@ -85,13 +74,7 @@ export const createFolderUseCase = async <TFolder extends FolderCommandEntity>({
   return folderId;
 };
 
-export const updateFolderUseCase = async <TFolder extends FolderCommandEntity>({
-  userId,
-  folderId,
-  data,
-  repository,
-}: {
-  userId: string;
+export const updateFolderUseCase = async <TFolder extends FolderCommandEntity>({ userId, folderId, data, repository, }: { userId: string;
   folderId: string;
   data: Record<string, unknown>;
   repository: FolderCommandRepository<TFolder>;
@@ -102,12 +85,7 @@ export const updateFolderUseCase = async <TFolder extends FolderCommandEntity>({
   });
 };
 
-export const reorderFoldersUseCase = async <TFolder extends FolderCommandEntity>({
-  userId,
-  folderIds,
-  repository,
-}: {
-  userId: string;
+export const reorderFoldersUseCase = async <TFolder extends FolderCommandEntity>({ userId, folderIds, repository, }: { userId: string;
   folderIds: string[];
   repository: FolderCommandRepository<TFolder>;
 }): Promise<void> => {
