@@ -1,9 +1,5 @@
 import type { BlockConfig } from "@/types/domain/base";
 
-
-
-
-
 type EditorBlockType = Extract<BlockConfig["type"], "text" | "question" | "code" | "image" | "math" | "markdown">;
 type EditorBlockIconName = | "Type" | "HelpCircle" | "Code" | "Image" | "Sigma" | "NotebookPen";
 type EditorBlockDefinition = Readonly<{ id: EditorBlockType;
@@ -17,10 +13,6 @@ type EditorBlockConfig = Omit<BlockConfig, "id" | "type"> & { id: EditorBlockTyp
   type: EditorBlockType;
 };
 type EditorBlockComparable = Pick<BlockConfig, "type" | "orderIndex">;
-
-
-
-
 
 const EDITOR_BLOCK_DEFINITIONS = [
   {
@@ -77,10 +69,6 @@ const EDITOR_BLOCK_DEFINITION_BY_TYPE = Object.fromEntries(
     (definition) => [definition.type, definition] as const,
   ),
 ) as Record<EditorBlockType, EditorBlockDefinition>;
-
-
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -194,13 +182,5 @@ const parseEditorBlockSettings = (input: readonly unknown[] | null | undefined):
   return normalizeEditorBlockSettings(parsedItems);
 };
 
-
-
-
-
 export { isEditorBlockType, getEditorBlockDefinition, createDefaultEditorBlockSettings, normalizeEditorBlockSettings, parseEditorBlockSettings };
-
-
-
-
 export type { EditorBlockType, EditorBlockIconName, EditorBlockDefinition, EditorBlockConfig };

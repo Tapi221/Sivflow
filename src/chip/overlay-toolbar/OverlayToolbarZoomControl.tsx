@@ -4,10 +4,6 @@ import { cn } from "@/lib/utils";
 import { Minus, Plus } from "@/ui/icons";
 import { OverlayToolbarButton } from "./OverlayToolbarButton";
 
-
-
-
-
 type OverlayToolbarZoomControlBaseProps = {
   value: number;
   min: number;
@@ -37,15 +33,7 @@ type OverlayToolbarZoomControlWithStepButtonsProps =
   };
 type OverlayToolbarZoomControlProps = | OverlayToolbarZoomControlWithoutStepButtonsProps | OverlayToolbarZoomControlWithStepButtonsProps;
 
-
-
-
-
 const DEFAULT_FORMAT_VALUE = (value: number) => `${Math.round(value)}%`;
-
-
-
-
 
 const OverlayToolbarZoomControl = (props: OverlayToolbarZoomControlProps) => {
   const { value, min, max, step, onChange, label, disabled = false, sliderWrapperClassName, valueClassName, trackClassName, rangeClassName, thumbClassName, formatValue = DEFAULT_FORMAT_VALUE } = props;
@@ -124,13 +112,5 @@ const OverlayToolbarZoomControl = (props: OverlayToolbarZoomControlProps) => {
   );
 };
 
-
-
-
-
 export { OverlayToolbarZoomControl };
-
-
-
-
 export type { OverlayToolbarZoomControlProps };

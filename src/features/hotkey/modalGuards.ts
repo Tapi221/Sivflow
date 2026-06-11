@@ -9,8 +9,4 @@ const hasOpenModalDialog = () => {
   );
 };
 
-
-
-
-
 export { hasOpenModalDialog };

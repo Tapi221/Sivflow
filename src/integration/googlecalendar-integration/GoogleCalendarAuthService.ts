@@ -4,10 +4,6 @@ import type { StoredGoogleAccount } from "./gcal.multi-storage";
 import { readStoredAccounts, updateStoredAccountCalendarIds, updateStoredAccountToken } from "./gcal.multi-storage";
 import type { GoogleCalendarListItem } from "./gcalSync.types";
 
-
-
-
-
 const silentReconnect = async (accountId: string): Promise<{ accessToken: string;
   calendars: GoogleCalendarListItem[];
 } | null> => {
@@ -45,9 +41,5 @@ const silentReconnect = async (accountId: string): Promise<{ accessToken: string
     return null;
   }
 };
-
-
-
-
 
 export { silentReconnect };

@@ -5,10 +5,6 @@ import type { ExplorerMenuPanelVariant } from "./ExplorerMenuPanel";
 import { ExplorerMenuPanel } from "./ExplorerMenuPanel";
 import type { MenuAction } from "./menuActions";
 
-
-
-
-
 interface ContextMenuProps {
   children?: ReactNode;
   anchorPoint?: { x: number; y: number; } | null;
@@ -19,15 +15,7 @@ interface ContextMenuProps {
   variant?: ExplorerMenuPanelVariant;
 }
 
-
-
-
-
 const CONTEXT_MENU_COLLISION_PADDING_PX = 8;
-
-
-
-
 
 /**
  * 右クリックなどで表示される汎用的なコンテキストメニューのコンテナ
@@ -84,9 +72,5 @@ const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions, class
     </DropdownMenu>
   );
 };
-
-
-
-
 
 export { ContextMenu };

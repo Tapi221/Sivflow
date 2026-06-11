@@ -1,9 +1,5 @@
 import * as React from "react";
 
-
-
-
-
 const useDebounce = <T>(value: T, delay = 500) => {
   const [debouncedValue, setDebouncedValue] = React.useState(value);
 
@@ -20,9 +16,5 @@ const useDebounce = <T>(value: T, delay = 500) => {
 
   return debouncedValue;
 };
-
-
-
-
 
 export { useDebounce };

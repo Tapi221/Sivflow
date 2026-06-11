@@ -1,8 +1,6 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { getDb, serverTimestamp } from "#src/firebaseAdmin.js";
 
-
-
 const renewExpiredWatchChannels = onSchedule({ region: "asia-northeast1", schedule: "every 24 hours", }, async () => {
   const db = await getDb();
   const now = Date.now();
@@ -32,7 +30,5 @@ const renewExpiredWatchChannels = onSchedule({ region: "asia-northeast1", schedu
   }
 },
 );
-
-
 
 export { renewExpiredWatchChannels };

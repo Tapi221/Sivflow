@@ -12,15 +12,7 @@ import { cn } from "@/lib/utils";
 import { Calendar, FileText, Folder, Image, Layers, List, MessageSquare, Search, SearchX, Settings2, Tag, Trash2, X } from "@/ui/icons";
 import { toMillis } from "@/utils/toMillis";
 
-
-
-
-
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
-
-
-
-
 
 const resolveTimestampLabel = (value: unknown) => {
   const timestampMillis = toMillis(value, 0);
@@ -67,10 +59,6 @@ const resolveItemIcon = (item: SearchItem) => {
       return List;
   }
 };
-
-
-
-
 
 const SearchDialog = () => {
   useSearchHotkey();
@@ -167,9 +155,5 @@ const SearchDialog = () => {
     </Dialog>
   );
 };
-
-
-
-
 
 export { SearchDialog };

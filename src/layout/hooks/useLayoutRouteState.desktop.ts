@@ -1,9 +1,5 @@
 import { useLocation } from "react-router-dom";
 
-
-
-
-
 const useLayoutRouteStateDesktop = () => {
   const { pathname } = useLocation();
 
@@ -41,9 +37,5 @@ const useLayoutRouteStateDesktop = () => {
     isScrollLocked,
   };
 };
-
-
-
-
 
 export { useLayoutRouteStateDesktop };
