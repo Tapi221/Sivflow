@@ -24,7 +24,8 @@ const normalizeCardSetRecord = (raw: RawCardSetRecord | undefined | null): CardS
     defaultDisplayMode: normalizeCardDisplayMode(raw.defaultDisplayMode ?? DEFAULT_CARD_DISPLAY_MODE),
   };
 };
-const useCardSetById = (cardSetId: string | null) => { const userId = useEffectiveLocalUserId();
+const useCardSetById = (cardSetId: string | null) => {
+  const userId = useEffectiveLocalUserId();
 
   const cardSet = useLiveQuery(async () => {
     if (!cardSetId) {

@@ -217,7 +217,8 @@ const CopyButton = ({
     </Button>
   );
 };
-const CodeBlockElement = (props: PlateElementProps<TCodeBlockElement>) => { const { editor, element } = props;
+const CodeBlockElement = (props: PlateElementProps<TCodeBlockElement>) => {
+  const { editor, element } = props;
 
   return (
     <PlateElement
@@ -258,9 +259,11 @@ const CodeBlockElement = (props: PlateElementProps<TCodeBlockElement>) => { cons
     </PlateElement>
   );
 };
-const CodeLineElement = (props: PlateElementProps) => { return <PlateElement {...props} />;
+const CodeLineElement = (props: PlateElementProps) => {
+  return <PlateElement {...props} />;
 };
-const CodeSyntaxLeaf = (props: PlateLeafProps<TCodeSyntaxLeaf>) => { const tokenClassName = props.leaf.className as string;
+const CodeSyntaxLeaf = (props: PlateLeafProps<TCodeSyntaxLeaf>) => {
+  const tokenClassName = props.leaf.className as string;
 
   return <PlateLeaf className={tokenClassName} {...props} />;
 };

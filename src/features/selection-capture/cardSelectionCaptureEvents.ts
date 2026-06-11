@@ -18,7 +18,8 @@ type DispatchedCardSelectionCaptureEvent = { handled: boolean;
 
 const CARD_SELECTION_CAPTURE_EVENT = "sivflow:card-selection-capture";
 
-const dispatchCardSelectionCaptureEvent = (payload: CardSelectionCaptureEventPayload): DispatchedCardSelectionCaptureEvent => { const tasks: Promise<CardSelectionCaptureTaskResult>[] = [];
+const dispatchCardSelectionCaptureEvent = (payload: CardSelectionCaptureEventPayload): DispatchedCardSelectionCaptureEvent => {
+  const tasks: Promise<CardSelectionCaptureTaskResult>[] = [];
   const detail: CardSelectionCaptureEventDetail = {
     ...payload,
     area: payload.area ?? { shape: "rectangle", rect: payload.rect },

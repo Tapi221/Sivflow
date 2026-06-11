@@ -31,7 +31,8 @@ const appendStroke = (document: InkDocument, stroke: InkStroke, now: number): In
 const hasStroke = (document: InkDocument, strokeId: string): boolean => {
   return document.strokes.some((stroke) => stroke.id === strokeId);
 };
-const createHandwritingStrokeDeltaMessage = ({ sessionId, cardId, side, stroke }: CreateHandwritingStrokeDeltaInput): HandwritingStrokeDeltaMessage => { const normalizedStroke = normalizeStroke(stroke);
+const createHandwritingStrokeDeltaMessage = ({ sessionId, cardId, side, stroke }: CreateHandwritingStrokeDeltaInput): HandwritingStrokeDeltaMessage => {
+  const normalizedStroke = normalizeStroke(stroke);
 
   if (!normalizedStroke) {
     throw new Error("Invalid handwriting stroke delta payload.");
@@ -45,7 +46,8 @@ const createHandwritingStrokeDeltaMessage = ({ sessionId, cardId, side, stroke }
     stroke: normalizedStroke,
   };
 };
-const applyHandwritingStrokeDelta = ({ document, message, expectedSessionId, expectedCardId, expectedSide, now = Date.now() }: ApplyHandwritingStrokeDeltaInput): ApplyHandwritingStrokeDeltaResult => { const currentDocument = normalizeInkDocument(document);
+const applyHandwritingStrokeDelta = ({ document, message, expectedSessionId, expectedCardId, expectedSide, now = Date.now() }: ApplyHandwritingStrokeDeltaInput): ApplyHandwritingStrokeDeltaResult => {
+  const currentDocument = normalizeInkDocument(document);
 
   if (expectedSessionId && message.sessionId !== expectedSessionId) {
     return { document: currentDocument, applied: false, reason: "session-mismatch" };

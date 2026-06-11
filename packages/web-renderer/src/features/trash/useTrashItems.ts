@@ -22,7 +22,8 @@ const EMPTY_TRASH_ITEMS: TrashItemsState = {
   documents: [],
 };
 
-const useTrashItems = (userId: string | null | undefined) => { const repository = useMemo(() => createWebTrashRepository(), []);
+const useTrashItems = (userId: string | null | undefined) => {
+  const repository = useMemo(() => createWebTrashRepository(), []);
   const [items, setItems] = useState<TrashItemsState>(EMPTY_TRASH_ITEMS);
   const [status, setStatus] = useState<TrashLoadState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);

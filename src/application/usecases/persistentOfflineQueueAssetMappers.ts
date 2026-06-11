@@ -24,7 +24,8 @@ const getDate = (record: Record<string, unknown>, key: string): Date | null => {
   const value = record[key];
   return value instanceof Date ? value : null;
 };
-const toAssetLikeRecord = (value: unknown): AssetLikeRecord | null => { if (!isRecord(value)) return null;
+const toAssetLikeRecord = (value: unknown): AssetLikeRecord | null => {
+  if (!isRecord(value)) return null;
 
   return {
     id: getString(value, "id") ?? undefined,

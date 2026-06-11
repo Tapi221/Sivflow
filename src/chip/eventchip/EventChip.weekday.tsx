@@ -198,7 +198,8 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
   const titleLabel = event.title || "Untitled";
   const chipStyle = createCalendarEventChipWeekdayStyle(tokens.bg, tokens.border, tokens.text, chipLayout.useInlineTimeLayout);
   const editUrl = createGoogleCalendarEventEditUrl(event);
-  const handleEdit = editUrl ? () => { window.open(editUrl, "_blank", "noopener,noreferrer"); } : undefined;
+  const handleEdit = editUrl ? () => {
+    window.open(editUrl, "_blank", "noopener,noreferrer"); } : undefined;
 
   useLayoutEffect(() => {
     const layoutMeasurement = layoutMeasurementRef.current;

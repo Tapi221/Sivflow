@@ -379,7 +379,8 @@ const CalendarListPieChartSplitViewComponent = ({ virtualRail, selectedDate, eve
     scheduleDeferred(event.currentTarget);
   }, [scheduleDeferred, updateRange]);
 
-  useLayoutEffect(() => { updateRange(scrollRef.current); }, [updateRange]);
+  useLayoutEffect(() => {
+    updateRange(scrollRef.current); }, [updateRange]);
 
   useEffect(() => {
     const element = scrollRef.current;
@@ -392,7 +393,8 @@ const CalendarListPieChartSplitViewComponent = ({ virtualRail, selectedDate, eve
     updateRange(element);
   }, [metrics, rail, selectedDate, updateRange]);
 
-  useEffect(() => () => { if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current); }, []);
+  useEffect(() => () => {
+    if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current); }, []);
 
   return (
     <div className={cn("ml-4 mr-4 flex min-h-0 flex-1 overflow-hidden bg-white", className)}>

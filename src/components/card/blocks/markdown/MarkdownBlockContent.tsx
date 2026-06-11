@@ -322,7 +322,8 @@ const parseAndSplitFencesWithRanges = (
   return { blocks, ranges };
 };
 
-const MarkdownBlockContent = (props: MarkdownBlockContentProps) => { const { settings } = useUserSettings();
+const MarkdownBlockContent = (props: MarkdownBlockContentProps) => {
+  const { settings } = useUserSettings();
   const [error, setError] = React.useState<string | null>(null);
 
   const markdownTabSize = clampMarkdownTabSize(settings?.markdownTabSize);

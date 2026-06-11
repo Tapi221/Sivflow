@@ -104,7 +104,8 @@ const toGoogleTaskItem = (
     position: item.position,
   };
 };
-const fetchGoogleTaskLists = async (accessToken: string): Promise<GoogleTaskListItem[]> => { const taskLists: GoogleTaskListItem[] = [];
+const fetchGoogleTaskLists = async (accessToken: string): Promise<GoogleTaskListItem[]> => {
+  const taskLists: GoogleTaskListItem[] = [];
   let pageToken: string | undefined;
 
   do {

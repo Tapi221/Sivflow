@@ -66,7 +66,8 @@ const TablePicker = () => {
     </div>
   );
 };
-const TableToolbarButton = (props: DropdownMenuProps) => { const tableSelected = useEditorSelector((editor) => editor.api.some({ match: { type: KEYS.table } }), []);
+const TableToolbarButton = (props: DropdownMenuProps) => {
+  const tableSelected = useEditorSelector((editor) => editor.api.some({ match: { type: KEYS.table } }), []);
 
   const { editor, tf } = useEditorPlugin(TablePlugin);
   const [open, setOpen] = React.useState(false);

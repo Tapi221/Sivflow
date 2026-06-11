@@ -5,7 +5,9 @@ type HookConfig<E extends HTMLElement> = {
   onDeferredScroll?: (element: E) => void;
 };
 
-const useImmediateVirtualScrollRange = <E extends HTMLElement>(config: HookConfig<E>) => { const handleScrollElement = useCallback((element: E) => { config.updateRange(element);
+const useImmediateVirtualScrollRange = <E extends HTMLElement>(config: HookConfig<E>) => {
+  const handleScrollElement = useCallback((element: E) => {
+  config.updateRange(element);
   config.onDeferredScroll?.(element);
 }, [config]);
 

@@ -24,7 +24,8 @@ const normalizeSyncSettings = (value: unknown): SyncSettings => {
     id: normalizedId,
   };
 };
-const useSyncSettings = () => { const { currentUser } = useAuthSession();
+const useSyncSettings = () => {
+  const { currentUser } = useAuthSession();
   const [settings, setSettings] = useState<SyncSettings>(DEFAULT_SYNC_SETTINGS);
   const [loading, setLoading] = useState(true);
 

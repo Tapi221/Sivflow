@@ -14,7 +14,8 @@ import { SuggestionToolbarButton } from "./suggestion-toolbar-button";
 import { ToolbarGroup } from "./toolbar";
 import { TurnIntoToolbarButton } from "./turn-into-toolbar-button";
 
-const FloatingToolbarButtons = () => { const readOnly = useEditorReadOnly();
+const FloatingToolbarButtons = () => {
+  const readOnly = useEditorReadOnly();
 
   return (
     <>

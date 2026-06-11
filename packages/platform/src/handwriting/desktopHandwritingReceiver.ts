@@ -23,7 +23,8 @@ const isSessionMessage = (
 ): boolean => {
   return message.sessionId === session.id;
 };
-const receiveDesktopHandwritingMessage = ({ document, session, message, now }: ReceiveDesktopHandwritingMessageInput): ReceiveDesktopHandwritingMessageResult => { const currentDocument = normalizeInkDocument(document);
+const receiveDesktopHandwritingMessage = ({ document, session, message, now }: ReceiveDesktopHandwritingMessageInput): ReceiveDesktopHandwritingMessageResult => {
+  const currentDocument = normalizeInkDocument(document);
 
   if (!isSessionMessage(message, session)) {
     return { document: currentDocument, applied: false, status: session.status, reason: "session-mismatch" };

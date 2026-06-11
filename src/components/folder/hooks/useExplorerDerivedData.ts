@@ -51,7 +51,8 @@ const isOrphanDocument = (document: DocumentItem, visibleFolderIdSet: Set<string
   if (normalizedFolderId === ROOT_FOLDER_ID) return true;
   return !visibleFolderIdSet.has(normalizedFolderId);
 };
-const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], documents, notes = [], isFiltering }: Params) => { const { purgeDocument } = useDocumentCommands();
+const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], documents, notes = [], isFiltering }: Params) => {
+  const { purgeDocument } = useDocumentCommands();
   const orphanCleanupInFlightRef = useRef<Set<string>>(new Set());
 
   const cardSetById = useMemo(() => {

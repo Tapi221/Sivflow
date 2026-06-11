@@ -51,11 +51,13 @@ const hydrateServerAccount = async (account: ServerStoredGoogleCalendarAccount):
     };
   }
 };
-const listServerStoredGoogleCalendarAccounts = async (): Promise<ServerStoredGoogleCalendarAccount[]> => { await waitForCallableAuth();
+const listServerStoredGoogleCalendarAccounts = async (): Promise<ServerStoredGoogleCalendarAccount[]> => {
+  await waitForCallableAuth();
   const result = await listGoogleCalendarAccountsCallable();
   return result.data.accounts;
 };
-const hydrateServerStoredGoogleCalendarAccounts = async (): Promise<number> => { const localAccounts = readStoredAccounts();
+const hydrateServerStoredGoogleCalendarAccounts = async (): Promise<number> => {
+  const localAccounts = readStoredAccounts();
   const knownAccountIds = new Set(localAccounts.map((account) => account.id));
   const remoteAccounts = await listServerStoredGoogleCalendarAccounts();
   const missingAccounts = remoteAccounts.filter((account) => !knownAccountIds.has(account.accountId));

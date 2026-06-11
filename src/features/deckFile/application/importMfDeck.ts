@@ -175,7 +175,8 @@ const buildCardInput = async ({
     isBookmarked: false,
   };
 };
-const importMfDeckArchive = async ({ archive, folderId, createCardSet, updateCardSet, createCard, ensureTagByName, destination }: ImportMfDeckArchiveParams): Promise<ImportMfDeckArchiveResult> => { const issues: MfDeckIssue[] = [];
+const importMfDeckArchive = async ({ archive, folderId, createCardSet, updateCardSet, createCard, ensureTagByName, destination }: ImportMfDeckArchiveParams): Promise<ImportMfDeckArchiveResult> => {
+  const issues: MfDeckIssue[] = [];
   const manifestDeck = archive.manifest.deck;
 
   const targetCardSet =

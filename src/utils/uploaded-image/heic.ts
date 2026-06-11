@@ -1,7 +1,8 @@
 const isBlob = (value: unknown): value is Blob => {
   return value instanceof Blob;
 };
-const isHeicFile = (file: File) => { const type = (file.type || "").toLowerCase();
+const isHeicFile = (file: File) => {
+  const type = (file.type || "").toLowerCase();
   const name = (file.name || "").toLowerCase();
   return (
     type === "image/heic" ||
@@ -10,7 +11,8 @@ const isHeicFile = (file: File) => { const type = (file.type || "").toLowerCase(
     name.endsWith(".heif")
   );
 };
-const convertHeicToJpeg = async (file: File): Promise<File> => { const heic2anyModule = await import("heic2any");
+const convertHeicToJpeg = async (file: File): Promise<File> => {
+  const heic2anyModule = await import("heic2any");
   const heic2any =
     (heic2anyModule as { default?: unknown; }).default ?? heic2anyModule;
 

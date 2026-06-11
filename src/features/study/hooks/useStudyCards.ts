@@ -13,7 +13,8 @@ type Params = {
   settings: Partial<UserSettings> | null | undefined;
 };
 
-const useStudyCards = ({ folderId, allCards, cardSets, folders, foldersLoading, settings }: Params) => { const cardSetById = useMemo(() => buildCardSetById(cardSets.filter((cardSet) => !cardSet.isDeleted)), [cardSets]);
+const useStudyCards = ({ folderId, allCards, cardSets, folders, foldersLoading, settings }: Params) => {
+  const cardSetById = useMemo(() => buildCardSetById(cardSets.filter((cardSet) => !cardSet.isDeleted)), [cardSets]);
 
   const studyCards = useMemo(() => {
     let cards = (allCards ?? []).filter(

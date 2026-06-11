@@ -6,7 +6,9 @@ interface UseTreeViewActionsParams {
   onFolderSelect: (folderId: string | null) => void;
 }
 
-const useTreeViewActions = ({ selectedFolderId, onFolderSelect }: UseTreeViewActionsParams) => { const handleFolderSelect = useCallback((folderId: string | null) => { onFolderSelect(folderId);
+const useTreeViewActions = ({ selectedFolderId, onFolderSelect }: UseTreeViewActionsParams) => {
+  const handleFolderSelect = useCallback((folderId: string | null) => {
+  onFolderSelect(folderId);
 },
 [onFolderSelect],
 );

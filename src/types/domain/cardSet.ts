@@ -17,7 +17,8 @@ type CardSet = BaseEntity & { /** 所属する Folder の ID（null = ルート�
 
 const DEFAULT_CARD_DISPLAY_MODE: CardDisplayMode = "fixed";
 
-const normalizeCardDisplayMode = (value: unknown) => { return value === "fluid" ? "fluid" : "fixed";
+const normalizeCardDisplayMode = (value: unknown) => {
+  return value === "fluid" ? "fluid" : "fixed";
 };
 
 export { DEFAULT_CARD_DISPLAY_MODE, normalizeCardDisplayMode };

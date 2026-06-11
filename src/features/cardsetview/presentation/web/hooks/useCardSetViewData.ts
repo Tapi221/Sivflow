@@ -4,7 +4,8 @@ interface UseCardSetViewDataOptions {
   cardSetId: string | null;
 }
 
-const useCardSetViewData = ({ cardSetId }: UseCardSetViewDataOptions) => { return useCardSetViewQuery({ cardSetId });
+const useCardSetViewData = ({ cardSetId }: UseCardSetViewDataOptions) => {
+  return useCardSetViewQuery({ cardSetId });
 };
 
 export { useCardSetViewData };

@@ -130,7 +130,8 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) resetState(); onOpenChange(o); }}>
+    <Dialog open={open} onOpenChange={(o) => {
+      if (!o) resetState(); onOpenChange(o); }}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -149,7 +150,8 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
               </div>
             )}
             <input type="file" accept=".json" onChange={handleFileSelect} ref={fileInputRef} className="hidden" disabled={isFallbackMode} />
-            <div onClick={() => { if (!isFallbackMode) fileInputRef.current?.click(); }} className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${isFallbackMode ? "cursor-not-allowed border-gray-200 bg-gray-50 opacity-70" : "cursor-pointer border-gray-300 hover:border-primary-600 hover:bg-gray-50"}`}>
+            <div onClick={() => {
+              if (!isFallbackMode) fileInputRef.current?.click(); }} className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${isFallbackMode ? "cursor-not-allowed border-gray-200 bg-gray-50 opacity-70" : "cursor-pointer border-gray-300 hover:border-primary-600 hover:bg-gray-50"}`}>
               <FileJson className="w-12 h-12 mx-auto mb-3 text-gray-400" />
               <p className="text-sm font-medium text-gray-700">クリックしてJSONファイルを選択</p>
               <p className="text-xs text-gray-500 mt-1">または、ファイルをドラッグ＆ドロップ</p>
@@ -206,7 +208,8 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
           {step === "select" && <Button variant="outline" onClick={() => onOpenChange(false)}>キャンセル</Button>}
           {step === "preview" && (
             <>
-              <Button variant="outline" onClick={() => { resetState(); }}>戻る</Button>
+              <Button variant="outline" onClick={() => {
+                resetState(); }}>戻る</Button>
               <Button onClick={handleImport} disabled={isFallbackMode} className={importAction === "replace" ? "bg-red-600 hover:bg-red-700" : "bg-primary-600 hover:bg-primary-700"}>{importAction === "replace" ? "上書きインポート" : "閉じる"}</Button>
             </>
           )}

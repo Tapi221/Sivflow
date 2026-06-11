@@ -18,7 +18,8 @@ const Indicator = () => {
     </span>
   );
 };
-const ModeToolbarButton = (props: DropdownMenuProps) => { const editor = useEditorRef();
+const ModeToolbarButton = (props: DropdownMenuProps) => {
+  const editor = useEditorRef();
   const readOnly = useEditorReadOnly();
   const [open, setOpen] = React.useState(false);
 

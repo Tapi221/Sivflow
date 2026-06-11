@@ -29,7 +29,8 @@ type UseVerticalCardPagerReturn = { /** 各カード要素への ref 配列 */ i
 
 const SCROLL_IDLE_COMMIT_DELAY_MS = 110;
 
-const useVerticalCardPager = ({ count, activeIndex, onActiveIndexChange, scrollContainerRef, onFlip, naturalIndexCommitDelayMs = 0, freezeActiveIndex = false, onNearestIndexImmediate }: UseVerticalCardPagerOptions) => { const itemRefs = useRef<(HTMLElement | null)[]>([]);
+const useVerticalCardPager = ({ count, activeIndex, onActiveIndexChange, scrollContainerRef, onFlip, naturalIndexCommitDelayMs = 0, freezeActiveIndex = false, onNearestIndexImmediate }: UseVerticalCardPagerOptions) => {
+  const itemRefs = useRef<(HTMLElement | null)[]>([]);
   const lastNearestIndexRef = useRef(Math.max(0, activeIndex));
 
   const onNearestIndexImmediateRef = useRef(onNearestIndexImmediate);

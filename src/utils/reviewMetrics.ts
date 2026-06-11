@@ -47,7 +47,8 @@ const calculateRetentionProbability = (stabilityInternal: number, intervalDays: 
  * 記憶の確率（Retention）とは異なり、復習に正解して間隔が伸びるたびに上昇します。
  * 最大間隔（MAX_INTERVAL_DAYS）に達すると 100% になります。
  */
-const calculateResistanceScore = (intervalDays: number): number => { const I = Math.max(0, intervalDays);
+const calculateResistanceScore = (intervalDays: number): number => {
+  const I = Math.max(0, intervalDays);
 
   // 対数スケールでスコア化
   // I=1 -> log(2) / log(91) ≈ 0.301 / 1.959 ≈ 15%

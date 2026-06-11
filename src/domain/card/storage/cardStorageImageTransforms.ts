@@ -1,7 +1,8 @@
 import { isStorageRecord } from "@/domain/shared/storage/storageRecordUtils";
 import { sanitizeCardStorageImageRef } from "./cardStorageImageRefTransforms";
 
-const sanitizeCardStorageBlockImages = (blocks: unknown[] | undefined) => { if (!Array.isArray(blocks)) return blocks;
+const sanitizeCardStorageBlockImages = (blocks: unknown[] | undefined) => {
+  if (!Array.isArray(blocks)) return blocks;
 
   return blocks.map((block) => {
     if (!isStorageRecord(block) || !Array.isArray(block.images)) return block;

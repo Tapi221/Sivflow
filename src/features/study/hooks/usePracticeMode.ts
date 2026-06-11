@@ -30,7 +30,8 @@ const shuffle = (items: string[]) => {
   }
   return next;
 };
-const usePracticeMode = ({ finalRatingByCardId, sourceSessionId, isPracticeFeatureEnabled, logPracticeEvent }: Params) => { const [practiceState, setPracticeState] = useState<PracticeState>(null);
+const usePracticeMode = ({ finalRatingByCardId, sourceSessionId, isPracticeFeatureEnabled, logPracticeEvent }: Params) => {
+  const [practiceState, setPracticeState] = useState<PracticeState>(null);
 
   const isPracticeMode = useMemo(() => Boolean(practiceState), [practiceState]);
 

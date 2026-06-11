@@ -5,7 +5,10 @@ type UseTreeViewSidebarHotkeyParams = {
   onToggle: () => void;
 };
 
-const useTreeViewSidebarHotkey = ({ onToggle }: UseTreeViewSidebarHotkeyParams) => { useEffect(() => { const handleKeyDown = (event: KeyboardEvent) => { if (event.defaultPrevented) return;
+const useTreeViewSidebarHotkey = ({ onToggle }: UseTreeViewSidebarHotkeyParams) => {
+  useEffect(() => {
+  const handleKeyDown = (event: KeyboardEvent) => {
+  if (event.defaultPrevented) return;
   if (!isPrimaryShortcut(event, "b")) return;
   if (isTypingTarget(event.target)) return;
 

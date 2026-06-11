@@ -64,7 +64,8 @@ const clampCalendarScrollBuffer = (buffer: CalendarScrollBuffer, maxUnits: Calen
   before: Math.min(buffer.before, maxUnits.before),
   after: Math.min(buffer.after, maxUnits.after),
 });
-const createCalendarScrollBuffer = (surface: CalendarScrollBufferSurface, viewMode: CalendarViewMode): CalendarScrollBuffer => { const config = getCalendarScrollBufferConfig(surface, viewMode);
+const createCalendarScrollBuffer = (surface: CalendarScrollBufferSurface, viewMode: CalendarViewMode): CalendarScrollBuffer => {
+  const config = getCalendarScrollBufferConfig(surface, viewMode);
 
   return clampCalendarScrollBuffer(
     {

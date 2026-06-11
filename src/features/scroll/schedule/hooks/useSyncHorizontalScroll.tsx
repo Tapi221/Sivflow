@@ -1,6 +1,9 @@
 import { useCallback } from "react";
 
-const useSyncHorizontalScroll = (sourceRef: React.RefObject<HTMLDivElement | null>, targetRef: React.RefObject<HTMLDivElement | null>) => { const sync = useCallback((scrollLeft: number) => { if (targetRef.current) { targetRef.current.scrollLeft = scrollLeft;
+const useSyncHorizontalScroll = (sourceRef: React.RefObject<HTMLDivElement | null>, targetRef: React.RefObject<HTMLDivElement | null>) => {
+  const sync = useCallback((scrollLeft: number) => {
+  if (targetRef.current) {
+  targetRef.current.scrollLeft = scrollLeft;
 }
 }, [targetRef]);
 

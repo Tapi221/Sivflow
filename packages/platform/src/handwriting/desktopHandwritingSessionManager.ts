@@ -34,7 +34,8 @@ type ReceiveDesktopHandwritingSessionManagerMessageResult = { state: DesktopHand
 };
 
 const createDesktopHandwritingSessionManagerState = (): DesktopHandwritingSessionManagerState => ({ activeSessionId: null, documents: {}, sessions: {} });
-const getDesktopHandwritingDocumentKey = (cardId: string, side: InkSide): DesktopHandwritingDocumentKey => { return `${cardId}:${side}`;
+const getDesktopHandwritingDocumentKey = (cardId: string, side: InkSide): DesktopHandwritingDocumentKey => {
+  return `${cardId}:${side}`;
 };
 const toReceiverSession = (session: HandwritingSession): DesktopHandwritingReceiverSession => ({
   id: session.id,
@@ -56,7 +57,8 @@ const updateDocument = (state: DesktopHandwritingSessionManagerState, key: Deskt
     [key]: document,
   },
 });
-const startDesktopHandwritingSession = ({ state, id, userId, cardId, side, desktopDevice, document, now }: StartDesktopHandwritingSessionInput): DesktopHandwritingSessionManagerState => { const session = createDesktopHandwritingSession({ id, userId, cardId, side, desktopDevice, now });
+const startDesktopHandwritingSession = ({ state, id, userId, cardId, side, desktopDevice, document, now }: StartDesktopHandwritingSessionInput): DesktopHandwritingSessionManagerState => {
+  const session = createDesktopHandwritingSession({ id, userId, cardId, side, desktopDevice, now });
   const documentKey = getDesktopHandwritingDocumentKey(cardId, side);
   const nextState = updateDocument(state, documentKey, normalizeInkDocument(document));
 
@@ -69,12 +71,14 @@ const startDesktopHandwritingSession = ({ state, id, userId, cardId, side, deskt
     },
   };
 };
-const attachMobileDeviceToDesktopHandwritingSession = ({ state, sessionId, mobileDevice, now }: AttachMobileDeviceToDesktopHandwritingSessionInput): DesktopHandwritingSessionManagerState => { const session = state.sessions[sessionId];
+const attachMobileDeviceToDesktopHandwritingSession = ({ state, sessionId, mobileDevice, now }: AttachMobileDeviceToDesktopHandwritingSessionInput): DesktopHandwritingSessionManagerState => {
+  const session = state.sessions[sessionId];
   if (!session) return state;
 
   return updateSession(state, attachMobileDeviceToHandwritingSession({ session, mobileDevice, now }));
 };
-const receiveDesktopHandwritingSessionManagerMessage = ({ state, message, now }: ReceiveDesktopHandwritingSessionManagerMessageInput): ReceiveDesktopHandwritingSessionManagerMessageResult => { const session = state.sessions[message.sessionId];
+const receiveDesktopHandwritingSessionManagerMessage = ({ state, message, now }: ReceiveDesktopHandwritingSessionManagerMessageInput): ReceiveDesktopHandwritingSessionManagerMessageResult => {
+  const session = state.sessions[message.sessionId];
 
   if (!session) {
     return { state, applied: false, reason: "session-not-found" };
@@ -97,7 +101,8 @@ const receiveDesktopHandwritingSessionManagerMessage = ({ state, message, now }:
     reason: result.reason,
   };
 };
-const closeDesktopHandwritingSession = (state: DesktopHandwritingSessionManagerState, sessionId: string, now = Date.now()): DesktopHandwritingSessionManagerState => { const session = state.sessions[sessionId];
+const closeDesktopHandwritingSession = (state: DesktopHandwritingSessionManagerState, sessionId: string, now = Date.now()): DesktopHandwritingSessionManagerState => {
+  const session = state.sessions[sessionId];
   if (!session) return state;
 
   const nextSession = closeHandwritingSession(session, now);
@@ -108,7 +113,8 @@ const closeDesktopHandwritingSession = (state: DesktopHandwritingSessionManagerS
     activeSessionId: state.activeSessionId === sessionId ? null : state.activeSessionId,
   };
 };
-const failDesktopHandwritingSession = (state: DesktopHandwritingSessionManagerState, sessionId: string, now = Date.now()): DesktopHandwritingSessionManagerState => { const session = state.sessions[sessionId];
+const failDesktopHandwritingSession = (state: DesktopHandwritingSessionManagerState, sessionId: string, now = Date.now()): DesktopHandwritingSessionManagerState => {
+  const session = state.sessions[sessionId];
   if (!session) return state;
 
   const nextSession = failHandwritingSession(session, now);

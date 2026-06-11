@@ -14,9 +14,11 @@ const roundDownToStep = (value: number, step: number) => {
   const safeStep = sanitizePositiveNumber(step, CARD_VIEW_ZOOM_STEP_PERCENT);
   return Math.floor(value / safeStep) * safeStep;
 };
-const zoomPercentToFactor = (zoomPercent: number) => { return (sanitizePositiveNumber(zoomPercent, CARD_VIEW_DEFAULT_ZOOM_PERCENT) / 100);
+const zoomPercentToFactor = (zoomPercent: number) => {
+  return (sanitizePositiveNumber(zoomPercent, CARD_VIEW_DEFAULT_ZOOM_PERCENT) / 100);
 };
-const zoomPercentToFixedCardWidthPx = (zoomPercent: number) => { return Math.max(1, Math.round(CANONICAL_CARD_WIDTH * zoomPercentToFactor(zoomPercent)));
+const zoomPercentToFixedCardWidthPx = (zoomPercent: number) => {
+  return Math.max(1, Math.round(CANONICAL_CARD_WIDTH * zoomPercentToFactor(zoomPercent)));
 };
 const computeDynamicMaxZoomPercent = ({ availableWidthPx, baseCardWidthPx = CANONICAL_CARD_WIDTH, stepPercent = CARD_VIEW_ZOOM_STEP_PERCENT }: { availableWidthPx: number;
   baseCardWidthPx?: number;

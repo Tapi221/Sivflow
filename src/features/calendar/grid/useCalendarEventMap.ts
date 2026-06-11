@@ -5,7 +5,9 @@ import { toDateKey } from "./calendarKey";
 
 type CalendarEventMap = Map<string, GoogleCalendarEvent[]>;
 
-const useCalendarEventMap = (visibleEvents: GoogleCalendarEvent[]): CalendarEventMap => { return useMemo(() => { const map: CalendarEventMap = new Map();
+const useCalendarEventMap = (visibleEvents: GoogleCalendarEvent[]): CalendarEventMap => {
+  return useMemo(() => {
+  const map: CalendarEventMap = new Map();
 
   for (const event of visibleEvents) {
     const key = toDateKey(event.startsAt);

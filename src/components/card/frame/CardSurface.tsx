@@ -17,7 +17,8 @@ type CardSurfaceProps = {
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
-const CardSurface = ({ children, className, style, overlay, ruled = true, ruledOpacity = 1, ruledRowPx = 24, ruledOffsetPx = 0, ruledBottomOffsetPx = 0, ruledPhasePx: _ruledPhasePx = 0 }: CardSurfaceProps) => { void _ruledPhasePx;
+const CardSurface = ({ children, className, style, overlay, ruled = true, ruledOpacity = 1, ruledRowPx = 24, ruledOffsetPx = 0, ruledBottomOffsetPx = 0, ruledPhasePx: _ruledPhasePx = 0 }: CardSurfaceProps) => {
+  void _ruledPhasePx;
 
   const rowPx = Math.max(8, ruledRowPx);
   const topPx = Math.max(0, ruledOffsetPx);

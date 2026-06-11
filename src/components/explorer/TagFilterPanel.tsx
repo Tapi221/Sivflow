@@ -202,7 +202,8 @@ const TagFilterSelectionSwitch = ({ label, checked, onToggle }: TagFilterSelecti
     </button>
   );
 };
-const TagFilterPanel = ({ allTags, isOpen = false, className }: TagFilterPanelProps) => { const { tags: tagRecords } = useTags();
+const TagFilterPanel = ({ allTags, isOpen = false, className }: TagFilterPanelProps) => {
+  const { tags: tagRecords } = useTags();
   const {
     tagFilter,
     tagMatchMode,

@@ -13,10 +13,12 @@ interface CardRenderSpec { surfaceMode: CardSurfaceMode;
 const MIN_ZOOM_SCALE = 0.5;
 const MAX_ZOOM_SCALE = 4;
 
-const clampCardRenderZoomScale = (value: number) => { if (!Number.isFinite(value)) return 1;
+const clampCardRenderZoomScale = (value: number) => {
+  if (!Number.isFinite(value)) return 1;
   return Math.min(MAX_ZOOM_SCALE, Math.max(MIN_ZOOM_SCALE, value));
 };
-const resolveCardSurfaceMode = (displayMode?: CardDisplayMode): CardSurfaceMode => { return displayMode === "fluid" ? "fluid" : "card";
+const resolveCardSurfaceMode = (displayMode?: CardDisplayMode): CardSurfaceMode => {
+  return displayMode === "fluid" ? "fluid" : "card";
 };
 const buildCardRenderSpec = ({ displayMode, interactionMode, zoomScale, showInk }: { displayMode?: CardDisplayMode;
   interactionMode: CardInteractionMode;
@@ -34,15 +36,20 @@ const buildCardRenderSpec = ({ displayMode, interactionMode, zoomScale, showInk 
     showInk: Boolean(showInk && surfaceMode === "card"),
   };
 };
-const resolveCardSurfaceScale = (spec: CardRenderSpec) => { return spec.surfaceMode === "card" ? spec.zoomScale : 1;
+const resolveCardSurfaceScale = (spec: CardRenderSpec) => {
+  return spec.surfaceMode === "card" ? spec.zoomScale : 1;
 };
-const resolveCardContentZoom = (spec: CardRenderSpec) => { return spec.surfaceMode === "fluid" ? spec.zoomScale : 1;
+const resolveCardContentZoom = (spec: CardRenderSpec) => {
+  return spec.surfaceMode === "fluid" ? spec.zoomScale : 1;
 };
-const resolveCardUsesSurfaceScale = (spec: CardRenderSpec) => { return spec.surfaceMode === "card";
+const resolveCardUsesSurfaceScale = (spec: CardRenderSpec) => {
+  return spec.surfaceMode === "card";
 };
-const resolveCardUsesStretchWidth = (spec: CardRenderSpec) => { return spec.surfaceMode === "fluid";
+const resolveCardUsesStretchWidth = (spec: CardRenderSpec) => {
+  return spec.surfaceMode === "fluid";
 };
-const resolveCardDisablesFrameScale = (spec: CardRenderSpec) => { return spec.surfaceMode === "fluid";
+const resolveCardDisablesFrameScale = (spec: CardRenderSpec) => {
+  return spec.surfaceMode === "fluid";
 };
 
 export { clampCardRenderZoomScale, resolveCardSurfaceMode, buildCardRenderSpec, resolveCardSurfaceScale, resolveCardContentZoom, resolveCardUsesSurfaceScale, resolveCardUsesStretchWidth, resolveCardDisablesFrameScale };

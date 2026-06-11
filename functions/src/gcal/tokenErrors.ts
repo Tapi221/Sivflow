@@ -20,7 +20,8 @@ const OAUTH_CLIENT_NOT_FOUND_PATTERNS = [
   "oauth client not found",
 ];
 
-const isGoogleOAuthServerConfigurationError = (googleError: string, description: string): boolean => { const normalizedDescription = description.toLowerCase();
+const isGoogleOAuthServerConfigurationError = (googleError: string, description: string): boolean => {
+  const normalizedDescription = description.toLowerCase();
 
   return (
     googleError === "invalid_client" ||

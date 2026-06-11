@@ -37,7 +37,8 @@ const buildDownloadUrl = (bucketName: string, path: string, token: string): stri
   const encodedToken = encodeURIComponent(token);
   return `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodedPath}?alt=media&token=${encodedToken}`;
 };
-const cacheGoogleProfileImageUrl = async (uid: string, sourceUrl: string | null): Promise<string | null> => { if (!sourceUrl) return null;
+const cacheGoogleProfileImageUrl = async (uid: string, sourceUrl: string | null): Promise<string | null> => {
+  if (!sourceUrl) return null;
 
   try {
     const image = await readImagePayload(sourceUrl);

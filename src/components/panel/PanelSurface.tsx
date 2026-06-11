@@ -8,7 +8,8 @@ type PanelSurfaceProps = HTMLAttributes<HTMLDivElement> &
     children: ReactNode;
   };
 
-const PanelSurface = ({ surface = "panel", className, children, ...props }: PanelSurfaceProps) => { return (<div className={cn(floatingSurfaceVariants({ surface }), className)} {...props} > {children} </div>);
+const PanelSurface = ({ surface = "panel", className, children, ...props }: PanelSurfaceProps) => {
+  return (<div className={cn(floatingSurfaceVariants({ surface }), className)} {...props} > {children} </div>);
 };
 
 export { PanelSurface };

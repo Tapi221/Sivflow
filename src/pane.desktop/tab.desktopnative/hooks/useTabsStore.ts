@@ -45,7 +45,8 @@ type WorkspaceTabsState = {
 type WorkspaceTabsPersistedState = Pick<WorkspaceTabsState, "tabs" | "activeTabId" | "lastOpenedTabId">;
 
 const EXPLORER_TAB_TITLE = "Library";
-const useWorkspaceTabsStore = create<WorkspaceTabsState>()(persist((set, get) => ({ tabs: [], activeTabId: null, lastOpenedTabId: null, openExplorerTab: (params = {}) => { const id = params.id ?? WORKSPACE_DEFAULT_EXPLORER_TAB_ID;
+const useWorkspaceTabsStore = create<WorkspaceTabsState>()(persist((set, get) => ({ tabs: [], activeTabId: null, lastOpenedTabId: null, openExplorerTab: (params = {}) => {
+  const id = params.id ?? WORKSPACE_DEFAULT_EXPLORER_TAB_ID;
   const existing = get().tabs.find((tab) => tab.id === id);
 
   if (existing?.kind === "explorer") {

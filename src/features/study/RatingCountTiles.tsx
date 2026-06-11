@@ -63,7 +63,8 @@ const FACE_DESIGN: Record<
 };
 const ORDER: RatingKey[] = ["forgot", "vague", "remembered", "easy"];
 
-const RatingCountTiles = ({ counts, compact = false, className = "", disableHover = false, singleColumn = false, singleRow = false, surface = "convex" }: Props) => { const surfaceClass = surface === "concave" ? "ds-rating-tile--concave" : "ds-rating-tile--convex";
+const RatingCountTiles = ({ counts, compact = false, className = "", disableHover = false, singleColumn = false, singleRow = false, surface = "convex" }: Props) => {
+  const surfaceClass = surface === "concave" ? "ds-rating-tile--concave" : "ds-rating-tile--convex";
   const gridClass = singleRow
     ? "grid grid-cols-4 gap-2"
     : singleColumn

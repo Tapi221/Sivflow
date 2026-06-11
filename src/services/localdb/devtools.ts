@@ -336,7 +336,8 @@ const deleteLocalFolders = async (db: unknown, folderIds: string[]): Promise<str
 const maybeReload = (reload: boolean): void => {
   if (reload) window.location.reload();
 };
-const installLocalDbDevtools = (): void => { if (!import.meta.env.DEV || typeof window === "undefined") return;
+const installLocalDbDevtools = (): void => {
+  if (!import.meta.env.DEV || typeof window === "undefined") return;
 
   const w = window as WindowWithLocalDbDevtools;
 

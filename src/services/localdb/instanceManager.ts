@@ -66,12 +66,14 @@ const createFallbackInstance = (userId?: string, reason?: unknown): InMemoryLoca
   return db;
 };
 const getFallbackInstance = async (userId?: string, reason?: unknown): Promise<InMemoryLocalDB> => createFallbackInstance(userId, reason);
-const getLocalDbSync = (userId?: string): LocalDBSyncStore => { const targetUserId = userId ?? currentUserId ?? "anonymous";
+const getLocalDbSync = (userId?: string): LocalDBSyncStore => {
+  const targetUserId = userId ?? currentUserId ?? "anonymous";
   if (cachedInstance && currentUserId === targetUserId) return cachedInstance as unknown as LocalDBSyncStore;
   return createFallbackInstance(targetUserId, "local-db-not-initialized") as unknown as LocalDBSyncStore;
 };
 const getInstanceUserId = (): string | null => currentUserId;
-const getInstance = async (userId?: string): Promise<LocalDBSyncStore> => { const targetUserId = userId ?? "anonymous";
+const getInstance = async (userId?: string): Promise<LocalDBSyncStore> => {
+  const targetUserId = userId ?? "anonymous";
 
   if (resettingPromise) await resettingPromise;
 
@@ -121,7 +123,10 @@ const getInstance = async (userId?: string): Promise<LocalDBSyncStore> => { cons
 };
 const getLocalDb = async (userId?: string): Promise<LocalDBSyncStore> => getInstance(userId);
 const initializeDB = async (userId?: string): Promise<LocalDBSyncStore> => getInstance(userId);
-const clearInstance = (): void => { if (instance) { try { instance.close();
+const clearInstance = (): void => {
+  if (instance) {
+  try {
+  instance.close();
 } catch {
   // ignore close failure
 }
@@ -140,7 +145,8 @@ cachedInstance = null;
 currentUserId = null;
 fallbackInstances.clear();
 };
-const resetForLogout = async (userId?: string): Promise<void> => { const targetUserId = userId ?? currentUserId ?? "anonymous";
+const resetForLogout = async (userId?: string): Promise<void> => {
+  const targetUserId = userId ?? currentUserId ?? "anonymous";
 
   if (resettingPromise) {
     await resettingPromise;

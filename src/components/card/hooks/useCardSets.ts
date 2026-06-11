@@ -9,7 +9,8 @@ type UseCardSetsOptions = {
   enabled?: boolean;
 };
 
-const useCardSets = (folderId?: string | null, options?: UseCardSetsOptions) => { const { currentUser } = useAuthSession();
+const useCardSets = (folderId?: string | null, options?: UseCardSetsOptions) => {
+  const { currentUser } = useAuthSession();
   const userId = currentUser?.uid ?? null;
   const enabled = options?.enabled ?? true;
 

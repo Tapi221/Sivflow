@@ -30,16 +30,19 @@ const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userin
 const REQUIRED_GOOGLE_SCOPES = ["https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.readonly", "https://www.googleapis.com/auth/calendar.app.created", "https://www.googleapis.com/auth/tasks", "https://www.googleapis.com/auth/drive.file"] as const;
 const exchangeGoogleCalendarCode = connectGoogleCalendarAccount;
 const getGoogleCalendarAccessToken = refreshGoogleCalendarAccessToken;
-const disconnectGoogleCalendarAccount = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
+const disconnectGoogleCalendarAccount = onCall({ region: REGION }, async (request) => {
+  const uid = requireUid(request);
   const accountId = typeof request.data?.accountId === "string" ? request.data.accountId : "";
   if (!accountId) throw new HttpsError("invalid-argument", "accountId is required.");
   await (await getDb()).doc(`users/${uid}/googleCalendarAccounts/${accountId}`).delete();
   return { ok: true };
 });
-const createGoogleCalendarCustomToken = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
+const createGoogleCalendarCustomToken = onCall({ region: REGION }, async (request) => {
+  const uid = requireUid(request);
   return { customToken: await (await getAdminAuth()).createCustomToken(uid) };
 });
-const listGoogleCalendarAccounts = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
+const listGoogleCalendarAccounts = onCall({ region: REGION }, async (request) => {
+  const uid = requireUid(request);
   const snapshot = await (await getDb()).collection(`users/${uid}/googleCalendarAccounts`).get();
   return {
     accounts: snapshot.docs.map((doc) => {
@@ -48,7 +51,8 @@ const listGoogleCalendarAccounts = onCall({ region: REGION }, async (request) =>
     })
   };
 });
-const connectGoogleCalendarAccount = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => { const uid = requireUid(request);
+const connectGoogleCalendarAccount = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => {
+  const uid = requireUid(request);
   const code = typeof request.data?.code === "string" ? request.data.code : "";
   const codeVerifier = typeof request.data?.codeVerifier === "string" ? request.data.codeVerifier : "";
   const redirectUri = typeof request.data?.redirectUri === "string" ? request.data.redirectUri : "";
@@ -65,7 +69,8 @@ const connectGoogleCalendarAccount = onCall({ region: REGION, secrets: [GOOGLE_O
   await (await getAdminAuth()).updateUser(uid, { email: profile.accountEmail, displayName: profile.accountName ?? undefined, photoURL: account.photoUrl ?? undefined });
   return toAccessResponse(accessToken, account, getTokenNumber(data, "expires_in"));
 });
-const refreshGoogleCalendarAccessToken = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => { const uid = requireUid(request);
+const refreshGoogleCalendarAccessToken = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => {
+  const uid = requireUid(request);
   const accountId = typeof request.data?.accountId === "string" ? request.data.accountId : typeof request.data?.accountEmail === "string" ? request.data.accountEmail : "";
   return await getStoredAccessToken(uid, accountId);
 });

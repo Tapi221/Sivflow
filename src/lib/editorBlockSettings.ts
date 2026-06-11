@@ -84,7 +84,8 @@ const createEditorBlockConfigFromDefinition = (
 const getFallbackOrderIndex = (type: EditorBlockType) => {
   return EDITOR_BLOCK_DEFINITION_BY_TYPE[type].orderIndex;
 };
-const isEditorBlockType = (value: unknown): value is EditorBlockType => { return (typeof value === "string" && Object.prototype.hasOwnProperty.call(EDITOR_BLOCK_DEFINITION_BY_TYPE, value));
+const isEditorBlockType = (value: unknown): value is EditorBlockType => {
+  return (typeof value === "string" && Object.prototype.hasOwnProperty.call(EDITOR_BLOCK_DEFINITION_BY_TYPE, value));
 };
 const compareEditorBlockConfigs = (
   left: EditorBlockComparable,
@@ -101,11 +102,14 @@ const compareEditorBlockConfigs = (
 
   return getFallbackOrderIndex(left.type) - getFallbackOrderIndex(right.type);
 };
-const getEditorBlockDefinition = (type: EditorBlockType): EditorBlockDefinition => { return EDITOR_BLOCK_DEFINITION_BY_TYPE[type];
+const getEditorBlockDefinition = (type: EditorBlockType): EditorBlockDefinition => {
+  return EDITOR_BLOCK_DEFINITION_BY_TYPE[type];
 };
-const createDefaultEditorBlockSettings = (): EditorBlockConfig[] => { return EDITOR_BLOCK_DEFINITIONS.map(createEditorBlockConfigFromDefinition);
+const createDefaultEditorBlockSettings = (): EditorBlockConfig[] => {
+  return EDITOR_BLOCK_DEFINITIONS.map(createEditorBlockConfigFromDefinition);
 };
-const normalizeEditorBlockSettings = (items: | readonly EditorBlockConfig[] | readonly BlockConfig[] | null | undefined): EditorBlockConfig[] => { const byType = new Map<EditorBlockType, EditorBlockConfig>();
+const normalizeEditorBlockSettings = (items: | readonly EditorBlockConfig[] | readonly BlockConfig[] | null | undefined): EditorBlockConfig[] => {
+  const byType = new Map<EditorBlockType, EditorBlockConfig>();
   const sortedItems = [...(items ?? [])].sort(compareEditorBlockConfigs);
 
   for (const item of sortedItems) {
@@ -141,7 +145,8 @@ const normalizeEditorBlockSettings = (items: | readonly EditorBlockConfig[] | re
     .sort(compareEditorBlockConfigs)
     .map((block, index) => ({ ...block, orderIndex: index }));
 };
-const parseEditorBlockSettings = (input: readonly unknown[] | null | undefined): EditorBlockConfig[] => { const parsedItems: EditorBlockConfig[] = [];
+const parseEditorBlockSettings = (input: readonly unknown[] | null | undefined): EditorBlockConfig[] => {
+  const parsedItems: EditorBlockConfig[] = [];
 
   for (const value of input ?? []) {
     if (!isRecord(value) || !isEditorBlockType(value["type"])) {

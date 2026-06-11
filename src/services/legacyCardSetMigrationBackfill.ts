@@ -15,7 +15,8 @@ const createId = (): string => {
 
   return `cardset-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 };
-const backfillLegacyCardsToCardSets = async (userId: string): Promise<void> => { const db = await getLocalDb(userId);
+const backfillLegacyCardsToCardSets = async (userId: string): Promise<void> => {
+  const db = await getLocalDb(userId);
   const syncDb = db as LocalFirstBackfillDb;
   const now = new Date();
   const activeCards = await db.cards.where("userId").equals(userId).and((card: Card) => !card.isDeleted).toArray();
@@ -149,7 +150,8 @@ const backfillLegacyCardsToCardSets = async (userId: string): Promise<void> => {
 
   console.info(`[AppInit:${userId}] CardSet backfill repaired ${legacyCards.length} legacy cards and ${danglingCardsBySetId.size} missing sets.`);
 };
-const ensureLegacyCardsBackfilled = async (userId: string) => { const existing = backfillPromiseByUserId.get(userId);
+const ensureLegacyCardsBackfilled = async (userId: string) => {
+  const existing = backfillPromiseByUserId.get(userId);
   if (existing) return existing;
 
   const promise = backfillLegacyCardsToCardSets(userId).catch((error) => {

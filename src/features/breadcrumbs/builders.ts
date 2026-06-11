@@ -5,7 +5,8 @@ import type { CardSet } from "@/types/domain/cardSet";
 
 type FolderLike = Pick<Folder, "id" | "folderName" | "parentFolderId">;
 
-const areBreadcrumbCrumbsEqual = (a: BreadcrumbCrumb[], b: BreadcrumbCrumb[]): boolean => { if (a === b) return true;
+const areBreadcrumbCrumbsEqual = (a: BreadcrumbCrumb[], b: BreadcrumbCrumb[]): boolean => {
+  if (a === b) return true;
   if (a.length !== b.length) return false;
 
   return a.every((crumb, index) => {

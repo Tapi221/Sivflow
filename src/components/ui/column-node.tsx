@@ -199,9 +199,11 @@ const ColumnFloatingToolbar = ({ children }: React.PropsWithChildren) => {
     </Popover>
   );
 };
-const ColumnGroupElement = (props: PlateElementProps) => { return (<PlateElement className="mb-2" {...props}> <ColumnFloatingToolbar> <div className="flex size-full rounded">{props.children}</div> </ColumnFloatingToolbar> </PlateElement>);
+const ColumnGroupElement = (props: PlateElementProps) => {
+  return (<PlateElement className="mb-2" {...props}> <ColumnFloatingToolbar> <div className="flex size-full rounded">{props.children}</div> </ColumnFloatingToolbar> </PlateElement>);
 };
-const ColumnElement = withHOC(ResizableProvider, (props: PlateElementProps<TColumnElement>) => { const { width } = props.element;
+const ColumnElement = withHOC(ResizableProvider, (props: PlateElementProps<TColumnElement>) => {
+  const { width } = props.element;
   const readOnly = useReadOnly();
   const isSelectionAreaVisible = usePluginOption(
     BlockSelectionPlugin,

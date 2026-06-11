@@ -24,7 +24,8 @@ const writeImageBlobToTauriClipboard = async (blob: Blob): Promise<boolean> => {
     return false;
   }
 };
-const copyImageBlobToClipboard = async (blob: Blob): Promise<void> => { const copiedByTauri = await writeImageBlobToTauriClipboard(blob);
+const copyImageBlobToClipboard = async (blob: Blob): Promise<void> => {
+  const copiedByTauri = await writeImageBlobToTauriClipboard(blob);
   if (copiedByTauri) return;
 
   if (!navigator.clipboard || typeof ClipboardItem === "undefined") {

@@ -194,7 +194,8 @@ const groups: Group[] = [
   },
 ];
 
-const InsertToolbarButton = (props: DropdownMenuProps) => { const editor = useEditorRef();
+const InsertToolbarButton = (props: DropdownMenuProps) => {
+  const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
 
   return (

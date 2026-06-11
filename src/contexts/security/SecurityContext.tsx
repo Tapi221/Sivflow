@@ -22,10 +22,12 @@ const SecurityContext = createContext<SecurityContextType>({
   dismissSecurityAlert: async () => {},
 });
 
-const useSecurity = () => { return useContext(SecurityContext);
+const useSecurity = () => {
+  return useContext(SecurityContext);
 };
 
-const SecurityProvider = ({ children }: SecurityProviderProps) => { const { currentUser } = useAuthSession();
+const SecurityProvider = ({ children }: SecurityProviderProps) => {
+  const { currentUser } = useAuthSession();
   const [securityState, setSecurityState] =
     useState<SecurityState>(defaultSecurityState);
 

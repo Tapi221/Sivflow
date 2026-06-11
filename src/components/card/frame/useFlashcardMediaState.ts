@@ -16,7 +16,8 @@ interface FlashcardMediaState { isImageModalOpen: boolean;
   isModalBlockingFlip: boolean;
 }
 
-const useFlashcardMediaState = () => { const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+const useFlashcardMediaState = () => {
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [isImagePopupOpen, setIsImagePopupOpen] = useState(false);
   const [isAudioPopupOpen, setIsAudioPopupOpen] = useState(false);
   const [isReferencePopupOpen, setIsReferencePopupOpen] = useState(false);

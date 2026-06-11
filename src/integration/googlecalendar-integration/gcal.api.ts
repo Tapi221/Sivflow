@@ -146,7 +146,8 @@ const toGoogleEventPayload = (event: Partial<GCalWritableEventInput>): Record<st
 
   return payload;
 };
-const fetchCalendarList = async (accessToken: string): Promise<GoogleCalendarListItem[]> => { console.info("[GoogleCalendarAPI] カレンダー一覧の取得を開始しました");
+const fetchCalendarList = async (accessToken: string): Promise<GoogleCalendarListItem[]> => {
+  console.info("[GoogleCalendarAPI] カレンダー一覧の取得を開始しました");
 
   try {
     const calendars: GoogleCalendarListItem[] = [];

@@ -63,7 +63,8 @@ const getRelativeLuminance = ({ red, green, blue }: RgbColor) => {
 
   return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
 };
-const generateColorTokens = (hex: string): CalendarColorTokens => { const cacheKey = `${normalizeHexColor(hex) ?? FALLBACK_ACCENT_COLOR}:${eventChipDesign.backgroundAlpha}`;
+const generateColorTokens = (hex: string): CalendarColorTokens => {
+  const cacheKey = `${normalizeHexColor(hex) ?? FALLBACK_ACCENT_COLOR}:${eventChipDesign.backgroundAlpha}`;
   const cachedTokens = colorTokensCache.get(cacheKey);
 
   if (cachedTokens) {

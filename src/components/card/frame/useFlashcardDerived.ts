@@ -12,7 +12,8 @@ const EMPTY_REFERENCES: ReturnType<typeof resolveQuestionAttachmentReferences> =
   [];
 const EMPTY_BLOCKS: ReturnType<typeof resolveSideBlocks> = [];
 
-const useFlashcardDerived = (cardData: FlashcardCardLike | null | undefined, effectiveIsFlipped: boolean): FlashcardDerived => { const cardId = cardData ? resolveCardId(cardData) : null;
+const useFlashcardDerived = (cardData: FlashcardCardLike | null | undefined, effectiveIsFlipped: boolean): FlashcardDerived => {
+  const cardId = cardData ? resolveCardId(cardData) : null;
 
   const hasUncertainty = cardData ? resolveHasUncertainty(cardData) : false;
   const isBookmarked = cardData ? resolveIsBookmarked(cardData) : false;

@@ -99,7 +99,8 @@ const ImageProgress = ({ className, file, imageRef, progress = 0 }: { file: File
     </div>
   );
 };
-const PlaceholderElement = withHOC(PlaceholderProvider, (props: PlateElementProps<TPlaceholderElement>) => { const { editor, element } = props;
+const PlaceholderElement = withHOC(PlaceholderProvider, (props: PlateElementProps<TPlaceholderElement>) => {
+  const { editor, element } = props;
 
   const { api } = useEditorPlugin(PlaceholderPlugin);
 

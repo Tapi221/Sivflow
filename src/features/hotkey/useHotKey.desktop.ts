@@ -5,7 +5,10 @@ type UseHotKeyParams = {
   onToggleRightSidebar?: () => void;
 };
 
-const useHotKeyDesktop = ({ onToggleRightSidebar }: UseHotKeyParams) => { useEffect(() => { const handleKeyDown = (event: KeyboardEvent) => { if (event.defaultPrevented) return;
+const useHotKeyDesktop = ({ onToggleRightSidebar }: UseHotKeyParams) => {
+  useEffect(() => {
+  const handleKeyDown = (event: KeyboardEvent) => {
+  if (event.defaultPrevented) return;
   if (isTypingTarget(event.target)) return;
   if (!isPrimaryShiftShortcut(event, "b")) return;
 

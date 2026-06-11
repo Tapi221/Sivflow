@@ -35,7 +35,8 @@ const getCalendarScrollLeft = ({
 
   return Math.max(0, anchorOffset - centerOffset);
 };
-const useCalendarScrollPositionSync = ({ selectedViewMode, calendarBufferBefore, calendarDayColumnWidth, viewportWidth, scrollTargetToken, scrollRef, headerRef, headerRefs }: Params) => { const lastRef = useRef<{ token: number | null;
+const useCalendarScrollPositionSync = ({ selectedViewMode, calendarBufferBefore, calendarDayColumnWidth, viewportWidth, scrollTargetToken, scrollRef, headerRef, headerRefs }: Params) => {
+  const lastRef = useRef<{ token: number | null;
   viewportWidth: number;
   selectedViewMode: CalendarViewMode | null;
 }>({

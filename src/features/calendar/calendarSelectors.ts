@@ -85,7 +85,8 @@ const buildCardsByDate = ({ cards, cardSets, folders, foldersLoading, autoCarryO
 
   return grouped;
 };
-const buildTodaySummary = (cardsByDate: CalendarCardsByDate): CalendarSummaryViewModel => { const todayKey = toDateKey(new Date());
+const buildTodaySummary = (cardsByDate: CalendarCardsByDate): CalendarSummaryViewModel => {
+  const todayKey = toDateKey(new Date());
   const todayDueCount = (cardsByDate[todayKey] ?? []).length;
 
   return {
@@ -94,7 +95,8 @@ const buildTodaySummary = (cardsByDate: CalendarCardsByDate): CalendarSummaryVie
     isTodaySelected: false,
   };
 };
-const buildStreak = (remoteLogs: CalendarStudyLogLike[], localLogs: CalendarStudyLogLike[]) => { return getStreakFromLogs([...remoteLogs, ...localLogs]);
+const buildStreak = (remoteLogs: CalendarStudyLogLike[], localLogs: CalendarStudyLogLike[]) => {
+  return getStreakFromLogs([...remoteLogs, ...localLogs]);
 };
 const buildCalendarGridViewModel = ({ currentDate, selectedDate, cardsByDate, weekStartDay }: { currentDate: Date;
   selectedDate: Date;

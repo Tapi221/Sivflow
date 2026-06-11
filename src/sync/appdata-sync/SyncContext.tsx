@@ -43,7 +43,8 @@ const buildResolvedConflictRecord = (conflict: SyncConflict, resolvedData: unkno
   };
 };
 
-const SyncProvider = ({ children }: SyncProviderProps) => { const { currentUser } = useAuthSession();
+const SyncProvider = ({ children }: SyncProviderProps) => {
+  const { currentUser } = useAuthSession();
   const userId = currentUser?.uid ?? null;
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("idle");
   const [syncNotice, setSyncNotice] = useState<SyncNotice>("none");

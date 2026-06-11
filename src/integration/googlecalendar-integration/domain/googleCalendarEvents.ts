@@ -23,7 +23,9 @@ const overlapsRange = (
   rangeStart: Date,
   rangeEnd: Date,
 ) => event.startsAt < rangeEnd && event.endsAt > rangeStart;
-const reduceGoogleCalendarEvents = (state: GoogleCalendarEventsState, action: GoogleCalendarEventsAction): GoogleCalendarEventsState => { switch (action.type) { case "UPSERT": { const next = new Map(state);
+const reduceGoogleCalendarEvents = (state: GoogleCalendarEventsState, action: GoogleCalendarEventsAction): GoogleCalendarEventsState => {
+  switch (action.type) { case "UPSERT": {
+  const next = new Map(state);
   const bucket = new Map(next.get(action.accountId) ?? []);
 
   bucket.set(action.event.id, action.event);

@@ -6,12 +6,16 @@ type PresentationCapabilities = { viewportWidth: number;
 
 const DESKTOP_PRESENTATION_MIN_WIDTH_PX = 1024;
 
-const getPresentationTarget = ({ viewportWidth, canHover, hasFinePointer }: PresentationCapabilities): PresentationTarget => { if (viewportWidth >= DESKTOP_PRESENTATION_MIN_WIDTH_PX && canHover && hasFinePointer) { return "desktop";
+const getPresentationTarget = ({ viewportWidth, canHover, hasFinePointer }: PresentationCapabilities): PresentationTarget => {
+  if (viewportWidth >= DESKTOP_PRESENTATION_MIN_WIDTH_PX && canHover && hasFinePointer) {
+  return "desktop";
 }
 
 return "mobile";
 };
-const getPresentationTargetFromWindow = (): PresentationTarget => { if (typeof window === "undefined") { return "mobile";
+const getPresentationTargetFromWindow = (): PresentationTarget => {
+  if (typeof window === "undefined") {
+  return "mobile";
 }
 
 return getPresentationTarget({

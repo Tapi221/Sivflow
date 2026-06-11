@@ -85,7 +85,8 @@ const copyTable = async (source: MigratableDexie, destination: MigratableDexie, 
   if (rows.length === 0) return;
   await destination.table(tableName).bulkPut(rows);
 };
-const migrateLegacyLocalDbBrandIfNeeded = async (userId: string, destinationDatabaseName: string): Promise<void> => { if (hasCompletedBrandMigration(userId)) return;
+const migrateLegacyLocalDbBrandIfNeeded = async (userId: string, destinationDatabaseName: string): Promise<void> => {
+  if (hasCompletedBrandMigration(userId)) return;
   if (!destinationDatabaseName.startsWith(LOCALDB_NAME_PREFIX)) return;
 
   const sourceDatabaseName = await getFirstExistingDatabaseName(getLegacyDatabaseCandidates(userId));

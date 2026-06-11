@@ -28,7 +28,8 @@ const resizableVariants = cva("", {
   },
 });
 
-const ResizeHandle = ({ className, options, ...props }: React.ComponentProps<typeof ResizeHandlePrimitive> & VariantProps<typeof resizeHandleVariants>) => { const state = useResizeHandleState(options ?? {});
+const ResizeHandle = ({ className, options, ...props }: React.ComponentProps<typeof ResizeHandlePrimitive> & VariantProps<typeof resizeHandleVariants>) => {
+  const state = useResizeHandleState(options ?? {});
   const resizeHandle = useResizeHandle(state);
 
   if (state.readOnly) return null;
@@ -45,7 +46,8 @@ const ResizeHandle = ({ className, options, ...props }: React.ComponentProps<typ
     />
   );
 };
-const Resizable = ({ align, className, ...props }: React.ComponentProps<typeof ResizablePrimitive> & VariantProps<typeof resizableVariants>) => { return (<ResizablePrimitive {...props} className={cn(resizableVariants({ align }), className)} />);
+const Resizable = ({ align, className, ...props }: React.ComponentProps<typeof ResizablePrimitive> & VariantProps<typeof resizableVariants>) => {
+  return (<ResizablePrimitive {...props} className={cn(resizableVariants({ align }), className)} />);
 };
 
 export { mediaResizeHandleVariants, ResizeHandle, Resizable };

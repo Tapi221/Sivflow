@@ -183,7 +183,8 @@ const delay = async (delayInMs?: number | null): Promise<void> => {
  *
  * @experimental
  */
-const markdownJoinerTransform = <TOOLS extends ToolSet>() => () => { const joiner = new MarkdownJoiner();
+const markdownJoinerTransform = <TOOLS extends ToolSet>() => () => {
+  const joiner = new MarkdownJoiner();
   let lastTextDeltaId: string | undefined;
   let textStreamEnded = false;
 

@@ -98,7 +98,8 @@ const cacheImageBlobUrl = (
   cleanupStaleUrls(existing);
   evictIfNeeded();
 };
-const getOrCreateImageBlobUrl = async (id: string | null | undefined, blobOrOptions?: Blob | BlobScopeOptions, options?: BlobScopeOptions): Promise<string | null> => { if (!id) return null;
+const getOrCreateImageBlobUrl = async (id: string | null | undefined, blobOrOptions?: Blob | BlobScopeOptions, options?: BlobScopeOptions): Promise<string | null> => {
+  if (!id) return null;
   const scopeOptions =
     blobOrOptions instanceof Blob || blobOrOptions == null
       ? options
@@ -112,7 +113,8 @@ const getOrCreateImageBlobUrl = async (id: string | null | undefined, blobOrOpti
   cacheImageBlobUrl(id, url, scopeOptions);
   return url;
 };
-const removeImageBlobUrl = (id: string | null | undefined, options?: BlobScopeOptions): void => { if (!id) return;
+const removeImageBlobUrl = (id: string | null | undefined, options?: BlobScopeOptions): void => {
+  if (!id) return;
   const key = makeScopedId(id, options);
   const entry = cache.get(key);
   if (!entry) return;
@@ -125,13 +127,15 @@ const removeImageBlobUrl = (id: string | null | undefined, options?: BlobScopeOp
   revokeBlobUrl(entry.url);
   cache.delete(key);
 };
-const pinImageBlobUrl = (id: string | null | undefined, options?: BlobScopeOptions): void => { if (!id) return;
+const pinImageBlobUrl = (id: string | null | undefined, options?: BlobScopeOptions): void => {
+  if (!id) return;
   const key = makeScopedId(id, options);
   const entry = cache.get(key);
   if (!entry) return;
   entry.pinCount += 1;
 };
-const unpinImageBlobUrl = (id: string | null | undefined, options?: BlobScopeOptions): void => { if (!id) return;
+const unpinImageBlobUrl = (id: string | null | undefined, options?: BlobScopeOptions): void => {
+  if (!id) return;
   const key = makeScopedId(id, options);
   const entry = cache.get(key);
   if (!entry) return;
@@ -140,7 +144,8 @@ const unpinImageBlobUrl = (id: string | null | undefined, options?: BlobScopeOpt
     cleanupStaleUrls(entry);
   }
 };
-const getBlobCacheStats = () => { let pinnedCount = 0;
+const getBlobCacheStats = () => {
+  let pinnedCount = 0;
   for (const entry of cache.values()) {
     if (entry.pinCount > 0) pinnedCount++;
   }

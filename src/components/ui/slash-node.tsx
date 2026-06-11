@@ -197,7 +197,8 @@ const groups: Group[] = [
   },
 ];
 
-const SlashInputElement = (props: PlateElementProps<TComboboxInputElement>) => { const { editor, element } = props;
+const SlashInputElement = (props: PlateElementProps<TComboboxInputElement>) => {
+  const { editor, element } = props;
 
   return (
     <PlateElement {...props} as="span">

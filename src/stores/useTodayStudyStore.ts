@@ -32,7 +32,8 @@ type TodayStudyActions = {
 };
 type TodayStudyStore = TodayStudyState & TodayStudyActions;
 
-const useTodayStudyStore = create<TodayStudyStore>()(persist((set, get) => ({ ...initialState(), hydrate: (userId: string) => { const s = get();
+const useTodayStudyStore = create<TodayStudyStore>()(persist((set, get) => ({ ...initialState(), hydrate: (userId: string) => {
+  const s = get();
   const today = localDateKey();
   if (s.dateKey !== today || s.userId !== userId) {
     set(initialState(userId));

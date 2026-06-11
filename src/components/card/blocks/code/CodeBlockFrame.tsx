@@ -12,7 +12,8 @@ type CodeBlockFrameProps = {
   children: React.ReactNode;
 };
 
-const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({ variant = "viewer", languageLabel, languageTitle, headerLeft, headerRight, children }) => { const showLangLabel = !!languageLabel && !headerLeft;
+const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({ variant = "viewer", languageLabel, languageTitle, headerLeft, headerRight, children }) => {
+  const showLangLabel = !!languageLabel && !headerLeft;
 
   return (
     <div className="codeBlockOuter">

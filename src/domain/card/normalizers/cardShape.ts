@@ -19,7 +19,8 @@ const getLegacyExtraRowsKeys = (side: CardFaceSide) => {
     ? (["questionExtraRows", "question_extra_rows"] as const)
     : (["answerExtraRows", "answer_extra_rows"] as const);
 };
-const resolveBlocksFromCardData = (value: CardLike, side: CardFaceSide) => { const aliasKey = side === "question" ? "frontBlocks" : "backBlocks";
+const resolveBlocksFromCardData = (value: CardLike, side: CardFaceSide) => {
+  const aliasKey = side === "question" ? "frontBlocks" : "backBlocks";
   const legacyKey = getLegacyBlocksKey(side);
   const faceKey = side === "question" ? "front" : "back";
   const face = value[faceKey];
@@ -39,7 +40,8 @@ const resolveBlocksFromCardData = (value: CardLike, side: CardFaceSide) => { con
 
   return [];
 };
-const resolveInkFromCardData = (value: CardLike, side: CardFaceSide, options?: ResolveCardShapeOptions): InkDocument | null => { const faceKey = side === "question" ? "front" : "back";
+const resolveInkFromCardData = (value: CardLike, side: CardFaceSide, options?: ResolveCardShapeOptions): InkDocument | null => {
+  const faceKey = side === "question" ? "front" : "back";
   const legacyKey = getLegacyInkKey(side);
   const face = value[faceKey];
   const faceInk =
@@ -54,7 +56,8 @@ const resolveInkFromCardData = (value: CardLike, side: CardFaceSide, options?: R
 
   return document;
 };
-const resolveExtraRowsFromCardData = (value: CardLike, side: CardFaceSide) => { const faceKey = side === "question" ? "front" : "back";
+const resolveExtraRowsFromCardData = (value: CardLike, side: CardFaceSide) => {
+  const faceKey = side === "question" ? "front" : "back";
   const [legacyKey, snakeKey] = getLegacyExtraRowsKeys(side);
   const face = value[faceKey];
   const faceExtraRows =
@@ -66,7 +69,8 @@ const resolveExtraRowsFromCardData = (value: CardLike, side: CardFaceSide) => { 
     faceExtraRows ?? value[legacyKey] ?? value[snakeKey] ?? 0,
   );
 };
-const normalizeCardFolderId = (value: unknown): string => { return typeof value === "string" ? value.trim() : "";
+const normalizeCardFolderId = (value: unknown): string => {
+  return typeof value === "string" ? value.trim() : "";
 };
 
 export { resolveBlocksFromCardData, resolveInkFromCardData, resolveExtraRowsFromCardData, normalizeCardFolderId };

@@ -26,7 +26,8 @@ const ensureResizeObserver = () => {
 
   return resizeObserver;
 };
-const observeElementRect = (element: Element, listener: ElementRectListener) => { const listeners = listenerMap.get(element) ?? new Set<ElementRectListener>();
+const observeElementRect = (element: Element, listener: ElementRectListener) => {
+  const listeners = listenerMap.get(element) ?? new Set<ElementRectListener>();
   listeners.add(listener);
   listenerMap.set(element, listeners);
 

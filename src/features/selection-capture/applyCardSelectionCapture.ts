@@ -8,7 +8,8 @@ const uid = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : Math.random().toString(36).slice(2);
-const normalizeSelectionCaptureOcrText = (text: string | null): string | null => { const normalized = text?.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim() ?? "";
+const normalizeSelectionCaptureOcrText = (text: string | null): string | null => {
+  const normalized = text?.replace(/\r\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim() ?? "";
   return normalized.length > 0 ? normalized : null;
 };
 const createCaptureImageBlock = ({

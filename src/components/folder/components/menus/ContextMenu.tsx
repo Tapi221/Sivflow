@@ -20,7 +20,8 @@ const CONTEXT_MENU_COLLISION_PADDING_PX = 8;
 /**
  * 右クリックなどで表示される汎用的なコンテキストメニューのコンテナ
  */
-const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions, className, variant = "default" }: ContextMenuProps) => { const suppressCloseAutoFocusRef = useRef(false);
+const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions, className, variant = "default" }: ContextMenuProps) => {
+  const suppressCloseAutoFocusRef = useRef(false);
 
   const anchoredStyle = useMemo(() => {
     if (!anchorPoint) return undefined;

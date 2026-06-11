@@ -74,7 +74,8 @@ const writeStoredScheduleNavigationObject = (state: StoredScheduleNavigationStat
   }
 };
 const normalizeScheduleMonthVisibleEventCount = (value: number): number => Math.min(C.MONTH_VISIBLE_EVENT_COUNT_MAX, Math.max(C.MONTH_VISIBLE_EVENT_COUNT_MIN, Math.round(value)));
-const readStoredScheduleNavigationState = (): Partial<ScheduleNavigationState> | null => { const parsed = readStoredScheduleNavigationObject();
+const readStoredScheduleNavigationState = (): Partial<ScheduleNavigationState> | null => {
+  const parsed = readStoredScheduleNavigationObject();
   if (!parsed) return null;
 
   const currentDate = readStoredDate(parsed.currentDate);
@@ -89,17 +90,20 @@ const readStoredScheduleNavigationState = (): Partial<ScheduleNavigationState> |
     ...(selectedViewMode ? { selectedViewMode } : {}),
   };
 };
-const readStoredScheduleCalendarScrollTop = (): number | null => { const parsed = readStoredScheduleNavigationObject();
+const readStoredScheduleCalendarScrollTop = (): number | null => {
+  const parsed = readStoredScheduleNavigationObject();
   if (!parsed) return null;
 
   return readStoredScrollTop(parsed.calendarScrollTop);
 };
-const readStoredScheduleMonthVisibleEventCount = (): number | null => { const parsed = readStoredScheduleNavigationObject();
+const readStoredScheduleMonthVisibleEventCount = (): number | null => {
+  const parsed = readStoredScheduleNavigationObject();
   if (!parsed || typeof parsed.monthVisibleEventCount !== "number" || !Number.isFinite(parsed.monthVisibleEventCount)) return null;
 
   return normalizeScheduleMonthVisibleEventCount(parsed.monthVisibleEventCount);
 };
-const persistScheduleNavigationState = ({ currentDate, selectedDate, monthTitleDate, selectedViewMode }: ScheduleNavigationState) => { const stored = readStoredScheduleNavigationObject() ?? {};
+const persistScheduleNavigationState = ({ currentDate, selectedDate, monthTitleDate, selectedViewMode }: ScheduleNavigationState) => {
+  const stored = readStoredScheduleNavigationObject() ?? {};
 
   writeStoredScheduleNavigationObject({
     ...stored,
@@ -109,7 +113,8 @@ const persistScheduleNavigationState = ({ currentDate, selectedDate, monthTitleD
     selectedViewMode,
   });
 };
-const persistScheduleCalendarScrollTop = (scrollTop: number) => { if (!Number.isFinite(scrollTop)) return;
+const persistScheduleCalendarScrollTop = (scrollTop: number) => {
+  if (!Number.isFinite(scrollTop)) return;
 
   const stored = readStoredScheduleNavigationObject() ?? {};
 
@@ -118,7 +123,8 @@ const persistScheduleCalendarScrollTop = (scrollTop: number) => { if (!Number.is
     calendarScrollTop: Math.max(0, scrollTop),
   });
 };
-const persistScheduleMonthVisibleEventCount = (monthVisibleEventCount: number) => { if (!Number.isFinite(monthVisibleEventCount)) return;
+const persistScheduleMonthVisibleEventCount = (monthVisibleEventCount: number) => {
+  if (!Number.isFinite(monthVisibleEventCount)) return;
 
   const stored = readStoredScheduleNavigationObject() ?? {};
 

@@ -25,7 +25,8 @@ const isTagAncestorOf = (sourceId: string, candidateParentId: string | undefined
 
   return false;
 };
-const useTagTreeCommands = (tagById: ReadonlyMap<string, TagRecord>) => { const { currentUser } = useAuthSession();
+const useTagTreeCommands = (tagById: ReadonlyMap<string, TagRecord>) => {
+  const { currentUser } = useAuthSession();
 
   const setTagTreePosition = useCallback(async (tagId: string, patch: TagTreePositionPatch): Promise<void> => {
     if (!currentUser) return;

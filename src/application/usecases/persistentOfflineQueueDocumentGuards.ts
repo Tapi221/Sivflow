@@ -20,7 +20,8 @@ const getString = (
     ? value.trim()
     : null;
 };
-const toDocumentLike = (value: unknown): DocumentLike => { if (!isRecord(value)) return {};
+const toDocumentLike = (value: unknown): DocumentLike => {
+  if (!isRecord(value)) return {};
 
   return {
     uploadStatus: getString(value, "uploadStatus"),
@@ -33,10 +34,12 @@ const toDocumentLike = (value: unknown): DocumentLike => { if (!isRecord(value))
 };
 const isPdfQueueItem = (item: Pick<QueueItem, "fileType" | "fileName">): boolean => item.fileType === "application/pdf" || (typeof item.fileName === "string" && item.fileName.toLowerCase().endsWith(".pdf"));
 const isDocumentQueueItem = (item: Pick<QueueItem, "fileType" | "fileName">): boolean => isPdfQueueItem(item);
-const getDocumentKindLabel = (item: Pick<QueueItem, "fileType" | "fileName">): "PDF" | "DOC" => { if (isPdfQueueItem(item)) return "PDF";
+const getDocumentKindLabel = (item: Pick<QueueItem, "fileType" | "fileName">): "PDF" | "DOC" => {
+  if (isPdfQueueItem(item)) return "PDF";
   return "DOC";
 };
-const isDocumentUploadReady = (doc: unknown): boolean => { const snapshot = toDocumentLike(doc);
+const isDocumentUploadReady = (doc: unknown): boolean => {
+  const snapshot = toDocumentLike(doc);
   if (snapshot.uploadStatus === "ready") return true;
 
   return (

@@ -10,7 +10,8 @@ import { cn } from "@/lib/utils";
 import { Calendar } from "./calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
-const DateElement = (props: PlateElementProps<TDateElement>) => { const { editor, element } = props;
+const DateElement = (props: PlateElementProps<TDateElement>) => {
+  const { editor, element } = props;
   const readOnly = useReadOnly();
 
   const trigger = (

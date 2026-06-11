@@ -58,7 +58,9 @@ const lookupUserSettingData = async (
   const snap = await getDoc(getUserSettingsRef(firestore, userId));
   return snap.exists() ? snap.data() : null;
 };
-const lookupCloudSyncEntityById = async (firestore: Firestore, userId: string, id: string): Promise<SyncChange | null> => { for (const descriptor of PULL_FULL_LOOKUP_ORDER) { const context = { firestore, userId, id };
+const lookupCloudSyncEntityById = async (firestore: Firestore, userId: string, id: string): Promise<SyncChange | null> => {
+  for (const descriptor of PULL_FULL_LOOKUP_ORDER) {
+  const context = { firestore, userId, id };
   const data = await descriptor.resolveData(context);
   if (!data) {
     continue;

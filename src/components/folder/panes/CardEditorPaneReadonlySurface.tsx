@@ -21,7 +21,8 @@ type CardEditorPaneReadonlySurfaceProps = Readonly<{ card: Card;
   fitScale?: number;
 }>;
 
-const CardEditorPaneReadonlySurface = ({ card, isFlipped, onFlip, onToggleUncertainty, onToggleBookmark, displayMode, cardLayoutMode, zoomScale, fitScale = 1 }: CardEditorPaneReadonlySurfaceProps) => { const metrics = React.useMemo(() => buildCardSurfaceMetrics({ displayMode, cardLayoutMode, interactionMode: "view", zoomScale, fitScale, showInk: displayMode === "fixed" }), [cardLayoutMode, displayMode, fitScale, zoomScale]);
+const CardEditorPaneReadonlySurface = ({ card, isFlipped, onFlip, onToggleUncertainty, onToggleBookmark, displayMode, cardLayoutMode, zoomScale, fitScale = 1 }: CardEditorPaneReadonlySurfaceProps) => {
+  const metrics = React.useMemo(() => buildCardSurfaceMetrics({ displayMode, cardLayoutMode, interactionMode: "view", zoomScale, fitScale, showInk: displayMode === "fixed" }), [cardLayoutMode, displayMode, fitScale, zoomScale]);
 
   const fixedHeightPx = React.useMemo(
     () =>

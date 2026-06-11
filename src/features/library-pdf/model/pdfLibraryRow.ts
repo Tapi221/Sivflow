@@ -99,7 +99,8 @@ const resolveDisplayTags = (
 
   return Array.from(new Set(explicitTags)).slice(0, 3);
 };
-const buildPdfDashboardRows = ({ documents, folders, tagById }: BuildPdfDashboardRowsParams): PdfDashboardRow[] => { const folderById = new Map(folders.map((folder) => [folder.id, folder]));
+const buildPdfDashboardRows = ({ documents, folders, tagById }: BuildPdfDashboardRowsParams): PdfDashboardRow[] => {
+  const folderById = new Map(folders.map((folder) => [folder.id, folder]));
 
   return documents
     .filter((document) => document.kind === "pdf")

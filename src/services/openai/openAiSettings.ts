@@ -37,7 +37,9 @@ const readStoredOpenAiSettings = (): string | null => {
   window.localStorage.removeItem(LEGACY_STORAGE_KEY);
   return legacy;
 };
-const loadOpenAiSettings = (): OpenAiSettings => { if (typeof window === "undefined") { return DEFAULT_OPEN_AI_SETTINGS;
+const loadOpenAiSettings = (): OpenAiSettings => {
+  if (typeof window === "undefined") {
+  return DEFAULT_OPEN_AI_SETTINGS;
 }
 
 try {
@@ -65,7 +67,9 @@ try {
   return DEFAULT_OPEN_AI_SETTINGS;
 }
 };
-const saveOpenAiSettings = (settings: OpenAiSettings) => { if (typeof window === "undefined") { return;
+const saveOpenAiSettings = (settings: OpenAiSettings) => {
+  if (typeof window === "undefined") {
+  return;
 }
 
 const normalized: OpenAiSettings = {
@@ -78,7 +82,9 @@ const normalized: OpenAiSettings = {
 window.localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
 window.localStorage.removeItem(LEGACY_STORAGE_KEY);
 };
-const clearOpenAiSettings = () => { if (typeof window === "undefined") { return;
+const clearOpenAiSettings = () => {
+  if (typeof window === "undefined") {
+  return;
 }
 
 window.localStorage.removeItem(STORAGE_KEY);

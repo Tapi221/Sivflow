@@ -12,7 +12,8 @@ import { Caption, CaptionTextarea } from "./caption";
 import { MediaToolbar } from "./media-toolbar";
 import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "./resize-handle";
 
-const ImageElement = withHOC(ResizableProvider, (props: PlateElementProps<TImageElement>) => { const { align = "center", focused, readOnly, selected } = useMediaState();
+const ImageElement = withHOC(ResizableProvider, (props: PlateElementProps<TImageElement>) => {
+  const { align = "center", focused, readOnly, selected } = useMediaState();
   const width = useResizableValue("width");
 
   const { isDragging, handleRef } = useDraggable({

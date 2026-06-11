@@ -79,7 +79,8 @@ const resolveImportDestination = ({
     },
   };
 };
-const loadXlsxImportFile = async (file: File): Promise<LoadXlsxImportFileResult> => { const fileBuffer = await file.arrayBuffer();
+const loadXlsxImportFile = async (file: File): Promise<LoadXlsxImportFileResult> => {
+  const fileBuffer = await file.arrayBuffer();
   const result = await parseXlsxImport(fileBuffer);
 
   return {
@@ -88,7 +89,9 @@ const loadXlsxImportFile = async (file: File): Promise<LoadXlsxImportFileResult>
     suggestedCardSetName: buildImportCardSetName(file.name),
   };
 };
-const executeXlsxImport = async ({ folderId, file, result, destinationMode, newCardSetName, selectedExistingCardSet, createCardSet, createCard }: ExecuteXlsxImportParams): Promise<ExecuteXlsxImportResult> => { if (!folderId) { return { ok: false, errorMessage: "インポート先フォルダが選択されていません。" };
+const executeXlsxImport = async ({ folderId, file, result, destinationMode, newCardSetName, selectedExistingCardSet, createCardSet, createCard }: ExecuteXlsxImportParams): Promise<ExecuteXlsxImportResult> => {
+  if (!folderId) {
+  return { ok: false, errorMessage: "インポート先フォルダが選択されていません。" };
 }
 
 if (!file || !result?.payload) {

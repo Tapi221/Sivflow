@@ -64,7 +64,8 @@ const CardSetViewMobileEmptyState = ({ cardSetName, onCreateCard }: CardSetViewM
     </div>
   );
 };
-const CardSetViewMobile = ({ cardsForPager, selectedCardId, safeCurrentIndex, isFlipped, isLoading, cardSetName, currentDisplayMode, settings, onIndexChange, onFlip, onEdit, onCreateCard, onToggleUncertainty, onToggleBookmark }: CardSetViewMobileProps) => { void selectedCardId;
+const CardSetViewMobile = ({ cardsForPager, selectedCardId, safeCurrentIndex, isFlipped, isLoading, cardSetName, currentDisplayMode, settings, onIndexChange, onFlip, onEdit, onCreateCard, onToggleUncertainty, onToggleBookmark }: CardSetViewMobileProps) => {
+  void selectedCardId;
   void settings;
   void onEdit;
 

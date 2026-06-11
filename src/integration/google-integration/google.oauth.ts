@@ -340,16 +340,19 @@ const requestGoogleOAuthServerCode = async ({ accessType, includeGrantedScopes, 
   const code = await codePromise;
   return { code, codeVerifier, redirectUri };
 };
-const consumeGoogleCalendarServerCodeVerifier = (): string | null => { const verifier = pendingGoogleCalendarServerCodeVerifier;
+const consumeGoogleCalendarServerCodeVerifier = (): string | null => {
+  const verifier = pendingGoogleCalendarServerCodeVerifier;
   pendingGoogleCalendarServerCodeVerifier = null;
   return verifier;
 };
 const requestGoogleSignInServerCode = async (): Promise<GoogleOAuthServerCode> => requestGoogleOAuthServerCode({ prompt: "select_account", scope: GOOGLE_SIGN_IN_SCOPE_PARAM });
-const requestGoogleCalendarServerCode = async (auth: Auth): Promise<GoogleOAuthServerCode> => { const result = await requestGoogleOAuthServerCode({ accessType: "offline", includeGrantedScopes: true, loginHint: auth.currentUser?.email ?? readEmail() ?? undefined, prompt: "consent select_account", scope: GOOGLE_CONNECTED_SERVICE_SCOPE_PARAM });
+const requestGoogleCalendarServerCode = async (auth: Auth): Promise<GoogleOAuthServerCode> => {
+  const result = await requestGoogleOAuthServerCode({ accessType: "offline", includeGrantedScopes: true, loginHint: auth.currentUser?.email ?? readEmail() ?? undefined, prompt: "consent select_account", scope: GOOGLE_CONNECTED_SERVICE_SCOPE_PARAM });
   pendingGoogleCalendarServerCodeVerifier = result.codeVerifier;
   return result;
 };
-const requestCalendarAccessToken = async (auth: Auth, silent = false): Promise<GoogleCalendarAccess> => { if (isDesktopLikeRuntime()) throw new Error("Desktop Google OAuth must use server-side token exchange.");
+const requestCalendarAccessToken = async (auth: Auth, silent = false): Promise<GoogleCalendarAccess> => {
+  if (isDesktopLikeRuntime()) throw new Error("Desktop Google OAuth must use server-side token exchange.");
   const provider = new GoogleAuthProvider();
   GOOGLE_SCOPES.forEach((scope) => provider.addScope(scope));
   if (silent) provider.setCustomParameters({ prompt: "none" });

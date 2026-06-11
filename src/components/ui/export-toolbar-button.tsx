@@ -17,7 +17,8 @@ import { DocxExportKit } from "@/components/editor/plugins/docx-export-kit";
 
 const siteUrl = "https://platejs.org";
 
-const ExportToolbarButton = (props: DropdownMenuProps) => { const editor = useEditorRef();
+const ExportToolbarButton = (props: DropdownMenuProps) => {
+  const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
 
   const getCanvas = async () => {

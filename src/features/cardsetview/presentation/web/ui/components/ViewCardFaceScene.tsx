@@ -43,7 +43,8 @@ const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   inkAnswer: card.back.ink ?? null,
 });
 
-const ViewCardFaceScene = ({ card, side, displayMode, fixedScale, fixedHeightPx = null, contentZoom, headerIconVisualScale, previewMode, showInkLayer, drawMode = false, inkEditingEnabled, fillHeight = false, onFlip, onToggleUncertainty, onToggleBookmark }: ViewCardFaceSceneProps) => { const contentRef = React.useRef<HTMLDivElement | null>(null);
+const ViewCardFaceScene = ({ card, side, displayMode, fixedScale, fixedHeightPx = null, contentZoom, headerIconVisualScale, previewMode, showInkLayer, drawMode = false, inkEditingEnabled, fillHeight = false, onFlip, onToggleUncertainty, onToggleBookmark }: ViewCardFaceSceneProps) => {
+  const contentRef = React.useRef<HTMLDivElement | null>(null);
 
   const flashcardCard = React.useMemo<FlashcardCardLike>(
     () => toFlashcardCardLike(card),

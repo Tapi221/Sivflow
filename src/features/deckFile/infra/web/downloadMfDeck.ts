@@ -20,7 +20,8 @@ const sanitizeFileNamePart = (value: string): string => {
   );
   return sanitized || "sivflow-deck";
 };
-const buildMfDeckFileName = (deckName: string): string => { const sanitizedName = sanitizeFileNamePart(deckName);
+const buildMfDeckFileName = (deckName: string): string => {
+  const sanitizedName = sanitizeFileNamePart(deckName);
   const baseName = sanitizedName.toLowerCase().endsWith(MF_DECK_FILE_EXTENSION)
     ? sanitizedName.slice(0, -MF_DECK_FILE_EXTENSION.length)
     : sanitizedName;

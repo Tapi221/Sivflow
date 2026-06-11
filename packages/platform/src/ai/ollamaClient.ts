@@ -98,7 +98,8 @@ const listOllamaModelsWithBrowserFetch = async (baseUrl: string): Promise<string
     abort.cancel();
   }
 };
-const generateOllamaAnswer = async ({ question, model }: GenerateOllamaAnswerInput): Promise<GenerateOllamaAnswerResult> => { const settings = getLocalAiSettings();
+const generateOllamaAnswer = async ({ question, model }: GenerateOllamaAnswerInput): Promise<GenerateOllamaAnswerResult> => {
+  const settings = getLocalAiSettings();
   if (!settings.enabled) throw new Error("LOCAL_AI_DISABLED");
 
   const normalizedQuestion = normalizeQuestion(question);
@@ -111,7 +112,8 @@ const generateOllamaAnswer = async ({ question, model }: GenerateOllamaAnswerInp
 
   return { answer, model: selectedModel };
 };
-const testOllamaConnection = async (): Promise<TestOllamaConnectionResult> => { const settings = getLocalAiSettings();
+const testOllamaConnection = async (): Promise<TestOllamaConnectionResult> => {
+  const settings = getLocalAiSettings();
   const models = window.desktop?.ai ? await window.desktop.ai.listOllamaModels({ baseUrl: settings.baseUrl }) : await listOllamaModelsWithBrowserFetch(settings.baseUrl);
 
   return {

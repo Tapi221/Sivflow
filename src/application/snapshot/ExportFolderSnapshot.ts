@@ -51,7 +51,9 @@ const collectAssetIdsFromCards = (cards: Card[]): Set<string> => {
 
   return assetIds;
 };
-const createExportFolderSnapshotUseCase = ({ fileExporter }: ExportFolderSnapshotDependencies) => { const execute = async (userId: string, folderId: string): Promise<void> => { const fullSnapshot = await createSnapshotUseCase.execute(userId);
+const createExportFolderSnapshotUseCase = ({ fileExporter }: ExportFolderSnapshotDependencies) => {
+  const execute = async (userId: string, folderId: string): Promise<void> => {
+  const fullSnapshot = await createSnapshotUseCase.execute(userId);
   const folder = fullSnapshot.data.folders.find(
     (item) => item.id === folderId,
   );

@@ -14,7 +14,9 @@ type StoredGoogleCalendarWatchChannel = {
 
 const REGION = "asia-northeast1";
 const INITIAL_SYNC_RESOURCE_STATE = "sync";
-const googleCalendarWebhook = onRequest({ region: REGION, }, async (request, response) => { if (request.method !== "POST") { response.status(405).send("Method Not Allowed");
+const googleCalendarWebhook = onRequest({ region: REGION, }, async (request, response) => {
+  if (request.method !== "POST") {
+  response.status(405).send("Method Not Allowed");
     return;
   }
 

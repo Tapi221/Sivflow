@@ -3,7 +3,8 @@ import React from "react";
 type CardOverlayTopRightProps = Readonly<{ children?: React.ReactNode;
 }>;
 
-const CardOverlayTopRight = ({ children }: CardOverlayTopRightProps) => { if (!children) return null;
+const CardOverlayTopRight = ({ children }: CardOverlayTopRightProps) => {
+  if (!children) return null;
 
   return (
     <div className="pointer-events-none absolute right-2 top-2 z-30">

@@ -14,7 +14,8 @@ type CardPresentationState = { isActiveCard: boolean;
 };
 type CardPresentationContextInput = Partial<Pick<CardPresentationContext, "isCurrentCard" | "isStandaloneEditor" | "hasFocusWithin">>;
 
-const resolveCardPresentationState = (context: CardPresentationContext): CardPresentationState => { const isActiveCard = context.isStandaloneEditor || context.isCurrentCard;
+const resolveCardPresentationState = (context: CardPresentationContext): CardPresentationState => {
+  const isActiveCard = context.isStandaloneEditor || context.isCurrentCard;
   const isInteractiveCard = isActiveCard || context.hasFocusWithin;
 
   return {

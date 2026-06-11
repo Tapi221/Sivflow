@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-const useSettingsDialogDesktop = () => { const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+const useSettingsDialogDesktop = () => {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return {
     isSettingsOpen,

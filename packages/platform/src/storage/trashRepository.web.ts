@@ -30,7 +30,8 @@ const purgeLocalTrashRecord = async (userId: string, table: TrashTable, id: stri
   await db.purge(table, id);
   await localFirstDb.queueDeleteSync({ entity: DELETE_ENTITY_BY_TABLE[table], targetId: id, priority: "high" });
 };
-const createWebTrashRepository = (): TrashRepository<Folder, Card, CardSet, Document> => ({ loadContext: async (userId) => { const db = await getLocalDb(userId);
+const createWebTrashRepository = (): TrashRepository<Folder, Card, CardSet, Document> => ({ loadContext: async (userId) => {
+  const db = await getLocalDb(userId);
   const [rawFolders, rawCards, rawCardSets, rawDocuments] = await Promise.all([
     db.getAllFolders(),
     db.getAllCards(),

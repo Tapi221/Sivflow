@@ -74,7 +74,8 @@ const resolveDeviceClientLabel = (userAgent: string, isStandalone: boolean) => {
 
   return DEVICE_LABELS.browser;
 };
-const getOrCreateDeviceId = () => { if (typeof window === "undefined") return "server";
+const getOrCreateDeviceId = () => {
+  if (typeof window === "undefined") return "server";
 
   let deviceId = localStorage.getItem(SHARED_STORAGE_KEYS.deviceId);
   if (!deviceId) {
@@ -84,7 +85,8 @@ const getOrCreateDeviceId = () => { if (typeof window === "undefined") return "s
 
   return deviceId;
 };
-const getDeviceName = () => { if (typeof window === "undefined") return DEVICE_LABELS.server;
+const getDeviceName = () => {
+  if (typeof window === "undefined") return DEVICE_LABELS.server;
 
   const userAgent = navigator.userAgent;
   const nav = navigator as Navigator & { standalone?: boolean; };

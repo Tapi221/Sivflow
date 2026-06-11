@@ -281,14 +281,23 @@ const useFolderContextMenu = ({ createFolder, updateFolder, deleteFolder, create
     const { folderId, folderName, isFavorite, isRootProject } = contextMenu;
     return [
       { id: "change-color", onSelect: () => undefined },
-      { id: "rename", onSelect: () => { const nextFolderName = window.prompt(isRootProject ? "プロジェクト名を変更" : "フォルダ名を変更", folderName)?.trim(); closeContextMenu(); if (nextFolderName && nextFolderName !== folderName) void updateFolder(folderId, { folderName: nextFolderName, name: nextFolderName }); } },
-      { id: "create-note", onSelect: () => { closeContextMenu(); void (async () => { const note = await createNote(DEFAULT_NEW_NOTE_NAME, folderId, { orderIndex: getNextOrderIndex(folderId) }); openNoteTab({ noteId: note.id, title: note.title, folderId: note.folderId }); })(); } },
-      { id: "create-card-set", onSelect: () => { closeContextMenu(); void createCardSet(DEFAULT_NEW_CARD_SET_NAME, folderId); } },
-      { id: "create-folder", onSelect: () => { closeContextMenu(); void createFolder(DEFAULT_NEW_FOLDER_NAME, folderId); setExpandedFolderIds((current) => new Set(current).add(folderId)); } },
-      { id: "import-pdf", onSelect: () => { handleToolbarAddDocument(); closeContextMenu(); } },
-      { id: "add-to-favorites", disabled: isFavorite, onSelect: () => { closeContextMenu(); void updateFolder(folderId, { isFavorite: true }); } },
-      { id: "hide", onSelect: () => { closeContextMenu(); void updateFolder(folderId, { isHidden: true }); } },
-      { id: "delete", onSelect: () => { closeContextMenu(); void deleteFolder(folderId); } },
+      { id: "rename", onSelect: () => {
+        const nextFolderName = window.prompt(isRootProject ? "プロジェクト名を変更" : "フォルダ名を変更", folderName)?.trim(); closeContextMenu(); if (nextFolderName && nextFolderName !== folderName) void updateFolder(folderId, { folderName: nextFolderName, name: nextFolderName }); } },
+      { id: "create-note", onSelect: () => {
+        closeContextMenu(); void (async () => {
+        const note = await createNote(DEFAULT_NEW_NOTE_NAME, folderId, { orderIndex: getNextOrderIndex(folderId) }); openNoteTab({ noteId: note.id, title: note.title, folderId: note.folderId }); })(); } },
+      { id: "create-card-set", onSelect: () => {
+        closeContextMenu(); void createCardSet(DEFAULT_NEW_CARD_SET_NAME, folderId); } },
+      { id: "create-folder", onSelect: () => {
+        closeContextMenu(); void createFolder(DEFAULT_NEW_FOLDER_NAME, folderId); setExpandedFolderIds((current) => new Set(current).add(folderId)); } },
+      { id: "import-pdf", onSelect: () => {
+        handleToolbarAddDocument(); closeContextMenu(); } },
+      { id: "add-to-favorites", disabled: isFavorite, onSelect: () => {
+        closeContextMenu(); void updateFolder(folderId, { isFavorite: true }); } },
+      { id: "hide", onSelect: () => {
+        closeContextMenu(); void updateFolder(folderId, { isHidden: true }); } },
+      { id: "delete", onSelect: () => {
+        closeContextMenu(); void deleteFolder(folderId); } },
     ];
   }, [closeContextMenu, contextMenu, createCardSet, createFolder, createNote, deleteFolder, getNextOrderIndex, handleToolbarAddDocument, openNoteTab, setExpandedFolderIds, updateFolder]);
 
@@ -313,8 +322,10 @@ const useCardSetContextMenu = ({ updateCardSet, deleteCardSet }: UseCardSetConte
     if (!contextMenu) return [];
     const { cardSetId, cardSetName } = contextMenu;
     return [
-      { id: "rename", label: "名前を変更", onSelect: () => { const nextCardSetName = window.prompt("カードセット名を変更", cardSetName)?.trim(); closeContextMenu(); if (nextCardSetName && nextCardSetName !== cardSetName) void updateCardSet(cardSetId, { name: nextCardSetName }); } },
-      { id: "delete", label: "削除", danger: true, onSelect: () => { closeContextMenu(); void deleteCardSet(cardSetId); } },
+      { id: "rename", label: "名前を変更", onSelect: () => {
+        const nextCardSetName = window.prompt("カードセット名を変更", cardSetName)?.trim(); closeContextMenu(); if (nextCardSetName && nextCardSetName !== cardSetName) void updateCardSet(cardSetId, { name: nextCardSetName }); } },
+      { id: "delete", label: "削除", danger: true, onSelect: () => {
+        closeContextMenu(); void deleteCardSet(cardSetId); } },
     ];
   }, [closeContextMenu, contextMenu, deleteCardSet, updateCardSet]);
 
@@ -339,8 +350,10 @@ const useNoteContextMenu = ({ updateNote, deleteNote }: UseNoteContextMenuParams
     if (!contextMenu) return [];
     const { noteId, noteTitle } = contextMenu;
     return [
-      { id: "rename", label: "名前を変更", onSelect: () => { const nextNoteTitle = window.prompt("ノート名を変更", noteTitle)?.trim(); closeContextMenu(); if (nextNoteTitle && nextNoteTitle !== noteTitle) void updateNote(noteId, { title: nextNoteTitle }); } },
-      { id: "delete", label: "削除", danger: true, onSelect: () => { closeContextMenu(); void deleteNote(noteId); } },
+      { id: "rename", label: "名前を変更", onSelect: () => {
+        const nextNoteTitle = window.prompt("ノート名を変更", noteTitle)?.trim(); closeContextMenu(); if (nextNoteTitle && nextNoteTitle !== noteTitle) void updateNote(noteId, { title: nextNoteTitle }); } },
+      { id: "delete", label: "削除", danger: true, onSelect: () => {
+        closeContextMenu(); void deleteNote(noteId); } },
     ];
   }, [closeContextMenu, contextMenu, deleteNote, updateNote]);
 
@@ -365,8 +378,10 @@ const useDocumentContextMenu = ({ updateDocument, deleteDocument }: UseDocumentC
     if (!contextMenu) return [];
     const { documentId, documentName } = contextMenu;
     return [
-      { id: "rename", label: "名前を変更", onSelect: () => { const nextDocumentName = window.prompt("PDF名を変更", documentName)?.trim(); closeContextMenu(); if (nextDocumentName && nextDocumentName !== documentName) void updateDocument(documentId, { title: nextDocumentName, fileName: nextDocumentName }); } },
-      { id: "delete", label: "削除", danger: true, onSelect: () => { closeContextMenu(); void deleteDocument(documentId); } },
+      { id: "rename", label: "名前を変更", onSelect: () => {
+        const nextDocumentName = window.prompt("PDF名を変更", documentName)?.trim(); closeContextMenu(); if (nextDocumentName && nextDocumentName !== documentName) void updateDocument(documentId, { title: nextDocumentName, fileName: nextDocumentName }); } },
+      { id: "delete", label: "削除", danger: true, onSelect: () => {
+        closeContextMenu(); void deleteDocument(documentId); } },
     ];
   }, [closeContextMenu, contextMenu, deleteDocument, updateDocument]);
 
@@ -520,9 +535,11 @@ const ProjectListSidebar = ({ onOpenCardSet }: ProjectListSidebarProps) => {
   const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId) ?? null, [activeTabId, tabs]);
   const selectedFolderId = useMemo(() => getSelectedFolderIdFromActiveTab(activeTab), [activeTab]);
   const selectedItem = useMemo(() => getSelectedItemFromActiveTab(activeTab), [activeTab]);
-  const handleToggleFolder = useCallback((folderId: string) => setExpandedFolderIds((current) => { const next = new Set(current); if (next.has(folderId)) next.delete(folderId); else next.add(folderId); return next; }), []);
+  const handleToggleFolder = useCallback((folderId: string) => setExpandedFolderIds((current) => {
+    const next = new Set(current); if (next.has(folderId)) next.delete(folderId); else next.add(folderId); return next; }), []);
   const handleSelectFolder = useCallback((folderId: string) => openExplorerTab({ title: LIBRARY_TITLE, explorerState: { isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: folderId, selectedItem: null } }), [openExplorerTab]);
-  const handleSelectCardSet = useCallback((cardSet: CardSet) => { openExplorerTab({ title: LIBRARY_TITLE, explorerState: { isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: getCardSetFolderId(cardSet), selectedItem: { type: "cardSet", id: cardSet.id } } }); onOpenCardSet?.(); }, [onOpenCardSet, openExplorerTab]);
+  const handleSelectCardSet = useCallback((cardSet: CardSet) => {
+    openExplorerTab({ title: LIBRARY_TITLE, explorerState: { isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: getCardSetFolderId(cardSet), selectedItem: { type: "cardSet", id: cardSet.id } } }); onOpenCardSet?.(); }, [onOpenCardSet, openExplorerTab]);
   const handleSelectDocument = useCallback((document: DocumentItem) => openDocumentTab({ documentId: document.id, title: getDocumentName(document), folderId: getDocumentFolderId(document) }), [openDocumentTab]);
   const handleSelectNote = useCallback((note: Note) => openNoteTab({ noteId: note.id, title: getNoteTitle(note), folderId: getNoteFolderId(note) }), [openNoteTab]);
   const isAppendingToRoot = isLayeredTreeAppendDropTarget(dragState, null);
@@ -577,9 +594,11 @@ const LibraryHierarchySidebar = ({ parentFolderId = null, onOpenCardSet }: Libra
     });
   }, [rootFolders]);
 
-  const handleToggleFolder = useCallback((folderId: string) => setExpandedFolderIds((current) => { const next = new Set(current); if (next.has(folderId)) next.delete(folderId); else next.add(folderId); return next; }), []);
+  const handleToggleFolder = useCallback((folderId: string) => setExpandedFolderIds((current) => {
+    const next = new Set(current); if (next.has(folderId)) next.delete(folderId); else next.add(folderId); return next; }), []);
   const handleSelectFolder = useCallback((folderId: string) => openExplorerTab({ title: LIBRARY_TITLE, explorerState: { isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: folderId, selectedItem: null } }), [openExplorerTab]);
-  const handleSelectCardSet = useCallback((cardSet: CardSet) => { openExplorerTab({ title: LIBRARY_TITLE, explorerState: { isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: getCardSetFolderId(cardSet, parentFolderId), selectedItem: { type: "cardSet", id: cardSet.id } } }); onOpenCardSet?.(); }, [onOpenCardSet, openExplorerTab, parentFolderId]);
+  const handleSelectCardSet = useCallback((cardSet: CardSet) => {
+    openExplorerTab({ title: LIBRARY_TITLE, explorerState: { isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: getCardSetFolderId(cardSet, parentFolderId), selectedItem: { type: "cardSet", id: cardSet.id } } }); onOpenCardSet?.(); }, [onOpenCardSet, openExplorerTab, parentFolderId]);
   const handleSelectDocument = useCallback((document: DocumentItem) => openDocumentTab({ documentId: document.id, title: getDocumentName(document), folderId: getDocumentFolderId(document, parentFolderId) }), [openDocumentTab, parentFolderId]);
   const handleSelectNote = useCallback((note: Note) => openNoteTab({ noteId: note.id, title: getNoteTitle(note), folderId: getNoteFolderId(note, parentFolderId) }), [openNoteTab, parentFolderId]);
 

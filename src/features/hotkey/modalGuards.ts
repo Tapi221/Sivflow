@@ -1,4 +1,5 @@
-const hasOpenModalDialog = () => { if (typeof document === "undefined") return false;
+const hasOpenModalDialog = () => {
+  if (typeof document === "undefined") return false;
 
   return Boolean(
     document.querySelector("[role=\"dialog\"][data-state=\"open\"]") ||

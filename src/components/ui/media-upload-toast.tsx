@@ -59,7 +59,8 @@ const useUploadErrorToast = () => {
     }
   }, [uploadError]);
 };
-const MediaUploadToast = () => { useUploadErrorToast();
+const MediaUploadToast = () => {
+  useUploadErrorToast();
 
   return null;
 };

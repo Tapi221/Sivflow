@@ -13,7 +13,8 @@ interface FlashcardNavigationProps {
   totalCards?: number;
 }
 
-const FlashcardNavigation = ({ onNext, onPrev, hasNext, hasPrev, currentIndex, totalCards }: FlashcardNavigationProps) => { const showNav = onNext || onPrev || (currentIndex !== undefined && totalCards !== undefined);
+const FlashcardNavigation = ({ onNext, onPrev, hasNext, hasPrev, currentIndex, totalCards }: FlashcardNavigationProps) => {
+  const showNav = onNext || onPrev || (currentIndex !== undefined && totalCards !== undefined);
   if (!showNav) return null;
 
   return (

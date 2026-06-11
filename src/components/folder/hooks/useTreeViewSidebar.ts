@@ -46,7 +46,8 @@ const readStoredSidebarOpen = () => {
   const savedOpen = window.localStorage.getItem(WEB_STORAGE_KEYS.sidebarOpen);
   return savedOpen !== null ? savedOpen === "true" : true;
 };
-const useTreeViewSidebar = () => { const [sidebarWidth, setSidebarWidth] = useState(readStoredSidebarWidth);
+const useTreeViewSidebar = () => {
+  const [sidebarWidth, setSidebarWidth] = useState(readStoredSidebarWidth);
   const [renderedSidebarWidth, setRenderedSidebarWidth] = useState(() =>
     clampSidebarWidth(readStoredSidebarWidth()),
   );

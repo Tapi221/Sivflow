@@ -53,7 +53,8 @@ const segmentedActionButtonClassName = cn(
 const segmentedActionIconClassName =
   "block h-4 w-4 shrink-0 text-current transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none";
 
-const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions, actions, variant = "underline" }: LibraryHeaderToolbarProps) => { const hasTabs = tabs.length > 0;
+const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions, actions, variant = "underline" }: LibraryHeaderToolbarProps) => {
+  const hasTabs = tabs.length > 0;
   const hasSecondaryTabs = Boolean(secondaryTabs && secondaryTabs.length > 0);
   const hasLeadingActions = Boolean(
     leadingActions && leadingActions.length > 0,

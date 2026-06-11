@@ -41,7 +41,8 @@ const canDeleteDocumentBlob = async (
     .first();
   return !sharedRef;
 };
-const cleanupBeforeDocumentUpdate = async (db: DocDbCtx, id: string, changes: unknown) => { const docChanges = changes as DocumentUpdateChanges;
+const cleanupBeforeDocumentUpdate = async (db: DocDbCtx, id: string, changes: unknown) => {
+  const docChanges = changes as DocumentUpdateChanges;
   const hasLocalFileIdChange = Object.prototype.hasOwnProperty.call(
     docChanges,
     "localFileId",
@@ -106,7 +107,9 @@ const cleanupBeforeDocumentUpdate = async (db: DocDbCtx, id: string, changes: un
     );
   }
 };
-const cleanupBeforeDocumentDelete = async (db: DocDbCtx, id: string) => { try { const existingDoc = await db.documents.get(id);
+const cleanupBeforeDocumentDelete = async (db: DocDbCtx, id: string) => {
+  try {
+  const existingDoc = await db.documents.get(id);
   safeRevokeBlobUrl(
     existingDoc?.blobUrl ?? existingDoc?.localUrl ?? null,
     `documents.deleteItem:${id}`,
@@ -132,7 +135,9 @@ const cleanupBeforeDocumentDelete = async (db: DocDbCtx, id: string) => { try { 
   console.warn("[LocalDB] deleteItem documents blob cleanup failed", err);
 }
 };
-const cleanupBeforeDocumentSoftDelete = async (db: DocDbCtx, id: string) => { try { const existingDoc = await db.documents.get(id);
+const cleanupBeforeDocumentSoftDelete = async (db: DocDbCtx, id: string) => {
+  try {
+  const existingDoc = await db.documents.get(id);
   safeRevokeBlobUrl(
     existingDoc?.blobUrl ?? existingDoc?.localUrl ?? null,
     `documents.softDelete:${id}`,

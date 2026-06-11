@@ -26,7 +26,8 @@ const compareSegments = (
 
   return a.event.id.localeCompare(b.event.id);
 };
-const getCalendarEventSegment = (event: CalendarEvent, range: readonly Date[]): CalendarEventSegment | null => { if (range.length === 0) return null;
+const getCalendarEventSegment = (event: CalendarEvent, range: readonly Date[]): CalendarEventSegment | null => {
+  if (range.length === 0) return null;
 
   const first = startOfDay(range[0]);
   const last = getExclusiveDayEnd(range[range.length - 1]);
@@ -59,7 +60,8 @@ const getCalendarEventSegment = (event: CalendarEvent, range: readonly Date[]): 
   };
 };
 const calendarEventSegmentsOverlap = (segment: CalendarEventSegment, otherSegments: readonly CalendarEventSegment[]): boolean => otherSegments.some((otherSegment) => otherSegment.left <= segment.right && otherSegment.right >= segment.left);
-const getCalendarEventLevels = (rowSegments: readonly CalendarEventSegment[], limit = Number.POSITIVE_INFINITY): CalendarEventLevelsResult => { const levels: CalendarEventSegment[][] = [];
+const getCalendarEventLevels = (rowSegments: readonly CalendarEventSegment[], limit = Number.POSITIVE_INFINITY): CalendarEventLevelsResult => {
+  const levels: CalendarEventSegment[][] = [];
   const extra: CalendarEventSegment[] = [];
 
   for (const segment of [...rowSegments].sort(compareSegments)) {

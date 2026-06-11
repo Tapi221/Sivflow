@@ -110,7 +110,13 @@ const LayeredProjectMenuBase = ({ x, y, actions, menuRef, noDragStyle, panelId =
           return (
             <Fragment key={item.id}>
               {item.separatorBefore ? <div className="layered-project-menu-separator" role="separator" /> : null}
-              <button type="button" disabled={isDisabled} className={["right-click-panel-item", "layered-project-menu-item", item.danger ? "layered-project-menu-item--danger" : null, isSubmenuOpen ? "layered-project-menu-item--open" : null].filter(Boolean).join(" ")} role="menuitem" aria-haspopup={item.submenu ? "menu" : undefined} aria-expanded={item.submenu ? isSubmenuOpen : undefined} onMouseEnter={() => { if (isDisabled) return; if (item.submenu) { onOpenSubmenu?.(item.id, getLayeredProjectMenuSubmenuAnchor(index)); return; } onCloseSubmenu?.(); }} onFocus={() => { if (isDisabled || !item.submenu) return; onOpenSubmenu?.(item.id, getLayeredProjectMenuSubmenuAnchor(index)); }} onClick={(event) => { event.preventDefault(); event.stopPropagation(); if (isDisabled) return; if (item.submenu) { if (onOpenSubmenu) { onOpenSubmenu(item.id, getLayeredProjectMenuSubmenuAnchor(index)); return; } action?.onSelect(); return; } action?.onSelect(); }}>
+              <button type="button" disabled={isDisabled} className={["right-click-panel-item", "layered-project-menu-item", item.danger ? "layered-project-menu-item--danger" : null, isSubmenuOpen ? "layered-project-menu-item--open" : null].filter(Boolean).join(" ")} role="menuitem" aria-haspopup={item.submenu ? "menu" : undefined} aria-expanded={item.submenu ? isSubmenuOpen : undefined} onMouseEnter={() => {
+                if (isDisabled) return; if (item.submenu) {
+                onOpenSubmenu?.(item.id, getLayeredProjectMenuSubmenuAnchor(index)); return; } onCloseSubmenu?.(); }} onFocus={() => {
+                if (isDisabled || !item.submenu) return; onOpenSubmenu?.(item.id, getLayeredProjectMenuSubmenuAnchor(index)); }} onClick={(event) => {
+                event.preventDefault(); event.stopPropagation(); if (isDisabled) return; if (item.submenu) {
+                if (onOpenSubmenu) {
+                onOpenSubmenu(item.id, getLayeredProjectMenuSubmenuAnchor(index)); return; } action?.onSelect(); return; } action?.onSelect(); }}>
                 <span>{item.label}</span>
                 {item.submenu ? (
                   <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className="layered-project-menu-item-chevron"><path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>

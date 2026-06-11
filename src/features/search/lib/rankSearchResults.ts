@@ -164,7 +164,8 @@ const rankItemForQuery = (
     timestampMillis,
   };
 };
-const rankSearchResults = ({ items, query, limit = 24 }: RankSearchResultsParams) => { const normalizedQuery = normalizeText(query);
+const rankSearchResults = ({ items, query, limit = 24 }: RankSearchResultsParams) => {
+  const normalizedQuery = normalizeText(query);
   const tokens = splitQueryTokens(query);
 
   if (!normalizedQuery) {

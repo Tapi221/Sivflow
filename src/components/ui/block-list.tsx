@@ -76,7 +76,8 @@ const List = (props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }) 
     </List>
   );
 };
-const BlockList: RenderNodeWrapper = (props) => { if (!props.element.listStyleType) return;
+const BlockList: RenderNodeWrapper = (props) => {
+  if (!props.element.listStyleType) return;
   if (!isOrderedList(props.element)) return;
 
   return (props) => <List {...props} />;

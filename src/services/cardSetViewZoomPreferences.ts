@@ -47,7 +47,8 @@ const buildLegacyZoomPreferenceScopeKey = ({
     cardLayoutMode,
   ].join("::");
 };
-const buildCardSetViewZoomPreferenceScopeKey = ({ deviceScope, cardSetId }: CardSetViewZoomPreferenceScope) => { return [normalizeDeviceScope(deviceScope), cardSetId ?? "__no_card_set__"].join("::");
+const buildCardSetViewZoomPreferenceScopeKey = ({ deviceScope, cardSetId }: CardSetViewZoomPreferenceScope) => {
+  return [normalizeDeviceScope(deviceScope), cardSetId ?? "__no_card_set__"].join("::");
 };
 const canResolveLegacyScopedKey = (
   scope: CardSetViewZoomPreferenceScope,
@@ -203,7 +204,9 @@ const migrateLegacyScopedZoomPreference = ({
   store.byScope[buildCardSetViewZoomPreferenceScopeKey(scope)] = zoomPercent;
   writeStore(store);
 };
-const getCardSetViewZoomPreference = (scope: CardSetViewZoomPreferenceScope) => { if (!scope.cardSetId) { return undefined;
+const getCardSetViewZoomPreference = (scope: CardSetViewZoomPreferenceScope) => {
+  if (!scope.cardSetId) {
+  return undefined;
 }
 
 const store = readStore();
@@ -227,7 +230,9 @@ if (storedZoomPercent != null) {
 
 return readLegacyCardSetValue(scope.cardSetId);
 };
-const setCardSetViewZoomPreference = (scope: CardSetViewZoomPreferenceScope, zoomPercent: number) => { if (!scope.cardSetId) { return;
+const setCardSetViewZoomPreference = (scope: CardSetViewZoomPreferenceScope, zoomPercent: number) => {
+  if (!scope.cardSetId) {
+  return;
 }
 
 const safeZoomPercent =

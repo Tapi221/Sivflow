@@ -4,7 +4,9 @@ type WindowWithKatex = Window & {
   katex?: unknown;
 };
 
-const useKatexLoader = () => { useEffect(() => { if ((window as WindowWithKatex).katex) return;
+const useKatexLoader = () => {
+  useEffect(() => {
+  if ((window as WindowWithKatex).katex) return;
 
   const link = document.createElement("link");
   link.rel = "stylesheet";

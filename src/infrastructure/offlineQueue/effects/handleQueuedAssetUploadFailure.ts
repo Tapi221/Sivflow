@@ -3,7 +3,9 @@ import type { QueueItem } from "@/application/usecases/persistentOfflineQueueMod
 import { auth } from "@/infrastructure/firebase/client";
 import { getLocalDb } from "@/infrastructure/localdb/client";
 
-const handleQueuedAssetUploadFailure = async (item: QueueItem): Promise<void> => { try { const localDb = await getLocalDb();
+const handleQueuedAssetUploadFailure = async (item: QueueItem): Promise<void> => {
+  try {
+  const localDb = await getLocalDb();
   const existingAsset = toAssetLikeRecord(await localDb.images.get(item.id));
 
   await localDb.upsert(

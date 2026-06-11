@@ -32,7 +32,8 @@ const getLayeredTreeDropIndicatorLeft = (level: number): number => Math.max(0, l
 const isLayeredTreeAppendDropTarget = (dragState: LayeredTreeDragState, parentId: string | null): boolean => dragState.dropInstruction?.position === "append" && dragState.dropInstruction.parentId === parentId;
 const getLayeredTreeDropPosition = (event: ReactDragEvent<HTMLElement>): LayeredTreeDropPosition => getLayeredTreeDropPositionForRow(event, event.currentTarget);
 const getLayeredTreeDropParentId = <TItem extends LayeredTreeItem>(targetItem: TItem, targetId: string, position: LayeredTreeDropPosition, getParentId: (item: TItem) => string | null): string | null => position === "inside" ? targetId : getParentId(targetItem);
-const createLayeredTreeItemMap = <TItem extends LayeredTreeItem>(rootItems: TItem[], getChildItems: (itemId: string) => TItem[]): Map<string, TItem> => { const map = new Map<string, TItem>();
+const createLayeredTreeItemMap = <TItem extends LayeredTreeItem>(rootItems: TItem[], getChildItems: (itemId: string) => TItem[]): Map<string, TItem> => {
+  const map = new Map<string, TItem>();
   const stack = [...rootItems];
 
   while (stack.length > 0) {
@@ -45,7 +46,8 @@ const createLayeredTreeItemMap = <TItem extends LayeredTreeItem>(rootItems: TIte
 
   return map;
 };
-const isLayeredTreeItemAncestorOf = <TItem extends LayeredTreeItem>(sourceId: string, candidateParentId: string | null, getChildItems: (itemId: string) => TItem[]): boolean => { if (!candidateParentId) return false;
+const isLayeredTreeItemAncestorOf = <TItem extends LayeredTreeItem>(sourceId: string, candidateParentId: string | null, getChildItems: (itemId: string) => TItem[]): boolean => {
+  if (!candidateParentId) return false;
   if (sourceId === candidateParentId) return true;
 
   const stack = getChildItems(sourceId).map((item) => item.id);
@@ -63,7 +65,8 @@ const isLayeredTreeItemAncestorOf = <TItem extends LayeredTreeItem>(sourceId: st
   return false;
 };
 const getLayeredTreeSiblings = <TItem extends LayeredTreeItem>(parentId: string | null, rootItems: TItem[], getChildItems: (itemId: string) => TItem[]): TItem[] => parentId ? getChildItems(parentId) : rootItems;
-const createLayeredTreeReorderedSiblingList = <TItem extends LayeredTreeItem>(sourceItem: TItem, targetItem: TItem | null, targetParentId: string | null, position: LayeredTreeDropPosition, rootItems: TItem[], getChildItems: (itemId: string) => TItem[]): TItem[] => { const targetId = targetItem?.id ?? null;
+const createLayeredTreeReorderedSiblingList = <TItem extends LayeredTreeItem>(sourceItem: TItem, targetItem: TItem | null, targetParentId: string | null, position: LayeredTreeDropPosition, rootItems: TItem[], getChildItems: (itemId: string) => TItem[]): TItem[] => {
+  const targetId = targetItem?.id ?? null;
   const siblings = getLayeredTreeSiblings(targetParentId, rootItems, getChildItems).filter((item) => item.id !== sourceItem.id);
   const insertionIndex = !targetId || position === "append" || position === "inside" ? siblings.length : Math.max(0, siblings.findIndex((item) => item.id === targetId) + (position === "after" ? 1 : 0));
   const nextSiblings = [...siblings];
@@ -92,11 +95,13 @@ const createLayeredTreeDragPreview = (sourceElement: HTMLElement): HTMLElement =
   document.body.append(preview);
   return preview;
 };
-const applyLayeredTreeDragPreview = (event: ReactDragEvent<HTMLElement>) => { const preview = createLayeredTreeDragPreview(event.currentTarget);
+const applyLayeredTreeDragPreview = (event: ReactDragEvent<HTMLElement>) => {
+  const preview = createLayeredTreeDragPreview(event.currentTarget);
   event.dataTransfer.setDragImage(preview, LAYERED_TREE_DRAG_IMAGE_OFFSET_X, LAYERED_TREE_DRAG_IMAGE_OFFSET_Y);
   requestAnimationFrame(() => preview.remove());
 };
-const getLayeredTreeAutoScrollStep = (clientY: number, scrollContainer: HTMLDivElement): number => { const rect = scrollContainer.getBoundingClientRect();
+const getLayeredTreeAutoScrollStep = (clientY: number, scrollContainer: HTMLDivElement): number => {
+  const rect = scrollContainer.getBoundingClientRect();
   const topDistance = clientY - rect.top;
   const bottomDistance = rect.bottom - clientY;
 
@@ -105,7 +110,8 @@ const getLayeredTreeAutoScrollStep = (clientY: number, scrollContainer: HTMLDivE
   return 0;
 };
 const isLayeredTreeRowEventTarget = (target: EventTarget | null): boolean => target instanceof HTMLElement && target.closest(LAYERED_TREE_ROW_SELECTOR) !== null;
-const resolveLayeredTreeEventDropTarget = (event: ReactDragEvent<HTMLElement>, itemMap: Map<string, LayeredTreeItem>): LayeredTreeEventDropTarget | null => { const targetElement = event.target instanceof HTMLElement ? event.target : null;
+const resolveLayeredTreeEventDropTarget = (event: ReactDragEvent<HTMLElement>, itemMap: Map<string, LayeredTreeItem>): LayeredTreeEventDropTarget | null => {
+  const targetElement = event.target instanceof HTMLElement ? event.target : null;
   const rows = Array.from(event.currentTarget.querySelectorAll<HTMLElement>(LAYERED_TREE_ROW_SELECTOR));
   const targetRow = targetElement?.closest<HTMLElement>(LAYERED_TREE_ROW_SELECTOR) ?? null;
   const rowElement = targetRow && event.currentTarget.contains(targetRow) ? targetRow : rows.find((row) => {

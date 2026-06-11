@@ -1521,7 +1521,8 @@ const createChatTransport = ({
     }) as typeof fetch,
   });
 };
-const useChat = () => { const editor = useEditorRef();
+const useChat = () => {
+  const editor = useEditorRef();
   const options = usePluginOption(aiChatPlugin, "chatOptions");
 
   // remove when you implement the route /api/ai/command

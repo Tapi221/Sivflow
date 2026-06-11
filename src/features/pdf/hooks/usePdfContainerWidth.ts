@@ -4,7 +4,8 @@
  */
 import { useEffect, useRef, useState } from "react";
 
-const usePdfContainerWidth = () => { const containerRef = useRef<HTMLDivElement>(null);
+const usePdfContainerWidth = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
 
   useEffect(() => {

@@ -177,7 +177,8 @@ const performFirebaseUpload = async (
     );
   });
 };
-const useReliableFileUpload = (): UseReliableFileUploadReturn => { const { currentUser } = useAuthSession();
+const useReliableFileUpload = (): UseReliableFileUploadReturn => {
+  const { currentUser } = useAuthSession();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle");

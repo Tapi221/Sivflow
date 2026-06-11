@@ -9,7 +9,8 @@ import { PlateElement, withHOC } from "platejs/react";
 import { cn } from "@/lib/utils";
 import { Caption, CaptionTextarea } from "./caption";
 
-const AudioElement = withHOC(ResizableProvider, (props: PlateElementProps<TAudioElement>) => { const { align = "center", readOnly, unsafeUrl } = useMediaState();
+const AudioElement = withHOC(ResizableProvider, (props: PlateElementProps<TAudioElement>) => {
+  const { align = "center", readOnly, unsafeUrl } = useMediaState();
 
   return (
     <PlateElement {...props} className="mb-1">
