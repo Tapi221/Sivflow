@@ -24,7 +24,7 @@ import {
   ContextMenuSubContent,
   ContextMenuSubTrigger,
   ContextMenuTrigger,
-} from '@/components/ui/context-menu';
+} from './context-menu';
 import { setBlockType } from '@/components/editor/transforms';
 import { useIsTouchDevice } from '@/components/use-is-touch-device';
 

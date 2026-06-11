@@ -7,8 +7,8 @@ import { SuggestionPlugin } from '@platejs/suggestion/react';
 import { CheckIcon, XIcon } from 'lucide-react';
 import { useEditorPlugin, usePluginOption } from 'platejs/react';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from './avatar';
+import { Button } from './button';
 import {
   type TDiscussion,
   discussionPlugin,

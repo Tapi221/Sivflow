@@ -1,24 +1,24 @@
-import { BaseAlignKit } from './plugins/align-base-kit';
-import { BaseBasicBlocksKit } from './plugins/basic-blocks-base-kit';
-import { BaseBasicMarksKit } from './plugins/basic-marks-base-kit';
-import { BaseCalloutKit } from './plugins/callout-base-kit';
-import { BaseCodeBlockKit } from './plugins/code-block-base-kit';
-import { BaseColumnKit } from './plugins/column-base-kit';
-import { BaseCommentKit } from './plugins/comment-base-kit';
-import { BaseDateKit } from './plugins/date-base-kit';
-import { BaseFootnoteKit } from './plugins/footnote-base-kit';
-import { BaseFontKit } from './plugins/font-base-kit';
-import { BaseLineHeightKit } from './plugins/line-height-base-kit';
-import { BaseLinkKit } from './plugins/link-base-kit';
-import { BaseListKit } from './plugins/list-base-kit';
-import { MarkdownKit } from './plugins/markdown-kit';
-import { BaseMathKit } from './plugins/math-base-kit';
-import { BaseMediaKit } from './plugins/media-base-kit';
-import { BaseMentionKit } from './plugins/mention-base-kit';
-import { BaseSuggestionKit } from './plugins/suggestion-base-kit';
-import { BaseTableKit } from './plugins/table-base-kit';
-import { BaseTocKit } from './plugins/toc-base-kit';
-import { BaseToggleKit } from './plugins/toggle-base-kit';
+import { BaseAlignKit } from '@/components/editor/plugins/align-base-kit';
+import { BaseBasicBlocksKit } from '@/components/editor/plugins/basic-blocks-base-kit';
+import { BaseBasicMarksKit } from '@/components/editor/plugins/basic-marks-base-kit';
+import { BaseCalloutKit } from '@/components/editor/plugins/callout-base-kit';
+import { BaseCodeBlockKit } from '@/components/editor/plugins/code-block-base-kit';
+import { BaseColumnKit } from '@/components/editor/plugins/column-base-kit';
+import { BaseCommentKit } from '@/components/editor/plugins/comment-base-kit';
+import { BaseDateKit } from '@/components/editor/plugins/date-base-kit';
+import { BaseFootnoteKit } from '@/components/editor/plugins/footnote-base-kit';
+import { BaseFontKit } from '@/components/editor/plugins/font-base-kit';
+import { BaseLineHeightKit } from '@/components/editor/plugins/line-height-base-kit';
+import { BaseLinkKit } from '@/components/editor/plugins/link-base-kit';
+import { BaseListKit } from '@/components/editor/plugins/list-base-kit';
+import { MarkdownKit } from '@/components/editor/plugins/markdown-kit';
+import { BaseMathKit } from '@/components/editor/plugins/math-base-kit';
+import { BaseMediaKit } from '@/components/editor/plugins/media-base-kit';
+import { BaseMentionKit } from '@/components/editor/plugins/mention-base-kit';
+import { BaseSuggestionKit } from '@/components/editor/plugins/suggestion-base-kit';
+import { BaseTableKit } from '@/components/editor/plugins/table-base-kit';
+import { BaseTocKit } from '@/components/editor/plugins/toc-base-kit';
+import { BaseToggleKit } from '@/components/editor/plugins/toggle-base-kit';
 
 export const BaseEditorKit = [
   ...BaseBasicBlocksKit,

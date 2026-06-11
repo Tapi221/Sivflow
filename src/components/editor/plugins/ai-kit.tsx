@@ -16,7 +16,7 @@ import { usePluginOption } from 'platejs/react';
 import { AILoadingBar, AIMenu } from '@/components/ai-menu';
 import { AIAnchorElement, AILeaf } from '@/components/ai-node';
 
-import { useChat } from '../use-chat';
+import { useChat } from '@/components/editor/use-chat';
 import { CursorOverlayKit } from './cursor-overlay-kit';
 import { MarkdownKit } from './markdown-kit';
 
