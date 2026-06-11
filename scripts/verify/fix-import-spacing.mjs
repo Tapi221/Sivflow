@@ -89,6 +89,13 @@ const applyDocumentFormatting = (filePath, source) => {
 
 const getNewline = (source) => source.includes("\r\n") ? "\r\n" : "\n";
 
+const collapseRepeatedBlankLines = (source) => {
+  const newline = getNewline(source);
+  const repeatedBlankLinePattern = newline === "\r\n" ? /\r\n[\t ]*(?:\r\n[\t ]*){2,}/gu : /\n[\t ]*(?:\n[\t ]*){2,}/gu;
+
+  return source.replace(repeatedBlankLinePattern, `${newline}${newline}`);
+};
+
 const isImportStatement = (statement) => ts.isImportDeclaration(statement) || ts.isImportEqualsDeclaration(statement);
 
 const isDirectiveStatement = (statement) => ts.isExpressionStatement(statement) && ts.isStringLiteral(statement.expression);
@@ -248,7 +255,7 @@ const applyTopLevelSpacingFix = (filePath, source) => {
   return replacements.length === 0 ? source : applyNonOverlappingReplacements(source, replacements);
 };
 
-const applySourceConventionFix = (filePath, source) => applyTopLevelSpacingFix(filePath, applyDocumentFormatting(filePath, source));
+const applySourceConventionFix = (filePath, source) => collapseRepeatedBlankLines(applyTopLevelSpacingFix(filePath, applyDocumentFormatting(filePath, source)));
 
 const updateFile = (filePath) => {
   const originalSource = readFileSync(filePath, "utf8");
