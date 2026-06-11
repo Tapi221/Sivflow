@@ -1,5 +1,7 @@
 import React from "react";
 
+
+
 type PointerGestureState = Readonly<{
   pointerId: number | null;
   startX: number;
@@ -12,7 +14,11 @@ type FlipTriggerEvent = Readonly<{
   stopPropagation?: () => void;
 }>;
 
+
+
 export const TAP_MOVE_CANCEL_THRESHOLD_PX = 8;
+
+
 
 export const shouldIgnoreFlipTarget = (target: EventTarget | null): boolean => { const element = target as HTMLElement | null;
   if (!element) return false;
@@ -31,6 +37,8 @@ const createInitialPointerGestureState = (): PointerGestureState => ({
   moved: false,
 });
 
+
+
 export type UseCardFlipBehaviorParams = Readonly<{ isCardClickable: boolean;
   previewMode: boolean;
   onFlip?: () => void;
@@ -46,6 +54,8 @@ export type UseCardFlipBehaviorResult = Readonly<{ handleFlip: (event?: React.Mo
   handlePointerUpCapture: React.PointerEventHandler<HTMLDivElement>;
   handlePointerCancelCapture: React.PointerEventHandler<HTMLDivElement>;
 }>;
+
+
 
 export const useCardFlipBehavior = ({ isCardClickable, previewMode, onFlip, onPreviewFlip, isModalBlockingFlip, isInkEditingActive, }: UseCardFlipBehaviorParams): UseCardFlipBehaviorResult => { const suppressNextFlipRef = React.useRef(false);
   const pointerGestureRef = React.useRef<PointerGestureState>(

@@ -3,6 +3,8 @@ import { CardCarousel3D } from "@/features/review/presentation/web/ui/components
 import StudyCard from "./StudyCard";
 import type { Card } from "@/types";
 
+
+
 type StudyCardProps = React.ComponentProps<typeof StudyCard>;
 
 type ReviewResultHandler = Extract<StudyCardProps, { mode: "review" }>["onResult"];
@@ -29,6 +31,8 @@ type PracticeCardCarouselProps = CardCarouselBaseProps & {
 };
 
 export type CardCarouselProps = ReviewCardCarouselProps | PracticeCardCarouselProps;
+
+
 
 export const CardCarousel = ({ cards, mode, sessionCurrentIndex, onResult, onToggleUncertainty, onToggleBookmark, onEdit, showHard, showEasy, }: CardCarouselProps) => { const [flipTrigger, setFlipTrigger] = useState(0);
 

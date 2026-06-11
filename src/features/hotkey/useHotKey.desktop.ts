@@ -1,9 +1,13 @@
 import { useEffect } from "react";
 import { isPrimaryShiftShortcut, isTypingTarget } from "./hotkeyGuards";
 
+
+
 type UseHotKeyParams = {
   onToggleRightSidebar?: () => void;
 };
+
+
 
 export const useHotKeyDesktop = ({ onToggleRightSidebar }: UseHotKeyParams) => { useEffect(() => { const handleKeyDown = (event: KeyboardEvent) => { if (event.defaultPrevented) return;
       if (isTypingTarget(event.target)) return;

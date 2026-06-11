@@ -24,10 +24,14 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 
 import { cn } from '@/lib/utils';
 
+
+
 type Model = {
   label: string;
   value: string;
 };
+
+
 
 const models: Model[] = [
   { label: 'GPT-3.5 Turbo', value: 'openai/gpt-3.5-turbo' },
@@ -147,7 +151,11 @@ const DEFAULT_MODEL_VALUE = 'openai/gpt-4o-mini';
 
 const FALLBACK_MODEL: Model = { label: 'GPT-4o Mini', value: DEFAULT_MODEL_VALUE };
 
+
+
 const getDefaultModel = () => models.find((model) => model.value === DEFAULT_MODEL_VALUE) ?? models[0] ?? FALLBACK_MODEL;
+
+
 
 const SettingsDialog = () => {
   const editor = useEditorRef();
@@ -311,5 +319,7 @@ const SettingsDialog = () => {
     </Dialog>
   );
 };
+
+
 
 export { SettingsDialog, models };

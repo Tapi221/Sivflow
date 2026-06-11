@@ -3,6 +3,8 @@ import { buildCardSetById, filterCardsByFolderId, resolveCardFolderIdStrict } fr
 import { normalizeDate } from "@/shared/codec/date";
 import type { Card, CardSet, Folder, UserSettings } from "@/types";
 
+
+
 type StudyCard = Card;
 
 type Params = {
@@ -13,6 +15,8 @@ type Params = {
   foldersLoading: boolean;
   settings: Partial<UserSettings> | null | undefined;
 };
+
+
 
 export const useStudyCards = ({ folderId, allCards, cardSets, folders, foldersLoading, settings, }: Params) => { const cardSetById = useMemo( () => buildCardSetById(cardSets.filter((cardSet) => !cardSet.isDeleted)), [cardSets], );
 

@@ -22,9 +22,13 @@ import type { SuggestionConfig } from '@/components/editor/plugins/suggestion-ki
 
 import { voidRemoveSuggestionOverlayVariants } from './suggestion-node-static';
 
+
+
 const suggestionPlugin = SuggestionPlugin as WithRequiredKey<SuggestionConfig>;
 
 export const suggestionVariants = cva( cn( 'bg-emerald-100 text-emerald-700 no-underline transition-colors duration-200' ), { defaultVariants: { insertActive: false, remove: false, removeActive: false, }, variants: { insertActive: { false: '', true: 'bg-emerald-200/80', }, remove: { false: '', true: 'bg-red-100 text-red-700', }, removeActive: { false: '', true: 'bg-red-200/80 no-underline', }, }, } );
+
+
 
 export function getBlockSuggestionWrapperClassName({ elementType, isActive, isHover, isInsert, isRemove, }: { elementType?: string;
   isActive: boolean;
@@ -44,6 +48,8 @@ export function getBlockSuggestionWrapperClassName({ elementType, isActive, isHo
 
 export function isVoidRemoveSuggestion(editor: PlateEditor, element: TElement) { return ( editor.getApi(SuggestionPlugin).suggestion.suggestionData(element)?.type === 'remove' );
 }
+
+
 
 export function VoidRemoveSuggestionOverlay({ editor, element, }: { editor: PlateEditor;
   element: TElement;

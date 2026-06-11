@@ -34,6 +34,8 @@ import { BlockSuggestionCard, isResolvedSuggestion } from './block-suggestion';
 
 import { Comment, CommentCreateForm } from './comment';
 
+
+
 export const BlockDiscussion: RenderNodeWrapper<AnyPluginConfig> = (_props) => (props) => <BlockCommentContent {...props} />;
 
 const BlockCommentContent = ({ children, element }: PlateElementProps) => {

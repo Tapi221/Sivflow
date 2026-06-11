@@ -9,6 +9,8 @@ import { SlateElement } from 'platejs/static';
 
 import { cn } from '@/lib/utils';
 
+
+
 export function FileElementStatic(props: SlateElementProps<TFileElement>) { const { name, url } = props.element;
   const suggestionData = (
     props.element as TFileElement & {

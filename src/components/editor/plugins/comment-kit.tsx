@@ -10,6 +10,8 @@ import { CommentLeaf } from '@/components/ui/comment-node';
 
 import { getDiscussionClickTarget } from './discussion-kit';
 
+
+
 type CommentConfig = ExtendConfig<
   BaseCommentConfig,
   {
@@ -18,6 +20,8 @@ type CommentConfig = ExtendConfig<
     hoverId: string | null;
   }
 >;
+
+
 
 export const commentPlugin = toTPlatePlugin<CommentConfig>(BaseCommentPlugin, { handlers: { onClick: ({ api, event, setOption, type }) => { const activeTarget = getDiscussionClickTarget({ selector: `.slate-${type}`, target: event.target, });
 

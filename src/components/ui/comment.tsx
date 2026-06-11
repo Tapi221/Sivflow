@@ -30,6 +30,8 @@ import { type TDiscussion, discussionPlugin, } from '@/components/editor/plugins
 
 import { Editor, EditorContainer } from './editor';
 
+
+
 export type TComment = { id: string;
   contentRich: Value;
   createdAt: Date;
@@ -37,6 +39,8 @@ export type TComment = { id: string;
   isEdited: boolean;
   userId: string;
 };
+
+
 
 const useCommentEditor = (
   options: Omit<CreatePlateEditorOptions, 'plugins'> = {},
@@ -54,6 +58,8 @@ const useCommentEditor = (
 
   return commentEditor;
 };
+
+
 
 export function Comment(props: { comment: TComment;
   discussionLength: number;
@@ -574,6 +580,8 @@ export function CommentCreateForm({ autoFocus = false, className, discussionId: 
     </div>
   );
 }
+
+
 
 export const formatCommentDate = (date: Date) => { const now = new Date();
   const diffMinutes = differenceInMinutes(now, date);

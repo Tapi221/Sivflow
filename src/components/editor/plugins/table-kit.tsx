@@ -4,11 +4,15 @@ import { TableCellHeaderPlugin, TableCellPlugin, TablePlugin, TableRowPlugin } f
 
 import { TableCellElement, TableCellHeaderElement, TableElement, TableRowElement } from '@/components/ui/table-node';
 
+
+
 const TableKit = [
   TablePlugin.withComponent(TableElement),
   TableRowPlugin.withComponent(TableRowElement),
   TableCellPlugin.withComponent(TableCellElement),
   TableCellHeaderPlugin.withComponent(TableCellHeaderElement),
 ];
+
+
 
 export { TableKit };

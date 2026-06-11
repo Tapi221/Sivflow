@@ -16,6 +16,8 @@ import { insertBlock, insertInlineElement, } from '@/components/editor/transform
 
 import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxGroupLabel, InlineComboboxInput, InlineComboboxItem, } from './inline-combobox';
 
+
+
 type Group = {
   group: string;
   items: {
@@ -28,6 +30,8 @@ type Group = {
     label?: string;
   }[];
 };
+
+
 
 const groups: Group[] = [
   {
@@ -202,6 +206,8 @@ const groups: Group[] = [
     })),
   },
 ];
+
+
 
 export function SlashInputElement( props: PlateElementProps<TComboboxInputElement> ) { const { editor, element } = props;
 
