@@ -1,12 +1,11 @@
-import type { CSSProperties } from "react";
+import type { ComponentType, CSSProperties, SVGProps } from "react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { ja } from "date-fns/locale";
-import { Check, Plus, Settings } from "lucide-react";
+import * as stratisIcons from "stratis-ui-icons";
 import type { CalendarTimetableColorKey, CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTimetablePeriod, CalendarTimetableSlot, CalendarTimetableVisibleDayCount, CalendarTimetableWeekdayIndex } from "@core/domain/calendar/timetable/timetable.types";
-import { getTagColorStyle } from "@/chip/tag/tag.style";
 import { TAG_COLOR_KEYS } from "@/chip/tag/tag.constants";
+import { getTagColorStyle } from "@/chip/tag/tag.style";
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
 import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
@@ -14,8 +13,6 @@ import { cn } from "@/lib/utils";
 import { CalendarTimetableSyllabusCatalogPanel } from "./CalendarTimetableSyllabusCatalogPanel";
 import { normalizeVisibleDayCount } from "./calendarTimetable.storage";
 import { useCalendarTimetable } from "./useCalendarTimetable";
-
-
 
 type TimetableSlot = { dayIndex: CalendarTimetableWeekdayIndex; periodId: string };
 
@@ -29,8 +26,14 @@ type CalendarTimetableSettingsPanelProps = { periods: CalendarTimetablePeriod[];
 
 type CalendarTimetableGridStyle = CSSProperties & { "--calendar-timetable-day-count": CalendarTimetableVisibleDayCount };
 
+type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
+type StratisOptionalIconProps = { names: readonly string[]; className?: string };
 
+const STRATIS_ICON_COMPONENTS = stratisIcons as Record<string, StratisIconComponent | undefined>;
+const STRATIS_CHECK_ICON_NAMES = ["StratisCheckIcon", "StratisCheck01Icon", "StratisCheckCircleContainedIcon"] as const;
+const STRATIS_PLUS_ICON_NAMES = ["StratisPlus01Icon", "StratisPlusIcon"] as const;
+const STRATIS_SETTINGS_ICON_NAMES = ["StratisSettingsIcon", "StratisSettings01Icon", "StratisWrenchIcon"] as const;
 const TIMETABLE_GRID_TEMPLATE_COLUMNS = "56px repeat(var(--calendar-timetable-day-count), 112px)";
 const TIMETABLE_COMPACT_GRID_TEMPLATE_COLUMNS = "34px repeat(var(--calendar-timetable-day-count), minmax(0, 1fr))";
 const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] as const;
@@ -38,7 +41,7 @@ const DEFAULT_COURSE_COLOR_KEY: CalendarTimetableColorKey = "blue";
 const DEFAULT_TIMETABLE_ADD_REQUEST_TOKEN = 0;
 const EMPTY_SLOT_LIST: CalendarTimetableSlot[] = [];
 
-
+const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
 
 const createTimetableSlotKey = ({ dayIndex, periodId }: TimetableSlot): string => `${dayIndex}:${periodId}`;
 
@@ -64,7 +67,10 @@ const isSameTimetableSlot = (left: CalendarTimetableSlot, right: CalendarTimetab
 
 const createEditorSlots = (course: CalendarTimetableCourse | null, initialSlot: CalendarTimetableSlot | null): CalendarTimetableSlot[] => course?.slots ?? (initialSlot ? [initialSlot] : EMPTY_SLOT_LIST);
 
-
+const StratisOptionalIcon = ({ names, className }: StratisOptionalIconProps) => {
+  const Icon = resolveStratisIcon(names);
+  return Icon ? <Icon className={className} aria-hidden="true" focusable="false" /> : null;
+};
 
 const CalendarTimetableSettingsPanel = ({ periods, visibleDayCount, onChangeVisibleDayCount, onAddPeriod, onUpdatePeriod, onDeletePeriod, onClose }: CalendarTimetableSettingsPanelProps) => {
   return (
@@ -168,7 +174,7 @@ const CalendarTimetableCourseEditor = ({ course, semesterId, initialSlot, period
                 {periods.map((period) => <div key={period.id} className="contents"><div className="flex items-center justify-end pr-2 text-[12px] font-bold text-[#6e6e73]">{period.label}</div>{TIMETABLE_DAY_LABELS.slice(0, visibleDayCount).map((_, dayIndex) => {
                   const slot = { dayIndex: dayIndex as CalendarTimetableWeekdayIndex, periodId: period.id };
                   const selected = slots.some((currentSlot) => isSameTimetableSlot(currentSlot, slot));
-                  return <button key={`${dayIndex}-${period.id}`} type="button" className={cn("flex h-9 items-center justify-center rounded-[10px] border text-[12px] font-bold", selected ? "border-[#007aff] bg-[#e8f2ff] text-[#007aff]" : "border-[#e5e5ea] bg-white text-[#c7c7cc]")} onClick={() => toggleSlot(slot)}>{selected ? <Check className="h-4 w-4" aria-hidden="true" /> : null}</button>;
+                  return <button key={`${dayIndex}-${period.id}`} type="button" className={cn("flex h-9 items-center justify-center rounded-[10px] border text-[12px] font-bold", selected ? "border-[#007aff] bg-[#e8f2ff] text-[#007aff]" : "border-[#e5e5ea] bg-white text-[#c7c7cc]")} onClick={() => toggleSlot(slot)}>{selected ? <StratisOptionalIcon names={STRATIS_CHECK_ICON_NAMES} className="h-4 w-4" /> : null}</button>;
                 })}</div>)}
               </div>
             </>
@@ -241,7 +247,7 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <button type="button" className={cn("rounded-full border border-[#e5e5ea] bg-white font-bold text-[#007aff] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "h-8 px-3 text-[12px]" : "h-9 px-4 text-[13px]")} onClick={handleOpenSyllabusCatalog}>授業DB</button>
-          <button type="button" aria-label="時間割設定" className={cn("flex items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[#6e6e73] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "h-8 w-8" : "h-9 w-9")} onClick={handleOpenSettings}><Settings className={cn(isCompact ? "h-3.5 w-3.5" : "h-4 w-4")} aria-hidden="true" /></button>
+          <button type="button" aria-label="時間割設定" className={cn("flex items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[#6e6e73] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "h-8 w-8" : "h-9 w-9")} onClick={handleOpenSettings}><StratisOptionalIcon names={STRATIS_SETTINGS_ICON_NAMES} className={cn(isCompact ? "h-3.5 w-3.5" : "h-4 w-4")} /></button>
         </div>
       </div>
 
@@ -270,7 +276,7 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
                 const entry = courseSlotMap.get(createTimetableSlotKey(slot)) ?? null;
                 return (
                   <button key={`${day.toISOString()}-${period.id}`} type="button" aria-label={`${format(day, "M月d日 EEEE", { locale: ja })} ${period.label}限`} className={cn("relative min-w-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "min-h-[48px] rounded-[14px]" : "min-h-[52px] rounded-[18px]", entry ? (isCompact ? "border px-1.5 py-1" : "border px-2.5 py-1") : "border border-dashed border-[#dadde3] bg-[rgba(255,255,255,0.62)] text-[#a1a1aa] hover:border-[#c7c7cc] hover:bg-[#fafafa]")} style={entry ? getTimetableEntryStyle(entry.colorKey) : undefined} onClick={() => handleOpenCourseEditor(entry, slot)}>
-                    {entry ? <span className={cn("flex h-full flex-col items-center justify-center text-center", isCompact ? "min-h-[36px]" : "min-h-[40px]")}><span className={cn("max-w-full truncate font-semibold leading-snug tracking-[-0.01em] text-inherit", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.title}</span><span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-80", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.room || entry.teacher}</span>{entry.memo ? <span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-60", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.memo}</span> : null}</span> : <span className="flex h-full items-center justify-center text-center"><Plus className="h-5 w-5" aria-hidden="true" /></span>}
+                    {entry ? <span className={cn("flex h-full flex-col items-center justify-center text-center", isCompact ? "min-h-[36px]" : "min-h-[40px]")}><span className={cn("max-w-full truncate font-semibold leading-snug tracking-[-0.01em] text-inherit", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.title}</span><span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-80", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.room || entry.teacher}</span>{entry.memo ? <span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-60", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.memo}</span> : null}</span> : <span className="flex h-full items-center justify-center text-center"><StratisOptionalIcon names={STRATIS_PLUS_ICON_NAMES} className="h-5 w-5" /></span>}
                   </button>
                 );
               })}
@@ -284,8 +290,6 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
     </div>
   );
 };
-
-
 
 const CalendarTimetableView = memo(CalendarTimetableViewComponent);
 
