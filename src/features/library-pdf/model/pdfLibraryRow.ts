@@ -1,7 +1,8 @@
 import { normalizeDate } from "@/shared/codec/date";
 import type { DocumentItem, Folder } from "@/types";
 
-type PdfDashboardRow = { id: string;
+type PdfDashboardRow = {
+  id: string;
   title: string;
   fileName: string;
   folderId: string;
@@ -22,7 +23,7 @@ type ViewerStateWithLastOpenedAt = NonNullable<DocumentItem["viewerState"]> & {
 type BuildPdfDashboardRowsParams = {
   documents: DocumentItem[];
   folders: Folder[];
-  tagById: ReadonlyMap<string, { name: string; }>;
+  tagById: ReadonlyMap<string, { name: string }>;
 };
 
 const toDate = (value: unknown): Date | null => {
@@ -30,6 +31,20 @@ const toDate = (value: unknown): Date | null => {
 };
 const resolveFolderName = (folder: Folder | undefined): string => {
   return folder?.folderName?.trim() ?? "未分類";
+};
+const resolveFolderPathLabel = (folderPath: string[]): string => {
+  return folderPath.length > 0 ? folderPath.join(" / ") : "未分類";
+};
+const resolveOrderIndex = (value: unknown): number => {
+  const orderIndex = Number(value);
+  return Number.isFinite(orderIndex) ? orderIndex : 0;
+};
+const resolveNonEmptyText = (...values: Array<string | null | undefined>): string | null => {
+  const resolved = values
+    .map((value) => value?.trim() ?? "")
+    .find((value) => value.length > 0);
+
+  return resolved ?? null;
 };
 const resolveCurrentPage = (document: DocumentItem): number | null => {
   const currentPage = document.viewerState?.currentPage;
@@ -88,7 +103,7 @@ const resolveCategoryLabel = (
 };
 const resolveDisplayTags = (
   document: DocumentItem,
-  tagById: ReadonlyMap<string, { name: string; }>,
+  tagById: ReadonlyMap<string, { name: string }>,
 ): string[] => {
   const explicitTags = (Array.isArray(document.tags) ? document.tags : [])
     .map((tagIdOrName) => tagById.get(tagIdOrName)?.name ?? tagIdOrName)
@@ -107,20 +122,19 @@ const buildPdfDashboardRows = ({ documents, folders, tagById }: BuildPdfDashboar
     .map((document) => {
       const folderPath = buildFolderPath(document.folderId, folderById);
       const categoryLabel = resolveCategoryLabel(document.folderId, folderById);
-      const viewerState = (document.viewerState ??
-        null) as ViewerStateWithLastOpenedAt | null;
+      const viewerState = (document.viewerState ?? null) as ViewerStateWithLastOpenedAt | null;
       const updatedAt = toDate(document.updatedAt);
       const lastViewedAt = toDate(viewerState?.lastOpenedAt);
+      const displayName = resolveNonEmptyText(document.title, document.fileName) ?? "無題のPDF";
+      const fileName = resolveNonEmptyText(document.fileName, document.title) ?? "無題のPDF";
 
       return {
         id: document.id,
-        title:
-          (document.title?.trim() || document.fileName?.trim()) ?? "無題のPDF",
-        fileName:
-          (document.fileName?.trim() || document.title?.trim()) ?? "無題のPDF",
+        title: displayName,
+        fileName,
         folderId: document.folderId,
         categoryLabel,
-        folderPathLabel: folderPath.join(" / ") ?? "未分類",
+        folderPathLabel: resolveFolderPathLabel(folderPath),
         storagePathLabel: ["ライブラリ", "PDF", ...folderPath].join(" / "),
         pageCount: document.pageCount ?? null,
         currentPage: resolveCurrentPage(document),
@@ -128,7 +142,7 @@ const buildPdfDashboardRows = ({ documents, folders, tagById }: BuildPdfDashboar
         updatedAt,
         lastViewedAt,
         tags: resolveDisplayTags(document, tagById),
-        orderIndex: Number(document.orderIndex) ?? 0,
+        orderIndex: resolveOrderIndex(document.orderIndex),
       } satisfies PdfDashboardRow;
     })
     .sort((left, right) => {
