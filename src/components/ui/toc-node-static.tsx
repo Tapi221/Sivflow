@@ -71,25 +71,23 @@ export function TocElementStatic(props: SlateElementProps) { const { editor } = 
 
   return (
     <SlateElement {...props} className="mb-1 p-0">
-      <>
-        {headingList.length > 0 ? (
-          headingList.map((item: Heading) => (
-            <Button
-              key={item.title}
-              variant="ghost"
-              className={headingItemVariants({
-                depth: item.depth as 1 | 2 | 3,
-              })}
-            >
-              {item.title}
-            </Button>
-          ))
-        ) : (
-          <div className="text-gray-500 text-sm">
-            Create a heading to display the table of contents.
-          </div>
-        )}
-      </>
+      {headingList.length > 0 ? (
+        headingList.map((item: Heading) => (
+          <Button
+            key={item.title}
+            variant="ghost"
+            className={headingItemVariants({
+              depth: item.depth as 1 | 2 | 3,
+            })}
+          >
+            {item.title}
+          </Button>
+        ))
+      ) : (
+        <div className="text-gray-500 text-sm">
+          Create a heading to display the table of contents.
+        </div>
+      )}
       {props.children}
     </SlateElement>
   );
