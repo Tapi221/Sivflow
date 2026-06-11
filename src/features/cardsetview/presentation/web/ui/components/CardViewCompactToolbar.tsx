@@ -210,4 +210,4 @@ const CardViewCompactToolbar = ({
 
 
 
-export { CardViewCompactTool
+export { CardViewCompactToolbar };

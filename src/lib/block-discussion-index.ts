@@ -1,26 +1,41 @@
 'use client';
 
 import * as React from 'react';
+
 import type { TResolvedSuggestion } from '@platejs/suggestion';
+
 import type { PlateEditor } from 'platejs/react';
+
 import { CommentPlugin } from '@platejs/comment/react';
+
 import { getSuggestionKey, keyId2SuggestionId } from '@platejs/suggestion';
+
 import { SuggestionPlugin } from '@platejs/suggestion/react';
+
 import { type NodeEntry, NodeApi, type Path, type TCommentText, type TElement, type TSuggestionText, ElementApi, KEYS, PathApi, TextApi, } from 'platejs';
+
 import { useEditorRef, useEditorVersion, usePluginOption } from 'platejs/react';
+
 import { type TDiscussion, discussionPlugin, } from '@/components/editor/plugins/discussion-kit';
+
 import type { TComment } from '@/components/ui/comment';
+
+
 
 export interface ResolvedSuggestion extends TResolvedSuggestion { comments: TComment[];
 }
+
 type BlockDiscussionEntry = NodeEntry<
   TCommentText | TElement | TSuggestionText
 >;
+
 type SuggestionEntry = NodeEntry<TElement | TSuggestionText>;
+
 type BlockDiscussionIndex = {
   discussionsByBlock: Map<string, TDiscussion[]>;
   suggestionsByBlock: Map<string, ResolvedSuggestion[]>;
 };
+
 type BuildBlockDiscussionIndexOptions = {
   entries: BlockDiscussionEntry[];
   discussions: TDiscussion[];
@@ -46,7 +61,10 @@ type BuildBlockDiscussionIndexOptions = {
   isBlockSuggestion: (node: TElement | TSuggestionText) => boolean;
 };
 
+
+
 export const BLOCK_SUGGESTION_TOKEN = '__block__';
+
 const discussionIndexCache = new WeakMap<
   PlateEditor,
   {
@@ -55,6 +73,7 @@ const discussionIndexCache = new WeakMap<
     version: number;
   }
 >();
+
 const TYPE_TEXT_MAP: Record<string, (node?: TElement) => string> = {
   [KEYS.audio]: () => 'Audio',
   [KEYS.blockquote]: () => 'Blockquote',
@@ -85,6 +104,8 @@ const TYPE_TEXT_MAP: Record<string, (node?: TElement) => string> = {
   [KEYS.video]: () => 'Video',
 };
 
+
+
 const appendByKey = <T>(map: Map<string, T[]>, key: string, value: T) => {
   const values = map.get(key);
 
@@ -95,9 +116,12 @@ const appendByKey = <T>(map: Map<string, T[]>, key: string, value: T) => {
 
   map.set(key, [value]);
 };
+
 const getBlockKey = (path: Path) => path.join(',');
+
 const getTopLevelPath = (path: Path): Path | null =>
   path.length > 0 ? path.slice(0, 1) : null;
+
 const getSuggestionIds = (
   node: TCommentText | TElement | TSuggestionText,
   getSuggestionDataList: BuildBlockDiscussionIndexOptions['getSuggestionDataList'],
@@ -124,8 +148,10 @@ const getSuggestionIds = (
 
   return [];
 };
+
 const suggestionTypeText = (node: TElement) =>
   (TYPE_TEXT_MAP[node.type] ?? (() => node.type))(node);
+
 const formatSuggestionDateText = (date: string) => {
   const elementDate = new Date(date);
 
@@ -153,6 +179,7 @@ const formatSuggestionDateText = (date: string) => {
     year: 'numeric',
   });
 };
+
 const getInlineSuggestionElementText = (node: TElement) => {
   if (typeof node.value === 'string' && node.value.length > 0) {
     return node.value;
@@ -177,6 +204,7 @@ const getInlineSuggestionElementText = (node: TElement) => {
     return nodeText;
   }
 };
+
 const toResolvedSuggestion = ({
   discussionsById,
   entries,
@@ -329,6 +357,7 @@ const toResolvedSuggestion = ({
 
   return null;
 };
+
 export const buildBlockDiscussionIndex = ({ discussions, entries, getCommentId, getSuggestionData, getSuggestionDataList, getSuggestionId, isBlockSuggestion, }: BuildBlockDiscussionIndexOptions): BlockDiscussionIndex => { const commentOwnerById = new Map<string, Path>();
   const suggestionOwnerById = new Map<string, Path>();
   const commentIds = new Set<string>();
@@ -409,6 +438,7 @@ export const buildBlockDiscussionIndex = ({ discussions, entries, getCommentId, 
     suggestionsByBlock,
   };
 };
+
 const getDiscussionIndex = (
   editor: PlateEditor,
   discussions: TDiscussion[],
@@ -442,6 +472,7 @@ const getDiscussionIndex = (
 
   return index;
 };
+
 export const useBlockDiscussionItems = (blockPath: Path) => { const editor = useEditorRef();
   const discussions = usePluginOption(discussionPlugin, 'discussions');
   const version = useEditorVersion() ?? 0;

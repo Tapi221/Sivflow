@@ -47,3 +47,4 @@ export const useScheduleDays = ({ anchorDate, viewMode, buffer, weekStartDay, }:
       },
     };
   }, [anchorDate, buffer, viewMode, weekStartDay]);
+};

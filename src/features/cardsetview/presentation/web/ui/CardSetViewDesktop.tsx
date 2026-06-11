@@ -437,4 +437,5 @@ export const CardSetViewDesktop = ({ isLoading, isGlobalEditing, flippedCardIds,
       scrollToActiveIndexBehavior="auto"
       renderCard={renderCard}
     />
-  
+  );
+};

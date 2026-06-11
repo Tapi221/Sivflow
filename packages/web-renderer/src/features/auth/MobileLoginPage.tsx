@@ -3,6 +3,8 @@ import appIconSrc from "@shared/assets/icons/app-icon.svg";
 import authBackgroundSrc from "@shared/assets/backgrounds/sivflow-flow-background.svg";
 import { signInWithGoogle } from "@/services/auth/googleSignIn";
 
+
+
 type MobileLoginPageStyles = {
   page: CSSProperties;
   backgroundOverlay: CSSProperties;
@@ -21,6 +23,8 @@ type MobileLoginPageStyles = {
   secureIcon: CSSProperties;
   secureText: CSSProperties;
 };
+
+
 
 const styles: MobileLoginPageStyles = {
   page: {
@@ -165,11 +169,15 @@ const styles: MobileLoginPageStyles = {
   },
 };
 
+
+
 const isAuthPopupClosedByUserError = (error: unknown): boolean =>
   typeof error === "object" &&
   error !== null &&
   "code" in error &&
   error.code === "auth/popup-closed-by-user";
+
+
 
 const GoogleIcon = () => (
   <svg style={{ width: 28, height: 28, flexShrink: 0 }} viewBox="0 0 24 24" aria-hidden="true">
@@ -252,5 +260,7 @@ const MobileLoginPage = () => {
     </main>
   );
 };
+
+
 
 export { MobileLoginPage };

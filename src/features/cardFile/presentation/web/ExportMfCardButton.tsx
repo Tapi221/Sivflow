@@ -87,4 +87,4 @@ export { ExportMfCardButton };
 
 
 
-export type { ExportMfCardButtonPr
+export type { ExportMfCardButtonProps };

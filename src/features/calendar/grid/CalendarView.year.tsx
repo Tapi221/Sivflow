@@ -527,4 +527,4 @@ const CalendarYearViewComponent = ({
 
 const CalendarYearView = memo(CalendarYearViewComponent);
 CalendarYearView.displayName = "CalendarYearView";
-export { CalendarYea
+export { CalendarYearView };

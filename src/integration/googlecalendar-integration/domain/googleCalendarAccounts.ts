@@ -1,5 +1,7 @@
 import type { GCalConnectionStatus, GCalSyncState, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 
+
+
 export type GoogleAccountEntry = { id: string;
   email: string | null;
   name: string | null;
@@ -39,6 +41,8 @@ export type GoogleAccountsAction = | { type: "ADD"; account: GoogleAccountEntry 
   | { type: "SET_LAST_SYNCED_AT"; id: string; at: Date }
   | { type: "NEEDS_RECONNECT"; id: string; error?: string | null }
   | { type: "SET_ERROR"; id: string; error: string | null };
+
+
 
 export const reduceGoogleCalendarAccounts = ( state: GoogleAccountEntry[], action: GoogleAccountsAction, ): GoogleAccountEntry[] => { switch (action.type) { case "ADD": return state.some((account) => account.id === action.account.id) ? state.map((account) => account.id === action.account.id ? action.account : account, ) : [...state, action.account];
 
