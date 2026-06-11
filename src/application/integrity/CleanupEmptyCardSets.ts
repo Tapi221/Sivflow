@@ -2,8 +2,6 @@ import { createWebTrashRepository } from "@platform/storage/trashRepository.web"
 import type { LocalDB } from "@/services/localdb/LocalDB";
 import type { Card, CardSet } from "@/types";
 
-
-
 export type CleanupEmptyCardSetsResult = { deletedCardSetIds: string[];
   skippedCardSetIds: string[];
 };
@@ -11,8 +9,6 @@ type DeletableRecord = {
   isDeleted?: boolean;
   is_deleted?: boolean;
 };
-
-
 
 const isActiveRecord = (record: DeletableRecord): boolean => {
   return !(record.isDeleted ?? record.is_deleted ?? false);

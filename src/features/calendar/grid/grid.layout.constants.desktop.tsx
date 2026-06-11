@@ -1,10 +1,6 @@
 import { hasDesktopRuntime } from "@/platform/detectDesktopBridge";
 
-
-
 type WeekdayHourLabelMode = "full" | "integer";
-
-
 
 //Month
 export const MONTH_GRID_WEEKDAY_HEADER_HEIGHT_CLASS = "h-8";

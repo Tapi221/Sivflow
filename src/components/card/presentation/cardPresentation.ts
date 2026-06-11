@@ -1,8 +1,6 @@
 import { CARD_SHELL_COMMON_CLASS_NAME } from "@/components/card/frame/cardShellClassNames";
 import { cn } from "@/lib/utils";
 
-
-
 export type CardPresentationContext = { inPager: boolean;
   isCurrentCard: boolean;
   isEditing: boolean;
@@ -15,8 +13,6 @@ export type CardPresentationState = { isActiveCard: boolean;
   showActiveChrome: boolean;
 };
 export type CardPresentationContextInput = Partial<Pick<CardPresentationContext, "isCurrentCard" | "isStandaloneEditor" | "hasFocusWithin">>;
-
-
 
 export const resolveCardPresentationState = (context: CardPresentationContext): CardPresentationState => { const isActiveCard = context.isStandaloneEditor || context.isCurrentCard;
   const isInteractiveCard = isActiveCard || context.hasFocusWithin;

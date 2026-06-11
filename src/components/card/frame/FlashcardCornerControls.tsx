@@ -6,8 +6,6 @@ import type { FlashcardCardLike, FlashcardMediaLike } from "./flashcard.types";
 import { cn } from "@/lib/utils";
 import type { ReferenceBlockData } from "@/types";
 
-
-
 interface FlashcardCornerControlsProps {
   card: FlashcardCardLike;
   hasUncertainty: boolean;
@@ -26,8 +24,6 @@ interface FlashcardCornerControlsProps {
 export interface FlashcardCornerControlsResult { actionsTopLeft: React.ReactNode[] | undefined;
   actionsTopRight: React.ReactNode[] | undefined;
 }
-
-
 
 const resolveSafeVisualScale = (value?: number) => {
   if (typeof value !== "number") return 1;

@@ -11,8 +11,6 @@ import type { FlashcardCardLike, FlashcardMediaLike } from "./flashcard.types";
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardBlock } from "@/types/domain/card";
 
-
-
 // ---------------------------------------------------------------------------
 // Scalar field normalizers
 // ---------------------------------------------------------------------------

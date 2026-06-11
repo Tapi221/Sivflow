@@ -1,14 +1,10 @@
 import type { GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 
-
-
 export type CachedGoogleCalendar = { id: string;
   summary: string;
   summaryOverride?: string;
   backgroundColor?: string;
 };
-
-
 
 export const toCachedCalendars = (calendars: GoogleCalendarListItem[]): CachedGoogleCalendar[] => calendars.map(({ id, summary, summaryOverride, backgroundColor }) => ({ id, summary, summaryOverride, backgroundColor }));
 export const getDefaultCalendarIds = (calendars: GoogleCalendarListItem[]): string[] => calendars.filter((calendar) => calendar.primary || calendar.selected).map((calendar) => calendar.id);

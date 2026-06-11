@@ -2,8 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { VerticalCardPager } from "@/features/review/VerticalCardPager";
 
-
-
 export type CardCarousel3DProps<T> = { cards: T[];
   syncIndex?: number;
   initialIndex?: number;
@@ -14,15 +12,11 @@ export type CardCarousel3DProps<T> = { cards: T[];
   onFlip?: () => void;
 };
 
-
-
 const clampIndex = (index: number, count: number) => {
   if (count <= 0) return 0;
   if (!Number.isFinite(index)) return 0;
   return Math.min(Math.max(Math.trunc(index), 0), count - 1);
 };
-
-
 
 export const CardCarousel3D = <T>({cards, syncIndex, initialIndex = 0, onIndexChange, renderCenter, renderPreview, getKey, onFlip}: CardCarousel3DProps<T>) => {void renderPreview;
 

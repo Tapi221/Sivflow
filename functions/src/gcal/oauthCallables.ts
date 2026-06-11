@@ -6,8 +6,6 @@ import { cacheGoogleProfileImageUrl } from "#src/gcal/profileImageCache.js";
 import { classifyGoogleTokenEndpointFailure } from "#src/gcal/tokenErrors.js";
 import type { GoogleOAuthServerErrorReason } from "#src/gcal/tokenErrors.js";
 
-
-
 type StoredGoogleCalendarAccount = {
   email: string;
   name: string | null;
@@ -22,8 +20,6 @@ type GoogleOAuthProfile = {
   accountPhotoUrl: string | null;
 };
 
-
-
 const GOOGLE_OAUTH_CLIENT_ID = defineSecret("GOOGLE_OAUTH_CLIENT_ID");
 const GOOGLE_OAUTH_CLIENT_SECRET = defineSecret("GOOGLE_OAUTH_CLIENT_SECRET");
 const GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY = defineSecret("GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY");
@@ -32,8 +28,6 @@ const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const GOOGLE_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
 const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
 const REQUIRED_GOOGLE_SCOPES = ["https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.readonly", "https://www.googleapis.com/auth/calendar.app.created", "https://www.googleapis.com/auth/tasks", "https://www.googleapis.com/auth/drive.file"] as const;
-
-
 
 const requireUid = (request: { auth?: { uid?: string; }; }) => {
   const uid = request.auth?.uid;
@@ -167,8 +161,6 @@ const getStoredAccessToken = async (uid: string, accountId: string) => {
   return toAccessResponse(accessToken, account, getTokenNumber(data, "expires_in"));
 };
 
-
-
 export const connectGoogleCalendarAccount = onCall({ region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] }, async (request) => { const uid = requireUid(request);
   const code = typeof request.data?.code === "string" ? request.data.code : "";
   const codeVerifier = typeof request.data?.codeVerifier === "string" ? request.data.codeVerifier : "";
@@ -210,8 +202,6 @@ export const disconnectGoogleCalendarAccount = onCall({ region: REGION }, async 
 export const createGoogleCalendarCustomToken = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
   return { customToken: await (await getAdminAuth()).createCustomToken(uid) };
 });
-
-
 
 export { googleCalendarWebhook } from "#src/gcal/googleCalendarWebhook.js";
 export { renewExpiredWatchChannels } from "#src/gcal/renewWatchChannels.js";

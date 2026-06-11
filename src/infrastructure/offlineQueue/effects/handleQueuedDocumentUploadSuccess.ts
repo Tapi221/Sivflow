@@ -3,8 +3,6 @@ import type { QueueItem } from "@/application/usecases/persistentOfflineQueueMod
 import { getLocalDb } from "@/infrastructure/localdb/client";
 import type { UploadedImage } from "@/types";
 
-
-
 export const handleQueuedDocumentUploadSuccess = async (item: QueueItem, updatedImage: UploadedImage): Promise<void> => { const localDb = await getLocalDb();
   const existingDoc = await localDb.documents.get(updatedImage.id);
   if (!existingDoc) {

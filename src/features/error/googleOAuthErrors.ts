@@ -1,19 +1,13 @@
 import { getGoogleOAuthCallableErrorReason, isGoogleOAuthDeterministicErrorReason } from "@/integration/google-integration/google.server-oauth";
 import type { GoogleOAuthCallableErrorReason } from "@/integration/google-integration/google.server-oauth";
 
-
-
 export const GOOGLE_OAUTH_DETERMINISTIC_ERROR_COOLDOWN_MS = 60_000;
-
-
 
 export type GoogleOAuthCooldownReason = GoogleOAuthCallableErrorReason | "auto_recovery_pending" | "internal";
 export type GoogleOAuthCooldownEntry = { reason: GoogleOAuthCooldownReason;
   message: string;
   until: number;
 };
-
-
 
 export const getErrorStatus = (error: unknown): number | undefined => { if (!(error instanceof Error)) return undefined;
   return (error as Error & { status?: number; }).status;

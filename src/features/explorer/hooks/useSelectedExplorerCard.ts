@@ -3,8 +3,6 @@ import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { getLocalDb } from "@/services/localDB";
 
-
-
 export const useSelectedExplorerCard = (cardId: string | null) => { const { currentUser } = useAuthSession();
 
   const card = useLiveQuery(

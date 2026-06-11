@@ -1,8 +1,6 @@
 import { stripCloudSyncLocalOnlyFields } from "./cloudSyncLocalFieldStripping";
 import { deepStripUndefined } from "./cloudSyncValueCleaning";
 
-
-
 export const sanitizeSyncDataForCloud = (type: string, data: unknown): unknown => { if (!data) return data;
 
   const cleaned = deepStripUndefined(data);

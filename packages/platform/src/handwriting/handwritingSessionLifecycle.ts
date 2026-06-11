@@ -1,8 +1,6 @@
 import type { InkSide } from "@core/domain/card/ink/inkDocument";
 import type { HandwritingDeviceInfo, HandwritingSession, HandwritingSessionStatus } from "./handwritingSession.types";
 
-
-
 export type CreateDesktopHandwritingSessionInput = { id: string;
   userId: string;
   cardId: string;
@@ -18,8 +16,6 @@ export type UpdateHandwritingSessionStatusInput = { session: HandwritingSession;
   status: HandwritingSessionStatus;
   now?: number;
 };
-
-
 
 export const createDesktopHandwritingSession = ({ id, userId, cardId, side, desktopDevice, now = Date.now() }: CreateDesktopHandwritingSessionInput): HandwritingSession => ({ id, userId, cardId, side, desktopDevice, status: "waiting", createdAt: now, updatedAt: now });
 export const attachMobileDeviceToHandwritingSession = ({ session, mobileDevice, now = Date.now() }: AttachMobileDeviceToHandwritingSessionInput): HandwritingSession => ({ ...session, mobileDevice, status: "connected", updatedAt: now });

@@ -6,8 +6,6 @@ import dedent from "dedent";
 import { KEYS, RangeApi } from "platejs";
 import type { SlateEditor } from "platejs";
 
-
-
 export type StructuredPromptSections = { context?: string;
   examples?: string[] | string;
   history?: string;
@@ -21,12 +19,8 @@ export type StructuredPromptSections = { context?: string;
   tone?: string;
 };
 
-
-
 const SELECTION_START = "<Selection>";
 const SELECTION_END = "</Selection>";
-
-
 
 export const tag = (tag: string, content?: string | null) => { if (!content) return "";
 

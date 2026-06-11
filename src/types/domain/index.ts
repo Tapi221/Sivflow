@@ -2,8 +2,6 @@ export type { ReviewLog } from "./base";
 export type { ReviewLog as SnapshotReviewLog, UserSettings as SnapshotUserSettings } from "./snapshot";
 export type { UserSettings, UserStats } from "./user";
 
-
-
 export * from "./assets";
 export * from "./card";
 export * from "./cardSet";

@@ -1,28 +1,16 @@
 "use client";
 
 import * as React from "react";
-
 import type { CodeDrawingType, TCodeDrawingElement, ViewMode } from "@platejs/code-drawing";
-
 import { VIEW_MODE, DEFAULT_MIN_HEIGHT, CODE_DRAWING_TYPE_ARRAY, VIEW_MODE_ARRAY, renderCodeDrawing, RENDER_DEBOUNCE_DELAY, downloadImage, DOWNLOAD_FILENAME } from "@platejs/code-drawing";
-
 import type { PlateElementProps } from "platejs/react";
-
 import { PlateElement, useEditorRef, useEditorSelector, useElement, useFocusedLast, useReadOnly, useSelected } from "platejs/react";
-
 import debounce from "lodash/debounce.js";
-
 import { Trash2, DownloadIcon } from "lucide-react";
-
 import { Button } from "./button";
-
 import { useIsMobile } from "@/hooks/use-mobile";
-
 import { Popover, PopoverAnchor, PopoverContent } from "./popover";
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
-
-
 
 function createDebouncedCodeDrawingRenderer(
   setImage: React.Dispatch<React.SetStateAction<string>>,
@@ -70,7 +58,6 @@ function createDebouncedCodeDrawingRenderer(
     RENDER_DEBOUNCE_DELAY,
   );
 }
-
 function useCodeDrawingElement({ element }: { element: TCodeDrawingElement; }) {
   const editor = useEditorRef();
   const readOnly = useReadOnly();
@@ -107,8 +94,6 @@ function useCodeDrawingElement({ element }: { element: TCodeDrawingElement; }) {
     removeNode,
   };
 }
-
-
 
 export function CodeDrawingElement(props: PlateElementProps<TCodeDrawingElement>) { const { children } = props;
   const isMobile = useIsMobile();
@@ -247,7 +232,6 @@ export function CodeDrawingElement(props: PlateElementProps<TCodeDrawingElement>
     </Popover>
   );
 }
-
 function CodeDrawingPreview({
   code,
   drawingType,
@@ -327,7 +311,6 @@ function CodeDrawingPreview({
     </div>
   );
 }
-
 function CodeDrawingToolbar({
   drawingType,
   viewMode,
@@ -415,7 +398,6 @@ function CodeDrawingToolbar({
     </div>
   );
 }
-
 function CodeDrawingTextarea({
   code,
   viewMode,
@@ -497,7 +479,6 @@ function CodeDrawingTextarea({
     </div>
   );
 }
-
 function CodeDrawingPreviewArea({
   image,
   loading,

@@ -2,8 +2,6 @@ import { RUNTIME_KINDS } from "@platform/runtime/runtime.constants";
 import type { RuntimeKind } from "@platform/runtime/runtime.constants";
 import { hasDesktopRuntime } from "./detectDesktopBridge";
 
-
-
 export const getRuntimeKind = (): RuntimeKind => { if (hasDesktopRuntime()) { return RUNTIME_KINDS.desktop;
 }
 

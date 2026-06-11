@@ -4,8 +4,6 @@ import type { UploadedImage, UploadedPdf } from "./assets";
 import type { BaseEntity, CardState, MathBlockData, ReferenceBlockData, ReviewLog, SubjectiveScoreValue } from "./base";
 import type { CodeBlockData } from "@/types/core/code-block";
 
-
-
 export type { UploadedImage };
 export type CardBlock = { id: string;
   type:

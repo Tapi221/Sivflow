@@ -1,30 +1,17 @@
 "use client";
 
 import * as React from "react";
-
 import { formatCodeBlock, isLangSupported } from "@platejs/code-block";
-
 import { BracesIcon, Check, CheckIcon, CopyIcon } from "lucide-react";
-
 import { NodeApi } from "platejs";
-
 import type { TCodeBlockElement, TCodeSyntaxLeaf } from "platejs";
-
 import { PlateElement, PlateLeaf } from "platejs/react";
-
 import type { PlateElementProps, PlateLeafProps } from "platejs/react";
-
 import { useEditorRef, useElement, useReadOnly } from "platejs/react";
-
 import { Button } from "./button";
-
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "./command";
-
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
-
 import { cn } from "@/lib/utils";
-
-
 
 const languages: { label: string; value: string; }[] = [
   { label: "Auto", value: "auto" },
@@ -118,8 +105,6 @@ const languages: { label: string; value: string; }[] = [
   { label: "YAML", value: "yaml" },
 ];
 
-
-
 export function CodeBlockElement(props: PlateElementProps<TCodeBlockElement>) { const { editor, element } = props;
 
   return (
@@ -161,7 +146,6 @@ export function CodeBlockElement(props: PlateElementProps<TCodeBlockElement>) { 
     </PlateElement>
   );
 }
-
 function CodeBlockCombobox() {
   const [open, setOpen] = React.useState(false);
   const readOnly = useReadOnly();
@@ -240,7 +224,6 @@ function CodeBlockCombobox() {
     </Popover>
   );
 }
-
 function CopyButton({
   value,
   ...props
@@ -275,10 +258,8 @@ function CopyButton({
     </Button>
   );
 }
-
 export function CodeLineElement(props: PlateElementProps) { return <PlateElement {...props} />;
 }
-
 export function CodeSyntaxLeaf(props: PlateLeafProps<TCodeSyntaxLeaf>) { const tokenClassName = props.leaf.className as string;
 
   return <PlateLeaf className={tokenClassName} {...props} />;

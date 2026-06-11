@@ -1,19 +1,11 @@
 import type { BaseEntity } from "./base";
 
-
-
 export type CardDisplayMode = "fixed" | "fluid";
-
-
 
 export const DEFAULT_CARD_DISPLAY_MODE: CardDisplayMode = "fixed";
 
-
-
 export const normalizeCardDisplayMode = (value: unknown) => { return value === "fluid" ? "fluid" : "fixed";
 };
-
-
 
 /**
  * CardSet — Card のコレクション単位。

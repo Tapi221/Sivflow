@@ -4,8 +4,6 @@ import type { StudyReviewProps } from "@/features/study/presentation/shared/stud
 import type { PresentationTarget } from "@/platform/presentation/getPresentationTarget";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 
-
-
 const STUDY_REVIEW_COMPONENTS = {
   desktop: StudyReviewDesktop,
   mobile: StudyReviewMobile,
@@ -13,8 +11,6 @@ const STUDY_REVIEW_COMPONENTS = {
   PresentationTarget,
   (props: StudyReviewProps) => React.JSX.Element
 >;
-
-
 
 export const StudyReview = (props: StudyReviewProps) => { const presentationTarget = usePresentationTarget();
   const Component = STUDY_REVIEW_COMPONENTS[presentationTarget];
