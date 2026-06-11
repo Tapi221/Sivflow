@@ -1,36 +1,20 @@
 "use client";
 
 import * as React from "react";
-
 import { DndPlugin, useDraggable, useDropLine } from "@platejs/dnd";
-
 import { expandListItemsWithChildren } from "@platejs/list";
-
 import { BlockSelectionPlugin } from "@platejs/selection/react";
-
 import { GripVertical } from "lucide-react";
-
 import { getPluginByType, isType, KEYS } from "platejs";
-
 import type { TElement } from "platejs";
-
 import { MemoizedChildren, useEditorRef, useElement, usePluginOption } from "platejs/react";
-
 import type { PlateEditor, PlateElementProps, RenderNodeWrapper } from "platejs/react";
-
 import { useSelected } from "platejs/react";
-
 import { Button } from "./button";
-
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
-
 import { cn } from "@/lib/utils";
 
-
-
 const UNDRAGGABLE_KEYS = [KEYS.column, KEYS.tr, KEYS.td];
-
-
 
 const createDragPreviewElements = (
   editor: PlateEditor,
@@ -131,7 +115,6 @@ const createDragPreviewElements = (
 
   return elements;
 };
-
 const calculatePreviewTop = (
   editor: PlateEditor,
   {
@@ -179,7 +162,6 @@ const calculatePreviewTop = (
 
   return previewElementsTopDistance;
 };
-
 const calcDragButtonTop = (editor: PlateEditor, element: TElement): number => {
   const child = editor.api.toDOMNode(element)!;
 
@@ -188,8 +170,6 @@ const calcDragButtonTop = (editor: PlateEditor, element: TElement): number => {
 
   return currentMarginTop;
 };
-
-
 
 export const BlockDraggable: RenderNodeWrapper = (props) => { const { editor, element, path } = props;
 
@@ -231,7 +211,6 @@ export const BlockDraggable: RenderNodeWrapper = (props) => { const { editor, el
 
   return (props) => <Draggable {...props} />;
 };
-
 function Draggable(props: PlateElementProps) {
   const { children, editor, element, path } = props;
   const blockSelectionApi = editor.getApi(BlockSelectionPlugin).blockSelection;
@@ -349,7 +328,6 @@ function Draggable(props: PlateElementProps) {
     </div>
   );
 }
-
 function Gutter({
   children,
   className,
@@ -382,8 +360,6 @@ function Gutter({
     </div>
   );
 }
-
-
 
 const DragHandle = React.memo(function DragHandle({
   isDragging,
@@ -496,7 +472,6 @@ const DragHandle = React.memo(function DragHandle({
     </Tooltip>
   );
 });
-
 const DropLine = React.memo(function DropLine({
   className,
   ...props

@@ -5,8 +5,6 @@ import { isTypingTarget } from "@/utils/isTypingTarget";
 import { buildVerticalCardPagerItemStyle, resolveVerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";
 import type { VerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";
 
-
-
 type ScrollAnchorFace = "question" | "answer";
 type ScrollAnchorSnapshot = {
   preserveKey: string | number | null;
@@ -36,8 +34,6 @@ export type VerticalCardPagerProps<T> = { cards: T[];
   scrollToActiveIndexBehavior?: ScrollBehavior;
 };
 
-
-
 export const ACTIVE_INDEX_RENDER_RADIUS = 6;
 const DEFAULT_CARD_WIDTH = CANONICAL_CARD_WIDTH;
 const CARD_GAP = 16;
@@ -46,8 +42,6 @@ const CARD_RADIUS_SM = 32;
 const CARD_RADIUS_MD = 40;
 const SCROLL_IDLE_COMMIT_DELAY_MS = 110;
 const SCROLL_ANCHOR_SUPPRESSION_MS = 180;
-
-
 
 const resolveCardBaseRadius = () => {
   if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
@@ -62,8 +56,6 @@ const clampIndex = (idx: number, count: number) => {
   if (!Number.isFinite(idx)) return 0;
   return Math.max(0, Math.min(count - 1, Math.trunc(idx)));
 };
-
-
 
 const buildStableCardKey = <T>(card: T, idx: number, getKey?: (card: T, idx: number) => string | number) => {
   return String(getKey ? getKey(card, idx) : idx);

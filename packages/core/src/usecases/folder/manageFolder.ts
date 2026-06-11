@@ -26,8 +26,6 @@ export type FolderCommandRepository<TFolder extends FolderCommandEntity = Folder
   updateFolder: (userId: string, folderId: string, changes: Record<string, unknown>) => Promise<void>;
 };
 
-
-
 const toNullableParentId = (parentId?: string | null) => parentId ?? null;
 export const createFolderUseCase = async <TFolder extends FolderCommandEntity>({ userId, name, parentId, options, repository }: { userId: string;
   name: string;

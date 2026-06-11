@@ -4,8 +4,6 @@ import { applyHandwritingStrokeDelta } from "./handwritingStrokeMessages";
 import type { ApplyHandwritingStrokeDeltaResult } from "./handwritingStrokeMessages";
 import type { HandwritingSession, HandwritingSessionMessage, HandwritingSessionStatus } from "./handwritingSession.types";
 
-
-
 export type DesktopHandwritingReceiverSession = Pick<HandwritingSession, "id" | "cardId" | "side" | "status">;
 export type ReceiveDesktopHandwritingMessageInput = { document: InkDocument | null | undefined;
   session: DesktopHandwritingReceiverSession;
@@ -18,8 +16,6 @@ export type ReceiveDesktopHandwritingMessageResult = { document: InkDocument;
   status: HandwritingSessionStatus;
   reason?: DesktopHandwritingReceiverReason;
 };
-
-
 
 const isSessionMessage = (
   message: HandwritingSessionMessage,

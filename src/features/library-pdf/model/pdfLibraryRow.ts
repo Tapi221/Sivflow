@@ -1,8 +1,6 @@
 import { normalizeDate } from "@/shared/codec/date";
 import type { DocumentItem, Folder } from "@/types";
 
-
-
 export type PdfDashboardRow = { id: string;
   title: string;
   fileName: string;
@@ -26,8 +24,6 @@ type BuildPdfDashboardRowsParams = {
   folders: Folder[];
   tagById: ReadonlyMap<string, { name: string; }>;
 };
-
-
 
 const toDate = (value: unknown): Date | null => {
   return normalizeDate(value);

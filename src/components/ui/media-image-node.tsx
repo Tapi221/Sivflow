@@ -1,28 +1,16 @@
 "use client";
 
 import * as React from "react";
-
 import type { TImageElement } from "platejs";
-
 import type { PlateElementProps } from "platejs/react";
-
 import { useDraggable } from "@platejs/dnd";
-
 import { Image, ImagePlugin, useMediaState } from "@platejs/media/react";
-
 import { ResizableProvider, useResizableValue } from "@platejs/resizable";
-
 import { PlateElement, withHOC } from "platejs/react";
-
 import { cn } from "@/lib/utils";
-
 import { Caption, CaptionTextarea } from "./caption";
-
 import { MediaToolbar } from "./media-toolbar";
-
 import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "./resize-handle";
-
-
 
 export const ImageElement = withHOC(ResizableProvider, function ImageElement(props: PlateElementProps<TImageElement>) { const { align = "center", focused, readOnly, selected } = useMediaState();
   const width = useResizableValue("width");

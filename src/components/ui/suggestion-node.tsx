@@ -1,34 +1,19 @@
 "use client";
 
 import * as React from "react";
-
 import { cva } from "class-variance-authority";
-
 import { CornerDownLeftIcon } from "lucide-react";
-
 import type { AnyPluginConfig, TElement, TSuggestionData, TSuggestionText, WithRequiredKey } from "platejs";
-
 import { KEYS } from "platejs";
-
 import type { PlateEditor, PlateLeafProps, RenderNodeWrapper } from "platejs/react";
-
 import { SuggestionPlugin } from "@platejs/suggestion/react";
-
 import { PlateLeaf, useEditorPlugin, usePluginOption } from "platejs/react";
-
 import { cn } from "@/lib/utils";
-
 import type { SuggestionConfig } from "@/components/editor/plugins/suggestion-kit";
-
 import { voidRemoveSuggestionOverlayVariants } from "./suggestion-node-static";
 
-
-
 const suggestionPlugin = SuggestionPlugin as WithRequiredKey<SuggestionConfig>;
-
 export const suggestionVariants = cva(cn("bg-emerald-100 text-emerald-700 no-underline transition-colors duration-200"), { defaultVariants: { insertActive: false, remove: false, removeActive: false }, variants: { insertActive: { false: "", true: "bg-emerald-200/80" }, remove: { false: "", true: "bg-red-100 text-red-700" }, removeActive: { false: "", true: "bg-red-200/80 no-underline" } } });
-
-
 
 export function getBlockSuggestionWrapperClassName({ elementType, isActive, isHover, isInsert, isRemove }: { elementType?: string;
   isActive: boolean;
@@ -45,11 +30,8 @@ export function getBlockSuggestionWrapperClassName({ elementType, isActive, isHo
     }),
   );
 }
-
 export function isVoidRemoveSuggestion(editor: PlateEditor, element: TElement) { return (editor.getApi(SuggestionPlugin).suggestion.suggestionData(element)?.type === "remove");
 }
-
-
 
 export function VoidRemoveSuggestionOverlay({ editor, element }: { editor: PlateEditor;
   element: TElement;
@@ -60,7 +42,6 @@ export function VoidRemoveSuggestionOverlay({ editor, element }: { editor: Plate
 
   return <div className={voidRemoveSuggestionOverlayVariants({ active })} contentEditable={false} data-slot="void-remove-suggestion" />;
 }
-
 export function SuggestionLineBreakAnchor({ badgeProps, children, className }: { badgeProps?: React.ComponentProps<"span">;
   children: React.ReactNode;
   className?: string;
@@ -69,7 +50,6 @@ export function SuggestionLineBreakAnchor({ badgeProps, children, className }: {
 
   return <>{children}{badge}</>;
 }
-
 function SuggestionLineBreakElementAnchor({ badgeProps, children, className }: {
   badgeProps?: React.ComponentProps<"span">;
   children: React.ReactElement<any>;
@@ -91,7 +71,6 @@ function SuggestionLineBreakElementAnchor({ badgeProps, children, className }: {
 
   return React.cloneElement(children as React.ReactElement<any>, { lineBreakBadge: badge });
 }
-
 export function SuggestionLeaf(props: PlateLeafProps<TSuggestionText>) { const { api, setOption } = useEditorPlugin(suggestionPlugin);
   const leaf = props.leaf;
   const leafId: string = api.suggestion.nodeId(leaf) ?? "";
@@ -106,7 +85,6 @@ export function SuggestionLeaf(props: PlateLeafProps<TSuggestionText>) { const {
 
   return <PlateLeaf {...props} as={Component} className={cn(suggestionVariants({ insertActive: hasActive || hasHover, remove: hasRemove, removeActive: (hasActive || hasHover) && hasRemove }))} attributes={{ ...props.attributes, onMouseEnter: () => setOption("hoverId", leafId), onMouseLeave: () => setOption("hoverId", null) }}>{props.children}</PlateLeaf>;
 }
-
 export const SuggestionLineBreak: RenderNodeWrapper<AnyPluginConfig> = ({ api, element }) => { if (!api.suggestion.isBlockSuggestion(element)) return;
 
   const suggestionData = element.suggestion as TSuggestionData;
@@ -115,7 +93,6 @@ export const SuggestionLineBreak: RenderNodeWrapper<AnyPluginConfig> = ({ api, e
     return <SuggestionLineBreakContent elementType={element.type} suggestionData={suggestionData}>{children}</SuggestionLineBreakContent>;
   };
 };
-
 export function SuggestionLineBreakContent({ children, elementType, suggestionData }: { children: React.ReactNode;
   elementType?: string;
   suggestionData: TSuggestionData;

@@ -2,12 +2,8 @@ import { validateMfCardFile } from "@/features/cardFile/domain/mfCardGuards";
 import { MfCardValidationError } from "@/features/cardFile/domain/mfCard.types";
 import type { MfCardFileV1 } from "@/features/cardFile/domain/mfCard.types";
 
-
-
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
-
-
 
 const parseJson = (raw: string): unknown => {
   try {

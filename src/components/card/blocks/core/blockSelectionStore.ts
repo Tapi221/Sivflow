@@ -1,15 +1,9 @@
 import { useSyncExternalStore } from "react";
 
-
-
 type BlockSelectionListener = () => void;
-
-
 
 let selectedBlockId: string | null = null;
 const blockSelectionListeners = new Set<BlockSelectionListener>();
-
-
 
 const emitBlockSelectionChange = () => {
   blockSelectionListeners.forEach((listener) => listener());

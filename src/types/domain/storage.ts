@@ -14,8 +14,6 @@ export interface IndexedDBMetadata { key: "main"; // 固定キー
   rebuildCount: number; // 再構築回数（無限ループ検知）
 }
 
-
-
 /**
  * 現在のスキーマバージョン
  */

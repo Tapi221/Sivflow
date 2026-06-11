@@ -2,8 +2,6 @@
 import type { CardBlock } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-
-
 export const MF_DECK_FORMAT = "sivflow.deck" as const;
 export const MF_DECK_VERSION = 1 as const;
 export const MF_DECK_MANIFEST_PATH = "manifest.json" as const;
@@ -16,8 +14,6 @@ export const MF_DECK_MEDIA_URI_PREFIX = "mfdeck://media/" as const;
 export const MF_DECK_MAX_CARDS = 50000 as const;
 export const MF_DECK_MAX_BLOCKS_PER_FACE = 1000 as const;
 export const MF_DECK_MAX_MEDIA_ENTRIES = 5000 as const;
-
-
 
 export type MfDeckIssueLevel = "error" | "warning";
 export type MfDeckIssueCode = | "invalid_extension" | "file_too_large" | "missing_manifest" | "missing_cards" | "missing_media" | "invalid_zip" | "invalid_json" | "invalid_format" | "unsupported_version" | "invalid_manifest" | "invalid_cards" | "invalid_media_manifest" | "empty_deck" | "card_count_mismatch" | "unsupported_media_reference" | "unreadable_media" | "unsafe_path" | "unexpected_value" | "duplicate_card_id" | "duplicate_block_id" | "duplicate_media_path" | "too_many_cards" | "too_many_blocks" | "too_many_media_entries" | "media_size_mismatch" | "unknown_media_entry" | "invalid_media_reference";
@@ -97,8 +93,6 @@ export type MfDeckValidationResult = | { ok: true;
     ok: false;
     issues: MfDeckIssue[];
   };
-
-
 
 export class MfDeckValidationError extends Error { readonly issues: MfDeckIssue[];
 

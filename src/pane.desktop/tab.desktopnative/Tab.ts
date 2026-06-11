@@ -1,7 +1,5 @@
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 
-
-
 /**
  * 全タブ共通ベース
  */
@@ -11,11 +9,7 @@ type WorkspaceTabBase = {
   sectionKey: WorkspaceSidebarSection;
 };
 
-
-
 export const WORKSPACE_DEFAULT_EXPLORER_TAB_ID = "explorer:default" as const;
-
-
 
 /**
  * サイドバーのセクション定義
@@ -78,14 +72,10 @@ export type WorkspaceTab = | WorkspaceRouteTab | WorkspaceExplorerTab | Workspac
  */
 export type WorkspaceEntityTab = Exclude<WorkspaceTab, WorkspaceExplorerTab | WorkspaceRouteTab>;
 
-
-
 /**
  * ルートタブ定義
  */
 export const WORKSPACE_ROUTE_TABS = [{ id: "route:home", kind: "route", title: "Home", routePath: "/schedule", isClosable: true, sectionKey: "home" }, { id: "route:review", kind: "route", title: "Review", routePath: "/study", isClosable: true, sectionKey: "review" }, { id: "route:schedule", kind: "route", title: "Schedule", routePath: "/schedule", isClosable: true, sectionKey: "schedule" }, { id: "route:settings", kind: "route", title: "設定", routePath: "/settings", isClosable: true, sectionKey: "settings" }] as const satisfies readonly WorkspaceRouteTab[];
-
-
 
 /**
  * Explorer初期状態

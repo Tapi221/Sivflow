@@ -4,8 +4,6 @@ import type { CreateMfDeckCard, CreateMfDeckCardSet, EnsureMfDeckTagByName, Impo
 import { MF_DECK_FORMAT, MF_DECK_VERSION } from "@/features/deckFile/domain/mfDeck.types";
 import type { MfDeckArchiveV1 } from "@/features/deckFile/domain/mfDeck.types";
 
-
-
 export type ImportMfCardFileParams = { cardFile: MfCardFileV1;
   folderId: string;
   createCardSet: CreateMfDeckCardSet;
@@ -14,8 +12,6 @@ export type ImportMfCardFileParams = { cardFile: MfCardFileV1;
   ensureTagByName?: EnsureMfDeckTagByName;
   destination: MfDeckImportDestination;
 };
-
-
 
 const resolveCardSetName = (cardFile: MfCardFileV1) => {
   const title = cardFile.card.title?.trim();
