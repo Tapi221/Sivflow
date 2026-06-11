@@ -14,7 +14,7 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "manifest": "node ../scripts/functions/generateManifest.mjs",
+    "manifest": "node ../scripts/functions/generateManifest.cjs",
     "deploy": "npm run build && firebase deploy --only functions"
   },
   "dependencies": {
