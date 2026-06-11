@@ -10,9 +10,9 @@ import { ElementApi, getPluginType, KEYS, PathApi } from 'platejs';
 
 import { usePluginOption } from 'platejs/react';
 
-import { AILoadingBar, AIMenu } from '@/components/ai-menu';
+import { AILoadingBar, AIMenu } from '@/components/ui/ai-menu';
 
-import { AIAnchorElement, AILeaf } from '@/components/ai-node';
+import { AIAnchorElement, AILeaf } from '@/components/ui/ai-node';
 
 import { useChat } from '@/components/editor/use-chat';
 

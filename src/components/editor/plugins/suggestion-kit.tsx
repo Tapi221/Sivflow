@@ -8,7 +8,7 @@ import { type BaseSuggestionConfig, BaseSuggestionPlugin } from '@platejs/sugges
 
 import { toTPlatePlugin } from 'platejs/react';
 
-import { SuggestionLeaf, SuggestionLineBreak, VoidRemoveSuggestionOverlay } from '@/components/suggestion-node';
+import { SuggestionLeaf, SuggestionLineBreak, VoidRemoveSuggestionOverlay } from '@/components/ui/suggestion-node';
 
 import { discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarget } from './discussion-kit';
 
