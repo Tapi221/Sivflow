@@ -1,10 +1,11 @@
 import { BaseListPlugin, isOrderedList } from '@platejs/list';
 import { KEYS } from 'platejs';
 
-import { BaseIndentKit } from '@/components/editor/plugins/indent-base-kit';
 import { BlockListStatic } from '@/components/block-list-static';
 
-export const BaseListKit = [
+import { BaseIndentKit } from './indent-base-kit';
+
+const BaseListKit = [
   ...BaseIndentKit,
   BaseListPlugin.configure({
     inject: {
@@ -37,3 +38,5 @@ export const BaseListKit = [
     },
   }),
 ];
+
+export { BaseListKit };
