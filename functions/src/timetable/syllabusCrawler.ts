@@ -298,15 +298,13 @@ const crawlSyllabusSource = async (source: CrawlSource, uid: string | null): Pro
   return await saveCrawlResult(jobId, uid, source, courses, seen.size, skippedUrlCount);
 };
 
-export const crawlTimetableSyllabusUrl = onCall({ region: REGION, timeoutSeconds: 300, memory: "512MiB" }, async (request) => {
-  const uid = requireUid(request);
+export const crawlTimetableSyllabusUrl = onCall({ region: REGION, timeoutSeconds: 300, memory: "512MiB" }, async (request) => { const uid = requireUid(request);
   const source: CrawlSource = { sourceId: null, seedUrl: getStringValue(request.data?.seedUrl), institutionName: getStringValue(request.data?.institutionName), facultyName: getStringValue(request.data?.facultyName), departmentName: getStringValue(request.data?.departmentName), maxPages: clampMaxPages(request.data?.maxPages) };
   if (!source.seedUrl) throw new HttpsError("invalid-argument", "seedUrl is required.");
   return await crawlSyllabusSource(source, uid);
 });
 
-export const upsertTimetableSyllabusSource = onCall({ region: REGION }, async (request) => {
-  const uid = requireUid(request);
+export const upsertTimetableSyllabusSource = onCall({ region: REGION }, async (request) => { const uid = requireUid(request);
   await requireAdmin(uid);
 
   const db = await getDb();
@@ -320,8 +318,7 @@ export const upsertTimetableSyllabusSource = onCall({ region: REGION }, async (r
   return { ok: true, sourceId };
 });
 
-export const runTimetableSyllabusCatalogCrawl = onSchedule({ schedule: "every 24 hours", timeZone: "Asia/Tokyo", region: REGION, timeoutSeconds: 540, memory: "1GiB" }, async () => {
-  const db = await getDb();
+export const runTimetableSyllabusCatalogCrawl = onSchedule({ schedule: "every 24 hours", timeZone: "Asia/Tokyo", region: REGION, timeoutSeconds: 540, memory: "1GiB" }, async () => { const db = await getDb();
   const snapshot = await db.collection("timetableSyllabusSources").where("enabled", "==", true).limit(20).get();
 
   for (const doc of snapshot.docs) {

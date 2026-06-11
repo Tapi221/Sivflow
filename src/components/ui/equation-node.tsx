@@ -1,20 +1,32 @@
 'use client';
 
 import * as React from 'react';
+
 import TextareaAutosize, { type TextareaAutosizeProps, } from 'react-textarea-autosize';
 
 import type { TEquationElement } from 'platejs';
+
 import type { PlateElementProps } from 'platejs/react';
 
 import { useEquationElement, useEquationInput } from '@platejs/math/react';
+
 import { BlockSelectionPlugin } from '@platejs/selection/react';
+
 import { CornerDownLeftIcon, RadicalIcon } from 'lucide-react';
+
 import { createPrimitiveComponent, PlateElement, useEditorRef, useEditorSelector, useElement, useReadOnly, useSelected, } from 'platejs/react';
 
 import { Button } from './button';
+
 import { Popover, PopoverContent, PopoverTrigger, } from './popover';
+
 import { cn } from '@/lib/utils';
+
 import { inlineSuggestionVariants } from '@/components/suggestion';
+
+const EquationInput = createPrimitiveComponent(TextareaAutosize)({
+  propsHook: useEquationInput,
+});
 
 export function EquationElement(props: PlateElementProps<TEquationElement>) { const selected = useSelected();
   const [open, setOpen] = React.useState(selected);
@@ -61,7 +73,7 @@ export function EquationElement(props: PlateElementProps<TEquationElement>) { co
             ) : (
               <div className="flex h-7 w-full items-center gap-2 whitespace-nowrap text-muted-foreground text-sm">
                 <RadicalIcon className="size-6 text-muted-foreground/80" />
-                <div>Add a Tex equation</div>
+                <>Add a Tex equation</>
               </div>
             )}
             {lineBreakBadge}
@@ -165,10 +177,6 @@ export function InlineEquationElement( props: PlateElementProps<TEquationElement
     </PlateElement>
   );
 }
-
-const EquationInput = createPrimitiveComponent(TextareaAutosize)({
-  propsHook: useEquationInput,
-});
 
 const EquationPopoverContent = ({
   className,

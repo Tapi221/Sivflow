@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
+
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { ja } from "date-fns/locale";
 import type { CalendarTimetableColorKey, CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTimetablePeriod, CalendarTimetableSlot, CalendarTimetableVisibleDayCount, CalendarTimetableWeekdayIndex } from "@core/domain/calendar/timetable/timetable.types";
@@ -60,10 +61,10 @@ const CalendarTimetableSettingsPanel = ({ periods, visibleDayCount, onChangeVisi
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 px-4 py-6" role="dialog" aria-modal="true" aria-label="時間割設定">
       <div className="flex max-h-full w-full max-w-[520px] flex-col overflow-hidden rounded-[22px] border border-[#e5e5ea] bg-white shadow-[0_18px_60px_rgba(0,0,0,0.18)]">
         <div className="flex shrink-0 items-center justify-between border-b border-[#f0f0f2] px-5 py-4">
-          <div>
+          <>
             <h2 className="text-[17px] font-bold tracking-[-0.03em] text-[#1c1c1e]">時間割設定</h2>
             <p className="mt-1 text-[12px] font-medium text-[#8e8e93]">曜日数と時限テンプレートを編集</p>
-          </div>
+          </>
           <button type="button" className="rounded-full px-3 py-1.5 text-[13px] font-semibold text-[#6e6e73] hover:bg-[#f7f7f8]" onClick={onClose}>閉じる</button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
@@ -143,13 +144,13 @@ const CalendarTimetableCourseEditor = ({ course, semesterId, initialSlot, period
               <input className="h-10 rounded-[12px] border border-[#e5e5ea] px-3 text-[14px] font-semibold text-[#1c1c1e] outline-none focus:border-[#007aff]" value={teacher} onChange={(event) => setTeacher(event.target.value)} placeholder="担当教員" />
             </div>
             <textarea className="min-h-[72px] rounded-[12px] border border-[#e5e5ea] px-3 py-2 text-[14px] font-medium text-[#1c1c1e] outline-none focus:border-[#007aff]" value={memo} onChange={(event) => setMemo(event.target.value)} placeholder="メモ" />
-            <div>
+            <>
               <div className="mb-2 text-[12px] font-bold text-[#6e6e73]">色</div>
               <div className="flex flex-wrap gap-2">
                 {TAG_COLOR_KEYS.map((key) => <button key={key} type="button" className={cn("h-8 w-8 rounded-full border-2", colorKey === key ? "border-[#007aff]" : "border-transparent")} style={getTimetableEntryStyle(key)} onClick={() => setColorKey(key)} aria-label={`色 ${key}`} />)}
               </div>
-            </div>
-            <div>
+            </>
+            <>
               <div className="mb-2 text-[12px] font-bold text-[#6e6e73]">曜日・時限</div>
               <div className="grid gap-2" style={{ gridTemplateColumns: `52px repeat(${visibleDayCount}, minmax(0, 1fr))` }}>
                 <div />
@@ -160,7 +161,7 @@ const CalendarTimetableCourseEditor = ({ course, semesterId, initialSlot, period
                   return <button key={`${dayIndex}-${period.id}`} type="button" className={cn("h-9 rounded-[10px] border text-[12px] font-bold", selected ? "border-[#007aff] bg-[#e8f2ff] text-[#007aff]" : "border-[#e5e5ea] bg-white text-[#c7c7cc]")} onClick={() => toggleSlot(slot)}>{selected ? "✓" : ""}</button>;
                 })}</div>)}
               </div>
-            </div>
+            </>
           </div>
         </div>
         <div className="flex shrink-0 items-center justify-between border-t border-[#f0f0f2] px-5 py-4">

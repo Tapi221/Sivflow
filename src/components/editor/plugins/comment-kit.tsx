@@ -3,9 +3,11 @@
 import type { ExtendConfig, Path } from 'platejs';
 
 import { type BaseCommentConfig, BaseCommentPlugin, getDraftCommentKey, } from '@platejs/comment';
+
 import { toTPlatePlugin } from 'platejs/react';
 
 import { CommentLeaf } from '@/components/comment-node';
+
 import { getDiscussionClickTarget } from './discussion-kit';
 
 type CommentConfig = ExtendConfig<

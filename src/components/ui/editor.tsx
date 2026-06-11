@@ -3,9 +3,11 @@
 import * as React from 'react';
 
 import type { VariantProps } from 'class-variance-authority';
+
 import type { PlateContentProps, PlateViewProps } from 'platejs/react';
 
 import { cva } from 'class-variance-authority';
+
 import { PlateContainer, PlateContent, PlateView } from 'platejs/react';
 
 import { cn } from '@/lib/utils';
@@ -34,9 +36,6 @@ const editorContainerVariants = cva(
     },
   }
 );
-
-export function EditorContainer({ className, variant, ...props }: React.ComponentProps<'div'> & VariantProps<typeof editorContainerVariants>) { return ( <PlateContainer className={cn( 'ignore-click-outside/toolbar', editorContainerVariants({ variant }), className )} {...props} /> );
-}
 
 const editorVariants = cva(
   cn(
@@ -72,6 +71,9 @@ const editorVariants = cva(
     },
   }
 );
+
+export function EditorContainer({ className, variant, ...props }: React.ComponentProps<'div'> & VariantProps<typeof editorContainerVariants>) { return ( <PlateContainer className={cn( 'ignore-click-outside/toolbar', editorContainerVariants({ variant }), className )} {...props} /> );
+}
 
 export type EditorProps = PlateContentProps & VariantProps<typeof editorVariants>;
 

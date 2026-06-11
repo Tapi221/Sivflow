@@ -3,10 +3,13 @@
 import * as React from 'react';
 
 import { useCalloutEmojiPicker } from '@platejs/callout/react';
+
 import { useEmojiDropdownMenuState } from '@platejs/emoji/react';
+
 import { PlateElement } from 'platejs/react';
 
 import { Button } from './button';
+
 import { cn } from '@/lib/utils';
 
 import { EmojiPicker, EmojiPopover } from './emoji-toolbar-button';

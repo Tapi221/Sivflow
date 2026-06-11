@@ -3,22 +3,89 @@
 import * as React from 'react';
 
 import { AIChatPlugin, AIPlugin, useEditorChat, useLastAssistantMessage, } from '@platejs/ai/react';
+
 import { getTransientCommentKey } from '@platejs/comment';
+
 import { BlockSelectionPlugin, useIsSelecting } from '@platejs/selection/react';
+
 import { getTransientSuggestionKey } from '@platejs/suggestion';
+
 import { Command as CommandPrimitive } from 'cmdk';
+
 import { Album, BadgeHelp, BookOpenCheck, Check, CornerUpLeft, FeatherIcon, ListEnd, ListMinus, ListPlus, Loader2Icon, PauseIcon, PenLine, SmileIcon, Wand, X, } from 'lucide-react';
+
 import { type NodeEntry, type SlateEditor, isHotkey, KEYS, NodeApi, TextApi, } from 'platejs';
+
 import { useEditorPlugin, useFocusedLast, useHotkeys, usePluginOption, } from 'platejs/react';
+
 import { type PlateEditor, useEditorRef } from 'platejs/react';
 
 import { Button } from './button';
+
 import { Command, CommandGroup, CommandItem, CommandList, } from './command';
+
 import { Popover, PopoverAnchor, PopoverContent, } from './popover';
+
 import { cn } from '@/lib/utils';
+
 import { commentPlugin } from '@/components/editor/plugins/comment-kit';
 
 import { AIChatEditor } from './ai-chat-editor';
+
+type EditorChatState =
+  | 'cursorCommand'
+  | 'cursorSuggestion'
+  | 'selectionCommand'
+  | 'selectionSuggestion';
+
+const menuStateItems: Record<
+  EditorChatState,
+  {
+    items: (typeof aiChatItems)[keyof typeof aiChatItems][];
+    heading?: string;
+  }[]
+> = {
+  cursorCommand: [
+    {
+      items: [
+        aiChatItems.comment,
+        aiChatItems.generateMdxSample,
+        aiChatItems.generateMarkdownSample,
+        aiChatItems.continueWrite,
+        aiChatItems.summarize,
+        aiChatItems.explain,
+      ],
+    },
+  ],
+  cursorSuggestion: [
+    {
+      items: [aiChatItems.accept, aiChatItems.discard, aiChatItems.tryAgain],
+    },
+  ],
+  selectionCommand: [
+    {
+      items: [
+        aiChatItems.improveWriting,
+        aiChatItems.comment,
+        aiChatItems.emojify,
+        aiChatItems.makeLonger,
+        aiChatItems.makeShorter,
+        aiChatItems.fixSpelling,
+        aiChatItems.simplifyLanguage,
+      ],
+    },
+  ],
+  selectionSuggestion: [
+    {
+      items: [
+        aiChatItems.accept,
+        aiChatItems.discard,
+        aiChatItems.insertBelow,
+        aiChatItems.tryAgain,
+      ],
+    },
+  ],
+};
 
 export function AIMenu() { const { api, editor } = useEditorPlugin(AIChatPlugin);
   const mode = usePluginOption(AIChatPlugin, 'mode');
@@ -205,12 +272,6 @@ export function AIMenu() { const { api, editor } = useEditorPlugin(AIChatPlugin)
     </Popover>
   );
 }
-
-type EditorChatState =
-  | 'cursorCommand'
-  | 'cursorSuggestion'
-  | 'selectionCommand'
-  | 'selectionSuggestion';
 
 const AICommentIcon = () => (
   <svg
@@ -467,55 +528,6 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
     }) => void;
   }
 >;
-
-const menuStateItems: Record<
-  EditorChatState,
-  {
-    items: (typeof aiChatItems)[keyof typeof aiChatItems][];
-    heading?: string;
-  }[]
-> = {
-  cursorCommand: [
-    {
-      items: [
-        aiChatItems.comment,
-        aiChatItems.generateMdxSample,
-        aiChatItems.generateMarkdownSample,
-        aiChatItems.continueWrite,
-        aiChatItems.summarize,
-        aiChatItems.explain,
-      ],
-    },
-  ],
-  cursorSuggestion: [
-    {
-      items: [aiChatItems.accept, aiChatItems.discard, aiChatItems.tryAgain],
-    },
-  ],
-  selectionCommand: [
-    {
-      items: [
-        aiChatItems.improveWriting,
-        aiChatItems.comment,
-        aiChatItems.emojify,
-        aiChatItems.makeLonger,
-        aiChatItems.makeShorter,
-        aiChatItems.fixSpelling,
-        aiChatItems.simplifyLanguage,
-      ],
-    },
-  ],
-  selectionSuggestion: [
-    {
-      items: [
-        aiChatItems.accept,
-        aiChatItems.discard,
-        aiChatItems.insertBelow,
-        aiChatItems.tryAgain,
-      ],
-    },
-  ],
-};
 
 export const AIMenuItems = ({ input, setInput, setValue, }: { input: string;
   setInput: (value: string) => void;

@@ -61,7 +61,7 @@ describe("VerticalCardPager", () => {
         cards={cards}
         activeIndex={0}
         onActiveIndexChange={onActiveIndexChange}
-        renderCard={(card) => <div>{card}</div>}
+        renderCard={(card) => <>{card}</>}
         getKey={(card) => card}
         scrollToActiveIndexRequestKey={0}
       />,
@@ -74,7 +74,7 @@ describe("VerticalCardPager", () => {
         cards={cards}
         activeIndex={2}
         onActiveIndexChange={onActiveIndexChange}
-        renderCard={(card) => <div>{card}</div>}
+        renderCard={(card) => <>{card}</>}
         getKey={(card) => card}
         scrollToActiveIndexRequestKey={0}
       />,
@@ -87,7 +87,7 @@ describe("VerticalCardPager", () => {
         cards={cards}
         activeIndex={2}
         onActiveIndexChange={onActiveIndexChange}
-        renderCard={(card) => <div>{card}</div>}
+        renderCard={(card) => <>{card}</>}
         getKey={(card) => card}
         scrollToActiveIndexRequestKey={1}
       />,
@@ -109,7 +109,7 @@ describe("VerticalCardPager", () => {
         cards={cards}
         activeIndex={0}
         onActiveIndexChange={vi.fn()}
-        renderCard={(card) => <div>{card}</div>}
+        renderCard={(card) => <>{card}</>}
         getKey={(card) => card}
         scrollToActiveIndexRequestKey={0}
         scrollToActiveIndexBehavior="smooth"
@@ -121,7 +121,7 @@ describe("VerticalCardPager", () => {
         cards={cards}
         activeIndex={1}
         onActiveIndexChange={vi.fn()}
-        renderCard={(card) => <div>{card}</div>}
+        renderCard={(card) => <>{card}</>}
         getKey={(card) => card}
         scrollToActiveIndexRequestKey={2}
         scrollToActiveIndexBehavior="smooth"
@@ -146,7 +146,7 @@ describe("VerticalCardPager", () => {
             cards={cards}
             activeIndex={0}
             onActiveIndexChange={vi.fn()}
-            renderCard={(card) => <div>{card}</div>}
+            renderCard={(card) => <>{card}</>}
             getKey={(card) => card}
           />
         </React.StrictMode>,

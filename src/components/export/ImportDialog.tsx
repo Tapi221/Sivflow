@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+
 import { toAssetRecordFromSnapshotAsset } from "@/application/snapshot/snapshotAssetManifest";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Button } from "@/components/ui/button";
@@ -174,11 +175,11 @@ const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                <div>
+                <>
                   <p className="text-xs text-blue-600 font-medium">インポートファイル</p>
                   <p className="text-sm leading-6">カード: {parsedSnapshot.data.cards.length}枚 / フォルダ: {parsedSnapshot.data.folders.length}件 / カードセット: {parsedSnapshot.data.cardSets.length}件<br />画像アセット: {parsedSnapshot.data.assets.length}件</p>
                   <p className="text-xs text-gray-500 leading-5">世代: {comparison.importedGeneration}</p>
-                </div>
+                </>
                 <ArrowRight className="w-5 h-5 text-gray-400" />
                 <div className="text-right">
                   <p className="text-xs text-green-600 font-medium">現在のデータ</p>

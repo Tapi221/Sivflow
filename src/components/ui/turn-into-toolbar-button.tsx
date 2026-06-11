@@ -3,14 +3,19 @@
 import * as React from 'react';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
+
 import type { TElement } from 'platejs';
 
 import { DropdownMenuItemIndicator } from '@radix-ui/react-dropdown-menu';
+
 import { CheckIcon, ChevronRightIcon, Code2, Columns3Icon, FileCodeIcon, Heading1Icon, Heading2Icon, Heading3Icon, Heading4Icon, Heading5Icon, Heading6Icon, ListIcon, ListOrderedIcon, PilcrowIcon, QuoteIcon, SquareIcon, } from 'lucide-react';
+
 import { KEYS } from 'platejs';
+
 import { useEditorRef, useSelectionFragmentProp } from 'platejs/react';
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioItem, DropdownMenuTrigger, } from './dropdown-menu';
+
 import { getBlockType, setBlockType, } from '@/components/editor/transforms';
 
 import { ToolbarButton, ToolbarMenuGroup } from './toolbar';

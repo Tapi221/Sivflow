@@ -1,5 +1,14 @@
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 
+/**
+ * 全タブ共通ベース
+ */
+type WorkspaceTabBase = {
+  title: string;
+  isClosable: boolean;
+  sectionKey: WorkspaceSidebarSection;
+};
+
 export const WORKSPACE_DEFAULT_EXPLORER_TAB_ID = "explorer:default" as const;
 
 /**
@@ -18,15 +27,6 @@ export type WorkspaceRouteTabId = | "route:home" | "route:review" | "route:sched
  * タブ種別
  */
 export type WorkspaceTabKind = "route" | "explorer" | "document" | "card" | "note";
-
-/**
- * 全タブ共通ベース
- */
-type WorkspaceTabBase = {
-  title: string;
-  isClosable: boolean;
-  sectionKey: WorkspaceSidebarSection;
-};
 
 /**
  * ルートタブ（画面遷移系）

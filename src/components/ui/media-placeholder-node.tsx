@@ -3,16 +3,45 @@
 import * as React from 'react';
 
 import type { TPlaceholderElement } from 'platejs';
+
 import type { PlateElementProps } from 'platejs/react';
 
 import { PlaceholderPlugin, PlaceholderProvider, updateUploadHistory, } from '@platejs/media/react';
+
 import { AudioLines, FileUp, Film, ImageIcon, Loader2Icon } from 'lucide-react';
+
 import { KEYS } from 'platejs';
+
 import { PlateElement, useEditorPlugin, withHOC } from 'platejs/react';
+
 import { useFilePicker } from 'use-file-picker';
 
 import { cn } from '@/lib/utils';
+
 import { useUploadFile } from '@/components/use-upload-file';
+
+function formatBytes(
+  bytes: number,
+  opts: {
+    decimals?: number;
+    sizeType?: 'accurate' | 'normal';
+  } = {}
+) {
+  const { decimals = 0, sizeType = 'normal' } = opts;
+
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const accurateSizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB'];
+
+  if (bytes === 0) return '0 Byte';
+
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+
+  return `${(bytes / 1024 ** i).toFixed(decimals)} ${
+    sizeType === 'accurate'
+      ? (accurateSizes[i] ?? 'Bytest')
+      : (sizes[i] ?? 'Bytes')
+  }`;
+}
 
 const CONTENT: Record<
   string,
@@ -143,14 +172,14 @@ export const PlaceholderElement = withHOC( PlaceholderProvider, function Placeho
               {currentContent.icon}
             </div>
             <div className="whitespace-nowrap text-muted-foreground text-sm">
-              <div>
+              <>
                 {loading ? uploadingFile?.name : currentContent.content}
-              </div>
+              </>
 
               {loading && !isImage && (
                 <div className="mt-1 flex items-center gap-1.5">
-                  <div>{formatBytes(uploadingFile?.size ?? 0)}</div>
-                  <div>–</div>
+                  <>{formatBytes(uploadingFile?.size ?? 0)}</>
+                  <>–</>
                   <div className="flex items-center">
                     <Loader2Icon className="mr-1 size-3.5 animate-spin text-muted-foreground" />
                     {progress ?? 0}%
@@ -214,27 +243,4 @@ export function ImageProgress({ className, file, imageRef, progress = 0, }: { fi
       )}
     </div>
   );
-}
-
-function formatBytes(
-  bytes: number,
-  opts: {
-    decimals?: number;
-    sizeType?: 'accurate' | 'normal';
-  } = {}
-) {
-  const { decimals = 0, sizeType = 'normal' } = opts;
-
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  const accurateSizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB'];
-
-  if (bytes === 0) return '0 Byte';
-
-  const i = Math.floor(Math.log(bytes) / Math.log(1024));
-
-  return `${(bytes / 1024 ** i).toFixed(decimals)} ${
-    sizeType === 'accurate'
-      ? (accurateSizes[i] ?? 'Bytest')
-      : (sizes[i] ?? 'Bytes')
-  }`;
 }

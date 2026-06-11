@@ -3,18 +3,183 @@
 import * as React from 'react';
 
 import { DndPlugin, useDraggable, useDropLine } from '@platejs/dnd';
+
 import { expandListItemsWithChildren } from '@platejs/list';
+
 import { BlockSelectionPlugin } from '@platejs/selection/react';
+
 import { GripVertical } from 'lucide-react';
+
 import { type TElement, getPluginByType, isType, KEYS } from 'platejs';
+
 import { type PlateEditor, type PlateElementProps, type RenderNodeWrapper, MemoizedChildren, useEditorRef, useElement, usePluginOption, } from 'platejs/react';
+
 import { useSelected } from 'platejs/react';
 
 import { Button } from './button';
+
 import { Tooltip, TooltipContent, TooltipTrigger, } from './tooltip';
+
 import { cn } from '@/lib/utils';
 
 const UNDRAGGABLE_KEYS = [KEYS.column, KEYS.tr, KEYS.td];
+
+const createDragPreviewElements = (
+  editor: PlateEditor,
+  blocks: TElement[]
+): HTMLElement[] => {
+  const elements: HTMLElement[] = [];
+  const ids: string[] = [];
+
+  /**
+   * Remove data attributes from the element to avoid recognized as slate
+   * elements incorrectly.
+   */
+  const removeDataAttributes = (element: HTMLElement) => {
+    Array.from(element.attributes).forEach((attr) => {
+      if (
+        attr.name.startsWith('data-slate') ||
+        attr.name.startsWith('data-block-id')
+      ) {
+        element.removeAttribute(attr.name);
+      }
+    });
+
+    Array.from(element.children).forEach((child) => {
+      removeDataAttributes(child as HTMLElement);
+    });
+  };
+
+  const resolveElement = (node: TElement, index: number) => {
+    const domNode = editor.api.toDOMNode(node)!;
+    const newDomNode = domNode.cloneNode(true) as HTMLElement;
+
+    // Apply visual compensation for horizontal scroll
+    const applyScrollCompensation = (
+      original: Element,
+      cloned: HTMLElement
+    ) => {
+      const scrollLeft = original.scrollLeft;
+
+      if (scrollLeft > 0) {
+        // Create a wrapper to handle the scroll offset
+        const scrollWrapper = document.createElement('div');
+        scrollWrapper.style.overflow = 'hidden';
+        scrollWrapper.style.width = `${original.clientWidth}px`;
+
+        // Create inner container with the full content
+        const innerContainer = document.createElement('div');
+        innerContainer.style.transform = `translateX(-${scrollLeft}px)`;
+        innerContainer.style.width = `${original.scrollWidth}px`;
+
+        // Move all children to the inner container
+        while (cloned.firstChild) {
+          innerContainer.append(cloned.firstChild);
+        }
+
+        // Apply the original element's styles to maintain appearance
+        const originalStyles = window.getComputedStyle(original);
+        cloned.style.padding = '0';
+        innerContainer.style.padding = originalStyles.padding;
+
+        scrollWrapper.append(innerContainer);
+        cloned.append(scrollWrapper);
+      }
+    };
+
+    applyScrollCompensation(domNode, newDomNode);
+
+    ids.push(node.id as string);
+    const wrapper = document.createElement('div');
+    wrapper.append(newDomNode);
+    wrapper.style.display = 'flow-root';
+
+    const lastDomNode = blocks[index - 1];
+
+    if (lastDomNode) {
+      const lastDomNodeRect = editor.api
+        .toDOMNode(lastDomNode)!
+        .parentElement!.getBoundingClientRect();
+
+      const domNodeRect = domNode.parentElement!.getBoundingClientRect();
+
+      const distance = domNodeRect.top - lastDomNodeRect.bottom;
+
+      // Check if the two elements are adjacent (touching each other)
+      if (distance > 15) {
+        wrapper.style.marginTop = `${distance}px`;
+      }
+    }
+
+    removeDataAttributes(newDomNode);
+    elements.push(wrapper);
+  };
+
+  blocks.forEach((node, index) => {
+    resolveElement(node, index);
+  });
+
+  editor.setOption(DndPlugin, 'draggingId', ids);
+
+  return elements;
+};
+
+const calculatePreviewTop = (
+  editor: PlateEditor,
+  {
+    blocks,
+    element,
+  }: {
+    blocks: TElement[];
+    element: TElement;
+  }
+): number => {
+  const child = editor.api.toDOMNode(element)!;
+  const editable = editor.api.toDOMNode(editor)!;
+  const firstSelectedChild = blocks[0];
+
+  const firstDomNode = editor.api.toDOMNode(firstSelectedChild)!;
+  // Get editor's top padding
+  const editorPaddingTop = Number(
+    window.getComputedStyle(editable).paddingTop.replace('px', '')
+  );
+
+  // Calculate distance from first selected node to editor top
+  const firstNodeToEditorDistance =
+    firstDomNode.getBoundingClientRect().top -
+    editable.getBoundingClientRect().top -
+    editorPaddingTop;
+
+  // Get margin top of first selected node
+  const firstMarginTopString = window.getComputedStyle(firstDomNode).marginTop;
+  const marginTop = Number(firstMarginTopString.replace('px', ''));
+
+  // Calculate distance from current node to editor top
+  const currentToEditorDistance =
+    child.getBoundingClientRect().top -
+    editable.getBoundingClientRect().top -
+    editorPaddingTop;
+
+  const currentMarginTopString = window.getComputedStyle(child).marginTop;
+  const currentMarginTop = Number(currentMarginTopString.replace('px', ''));
+
+  const previewElementsTopDistance =
+    currentToEditorDistance -
+    firstNodeToEditorDistance +
+    marginTop -
+    currentMarginTop;
+
+  return previewElementsTopDistance;
+};
+
+const calcDragButtonTop = (editor: PlateEditor, element: TElement): number => {
+  const child = editor.api.toDOMNode(element)!;
+
+  const currentMarginTopString = window.getComputedStyle(child).marginTop;
+  const currentMarginTop = Number(currentMarginTopString.replace('px', ''));
+
+  return currentMarginTop;
+};
 
 export const BlockDraggable: RenderNodeWrapper = (props) => { const { editor, element, path } = props;
 
@@ -342,160 +507,3 @@ const DropLine = React.memo(function DropLine({
     />
   );
 });
-
-const createDragPreviewElements = (
-  editor: PlateEditor,
-  blocks: TElement[]
-): HTMLElement[] => {
-  const elements: HTMLElement[] = [];
-  const ids: string[] = [];
-
-  /**
-   * Remove data attributes from the element to avoid recognized as slate
-   * elements incorrectly.
-   */
-  const removeDataAttributes = (element: HTMLElement) => {
-    Array.from(element.attributes).forEach((attr) => {
-      if (
-        attr.name.startsWith('data-slate') ||
-        attr.name.startsWith('data-block-id')
-      ) {
-        element.removeAttribute(attr.name);
-      }
-    });
-
-    Array.from(element.children).forEach((child) => {
-      removeDataAttributes(child as HTMLElement);
-    });
-  };
-
-  const resolveElement = (node: TElement, index: number) => {
-    const domNode = editor.api.toDOMNode(node)!;
-    const newDomNode = domNode.cloneNode(true) as HTMLElement;
-
-    // Apply visual compensation for horizontal scroll
-    const applyScrollCompensation = (
-      original: Element,
-      cloned: HTMLElement
-    ) => {
-      const scrollLeft = original.scrollLeft;
-
-      if (scrollLeft > 0) {
-        // Create a wrapper to handle the scroll offset
-        const scrollWrapper = document.createElement('div');
-        scrollWrapper.style.overflow = 'hidden';
-        scrollWrapper.style.width = `${original.clientWidth}px`;
-
-        // Create inner container with the full content
-        const innerContainer = document.createElement('div');
-        innerContainer.style.transform = `translateX(-${scrollLeft}px)`;
-        innerContainer.style.width = `${original.scrollWidth}px`;
-
-        // Move all children to the inner container
-        while (cloned.firstChild) {
-          innerContainer.append(cloned.firstChild);
-        }
-
-        // Apply the original element's styles to maintain appearance
-        const originalStyles = window.getComputedStyle(original);
-        cloned.style.padding = '0';
-        innerContainer.style.padding = originalStyles.padding;
-
-        scrollWrapper.append(innerContainer);
-        cloned.append(scrollWrapper);
-      }
-    };
-
-    applyScrollCompensation(domNode, newDomNode);
-
-    ids.push(node.id as string);
-    const wrapper = document.createElement('div');
-    wrapper.append(newDomNode);
-    wrapper.style.display = 'flow-root';
-
-    const lastDomNode = blocks[index - 1];
-
-    if (lastDomNode) {
-      const lastDomNodeRect = editor.api
-        .toDOMNode(lastDomNode)!
-        .parentElement!.getBoundingClientRect();
-
-      const domNodeRect = domNode.parentElement!.getBoundingClientRect();
-
-      const distance = domNodeRect.top - lastDomNodeRect.bottom;
-
-      // Check if the two elements are adjacent (touching each other)
-      if (distance > 15) {
-        wrapper.style.marginTop = `${distance}px`;
-      }
-    }
-
-    removeDataAttributes(newDomNode);
-    elements.push(wrapper);
-  };
-
-  blocks.forEach((node, index) => {
-    resolveElement(node, index);
-  });
-
-  editor.setOption(DndPlugin, 'draggingId', ids);
-
-  return elements;
-};
-
-const calculatePreviewTop = (
-  editor: PlateEditor,
-  {
-    blocks,
-    element,
-  }: {
-    blocks: TElement[];
-    element: TElement;
-  }
-): number => {
-  const child = editor.api.toDOMNode(element)!;
-  const editable = editor.api.toDOMNode(editor)!;
-  const firstSelectedChild = blocks[0];
-
-  const firstDomNode = editor.api.toDOMNode(firstSelectedChild)!;
-  // Get editor's top padding
-  const editorPaddingTop = Number(
-    window.getComputedStyle(editable).paddingTop.replace('px', '')
-  );
-
-  // Calculate distance from first selected node to editor top
-  const firstNodeToEditorDistance =
-    firstDomNode.getBoundingClientRect().top -
-    editable.getBoundingClientRect().top -
-    editorPaddingTop;
-
-  // Get margin top of first selected node
-  const firstMarginTopString = window.getComputedStyle(firstDomNode).marginTop;
-  const marginTop = Number(firstMarginTopString.replace('px', ''));
-
-  // Calculate distance from current node to editor top
-  const currentToEditorDistance =
-    child.getBoundingClientRect().top -
-    editable.getBoundingClientRect().top -
-    editorPaddingTop;
-
-  const currentMarginTopString = window.getComputedStyle(child).marginTop;
-  const currentMarginTop = Number(currentMarginTopString.replace('px', ''));
-
-  const previewElementsTopDistance =
-    currentToEditorDistance -
-    firstNodeToEditorDistance +
-    marginTop -
-    currentMarginTop;
-
-  return previewElementsTopDistance;
-};
-
-const calcDragButtonTop = (editor: PlateEditor, element: TElement): number => {
-  const child = editor.api.toDOMNode(element)!;
-
-  const currentMarginTopString = window.getComputedStyle(child).marginTop;
-  const currentMarginTop = Number(currentMarginTopString.replace('px', ''));
-
-  return currentMarginTop;
-};

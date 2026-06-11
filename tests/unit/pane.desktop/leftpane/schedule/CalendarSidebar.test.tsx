@@ -43,7 +43,7 @@ vi.mock("@/chip/rightclickpanel.desktop/rightClickPanel.utils", () => ({
 
 vi.mock("@/features/calendar/panel/SelectableGoogleSourceRow", () => ({
   GOOGLE_SOURCE_ROW_CLASS_NAME: "google-source-row",
-  SelectableGoogleSourceRow: ({ label }: { label: string }) => <div>{label}</div>,
+  SelectableGoogleSourceRow: ({ label }: { label: string }) => <>{label}</>,
 }));
 
 vi.mock("@/pane.desktop/leftpane/Sidebar.LayeredDirectory", () => ({

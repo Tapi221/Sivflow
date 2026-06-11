@@ -5,10 +5,13 @@ import * as React from 'react';
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
 import { CalendarIcon, ChevronRightIcon, Code2, Columns3Icon, FileCodeIcon, FilmIcon, Heading1Icon, Heading2Icon, Heading3Icon, ImageIcon, Link2Icon, ListIcon, ListOrderedIcon, MinusIcon, PenToolIcon, PilcrowIcon, PlusIcon, QuoteIcon, RadicalIcon, SquareIcon, SuperscriptIcon, TableIcon, TableOfContentsIcon, } from 'lucide-react';
+
 import { KEYS } from 'platejs';
+
 import { type PlateEditor, useEditorRef } from 'platejs/react';
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from './dropdown-menu';
+
 import { insertBlock, insertInlineElement, } from '@/components/editor/transforms';
 
 import { ToolbarButton, ToolbarMenuGroup } from './toolbar';

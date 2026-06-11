@@ -45,13 +45,7 @@ const clearDevSwAndCaches = () => {
   });
 };
 
-export const initServiceWorkerLifecycle = () => {
-  if (
-    started ||
-    typeof window === "undefined" ||
-    !("serviceWorker" in navigator)
-  ) {
-    return;
+export const initServiceWorkerLifecycle = () => { if ( started || typeof window === "undefined" || !("serviceWorker" in navigator) ) { return;
   }
   started = true;
 

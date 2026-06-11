@@ -1,15 +1,6 @@
 import { memo } from "react";
-import { StyleSheet, Text, View } from "react-native";
 
-const TrashScreen = () => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.eyebrow}>Trash</Text>
-      <Text style={styles.title}>ゴミ箱</Text>
-      <Text style={styles.description}>Mobile のゴミ箱 UI はこの screen に実装します。</Text>
-    </View>
-  );
-};
+import { StyleSheet, Text, View } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
@@ -41,6 +32,16 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 });
+
+const TrashScreen = () => {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.eyebrow}>Trash</Text>
+      <Text style={styles.title}>ゴミ箱</Text>
+      <Text style={styles.description}>Mobile のゴミ箱 UI はこの screen に実装します。</Text>
+    </View>
+  );
+};
 
 const MemoizedTrashScreen = memo(TrashScreen);
 

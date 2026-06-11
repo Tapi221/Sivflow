@@ -3,10 +3,13 @@
 import type { ExtendConfig, TElement, TInlineSuggestionData, TSuggestionData, TSuggestionText, } from 'platejs';
 
 import { KEYS, TextApi, TrailingBlockPlugin } from 'platejs';
+
 import { type BaseSuggestionConfig, BaseSuggestionPlugin, } from '@platejs/suggestion';
+
 import { toTPlatePlugin } from 'platejs/react';
 
 import { SuggestionLeaf, SuggestionLineBreak, VoidRemoveSuggestionOverlay, } from '@/components/suggestion-node';
+
 import { discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarget, } from './discussion-kit';
 
 export type SuggestionConfig = ExtendConfig< BaseSuggestionConfig, { activeId: string | null;
@@ -20,6 +23,18 @@ const INLINE_SUGGESTION_TARGET_PLUGINS = [
   KEYS.link,
   KEYS.mention,
 ];
+
+const suggestionEntry = api.suggestion?.node({
+        isText: !blockTarget,
+      });
+
+const trailingBlockPlugin = TrailingBlockPlugin.configure({
+  options: {
+    insert: (editor, { insert }) => {
+      editor.getApi(suggestionPlugin).suggestion.withoutSuggestions(insert);
+    },
+  },
+});
 
 function getInlineSuggestionData(editor: any, element: TElement) {
   const suggestionApi = editor.getApi(BaseSuggestionPlugin).suggestion;
@@ -48,23 +63,20 @@ export const suggestionPlugin = toTPlatePlugin<SuggestionConfig>( BaseSuggestion
           });
 
       if (!markTarget && !blockTarget) {
-        setOption('activeId', null);
-        return;
-      }
+        setOption
 
-      const suggestionEntry = api.suggestion?.node({
-        isText: !blockTarget,
-      });
+('activeId', null);
 
-      setOption(
+return;
+
+setOption(
         'activeId',
         suggestionEntry
           ? (api.suggestion?.nodeId(suggestionEntry[0]) ?? null)
           : null
       );
-    },
-  },
-  inject: {
+
+inject: {
     isElement: true,
     nodeProps: {
       nodeKey: '',
@@ -84,20 +96,14 @@ export const suggestionPlugin = toTPlatePlugin<SuggestionConfig>( BaseSuggestion
       transformStyle: () => ({}) as CSSStyleDeclaration,
     },
     targetPlugins: INLINE_SUGGESTION_TARGET_PLUGINS,
-  },
-  render: {
+  }
+
+render: {
     belowNodes: SuggestionLineBreak as any,
     belowRootNodes: VoidRemoveSuggestionOverlay as any,
     node: SuggestionLeaf,
-  },
-});
+  }
 
-const trailingBlockPlugin = TrailingBlockPlugin.configure({
-  options: {
-    insert: (editor, { insert }) => {
-      editor.getApi(suggestionPlugin).suggestion.withoutSuggestions(insert);
-    },
-  },
-});
+;
 
 export const SuggestionKit = [suggestionPlugin, trailingBlockPlugin];

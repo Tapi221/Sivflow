@@ -3,17 +3,25 @@
 import * as React from 'react';
 
 import type { TFootnoteElement } from '@platejs/footnote';
+
 import { PathApi, type Path } from 'platejs';
+
 import { FootnoteReferencePlugin } from '@platejs/footnote/react';
+
 import type { PlateEditor, PlateElementProps } from 'platejs/react';
 
 import { PlateElement, useEditorSelector, useFocused, useNavigationHighlight, usePath, useSelected, } from 'platejs/react';
 
 import { HoverCard, HoverCardContent, HoverCardTrigger, } from './hover-card';
+
 import { Popover, PopoverAnchor, PopoverContent, } from './popover';
+
 import { Command, CommandGroup, CommandItem, CommandList, } from './command';
+
 import { cn } from '@/lib/utils';
+
 import { Button } from './button';
+
 import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem, } from '@/components/inline-combobox';
 
 const NUMERIC_FOOTNOTE_QUERY = /^\d+$/;

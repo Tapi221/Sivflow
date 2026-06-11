@@ -5,17 +5,27 @@ import * as React from 'react';
 import type { CreatePlateEditorOptions } from 'platejs/react';
 
 import { getCommentKey, getDraftCommentKey } from '@platejs/comment';
+
 import { CommentPlugin, useCommentId } from '@platejs/comment/react';
+
 import { differenceInDays, differenceInHours, differenceInMinutes, format, } from 'date-fns';
+
 import { ArrowUpIcon, CheckIcon, MoreHorizontalIcon, PencilIcon, TrashIcon, XIcon, } from 'lucide-react';
+
 import { type NodeEntry, type TCommentText, type Value, KEYS, nanoid, NodeApi, } from 'platejs';
+
 import { Plate, useEditorPlugin, useEditorRef, usePlateEditor, usePluginOption, } from 'platejs/react';
 
 import { Avatar, AvatarFallback, AvatarImage } from './avatar';
+
 import { Button } from './button';
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger, } from './dropdown-menu';
+
 import { cn } from '@/lib/utils';
+
 import { BasicMarksKit } from '@/components/editor/plugins/basic-marks-kit';
+
 import { type TDiscussion, discussionPlugin, } from '@/components/editor/plugins/discussion-kit';
 
 import { Editor, EditorContainer } from './editor';
@@ -26,6 +36,23 @@ export type TComment = { id: string;
   discussionId: string;
   isEdited: boolean;
   userId: string;
+};
+
+const useCommentEditor = (
+  options: Omit<CreatePlateEditorOptions, 'plugins'> = {},
+  deps: any[] = []
+) => {
+  const commentEditor = usePlateEditor(
+    {
+      id: 'comment',
+      plugins: BasicMarksKit,
+      value: [],
+      ...options,
+    },
+    deps
+  );
+
+  return commentEditor;
 };
 
 export function Comment(props: { comment: TComment;
@@ -358,23 +385,6 @@ function CommentMoreDropdown(props: {
     </DropdownMenu>
   );
 }
-
-const useCommentEditor = (
-  options: Omit<CreatePlateEditorOptions, 'plugins'> = {},
-  deps: any[] = []
-) => {
-  const commentEditor = usePlateEditor(
-    {
-      id: 'comment',
-      plugins: BasicMarksKit,
-      value: [],
-      ...options,
-    },
-    deps
-  );
-
-  return commentEditor;
-};
 
 export function CommentCreateForm({ autoFocus = false, className, discussionId: discussionIdProp, focusOnMount = false, }: { autoFocus?: boolean;
   className?: string;

@@ -5,18 +5,27 @@ import * as React from 'react';
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
 import { exportToDocx } from '@platejs/docx-io';
+
 import { MarkdownPlugin } from '@platejs/markdown';
+
 import { ArrowDownToLineIcon } from 'lucide-react';
+
 import type { SlatePlugin } from 'platejs';
+
 import { createSlateEditor } from 'platejs';
+
 import { useEditorRef } from 'platejs/react';
+
 import { serializeHtml } from 'platejs/static';
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger, } from './dropdown-menu';
+
 import { BaseEditorKit } from '@/components/editor/editor-base-kit';
 
 import { EditorStatic } from './editor-static';
+
 import { ToolbarButton } from './toolbar';
+
 import { DocxExportKit } from '@/components/editor/plugins/docx-export-kit';
 
 const siteUrl = 'https://platejs.org';

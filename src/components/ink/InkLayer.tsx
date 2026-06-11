@@ -1,11 +1,48 @@
 import React from "react";
+
 import { Button } from "@/components/ui/button";
+
 import { Eraser, PenLine, Redo2, Trash2, Undo2 } from "@/ui/icons";
+
 import { saveInkToStorage } from "./inkStorage";
+
 import { cloneInkDocument, createEmptyInkDocument, INK_DOCUMENT_VERSION, INK_PAPER_H, INK_PAPER_W, type InkDocument, type InkEditTool, type InkPoint, type InkSide, type InkStroke, normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
+
 import type { InkHistoryState, InkLayerHandle } from "./inkLayer.types";
+
 import { cn } from "@/lib/utils";
+
 import { clientPointToPaperPoint, paperPointToCanvasPoint, type RectLike, squaredDistance } from "@/utils/inkCoords";
+
+interface InkLayerProps {
+  cardId?: string | null;
+  side: InkSide;
+  editable: boolean;
+  tool: InkEditTool;
+  value?: InkDocument | null;
+  onChange?: (next: InkDocument) => void;
+  /** @deprecated use value */
+  document?: InkDocument | null;
+  /** @deprecated use onChange */
+  className?: string;
+  paperWidth?: number;
+  paperHeight?: number;
+  eraserRadius?: number;
+  /** @deprecated use onChange */
+  onDocumentChange?: (next: InkDocument) => void;
+  onHistoryChange?: (state: InkHistoryState) => void;
+}
+
+interface InkToolbarProps {
+  tool: InkEditTool | null;
+  canUndo: boolean;
+  canRedo: boolean;
+  className?: string;
+  onToolChange: (next: InkEditTool | null) => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  onClear: () => void;
+}
 
 const TOOL_STYLE: Record<
   Exclude<InkEditTool, "eraser">,
@@ -50,25 +87,6 @@ const toDocSignature = (doc: InkDocument): string => {
     })),
   });
 };
-
-interface InkLayerProps {
-  cardId?: string | null;
-  side: InkSide;
-  editable: boolean;
-  tool: InkEditTool;
-  value?: InkDocument | null;
-  onChange?: (next: InkDocument) => void;
-  /** @deprecated use value */
-  document?: InkDocument | null;
-  /** @deprecated use onChange */
-  className?: string;
-  paperWidth?: number;
-  paperHeight?: number;
-  eraserRadius?: number;
-  /** @deprecated use onChange */
-  onDocumentChange?: (next: InkDocument) => void;
-  onHistoryChange?: (state: InkHistoryState) => void;
-}
 
 export const InkLayer = React.memo( React.forwardRef<InkLayerHandle, InkLayerProps>(function InkLayer( { cardId, side, editable, tool, value, onChange, document, className, paperWidth = INK_PAPER_W, paperHeight = INK_PAPER_H, eraserRadius = 28, onDocumentChange, onHistoryChange, }, ref, ) { const containerRef = React.useRef<HTMLDivElement | null>(null);
     const baseCanvasRef = React.useRef<HTMLCanvasElement | null>(null);
@@ -636,17 +654,6 @@ export const InkLayer = React.memo( React.forwardRef<InkLayerHandle, InkLayerPro
 );
 
 InkLayer.displayName = "InkLayer";
-
-interface InkToolbarProps {
-  tool: InkEditTool | null;
-  canUndo: boolean;
-  canRedo: boolean;
-  className?: string;
-  onToolChange: (next: InkEditTool | null) => void;
-  onUndo: () => void;
-  onRedo: () => void;
-  onClear: () => void;
-}
 
 export const InkToolbar = React.memo(function InkToolbar({ tool, canUndo, canRedo, className, onToolChange, onUndo, onRedo, onClear, }: InkToolbarProps) { return ( <div className={cn( "pointer-events-auto inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white/90 p-1 shadow-sm backdrop-blur", className, )} data-card-no-pan="true" > <Button type="button" size="icon" variant={tool === "pen" ? "default" : "ghost"} className="h-7 w-7" onClick={() => onToolChange(tool === "pen" ? null : "pen")} > <PenLine className="h-3.5 w-3.5" /> </Button> <Button type="button" size="icon" variant={tool === "eraser" ? "default" : "ghost"} className="h-7 w-7" onClick={() => onToolChange(tool === "eraser" ? null : "eraser")} > <Eraser className="h-3.5 w-3.5" /> </Button> <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={onUndo} disabled={!canUndo} > <Undo2 className="h-3.5 w-3.5" /> </Button> <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={onRedo} disabled={!canRedo} > <Redo2 className="h-3.5 w-3.5" /> </Button> <Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-rose-500 hover:text-rose-600" onClick={onClear} disabled={!canUndo} > <Trash2 className="h-3.5 w-3.5" /> </Button> </div> );
 });

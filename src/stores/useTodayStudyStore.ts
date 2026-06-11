@@ -6,22 +6,10 @@
  * - userId が変わったらリセット（複数アカウントでの混在防止）
  */
 import { create } from "zustand";
+
 import { persist } from "zustand/middleware";
 
 export type RatingKey = "forgot" | "vague" | "remembered" | "easy";
-
-const emptyRatings = (): Record<RatingKey, number> => ({
-  forgot: 0,
-  vague: 0,
-  remembered: 0,
-  easy: 0,
-});
-
-/** ローカル日付を YYYY-MM-DD 形式で返す */
-const localDateKey = (): string => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-};
 
 type TodayStudyState = {
   dateKey: string;
@@ -44,6 +32,19 @@ type TodayStudyActions = {
   markForExtra: (cardId: string) => void;
   /** 追い復習で OK になったカードをキューから除外 */
   markExtraDone: (cardId: string) => void;
+};
+
+const emptyRatings = (): Record<RatingKey, number> => ({
+  forgot: 0,
+  vague: 0,
+  remembered: 0,
+  easy: 0,
+});
+
+/** ローカル日付を YYYY-MM-DD 形式で返す */
+const localDateKey = (): string => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
 export type TodayStudyStore = TodayStudyState & TodayStudyActions;

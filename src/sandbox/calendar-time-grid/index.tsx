@@ -110,10 +110,10 @@ const CalendarTimeGridSandboxPage = () => {
 
           <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
             <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-              <div>
+              <>
                 <p className="text-sm text-slate-400">Sample day</p>
                 <h2 className="text-xl font-semibold text-white">{getDateLabel(SAMPLE_DATE)}</h2>
-              </div>
+              </>
               <div className="rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300">
                 {SAMPLE_EVENTS.length} events / 08:00 - 18:00
               </div>

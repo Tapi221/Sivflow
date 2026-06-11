@@ -1,8 +1,27 @@
 import { WEB_STORAGE_KEYS } from "@platform/storage/webStorageKeys.constants";
+
 import type { CardSetViewEditingDraftPatch } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
+
 import { createLatestReviewLogPatch, createReviewPatchFromRating } from "@/services/reviewAlgorithm";
+
 import type { ReviewLog } from "@/types/domain/base";
+
 import type { Card, UserSettings } from "@/types";
+
+type CreateMetaPanelActionsArgs = {
+  selectedCard: Card | null;
+  settings?: Partial<UserSettings> | null;
+  updateCard: (cardId: string, data: unknown) => void | Promise<void>;
+  onCardUpdated?: () => void;
+  flushDraft: (args?: {
+    reason?: "autosave";
+    showSuccessToast?: boolean;
+  }) => Promise<boolean>;
+  handleTitleInputChange: (nextTitle: string) => void;
+  handleUpdateTags: (nextTags: string[]) => Promise<void>;
+  handleToggleDraft: (nextIsDraft: boolean) => Promise<void>;
+  handleUpdateTitle: (nextTitle: string) => Promise<void>;
+};
 
 export const META_PANEL_OPEN_STORAGE_KEY = WEB_STORAGE_KEYS.cardEditorMetaPanelOpen;
 
@@ -63,21 +82,6 @@ export const readStoredMetaPanelOpen = () => { if (typeof window === "undefined"
 
 export const writeStoredMetaPanelOpen = (isOpen: boolean) => { if (typeof window === "undefined") return;
   window.localStorage.setItem(META_PANEL_OPEN_STORAGE_KEY, String(isOpen));
-};
-
-type CreateMetaPanelActionsArgs = {
-  selectedCard: Card | null;
-  settings?: Partial<UserSettings> | null;
-  updateCard: (cardId: string, data: unknown) => void | Promise<void>;
-  onCardUpdated?: () => void;
-  flushDraft: (args?: {
-    reason?: "autosave";
-    showSuccessToast?: boolean;
-  }) => Promise<boolean>;
-  handleTitleInputChange: (nextTitle: string) => void;
-  handleUpdateTags: (nextTags: string[]) => Promise<void>;
-  handleToggleDraft: (nextIsDraft: boolean) => Promise<void>;
-  handleUpdateTitle: (nextTitle: string) => Promise<void>;
 };
 
 const normalizeReviewRating = (rating: number): ReviewLog["rating"] => {

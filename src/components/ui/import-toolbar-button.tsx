@@ -5,10 +5,15 @@ import * as React from 'react';
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
 import { importDocx } from '@platejs/docx-io';
+
 import { MarkdownPlugin } from '@platejs/markdown';
+
 import { ArrowUpToLineIcon } from 'lucide-react';
+
 import { getEditorDOMFromHtmlString } from 'platejs/static';
+
 import { useEditorRef } from 'platejs/react';
+
 import { useFilePicker } from 'use-file-picker';
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger, } from './dropdown-menu';

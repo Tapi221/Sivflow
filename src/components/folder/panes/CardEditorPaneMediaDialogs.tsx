@@ -1,13 +1,21 @@
 import React from "react";
+
 import { memo } from "react";
+
 import { LinkEditor } from "@/components/card/editor/LinkEditor";
+
 import MediaUploader from "@/components/card/media/MediaUploader";
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
 import type { UploadedImage } from "@/types";
+
 import type { ReferenceBlockData } from "@/types/domain/base";
+
 import type { CardFaceAttachmentAudio } from "@/types/domain/card";
 
 type Side = "question" | "answer";
+
 type DialogAudioItem = string | CardFaceAttachmentAudio;
 
 interface MediaDialogProps {
@@ -42,6 +50,23 @@ const toDialogAudio = (url: string, index: number): CardFaceAttachmentAudio => (
   filename: `audio-${index + 1}`,
   order: index,
 });
+
+const areMediaDialogsPropsEqual = (
+  prev: CardEditorPaneMediaDialogsProps,
+  next: CardEditorPaneMediaDialogsProps,
+): boolean => {
+  const prevClosed =
+    prev.imageDialogSide === null &&
+    prev.audioDialogSide === null &&
+    prev.linkDialogSide === null;
+  const nextClosed =
+    next.imageDialogSide === null &&
+    next.audioDialogSide === null &&
+    next.linkDialogSide === null;
+
+  if (prevClosed && nextClosed) return true;
+  return false;
+};
 
 const MediaDialog = ({
   title,
@@ -127,22 +152,6 @@ const CardEditorPaneMediaDialogsInner = ({
   );
 };
 
-const areMediaDialogsPropsEqual = (
-  prev: CardEditorPaneMediaDialogsProps,
-  next: CardEditorPaneMediaDialogsProps,
-): boolean => {
-  const prevClosed =
-    prev.imageDialogSide === null &&
-    prev.audioDialogSide === null &&
-    prev.linkDialogSide === null;
-  const nextClosed =
-    next.imageDialogSide === null &&
-    next.audioDialogSide === null &&
-    next.linkDialogSide === null;
-
-  if (prevClosed && nextClosed) return true;
-  return false;
-};
-
 export const CardEditorPaneMediaDialogs = memo( CardEditorPaneMediaDialogsInner, areMediaDialogsPropsEqual, );
+
 CardEditorPaneMediaDialogs.displayName = "CardEditorPaneMediaDialogs";

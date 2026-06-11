@@ -3,16 +3,23 @@
 import * as React from 'react';
 
 import { cva } from 'class-variance-authority';
+
 import { CornerDownLeftIcon } from 'lucide-react';
+
 import type { AnyPluginConfig, TElement, TSuggestionData, TSuggestionText, WithRequiredKey, } from 'platejs';
+
 import { KEYS } from 'platejs';
+
 import type { PlateEditor, PlateLeafProps, RenderNodeWrapper, } from 'platejs/react';
 
 import { SuggestionPlugin } from '@platejs/suggestion/react';
+
 import { PlateLeaf, useEditorPlugin, usePluginOption } from 'platejs/react';
 
 import { cn } from '@/lib/utils';
+
 import type { SuggestionConfig } from '@/components/editor/plugins/suggestion-kit';
+
 import { voidRemoveSuggestionOverlayVariants } from '@/components/suggestion-node-static';
 
 const suggestionPlugin = SuggestionPlugin as WithRequiredKey<SuggestionConfig>;
@@ -188,6 +195,7 @@ export function SuggestionLeaf(props: PlateLeafProps<TSuggestionText>) { const {
     </PlateLeaf>
   );
 }
+
 export const SuggestionLineBreak: RenderNodeWrapper<AnyPluginConfig> = ({ api, element, }) => { if (!api.suggestion.isBlockSuggestion(element)) return;
 
   const suggestionData = element.suggestion as TSuggestionData;

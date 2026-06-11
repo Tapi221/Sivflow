@@ -3,8 +3,11 @@
 import * as React from 'react';
 
 import { SuggestionPlugin } from '@platejs/suggestion/react';
+
 import { type DropdownMenuProps, DropdownMenuItemIndicator, } from '@radix-ui/react-dropdown-menu';
+
 import { CheckIcon, EyeIcon, PencilLineIcon, PenIcon } from 'lucide-react';
+
 import { useEditorReadOnly, useEditorRef, usePluginOption, } from 'platejs/react';
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger, } from './dropdown-menu';

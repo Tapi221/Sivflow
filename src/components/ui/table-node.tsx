@@ -3,23 +3,37 @@
 import * as React from 'react';
 
 import { useDraggable, useDropLine } from '@platejs/dnd';
+
 import { BlockSelectionPlugin, useBlockSelected, } from '@platejs/selection/react';
+
 import { resizeLengthClampStatic } from '@platejs/resizable';
+
 import { getTableColumnCount, setCellBackground, setTableColSize, setTableMarginLeft, setTableRowSize, } from '@platejs/table';
+
 import { TablePlugin, TableProvider, roundCellSizeToStep, useCellIndices, useOverrideColSize, useOverrideMarginLeft, useOverrideRowSize, useTableCellBorders, useTableBordersDropdownMenuContentState, useTableColSizes, useTableElement, useTableMergeState, useTableSelectionDom, useTableValue, } from '@platejs/table/react';
+
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, CombineIcon, EraserIcon, Grid2X2Icon, GripVertical, PaintBucketIcon, SquareSplitHorizontalIcon, Trash2Icon, XIcon, } from 'lucide-react';
+
 import { type TElement, type TTableCellElement, type TTableElement, type TTableRowElement, KEYS, PathApi, } from 'platejs';
+
 import { type PlateElementProps, PlateElement, useComposedRef, useEditorPlugin, useEditorRef, useEditorSelector, useElement, useFocusedLast, usePluginOption, useReadOnly, useRemoveNodeButton, useSelected, withHOC, } from 'platejs/react';
+
 import { useElementSelector } from 'platejs/react';
 
 import { Button } from './button';
+
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuPortal, DropdownMenuTrigger, } from './dropdown-menu';
+
 import { Popover, PopoverAnchor, PopoverContent, } from './popover';
+
 import { cn } from '@/lib/utils';
 
 import { blockSelectionVariants } from './block-selection';
+
 import { ColorDropdownMenuItems, DEFAULT_COLORS, } from './font-color-toolbar-button';
+
 import { BorderAllIcon, BorderBottomIcon, BorderLeftIcon, BorderNoneIcon, BorderRightIcon, BorderTopIcon, } from './table-icons';
+
 import { Toolbar, ToolbarButton, ToolbarGroup, ToolbarMenuGroup, } from './toolbar';
 
 type TableResizeDirection = 'bottom' | 'left' | 'right';
@@ -54,8 +68,11 @@ type TableResizeContextValue = {
 };
 
 const TABLE_CONTROL_COLUMN_WIDTH = 8;
+
 const TABLE_DEFAULT_COLUMN_WIDTH = 120;
+
 const TABLE_DEFERRED_COLUMN_RESIZE_CELL_COUNT = 1200;
+
 const TABLE_MULTI_SELECTION_TOOLBAR_DELAY_MS = 150;
 
 const TableResizeContext = React.createContext<TableResizeContextValue | null>(
@@ -516,6 +533,32 @@ function useTableResizeController({
   );
 }
 
+function useTableCellPresentation(element: TTableCellElement) {
+  const { api } = useEditorPlugin(TablePlugin);
+  const borders = useTableCellBorders({ element });
+  const { col, row } = useCellIndices();
+
+  const colSpan = api.table.getColSpan(element);
+  const rowSpan = api.table.getRowSpan(element);
+  const width = React.useMemo(() => {
+    const terms = Array.from(
+      { length: colSpan },
+      (_, offset) => `var(--table-col-${col + offset}, 120px)`
+    );
+
+    return terms.length === 1 ? terms[0]! : `calc(${terms.join(' + ')})`;
+  }, [col, colSpan]);
+
+  return {
+    borders,
+    colIndex: col + colSpan - 1,
+    colSpan,
+    rowIndex: row + rowSpan - 1,
+    rowSpan,
+    width,
+  };
+}
+
 export const TableElement = withHOC( TableProvider, function TableElement({ children, ...props }: PlateElementProps<TTableElement>) { const readOnly = useReadOnly();
     const isSelectionAreaVisible = usePluginOption(
       BlockSelectionPlugin,
@@ -949,28 +992,28 @@ function TableBordersDropdownMenuContent(
           onCheckedChange={getOnSelectTableBorder('top')}
         >
           <BorderTopIcon />
-          <div>Top Border</div>
+          <>Top Border</>
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
           checked={hasRightBorder}
           onCheckedChange={getOnSelectTableBorder('right')}
         >
           <BorderRightIcon />
-          <div>Right Border</div>
+          <>Right Border</>
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
           checked={hasBottomBorder}
           onCheckedChange={getOnSelectTableBorder('bottom')}
         >
           <BorderBottomIcon />
-          <div>Bottom Border</div>
+          <>Bottom Border</>
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
           checked={hasLeftBorder}
           onCheckedChange={getOnSelectTableBorder('left')}
         >
           <BorderLeftIcon />
-          <div>Left Border</div>
+          <>Left Border</>
         </DropdownMenuCheckboxItem>
       </DropdownMenuGroup>
 
@@ -980,14 +1023,14 @@ function TableBordersDropdownMenuContent(
           onCheckedChange={getOnSelectTableBorder('none')}
         >
           <BorderNoneIcon />
-          <div>No Border</div>
+          <>No Border</>
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
           checked={hasOuterBorders}
           onCheckedChange={getOnSelectTableBorder('outer')}
         >
           <BorderAllIcon />
-          <div>Outside Borders</div>
+          <>Outside Borders</>
         </DropdownMenuCheckboxItem>
       </DropdownMenuGroup>
     </DropdownMenuContent>
@@ -1114,32 +1157,6 @@ export function TableRowElement({ children, ...props }: PlateElementProps<TTable
       {children}
     </PlateElement>
   );
-}
-
-function useTableCellPresentation(element: TTableCellElement) {
-  const { api } = useEditorPlugin(TablePlugin);
-  const borders = useTableCellBorders({ element });
-  const { col, row } = useCellIndices();
-
-  const colSpan = api.table.getColSpan(element);
-  const rowSpan = api.table.getRowSpan(element);
-  const width = React.useMemo(() => {
-    const terms = Array.from(
-      { length: colSpan },
-      (_, offset) => `var(--table-col-${col + offset}, 120px)`
-    );
-
-    return terms.length === 1 ? terms[0]! : `calc(${terms.join(' + ')})`;
-  }, [col, colSpan]);
-
-  return {
-    borders,
-    colIndex: col + colSpan - 1,
-    colSpan,
-    rowIndex: row + rowSpan - 1,
-    rowSpan,
-    width,
-  };
 }
 
 function RowDragHandle({ dragRef }: { dragRef: React.Ref<any> }) {

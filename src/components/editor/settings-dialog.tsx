@@ -5,14 +5,21 @@
 import * as React from 'react';
 
 import { CopilotPlugin } from '@platejs/ai/react';
+
 import { Check, ChevronsUpDown, ExternalLinkIcon, Eye, EyeOff, Settings, Wand2Icon, } from 'lucide-react';
+
 import { useEditorRef } from 'platejs/react';
 
 import { Button } from '@/components/ui/button';
+
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, } from '@/components/ui/command';
+
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, } from '@/components/ui/dialog';
+
 import { Input } from '@/components/ui/input';
+
 import { Popover, PopoverContent, PopoverTrigger, } from '@/components/ui/popover';
+
 import { cn } from '@/lib/utils';
 
 import { aiChatPlugin } from '@/components/editor/plugins/ai-kit';

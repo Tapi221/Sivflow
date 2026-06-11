@@ -1,19 +1,6 @@
 import React from "react";
+
 import { cn } from "@/lib/utils";
-
-const clamp = (v: number, min: number, max: number) =>
-  Math.min(max, Math.max(min, v));
-
-const DRAG_START_THRESHOLD_PX = 6;
-
-const inferBaseWidthFromLegacyScale = (
-  referenceWidthPx: number,
-  legacyScale?: number | null,
-) => {
-  const safeReferenceWidth = Math.max(1, referenceWidthPx || 1);
-  const safeLegacyScale = clamp(Number(legacyScale ?? 1), 0.2, 1);
-  return safeReferenceWidth * safeLegacyScale;
-};
 
 type ImageTransform = {
   scale: number;
@@ -45,6 +32,20 @@ type ImageFrameProps = {
   onTransformCommit?: (next: ImageTransform) => void;
   onNaturalSize?: (size: { naturalW: number; naturalH: number }) => void;
   onError?: () => void;
+};
+
+const DRAG_START_THRESHOLD_PX = 6;
+
+const clamp = (v: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, v));
+
+const inferBaseWidthFromLegacyScale = (
+  referenceWidthPx: number,
+  legacyScale?: number | null,
+) => {
+  const safeReferenceWidth = Math.max(1, referenceWidthPx || 1);
+  const safeLegacyScale = clamp(Number(legacyScale ?? 1), 0.2, 1);
+  return safeReferenceWidth * safeLegacyScale;
 };
 
 export const ImageFrame = ({ src, alt, className, imgClassName, displayMode = "fixed", zoom = 1, scale = 1, x = 0, layoutBaseWidthPx, cropX, fixedReferenceFrameWidthPx, fluidAvailableWidthPx, naturalW, naturalH, editable = false, onImageClick, onTransformChange, onTransformCommit, onNaturalSize, onError, }: ImageFrameProps) => { const frameRef = React.useRef<HTMLDivElement | null>(null);

@@ -1,4 +1,4 @@
-import type { Card } from "@/types/index";
+import type { Card } from "@/types";
 
 // シミュレーション用：状態遷移・S・Iの変化をテスト
 function simulateCardScenario(

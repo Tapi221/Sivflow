@@ -1,9 +1,15 @@
 import { type ComponentProps, useCallback, useEffect, useRef, useState } from "react";
+
 import { Flashcard } from "@/components/card/frame/Flashcard";
+
 import { Badge } from "@/components/ui/badge";
+
 import { Button } from "@/components/ui/button";
+
 import { Volume2 } from "@/ui/icons";
+
 import type { Card } from "@/types";
+
 import { toIsoStringOrNull } from "@/utils/toMillis";
 
 type FlashcardCardLike = ComponentProps<typeof Flashcard>["card"];
@@ -11,6 +17,7 @@ type FlashcardCardLike = ComponentProps<typeof Flashcard>["card"];
 type StudyPhase = "timing" | "answer";
 
 type PracticeScore = "ok" | "anxious";
+
 type ReviewScore = 0 | 1 | 2 | 3;
 
 type BaseProps = {
@@ -53,6 +60,8 @@ type Keyable = {
   createdAt?: unknown;
 };
 
+type InnerProps = Omit<StudyCardProps, "card"> & { card: Card };
+
 const stableKeyPart = (value: unknown): string => {
   if (typeof value === "string") return value;
   if (typeof value === "number") return String(value);
@@ -84,8 +93,6 @@ const StudyCard = (props: StudyCardProps) => {
 
   return <StudyCardInner key={getCardKey(card)} {...props} card={card} />;
 };
-
-type InnerProps = Omit<StudyCardProps, "card"> & { card: Card };
 
 const StudyCardInner = ({
   card,
@@ -389,8 +396,7 @@ const StudyCardInner = ({
   return (
     <div className="reviewStudyCard mx-auto flex w-full max-w-[520px] flex-col gap-6">
       <div className="reviewCardViewport">
-        <div>
-          <Flashcard
+        <Flashcard
             card={flashcardCard}
             isFlipped={studyPhase === "answer"}
             onFlip={handleFlip}
@@ -428,7 +434,6 @@ const StudyCardInner = ({
             onToggleBookmark={handleToggleBookmark}
             onEdit={handleEdit}
           />
-        </div>
       </div>
 
       {studyPhase === "answer" &&

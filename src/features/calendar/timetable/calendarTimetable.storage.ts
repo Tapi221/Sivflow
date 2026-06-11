@@ -1,6 +1,24 @@
 import Dexie, { type Table } from "dexie";
+
 import type { CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTimetableDepartment, CalendarTimetableInstitution, CalendarTimetablePeriod, CalendarTimetableSettings, CalendarTimetableSlot, CalendarTimetableSyllabusCourse, CalendarTimetableSyllabusCourseDisplay, CalendarTimetableSyllabusCourseDraft, CalendarTimetableVisibleDayCount } from "@core/domain/calendar/timetable/timetable.types";
+
 import { createCalendarTimetableSearchText as createSearchText, normalizeCalendarTimetableSlots as normalizeSlots, normalizeCalendarTimetableText as normalizeText, normalizeCalendarTimetableVisibleDayCount as normalizeVisibleDayCount, sortCalendarTimetablePeriods as sortPeriods } from "@core/domain/calendar/timetable/timetable.model";
+
+const TIMETABLE_SETTINGS_ID = "default";
+
+const DEFAULT_SEMESTER_ID = "default-semester";
+
+const DEFAULT_VISIBLE_DAY_COUNT: CalendarTimetableVisibleDayCount = 5;
+
+const DEFAULT_TIMETABLE_PERIODS: readonly CalendarTimetablePeriod[] = [
+  { id: "period-1", label: "1", startTime: "08:50", endTime: "10:20", order: 0 },
+  { id: "period-2", label: "2", startTime: "10:30", endTime: "12:00", order: 1 },
+  { id: "period-3", label: "3", startTime: "13:00", endTime: "14:30", order: 2 },
+  { id: "period-4", label: "4", startTime: "14:40", endTime: "16:10", order: 3 },
+  { id: "period-5", label: "5", startTime: "16:20", endTime: "17:50", order: 4 },
+  { id: "period-6", label: "6", startTime: "18:00", endTime: "19:30", order: 5 },
+  { id: "period-7", label: "7", startTime: "19:40", endTime: "21:10", order: 6 },
+];
 
 class CalendarTimetableDatabase extends Dexie {
   courses!: Table<CalendarTimetableCourse, string>;
@@ -27,19 +45,6 @@ class CalendarTimetableDatabase extends Dexie {
     });
   }
 }
-
-const TIMETABLE_SETTINGS_ID = "default";
-const DEFAULT_SEMESTER_ID = "default-semester";
-const DEFAULT_VISIBLE_DAY_COUNT: CalendarTimetableVisibleDayCount = 5;
-const DEFAULT_TIMETABLE_PERIODS: readonly CalendarTimetablePeriod[] = [
-  { id: "period-1", label: "1", startTime: "08:50", endTime: "10:20", order: 0 },
-  { id: "period-2", label: "2", startTime: "10:30", endTime: "12:00", order: 1 },
-  { id: "period-3", label: "3", startTime: "13:00", endTime: "14:30", order: 2 },
-  { id: "period-4", label: "4", startTime: "14:40", endTime: "16:10", order: 3 },
-  { id: "period-5", label: "5", startTime: "16:20", endTime: "17:50", order: 4 },
-  { id: "period-6", label: "6", startTime: "18:00", endTime: "19:30", order: 5 },
-  { id: "period-7", label: "7", startTime: "19:40", endTime: "21:10", order: 6 },
-];
 
 const timetableDb = new CalendarTimetableDatabase();
 

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
@@ -132,11 +133,11 @@ const TrashPage = () => {
     <main className="h-full min-h-0 w-full overflow-auto bg-white px-6 py-6">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
         <header className="flex flex-col gap-3 border-b border-slate-200 pb-5 md:flex-row md:items-end md:justify-between">
-          <div>
+          <>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Trash</p>
             <h1 className="mt-2 text-2xl font-semibold text-slate-950">ゴミ箱</h1>
             <p className="mt-2 text-sm text-slate-600">削除済みのフォルダ、カードセット、カード、ドキュメントを復元、または完全に削除します。</p>
-          </div>
+          </>
 
           <div className="flex flex-wrap gap-2">
             <Button type="button" variant="outline" onClick={() => void refresh()} disabled={isBusy}>

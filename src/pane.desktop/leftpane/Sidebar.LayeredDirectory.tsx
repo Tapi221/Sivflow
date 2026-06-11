@@ -1,27 +1,51 @@
 import "./sidebar.layered-directory.css";
+
 import { useCallback, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type RefObject } from "react";
+
 import { useNavigate, useOutletContext } from "react-router-dom";
+
 import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
+
 import { TagFilterPopover } from "@/chip/popover/TagFilterPopover";
+
 import { RightClickPanelSurface } from "@/chip/rightclickpanel.desktop/rightClickPanelCommon";
+
 import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, resolveRightClickPanelTextWidth, useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
+
 import { useCardSets } from "@/components/card/hooks/useCardSets";
+
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
+
 import { DEFAULT_NEW_CARD_SET_NAME, DEFAULT_NEW_FOLDER_NAME, DEFAULT_NEW_PROJECT_NAME, getFolderId, type FolderTreeNode } from "@/components/folder/explorer/model/utils";
+
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
+
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
+
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
+
 import { useSearchStore } from "@/features/search/store/useSearchStore";
+
 import { useTags } from "@/features/settings/hooks/useTags";
+
 import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
+
 import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
+
 import { useNotes } from "@/hooks/note/useNotes";
+
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
+
 import { LibraryHierarchySidebar, ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
+
 import { TagTreeSidebar } from "@/pane.desktop/leftpane/folder/TagTreeSidebar";
+
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+
 import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
+
 import { StratisTagIcon } from "@/ui/icons/stratis";
+
 import { useFolderTagModeStore } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
 
 type IconProps = {
@@ -57,38 +81,59 @@ type SidebarLayeredDirectoryProps = {
 };
 
 const WORKSPACE_OWNER_FALLBACK_NAME = "Akari T";
+
 const WORKSPACE_NAME_SUFFIX = "のWorkspace";
+
 const WORKSPACE_AVATAR_FALLBACK = "A";
+
 const WORKSPACE_HOME_LABEL = "ホーム";
+
 const WORKSPACE_LIBRARY_LABEL = "ライブラリ";
+
 const WORKSPACE_TAGS_LABEL = "タグ";
+
 const WORKSPACE_SCHEDULE_LABEL = "カレンダー";
+
 const WORKSPACE_EXPLORE_LABEL = "Explore";
+
 const WORKSPACE_SETTINGS_LABEL = "設定";
+
 const FAVORITE_SECTION_LABEL = "お気に入り";
+
 const FAVORITE_EMPTY_MESSAGE = "プロジェクトをお気に入りに追加すると、ここからすぐ開けます";
+
 const PROJECT_SECTION_LABEL = "プロジェクト";
+
 const TAG_SECTION_LABEL = "タグツリー";
+
 const DEFAULT_NEW_TAG_NAME = "新規タグ";
+
 const DEFAULT_NEW_NOTE_NAME = "新規ノート";
+
 const ADD_PROJECT_ARIA_LABEL = "プロジェクトを追加";
+
 const ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL = "選択中のフォルダに追加";
+
 const ADD_TAG_ARIA_LABEL = "タグを追加";
+
 const FILTER_ARIA_LABEL = "絞り込みを開く";
+
 const PROJECT_ADD_MENU_PANEL_ID = "layered-project-add-menu";
+
 const PROJECT_ADD_MENU_ITEM_DEFINITIONS: readonly ProjectAddMenuItemDefinition[] = [
   { id: "create-note", label: DEFAULT_NEW_NOTE_NAME },
   { id: "create-card-set", label: DEFAULT_NEW_CARD_SET_NAME },
   { id: "create-folder", label: "新規フォルダ" },
   { id: "import-pdf", label: "PDFを追加" },
 ];
-const PROJECT_ADD_MENU_WIDTH = resolveRightClickPanelTextWidth(PROJECT_ADD_MENU_ITEM_DEFINITIONS.map((item) => item.label), 132);
-const PROJECT_ADD_MENU_HEIGHT = PROJECT_ADD_MENU_ITEM_DEFINITIONS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
-const EMPTY_COLLECTION: never[] = [];
-const OPENABLE_ENTITY_SELECTOR = "[data-directory-entity-kind='cardSet'], [data-directory-entity-kind='document'], [data-directory-entity-kind='note']";
 
-const IconPlus = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
-const IconChevronDown = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M4 6.25L8 10.25L12 6.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>);
+const PROJECT_ADD_MENU_WIDTH = resolveRightClickPanelTextWidth(PROJECT_ADD_MENU_ITEM_DEFINITIONS.map((item) => item.label), 132);
+
+const PROJECT_ADD_MENU_HEIGHT = PROJECT_ADD_MENU_ITEM_DEFINITIONS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
+
+const EMPTY_COLLECTION: never[] = [];
+
+const OPENABLE_ENTITY_SELECTOR = "[data-directory-entity-kind='cardSet'], [data-directory-entity-kind='document'], [data-directory-entity-kind='note']";
 
 const getFolderName = (folder: FolderTreeNode): string => {
   const name = folder.folderName ?? folder.folder_name;
@@ -158,6 +203,10 @@ const scheduleLeftPanelClose = (onToggleLeftPanel?: () => void) => {
   if (!onToggleLeftPanel) return;
   window.setTimeout(onToggleLeftPanel, 0);
 };
+
+const IconPlus = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
+
+const IconChevronDown = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M4 6.25L8 10.25L12 6.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>);
 
 const ProjectAddMenu = ({ x, y, menuRef, onCreateNote, onCreateCardSet, onCreateFolder, onImportPdf }: ProjectAddMenuProps) => {
   const handleItemClick = (event: ReactMouseEvent<HTMLButtonElement>, id: ProjectAddMenuActionId) => {
@@ -401,4 +450,3 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
 };
 
 export { LibraryHierarchySidebar, ProjectListSidebar, SidebarLayeredDirectory, TagTreeSidebar };
-

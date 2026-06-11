@@ -17,8 +17,7 @@ export function ImageElementStatic( props: SlateElementProps<TImageElement & TCa
           className="relative min-w-[92px] max-w-full"
           style={{ textAlign: align }}
         >
-          <div>
-            <img
+          <img
               className={cn(
                 'w-full max-w-full cursor-default object-cover px-0',
                 'rounded-sm'
@@ -26,7 +25,6 @@ export function ImageElementStatic( props: SlateElementProps<TImageElement & TCa
               alt={(props.attributes as any).alt}
               src={url}
             />
-          </div>
           {caption && (
             <figcaption
               className="mx-auto mt-2 h-[24px] max-w-full"

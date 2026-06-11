@@ -1,7 +1,3 @@
-const MARKDOWN_TAB_SIZE_VALUES = [2, 4, 8] as const;
-
-export type MarkdownTabSize = 2 | 4 | 8;
-
 type MarkdownWhitespaceLineKind = "eligible" | "excluded";
 
 type MarkdownScannerState = {
@@ -22,6 +18,10 @@ type InlineCodeRange = {
   start: number;
   end: number;
 };
+
+const MARKDOWN_TAB_SIZE_VALUES = [2, 4, 8] as const;
+
+export type MarkdownTabSize = 2 | 4 | 8;
 
 const NBSP_REGEX = /\u00A0/g;
 

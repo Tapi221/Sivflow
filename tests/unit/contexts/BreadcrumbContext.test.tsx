@@ -26,7 +26,7 @@ const ReaderConsumer = () => {
   const extraCrumbs = useBreadcrumbExtraCrumbs();
 
   return (
-    <div>{extraCrumbs.map(({ label }) => label).join(" / ") || "empty"}</div>
+    <>{extraCrumbs.map(({ label }) => label).join(" / ") || "empty"}</>
   );
 };
 

@@ -1,4 +1,5 @@
 import { memo, useCallback, useMemo, useState } from "react";
+
 import { useLiveQuery } from "dexie-react-hooks";
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
@@ -166,7 +167,7 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
         {isOpen ? (
           <div className="border-t border-[#eceae4] px-3 pb-3 pt-2">
             <div className="space-y-2">
-              <div>
+              <>
                 <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9a9690]">この回答から作る</p>
                 <div className="flex flex-wrap gap-1.5">
                   {candidateTerms.length > 0 ? candidateTerms.map((term) => (
@@ -176,7 +177,7 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
                     </button>
                   )) : <span className="text-[11px] text-[#9a9690]">候補語句がありません。</span>}
                 </div>
-              </div>
+              </>
               <div className="flex gap-1.5">
                 <input value={customTerm} onChange={(event) => setCustomTerm(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") handleCreateCustomQuestion(); }} placeholder="語句を入力して疑問にする" className="h-8 min-w-0 flex-1 rounded-[9px] border border-[#dddcd5] bg-white px-2.5 text-[12px] text-[#343434] outline-none transition placeholder:text-[#aaa49d] focus:border-[#c8c6bf]" maxLength={MAX_CUSTOM_TERM_LENGTH} />
                 <button type="button" className="inline-flex h-8 shrink-0 items-center justify-center rounded-[9px] border border-[#dddcd5] bg-[#f7f6f2] px-2.5 text-[11px] font-semibold text-[#5f5f5f] transition hover:bg-[#eeeeee] disabled:opacity-60" onClick={handleCreateCustomQuestion} disabled={!sanitizeCustomTerm(customTerm) || creatingTerm !== null}>追加</button>
