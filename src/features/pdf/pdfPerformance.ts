@@ -13,6 +13,7 @@ type PatchedPdfViewerConstructor = typeof PDFViewer & {
 
 type PatchedPdfViewerPrototype = InstanceType<typeof PDFViewer> & {
   __sivflowIsSettingScale?: boolean;
+  __sivflowSuppressScaleScrollUntil?: number;
   container?: HTMLElement;
   scrollPageIntoView?: (...args: unknown[]) => unknown;
 };
@@ -24,17 +25,31 @@ type PdfViewerScaleDescriptor = PropertyDescriptor & {
 
 const PDF_PERFORMANCE_ENTRY_PREFIX = "sivflow.pdf";
 const PDF_PERFORMANCE_DEBUG_STORAGE_KEY = "sivflow.pdf.debugPerformance";
+const PDF_SCALE_SCROLL_SUPPRESSION_WINDOW_MS = 800;
 const PDF_VIEWER_SCALE_PROPERTY_NAMES = ["currentScale", "currentScaleValue"] as const;
 const PDF_ZOOMING_CLASS_NAME = "pdf-pane--zooming";
 
 let pdfPerformanceTraceCounter = 0;
 
+const getPdfPerformanceNow = (): number => {
+  return typeof globalThis.performance?.now === "function" ? globalThis.performance.now() : Date.now();
+};
+
+const markPdfViewerScaleScrollSuppressed = (pdfViewer: PatchedPdfViewerPrototype): void => {
+  pdfViewer.__sivflowSuppressScaleScrollUntil = getPdfPerformanceNow() + PDF_SCALE_SCROLL_SUPPRESSION_WINDOW_MS;
+};
+
 const isPdfViewerZooming = (pdfViewer: PatchedPdfViewerPrototype): boolean => {
   return Boolean(pdfViewer.container?.classList.contains(PDF_ZOOMING_CLASS_NAME));
 };
 
+const isPdfViewerScaleScrollSuppressed = (pdfViewer: PatchedPdfViewerPrototype): boolean => {
+  const suppressUntil = pdfViewer.__sivflowSuppressScaleScrollUntil;
+  return typeof suppressUntil === "number" && getPdfPerformanceNow() <= suppressUntil;
+};
+
 const shouldSuppressPdfViewerScaleScroll = (pdfViewer: PatchedPdfViewerPrototype): boolean => {
-  return Boolean(pdfViewer.__sivflowIsSettingScale || isPdfViewerZooming(pdfViewer));
+  return Boolean(pdfViewer.__sivflowIsSettingScale || isPdfViewerZooming(pdfViewer) || isPdfViewerScaleScrollSuppressed(pdfViewer));
 };
 
 const patchPdfViewerScaleSetter = (prototype: PatchedPdfViewerPrototype, propertyName: (typeof PDF_VIEWER_SCALE_PROPERTY_NAMES)[number]): void => {
@@ -47,9 +62,11 @@ const patchPdfViewerScaleSetter = (prototype: PatchedPdfViewerPrototype, propert
     get: descriptor.get,
     set(value: unknown) {
       this.__sivflowIsSettingScale = true;
+      markPdfViewerScaleScrollSuppressed(this);
       try {
         descriptor.set?.call(this, value);
       } finally {
+        markPdfViewerScaleScrollSuppressed(this);
         this.__sivflowIsSettingScale = false;
       }
     },
