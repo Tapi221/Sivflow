@@ -1,63 +1,35 @@
 const { spawnSync } = require("node:child_process");
 const path = require("node:path");
 
-const isWin = process.platform === "win32";
-const npmCmd = isWin ? "npm.cmd" : "npm";
+const ROOT_DIR = path.resolve(__dirname, "..", "..");
+const FUNCTIONS_DIR = path.join(ROOT_DIR, "functions");
+const IS_WINDOWS = process.platform === "win32";
+const NPM_COMMAND = IS_WINDOWS ? "npm.cmd" : "npm";
+const PREDEPLOY_STEPS = [
+  ["--prefix", FUNCTIONS_DIR, "ci"],
+  ["--prefix", FUNCTIONS_DIR, "run", "build"],
+  ["--prefix", FUNCTIONS_DIR, "run", "manifest"],
+];
 
-// Firebase CLI sets RESOURCE_DIR for functions predeploy hooks
-const resourceDir = process.env.RESOURCE_DIR
-  ? path.resolve(process.env.RESOURCE_DIR)
-  : path.resolve("functions");
+const formatCommand = (args) => `${NPM_COMMAND} ${args.join(" ")}`;
 
-function run(args) {
-  console.log("[predeploy] running:", npmCmd, args.join(" "));
-  let r;
-  if (isWin) {
-    // On Windows, run cmd.exe /c npm.cmd ... to avoid EINVAL/ENOENT for .cmd wrappers
-    r = spawnSync("cmd.exe", ["/c", npmCmd, ...args], {
-      stdio: "inherit",
-      shell: false,
-      env: process.env,
-    });
-  } else {
-    r = spawnSync(npmCmd, args, {
-      stdio: "inherit",
-      shell: false,
-      env: process.env,
-    });
-  }
-  if (r.error) {
-    console.error("[predeploy] spawn error:", r.error);
+const runNpm = (args) => {
+  console.log(`[firebase-predeploy] 実行: ${formatCommand(args)}`);
+
+  const result = IS_WINDOWS
+    ? spawnSync("cmd.exe", ["/c", NPM_COMMAND, ...args], { env: process.env, shell: false, stdio: "inherit" })
+    : spawnSync(NPM_COMMAND, args, { env: process.env, shell: false, stdio: "inherit" });
+
+  if (result.error) {
+    console.error("[firebase-predeploy] npm コマンドの起動に失敗しました:", result.error);
     process.exit(1);
   }
-  if (typeof r.status === "number" && r.status !== 0) {
-    process.exit(r.status);
+
+  if (typeof result.status === "number" && result.status !== 0) {
+    process.exit(result.status);
   }
-}
+};
 
-console.log("[predeploy] using:", npmCmd);
-console.log("[predeploy] resourceDir:", resourceDir);
-// Only run scripts if they are defined in resourceDir/package.json
-const pkgPath = path.join(resourceDir, "package.json");
-let pkg = null;
-try {
-  pkg = require(pkgPath);
-} catch (e) {
-  console.log(
-    "[predeploy] no package.json in",
-    resourceDir,
-    "- skipping lint/build",
-  );
-}
-
-if (pkg && pkg.scripts && pkg.scripts.lint) {
-  run(["--prefix", resourceDir, "run", "lint"]);
-} else {
-  console.log("[predeploy] skipping lint (script not defined)");
-}
-
-if (pkg && pkg.scripts && pkg.scripts.build) {
-  run(["--prefix", resourceDir, "run", "build"]);
-} else {
-  console.log("[predeploy] skipping build (script not defined)");
+for (const step of PREDEPLOY_STEPS) {
+  runNpm(step);
 }
