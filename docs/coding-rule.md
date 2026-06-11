@@ -97,6 +97,28 @@ export type { AppProvidersProps };
 
 モジュールスコープの固定値・設定値として定義する `const` は、大文字 + アンダースコアの `UPPER_SNAKE_CASE` にする。対象は定数ブロックに置く値で、関数内の一時変数、`const helper = (...) => ...` のような helper 関数、component / memo / displayName / export 用の識別子は対象外とする。
 
+## 色表記
+
+hex color は、省略可能な場合は省略表記に統一する。`#rrggbb` は `rr`、`gg`、`bb` の各2桁が同じ時だけ `#rgb` にする。`#rrggbbaa` は alpha を含む各2桁が同じ時だけ `#rgba` にする。
+
+```css
+/* NG */
+color: #ffffff;
+background: #eeeeee;
+border-color: #aabbcc;
+box-shadow: 0 0 0 1px #ffffffff;
+
+/* OK */
+color: #fff;
+background: #eee;
+border-color: #abc;
+box-shadow: 0 0 0 1px #ffff;
+```
+
+`#fefefe`、`#eeeeef`、`#12aa33` のように各2桁が同じではない hex color は省略しない。hex color は小文字に統一する。
+
+`npm run fix:short-hex-colors` は省略可能な hex color を自動修正する。`npm run verify:short-hex-colors` は未省略の hex color を検出する。`npm run fix:source-conventions` と `npm run verify:source-conventions` はこの検査を含めて実行する。
+
 ## JSX wrapper
 
 複数要素を返すだけのラッパーは必ず `<>...</>` を使う。`Fragment` の明示使用は `key` が必要な `map` 内だけ許可する。`className` / `style` / `ref` / `onClick` / `role` / `aria-*` / `data-*` / layout が必要な場合だけ `div` などの実 DOM を使う。意味のないラッパー `div` は使わない。
