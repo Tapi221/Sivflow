@@ -1,0 +1,9 @@
+.app-layered-directory.app-layered-directory [aria-label="Project list explorer"] [role="treeitem"],
+.app-layered-directory.app-layered-directory [aria-label="Library hierarchy explorer"] [role="treeitem"] {
+  color: #2f343b !important;
+}
+
+.app-layered-directory.app-layered-directory [aria-label="Project list explorer"] .layered-directory-row-icon,
+.app-layered-directory.app-layered-directory [aria-label="Library hierarchy explorer"] .layered-directory-row-icon {
+  color: #2f343b !important;
+}
