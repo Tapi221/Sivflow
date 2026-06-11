@@ -21,6 +21,7 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    environmentMatchGlobs: [["tests/unit/features/pdf/pdfZoom.*.test.ts", "node"]],
     exclude: ["**/node_modules/**", "**/dist/**", "nouse/**"],
     maxWorkers: 1,
     minWorkers: 1,
