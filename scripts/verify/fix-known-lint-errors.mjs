@@ -15,7 +15,19 @@ const SCHEDULE_SCREEN_ICON_DECLARATIONS = "const StratisCheckIcon = resolveStrat
 const PDF_PANE_ICON_DECLARATIONS = "const StratisBookmarkIcon = resolveStratisIcon(STRATIS_BOOKMARK_ICON_NAMES);\n";
 const PDF_DOCUMENT_SOURCE_RESOLUTION_REPLACEMENT = "const waitForPdfSourceResolution: PdfSourceResolutionWaiter = async (promise) => {";
 
+const normalizeLineEndings = (source) => source.split("\r\n").join("\n").split("\r").join("\n");
+
 const replaceAll = (source, searchValue, replaceValue) => source.split(searchValue).join(replaceValue);
+
+const removeBlock = (source, startText) => {
+  const startIndex = source.indexOf(startText);
+  if (startIndex === -1) return source;
+
+  const endIndex = source.indexOf("\n};\n", startIndex);
+  if (endIndex === -1) return source;
+
+  return `${source.slice(0, startIndex)}${source.slice(endIndex + "\n};\n".length)}`;
+};
 
 const insertAfterResolveStratisIcon = (source, declarations) => {
   if (source.includes(declarations.trim())) return source;
@@ -25,10 +37,14 @@ const insertAfterResolveStratisIcon = (source, declarations) => {
 };
 
 const applyPdfDocumentPaneFixes = (source) => {
-  const conflictStart = source.indexOf("<<<<<<< HEAD\nconst waitForPdfSourceResolution = async <T,>(promise: Promise<T>): Promise<T> => {\n=======\n\nconst waitForPdfSourceResolution: PdfSourceResolutionWaiter = async (promise) => {\n>>>>>>>");
+  const conflictStart = source.indexOf("<<<<<<< HEAD");
   if (conflictStart === -1) return source;
+  if (!source.slice(conflictStart).includes("waitForPdfSourceResolution")) return source;
 
-  const conflictEnd = source.indexOf("\n", source.indexOf(">>>>>>>", conflictStart));
+  const conflictMarkerStart = source.indexOf("\n>>>>>>>", conflictStart);
+  if (conflictMarkerStart === -1) return source;
+
+  const conflictEnd = source.indexOf("\n", conflictMarkerStart + 1);
   if (conflictEnd === -1) return source;
 
   return `${source.slice(0, conflictStart)}${PDF_DOCUMENT_SOURCE_RESOLUTION_REPLACEMENT}${source.slice(conflictEnd)}`;
@@ -38,10 +54,10 @@ const applyUseChatFixes = (source) => source.replace("type ChatMessage = UIMessa
 
 const removeStratisOptionalIcon = (source) => {
   let nextSource = source;
-  nextSource = nextSource.replace("type StratisOptionalIconProps = { names: readonly string[]; className?: string; };\n", "");
-  nextSource = nextSource.replace("type StratisOptionalIconProps = { names: readonly string[]; className?: string; active?: boolean; };\n", "");
-  nextSource = nextSource.replace("const StratisOptionalIcon = ({ names, className }: StratisOptionalIconProps) => {\n  const Icon = resolveStratisIcon(names);\n  return Icon ? <Icon className={className} aria-hidden=\"true\" focusable=\"false\" /> : null;\n};\n", "");
-  nextSource = nextSource.replace("const StratisOptionalIcon = ({ names, className, active = false }: StratisOptionalIconProps) => {\n  const Icon = resolveStratisIcon(names);\n  return Icon ? <Icon className={className} aria-hidden=\"true\" focusable=\"false\" /> : <StratisFallbackBookmarkIcon className={className} active={active} />;\n};\n", "");
+  nextSource = replaceAll(nextSource, "type StratisOptionalIconProps = { names: readonly string[]; className?: string; };\n", "");
+  nextSource = replaceAll(nextSource, "type StratisOptionalIconProps = { names: readonly string[]; className?: string; active?: boolean; };\n", "");
+  nextSource = removeBlock(nextSource, "const StratisOptionalIcon = ({ names, className }: StratisOptionalIconProps) => {");
+  nextSource = removeBlock(nextSource, "const StratisOptionalIcon = ({ names, className, active = false }: StratisOptionalIconProps) => {");
 
   return nextSource;
 };
@@ -75,14 +91,15 @@ const applyPdfPaneFixes = (source) => {
 
 const applyKnownLintFixes = (filePath, source) => {
   const relativePath = path.relative(ROOT_DIR, filePath).split(path.sep).join("/");
+  const normalizedSource = normalizeLineEndings(source);
 
-  if (relativePath === "src/features/calendar/timetable/CalendarTimetableView.tsx") return applyCalendarTimetableFixes(source);
-  if (relativePath === "src/features/pdf/PdfDocumentPane.tsx") return applyPdfDocumentPaneFixes(source);
-  if (relativePath === "src/features/pdf/PdfPane.tsx") return applyPdfPaneFixes(source);
-  if (relativePath === "src/pane.desktop/view/ScheduleScreen.mobile.tsx") return applyScheduleScreenFixes(source);
-  if (relativePath === "src/components/editor/use-chat.ts") return applyUseChatFixes(source);
+  if (relativePath === "src/features/calendar/timetable/CalendarTimetableView.tsx") return applyCalendarTimetableFixes(normalizedSource);
+  if (relativePath === "src/features/pdf/PdfDocumentPane.tsx") return applyPdfDocumentPaneFixes(normalizedSource);
+  if (relativePath === "src/features/pdf/PdfPane.tsx") return applyPdfPaneFixes(normalizedSource);
+  if (relativePath === "src/pane.desktop/view/ScheduleScreen.mobile.tsx") return applyScheduleScreenFixes(normalizedSource);
+  if (relativePath === "src/components/editor/use-chat.ts") return applyUseChatFixes(normalizedSource);
 
-  return source;
+  return normalizedSource;
 };
 
 const updateFile = (filePath) => {
