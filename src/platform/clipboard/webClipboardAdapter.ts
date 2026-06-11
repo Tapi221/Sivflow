@@ -1,5 +1,7 @@
 import type { ClipboardAdapter } from "./clipboardAdapter";
 
+
+
 const webClipboardAdapter: ClipboardAdapter = { async writeText(text: string) {
   if (typeof navigator !== "undefined" && navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
     try {
@@ -16,6 +18,8 @@ const webClipboardAdapter: ClipboardAdapter = { async writeText(text: string) {
   }
 },
 };
+
+
 
 const fallbackCopyText = (text: string): boolean => {
   if (typeof document === "undefined") return false;
@@ -41,5 +45,7 @@ const fallbackCopyText = (text: string): boolean => {
 
   return copied;
 };
+
+
 
 export { webClipboardAdapter };
