@@ -129,7 +129,7 @@ const PDF_WHEEL_DELTA_LINE_HEIGHT_PX = 16;
 const PDF_WHEEL_DELTA_MODE_LINE = 1;
 const PDF_WHEEL_DELTA_MODE_PAGE = 2;
 const PDF_ZOOM_BUTTON_SCALE_FACTOR = 1.1;
-const PDF_ZOOM_COMMIT_DELAY_MS = 110;
+const PDF_ZOOM_INPUT_IDLE_COMMIT_DELAY_MS = 280;
 const PDF_ZOOMING_CLASS_NAME = "pdf-pane--zooming";
 const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
@@ -759,7 +759,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
 
     const scheduleZoomCommit = () => {
       clearZoomCommitTimer();
-      zoomCommitTimer = globalThis.setTimeout(commitActiveZoomPreview, PDF_ZOOM_COMMIT_DELAY_MS);
+      zoomCommitTimer = globalThis.setTimeout(commitActiveZoomPreview, PDF_ZOOM_INPUT_IDLE_COMMIT_DELAY_MS);
     };
 
     const requestResponsiveScaleUpdate = () => {
