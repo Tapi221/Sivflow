@@ -44,7 +44,7 @@ const normalizeUploadedImage = (
   raw: unknown,
   options: NormalizeUploadedImageOptions = {},
 ) => {
-  if (raw == null) return null;
+  if ((raw === null || raw === undefined)) return null;
 
   if (typeof raw === "string") {
     return {
@@ -139,7 +139,7 @@ const normalizeUploadedImage = (
     scale: normalizedScale,
     x: normalizedX,
     layout:
-      baseWidthPx != null || cropX != null
+      (baseWidthPx !== null && baseWidthPx !== undefined) || (cropX !== null && cropX !== undefined)
         ? {
           baseWidthPx: baseWidthPx ?? null,
           cropX: cropX ?? null,
@@ -150,7 +150,7 @@ const normalizeUploadedImage = (
   };
 };
 const normalizeUploadedImages = (raw: unknown, options: NormalizeUploadedImageOptions = {}) => {
-  if (raw == null) return [];
+  if ((raw === null || raw === undefined)) return [];
   const items = Array.isArray(raw) ? raw : [raw];
 
   return items
@@ -187,7 +187,7 @@ const denormalizeUploadedImage = (
         storage_path: image.storagePath ?? null,
         status: image.status,
         layout:
-          image.layout != null
+          (image.layout !== null && image.layout !== undefined)
             ? {
               base_width_px: image.layout.baseWidthPx ?? null,
               crop_x: image.layout.cropX ?? null,
@@ -204,7 +204,7 @@ const denormalizeUploadedImage = (
         storagePath: image.storagePath ?? null,
         status: image.status,
         layout:
-          image.layout != null
+          (image.layout !== null && image.layout !== undefined)
             ? {
               baseWidthPx: image.layout.baseWidthPx ?? null,
               cropX: image.layout.cropX ?? null,

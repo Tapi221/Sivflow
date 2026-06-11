@@ -19,7 +19,7 @@ const toCardSyncStatusSnapshot = (status: CardSyncStatus | null): CardSyncStatus
     lastSyncedAtMs: status.lastSyncedAtMs,
     hasError: status.hasError,
     isRetrying: status.isRetrying,
-    canRetry: status.retry != null,
+    canRetry: (status.retry !== null && status.retry !== undefined),
   };
 };
 const areCardSyncStatusSnapshotsEqual = (left: CardSyncStatusSnapshot | null, right: CardSyncStatusSnapshot | null): boolean => left?.lastSyncedAtMs === right?.lastSyncedAtMs && left?.hasError === right?.hasError && left?.isRetrying === right?.isRetrying && left?.canRetry === right?.canRetry;

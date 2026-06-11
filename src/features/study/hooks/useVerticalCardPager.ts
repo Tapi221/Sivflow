@@ -78,7 +78,7 @@ const useVerticalCardPager = ({ count, activeIndex, onActiveIndexChange, scrollC
       while (low <= high) {
         const mid = (low + high) >> 1;
         const centerY = getItemCenterY(mid);
-        if (centerY == null) break;
+        if ((centerY === null || centerY === undefined)) break;
 
         bestIdx = mid;
         if (centerY < targetCenterY) {
@@ -106,7 +106,7 @@ const useVerticalCardPager = ({ count, activeIndex, onActiveIndexChange, scrollC
       let nearestDist = Number.POSITIVE_INFINITY;
       for (const idx of candidates) {
         const centerY = getItemCenterY(idx);
-        if (centerY == null) continue;
+        if ((centerY === null || centerY === undefined)) continue;
         const dist = Math.abs(centerY - targetCenterY);
         if (dist < nearestDist) {
           nearestDist = dist;
@@ -119,21 +119,21 @@ const useVerticalCardPager = ({ count, activeIndex, onActiveIndexChange, scrollC
   );
 
   const clearNaturalIndexTimer = useCallback(() => {
-    if (naturalIndexTimerRef.current != null) {
+    if ((naturalIndexTimerRef.current !== null && naturalIndexTimerRef.current !== undefined)) {
       window.clearTimeout(naturalIndexTimerRef.current);
       naturalIndexTimerRef.current = null;
     }
   }, []);
 
   const clearComputeNearestRaf = useCallback(() => {
-    if (computeNearestRafRef.current != null) {
+    if ((computeNearestRafRef.current !== null && computeNearestRafRef.current !== undefined)) {
       window.cancelAnimationFrame(computeNearestRafRef.current);
       computeNearestRafRef.current = null;
     }
   }, []);
 
   const clearIdleCommitTimer = useCallback(() => {
-    if (idleCommitTimerRef.current != null) {
+    if ((idleCommitTimerRef.current !== null && idleCommitTimerRef.current !== undefined)) {
       window.clearTimeout(idleCommitTimerRef.current);
       idleCommitTimerRef.current = null;
     }
@@ -144,7 +144,7 @@ const useVerticalCardPager = ({ count, activeIndex, onActiveIndexChange, scrollC
     queuedNaturalIndexRef.current = null;
     clearNaturalIndexTimer();
 
-    if (nearestIdx == null || nearestIdx === activeIndexRef.current) return;
+    if ((nearestIdx === null || nearestIdx === undefined) || nearestIdx === activeIndexRef.current) return;
     onActiveIndexChange(nearestIdx);
   }, [clearNaturalIndexTimer, onActiveIndexChange]);
 
@@ -255,7 +255,7 @@ const useVerticalCardPager = ({ count, activeIndex, onActiveIndexChange, scrollC
         computeNearestIndex();
       }, SCROLL_IDLE_COMMIT_DELAY_MS);
 
-      if (computeNearestRafRef.current != null) return;
+      if ((computeNearestRafRef.current !== null && computeNearestRafRef.current !== undefined)) return;
       computeNearestRafRef.current = window.requestAnimationFrame(() => {
         computeNearestRafRef.current = null;
         computeNearestIndex();

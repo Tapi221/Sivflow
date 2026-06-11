@@ -122,7 +122,7 @@ const useCardEditorSession = ({ selectedCardId, selectedCardSnapshot = null, res
   isEditingRef.current = isEditing;
 
   useEffect(() => {
-    if (selectedCardId != null) setLocalSelectedCardId(null);
+    if ((selectedCardId !== null && selectedCardId !== undefined)) setLocalSelectedCardId(null);
   }, [selectedCardId]);
 
   const effectiveSelectedCardId = selectedCardId ?? localSelectedCardId;
@@ -163,7 +163,7 @@ const useCardEditorSession = ({ selectedCardId, selectedCardSnapshot = null, res
   selectedCardRef.current = selectedCard ?? null;
 
   const clearAutosaveTimer = useCallback(() => {
-    if (autosaveTimerRef.current == null) return;
+    if ((autosaveTimerRef.current === null || autosaveTimerRef.current === undefined)) return;
     clearTimeout(autosaveTimerRef.current);
     autosaveTimerRef.current = null;
   }, []);
@@ -365,7 +365,7 @@ const useCardEditorSession = ({ selectedCardId, selectedCardSnapshot = null, res
       setIsEditing(true);
       persistentCardIdRef.current = null;
       applyDraft((prev) => prev ?? makeNewDraft(), {
-        resetPersisted: draftRef.current == null,
+        resetPersisted: (draftRef.current === null || draftRef.current === undefined),
         lastSavedAt: null,
       });
       editingCardIdRef.current = NEW_SENTINEL;
@@ -428,7 +428,7 @@ const useCardEditorSession = ({ selectedCardId, selectedCardSnapshot = null, res
 
     if (targetId === NEW_SENTINEL) {
       applyDraft((prev) => prev ?? makeNewDraft(), {
-        resetPersisted: draftRef.current == null,
+        resetPersisted: (draftRef.current === null || draftRef.current === undefined),
         lastSavedAt: null,
       });
       hydratedFromIdRef.current = NEW_SENTINEL;

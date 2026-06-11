@@ -90,7 +90,7 @@ const ToggleCalendarViewMode = ({
         return;
       }
 
-      if (changeFrameRef.current != null) {
+      if ((changeFrameRef.current !== null && changeFrameRef.current !== undefined)) {
         window.cancelAnimationFrame(changeFrameRef.current);
       }
 
@@ -108,7 +108,7 @@ const ToggleCalendarViewMode = ({
 
   useEffect(() => {
     return () => {
-      if (changeFrameRef.current != null) {
+      if ((changeFrameRef.current !== null && changeFrameRef.current !== undefined)) {
         window.cancelAnimationFrame(changeFrameRef.current);
       }
     };

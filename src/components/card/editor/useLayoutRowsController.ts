@@ -61,12 +61,12 @@ const useLayoutRowsController = <TDraft extends { layoutRows: number; } | null>(
       const nextRows = Math.max(requestedRows, getRequiredMinRows());
       pendingRowsRef.current = nextRows;
 
-      if (rowsRafRef.current != null) return;
+      if ((rowsRafRef.current !== null && rowsRafRef.current !== undefined)) return;
       rowsRafRef.current = window.requestAnimationFrame(() => {
         rowsRafRef.current = null;
         const pending = pendingRowsRef.current;
         pendingRowsRef.current = null;
-        if (pending == null) return;
+        if ((pending === null || pending === undefined)) return;
         setLayoutRows(pending);
       });
     },
@@ -118,7 +118,7 @@ const useLayoutRowsController = <TDraft extends { layoutRows: number; } | null>(
 
   useEffect(() => {
     return () => {
-      if (rowsRafRef.current != null) {
+      if ((rowsRafRef.current !== null && rowsRafRef.current !== undefined)) {
         window.cancelAnimationFrame(rowsRafRef.current);
         rowsRafRef.current = null;
       }

@@ -69,7 +69,7 @@ const createCheckDataIntegrityUseCase = () => {
 
       for (const card of cards) {
         const candidate = toRecord(card);
-        const deletedAtExists = candidate.deletedAt != null;
+        const deletedAtExists = (candidate.deletedAt !== null && candidate.deletedAt !== undefined);
         const isDeleted = readDeletedState(candidate);
         const cardSetId = toNonEmptyString(
           candidate.cardSetId ?? candidate.card_set_id,
@@ -88,7 +88,7 @@ const createCheckDataIntegrityUseCase = () => {
 
         for (const key of TIMESTAMP_KEYS) {
           const raw = candidate[key];
-          if (raw == null) {
+          if ((raw === null || raw === undefined)) {
             continue;
           }
 

@@ -173,7 +173,7 @@ class MarkdownJoiner { delayInMs = DEFAULT_DELAY_IN_MS;
   }
 }
 const delay = async (delayInMs?: number | null): Promise<void> => {
-  return delayInMs == null
+  return (delayInMs === null || delayInMs === undefined)
     ? Promise.resolve()
     : new Promise((resolve) => setTimeout(resolve, delayInMs));
 };

@@ -321,7 +321,7 @@ const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>(({ blo
   };
 
   const handleDeleteBlock = (id: string, index?: number) => {
-    if (index != null && index < minDeletableIndex) return;
+    if ((index !== null && index !== undefined) && index < minDeletableIndex) return;
     if (onDelete && index !== undefined) {
       onDelete(index);
       return;

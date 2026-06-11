@@ -59,7 +59,7 @@ const TextBlockGlyph = ({
   ...rest
 }: IconProps) => {
   const resolvedLabel = label ?? rest["aria-label"];
-  const decorative = resolvedLabel == null;
+  const decorative = (resolvedLabel === null || resolvedLabel === undefined);
   const pixelSize = typeof size === "number" ? `${size}px` : size;
 
   return (
@@ -96,7 +96,7 @@ const QuestionBlockGlyph = ({
   ...rest
 }: IconProps) => {
   const resolvedLabel = label ?? rest["aria-label"];
-  const decorative = resolvedLabel == null;
+  const decorative = (resolvedLabel === null || resolvedLabel === undefined);
   const pixelSize = typeof size === "number" ? `${size}px` : size;
 
   return (
@@ -136,7 +136,7 @@ const CodeBlockGlyph = ({
   ...rest
 }: IconProps) => {
   const resolvedLabel = label ?? rest["aria-label"];
-  const decorative = resolvedLabel == null;
+  const decorative = (resolvedLabel === null || resolvedLabel === undefined);
   const pixelSize = typeof size === "number" ? `${size}px` : size;
 
   return (
@@ -173,7 +173,7 @@ const ImageBlockGlyph = ({
   ...rest
 }: IconProps) => {
   const resolvedLabel = label ?? rest["aria-label"];
-  const decorative = resolvedLabel == null;
+  const decorative = (resolvedLabel === null || resolvedLabel === undefined);
   const pixelSize = typeof size === "number" ? `${size}px` : size;
 
   return (
@@ -217,7 +217,7 @@ const MathBlockGlyph = ({
   ...rest
 }: IconProps) => {
   const resolvedLabel = label ?? rest["aria-label"];
-  const decorative = resolvedLabel == null;
+  const decorative = (resolvedLabel === null || resolvedLabel === undefined);
   const pixelSize = typeof size === "number" ? `${size}px` : size;
 
   return (
@@ -254,7 +254,7 @@ const MarkdownBlockGlyph = ({
   ...rest
 }: IconProps) => {
   const resolvedLabel = label ?? rest["aria-label"];
-  const decorative = resolvedLabel == null;
+  const decorative = (resolvedLabel === null || resolvedLabel === undefined);
   const pixelSize = typeof size === "number" ? `${size}px` : size;
 
   return (

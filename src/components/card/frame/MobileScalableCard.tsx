@@ -155,7 +155,7 @@ const MobileScalableCard = ({
         )}
         style={{
           height:
-            !isEditMode && contentHeight != null
+            !isEditMode && (contentHeight !== null && contentHeight !== undefined)
               ? `${Math.ceil(contentHeight * scale)}px`
               : undefined,
         }}

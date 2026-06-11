@@ -66,7 +66,7 @@ const useFlashcardInk = ({ cardId, effectiveIsFlipped, showInkLayer, inkEditingE
 
     const scheduleStable = () => {
       if (cancelled) return;
-      if (settleTimer != null) window.clearTimeout(settleTimer);
+      if ((settleTimer !== null && settleTimer !== undefined)) window.clearTimeout(settleTimer);
       settleTimer = window.setTimeout(() => {
         if (!cancelled) setLayoutStable(true);
       }, 250);
@@ -100,7 +100,7 @@ const useFlashcardInk = ({ cardId, effectiveIsFlipped, showInkLayer, inkEditingE
     void init();
     return () => {
       cancelled = true;
-      if (settleTimer != null) window.clearTimeout(settleTimer);
+      if ((settleTimer !== null && settleTimer !== undefined)) window.clearTimeout(settleTimer);
       if (resizeObserver) resizeObserver.disconnect();
     };
   }, [cardId, effectiveIsFlipped, showInkLayer, previewMode, contentRef]);
@@ -120,7 +120,7 @@ const useFlashcardInk = ({ cardId, effectiveIsFlipped, showInkLayer, inkEditingE
     const next: InkDocument = { ...nextDocument, version: nextDocument.version ?? INK_DOCUMENT_VERSION, updatedAt: Date.now() };
     onInkDocumentChange?.(side, next);
     pendingInkRef.current = { side, doc: next };
-    if (inkSaveTimerRef.current != null) window.clearTimeout(inkSaveTimerRef.current);
+    if ((inkSaveTimerRef.current !== null && inkSaveTimerRef.current !== undefined)) window.clearTimeout(inkSaveTimerRef.current);
     inkSaveTimerRef.current = window.setTimeout(() => {
       flushPendingInk();
       inkSaveTimerRef.current = null;
@@ -129,7 +129,7 @@ const useFlashcardInk = ({ cardId, effectiveIsFlipped, showInkLayer, inkEditingE
 
   useEffect(() => {
     return () => {
-      if (inkSaveTimerRef.current != null) window.clearTimeout(inkSaveTimerRef.current);
+      if ((inkSaveTimerRef.current !== null && inkSaveTimerRef.current !== undefined)) window.clearTimeout(inkSaveTimerRef.current);
       flushPendingInk();
     };
   }, [flushPendingInk]);

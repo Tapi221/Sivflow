@@ -31,7 +31,7 @@ const UNTITLED_FOLDER_NAME = "無題のフォルダ";
 const getFolderId = (folder: FolderTreeNode): string => String(folder?.id ?? folder?.folderId ?? "");
 const getParentFolderId = (folder: FolderTreeNode): string | null => {
   const parent = folder?.parentFolderId ?? folder?.parent_folder_id ?? null;
-  return parent == null ? null : String(parent);
+  return (parent === null || parent === undefined) ? null : String(parent);
 };
 const normalizeFolderId = (folderId: string | null | undefined): string => folderId ?? ROOT_FOLDER_ID;
 const isSameFolder = (left: string | null | undefined, right: string | null | undefined): boolean => normalizeFolderId(left) === normalizeFolderId(right);

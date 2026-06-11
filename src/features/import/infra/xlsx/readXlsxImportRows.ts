@@ -30,7 +30,7 @@ const readXlsxImportRows = (fileBuffer: ArrayBuffer): ReadXlsxImportRowsResult =
   const sheetName = IMPORT_SHEET_NAME;
   const worksheet = workbook.Sheets[sheetName];
 
-  if (worksheet == null) {
+  if ((worksheet === null || worksheet === undefined)) {
     return {
       payload: null,
       issues: [

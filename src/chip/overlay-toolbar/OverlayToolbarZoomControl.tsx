@@ -44,7 +44,7 @@ const OverlayToolbarZoomControl = (props: OverlayToolbarZoomControlProps) => {
   );
 
   const resolvedStep = React.useMemo(() => {
-    if (!Number.isFinite(step) || step == null || step <= 0) {
+    if (!Number.isFinite(step) || (step === null || step === undefined) || step <= 0) {
       return 1;
     }
 

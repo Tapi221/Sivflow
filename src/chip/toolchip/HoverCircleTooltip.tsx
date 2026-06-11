@@ -17,7 +17,7 @@ const HoverCircleTooltip = ({ label, children, className, disabled = false }: Ho
   const tooltipLabel = label?.trim();
   const content = children ?? tooltipLabel;
 
-  if (disabled || content == null || content === "") return null;
+  if (disabled || (content === null || content === undefined) || content === "") return null;
 
   return (
     <span className={cn(hoverCircleTooltipClassName, className)}>

@@ -31,7 +31,7 @@ const groupParsedRowsToCards = (rows: ParsedImportRow[]) => {
   rows.forEach((parsedRow) => {
     const existing = cardMap.get(parsedRow.cardId);
 
-    if (existing == null) {
+    if ((existing === null || existing === undefined)) {
       cardMap.set(parsedRow.cardId, {
         title: parsedRow.title,
         frontRows: parsedRow.side === "front" ? [parsedRow] : [],

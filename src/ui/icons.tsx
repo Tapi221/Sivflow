@@ -222,10 +222,10 @@ const normalizeStratisSvgBody = (source: string): string => source.replace(/^[\s
 const wrapStratisIcon = (BaseIcon: StratisIconComponent, name: string) => {
   const Icon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, strokeWidth, ...rest }, ref) => {
     const resolvedLabel = label ?? rest["aria-label"];
-    const decorative = resolvedLabel == null;
+    const decorative = (resolvedLabel === null || resolvedLabel === undefined);
     const pixelSize = typeof size === "number" ? `${size}px` : size;
 
-    return <BaseIcon ref={ref} width={pixelSize} height={pixelSize} className={className} style={{ display: "block", flexShrink: 0, ...style }} role={decorative ? "presentation" : "img"} aria-label={resolvedLabel} aria-hidden={decorative ? true : undefined} {...(title ? { title } : {})} {...(strokeWidth != null ? { strokeWidth } : {})} {...rest} />;
+    return <BaseIcon ref={ref} width={pixelSize} height={pixelSize} className={className} style={{ display: "block", flexShrink: 0, ...style }} role={decorative ? "presentation" : "img"} aria-label={resolvedLabel} aria-hidden={decorative ? true : undefined} {...(title ? { title } : {})} {...((strokeWidth !== null && strokeWidth !== undefined) ? { strokeWidth } : {})} {...rest} />;
   });
 
   Icon.displayName = name;
@@ -237,11 +237,11 @@ const wrapStratisDataIcon = (source: StratisDataIcon, name: string) => {
 
   const Icon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, strokeWidth, ...rest }, ref) => {
     const resolvedLabel = label ?? rest["aria-label"];
-    const decorative = resolvedLabel == null;
+    const decorative = (resolvedLabel === null || resolvedLabel === undefined);
     const pixelSize = typeof size === "number" ? `${size}px` : size;
     const innerHtml = title ? `<title>${escapeSvgText(title)}</title>${body}` : body;
 
-    return <svg ref={ref} xmlns="http://www.w3.org/2000/svg" viewBox={viewBox} width={pixelSize} height={pixelSize} className={className} style={{ display: "block", flexShrink: 0, ...style }} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" role={decorative ? "presentation" : "img"} aria-label={resolvedLabel} aria-hidden={decorative ? true : undefined} data-icon-source="stratis-ui-icons" data-icon-name={name} {...(strokeWidth != null ? { strokeWidth } : {})} {...rest} dangerouslySetInnerHTML={{ __html: innerHtml }} />;
+    return <svg ref={ref} xmlns="http://www.w3.org/2000/svg" viewBox={viewBox} width={pixelSize} height={pixelSize} className={className} style={{ display: "block", flexShrink: 0, ...style }} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" role={decorative ? "presentation" : "img"} aria-label={resolvedLabel} aria-hidden={decorative ? true : undefined} data-icon-source="stratis-ui-icons" data-icon-name={name} {...((strokeWidth !== null && strokeWidth !== undefined) ? { strokeWidth } : {})} {...rest} dangerouslySetInnerHTML={{ __html: innerHtml }} />;
   });
 
   Icon.displayName = name;
@@ -252,7 +252,7 @@ const makeIcon = (name: string) => {
 
   const Icon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, strokeWidth = 1.5, ...rest }, ref) => {
     const resolvedLabel = label ?? rest["aria-label"];
-    const decorative = resolvedLabel == null;
+    const decorative = (resolvedLabel === null || resolvedLabel === undefined);
     const pixelSize = typeof size === "number" ? `${size}px` : size;
 
     return (
@@ -276,7 +276,7 @@ const makeStratisIcon = (exportName: string, name: string) => {
 
 const MoreVerticalIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, ...rest }, ref) => {
   const resolvedLabel = label ?? rest["aria-label"];
-  const decorative = resolvedLabel == null;
+  const decorative = (resolvedLabel === null || resolvedLabel === undefined);
   const pixelSize = typeof size === "number" ? `${size}px` : size;
 
   return (
