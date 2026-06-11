@@ -1,14 +1,15 @@
 import { Dexie } from "dexie";
+
 import { defineNoteSchema } from "./noteSchema";
 import { defineSchema } from "./schema";
 import { LOCALDB_BRAND_MIGRATION_KEY_PREFIX, LOCALDB_GENERATION_MAX, LOCALDB_LEGACY_NAME_PREFIX, LOCALDB_NAME_PREFIX, LOCALDB_SCHEMA_VERSION_FOR_NAME } from "./localdb.constants";
 import { warnOncePerSession } from "@/services/localDBRuntimeState";
 
-const MIGRATABLE_TABLE_NAMES = ["folders", "cardSets", "cards", "documents", "notes", "users", "userSettings", "userStats", "syncMetadata", "levelHistories", "deviceMeta", "syncErrors", "syncHistory", "syncSettings", "syncQueue", "conflicts", "metadata", "images", "cardRelations", "projectMaps", "studyLogs", "tagRecords", "documentFiles"] as const;
-
 type MigratableTableName = (typeof MIGRATABLE_TABLE_NAMES)[number];
 
 type MigratableDexie = Dexie & Record<MigratableTableName, Dexie.Table<unknown, unknown>>;
+
+const MIGRATABLE_TABLE_NAMES = ["folders", "cardSets", "cards", "documents", "notes", "users", "userSettings", "userStats", "syncMetadata", "levelHistories", "deviceMeta", "syncErrors", "syncHistory", "syncSettings", "syncQueue", "conflicts", "metadata", "images", "cardRelations", "projectMaps", "studyLogs", "tagRecords", "documentFiles"] as const;
 
 const createMigrationDb = (name: string): MigratableDexie => {
   const db = new Dexie(name) as MigratableDexie;
