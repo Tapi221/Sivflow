@@ -84,7 +84,7 @@ const dropdownArrowVariants = cva(
   },
 );
 
-const withTooltip = <T extends React.ElementType>(Component: T) => {
+const withTooltip = <T extends React.ElementType,>(Component: T) => {
   return ({
     tooltip,
     tooltipContentProps,

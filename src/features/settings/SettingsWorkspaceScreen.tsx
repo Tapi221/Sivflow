@@ -431,7 +431,7 @@ const SettingToggle = ({ label, description, checked, onChange }: SettingToggleP
     </div>
   );
 };
-const SettingChoiceRow = <T extends string | number>({ label, value, options, onChange }: SettingChoiceRowProps<T>) => {
+const SettingChoiceRow = <T extends string | number,>({ label, value, options, onChange }: SettingChoiceRowProps<T>) => {
   return (
     <div className="settings-workspace__row settings-workspace__row--choice">
       <span className="settings-workspace__row-title">{label}</span>

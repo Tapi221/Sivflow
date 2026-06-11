@@ -317,7 +317,7 @@ const SettingSwitchRow = ({ checked, label, onChange }: SettingSwitchRowProps) =
     </button>
   </div>
 );
-const SettingChoiceRow = <T extends string | number>({ label, options, value, onChange }: SettingChoiceRowProps<T>) => (
+const SettingChoiceRow = <T extends string | number,>({ label, options, value, onChange }: SettingChoiceRowProps<T>) => (
   <div className={`${SETTINGS_DETAIL_ROW_CLASS_NAME} items-start`}>
     <span className="pt-1 text-[15px] font-medium tracking-[-0.02em] text-[#1c1c1e]">{label}</span>
     <div className="flex max-w-[58%] flex-wrap justify-end gap-1.5">
