@@ -4,8 +4,12 @@ import { isMfDeckMediaPath, MF_DECK_MAX_MEDIA_ENTRY_BYTES, MF_DECK_MAX_MEDIA_TOT
 import { MF_DECK_CARDS_PATH, MF_DECK_MANIFEST_PATH, MF_DECK_MEDIA_DIRECTORY, MF_DECK_MEDIA_MANIFEST_PATH, MfDeckValidationError } from "@/features/deckFile/domain/mfDeck.types";
 import type { MfDeckArchiveV1 } from "@/features/deckFile/domain/mfDeck.types";
 
+
+
 const MF_DECK_MAX_FILE_BYTES = 128 * 1024 * 1024;
 const MF_DECK_MAX_JSON_BYTES = 24 * 1024 * 1024;
+
+
 
 const parseJsonEntry = (text: string, path: string): unknown => {
   try {
@@ -247,5 +251,7 @@ const decodeMfDeckArchive = (buffer: ArrayBuffer): MfDeckArchiveV1 => {
 
   return validation.value;
 };
+
+
 
 export { MF_DECK_MAX_FILE_BYTES, MF_DECK_MAX_JSON_BYTES, encodeMfDeckArchive, decodeMfDeckArchive };
