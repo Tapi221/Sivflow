@@ -25,7 +25,7 @@ const writeLocalValue = (key: string, value: string | null) => {
   if (typeof window === "undefined") return;
 
   try {
-    if (value == null) {
+    if ((value === null || value === undefined)) {
       window.localStorage.removeItem(key);
       return;
     }

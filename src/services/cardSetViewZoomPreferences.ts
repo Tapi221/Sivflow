@@ -54,9 +54,9 @@ const canResolveLegacyScopedKey = (
   scope: CardSetViewZoomPreferenceScope,
 ): scope is LegacyCardSetViewZoomPreferenceScope => {
   return (
-    scope.displayMode != null &&
-    scope.interactionMode != null &&
-    scope.cardLayoutMode != null
+    (scope.displayMode !== null && scope.displayMode !== undefined) &&
+    (scope.interactionMode !== null && scope.interactionMode !== undefined) &&
+    (scope.cardLayoutMode !== null && scope.cardLayoutMode !== undefined)
   );
 };
 const parseCurrentStore = (raw: string | null) => {
@@ -212,7 +212,7 @@ const getCardSetViewZoomPreference = (scope: CardSetViewZoomPreferenceScope) => 
   const store = readStore();
   const storedZoomPercent = readStoredZoomPercent({ store, scope });
 
-  if (storedZoomPercent != null) {
+  if ((storedZoomPercent !== null && storedZoomPercent !== undefined)) {
     if (
       canResolveLegacyScopedKey(scope) &&
       buildCardSetViewZoomPreferenceScopeKey(scope) !==

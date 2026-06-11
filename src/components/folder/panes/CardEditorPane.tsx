@@ -724,7 +724,7 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
         lastSyncedAtMs: syncStatus.lastSyncedAtMs,
         hasError: syncStatus.hasError,
         isRetrying: syncStatus.isRetrying,
-        canRetry: syncStatus.retry != null,
+        canRetry: (syncStatus.retry !== null && syncStatus.retry !== undefined),
         onRetry: syncStatus.retry ?? undefined,
       }}
     />
@@ -978,7 +978,7 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
               className={cn(
                 "flex w-full flex-col items-center gap-4",
                 embeddedInPager &&
-                forcedPaneWidthPx == null &&
+                (forcedPaneWidthPx === null || forcedPaneWidthPx === undefined) &&
                 (dockToolbarsToTop ? "max-w-[1000px]" : "max-w-[820px]"),
               )}
               style={{

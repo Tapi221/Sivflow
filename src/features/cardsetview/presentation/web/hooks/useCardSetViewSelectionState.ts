@@ -159,7 +159,7 @@ const useCardSetViewSelectionState = ({ initialIndex, targetCardId, deviceScope,
   }, [cardSetId, deviceScope, sourceKey]);
 
   useEffect(() => {
-    if (!pendingFocusCardId || pendingFocusIndex == null) {
+    if (!pendingFocusCardId || (pendingFocusIndex === null || pendingFocusIndex === undefined)) {
       return;
     }
 

@@ -141,7 +141,7 @@ const useCardEditorPaneWidth = ({ settings, dockToolbarsToTop, embeddedInPager, 
     !dockToolbarsToTop && !hideBlockToolbars && !usesExternalToolbarMount;
 
   const shouldApplyPaneWidth =
-    (showWidthControl && contentViewportWidth > 0) || forcedPaneWidthPx != null;
+    (showWidthControl && contentViewportWidth > 0) || (forcedPaneWidthPx !== null && forcedPaneWidthPx !== undefined);
 
   const availablePaneWidthPx =
     contentViewportWidth > 0 ? contentViewportWidth : resolvedPaneWidthPx;

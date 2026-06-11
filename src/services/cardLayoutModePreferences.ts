@@ -49,7 +49,7 @@ const getCardLayoutModePreference = (scope: CardLayoutModePreferenceScope): Card
   if (!scope.cardSetId) return null;
 
   const raw = readStorageValue(buildStorageKey(scope));
-  return raw == null ? null : normalizeCardLayoutMode(raw);
+  return (raw === null || raw === undefined) ? null : normalizeCardLayoutMode(raw);
 };
 const resolveCardLayoutModePreference = (scope: CardLayoutModePreferenceScope, fallbackMode?: CardLayoutMode | null): CardLayoutMode => {
   const stored = getCardLayoutModePreference(scope);

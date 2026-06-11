@@ -245,11 +245,11 @@ const InkLayer = React.memo(React.forwardRef<InkLayerHandle, InkLayerProps>(({ c
   }, [cardId, emitHistory, onChange, onDocumentChange, side]);
 
   const stopDrawingRaf = React.useCallback(() => {
-    if (drawRafRef.current != null) {
+    if ((drawRafRef.current !== null && drawRafRef.current !== undefined)) {
       cancelAnimationFrame(drawRafRef.current);
       drawRafRef.current = null;
     }
-    if (eraseRafRef.current != null) {
+    if ((eraseRafRef.current !== null && eraseRafRef.current !== undefined)) {
       cancelAnimationFrame(eraseRafRef.current);
       eraseRafRef.current = null;
     }
@@ -260,7 +260,7 @@ const InkLayer = React.memo(React.forwardRef<InkLayerHandle, InkLayerProps>(({ c
   }, [clearCanvas]);
 
   const scheduleDrawFlush = React.useCallback(() => {
-    if (drawRafRef.current != null) return;
+    if ((drawRafRef.current !== null && drawRafRef.current !== undefined)) return;
 
     drawRafRef.current = requestAnimationFrame(() => {
       drawRafRef.current = null;
@@ -309,7 +309,7 @@ const InkLayer = React.memo(React.forwardRef<InkLayerHandle, InkLayerProps>(({ c
   );
 
   const scheduleEraseFlush = React.useCallback(() => {
-    if (eraseRafRef.current != null) return;
+    if ((eraseRafRef.current !== null && eraseRafRef.current !== undefined)) return;
 
     eraseRafRef.current = requestAnimationFrame(() => {
       eraseRafRef.current = null;

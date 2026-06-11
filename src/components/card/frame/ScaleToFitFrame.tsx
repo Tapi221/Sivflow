@@ -147,7 +147,7 @@ const ScaleToFitFrame = ({ children, className, baseWidth = 480, scaleMultiplier
       return;
     }
 
-    if (resolvedIntrinsicHeightPx != null) {
+    if ((resolvedIntrinsicHeightPx !== null && resolvedIntrinsicHeightPx !== undefined)) {
       return;
     }
 
@@ -158,7 +158,7 @@ const ScaleToFitFrame = ({ children, className, baseWidth = 480, scaleMultiplier
       });
       const nextHeight = Math.max(0, Math.ceil(logicalHeight));
       setContentHeight((previousHeight) =>
-        previousHeight != null &&
+        (previousHeight !== null && previousHeight !== undefined) &&
           Math.abs(previousHeight - nextHeight) < CONTENT_HEIGHT_EPSILON_PX
           ? previousHeight
           : nextHeight,
@@ -171,7 +171,7 @@ const ScaleToFitFrame = ({ children, className, baseWidth = 480, scaleMultiplier
   }, [measurementScale, resolvedIntrinsicHeightPx]);
 
   const scaledHeight =
-    resolvedContentHeight != null
+    (resolvedContentHeight !== null && resolvedContentHeight !== undefined)
       ? Math.ceil(resolvedContentHeight * effectiveScale)
       : null;
 
@@ -188,7 +188,7 @@ const ScaleToFitFrame = ({ children, className, baseWidth = 480, scaleMultiplier
         className,
       )}
       style={
-        !fitHeight && scaledHeight != null
+        !fitHeight && (scaledHeight !== null && scaledHeight !== undefined)
           ? { height: `${scaledHeight}px` }
           : undefined
       }
@@ -211,7 +211,7 @@ const ScaleToFitFrame = ({ children, className, baseWidth = 480, scaleMultiplier
                 minWidth: 0,
                 height: fitHeight ? "100%" : undefined,
               }
-              : visualWidthPx != null
+              : (visualWidthPx !== null && visualWidthPx !== undefined)
                 ? {
                   width: `${visualWidthPx.toFixed(3)}px`,
                   height: fitHeight ? "100%" : undefined,

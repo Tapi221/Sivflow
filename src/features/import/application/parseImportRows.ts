@@ -50,14 +50,14 @@ const normalizeHeaderName = (value: string): ImportColumnKey | null => {
   return null;
 };
 const toTrimmedString = (value: unknown) => {
-  if (value == null) return "";
+  if ((value === null || value === undefined)) return "";
   return String(value).trim();
 };
 const parseHeaderMap = (headerRow: unknown[]): HeaderMap => {
   return headerRow.reduce<HeaderMap>((accumulator, cellValue, columnIndex) => {
     const normalizedKey = normalizeHeaderName(toTrimmedString(cellValue));
 
-    if (normalizedKey == null || accumulator[normalizedKey] != null) {
+    if ((normalizedKey === null || normalizedKey === undefined) || accumulator[normalizedKey] != null) {
       return accumulator;
     }
 
@@ -72,7 +72,7 @@ const getCellValue = (
 ) => {
   const columnIndex = headerMap[columnKey];
 
-  if (columnIndex == null) {
+  if ((columnIndex === null || columnIndex === undefined)) {
     return "";
   }
 
@@ -196,7 +196,7 @@ const buildRowBlock = ({
   const parsedSide = parseImportSide(rowCellMap.side ?? "");
   const parsedOrder = parseBlockOrder(rowCellMap.blockOrder ?? "");
 
-  if (parsedSide == null) {
+  if ((parsedSide === null || parsedSide === undefined)) {
     return {
       side: null,
       block: null,
@@ -214,7 +214,7 @@ const buildRowBlock = ({
     };
   }
 
-  if (parsedOrder == null) {
+  if ((parsedOrder === null || parsedOrder === undefined)) {
     return {
       side: parsedSide,
       block: null,
@@ -363,7 +363,7 @@ const parseImportRows = ({ sheetName, rows }: { sheetName: ImportSheetName;
 
     issues.push(...rowIssues);
 
-    if (side == null || block == null) {
+    if ((side === null || side === undefined) || (block === null || block === undefined)) {
       continue;
     }
 

@@ -158,7 +158,7 @@ const resolveCardSetViewDefaultZoomPercent = ({ deviceScope, cardLayoutMode, max
   canonicalCardWidthPx?: number;
 }) => {
   const zoomPercentOverride = resolveCardSetViewZoomPercentOverride({ deviceScope });
-  if (zoomPercentOverride != null) {
+  if ((zoomPercentOverride !== null && zoomPercentOverride !== undefined)) {
     return zoomPercentOverride;
   }
 

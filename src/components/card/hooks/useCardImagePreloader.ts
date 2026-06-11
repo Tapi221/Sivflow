@@ -254,7 +254,7 @@ const useCardImagePreloader = (
       return;
     }
 
-    if (flushReadyRafRef.current != null) {
+    if ((flushReadyRafRef.current !== null && flushReadyRafRef.current !== undefined)) {
       return;
     }
 
@@ -318,7 +318,7 @@ const useCardImagePreloader = (
 
   useEffect(() => {
     return () => {
-      if (typeof window !== "undefined" && flushReadyRafRef.current != null) {
+      if (typeof window !== "undefined" && (flushReadyRafRef.current !== null && flushReadyRafRef.current !== undefined)) {
         window.cancelAnimationFrame(flushReadyRafRef.current);
         flushReadyRafRef.current = null;
       }
@@ -439,7 +439,7 @@ const useCardImagePreloader = (
     return () => {
       controller.abort();
 
-      if (typeof window !== "undefined" && flushReadyRafRef.current != null) {
+      if (typeof window !== "undefined" && (flushReadyRafRef.current !== null && flushReadyRafRef.current !== undefined)) {
         window.cancelAnimationFrame(flushReadyRafRef.current);
         flushReadyRafRef.current = null;
       }

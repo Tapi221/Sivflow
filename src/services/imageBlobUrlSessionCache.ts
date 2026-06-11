@@ -101,7 +101,7 @@ const cacheImageBlobUrl = (
 const getOrCreateImageBlobUrl = async (id: string | null | undefined, blobOrOptions?: Blob | BlobScopeOptions, options?: BlobScopeOptions): Promise<string | null> => {
   if (!id) return null;
   const scopeOptions =
-    blobOrOptions instanceof Blob || blobOrOptions == null
+    blobOrOptions instanceof Blob || (blobOrOptions === null || blobOrOptions === undefined)
       ? options
       : (blobOrOptions as BlobScopeOptions);
   const providedBlob = blobOrOptions instanceof Blob ? blobOrOptions : null;

@@ -24,7 +24,7 @@ class FeatureFlagService {
       if (!raw) return;
 
       const parsed: unknown = JSON.parse(raw);
-      if (parsed == null || typeof parsed !== "object") return;
+      if ((parsed === null || parsed === undefined) || typeof parsed !== "object") return;
 
       const obj = parsed as Record<string, unknown>;
 
@@ -52,7 +52,7 @@ class FeatureFlagService {
           localStorage.getItem(SHARED_STORAGE_KEYS.featureFlags) ?? "{}";
         const parsed: unknown = JSON.parse(raw);
         const current: Record<string, unknown> =
-          parsed != null && typeof parsed === "object"
+          (parsed !== null && parsed !== undefined) && typeof parsed === "object"
             ? (parsed as Record<string, unknown>)
             : {};
 

@@ -18,7 +18,7 @@ const RowSnap = ({ rowPx, children, afterGapRows = 0 }: RowSnapProps) => {
     paddingRef.current = snapPaddingBottomPx; }, [snapPaddingBottomPx]);
 
   const scheduleMeasure = React.useCallback(() => {
-    if (rafRef.current != null) return;
+    if ((rafRef.current !== null && rafRef.current !== undefined)) return;
     rafRef.current = window.requestAnimationFrame(() => {
       rafRef.current = null;
       const node = targetRef.current;
@@ -51,7 +51,7 @@ const RowSnap = ({ rowPx, children, afterGapRows = 0 }: RowSnapProps) => {
         observerRef.current.disconnect();
         observerRef.current = null;
       }
-      if (rafRef.current != null) {
+      if ((rafRef.current !== null && rafRef.current !== undefined)) {
         window.cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
       }

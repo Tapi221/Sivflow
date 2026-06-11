@@ -130,7 +130,7 @@ const useCardCommands = (folderId?: string) => {
       },
       layoutRows: normalizeLayoutRows((cardData as unknown as { layoutRows?: unknown; layout_rows?: unknown; }).layoutRows ?? (cardData as unknown as { layoutRows?: unknown; layout_rows?: unknown; }).layout_rows ?? DEFAULT_LAYOUT_ROWS),
       memoryStability: 0,
-      ...(cardData.currentLevel != null ? { currentLevel: cardData.currentLevel } : {}),
+      ...((cardData.currentLevel !== null && cardData.currentLevel !== undefined) ? { currentLevel: cardData.currentLevel } : {}),
       nextReviewDate,
       createdAt: now,
       updatedAt: now,

@@ -76,7 +76,7 @@ const useCardSetViewZoom = ({ deviceScope, cardSetId, viewportRef, displayMode, 
       return;
     }
 
-    if (indicatorTimeoutRef.current != null) {
+    if ((indicatorTimeoutRef.current !== null && indicatorTimeoutRef.current !== undefined)) {
       window.clearTimeout(indicatorTimeoutRef.current);
     }
 
@@ -133,7 +133,7 @@ const useCardSetViewZoom = ({ deviceScope, cardSetId, viewportRef, displayMode, 
     return () => {
       if (
         typeof window !== "undefined" &&
-        indicatorTimeoutRef.current != null
+        (indicatorTimeoutRef.current !== null && indicatorTimeoutRef.current !== undefined)
       ) {
         window.clearTimeout(indicatorTimeoutRef.current);
       }
@@ -241,7 +241,7 @@ const useCardSetViewZoom = ({ deviceScope, cardSetId, viewportRef, displayMode, 
   const preferredZoomPercent = isMobileDeviceScope
     ? 100
     : zoomPreferenceState.scopeKey === zoomSourceKey &&
-      zoomPreferenceState.preferredPercent != null
+      (zoomPreferenceState.preferredPercent !== null && zoomPreferenceState.preferredPercent !== undefined)
       ? zoomPreferenceState.preferredPercent
       : (storedPreferredPercent ?? defaultZoomPercent);
 
@@ -255,7 +255,7 @@ const useCardSetViewZoom = ({ deviceScope, cardSetId, viewportRef, displayMode, 
       isMobileDeviceScope ||
       !cardSetId ||
       zoomPreferenceState.scopeKey !== zoomSourceKey ||
-      zoomPreferenceState.preferredPercent == null
+      (zoomPreferenceState.preferredPercent === null || zoomPreferenceState.preferredPercent === undefined)
     ) {
       return;
     }

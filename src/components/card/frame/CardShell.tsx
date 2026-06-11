@@ -179,7 +179,7 @@ const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
       if (
         !resizable ||
         !resizeStorageKey ||
-        customHeightPx == null ||
+        (customHeightPx === null || customHeightPx === undefined) ||
         typeof window === "undefined"
       )
         return;
@@ -211,7 +211,7 @@ const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     };
 
     const resolvedShellStyle: CssVars =
-      resolvedHeightPx != null
+      (resolvedHeightPx !== null && resolvedHeightPx !== undefined)
         ? {
           ...(style ?? {}),
           ...enforcedShellOverflowStyle,
@@ -357,13 +357,13 @@ const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
                 const nextHeight = clampHeight(nextHeightRaw);
 
                 resizePendingHeightRef.current = nextHeight;
-                if (resizeRafRef.current != null) return;
+                if ((resizeRafRef.current !== null && resizeRafRef.current !== undefined)) return;
 
                 resizeRafRef.current = window.requestAnimationFrame(() => {
                   resizeRafRef.current = null;
                   const pendingHeight = resizePendingHeightRef.current;
                   resizePendingHeightRef.current = null;
-                  if (pendingHeight == null) return;
+                  if ((pendingHeight === null || pendingHeight === undefined)) return;
                   commitHeight(pendingHeight);
                 });
               };
@@ -375,13 +375,13 @@ const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
                 )
                   return;
                 resizeRef.current = null;
-                if (resizeRafRef.current != null) {
+                if ((resizeRafRef.current !== null && resizeRafRef.current !== undefined)) {
                   window.cancelAnimationFrame(resizeRafRef.current);
                   resizeRafRef.current = null;
                 }
                 const pendingHeight = resizePendingHeightRef.current;
                 resizePendingHeightRef.current = null;
-                if (pendingHeight != null) {
+                if ((pendingHeight !== null && pendingHeight !== undefined)) {
                   commitHeight(pendingHeight);
                 }
                 if (typeof window !== "undefined") {

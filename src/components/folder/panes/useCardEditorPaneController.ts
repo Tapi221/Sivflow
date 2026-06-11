@@ -46,7 +46,7 @@ const useCardEditorPaneController = ({ selectedCardId, folderId, cardSetId, card
     updateCard,
     createCard,
   } = useCards(folderId, cardSetId, {
-    enabled: cardsOverride == null,
+    enabled: (cardsOverride === null || cardsOverride === undefined),
   }) as unknown as UseCardsResult;
 
   const cards = cardsOverride ?? cardsFromHook;

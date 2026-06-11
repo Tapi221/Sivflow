@@ -121,7 +121,7 @@ const VerticalCardPagerFn = <T,>({
   }, [activeIndex, cardWidth, cards, getCardWidth, getCardWidthSpec, stableCardKeys]);
 
   const clearNaturalIndexTimer = useCallback(() => {
-    if (naturalIndexTimerRef.current == null) return;
+    if ((naturalIndexTimerRef.current === null || naturalIndexTimerRef.current === undefined)) return;
 
     window.clearTimeout(naturalIndexTimerRef.current);
     naturalIndexTimerRef.current = null;
@@ -277,7 +277,7 @@ const VerticalCardPagerFn = <T,>({
   }, [clearNaturalIndexTimer, commitNearestIndex, isNaturalIndexCommitSuppressed, naturalIndexCommitDelayMs]);
 
   useEffect(() => {
-    if (scrollToActiveIndexRequestKey == null) return;
+    if ((scrollToActiveIndexRequestKey === null || scrollToActiveIndexRequestKey === undefined)) return;
     if (lastScrollToActiveIndexRequestKeyRef.current === scrollToActiveIndexRequestKey) return;
 
     lastScrollToActiveIndexRequestKeyRef.current = scrollToActiveIndexRequestKey;

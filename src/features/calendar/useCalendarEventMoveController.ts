@@ -75,7 +75,7 @@ const useCalendarEventMoveController = ({ updateGoogleCalendarEvent }: UseCalend
 
   const clearSaveTimer = useCallback((eventKey: string) => {
     const timerId = saveTimerByEventRef.current.get(eventKey);
-    if (timerId == null) return;
+    if ((timerId === null || timerId === undefined)) return;
 
     window.clearTimeout(timerId);
     saveTimerByEventRef.current.delete(eventKey);
@@ -83,7 +83,7 @@ const useCalendarEventMoveController = ({ updateGoogleCalendarEvent }: UseCalend
 
   const clearReleaseTimer = useCallback((eventKey: string) => {
     const timerId = releaseTimerByEventRef.current.get(eventKey);
-    if (timerId == null) return;
+    if ((timerId === null || timerId === undefined)) return;
 
     window.clearTimeout(timerId);
     releaseTimerByEventRef.current.delete(eventKey);
