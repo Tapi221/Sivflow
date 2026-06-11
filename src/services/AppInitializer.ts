@@ -10,8 +10,6 @@ import { warnOncePerSession } from "./localDBRuntimeState";
 
 
 
-
-
 // NOTE: 初期化時のユーザー向け INFO 通知は UI 上で邪魔になるため表示しない。
 
 /**
@@ -110,9 +108,9 @@ export class AppInitializer { private static initialized = false;
           skippedFailures,
         });
       }
-      console.log(`[アプリ初期化:${userId}] フェーズ2: 再構築が完了しました ✓`);
+      console.log(`[アプリ初期化:${userId}] フェーズ2: 再構築が完了しました`);
     } else {
-      console.log(`[アプリ初期化:${userId}] フェーズ1: 健全性チェックは正常です ✓`);
+      console.log(`[アプリ初期化:${userId}] フェーズ1: 健全性チェックは正常です`);
     }
 
     // 🔥 Phase 3: Snapshot 移行
@@ -120,7 +118,7 @@ export class AppInitializer { private static initialized = false;
     try {
       const { snapshotService } = await import("./SnapshotService");
       await snapshotService.migrateFromLocalStorage(userId);
-      console.log(`[アプリ初期化:${userId}] フェーズ3: スナップショット移行が完了しました ✓`);
+      console.log(`[アプリ初期化:${userId}] フェーズ3: スナップショット移行が完了しました`);
     } catch (error) {
       console.error(
         `[アプリ初期化:${userId}] フェーズ3: スナップショット移行に失敗しました（次回起動時に再試行します）`,
@@ -134,7 +132,7 @@ export class AppInitializer { private static initialized = false;
     try {
       await ensureLegacyCardsBackfilled(userId);
       console.log(
-        `[アプリ初期化:${userId}] フェーズ4: カードセット移行補完が完了しました ✓`,
+        `[アプリ初期化:${userId}] フェーズ4: カードセット移行補完が完了しました`,
       );
     } catch (error) {
       console.error(
@@ -156,12 +154,12 @@ export class AppInitializer { private static initialized = false;
         },
       );
     });
-    console.log(`[アプリ初期化:${userId}] フェーズ5: 履歴圧縮を予約しました ✓`);
+    console.log(`[アプリ初期化:${userId}] フェーズ5: 履歴圧縮を予約しました`);
 
     // Phase 6: CLEAN マーク（再構築内で実行される）
 
     this.initialized = true;
-    console.log(`[アプリ初期化:${userId}] ✅ 初期化が完了しました（全フェーズ）`);
+    console.log(`[アプリ初期化:${userId}] 初期化が完了しました（全フェーズ）`);
     return { degraded, reason: degradedReason, skippedFailures };
 
     // 初期化完了の通知は自動で消える（INFO レベル）
