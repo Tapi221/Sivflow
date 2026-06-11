@@ -4,8 +4,6 @@ import { PdfDocumentPane } from "@/features/pdf/PdfDocumentPane";
 import type { Card, DocumentItem, SelectedExplorerItem } from "@/types";
 import { CardPane } from "./CardPane";
 
-
-
 type RightPaneProps = {
   selectedItem: SelectedExplorerItem;
   selectedCardId: string | null;
@@ -24,8 +22,6 @@ type RightPaneProps = {
   folderSelectionNonce: number;
 };
 
-
-
 const UnsupportedDocumentPane = () => {
   return (
     <div className="flex h-full items-center justify-center bg-transparent p-6">
@@ -39,7 +35,9 @@ const UnsupportedDocumentPane = () => {
     </div>
   );
 };
-export const RightPane = ({ selectedItem, selectedCardId, selectedDocument, selectedFolderId, selectedFolderName, folderCards, onCardUpdated, onDocumentUpdated, onRenameFolder, handlers, folderSelectionNonce }: RightPaneProps) => { if (selectedItem?.type === "trash") { return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
+export const RightPane = ({ selectedItem, selectedCardId, selectedDocument, selectedFolderId, selectedFolderName, folderCards, onCardUpdated, onDocumentUpdated, onRenameFolder, handlers, folderSelectionNonce }: RightPaneProps) => {
+  if (selectedItem?.type === "trash") {
+    return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
   }
 
   if (selectedItem?.type === "cardSet") {

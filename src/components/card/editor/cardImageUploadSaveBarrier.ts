@@ -4,8 +4,6 @@ import type { UploadedImage } from "@/types/domain/assets";
 import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 import type { EditorDraft } from "./cardEditorUtils";
 
-
-
 type LocalImageRecordLike = {
   remoteStatus?: "none" | "uploading" | "ready" | "failed" | null;
   status?: "pending" | "uploading" | "ready" | "failed" | null;
@@ -15,12 +13,8 @@ type LocalImageRecordLike = {
   storagePath?: string | null;
 };
 
-
-
 const IMAGE_UPLOAD_SAVE_TIMEOUT_MS = 30_000;
 const IMAGE_UPLOAD_SAVE_POLL_MS = 300;
-
-
 
 const sleep = (ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -177,7 +171,8 @@ const processAssetQueueBestEffort = async (): Promise<void> => {
     console.warn("[CardSave] Failed to process image upload queue", error);
   }
 };
-export const waitForDraftImageUploads = async (draft: EditorDraft): Promise<EditorDraft> => { const images = uniqueImagesByAssetKey(collectDraftImages(draft));
+export const waitForDraftImageUploads = async (draft: EditorDraft): Promise<EditorDraft> => {
+  const images = uniqueImagesByAssetKey(collectDraftImages(draft));
   const pendingImages = images.filter(shouldWaitForImage);
 
   if (pendingImages.length === 0) {

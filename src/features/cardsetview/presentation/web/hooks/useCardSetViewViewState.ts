@@ -5,8 +5,6 @@ import { useCardSetViewSelectionState } from "./useCardSetViewSelectionState";
 import type { Card } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 
-
-
 interface UseCardSetViewViewStateOptions {
   initialIndex: number;
   targetCardId: string | null;
@@ -17,9 +15,8 @@ interface UseCardSetViewViewStateOptions {
   deviceScope: string;
 }
 
-
-
-export const useCardSetViewViewState = ({ initialIndex, targetCardId, cardSetId, sortedCards, cardIndexById, selectedCardSet, deviceScope }: UseCardSetViewViewStateOptions) => { const selectionState = useCardSetViewSelectionState({ initialIndex, targetCardId, deviceScope, cardSetId, sortedCards, cardIndexById });
+export const useCardSetViewViewState = ({ initialIndex, targetCardId, cardSetId, sortedCards, cardIndexById, selectedCardSet, deviceScope }: UseCardSetViewViewStateOptions) => {
+  const selectionState = useCardSetViewSelectionState({ initialIndex, targetCardId, deviceScope, cardSetId, sortedCards, cardIndexById });
 
   const displayModeState = useCardSetViewDisplayMode({
     cardSetId,

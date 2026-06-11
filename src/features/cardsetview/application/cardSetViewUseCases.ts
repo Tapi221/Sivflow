@@ -1,8 +1,6 @@
 import type { Card } from "@/types";
 import { type CardDisplayMode, type CardSet, normalizeCardDisplayMode } from "@/types/domain/cardSet";
 
-
-
 type UpdateCardSetInput = Partial<
   Pick<CardSet, "name" | "description" | "orderIndex" | "defaultDisplayMode">
 >;
@@ -22,8 +20,6 @@ interface ToggleCardFlagOptions {
   updateCard: (id: string, data: Partial<Card>) => Promise<unknown>;
 }
 
-
-
 const buildNewCardPayload = ({
   cardSetId,
   targetFolderId,
@@ -42,7 +38,9 @@ const buildNewCardPayload = ({
     isSilent: false,
   };
 };
-export const extractCreatedCardId = (created: unknown): string | null => { if (typeof created === "string") { return created;
+export const extractCreatedCardId = (created: unknown): string | null => {
+  if (typeof created === "string") {
+    return created;
   }
 
   if (
@@ -65,13 +63,17 @@ export const extractCreatedCardId = (created: unknown): string | null => { if (t
 
   return null;
 };
-export const createAndFocusCard = async ({ targetCardSetId, targetFolderId, createCard }: CreateAndFocusCardOptions): Promise<string | null> => { const created = await createCard(buildNewCardPayload({ cardSetId: targetCardSetId, targetFolderId }));
+export const createAndFocusCard = async ({ targetCardSetId, targetFolderId, createCard }: CreateAndFocusCardOptions): Promise<string | null> => {
+  const created = await createCard(buildNewCardPayload({ cardSetId: targetCardSetId, targetFolderId }));
 
   return extractCreatedCardId(created);
 };
-export const toggleCardUncertainty = async ({ card, updateCard }: ToggleCardFlagOptions): Promise<void> => { await updateCard(card.id, { hasUncertainty: !card.hasUncertainty });
+export const toggleCardUncertainty = async ({ card, updateCard }: ToggleCardFlagOptions): Promise<void> => {
+  await updateCard(card.id, { hasUncertainty: !card.hasUncertainty });
 };
-export const toggleCardBookmark = async ({ card, updateCard }: ToggleCardFlagOptions): Promise<void> => { await updateCard(card.id, { isBookmarked: !card.isBookmarked });
+export const toggleCardBookmark = async ({ card, updateCard }: ToggleCardFlagOptions): Promise<void> => {
+  await updateCard(card.id, { isBookmarked: !card.isBookmarked });
 };
-export const saveDefaultDisplayMode = async ({ cardSetId, currentDisplayMode, updateCardSet }: SaveDefaultDisplayModeOptions): Promise<void> => { await updateCardSet(cardSetId, { defaultDisplayMode: normalizeCardDisplayMode(currentDisplayMode) });
+export const saveDefaultDisplayMode = async ({ cardSetId, currentDisplayMode, updateCardSet }: SaveDefaultDisplayModeOptions): Promise<void> => {
+  await updateCardSet(cardSetId, { defaultDisplayMode: normalizeCardDisplayMode(currentDisplayMode) });
 };

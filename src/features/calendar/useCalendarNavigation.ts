@@ -7,16 +7,10 @@ import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model
 import { createCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
 import { persistScheduleNavigationState, readStoredScheduleNavigationState, type ScheduleNavigationState } from "./scheduleNavigationPersistence";
 
-
-
 type CalendarNavigationOptions = { allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay; };
-
-
 
 const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_MODES);
-
-
 
 const isViewModeSelectionArray = (selection: CalendarViewModeSelection): selection is readonly CalendarViewMode[] => Array.isArray(selection);
 const isMultiSelectViewMode = (viewMode: CalendarViewMode): boolean => MULTI_SELECT_VIEW_MODE_SET.has(viewMode);
@@ -83,7 +77,8 @@ const createInitialScheduleNavigationState = ({ allowMultiSelectViewMode, weekSt
     selectedViewMode,
   };
 };
-export const useCalendarNavigation = ({ allowMultiSelectViewMode = true, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY }: CalendarNavigationOptions = {}) => { const contentViewportRef = useRef<HTMLDivElement | null>(null);
+export const useCalendarNavigation = ({ allowMultiSelectViewMode = true, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY }: CalendarNavigationOptions = {}) => {
+  const contentViewportRef = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
   const initialNavigationStateRef = useRef<ScheduleNavigationState | null>(null);

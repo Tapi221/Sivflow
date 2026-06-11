@@ -1,14 +1,11 @@
 import * as XLSX from "xlsx";
 import { IMPORT_SHEET_NAME, type ImportIssue, type ImportParseResult, type ImportSheetName } from "@/features/import/domain/import.types";
 
-
-
-export type ReadXlsxImportRowsResult = | { sheetName: ImportSheetName;
+export type ReadXlsxImportRowsResult = | {
+  sheetName: ImportSheetName;
   rows: unknown[][];
 }
   | ImportParseResult;
-
-
 
 const buildIssue = ({
   level,
@@ -27,7 +24,8 @@ const buildIssue = ({
     message,
   };
 };
-export const readXlsxImportRows = (fileBuffer: ArrayBuffer): ReadXlsxImportRowsResult => { const workbook = XLSX.read(fileBuffer, { type: "array", raw: false, dense: false });
+export const readXlsxImportRows = (fileBuffer: ArrayBuffer): ReadXlsxImportRowsResult => {
+  const workbook = XLSX.read(fileBuffer, { type: "array", raw: false, dense: false });
 
   const sheetName = IMPORT_SHEET_NAME;
   const worksheet = workbook.Sheets[sheetName];

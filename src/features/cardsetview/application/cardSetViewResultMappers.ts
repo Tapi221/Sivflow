@@ -1,4 +1,6 @@
-export const extractCreatedCardId = (created: unknown): string | null => { if (typeof created === "string") { return created;
+export const extractCreatedCardId = (created: unknown): string | null => {
+  if (typeof created === "string") {
+    return created;
   }
 
   if (

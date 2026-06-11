@@ -5,8 +5,6 @@ import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
 import { cn } from "@/lib/utils";
 import { ChevronRight } from "@/ui/icons";
 
-
-
 type WorkspaceBreadcrumbsProps = {
   className?: string;
   isLeftPanelCollapsed?: boolean;
@@ -14,8 +12,6 @@ type WorkspaceBreadcrumbsProps = {
 type NoDragStyle = CSSProperties & {
   WebkitAppRegion?: "no-drag";
 };
-
-
 
 const WORKSPACE_BREADCRUMBS_NO_DRAG_STYLE: NoDragStyle = {
   WebkitAppRegion: "no-drag",
@@ -29,8 +25,6 @@ const WORKSPACE_BREADCRUMB_BUTTON_CLASS_NAME = "min-w-0 truncate border-0 bg-tra
 const WORKSPACE_BREADCRUMB_LABEL_CLASS_NAME = "min-w-0 truncate p-0 leading-none text-[#7d7b78]";
 const WORKSPACE_BREADCRUMB_SEPARATOR_CLASS_NAME = "h-3 w-3 shrink-0 text-[#7d7b78]";
 
-
-
 const getBreadcrumbLabel = (crumb: BreadcrumbCrumb): string => {
   const label = crumb.label.trim();
   return label.length > 0 ? label : "無題";
@@ -38,8 +32,6 @@ const getBreadcrumbLabel = (crumb: BreadcrumbCrumb): string => {
 const getBreadcrumbKey = (crumb: BreadcrumbCrumb, index: number): string => {
   return `${index}:${crumb.to ?? ""}:${crumb.folderId ?? ""}:${crumb.label}`;
 };
-
-
 
 const WorkspaceBreadcrumbs = ({ className, isLeftPanelCollapsed = false }: WorkspaceBreadcrumbsProps) => {
   const navigate = useNavigate();
@@ -103,10 +95,6 @@ const WorkspaceBreadcrumbs = ({ className, isLeftPanelCollapsed = false }: Works
   );
 };
 
-
-
 export { WorkspaceBreadcrumbs };
-
-
 
 export type { WorkspaceBreadcrumbsProps };
