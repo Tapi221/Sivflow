@@ -3,6 +3,8 @@ import type { AppSnapshot } from "@/types/domain/snapshot";
 
 
 
+
+
 const createSnapshotStoreUseCase = ({ repository }: { repository: SnapshotRepositoryPort;
 }) => {
   const save = async (snapshot: AppSnapshot): Promise<void> => {
@@ -18,6 +20,8 @@ const createSnapshotStoreUseCase = ({ repository }: { repository: SnapshotReposi
     list,
   };
 };
+
+
 
 
 

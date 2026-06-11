@@ -12,12 +12,16 @@ import type { FlashcardMediaLike } from "./flashcard.types";
 
 
 
+
+
 interface SideData {
   blocks: CardBlock[];
   text: string;
   audios: FlashcardMediaLike[];
   code: { code?: string; language?: string; } | null;
 }
+
+
 
 
 
@@ -58,6 +62,8 @@ const resolveSideBlocks = (side: "question" | "answer", data: SideData) => {
 
   return fallbackBlocks;
 };
+
+
 
 
 

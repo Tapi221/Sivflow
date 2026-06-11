@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type BlockFrameVariant = "none" | "neutral" | "editor";
 type BlockFrameProps = React.HTMLAttributes<HTMLDivElement> & {
   children: React.ReactNode;
@@ -17,8 +19,12 @@ type BlockFrameProps = React.HTMLAttributes<HTMLDivElement> & {
 
 
 
+
+
 const SELECTED_BLOCK_OUTLINE_COLOR = "rgba(37, 99, 235, 0.82)";
 const SELECTED_BLOCK_OUTLINE_WIDTH = "1px";
+
+
 
 
 
@@ -26,6 +32,8 @@ const getClosestBlockId = (target: EventTarget | null) => {
   if (!(target instanceof HTMLElement)) return null;
   return target.closest<HTMLElement>("[data-block-id]")?.dataset.blockId ?? null;
 };
+
+
 
 
 
@@ -83,6 +91,8 @@ const BlockFrame = ({ children, className, contentClassName, overlay, accentColo
     </div>
   );
 };
+
+
 
 
 

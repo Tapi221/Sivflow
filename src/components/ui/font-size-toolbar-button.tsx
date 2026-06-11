@@ -20,6 +20,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 import { ToolbarButton } from "./toolbar";
 
+
+
 const DEFAULT_FONT_SIZE = "16";
 
 const FONT_SIZE_MAP = {
@@ -44,6 +46,8 @@ const FONT_SIZES = [
   "72",
   "96",
 ] as const;
+
+
 
 const FontSizeToolbarButton = () => {
   const [inputValue, setInputValue] = React.useState(DEFAULT_FONT_SIZE);
@@ -153,5 +157,7 @@ const FontSizeToolbarButton = () => {
     </div>
   );
 };
+
+
 
 export { FontSizeToolbarButton };

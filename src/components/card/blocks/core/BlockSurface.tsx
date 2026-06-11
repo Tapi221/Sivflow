@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type CSSVarStyle = React.CSSProperties &
   Partial<Record<`--${string}`, string | number>>;
 type BlockSurfaceProps = {
@@ -25,6 +27,8 @@ type BlockSurfaceProps = {
   bleedX?: boolean;
   children: React.ReactNode;
 };
+
+
 
 
 
@@ -76,6 +80,8 @@ const BlockSurface = ({ className, contentClassName, style, padTopRows = 0, padB
     </div>
   );
 };
+
+
 
 
 

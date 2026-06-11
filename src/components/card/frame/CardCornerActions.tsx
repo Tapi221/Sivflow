@@ -5,6 +5,8 @@ import { CARD_ACTION_BG_CLASS, CARD_ACTION_BUTTON_PX, CARD_ACTION_COLOR_ACTIVE_C
 
 
 
+
+
 interface CardCornerActionsProps {
   onHelp?: () => void;
   onStar?: () => void;
@@ -15,6 +17,8 @@ interface CardCornerActionsProps {
   visualScale?: number;
   iconPx?: number;
 }
+
+
 
 
 
@@ -30,6 +34,8 @@ const resolveSafeIconPx = (value?: number) => {
   if (value <= 0) return null;
   return value;
 };
+
+
 
 
 
@@ -157,6 +163,8 @@ const CardCornerActions = ({
     </div>
   );
 };
+
+
 
 
 

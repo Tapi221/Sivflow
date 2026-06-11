@@ -13,6 +13,8 @@ import type { FlashcardCardLike, FlashcardMediaLike } from "./flashcard.types";
 
 
 
+
+
 // ---------------------------------------------------------------------------
 // Scalar field normalizers
 // ---------------------------------------------------------------------------
@@ -144,6 +146,8 @@ const resolveQuestionAttachmentReferences = (card: FlashcardCardLike) => {
 const resolveAnswerAttachmentReferences = (card: FlashcardCardLike) => {
   return (card.back?.attachments?.references ?? []).filter((r) => r.url);
 };
+
+
 
 
 

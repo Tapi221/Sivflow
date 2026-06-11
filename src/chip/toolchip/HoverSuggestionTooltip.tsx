@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type TooltipSide = "top" | "right" | "bottom" | "left";
 type TooltipPosition = {
   x: number;
@@ -28,6 +30,8 @@ type HoverSuggestionTooltipProps = {
   tooltipClassName?: string;
   disabled?: boolean;
 };
+
+
 
 
 
@@ -64,6 +68,8 @@ const getArrowClassName = (side: TooltipSide) => {
 
   return "left-[-3px] top-1/2 -translate-y-1/2";
 };
+
+
 
 
 
@@ -229,7 +235,11 @@ const HoverSuggestionTooltip = ({ children, items, side = "right", offset = 10, 
 
 
 
+
+
 export { HoverSuggestionTooltip };
+
+
 
 
 export type { HoverSuggestionItem };

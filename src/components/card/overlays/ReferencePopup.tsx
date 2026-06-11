@@ -5,11 +5,15 @@ import { ExternalLink, Globe, Link as LinkIcon } from "@/ui/icons";
 
 
 
+
+
 interface ReferencePopupProps {
   isOpen: boolean;
   onClose: () => void;
   references: ReferenceBlockData[];
 }
+
+
 
 
 
@@ -34,6 +38,8 @@ const ReferencePopup = ({ isOpen, onClose, references }: ReferencePopupProps) =>
   </Dialog>
   );
 };
+
+
 
 
 

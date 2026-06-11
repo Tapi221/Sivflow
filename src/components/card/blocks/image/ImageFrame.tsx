@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type ImageTransform = {
   scale: number;
   x: number;
@@ -36,7 +38,11 @@ type ImageFrameProps = {
 
 
 
+
+
 const DRAG_START_THRESHOLD_PX = 6;
+
+
 
 
 
@@ -50,6 +56,8 @@ const inferBaseWidthFromLegacyScale = (
   const safeLegacyScale = clamp(Number(legacyScale ?? 1), 0.2, 1);
   return safeReferenceWidth * safeLegacyScale;
 };
+
+
 
 
 
@@ -374,6 +382,8 @@ const ImageFrame = ({ src, alt, className, imgClassName, displayMode = "fixed", 
     </div>
   );
 };
+
+
 
 
 

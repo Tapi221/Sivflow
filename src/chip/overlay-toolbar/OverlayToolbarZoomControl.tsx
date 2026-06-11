@@ -6,6 +6,8 @@ import { OverlayToolbarButton } from "./OverlayToolbarButton";
 
 
 
+
+
 type OverlayToolbarZoomControlBaseProps = {
   value: number;
   min: number;
@@ -37,7 +39,11 @@ type OverlayToolbarZoomControlProps = | OverlayToolbarZoomControlWithoutStepButt
 
 
 
+
+
 const DEFAULT_FORMAT_VALUE = (value: number) => `${Math.round(value)}%`;
+
+
 
 
 
@@ -120,7 +126,11 @@ const OverlayToolbarZoomControl = (props: OverlayToolbarZoomControlProps) => {
 
 
 
+
+
 export { OverlayToolbarZoomControl };
+
+
 
 
 export type { OverlayToolbarZoomControlProps };
