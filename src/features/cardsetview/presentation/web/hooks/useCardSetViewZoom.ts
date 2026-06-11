@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RefObject } from "react";
-import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
-import { CARD_SET_VIEW_LAYOUT_CONSTRAINT_INDICATOR_DURATION_MS } from "@/features/cardsetview/domain/cardSetViewPresentation.constants";
 import { CARD_PANE_VIEW_DEFAULT_WIDTH_PX } from "@/components/card/frame/cardPane.constants";
-import { CARD_VIEW_ZOOM_BUTTON_STEP_PERCENT } from "@/features/cardsetview/domain/cardSetView.constants";
+import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
 import type { CardLayoutMode, CardSetInteractionMode, SplitFallbackCardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
+import { CARD_VIEW_ZOOM_BUTTON_STEP_PERCENT } from "@/features/cardsetview/domain/cardSetView.constants";
+import { CARD_SET_VIEW_LAYOUT_CONSTRAINT_INDICATOR_DURATION_MS } from "@/features/cardsetview/domain/cardSetViewPresentation.constants";
 import { clampZoomPercent as clampZoomPercentRange, resolveCanUseSplitLayout, resolvePresentationMaxWidthPx, resolvePresentationWidthPx, resolveUsablePresentationWidthPx, resolveZoomDefaultPercent, resolveZoomScaleFromPresentationWidthPx } from "@/features/cardsetview/domain/cardSetViewPresentationPolicy";
-import { buildCardSetViewZoomPreferenceScopeKey, getCardSetViewZoomPreference, setCardSetViewZoomPreference } from "@/services/cardSetViewZoomPreferences";
 import type { CardSetViewZoomPreferenceScope } from "@/services/cardSetViewZoomPreferences";
+import { buildCardSetViewZoomPreferenceScopeKey, getCardSetViewZoomPreference, setCardSetViewZoomPreference } from "@/services/cardSetViewZoomPreferences";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
+
+
 
 interface UseCardSetViewZoomOptions {
   deviceScope: string;
@@ -28,7 +30,11 @@ type LegacyZoomMigrationHint = Pick<
   "displayMode" | "interactionMode" | "cardLayoutMode"
 >;
 
+
+
 const DEFAULT_SOURCE_KEY = "__cardsetview_zoom_default__";
+
+
 
 const clampZoomPercent = (value: number) => clampZoomPercentRange(value);
 const computeDynamicMaxZoomPercent = () => 100;
@@ -331,5 +337,7 @@ const useCardSetViewZoom = ({ deviceScope, cardSetId, viewportRef, displayMode, 
     maxPresentationWidthPx,
   };
 };
+
+
 
 export { clampZoomPercent, computeDynamicMaxZoomPercent, useCardSetViewZoom };

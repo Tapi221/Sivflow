@@ -1,7 +1,9 @@
-import { makeAssetRecord, toAssetLikeRecord } from "@/application/usecases/persistentOfflineQueueModels";
 import type { QueueItem } from "@/application/usecases/persistentOfflineQueueModels";
+import { makeAssetRecord, toAssetLikeRecord } from "@/application/usecases/persistentOfflineQueueModels";
 import { auth } from "@/infrastructure/firebase/client";
 import { getLocalDb } from "@/infrastructure/localdb/client";
+
+
 
 const handleQueuedAssetUploadFailure = async (item: QueueItem): Promise<void> => {
   try {
@@ -35,4 +37,6 @@ const handleQueuedAssetUploadFailure = async (item: QueueItem): Promise<void> =>
   }
 };
 
-export { handleQueuedAssetUploadFailure };
+
+
+export { handleQueuedAssetUploadFailure 

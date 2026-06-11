@@ -1,6 +1,6 @@
-import type { CSSProperties } from "react";
 import { memo } from "react";
 import type { CalendarTimeGridLayoutEntry } from "@core/calendar";
+import type { CSSProperties } from "react";
 
 type CalendarEventChipProperties = {
   entry: CalendarTimeGridLayoutEntry;

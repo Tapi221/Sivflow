@@ -4,6 +4,8 @@ import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 
+
+
 type ScheduleColumnBuffer = { before: number;
   after: number;
 };
@@ -11,6 +13,8 @@ type ScheduleVirtualRail = { startDate: Date;
   anchorIndex: number;
   totalDayCount: number;
 };
+
+
 
 const getScheduleViewStart = (anchorDate: Date, viewMode: CalendarViewMode, weekStartDay: CalendarWeekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY) => {
   const normalized = startOfDay(anchorDate);
@@ -81,5 +85,9 @@ const getScheduleVirtualRailDate = (rail: ScheduleVirtualRail, index: number): D
   return addDays(rail.startDate, index);
 };
 
+
+
 export { getScheduleViewStart, getScheduleViewDayCount, buildScheduleDisplayDays, buildScheduleInteractionDays, buildScheduleVirtualRail, buildScheduleVirtualRailDays, getScheduleVirtualRailDate };
+
+
 export type { ScheduleColumnBuffer, ScheduleVirtualRail };

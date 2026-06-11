@@ -1,13 +1,17 @@
+import type { GenerationCounterStorePort } from "@/application/ports/GenerationCounterStorePort";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
-import { toSnapshotAsset } from "./snapshotAssetManifest";
-import type { GenerationCounterStorePort } from "@/application/ports/GenerationCounterStorePort";
 import { getLocalDb, getLocalDBRuntimeStatus } from "@/infrastructure/persistence/indexeddb";
 import type { AppSnapshot, SnapshotAsset, SnapshotData, SnapshotMetadata } from "@/types/domain/snapshot";
 import { APP_VERSION, CURRENT_SCHEMA_VERSION } from "@/types/domain/snapshot";
+import { toSnapshotAsset } from "./snapshotAssetManifest";
+
+
 
 interface CreateSnapshotDependencies { generationCounterStore: GenerationCounterStorePort;
 }
+
+
 
 const createCreateSnapshotUseCase = ({ generationCounterStore }: CreateSnapshotDependencies) => {
   const assertPersistentStorageAvailable = (operation: string): void => {
@@ -72,5 +76,9 @@ const createCreateSnapshotUseCase = ({ generationCounterStore }: CreateSnapshotD
   };
 };
 
+
+
 export { createCreateSnapshotUseCase };
+
+
 export type { CreateSnapshotDependencies };

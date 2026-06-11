@@ -1,16 +1,18 @@
 import * as React from "react";
 import type { DropResult } from "@hello-pangea/dnd";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { getTagColorKey, getTagColorSwatchStyle } from "@/chip/tag/tagColor";
 import type { TagColorKey } from "@/chip/tag/tagColor";
+import { getTagColorKey, getTagColorSwatchStyle } from "@/chip/tag/tagColor";
 import { TagBadge } from "@/components/tag/TagBadge";
 import { TagChip } from "@/components/tag/TagChip";
+import { useTags } from "@/features/settings/hooks/useTags";
+import { cn } from "@/lib/utils";
+import { Check, Palette, Plus, Tag as TagIcon } from "@/ui/icons";
 import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "./command";
 import { PlaceholderText } from "./placeholder-text";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
-import { Check, Palette, Plus, Tag as TagIcon } from "@/ui/icons";
-import { useTags } from "@/features/settings/hooks/useTags";
-import { cn } from "@/lib/utils";
+
+
 
 interface TagInputProps {
   tags: string[];
@@ -19,6 +21,8 @@ interface TagInputProps {
   className?: string;
   quietHover?: boolean;
 }
+
+
 
 const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", className, quietHover = false }: TagInputProps) => {
   const [open, setOpen] = React.useState(false);
@@ -275,5 +279,7 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
     </Popover>
   );
 };
+
+
 
 export { TagInput };

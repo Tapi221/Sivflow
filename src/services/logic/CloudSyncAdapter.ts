@@ -3,6 +3,8 @@ import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 import { pullCloudSyncDiff, pullCloudSyncFull, pushCloudSyncBatch } from "@/infrastructure/sync/cloudSyncFirestoreAdapter";
 import type { CloudDeviceStatus, ICloudSyncAdapter, SyncChange } from "@/services/interfaces/ISyncService";
 
+
+
 const getDeviceMetadataPath = (userId: string, deviceId: string) => {
   return `sync_metadata/${userId}/devices/${deviceId}`;
 };
@@ -79,4 +81,6 @@ class CloudSyncAdapter implements ICloudSyncAdapter { private readonly userId: s
   };
 }
 
-export { CloudSyncAdapter };
+
+
+export { CloudSyncAdapter 

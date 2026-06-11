@@ -1,6 +1,8 @@
-import { createCheckDataIntegrityUseCase } from "./CheckDataIntegrity";
 import { getLocalDb } from "@/infrastructure/persistence/indexeddb";
 import { sanitizeForLog } from "@/utils/logSanitizer";
+import { createCheckDataIntegrityUseCase } from "./CheckDataIntegrity";
+
+
 
 const createQuarantineOrphanedCardsUseCase = () => {
   const checkDataIntegrityUseCase = createCheckDataIntegrityUseCase();
@@ -36,5 +38,7 @@ const createQuarantineOrphanedCardsUseCase = () => {
     execute,
   };
 };
+
+
 
 export { createQuarantineOrphanedCardsUseCase };

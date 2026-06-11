@@ -1,5 +1,5 @@
-import { initAppRuntime } from "./initAppRuntime";
 import { initPersistentQueue } from "@/platform/web/initPersistentQueue";
+import { initAppRuntime } from "./initAppRuntime";
 
 let started = false;
 

@@ -1,9 +1,11 @@
-import { cleanupQueuedAssetSyncItems } from "./cleanupQueuedAssetSyncItems";
-import { makeAssetRecord, toAssetLikeRecord } from "@/application/usecases/persistentOfflineQueueModels";
 import type { QueueItem } from "@/application/usecases/persistentOfflineQueueModels";
+import { makeAssetRecord, toAssetLikeRecord } from "@/application/usecases/persistentOfflineQueueModels";
 import { auth } from "@/infrastructure/firebase/client";
 import { getLocalDb } from "@/infrastructure/localdb/client";
 import type { UploadedImage } from "@/types";
+import { cleanupQueuedAssetSyncItems } from "./cleanupQueuedAssetSyncItems";
+
+
 
 const handleQueuedAssetUploadSuccess = async (item: QueueItem, updatedImage: UploadedImage): Promise<void> => {
   const localDb = await getLocalDb();
@@ -43,4 +45,6 @@ const handleQueuedAssetUploadSuccess = async (item: QueueItem, updatedImage: Upl
   }
 };
 
-export { handleQueuedAssetUploadSuccess };
+
+
+export { handleQueuedAssetUploadSuccess 

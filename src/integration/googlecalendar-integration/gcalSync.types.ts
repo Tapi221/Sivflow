@@ -1,5 +1,7 @@
-import type { Auth } from "firebase/auth";
 import type { CalendarEvent, CalendarRecurrenceRule } from "@core/calendar";
+import type { Auth } from "firebase/auth";
+
+
 
 type GoogleCalendarEvent = CalendarEvent;
 type GoogleCalendarListItem = { id: string;

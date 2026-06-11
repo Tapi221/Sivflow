@@ -6,8 +6,8 @@ import { BaseCodeBlockKit } from "@/components/editor/plugins/code-block-base-ki
 import { BaseColumnKit } from "@/components/editor/plugins/column-base-kit";
 import { BaseCommentKit } from "@/components/editor/plugins/comment-base-kit";
 import { BaseDateKit } from "@/components/editor/plugins/date-base-kit";
-import { BaseFootnoteKit } from "@/components/editor/plugins/footnote-base-kit";
 import { BaseFontKit } from "@/components/editor/plugins/font-base-kit";
+import { BaseFootnoteKit } from "@/components/editor/plugins/footnote-base-kit";
 import { BaseLineHeightKit } from "@/components/editor/plugins/line-height-base-kit";
 import { BaseLinkKit } from "@/components/editor/plugins/link-base-kit";
 import { BaseListKit } from "@/components/editor/plugins/list-base-kit";
@@ -20,6 +20,10 @@ import { BaseTableKit } from "@/components/editor/plugins/table-base-kit";
 import { BaseTocKit } from "@/components/editor/plugins/toc-base-kit";
 import { BaseToggleKit } from "@/components/editor/plugins/toggle-base-kit";
 
+
+
 const BaseEditorKit = [...BaseBasicBlocksKit, ...BaseCodeBlockKit, ...BaseTableKit, ...BaseToggleKit, ...BaseTocKit, ...BaseMediaKit, ...BaseCalloutKit, ...BaseColumnKit, ...BaseMathKit, ...BaseDateKit, ...BaseLinkKit, ...BaseMentionKit, ...BaseBasicMarksKit, ...BaseFontKit, ...BaseListKit, ...BaseAlignKit, ...BaseLineHeightKit, ...BaseCommentKit, ...BaseSuggestionKit, ...MarkdownKit, ...BaseFootnoteKit];
+
+
 
 export { BaseEditorKit };

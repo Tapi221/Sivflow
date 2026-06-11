@@ -1,6 +1,6 @@
 import React from "react";
-import { Platform, requireNativeComponent, View } from "react-native";
 import type { StyleProp, ViewStyle } from "react-native";
+import { Platform, requireNativeComponent, View } from "react-native";
 
 type IpadInkCanvasHostProps = {
   onStrokeComplete?: () => void;

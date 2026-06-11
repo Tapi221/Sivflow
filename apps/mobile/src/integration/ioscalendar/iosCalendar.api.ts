@@ -1,8 +1,8 @@
-import { Platform } from "react-native";
-import * as ExpoCalendar from "expo-calendar";
-import type { Calendar as ExpoCalendarItem, Event as ExpoCalendarEvent, PermissionResponse, RecurrenceRule as ExpoRecurrenceRule } from "expo-calendar";
-import { normalizeCalendarRecurrenceRule } from "@core/calendar";
 import type { CalendarRecurrenceFrequency, CalendarRecurrenceRule, CalendarWeekday } from "@core/calendar";
+import { normalizeCalendarRecurrenceRule } from "@core/calendar";
+import type { Calendar as ExpoCalendarItem, Event as ExpoCalendarEvent, PermissionResponse, RecurrenceRule as ExpoRecurrenceRule } from "expo-calendar";
+import * as ExpoCalendar from "expo-calendar";
+import { Platform } from "react-native";
 import type { IosCalendarEvent, IosCalendarListItem, IosCalendarPermissionStatus, IosCalendarWritableEventDeleteInput, IosCalendarWritableEventInput, IosCalendarWritableEventUpdateInput } from "./iosCalendar.types";
 
 type ExpoCalendarCreateEventDetails = NonNullable<Parameters<typeof ExpoCalendar.createEventAsync>[1]>;

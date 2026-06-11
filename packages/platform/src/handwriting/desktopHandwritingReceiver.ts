@@ -1,8 +1,8 @@
-import { normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
 import type { InkDocument } from "@core/domain/card/ink/inkDocument";
-import { applyHandwritingStrokeDelta } from "./handwritingStrokeMessages";
-import type { ApplyHandwritingStrokeDeltaResult } from "./handwritingStrokeMessages";
+import { normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
 import type { HandwritingSession, HandwritingSessionMessage, HandwritingSessionStatus } from "./handwritingSession.types";
+import type { ApplyHandwritingStrokeDeltaResult } from "./handwritingStrokeMessages";
+import { applyHandwritingStrokeDelta } from "./handwritingStrokeMessages";
 
 type DesktopHandwritingReceiverSession = Pick<HandwritingSession, "id" | "cardId" | "side" | "status">;
 type ReceiveDesktopHandwritingMessageInput = { document: InkDocument | null | undefined;

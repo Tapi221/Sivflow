@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState } from "react";
-import type { ComponentType, CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
 import { createPortal } from "react-dom";
+import type { ComponentType, CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
 import { PlusLineIcon } from "@/chip/icons/icons.schedule";
 import { ClockIcon, HomeIcon, InboxIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";
-import { WORKSPACE_TAB_CONTEXT_MENU_HEIGHT, WORKSPACE_TAB_CONTEXT_MENU_MARGIN, WORKSPACE_TAB_CONTEXT_MENU_WIDTH, WORKSPACE_TAB_CONTEXT_PANEL_ID, WorkspaceTabContextMenu } from "@/chip/rightclickpanel.desktop/TabContextMenu.desktop";
 import { useRightClickPanelDismiss } from "@/chip/rightclickpanel.desktop/rightClickPanel.utils";
-import { WorkspaceTabDndItem, WorkspaceTabDndList } from "@/features/dnd/tab/WorkspaceTabDnd";
+import { WORKSPACE_TAB_CONTEXT_MENU_HEIGHT, WORKSPACE_TAB_CONTEXT_MENU_MARGIN, WORKSPACE_TAB_CONTEXT_MENU_WIDTH, WORKSPACE_TAB_CONTEXT_PANEL_ID, WorkspaceTabContextMenu } from "@/chip/rightclickpanel.desktop/TabContextMenu.desktop";
 import { useWorkspaceTabDnd } from "@/features/dnd/tab/useWorkspaceTabDnd";
-import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+import { WorkspaceTabDndItem, WorkspaceTabDndList } from "@/features/dnd/tab/WorkspaceTabDnd";
 import { cn } from "@/lib/utils";
+import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { FileText, Layers, X } from "@/ui/icons";
 import type { WorkspaceSidebarSection, WorkspaceTab } from "./Tab";
+
+
 
 type TabsBarVariant = "workspace" | "titlebar";
 type TabsBarProps = {
@@ -28,6 +30,8 @@ type TabContextMenuState = {
   y: number;
 };
 type TabContextMenuTriggerEvent = ReactMouseEvent<HTMLElement> | ReactPointerEvent<HTMLElement>;
+
+
 
 const TABS_NO_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "no-drag",
@@ -89,6 +93,8 @@ const SIDEBAR_ROUTE_TAB_ICONS = {
   settings: SettingIcon,
 } satisfies Partial<Record<WorkspaceSidebarSection, TabIconComponent>>;
 
+
+
 const resolveTabsSurfaceStyle = (isTitlebar: boolean): CSSProperties => ({
   background: isTitlebar ? "var(--app-titlebar-bg, var(--app-sidebar-bg))" : "var(--app-sidebar-bg)",
 });
@@ -147,6 +153,8 @@ const resolveTabIcon = (tab: WorkspaceTab): TabIconComponent => {
 
   return FileText;
 };
+
+
 
 const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps) => {
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
@@ -421,4 +429,6 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
   );
 };
 
-export { TabsBar };
+
+
+export { Ta

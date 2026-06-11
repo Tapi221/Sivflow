@@ -1,10 +1,12 @@
 import { importMfCardFile } from "@/features/cardFile/application/importMfCard";
 import { readMfCardFile } from "@/features/cardFile/infra/web/readMfCardFile";
-import { importMfDeckArchive } from "@/features/deckFile/application/importMfDeck";
 import type { CreateMfDeckCard, CreateMfDeckCardSet, EnsureMfDeckTagByName, ImportMfDeckArchiveResult, UpdateMfDeckCardSet } from "@/features/deckFile/application/importMfDeck";
+import { importMfDeckArchive } from "@/features/deckFile/application/importMfDeck";
 import { readMfDeckFile } from "@/features/deckFile/infra/web/readMfDeckFile";
-import { detectImportFileKind, IMPORT_FILE_LABELS, isPortableImportFileKind } from "@/features/import/domain/importFileKind";
 import type { PortableImportFileKind } from "@/features/import/domain/importFileKind";
+import { detectImportFileKind, IMPORT_FILE_LABELS, isPortableImportFileKind } from "@/features/import/domain/importFileKind";
+
+
 
 type PortableImportBatchItemStatus = | "queued" | "parsing" | "importing" | "imported" | "failed" | "skipped";
 type PortableImportBatchItem = { id: string;
@@ -35,6 +37,8 @@ type ImportPortableFileBatchParams = { files: File[];
   ensureTagByName?: EnsureMfDeckTagByName;
   onItemChange?: (item: PortableImportBatchItem) => void;
 };
+
+
 
 const genId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -235,5 +239,9 @@ const formatPortableImportBatchItemSubtitle = (item: Pick<PortableImportBatchIte
   return `${IMPORT_FILE_LABELS[item.kind]} / ${formatFileSize(item.size)}`;
 };
 
+
+
 export { buildPortableImportBatchItems, importPortableFileBatch, formatPortableImportBatchItemSubtitle };
+
+
 export type { PortableImportBatchItemStatus, PortableImportBatchItem, PortableImportBatchResult, ImportPortableFileBatchParams };

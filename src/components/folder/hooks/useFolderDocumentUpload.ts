@@ -1,14 +1,16 @@
 import React, { useCallback, useRef } from "react";
-import { uploadPdfToGoogleDrive } from "@/integration/google-integration/googleDrive.pdfUpload";
-import { requestGoogleDriveFileAccessToken } from "@/integration/google-integration/googleDrive.oauth";
+import { useToast } from "@web-renderer/contexts/ToastContext";
 import { buildStoragePath, createDocumentId, extractPdfFiles } from "@/components/folder/explorer/model/utils";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-import { auth } from "@/services/firebase";
+import { requestGoogleDriveFileAccessToken } from "@/integration/google-integration/googleDrive.oauth";
+import { uploadPdfToGoogleDrive } from "@/integration/google-integration/googleDrive.pdfUpload";
 import { saveDocumentWithBlob } from "@/services/documentFileStore";
+import { auth } from "@/services/firebase";
 import { getLocalDb } from "@/services/localDB";
 import type { DocumentItem } from "@/types";
 import { getOrCreateDeviceId } from "@/utils/device";
-import { useToast } from "@web-renderer/contexts/ToastContext";
+
+
 
 interface UseFolderDocumentUploadParams {
   actionFolderId: string | null;
@@ -16,6 +18,8 @@ interface UseFolderDocumentUploadParams {
   setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>;
 }
 type LegacyEntityFields = { blobUrl?: string | null; };
+
+
 
 const withLegacyFields = <T extends object>(value: T): T & LegacyEntityFields => value as T & LegacyEntityFields;
 const getErrorMessage = (error: unknown, fallback: string): string => {
@@ -184,5 +188,7 @@ const useFolderDocumentUpload = ({ actionFolderId, getNextOrderIndex, setExpande
     handleToolbarFileInputChange,
   };
 };
+
+
 
 export { useFolderDocumentUpload };

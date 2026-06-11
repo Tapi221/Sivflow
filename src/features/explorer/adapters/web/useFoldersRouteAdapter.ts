@@ -2,8 +2,10 @@ import { useCallback, useMemo } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import { mapSearchParamsToExplorerRouteState } from "@/features/explorer/mappers/mapSearchParamsToExplorerRouteState";
-import { getLastSelectedFolderId, setLastSelectedFolderId } from "./explorerStorage";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
+import { getLastSelectedFolderId, setLastSelectedFolderId } from "./explorerStorage";
+
+
 
 type FoldersRouteAdapter = { routeKey: string;
   isDesktop: boolean;
@@ -13,6 +15,8 @@ type FoldersRouteAdapter = { routeKey: string;
 
   getBaseSearchParams: () => URLSearchParams;
 };
+
+
 
 const isLibraryPath = (pathname: string): boolean =>
   pathname.toLowerCase() === "/library" ||
@@ -95,6 +99,10 @@ const useFoldersRouteAdapter = (): FoldersRouteAdapter => {
   );
 };
 
+
+
 export { useFoldersRouteAdapter };
+
+
 export type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 export type { FoldersRouteAdapter };

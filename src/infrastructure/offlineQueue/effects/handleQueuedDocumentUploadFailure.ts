@@ -1,6 +1,8 @@
-import { getDocumentKindLabel, isDocumentUploadReady, toDocumentLike } from "@/application/usecases/persistentOfflineQueueModels";
 import type { QueueItem } from "@/application/usecases/persistentOfflineQueueModels";
+import { getDocumentKindLabel, isDocumentUploadReady, toDocumentLike } from "@/application/usecases/persistentOfflineQueueModels";
 import { getLocalDb } from "@/infrastructure/localdb/client";
+
+
 
 const handleQueuedDocumentUploadFailure = async (item: QueueItem): Promise<void> => {
   try {
@@ -50,4 +52,6 @@ const handleQueuedDocumentUploadFailure = async (item: QueueItem): Promise<void>
   }
 };
 
-export { handleQueuedDocumentUploadFailure };
+
+
+export { handleQueuedDocumentUploadFailure 

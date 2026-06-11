@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { CSSProperties, MutableRefObject } from "react";
 import { differenceInCalendarDays, format, getDaysInMonth, isSameDay, startOfMonth, subDays } from "date-fns";
 import { ja } from "date-fns/locale";
+import type { CSSProperties, MutableRefObject } from "react";
 import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
 import { LIST_DAY_GAP_PX, LIST_EMPTY_DAY_HEIGHT_PX, LIST_EVENT_ROW_GAP_PX, LIST_EVENT_ROW_HEIGHT_PX } from "@/chip/eventchip/EventChip.list.placement";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
@@ -10,6 +10,8 @@ import { buildScheduleVirtualRailDays, getScheduleVirtualRailDate } from "@/feat
 import { useImmediateVirtualScrollRange } from "@/features/scroll/schedule/hooks/useImmediateVirtualScrollRange";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
+
+
 
 type CalendarListViewProps = {
   days: Date[];
@@ -51,6 +53,8 @@ type CalendarListDaySectionProps = {
   onSelectDate?: (date: Date) => void;
 };
 
+
+
 const EMPTY_DAY_LABEL = "予定なし";
 const SELECTED_OFFSET = 8;
 const ANCHOR_OFFSET = 160;
@@ -77,6 +81,8 @@ const EMPTY_DAY_LINE_CLASS_NAME =
   "absolute -bottom-1.5 left-1/2 top-0 w-px -translate-x-1/2 bg-[#eceff3]";
 const EMPTY_DAY_DOT_CLASS_NAME =
   "relative mt-2 h-2 w-2 rounded-full border-2 border-[#dedede] bg-white shadow-[0_1px_4px_rgba(15,23,42,0.08)]";
+
+
 
 const createRail = (selectedDate: Date): ScheduleVirtualRail => ({
   startDate: subDays(startOfMonth(selectedDate), LOCAL_DAYS),
@@ -404,6 +410,8 @@ const getDayDateNumberClassName = (day: CalendarListDay): string =>
         : "text-[#1c1c1e]",
   );
 
+
+
 const EmptyDayCard = () => (
   <div className={EMPTY_DAY_ROW_CLASS_NAME}>
     <div className="pt-2.5 text-right text-[12px] font-medium leading-none text-[#b3b3b3]">
@@ -671,6 +679,8 @@ const CalendarListViewComponent = ({
     </div>
   );
 };
+
+
 
 const CalendarListDaySection = memo(CalendarListDaySectionComponent);
 CalendarListDaySection.displayName = "CalendarListDaySection";

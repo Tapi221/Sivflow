@@ -1,5 +1,5 @@
-import type { PlatformApi } from "./desktopApi";
 import { desktopPlatform } from "./desktop";
+import type { PlatformApi } from "./desktopApi";
 import { hasDesktopBridge } from "./runtime";
 import { webPlatform } from "./web";
 

@@ -1,12 +1,16 @@
-import { createAssetQueueImage } from "@/application/usecases/persistentOfflineQueueModels";
 import type { AssetUploadRequest, QueueItem } from "@/application/usecases/persistentOfflineQueueModels";
+import { createAssetQueueImage } from "@/application/usecases/persistentOfflineQueueModels";
 import { processPersistentOfflineQueue } from "@/application/usecases/processPersistentOfflineQueue";
 import { IndexedDbPersistentOfflineQueueStore } from "@/infrastructure/offlineQueue/IndexedDbPersistentOfflineQueueStore";
 import { handleQueuedUploadPermanentFailure, handleQueuedUploadSuccess, shouldSkipQueuedDocumentUpload } from "@/infrastructure/offlineQueue/persistentOfflineQueueEffects";
 import { uploadQueuedAsset } from "@/infrastructure/offlineQueue/uploadQueuedAsset";
 import type { UploadedImage } from "@/types";
 
+
+
 const persistentQueue = new PersistentOfflineQueue();
+
+
 
 class PersistentOfflineQueue {
   private isProcessing = false;
@@ -94,5 +98,9 @@ class PersistentOfflineQueue {
   };
 }
 
+
+
 export { persistentQueue };
-export type { AssetUploadRequest };
+
+
+export type { AssetUploadRequ

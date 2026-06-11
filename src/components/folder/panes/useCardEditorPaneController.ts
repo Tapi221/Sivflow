@@ -1,22 +1,24 @@
 import React from "react";
-import { CARD_SET_VIEW_EVENTS } from "@/features/cardsetview/events/cardSetViewEvents.constants";
-import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
-import { subscribeCardSetViewWindowEvent } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
-import type { CardSetViewEditingDraftPatch } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
 import { useCardEditorContentController } from "@/components/card/editor/useCardEditorContentController";
 import { useCardEditorSession } from "@/components/card/editor/useCardEditorSession";
 import { useCardEditorTags } from "@/components/card/editor/useCardEditorTags";
 import { useLayoutRowsController } from "@/components/card/editor/useLayoutRowsController";
-import { applyEditingDraftPatch, buildCardsById, createMetaPanelActions, resolveSelectedCardSnapshot } from "./cardEditorPaneControllerCore";
-import { appendSelectionCaptureBlocks, normalizeSelectionCaptureOcrText } from "@/features/selection-capture/applyCardSelectionCapture";
-import { createSelectionCaptureImageAsset } from "@/features/selection-capture/createSelectionCaptureImageAsset";
-import { CARD_SELECTION_CAPTURE_EVENT } from "@/features/selection-capture/cardSelectionCaptureEvents";
-import type { CardSelectionCaptureEventDetail } from "@/features/selection-capture/cardSelectionCaptureEvents";
-import { useToast } from "@/contexts/ToastContext";
-import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useCards } from "@/components/card/hooks/useCards";
+import { useAuthSession } from "@/contexts/auth/useAuthSession";
+import { useToast } from "@/contexts/ToastContext";
+import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
+import { CARD_SET_VIEW_EVENTS } from "@/features/cardsetview/events/cardSetViewEvents.constants";
+import type { CardSetViewEditingDraftPatch } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
+import { subscribeCardSetViewWindowEvent } from "@/features/cardsetview/presentation/web/events/cardSetViewWindowEvents";
+import { appendSelectionCaptureBlocks, normalizeSelectionCaptureOcrText } from "@/features/selection-capture/applyCardSelectionCapture";
+import type { CardSelectionCaptureEventDetail } from "@/features/selection-capture/cardSelectionCaptureEvents";
+import { CARD_SELECTION_CAPTURE_EVENT } from "@/features/selection-capture/cardSelectionCaptureEvents";
+import { createSelectionCaptureImageAsset } from "@/features/selection-capture/createSelectionCaptureImageAsset";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { Card, CardPatch, UserSettings } from "@/types";
+import { applyEditingDraftPatch, buildCardsById, createMetaPanelActions, resolveSelectedCardSnapshot } from "./cardEditorPaneControllerCore";
+
+
 
 type UseCardsResult = {
   cards: Card[];
@@ -33,6 +35,8 @@ type UseCardEditorPaneControllerParams = {
   onSelectCardId?: (cardId: string) => void;
   settingsOverride?: Partial<UserSettings> | null;
 };
+
+
 
 const useCardEditorPaneController = ({ selectedCardId, folderId, cardSetId, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, settingsOverride }: UseCardEditorPaneControllerParams) => {
   const { settings: settingsFromHook } = useUserSettings();
@@ -253,5 +257,7 @@ const useCardEditorPaneController = ({ selectedCardId, folderId, cardSetId, card
     actions,
   };
 };
+
+
 
 export { useCardEditorPaneController };

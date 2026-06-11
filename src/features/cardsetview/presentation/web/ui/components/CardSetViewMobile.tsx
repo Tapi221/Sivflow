@@ -1,12 +1,14 @@
 import { useCallback } from "react";
 import type { ReactNode } from "react";
-import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
-import { Flashcard } from "@/components/card/frame/Flashcard";
 import type { FlashcardCardLike } from "@/components/card/frame/Flashcard";
+import { Flashcard } from "@/components/card/frame/Flashcard";
 import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
+import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
 import { VerticalCardPager } from "@/features/review/VerticalCardPager";
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
+
+
 
 interface CardSetViewMobileProps {
   cardsForPager: Card[];
@@ -29,9 +31,13 @@ interface CardSetViewMobileEmptyStateProps {
   onCreateCard: () => void | Promise<void>;
 }
 
+
+
 const MOBILE_CARD_PAGER_PADDING_INLINE_PX = 0;
 const MOBILE_CARD_PAGER_PADDING_BLOCK = "22px";
 const MOBILE_CARD_PAGER_NATURAL_INDEX_COMMIT_DELAY_MS = 80;
+
+
 
 const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   id: card.id,
@@ -46,6 +52,8 @@ const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   inkQuestion: card.front.ink ?? null,
   inkAnswer: card.back.ink ?? null,
 });
+
+
 
 const CardSetViewMobileEmptyState = ({ cardSetName, onCreateCard }: CardSetViewMobileEmptyStateProps) => {
   const handleCreateCard = () => {
@@ -138,5 +146,7 @@ const CardSetViewMobile = ({ cardsForPager, selectedCardId, safeCurrentIndex, is
     />
   );
 };
+
+
 
 export { CardSetViewMobile };

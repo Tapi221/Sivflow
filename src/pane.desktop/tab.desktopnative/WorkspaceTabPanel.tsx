@@ -1,9 +1,11 @@
 import { useCallback, useMemo } from "react";
 import { CardPane } from "@/components/folder/panes/CardPane";
-import { PdfDocumentPane } from "@/features/pdf/PdfDocumentPane";
 import { useDocumentCommands } from "@/features/document/hooks/useDocumentCommands";
+import { PdfDocumentPane } from "@/features/pdf/PdfDocumentPane";
 import type { Card, DocumentItem } from "@/types";
 import type { WorkspaceEntityTab } from "./Tab";
+
+
 
 type WorkspaceTabPanelProps = {
   activeTab: WorkspaceEntityTab;
@@ -14,11 +16,17 @@ type WorkspaceTabPanelProps = {
   onCardUpdated: () => void;
 };
 
+
+
 const workspaceTabPanelTextClassName = "text-[18px] leading-6";
+
+
 
 const buildMapById = <TEntity extends { id: string; },>(entities: TEntity[]) => {
   return new Map(entities.map((entity) => [entity.id, entity]));
 };
+
+
 
 const WorkspacePanelStatus = ({ title }: { title: string; }) => {
   return (
@@ -79,4 +87,6 @@ const WorkspaceTabPanel = ({
   return null;
 };
 
-export { WorkspaceTabPanel };
+
+
+export { WorkspaceTab

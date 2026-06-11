@@ -1,17 +1,23 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { addDays, addMonths, addYears, startOfDay, startOfMonth, startOfWeek, startOfYear, subDays, subMonths, subYears } from "date-fns";
-import type { CalendarWeekStartDay } from "./calendar.types";
-import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScreen.types";
-import { getCalendarWeekStartsOn } from "./calendarWeekStart";
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
 import { createCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
-import { persistScheduleNavigationState, readStoredScheduleNavigationState } from "./scheduleNavigationPersistence";
+import type { CalendarWeekStartDay } from "./calendar.types";
+import { getCalendarWeekStartsOn } from "./calendarWeekStart";
 import type { ScheduleNavigationState } from "./scheduleNavigationPersistence";
+import { persistScheduleNavigationState, readStoredScheduleNavigationState } from "./scheduleNavigationPersistence";
+import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScreen.types";
+
+
 
 type CalendarNavigationOptions = { allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay; };
 
+
+
 const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_MODES);
+
+
 
 const isViewModeSelectionArray = (selection: CalendarViewModeSelection): selection is readonly CalendarViewMode[] => Array.isArray(selection);
 const isMultiSelectViewMode = (viewMode: CalendarViewMode): boolean => MULTI_SELECT_VIEW_MODE_SET.has(viewMode);
@@ -285,5 +291,7 @@ const useCalendarNavigation = ({ allowMultiSelectViewMode = true, weekStartDay =
     resetCalendarPosition,
   };
 };
+
+
 
 export { useCalendarNavigation };

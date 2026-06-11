@@ -1,8 +1,10 @@
-import type { ChatMessage } from "@/app/api/ai/command/types";
-import type { SlateEditor } from "platejs";
 import { getMarkdown } from "@platejs/ai";
 import dedent from "dedent";
+import type { SlateEditor } from "platejs";
+import type { ChatMessage } from "@/app/api/ai/command/types";
 import { buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction } from "@/app/api/ai/command/utils";
+
+
 
 const getCommentPrompt = (editor: SlateEditor, { messages }: { messages: ChatMessage[]; }) => {
   const selectingMarkdown = getMarkdown(editor, { type: "blockWithBlockId" });
@@ -150,5 +152,7 @@ const getCommentPrompt = (editor: SlateEditor, { messages }: { messages: ChatMes
     `,
   });
 };
+
+
 
 export { getCommentPrompt };

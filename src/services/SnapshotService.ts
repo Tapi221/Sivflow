@@ -1,4 +1,3 @@
-import type { AppSnapshot } from "@/types/domain/snapshot";
 import { createCompareSnapshotUseCase } from "@/application/snapshot/CompareSnapshot";
 import { createCreateSnapshotUseCase } from "@/application/snapshot/CreateSnapshot";
 import { createExportFolderSnapshotUseCase } from "@/application/snapshot/ExportFolderSnapshot";
@@ -8,6 +7,9 @@ import { createSnapshotStoreUseCase } from "@/application/snapshot/StoreSnapshot
 import { browserJsonFileExportAdapter } from "@/infrastructure/browser-storage/BrowserJsonFileExportAdapter";
 import { localGenerationCounterStore } from "@/infrastructure/browser-storage/LocalGenerationCounterStore";
 import { snapshotFirestoreRepository } from "@/infrastructure/firebase/firestore/SnapshotFirestoreRepository";
+import type { AppSnapshot } from "@/types/domain/snapshot";
+
+
 
 const SNAPSHOTS_KEY = "flashcard_snapshots";
 const createSnapshotUseCase = createCreateSnapshotUseCase({
@@ -69,6 +71,8 @@ migrateFromLocalStorage: async (userId: string): Promise<void> => {
 },
 };
 
+
+
 const getStoredSnapshotsFromLocalStorage = (): AppSnapshot[] => {
   if (typeof window === "undefined") {
     return [];
@@ -78,4 +82,6 @@ const getStoredSnapshotsFromLocalStorage = (): AppSnapshot[] => {
   return storedJson ? (JSON.parse(storedJson) as AppSnapshot[]) : [];
 };
 
-export { snapshotService };
+
+
+export { snapshotServic

@@ -3,6 +3,8 @@ import { buildExplorerSearchItems } from "@/features/search/lib/buildExplorerSea
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
+
+
 type ExplorerSearchSourceBridgeProps = {
   folders: Folder[];
   cards: Card[];
@@ -11,6 +13,8 @@ type ExplorerSearchSourceBridgeProps = {
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
 };
+
+
 
 const ExplorerSearchSourceBridge = ({ folders, cards, cardSets, documents, onFolderSelect, onItemSelect }: ExplorerSearchSourceBridgeProps) => {
   const registerSource = useSearchStore((state) => state.registerSource);
@@ -42,5 +46,7 @@ const ExplorerSearchSourceBridge = ({ folders, cards, cardSets, documents, onFol
 
   return null;
 };
+
+
 
 export { ExplorerSearchSourceBridge };

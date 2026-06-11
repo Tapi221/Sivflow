@@ -1,7 +1,7 @@
 import { RUNTIME_RELOAD_KEYS } from "@platform/runtime/runtime.constants";
-import { isChunkLoadError, toErrorText } from "./runtimeErrorUtils";
 import { logRuntimeFault } from "./logRuntimeFault";
 import { hardReloadOnce } from "./reloadGuard";
+import { isChunkLoadError, toErrorText } from "./runtimeErrorUtils";
 
 let started = false;
 

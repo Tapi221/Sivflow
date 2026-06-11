@@ -2,9 +2,9 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { GalleryIcon, HomeIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
-import type { WorkspaceSidebarSection } from "@/pane.desktop/tab.desktopnative/Tab";
-import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { cn } from "@/lib/utils";
+import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+import type { WorkspaceSidebarSection } from "@/pane.desktop/tab.desktopnative/Tab";
 import "./navigationbar.css";
 
 type NavigationBarItemId = "explore" | "library" | "home" | "settings";

@@ -1,6 +1,6 @@
 import { memo } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { InkEditTool } from "@core/domain/card/ink/inkDocument";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 type IpadInkToolbarProps = {
   tool: InkEditTool;

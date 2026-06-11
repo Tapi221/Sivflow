@@ -2,12 +2,14 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { overlayGlassActionButtonClassName, overlayGlassPillClassName, overlayGlassToolbarClassName } from "@/components/card/shell/overlaySurfaceClassNames";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import type { IconProps } from "@/ui/icons";
-import { Plus } from "@/ui/icons";
-import { getEditorBlockDefinition, parseEditorBlockSettings } from "@/lib/editorBlockSettings";
 import type { EditorBlockIconName, EditorBlockType } from "@/lib/editorBlockSettings";
+import { getEditorBlockDefinition, parseEditorBlockSettings } from "@/lib/editorBlockSettings";
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
+import type { IconProps } from "@/ui/icons";
+import { Plus } from "@/ui/icons";
+
+
 
 interface BlockToolbarProps {
   label: string;
@@ -24,6 +26,8 @@ type ToolbarBlockConfig = {
   isVisible: boolean;
   orderIndex: number;
 };
+
+
 
 const areBlockToolbarPropsEqual = (
   prev: BlockToolbarProps,
@@ -49,6 +53,8 @@ const getIcon = (
 
   return map[iconName];
 };
+
+
 
 const TextBlockGlyph = ({
   size = 16,
@@ -601,6 +607,8 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
 
   return renderToolbarShell();
 };
+
+
 
 const BlockToolbar = React.memo(BlockToolbarInner, areBlockToolbarPropsEqual);
 BlockToolbar.displayName = "BlockToolbar";
