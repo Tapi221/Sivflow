@@ -91,6 +91,7 @@ const createPrompt = (filePath, source, violations) => `You are fixing one Sivfl
 
 Rules:
 - Keep every import/export-from declaration on one line.
+- Do not write type inside named imports. Use import type for type-only imports, and split value imports from type imports when they come from the same module.
 - Use ./ relative imports only for the same directory.
 - Use the existing repository aliases for imports that cross directories.
 - Do not add compatibility paths, barrel exports, fallback imports, or @constants imports.
