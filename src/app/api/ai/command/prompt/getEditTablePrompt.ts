@@ -12,6 +12,8 @@ import { buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction }
 
 
 
+
+
 export const buildEditTableMultiCellPrompt = (editor: SlateEditor, messages: ChatMessage[]): string => { const tableCellMarkdown = getMarkdown(editor, { type: 'tableCellWithId' });
 
   return buildStructuredPrompt({

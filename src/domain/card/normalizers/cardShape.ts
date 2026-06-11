@@ -7,11 +7,15 @@ import { type InkDocument, normalizeInkDocument } from "@core/domain/card/ink/in
 
 
 
+
+
 type CardLike = Partial<Record<string, unknown>>;
 type CardFaceSide = "question" | "answer";
 type ResolveCardShapeOptions = {
   emptyInkAsNull?: boolean;
 };
+
+
 
 
 

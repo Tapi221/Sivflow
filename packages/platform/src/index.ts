@@ -10,6 +10,8 @@ import { webPlatform } from "./web";
 
 
 
+
+
 export const platform: PlatformApi = hasDesktopBridge() ? desktopPlatform : webPlatform;
 
 
@@ -18,7 +20,11 @@ export const platform: PlatformApi = hasDesktopBridge() ? desktopPlatform : webP
 
 
 
+
+
 export type { PlatformApi } from "./desktopApi";
+
+
 
 
 

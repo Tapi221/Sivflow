@@ -7,6 +7,8 @@ const MF_CARD_FILE_EXTENSION = ".mfcard";
 
 
 
+
+
 const appendVirtualFileExtension = (name: string, extension: string) => {
   const trimmedName = name.trim();
 

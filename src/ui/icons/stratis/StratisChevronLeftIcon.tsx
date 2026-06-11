@@ -7,7 +7,11 @@ import { forwardRef } from "react";
 
 
 
+
+
 export type StratisChevronLeftIconProps = SVGProps<SVGSVGElement>;
+
+
 
 
 

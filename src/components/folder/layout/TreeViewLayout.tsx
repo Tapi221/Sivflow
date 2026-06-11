@@ -35,6 +35,8 @@ import type { CardSet, Folder, SelectedExplorerItem } from "@/types";
 
 
 
+
+
 interface TreeViewLayoutProps {
   folders: Folder[];
   isSectionListMode: boolean;
@@ -56,7 +58,11 @@ interface TreeViewLayoutProps {
 
 
 
+
+
 const MOBILE_DETAIL_MEDIA_QUERY = "(max-width: 767px)";
+
+
 
 
 
@@ -92,6 +98,8 @@ const useIsMobileViewport = (): boolean => {
 
   return isMobileViewport;
 };
+
+
 
 
 
@@ -828,6 +836,8 @@ const TreeViewLayout = ({
     </div>
   );
 };
+
+
 
 
 

@@ -6,9 +6,13 @@ import { detectCssZoomSupport, resolveScaleRenderingStrategy, type ResolveScaleR
 
 
 
+
+
 type CardScaleRenderingMode = ScaleRenderingMode;
 type ResolveCardScaleRenderingStrategyArgs = ResolveScaleRenderingStrategyArgs;
 type CardScaleRenderingStrategy = ScaleRenderingStrategy;
+
+
 
 
 
@@ -34,7 +38,11 @@ const resolveCardScaleRenderingStrategy = ({
 
 
 
+
+
 export { detectCssZoomSupport, resolveCardScaleRenderingStrategy };
+
+
 
 
 

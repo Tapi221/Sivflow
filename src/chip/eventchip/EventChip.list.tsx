@@ -13,9 +13,13 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type CalendarEventChipListProps = {
   event: GoogleCalendarEvent;
 };
+
+
 
 
 
@@ -34,6 +38,8 @@ const LIST_EVENT_TIME_CLASS_NAME = "overflow-hidden whitespace-nowrap font-semib
 const LIST_EVENT_TITLE_CLASS_NAME = "line-clamp-2 overflow-hidden whitespace-normal break-words font-semibold leading-snug tracking-[-0.01em]";
 const LIST_ALL_DAY_EVENT_TITLE_CLASS_NAME = "mt-0 line-clamp-1 whitespace-nowrap leading-none";
 const MINUTE_IN_MS = 60_000;
+
+
 
 
 
@@ -97,6 +103,8 @@ const createEventTitleStyle = (): CSSProperties => ({
 
 
 
+
+
 const CalendarEventChipListComponent = ({ event }: CalendarEventChipListProps) => {
   const tokens = useMemo(() => generateColorTokens(event.accentColor), [event.accentColor]);
   const title = getEventTitle(event);
@@ -121,6 +129,8 @@ const CalendarEventChipListComponent = ({ event }: CalendarEventChipListProps) =
     </div>
   );
 };
+
+
 
 
 

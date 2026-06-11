@@ -9,6 +9,8 @@ import { normalizeLayoutRows } from "@/domain/card/extraRows";
 
 
 
+
+
 type Side = "question" | "answer";
 
 type UseLayoutRowsControllerParams<
@@ -20,6 +22,8 @@ type UseLayoutRowsControllerParams<
   normalizedSelectedCardId: string | null;
   isEditing: boolean;
 };
+
+
 
 
 

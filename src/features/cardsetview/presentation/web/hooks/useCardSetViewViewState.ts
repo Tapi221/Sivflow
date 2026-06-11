@@ -11,6 +11,8 @@ import type { CardSet } from "@/types/domain/cardSet";
 
 
 
+
+
 interface UseCardSetViewViewStateOptions {
   initialIndex: number;
   targetCardId: string | null;
@@ -20,6 +22,8 @@ interface UseCardSetViewViewStateOptions {
   selectedCardSet: CardSet | null;
   deviceScope: string;
 }
+
+
 
 
 

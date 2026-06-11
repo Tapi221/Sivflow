@@ -9,6 +9,8 @@ import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "
 
 
 
+
+
 type ExplorerSearchSourceBridgeProps = {
   folders: Folder[];
   cards: Card[];
@@ -17,6 +19,8 @@ type ExplorerSearchSourceBridgeProps = {
   onFolderSelect: (folderId: string | null) => void;
   onItemSelect: (item: SelectedExplorerItem) => void;
 };
+
+
 
 
 

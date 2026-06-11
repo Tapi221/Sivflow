@@ -6,11 +6,15 @@ import type { GoogleCalendarListItem } from "@/integration/googlecalendar-integr
 
 
 
+
+
 export type CachedGoogleCalendar = { id: string;
   summary: string;
   summaryOverride?: string;
   backgroundColor?: string;
 };
+
+
 
 
 

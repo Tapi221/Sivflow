@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 export type SegmentedOption<T extends string> = { label: ReactNode;
   value: T;
   ariaLabel?: string;
@@ -22,6 +24,8 @@ interface SegmentedControlGroupProps<T extends string> {
   className?: string;
   buttonClassName?: string;
 }
+
+
 
 
 

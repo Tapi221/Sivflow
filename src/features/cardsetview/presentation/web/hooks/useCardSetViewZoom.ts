@@ -14,6 +14,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 interface UseCardSetViewZoomOptions {
   deviceScope: string;
   cardSetId: string | null;
@@ -40,7 +42,11 @@ type LegacyZoomMigrationHint = Pick<
 
 
 
+
+
 const DEFAULT_SOURCE_KEY = "__cardsetview_zoom_default__";
+
+
 
 
 

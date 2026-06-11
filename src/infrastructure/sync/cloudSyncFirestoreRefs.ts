@@ -8,6 +8,8 @@ import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 
 
 
+
+
 export const requireCloudSyncFirestore = (): Firestore => requireFirestoreDb();
 
 export const getPullableCollectionRef = ( firestore: Firestore, userId: string, type: PullableEntityType, ): CollectionReference<DocumentData> => collection(firestore, `users/${userId}/${COLLECTION_BY_TYPE[type]}`);

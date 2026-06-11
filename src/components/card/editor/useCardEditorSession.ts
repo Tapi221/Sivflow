@@ -10,6 +10,8 @@ import type { Card, CardPatch } from "@/types/domain/card";
 
 
 
+
+
 type UseCardEditorSessionParams = {
   selectedCardId: string | null;
   selectedCardSnapshot?: Card | null;
@@ -42,6 +44,8 @@ type FlushDraftOptions = {
   exitEditing?: boolean;
   showSuccessToast?: boolean;
 };
+
+
 
 
 

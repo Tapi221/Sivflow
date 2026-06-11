@@ -16,6 +16,8 @@ import type { MathBlockData } from "@/types/domain/base";
 
 
 
+
+
 type CSSCustomProperties = React.CSSProperties & Record<`--${string}`, string>;
 
 interface MathEditorDialogProps {
@@ -26,6 +28,8 @@ interface MathEditorDialogProps {
   accentColor?: string;
   error?: string | null;
 }
+
+
 
 
 
@@ -47,7 +51,11 @@ const MAX_LATEX_LENGTH = 10000;
 
 
 
+
+
 const isHexColor = (color: string) => /^#[0-9a-fA-F]{3,8}$/.test(color);
+
+
 
 
 

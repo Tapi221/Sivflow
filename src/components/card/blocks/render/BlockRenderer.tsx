@@ -11,12 +11,16 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 interface BlockRendererProps {
   blocks?: CardBlock[];
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;
   displayMode?: CardDisplayMode;
   zoom?: number;
 }
+
+
 
 
 

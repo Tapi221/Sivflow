@@ -7,6 +7,8 @@ import type { SyncChange } from "@/services/interfaces/ISyncService";
 
 
 
+
+
 export const getChangeParts = ( change: SyncChange, ): { type: CloudEntityType; id: string; data: unknown } | null => {
   const type = change.type;
   const id = change.id;

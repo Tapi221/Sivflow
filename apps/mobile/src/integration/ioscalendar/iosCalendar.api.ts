@@ -11,9 +11,13 @@ import type { IosCalendarEvent, IosCalendarListItem, IosCalendarPermissionStatus
 
 
 
+
+
 type ExpoCalendarCreateEventDetails = NonNullable<Parameters<typeof ExpoCalendar.createEventAsync>[1]>;
 type ExpoCalendarUpdateEventDetails = NonNullable<Parameters<typeof ExpoCalendar.updateEventAsync>[1]>;
 type IosCalendarWritableEventDetails = Partial<ExpoCalendarCreateEventDetails & ExpoCalendarUpdateEventDetails>;
+
+
 
 
 
@@ -64,6 +68,8 @@ const WEEKDAY_BY_EXPO_DAY: Record<number, CalendarWeekday> = {
   [ExpoCalendar.DayOfTheWeek.Friday]: 5,
   [ExpoCalendar.DayOfTheWeek.Saturday]: 6,
 };
+
+
 
 
 

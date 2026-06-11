@@ -10,10 +10,14 @@ import type { DocumentItem } from "@/types";
 
 
 
+
+
 type PdfDocumentBlobFields = Pick<
   DocumentItem,
   "id" | "localFileId" | "userId" | "googleDriveFileId"
 >;
+
+
 
 
 

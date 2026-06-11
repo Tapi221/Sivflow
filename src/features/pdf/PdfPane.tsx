@@ -21,6 +21,8 @@ import "./PdfPane.css";
 
 
 
+
+
 type PdfPaneProps = {
   source: PdfDocumentSource | null;
   className?: string;
@@ -122,6 +124,8 @@ type PdfZoomCommit = {
 
 
 
+
+
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 640;
 const PDF_EXPLICIT_ZOOM_SCALE_CHANGE_WINDOW_MS = 500;
 const PDF_HISTORY_LIMIT = 80;
@@ -144,6 +148,8 @@ const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
+
+
 
 
 
@@ -461,6 +467,8 @@ const createDefaultToolbarState = (): PdfToolbarState => ({
   scale: 1,
   isBookmarked: false,
 });
+
+
 
 
 
@@ -1108,6 +1116,8 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     </section>
   );
 };
+
+
 
 
 

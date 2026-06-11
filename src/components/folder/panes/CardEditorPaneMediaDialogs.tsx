@@ -20,6 +20,8 @@ import type { CardFaceAttachmentAudio } from "@/types/domain/card";
 
 
 
+
+
 type Side = "question" | "answer";
 
 type DialogAudioItem = string | CardFaceAttachmentAudio;
@@ -53,6 +55,8 @@ interface CardEditorPaneMediaDialogsProps {
 
 
 
+
+
 const toAudioUrl = (item: DialogAudioItem): string => {
   return typeof item === "string" ? item : item.url;
 };
@@ -79,6 +83,8 @@ const areMediaDialogsPropsEqual = (
   if (prevClosed && nextClosed) return true;
   return false;
 };
+
+
 
 
 
@@ -169,6 +175,8 @@ const CardEditorPaneMediaDialogsInner = ({
     </>
   );
 };
+
+
 
 
 

@@ -7,6 +7,8 @@ import type { SelectedExplorerItem } from "@/types";
 
 
 
+
+
 export type ExplorerControllerState = { isHomeOnlyMode: boolean;
   isSectionListMode: boolean;
   selectedFolderId: string | null;

@@ -9,10 +9,14 @@ import type { Card, CardSet } from "@/types";
 
 
 
+
+
 type LocalFirstCardSetDb = Awaited<ReturnType<typeof getLocalDb>> & {
   addItem: (table: "cardSets", item: Record<string, unknown>) => Promise<string>;
   updateItem: (table: "cardSets", id: string, changes: Record<string, unknown>) => Promise<number>;
 };
+
+
 
 
 

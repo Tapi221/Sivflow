@@ -7,6 +7,8 @@ import type { DocumentItem } from "@/types";
 
 
 
+
+
 type UpdateDocumentOptions = {
   touchUpdatedAt?: boolean;
 };
@@ -34,7 +36,11 @@ type DocumentPurgeCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
 
 
 
+
+
 const VIEWER_STATE_UPDATE_KEYS = new Set(["viewerState", "updatedAt"]);
+
+
 
 
 

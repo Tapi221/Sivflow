@@ -9,8 +9,12 @@ type PdfLoadingTaskLike<T> = {
 
 
 
+
+
 const DEFAULT_PDF_LOAD_TIMEOUT_MS = 30_000;
 const PDF_LOAD_TIMEOUT_ERROR_MESSAGE = "PDFの読み込みがタイムアウトしました。ネットワーク接続を確認して、もう一度開き直してください。";
+
+
 
 
 
@@ -50,6 +54,8 @@ const waitForPdfLoadingTask = async <T>(
     }
   }
 };
+
+
 
 
 

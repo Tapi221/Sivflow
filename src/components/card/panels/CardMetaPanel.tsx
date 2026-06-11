@@ -7,6 +7,8 @@ import type { Card, ReviewLog } from "@/types";
 
 
 
+
+
 type CardMetaSyncStatus = {
   lastSyncedAtMs: number | null;
   hasError?: boolean;
@@ -58,7 +60,11 @@ type CardMetaPanelProps = {
 
 
 
+
+
 const CardMetaPanelComponent = (_props: CardMetaPanelProps) => null;
+
+
 
 
 

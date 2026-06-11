@@ -12,6 +12,8 @@ import type { CalendarPrintRangeState } from "./calendarPrint.types";
 
 
 
+
+
 type CalendarPrintRangeInput = {
   printRange: CalendarPrintRangeState;
   primaryViewMode: CalendarViewMode;
@@ -21,6 +23,8 @@ type CalendarPrintRangeInput = {
   currentDisplayRange: CalendarDateRange;
   weekStartDay?: CalendarWeekStartDay;
 };
+
+
 
 
 

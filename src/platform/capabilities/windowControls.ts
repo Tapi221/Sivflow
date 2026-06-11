@@ -8,6 +8,8 @@ import { hasDesktopBridge } from "@/platform/runtime";
 
 
 
+
+
 const getDesktopWindowApi = () => {
   if (!hasDesktopBridge()) {
     return null;
@@ -15,6 +17,8 @@ const getDesktopWindowApi = () => {
 
   return getDesktopBridge().window;
 };
+
+
 
 
 

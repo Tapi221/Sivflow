@@ -12,6 +12,8 @@ import { buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction }
 
 
 
+
+
 export function getCommentPrompt(editor: SlateEditor, { messages }: { messages: ChatMessage[] }) { const selectingMarkdown = getMarkdown(editor, { type: 'blockWithBlockId', });
 
   return buildStructuredPrompt({

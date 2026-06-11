@@ -8,6 +8,8 @@ type UpgradePanelProps = {
 
 
 
+
+
 const UpgradePanel = ({ compact = false }: UpgradePanelProps) => {
   if (compact) {
     return null;
@@ -25,6 +27,8 @@ const UpgradePanel = ({ compact = false }: UpgradePanelProps) => {
     </div>
   );
 };
+
+
 
 
 

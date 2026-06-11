@@ -10,6 +10,8 @@ import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
 
 
+
+
 type Params = {
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;
@@ -18,6 +20,8 @@ type Params = {
   cardById: Map<string, Card>;
   documentById: Map<string, DocumentItem>;
 };
+
+
 
 
 

@@ -12,6 +12,8 @@ import { CONTENT_TYPO } from "@shared/design-tokens/typography";
 
 
 
+
+
 type SharedCardContentRootProps = Readonly<{
   className?: string;
   isTextSelectable?: boolean;
@@ -24,8 +26,12 @@ type SharedCardContentRootProps = Readonly<{
 
 
 
+
+
 const SHARED_CARD_CONTENT_ROOT_CLASS_NAME =
   "card-content-root flex min-h-0 flex-1 w-full max-w-full flex-col overflow-x-clip overflow-y-visible";
+
+
 
 
 
@@ -78,6 +84,8 @@ const SharedCardContentInner = (props: SharedCardContentProps) => {
 
 
 
+
+
 const SharedCardContentRoot = React.memo(SharedCardContentRootComponent);
 const SharedCardContentScene = React.memo(SharedCardContentSceneComponent);
 const SharedCardContent = React.memo(SharedCardContentInner);
@@ -87,6 +95,8 @@ SharedCardContentScene.displayName = "SharedCardContentScene";
 SharedCardContent.displayName = "SharedCardContent";
 
 export { SharedCardContent };
+
+
 
 
 

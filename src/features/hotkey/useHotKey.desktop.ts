@@ -7,9 +7,13 @@ import { isPrimaryShiftShortcut, isTypingTarget } from "./hotkeyGuards";
 
 
 
+
+
 type UseHotKeyParams = {
   onToggleRightSidebar?: () => void;
 };
+
+
 
 
 

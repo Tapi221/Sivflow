@@ -11,6 +11,8 @@ import { SlateElement } from 'platejs/static';
 
 
 
+
+
 export function FootnoteReferenceElementStatic( props: SlateElementProps<TFootnoteElement> ) { const { element } = props;
 
   return (

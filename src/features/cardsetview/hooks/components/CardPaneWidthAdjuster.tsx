@@ -8,6 +8,8 @@ import { Minus, Plus, RefreshCw } from "@/ui/icons";
 
 
 
+
+
 const clampValue = (value: number, min: number, max: number) => {
   const safeMin = Math.min(min, max);
   const safeMax = Math.max(min, max);
@@ -15,6 +17,8 @@ const clampValue = (value: number, min: number, max: number) => {
   if (!Number.isFinite(value)) return safeMin;
   return Math.min(safeMax, Math.max(safeMin, value));
 };
+
+
 
 
 
@@ -35,6 +39,8 @@ export interface CardPaneWidthAdjusterProps { modeLabel: string;
   onStepUp: () => void;
   onReset: () => void;
 }
+
+
 
 
 
