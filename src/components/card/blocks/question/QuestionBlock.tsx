@@ -8,6 +8,8 @@ import type { CardBlock } from "@/types/domain/card";
 
 
 
+
+
 interface QuestionBlockProps {
   block: CardBlock;
   onUpdateBlock: (id: string, updates: Partial<CardBlock>) => void;
@@ -33,6 +35,8 @@ interface QuestionBlockProps {
 
 
 
+
+
 const areQuestionBlockPropsEqual = (
   prev: QuestionBlockProps,
   next: QuestionBlockProps,
@@ -45,6 +49,8 @@ const areQuestionBlockPropsEqual = (
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&
   prev.zoom === next.zoom;
+
+
 
 
 
@@ -126,6 +132,8 @@ const QuestionBlockInner: React.FC<QuestionBlockProps> = ({
     </BlockWrapper>
   );
 };
+
+
 
 
 

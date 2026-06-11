@@ -7,6 +7,8 @@ import StudyCard from "@/features/study/StudyCard";
 
 
 
+
+
 export const StudyReviewDesktop = ({ cards, sessionCurrentIndex, onResult, onToggleUncertainty, onToggleBookmark, onEdit, showHard, showEasy, }: StudyReviewProps) => { const [flipTrigger, setFlipTrigger] = useState(0);
 
   useEffect(() => {

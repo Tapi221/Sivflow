@@ -14,6 +14,8 @@ import { getDiscussionClickTarget } from './discussion-kit';
 
 
 
+
+
 type CommentConfig = ExtendConfig<
   BaseCommentConfig,
   {
@@ -22,6 +24,8 @@ type CommentConfig = ExtendConfig<
     hoverId: string | null;
   }
 >;
+
+
 
 
 

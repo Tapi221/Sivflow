@@ -13,9 +13,13 @@ import { ToastProvider } from "@web-renderer/contexts/ToastContext";
 
 
 
+
+
 type AppProvidersProps = {
   children: ReactNode;
 };
+
+
 
 
 
@@ -42,5 +46,9 @@ const AppProviders = ({ children }: AppProvidersProps) => (
 
 
 
+
+
 export { AppProviders };
+
+
 export type { AppProvidersProps };

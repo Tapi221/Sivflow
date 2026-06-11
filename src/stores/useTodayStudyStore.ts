@@ -13,6 +13,8 @@ import { persist } from "zustand/middleware";
 
 
 
+
+
 export type RatingKey = "forgot" | "vague" | "remembered" | "easy";
 
 type TodayStudyState = {
@@ -42,6 +44,8 @@ type TodayStudyActions = {
 
 
 
+
+
 const emptyRatings = (): Record<RatingKey, number> => ({
   forgot: 0,
   vague: 0,
@@ -55,7 +59,11 @@ const localDateKey = (): string => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
+
+
 export type TodayStudyStore = TodayStudyState & TodayStudyActions;
+
+
 
 
 
@@ -68,6 +76,8 @@ const initialState = (userId = "anon"): TodayStudyState => ({
   extraQueue: [],
   extraDone: [],
 });
+
+
 
 export const useTodayStudyStore = create<TodayStudyStore>()( persist( (set, get) => ({ ...initialState(), hydrate: (userId: string) => { const s = get();
         const today = localDateKey();

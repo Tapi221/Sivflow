@@ -6,10 +6,14 @@ import { FootnoteDefinitionElementStatic, FootnoteReferenceElementStatic } from 
 
 
 
+
+
 const BaseFootnoteKit = [
   BaseFootnoteReferencePlugin.withComponent(FootnoteReferenceElementStatic),
   BaseFootnoteDefinitionPlugin.withComponent(FootnoteDefinitionElementStatic),
 ];
+
+
 
 
 

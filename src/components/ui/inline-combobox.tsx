@@ -20,6 +20,8 @@ import { cn } from '@/lib/utils';
 
 
 
+
+
 type FilterFn = (
   item: { value: string; group?: string; keywords?: string[]; label?: string },
   search: string
@@ -50,6 +52,8 @@ type InlineComboboxProps = {
 
 
 
+
+
 const InlineComboboxContext = React.createContext<InlineComboboxContextValue>(
   null as unknown as InlineComboboxContextValue
 );
@@ -75,6 +79,8 @@ const InlineComboboxRow = ComboboxRow;
 
 
 
+
+
 const defaultFilter: FilterFn = (
   { group, keywords = [], label, value },
   search
@@ -87,6 +93,8 @@ const defaultFilter: FilterFn = (
     filterWords(keyword!, search)
   );
 };
+
+
 
 
 
@@ -432,6 +440,8 @@ function InlineComboboxGroupLabel({
     />
   );
 }
+
+
 
 
 

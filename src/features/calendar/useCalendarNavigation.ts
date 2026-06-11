@@ -11,7 +11,11 @@ import { persistScheduleNavigationState, readStoredScheduleNavigationState, type
 
 
 
+
+
 type CalendarNavigationOptions = { allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay };
+
+
 
 
 
@@ -19,6 +23,8 @@ type CalendarNavigationOptions = { allowMultiSelectViewMode?: boolean; weekStart
 
 const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_MODES);
+
+
 
 
 

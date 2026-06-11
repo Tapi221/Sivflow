@@ -4,6 +4,8 @@ import { MF_DECK_MEDIA_DIRECTORY, MF_DECK_MEDIA_URI_PREFIX, type MfDeckMediaEntr
 
 
 
+
+
 const EXTENSION_BY_MIME_TYPE: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",
@@ -20,6 +22,8 @@ const EXTENSION_BY_MIME_TYPE: Record<string, string> = {
 };
 
 const INVALID_FILENAME_CHARACTERS = new Set(["\\", "/", ":", "*", "?", "\"", "<", ">", "|"]);
+
+
 
 
 
@@ -80,8 +84,12 @@ const stripLeadingDots = (value: string): string => {
   return nextValue;
 };
 
+
+
 export const MF_DECK_MAX_MEDIA_ENTRY_BYTES = 32 * 1024 * 1024;
 export const MF_DECK_MAX_MEDIA_TOTAL_BYTES = 96 * 1024 * 1024;
+
+
 
 
 

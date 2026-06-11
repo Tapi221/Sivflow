@@ -5,7 +5,11 @@ import { forwardRef } from "react";
 
 
 
+
+
 export type StratisFilterIconProps = SVGProps<SVGSVGElement>;
+
+
 
 
 

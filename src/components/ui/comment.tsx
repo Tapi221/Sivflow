@@ -34,6 +34,8 @@ import { Editor, EditorContainer } from './editor';
 
 
 
+
+
 export type TComment = { id: string;
   contentRich: Value;
   createdAt: Date;
@@ -41,6 +43,8 @@ export type TComment = { id: string;
   isEdited: boolean;
   userId: string;
 };
+
+
 
 
 
@@ -62,6 +66,8 @@ const useCommentEditor = (
 
   return commentEditor;
 };
+
+
 
 
 
@@ -586,6 +592,8 @@ export function CommentCreateForm({ autoFocus = false, className, discussionId: 
     </div>
   );
 }
+
+
 
 export const formatCommentDate = (date: Date) => { const now = new Date();
   const diffMinutes = differenceInMinutes(now, date);

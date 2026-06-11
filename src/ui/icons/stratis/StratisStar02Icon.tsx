@@ -5,7 +5,11 @@ import { forwardRef } from "react";
 
 
 
+
+
 export type StratisStar02IconProps = SVGProps<SVGSVGElement>;
+
+
 
 
 

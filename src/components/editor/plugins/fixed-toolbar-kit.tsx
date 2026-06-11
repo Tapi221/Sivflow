@@ -10,6 +10,8 @@ import { FixedToolbarButtons } from '@/components/ui/fixed-toolbar-buttons';
 
 
 
+
+
 const FixedToolbarKit = [
   createPlatePlugin({
     key: 'fixed-toolbar',
@@ -22,6 +24,8 @@ const FixedToolbarKit = [
     },
   }),
 ];
+
+
 
 
 

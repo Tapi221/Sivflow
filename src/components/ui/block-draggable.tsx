@@ -26,7 +26,11 @@ import { cn } from '@/lib/utils';
 
 
 
+
+
 const UNDRAGGABLE_KEYS = [KEYS.column, KEYS.tr, KEYS.td];
+
+
 
 
 
@@ -188,6 +192,8 @@ const calcDragButtonTop = (editor: PlateEditor, element: TElement): number => {
 
   return currentMarginTop;
 };
+
+
 
 
 
@@ -384,6 +390,8 @@ function Gutter({
     </div>
   );
 }
+
+
 
 
 

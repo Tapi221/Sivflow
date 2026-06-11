@@ -5,6 +5,8 @@ import { MF_DECK_FORMAT, MF_DECK_MAX_BLOCKS_PER_FACE, MF_DECK_MAX_CARDS, MF_DECK
 
 
 
+
+
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 };

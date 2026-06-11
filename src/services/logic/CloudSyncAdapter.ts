@@ -7,6 +7,8 @@ import type { CloudDeviceStatus, ICloudSyncAdapter, SyncChange } from "@/service
 
 
 
+
+
 const getDeviceMetadataPath = (userId: string, deviceId: string) => {
   return `sync_metadata/${userId}/devices/${deviceId}`;
 };

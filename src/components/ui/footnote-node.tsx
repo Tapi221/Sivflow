@@ -28,7 +28,11 @@ import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineCombo
 
 
 
+
+
 const NUMERIC_FOOTNOTE_QUERY = /^\d+$/;
+
+
 
 
 
@@ -84,6 +88,8 @@ const getReferenceContextLabel = (
     ? `${normalized.slice(0, 53).trimEnd()}...`
     : normalized;
 };
+
+
 
 
 

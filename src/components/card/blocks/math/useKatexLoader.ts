@@ -4,9 +4,13 @@ import { useEffect } from "react";
 
 
 
+
+
 type WindowWithKatex = Window & {
   katex?: unknown;
 };
+
+
 
 
 

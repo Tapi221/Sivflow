@@ -4,8 +4,12 @@ import type { GoogleAuthPort } from "@/application/ports/GoogleAuthPort";
 
 
 
+
+
 export interface SignInWithGoogleDependencies { auth: GoogleAuthPort;
 }
+
+
 
 
 

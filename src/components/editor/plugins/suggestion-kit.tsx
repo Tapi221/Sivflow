@@ -16,6 +16,8 @@ import { discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarg
 
 
 
+
+
 type SuggestionConfig = ExtendConfig<
   BaseSuggestionConfig,
   {
@@ -23,6 +25,8 @@ type SuggestionConfig = ExtendConfig<
     hoverId: string | null;
   }
 >;
+
+
 
 
 
@@ -104,6 +108,8 @@ const SuggestionKit = [suggestionPlugin, trailingBlockPlugin];
 
 
 
+
+
 function getInlineSuggestionData(editor: any, element: TElement) {
   const suggestionApi = editor.getApi(BaseSuggestionPlugin).suggestion;
   const data = suggestionApi.suggestionData(element) as TSuggestionData | TInlineSuggestionData | undefined;
@@ -120,7 +126,11 @@ function getInlineSuggestionData(editor: any, element: TElement) {
   }
 }
 
+
+
 export type { SuggestionConfig };
+
+
 
 
 

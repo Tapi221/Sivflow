@@ -4,6 +4,8 @@ import type { CardBlock } from "@/types/domain/card";
 
 
 
+
+
 export const isRenderableCardBlock = (block: CardBlock): boolean => { switch (block.type) { case "text": return (block.content ?? "").trim() !== "";
     case "question":
       return (

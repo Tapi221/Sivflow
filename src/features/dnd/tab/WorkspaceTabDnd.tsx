@@ -6,6 +6,8 @@ import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 
 
 
+
+
 type WorkspaceTabDndListProps = {
   tabsListRef: RefObject<HTMLDivElement | null>;
   orderedTabs: WorkspaceTab[];
@@ -32,6 +34,8 @@ type WorkspaceTabDndItemProps = Omit<
 
 
 
+
+
 const REORDER_ITEM_TRANSITION: Transition = {
   layout: {
     type: "tween",
@@ -47,6 +51,8 @@ const REORDER_ITEM_TRANSITION: Transition = {
     duration: 0,
   },
 };
+
+
 
 
 
@@ -107,6 +113,8 @@ const WorkspaceTabDndItem = ({
     </Reorder.Item>
   );
 };
+
+
 
 
 

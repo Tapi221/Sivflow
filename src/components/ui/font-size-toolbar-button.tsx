@@ -24,6 +24,8 @@ import { ToolbarButton } from './toolbar';
 
 
 
+
+
 const DEFAULT_FONT_SIZE = '16';
 
 const FONT_SIZE_MAP = {
@@ -48,6 +50,8 @@ const FONT_SIZES = [
   '72',
   '96',
 ] as const;
+
+
 
 
 

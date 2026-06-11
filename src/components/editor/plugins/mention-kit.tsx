@@ -8,6 +8,8 @@ import { MentionElement, MentionInputElement } from '@/components/ui/mention-nod
 
 
 
+
+
 const MentionKit = [
   MentionPlugin.configure({
     options: {
@@ -16,6 +18,8 @@ const MentionKit = [
   }).withComponent(MentionElement),
   MentionInputPlugin.withComponent(MentionInputElement),
 ];
+
+
 
 
 

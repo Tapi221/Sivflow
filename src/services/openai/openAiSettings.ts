@@ -10,10 +10,14 @@ export type OpenAiSettings = { providerMode: AiProviderMode;
 
 
 
+
+
 const STORAGE_KEY = "sivflow.openai.settings.v1";
 const LEGACY_STORAGE_KEY = "flashcard-master.openai.settings.v1";
 
 export const DEFAULT_OPEN_AI_SETTINGS: OpenAiSettings = { providerMode: "local-template", apiKey: "", model: "gpt-5.4-mini", maxOutputTokens: 700, };
+
+
 
 
 

@@ -9,10 +9,14 @@ import type { CardFaceAttachments } from "@/types/domain/card";
 
 
 
+
+
 type SharedCardAttachmentsProps = Readonly<{
   attachments?: CardFaceAttachments | null;
   className?: string;
 }>;
+
+
 
 
 
@@ -28,6 +32,8 @@ const normalizeAudioUrls = (
 const normalizeReferences = (
   attachments?: CardFaceAttachments | null,
 ): ReferenceBlockData[] => sanitizeReferences(attachments?.references ?? []);
+
+
 
 
 

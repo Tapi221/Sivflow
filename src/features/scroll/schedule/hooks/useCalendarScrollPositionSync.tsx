@@ -6,6 +6,8 @@ import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types"
 
 
 
+
+
 type Params = {
   selectedViewMode: CalendarViewMode;
   calendarBufferBefore: number;
@@ -16,6 +18,8 @@ type Params = {
   headerRef?: React.RefObject<HTMLDivElement | null>;
   headerRefs?: React.RefObject<HTMLDivElement | null>[];
 };
+
+
 
 
 

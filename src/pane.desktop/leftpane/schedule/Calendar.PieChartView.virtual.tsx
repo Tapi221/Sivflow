@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 type CalendarPieChartViewProps = { days: Date[]; virtualRail?: ScheduleVirtualRail; selectedDate: Date; events: GoogleCalendarEvent[]; appProjects: AppCalendarItem[]; googleAccounts: GoogleAccountDisplay[]; onSelectDate?: (date: Date) => void; onVisibleDateChange?: (date: Date) => void; dayHeights?: Record<string, number>; scrollViewportRef?: MutableRefObject<HTMLDivElement | null>; onScrollTopChange?: (scrollTop: number) => void; className?: string };
 
 type VirtualRange = { start: number; end: number };
@@ -19,6 +21,8 @@ type VirtualRange = { start: number; end: number };
 type DaySummary = { date: Date; key: string; minutes: number; count: number; isSelected: boolean; isToday: boolean };
 
 type DayDateButtonProps = { day: DaySummary; onSelectDate?: (date: Date) => void };
+
+
 
 
 
@@ -36,6 +40,8 @@ const USER_SCROLL_AUTO_SCROLL_BLOCK_MS = 350;
 const DAY_DATE_NUMBER_CLASS_NAME = "flex h-8 w-8 items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-all duration-150";
 const DAY_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 const SELECTED_DAY_DATE_NUMBER_CLASS_NAME = "border-0 bg-[var(--ds-color-tag-sky-bg)] text-[var(--ds-color-tag-sky-fg)] shadow-none ring-0";
+
+
 
 
 
@@ -115,12 +121,16 @@ const getDayDateNumberClassName = (day: DaySummary): string => cn(DAY_DATE_NUMBE
 
 
 
+
+
 const DayDateButton = ({ day, onSelectDate }: DayDateButtonProps) => (
   <button type="button" className="mt-0.5 flex h-8 items-center justify-end gap-1 rounded-[10px] pr-0.5 text-right transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25" onClick={() => onSelectDate?.(day.date)}>
     <span className={getDayDateNumberClassName(day)}>{format(day.date, "d")}</span>
     <span className={DAY_WEEKDAY_CLASS_NAME}>{format(day.date, "EEE", { locale: ja })}</span>
   </button>
 );
+
+
 
 
 
@@ -134,6 +144,8 @@ const DayRow = memo(({ day, onSelectDate }: { day: DaySummary; onSelectDate?: (d
 });
 
 DayRow.displayName = "DayRow";
+
+
 
 const CalendarPieChartViewComponent = ({ virtualRail, selectedDate, events, onSelectDate, onVisibleDateChange, scrollViewportRef: externalRef, onScrollTopChange, className }: CalendarPieChartViewProps) => {
   const localRef = useRef<HTMLDivElement | null>(null);
@@ -165,6 +177,8 @@ const CalendarPieChartViewComponent = ({ virtualRail, selectedDate, events, onSe
 
   return <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden bg-white", className)}><div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-2 scrollbar-hidden"><div className="mx-auto w-full max-w-[940px]"><div className="relative w-full" style={{ height: totalHeight }}>{days.map((day, offset) => <div key={day.key} className="absolute left-0 right-0" style={{ contain: "layout style", top: (range.start + offset) * DAY_BLOCK, height: DAY_HEIGHT }}><DayRow day={day} onSelectDate={onSelectDate} /></div>)}</div></div></div></div>;
 };
+
+
 
 
 

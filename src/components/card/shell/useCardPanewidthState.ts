@@ -4,6 +4,8 @@ import { type CardPaneMode, clampPaneWidthPx } from "@/components/card/frame/car
 
 
 
+
+
 type PaneWidthMap<T> = {
   view: T;
   edit: T;
@@ -40,7 +42,11 @@ interface UseCardPaneWidthStateOptions {
 
 
 
+
+
 const DEFAULT_INITIAL_VIEWPORT_WIDTH_PX = 1024;
+
+
 
 
 

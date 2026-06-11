@@ -30,6 +30,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 
 
+
+
 type CssVars = React.CSSProperties & Record<`--${string}`, string>;
 
 interface BlockEditorProps {
@@ -58,9 +60,13 @@ interface BlockEditorProps {
 
 
 
+
+
 const ROW_STEP_PX = CARD_ROW_PX;
 
 const EMPTY_HIDDEN_BLOCK_TYPES: CardBlock["type"][] = [];
+
+
 
 
 
@@ -71,8 +77,12 @@ const uid = () =>
     ? crypto.randomUUID()
     : Math.random().toString(36).slice(2);
 
+
+
 export interface BlockEditorHandle { addBlock: (type: CardBlock["type"]) => void;
 }
+
+
 
 
 
@@ -642,6 +652,8 @@ export const BlockEditor = React.forwardRef< BlockEditorHandle, BlockEditorProps
     );
   },
 );
+
+
 
 
 

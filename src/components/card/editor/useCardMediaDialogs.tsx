@@ -11,6 +11,8 @@ import type { CardFaceAttachmentAudio, CardFaceAttachments } from "@/types/domai
 
 
 
+
+
 type Side = "question" | "answer";
 type UseCardMediaDialogsParams = {
   getSideAttachments: (side: Side) => CardFaceAttachments;
@@ -19,6 +21,8 @@ type UseCardMediaDialogsParams = {
     nextAttachments: CardFaceAttachments,
   ) => void;
 };
+
+
 
 
 

@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 
 
 
+
+
 interface UploadProgressProps {
   fileName: string;
   progress: number;
@@ -17,6 +19,8 @@ interface UploadProgressProps {
   className?: string;
   showIcon?: boolean;
 }
+
+
 
 
 
@@ -124,5 +128,9 @@ const UploadProgress = ({
 
 
 
+
+
 export { UploadProgress };
+
+
 export type { UploadProgressProps };

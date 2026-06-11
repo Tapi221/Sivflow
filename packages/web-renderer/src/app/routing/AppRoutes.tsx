@@ -10,6 +10,8 @@ import { ProtectedRoute } from "./ProtectedRoute";
 
 
 
+
+
 const Settings = lazy(() => import("@/routes/SettingScreen"));
 const Trash = lazy(() => import("@web-renderer/routes/Trash"));
 const REDIRECT_TO_SCHEDULE_ROUTES = ["calendar/*", "CardEdit/*", "CardSetView/*", "CardView/*", "study/*", "library/*", "statistics/*"] as const;
@@ -18,9 +20,13 @@ const REDIRECT_TO_SCHEDULE_ROUTES = ["calendar/*", "CardEdit/*", "CardSetView/*"
 
 
 
+
+
 const withRouteFallback = (element: ReactNode) => {
   return <Suspense fallback={null}>{element}</Suspense>;
 };
+
+
 
 
 

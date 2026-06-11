@@ -24,6 +24,8 @@ import { BLOCK_SUGGESTION_TOKEN, type ResolvedSuggestion, } from '@/lib/block-di
 
 
 
+
+
 export function BlockSuggestionCard({ idx, isLast, suggestion, }: { idx: number;
   isLast: boolean;
   suggestion: ResolvedSuggestion;
@@ -200,5 +202,7 @@ export function BlockSuggestionCard({ idx, isLast, suggestion, }: { idx: number;
     </div>
   );
 }
+
+
 
 export const isResolvedSuggestion = ( suggestion: ResolvedSuggestion | TDiscussion ): suggestion is ResolvedSuggestion => 'suggestionId' in suggestion;

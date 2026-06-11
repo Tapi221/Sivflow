@@ -12,6 +12,8 @@ import { generateSafeStoragePath } from "@/utils/fileUtils";
 
 
 
+
+
 interface UploadResult {
   url: string;
   storagePath: string | null;
@@ -45,6 +47,8 @@ type UploadValidationRule = {
   maxFileSize: number;
   defaultMimeType?: string;
 };
+
+
 
 
 
@@ -98,6 +102,8 @@ const UPLOAD_VALIDATION_RULES: Record<UploadKind, UploadValidationRule> = {
     defaultMimeType: "application/pdf",
   },
 };
+
+
 
 
 

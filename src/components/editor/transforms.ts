@@ -34,9 +34,13 @@ import { type NodeEntry, type Path, type TElement, KEYS, PathApi, } from 'platej
 
 
 
+
+
 type InsertBlockOptions = {
   upsert?: boolean;
 };
+
+
 
 
 
@@ -56,6 +60,8 @@ const insertInlineMap: Record<
     insertInlineEquation(editor, '', { select: true }),
   [KEYS.link]: (editor) => triggerFloatingLink(editor, { focused: true }),
 };
+
+
 
 
 
@@ -83,6 +89,8 @@ const selectBlockquoteStart = (editor: PlateEditor, path: Path) => {
     editor.tf.select(start);
   }
 };
+
+
 
 const insertBlockMap: Record<
   string,
@@ -116,6 +124,8 @@ const insertBlockMap: Record<
   [KEYS.toc]: (editor) => insertToc(editor, { select: true }),
   [KEYS.video]: (editor) => insertVideoPlaceholder(editor, { select: true }),
 };
+
+
 
 
 
@@ -193,6 +203,8 @@ const setList = (
   );
 };
 
+
+
 const setBlockMap: Record<
   string,
   (editor: PlateEditor, type: string, entry: NodeEntry<TElement>) => void
@@ -203,6 +215,8 @@ const setBlockMap: Record<
   [ACTION_THREE_COLUMNS]: (editor) => toggleColumnGroup(editor, { columns: 3 }),
   [KEYS.codeBlock]: (editor) => toggleCodeBlock(editor),
 };
+
+
 
 
 

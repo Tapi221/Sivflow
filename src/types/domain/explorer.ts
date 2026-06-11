@@ -6,6 +6,8 @@ import type { Note } from "./note";
 
 
 
+
+
 export type ExplorerItem = | { type: "card"; data: Card }
   | { type: "document"; data: DocumentItem }
   | { type: "note"; data: Note };
