@@ -181,6 +181,12 @@ export 群はファイル末尾の1つの連続したブロックにする。直
 
 export 群の順序は、値 export、type export の順にする。
 
+互換 export ファイルは禁止する。移動・リネーム・責務分離後に、旧 import パスを維持するためだけの `export * from "..."` / `export { ... } from "..."` / `export type { ... } from "..."` だけのファイルを作らない。呼び出し元の import パスを正しい module へ修正する。
+
+`index.ts` / `index.tsx` で責務のある公開 API を集約する場合だけ例外とする。非 index ファイルを旧 path 互換の入口として残すことは禁止する。
+
+`npm run verify:no-compat-export-files` は、非 index source file が export-from 宣言だけで構成されている場合に検出する。`npm run verify:source-conventions` はこの検査を含めて実行する。
+
 ```ts
 const AppProviders = ({ children }: AppProvidersProps) => (
   <MantineProvider defaultColorScheme="light">{children}</MantineProvider>
