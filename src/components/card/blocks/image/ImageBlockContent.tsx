@@ -1,9 +1,7 @@
 import { ImageGallery } from "@/components/card/media/CardMedia";
 import MediaUploader from "@/components/card/media/MediaUploader";
-import type { ImageGalleryItem } from "@/components/card/media/types";
+import type { ImageGalleryItem } from "@/components/card/media/media.types";
 import type { UploadedImage } from "@/types/domain/assets";
-
-
 
 type ImageBlockContentProps =
   | {
@@ -26,8 +24,6 @@ type ImageBlockContentProps =
     zoom?: number;
   };
 
-
-
 const ImageBlockContent = (props: ImageBlockContentProps) => {
   if (props.mode === "view") {
     return (<ImageGallery urls={props.urls} items={props.items} onFullscreenChange={props.onFullscreenChange} displayMode={props.displayMode} zoom={props.zoom} />);
@@ -47,7 +43,5 @@ const ImageBlockContent = (props: ImageBlockContentProps) => {
     />
   );
 };
-
-
 
 export { ImageBlockContent };
