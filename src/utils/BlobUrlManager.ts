@@ -1,16 +1,8 @@
-/**
- * Blob URL のライフサイクル管理
- * Safari/iOS のメモリ制限に対応
- */
-class BlobUrlManager {
+const BlobUrlManager = class {
   private activeUrls = new Set<string>();
-  private readonly MAX_ACTIVE_URLS = 20; // Safari/iOS の制限を考慮
+  private readonly MAX_ACTIVE_URLS = 20;
 
-  /**
-   * Blob URL を生成（上限管理付き）
-   */
   create(blob: Blob): string {
-    // 上限チェック
     if (this.activeUrls.size >= this.MAX_ACTIVE_URLS) {
       console.warn(
         `[BlobUrlManager] Max URLs reached (${this.MAX_ACTIVE_URLS}). Revoking oldest...`,
@@ -30,9 +22,6 @@ class BlobUrlManager {
     return url;
   }
 
-  /**
-   * Blob URL を解放
-   */
   revoke(url: string): void {
     if (this.activeUrls.has(url)) {
       URL.revokeObjectURL(url);
@@ -43,9 +32,6 @@ class BlobUrlManager {
     }
   }
 
-  /**
-   * すべての Blob URL を解放（クリーンアップ）
-   */
   revokeAll(): void {
     for (const url of this.activeUrls) {
       URL.revokeObjectURL(url);
@@ -54,20 +40,13 @@ class BlobUrlManager {
     console.log("[BlobUrlManager] All URLs revoked");
   }
 
-  /**
-   * 現在のアクティブURL数を取得
-   */
   getActiveCount(): number {
     return this.activeUrls.size;
   }
-}
+};
 
-/**
- * Blob URL 管理の統一インスタンス
- */
 export const blobUrlManager = new BlobUrlManager();
 
-// アプリ終了時にクリーンアップ
 if (typeof window !== "undefined") {
   window.addEventListener("beforeunload", () => {
     blobUrlManager.revokeAll();
