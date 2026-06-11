@@ -8,15 +8,7 @@ const CONTEXT_SYNC_THRESHOLDS = {
   offlineRecoveryMs: 60 * 60 * 1000,
 } as const;
 
-export const contextService = new ContextService();
-
-/**
- * コンテキストサービス
- *
- * ユーザーの状況に応じて適切なメッセージを提供する
- * 同じ処理でも「意味」を変える
- */
-class ContextService {
+const ContextService = class {
   private buildLastInitKey = (userId: string) => {
     return `${CONTEXT_STORAGE_KEY_PREFIXES.lastInit}${userId}`;
   };
@@ -77,4 +69,6 @@ class ContextService {
   recordSync = (userId: string): void => {
     localStorage.setItem(this.buildLastSyncKey(userId), Date.now().toString());
   };
-}
+};
+
+export const contextService = new ContextService();
