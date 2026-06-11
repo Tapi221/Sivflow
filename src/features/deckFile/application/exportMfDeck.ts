@@ -3,6 +3,8 @@ import type { MfDeckTagLookup } from "./mfDeck.types";
 import { encodeMfDeckArchive } from "@/features/deckFile/infra/web/mfDeckZipCodec";
 import type { Card, CardSet } from "@/types";
 
+
+
 const exportMfDeckBytes = async ({ cardSet, cards, tagById, appVersion }: { cardSet: CardSet;
   cards: Card[];
   tagById?: MfDeckTagLookup;
@@ -16,5 +18,7 @@ const exportMfDeckBytes = async ({ cardSet, cards, tagById, appVersion }: { card
   });
   return encodeMfDeckArchive(archive);
 };
+
+
 
 export { exportMfDeckBytes };

@@ -2,6 +2,8 @@ import { resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
 import type { Card } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 
+
+
 interface ResolveCardMutationTargetOptions {
   cardSetId: string | null;
   cardSetById: ReadonlyMap<string, Pick<CardSet, "id" | "folderId">>;
@@ -13,6 +15,8 @@ interface CardMutationTarget {
   targetCardSetId: string | null;
   targetFolderId: string | null;
 }
+
+
 
 const resolveCardMutationTarget = ({ cardSetId, cardSetById, selectedCardSet, selectedCard, currentCard }: ResolveCardMutationTargetOptions): CardMutationTarget => { const resolveTargetFolderId = (card: Card | null) => { if (!card) return null;
   return resolveCardFolderIdStrict(card, cardSetById);
@@ -36,5 +40,7 @@ return {
   targetFolderId,
 };
 };
+
+
 
 export { resolveCardMutationTarget };

@@ -6,6 +6,8 @@ import { warnOncePerSession } from "@/services/localDBRuntimeState";
 import { normalizeDate } from "@/shared/codec/date";
 import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 
+
+
 /** queries.ts が必要とする LocalDB プロパティの最小インターフェース */
 type QueryDb = Dexie & {
   readonly cards: Table;
@@ -17,6 +19,8 @@ type MutableDocumentBlobFields = {
   localUrl?: string | null;
   blobUrl?: string | null;
 };
+
+
 
 const getItem = async (db: QueryDb, table: string, id: string) => { const item = await db.table(table).get(id);
   if (table === "cards") return item ? normalizeCard(item) : item;
@@ -70,5 +74,7 @@ const normalizeDocumentBlobUrlsForSession = async (db: QueryDb) => { try { await
   );
 }
 };
+
+
 
 export { getItem, getAllItems, getAllCards, getAllFolders, getDirtyItems, getUpdatedCards, getLastSyncTime, updateLastSyncTime, normalizeDocumentBlobUrlsForSession };

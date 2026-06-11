@@ -1,7 +1,11 @@
 import type { UploadedImage } from "@/types";
 import { isBase64DataUrl, isBlobUrl, isStorageUrl } from "@/types/core/branded";
 
+
+
 type ImageUrlField = "remoteUrl" | "localUrl" | "thumbnailUrl";
+
+
 
 /**
  * 画像ドメインの不変条件違反を示すエラー
@@ -95,5 +99,7 @@ const assertImageInvariant = (image: UploadedImage): void => { assertNoBase64InI
  */
 const assertImageArrayInvariant = (images: UploadedImage[]): void => { images.forEach(assertImageInvariant);
 };
+
+
 
 export { ImageInvariantViolation, assertNoBase64InImage, assertImageInvariant, assertImageArrayInvariant };

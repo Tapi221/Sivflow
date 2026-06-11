@@ -1,9 +1,13 @@
 import { useEffect } from "react";
 import { isPrimaryShortcut, isTypingTarget } from "./hotkeyGuards";
 
+
+
 type UseTreeViewSidebarHotkeyParams = {
   onToggle: () => void;
 };
+
+
 
 const useTreeViewSidebarHotkey = ({ onToggle }: UseTreeViewSidebarHotkeyParams) => { useEffect(() => { const handleKeyDown = (event: KeyboardEvent) => { if (event.defaultPrevented) return;
   if (!isPrimaryShortcut(event, "b")) return;
@@ -20,5 +24,7 @@ return () => {
 };
 }, [onToggle]);
 };
+
+
 
 export { useTreeViewSidebarHotkey };

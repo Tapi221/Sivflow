@@ -3,6 +3,8 @@ import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selec
 import { normalizeDate } from "@/shared/codec/date";
 import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
+
+
 interface UseTreeViewDerivedStateParams {
   folders: Folder[];
   cards: Card[];
@@ -21,11 +23,15 @@ type FolderStats = {
   lastReviewedAt: Date | null;
 };
 
+
+
 const EMPTY_FOLDER_STATS: FolderStats = {
   dueCount: 0,
   unlearnedCount: 0,
   lastReviewedAt: null,
 };
+
+
 
 const createEmptyFolderStats = (): FolderStats => ({
   dueCount: 0,
@@ -204,5 +210,7 @@ return {
   showMobileDetail,
 };
 };
+
+
 
 export { useTreeViewDerivedState };

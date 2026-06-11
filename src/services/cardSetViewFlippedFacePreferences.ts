@@ -1,9 +1,13 @@
 import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 
+
+
 type CardSetViewFlippedFaceScope = {
   deviceScope: string;
   cardSetId: string | null | undefined;
 };
+
+
 
 const normalizeDeviceScope = (value: string | null | undefined) => {
   const trimmed = typeof value === "string" ? value.trim() : "";
@@ -71,5 +75,7 @@ const setCardSetViewFlippedCardIds = ({ deviceScope, cardSetId, ids }: CardSetVi
     normalizedIds.length > 0 ? JSON.stringify(normalizedIds) : null,
   );
 };
+
+
 
 export { buildCardSetViewFlippedFaceScopeKey, getCardSetViewFlippedCardIds, setCardSetViewFlippedCardIds };

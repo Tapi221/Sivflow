@@ -1,5 +1,7 @@
 import { asRecord } from "./records";
 
+
+
 const makeFallbackId = () => { try { const cryptoObject = asRecord(globalThis.crypto as unknown);
   const randomUUID = cryptoObject?.randomUUID;
   if (typeof randomUUID === "function") {
@@ -11,5 +13,7 @@ const makeFallbackId = () => { try { const cryptoObject = asRecord(globalThis.cr
 
 return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 };
+
+
 
 export { makeFallbackId };
