@@ -3,7 +3,18 @@ import type { Notification, NotificationOptions } from "@/types/notification";
 
 type NotificationListener = (notification: Notification) => void;
 
-const notificationService = new NotificationService();
+const createDismissedNotification = (id: string): Notification => {
+  return {
+    id,
+    level: "info",
+    title: "",
+    message: "",
+    timestamp: Date.now(),
+    autoClose: true,
+    closeable: true,
+    duration: 0,
+  };
+};
 const NotificationService = class {
   private readonly listeners = new Set<NotificationListener>();
   private readonly notifications = new Map<string, Notification>();
@@ -99,18 +110,6 @@ const NotificationService = class {
     return Array.from(this.notifications.values());
   };
 };
-
-const createDismissedNotification = (id: string): Notification => {
-  return {
-    id,
-    level: "info",
-    title: "",
-    message: "",
-    timestamp: Date.now(),
-    autoClose: true,
-    closeable: true,
-    duration: 0,
-  };
-};
+const notificationService = new NotificationService();
 
 export { notificationService };
