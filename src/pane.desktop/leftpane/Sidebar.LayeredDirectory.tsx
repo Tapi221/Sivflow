@@ -3,7 +3,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent, ReactNode, RefObject } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
-import { TagFilterPopover } from "@/chip/panel/popover/Popover.TagFilter";
+import { TagFilterPopover } from "@/chip/panel/clickpanel.desktop/Popover.TagFilter";
 import { RightClickPanel } from "@/chip/panel/rightclickpanel.desktop/rightclickpanel";
 import { clampRightClickPanelPosition, resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, useRightClickPanelDismiss } from "@/chip/panel/rightclickpanel.desktop/rightClickPanel.utils";
 import { useCardSets } from "@/components/card/hooks/useCardSets";

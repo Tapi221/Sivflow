@@ -6,7 +6,7 @@ import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
 import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
 import { CheckIcon, WrapText } from "lucide-react";
 import { useEditorRef, useSelectionFragmentProp } from "platejs/react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/popover/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { ToolbarButton } from "@/chip/ui/toolbar";
 
 const LineHeightToolbarButton = (props: DropdownMenuProps) => {

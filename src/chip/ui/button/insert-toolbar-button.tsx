@@ -7,7 +7,7 @@ import { KEYS } from "platejs";
 import type { PlateEditor } from "platejs/react";
 import { useEditorRef } from "platejs/react";
 import { insertBlock, insertInlineElement } from "@/components/editor/transforms";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/popover/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { ToolbarButton, ToolbarMenuGroup } from "@/chip/ui/toolbar";
 
 type Item = {

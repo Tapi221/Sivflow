@@ -8,7 +8,7 @@ import { CheckIcon, EraserIcon, PlusIcon } from "lucide-react";
 import type { PlateEditor } from "platejs/react";
 import { useEditorRef, useEditorSelector } from "platejs/react";
 import { buttonVariants } from "@/chip/ui/button/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/popover/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { ToolbarButton, ToolbarMenuGroup } from "@/chip/ui/toolbar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/ui/tooltip";
 import { cn } from "@/lib/utils";
