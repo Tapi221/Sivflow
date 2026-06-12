@@ -28,8 +28,6 @@ const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const GOOGLE_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
 const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
 const REQUIRED_GOOGLE_SCOPES = ["https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/calendar.readonly", "https://www.googleapis.com/auth/calendar.app.created", "https://www.googleapis.com/auth/tasks", "https://www.googleapis.com/auth/drive.file"] as const;
-const exchangeGoogleCalendarCode = connectGoogleCalendarAccount;
-const getGoogleCalendarAccessToken = refreshGoogleCalendarAccessToken;
 const disconnectGoogleCalendarAccount = onCall({ region: REGION }, async (request) => {
   const uid = requireUid(request);
   const accountId = typeof request.data?.accountId === "string" ? request.data.accountId : "";
@@ -74,6 +72,8 @@ const refreshGoogleCalendarAccessToken = onCall({ region: REGION, secrets: [GOOG
   const accountId = typeof request.data?.accountId === "string" ? request.data.accountId : typeof request.data?.accountEmail === "string" ? request.data.accountEmail : "";
   return await getStoredAccessToken(uid, accountId);
 });
+const exchangeGoogleCalendarCode = connectGoogleCalendarAccount;
+const getGoogleCalendarAccessToken = refreshGoogleCalendarAccessToken;
 
 const requireUid = (request: { auth?: { uid?: string; }; }) => {
   const uid = request.auth?.uid;
