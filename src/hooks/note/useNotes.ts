@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-import { getLocalDb } from "@/services/localdb/LocalDB";
+import { getLocalDb } from "@/services/localdb";
 import type { Note, NoteBlockContent } from "@/types";
 
 type UseNotesOptions = {
@@ -11,6 +11,10 @@ type CreateNoteOptions = {
   id?: string;
   orderIndex?: number;
 };
+type DateLike = Date | {
+  toMillis?: () => number;
+  toDate?: () => Date;
+} | null | undefined;
 
 const DEFAULT_NOTE_CONTENT: NoteBlockContent = [];
 
@@ -20,10 +24,16 @@ const createId = (): string => {
 };
 const isDeletedNote = (note: Note & { isDeleted?: boolean; is_deleted?: boolean; }): boolean => Boolean(note.isDeleted ?? note.is_deleted);
 const getNoteOrderIndex = (note: Note & { order_index?: number; }): number => note.orderIndex ?? note.order_index ?? 0;
+const getDateTime = (value: DateLike): number => {
+  if (value instanceof Date) return value.getTime();
+  if (typeof value?.toMillis === "function") return value.toMillis();
+  if (typeof value?.toDate === "function") return value.toDate().getTime();
+  return 0;
+};
 const sortNotes = (notes: Note[]): Note[] => [...notes].sort((left, right) => {
   const orderDiff = getNoteOrderIndex(left) - getNoteOrderIndex(right);
   if (orderDiff !== 0) return orderDiff;
-  return right.updatedAt.getTime() - left.updatedAt.getTime();
+  return getDateTime(right.updatedAt) - getDateTime(left.updatedAt);
 });
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) return error.message;
