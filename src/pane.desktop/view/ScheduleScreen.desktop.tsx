@@ -11,7 +11,7 @@ import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
 import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
-import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
+import { CalendarListViewAnchored } from "@/features/calendar/list/CalendarListView.anchored.desktop";
 import type { CalendarPrintRangeState } from "@/features/calendar/print/calendarPrint.types";
 import { createCalendarPrintDateInputValue, getCalendarPrintRange, getCalendarPrintRangeLabel } from "@/features/calendar/print/calendarPrintRange.utils";
 import { CalendarPrintRangeView } from "@/features/calendar/print/CalendarPrintRangeView.desktop";
@@ -259,7 +259,7 @@ const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose, conte
             ) : isPieChartCalendarView ? (
               <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden bg-white"><CalendarPieChartView days={visibleDays} virtualRail={virtualRail} selectedDate={selectedDate} events={mainCalendarEvents} appProjects={appProjects} googleAccounts={googleAccountsWithColorOverrides} onSelectDate={handleSidebarSelectDate} onVisibleDateChange={handleVisibleDateChange} /></div>
             ) : isListCalendarView ? (
-              <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0 bg-white"><CalendarListView days={visibleDays} virtualRail={virtualRail} events={listCalendarEvents} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} onVisibleMonthChange={handleListVisibleMonthChange} onScrollTopChange={handleListScrollTopChange} /></div>
+              <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0 bg-white"><CalendarListViewAnchored days={visibleDays} virtualRail={virtualRail} events={listCalendarEvents} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} onVisibleMonthChange={handleListVisibleMonthChange} onScrollTopChange={handleListScrollTopChange} /></div>
             ) : isMonthCalendarView ? (
               <div className={cn("ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0 border-r-0", IOS_CALENDAR_MONTH_SURFACE_CLASS)}><CalendarMonthView currentDate={currentDate} selectedDate={selectedDate} weekStartDay={weekStartDay} scrollTargetToken={monthScrollTargetToken} visibleEvents={mainCalendarEvents} monthVisibleEventCount={monthVisibleEventCount} onSelectDate={handleMonthCellSelectDate} onVisibleMonthChange={handleVisibleMonthChange} onRenderedRangeChange={handleMonthRenderedRangeChange} onMoveCalendarEvent={handleMoveCalendarEvent} /></div>
             ) : isTimetableCalendarView ? (
