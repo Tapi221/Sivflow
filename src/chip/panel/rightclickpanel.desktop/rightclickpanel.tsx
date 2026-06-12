@@ -29,13 +29,7 @@ const RightClickPanelBase = ({ id, x, y, width, panelRef, style, className, aria
     event.stopPropagation();
   };
 
-  return (
-    <Panel id={id} panelRef={panelRef} className={getRightClickPanelClassName(className)} role="menu" ariaLabel={ariaLabel} style={getRightClickPanelStyle(style, x, y, width)}>
-      <div onContextMenu={handleContextMenu}>
-        {children}
-      </div>
-    </Panel>
-  );
+  return <Panel id={id} panelRef={panelRef} className={getRightClickPanelClassName(className)} role="menu" ariaLabel={ariaLabel} style={getRightClickPanelStyle(style, x, y, width)} onContextMenu={handleContextMenu}>{children}</Panel>;
 };
 
 const RightClickPanel = memo(RightClickPanelBase);
