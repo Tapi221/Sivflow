@@ -1,12 +1,15 @@
+import { spawnSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import ts from "typescript";
 
 const ROOT_DIR = process.cwd();
-const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src"].map((directory) => path.join(ROOT_DIR, directory));
+const ESLINT_BIN_PATH = path.resolve(ROOT_DIR, "node_modules/eslint/bin/eslint.js");
+const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "functions/src"].map((directory) => path.join(ROOT_DIR, directory));
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 const ORDER_EXCLUDED_PATH_PARTS = ["/tests/", "/scripts/", "/src/sandbox/"];
 const ORDER_EXCLUDED_FILE_SUFFIXES = [".d.ts"];
+const ESLINT_LAYOUT_FIX_TARGETS = ["src/**/*.{ts,tsx}", "apps/web/src/**/*.{ts,tsx}", "apps/mobile/src/**/*.{ts,tsx}", "packages/core/src/**/*.{ts,tsx}", "packages/platform/src/**/*.{ts,tsx}", "packages/web-renderer/src/**/*.{ts,tsx}", "packages/mobile-renderer/src/**/*.{ts,tsx}"];
 const ORDER_RANKS = {
   import: 1,
   type: 2,
@@ -216,6 +219,29 @@ const applySourceOrderFix = (filePath, source) => {
   return nextSource;
 };
 
+const runEslintLayoutFix = () => {
+  if (!existsSync(ESLINT_BIN_PATH)) return 0;
+
+  const result = spawnSync(process.execPath, [ESLINT_BIN_PATH, ...ESLINT_LAYOUT_FIX_TARGETS, "--fix", "--fix-type", "layout", "--no-error-on-unmatched-pattern", "--format", "json"], {
+    cwd: ROOT_DIR,
+    encoding: "utf8",
+    maxBuffer: 1024 * 1024 * 64,
+  });
+
+  if (result.error) {
+    console.error(`ESLint layout fix の実行に失敗しました: ${result.error.message}`);
+    return 1;
+  }
+
+  if (result.status && result.status !== 0) {
+    if (result.stdout.trim()) console.error(result.stdout.trim());
+    if (result.stderr.trim()) console.error(result.stderr.trim());
+    return result.status;
+  }
+
+  return 0;
+};
+
 const updateFile = (filePath) => {
   const originalSource = readFileSync(filePath, "utf8");
   const nextSource = applySourceOrderFix(filePath, originalSource);
@@ -231,3 +257,5 @@ const updatedFiles = SOURCE_DIRECTORIES.flatMap(walkSourceFiles).filter(updateFi
 if (updatedFiles.length > 0) {
   console.log(`source 規約の並び順を ${updatedFiles.length} file(s) 修正しました。`);
 }
+
+process.exitCode = runEslintLayoutFix();
