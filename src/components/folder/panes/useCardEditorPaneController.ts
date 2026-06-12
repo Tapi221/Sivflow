@@ -23,6 +23,10 @@ type UseCardsResult = {
   updateCard: (cardId: string, data: unknown) => void | Promise<void>;
   createCard: (data: unknown) => unknown;
 };
+type CreateCardPayload = CardPatch & {
+  folderId: string;
+  cardSetId?: string;
+};
 type UseCardEditorPaneControllerParams = {
   selectedCardId: string | null;
   folderId?: string;
@@ -72,7 +76,7 @@ const useCardEditorPaneController = ({ selectedCardId, folderId, cardSetId, card
   );
 
   const createCardAsync = React.useCallback(
-    async (data: Partial<Card>): Promise<unknown> => {
+    async (data: CreateCardPayload): Promise<unknown> => {
       return await Promise.resolve(createCard(data));
     },
     [createCard],
