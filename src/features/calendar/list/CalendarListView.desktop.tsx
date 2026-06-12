@@ -58,8 +58,8 @@ const LOCAL_DAYS = 3650;
 const LIST_VIRTUAL_BASE_DAY_HEIGHT_PX = LIST_EMPTY_DAY_HEIGHT_PX;
 const LIST_VIRTUAL_BASE_DAY_BLOCK_HEIGHT_PX =
   LIST_VIRTUAL_BASE_DAY_HEIGHT_PX + LIST_DAY_GAP_PX;
-const LIST_MATERIALIZE_OVERSCAN_PX = 3_600;
-const LIST_MAX_RANGE_UPDATE_GUARD_PX = 1_800;
+const LIST_MATERIALIZE_OVERSCAN_PX = 8_000;
+const LIST_MAX_RANGE_UPDATE_GUARD_PX = 2_400;
 const DATE_KEY_PART_COUNT = 3;
 const LIST_DAY_RAIL_CLASS_NAME =
   "pointer-events-none absolute -bottom-2 left-[67px] top-0 w-px -translate-x-1/2 bg-[#eceff3]";
@@ -391,8 +391,10 @@ const createVirtualDayStyle = (
   height: number,
 ): CSSProperties => ({
   contain: "layout style paint",
+  contentVisibility: "auto",
+  containIntrinsicSize: `${height}px`,
   height,
-  transform: `translate3d(0, ${getDayTop(metrics, dayIndex)}px, 0)`,
+  top: getDayTop(metrics, dayIndex),
 });
 const getDayDateNumberClassName = (day: CalendarListDay): string =>
   cn(
