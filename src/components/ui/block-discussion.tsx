@@ -1,42 +1,23 @@
 "use client";
 
 import * as React from "react";
-
 import { getDraftCommentKey } from "@platejs/comment";
-
 import { CommentPlugin } from "@platejs/comment/react";
-
 import { getTransientSuggestionKey } from "@platejs/suggestion";
-
 import { SuggestionPlugin } from "@platejs/suggestion/react";
-
 import { MessageSquareTextIcon, MessagesSquareIcon, PencilLineIcon } from "lucide-react";
-
 import type { AnyPluginConfig, NodeEntry } from "platejs";
-
 import { PathApi } from "platejs";
-
 import type { PlateElementProps, RenderNodeWrapper } from "platejs/react";
-
 import { useEditorRef, usePluginOption } from "platejs/react";
-
 import { commentPlugin } from "@/components/editor/plugins/comment-kit";
-
 import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
-
 import { suggestionPlugin } from "@/components/editor/plugins/suggestion-kit";
-
 import { useBlockDiscussionItems } from "@/lib/block-discussion-index";
-
 import { BlockSuggestionCard, isResolvedSuggestion } from "./block-suggestion";
-
 import { Button } from "./button";
-
 import { Comment, CommentCreateForm } from "./comment";
-
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "./popover";
-
-
 
 const BlockComment = ({ discussion, isLast }: { discussion: TDiscussion; isLast: boolean; }) => {
   const [editingId, setEditingId] = React.useState<string | null>(null);
@@ -51,7 +32,6 @@ const BlockComment = ({ discussion, isLast }: { discussion: TDiscussion; isLast:
     </>
   );
 };
-
 const BlockCommentContent = ({ children, element }: PlateElementProps) => {
   const editor = useEditorRef();
   const commentsApi = editor.getApi(CommentPlugin).comment;
@@ -119,9 +99,6 @@ const BlockCommentContent = ({ children, element }: PlateElementProps) => {
     </div>
   );
 };
-
 const BlockDiscussion: RenderNodeWrapper<AnyPluginConfig> = (_props) => (props) => <BlockCommentContent {...props} />;
-
-
 
 export { BlockDiscussion };
