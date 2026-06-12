@@ -77,11 +77,15 @@ const CalendarListViewAnchoredComponent = ({ scrollViewportRef: externalRef, onS
     isRestoringRef.current = true;
     const didRestore = restoreViewportAnchor(element, anchor);
     if (didRestore) {
-      anchorRef.current = findViewportAnchor(element) ?? anchor;
       onScrollTopChange?.(element.scrollTop);
     }
     isRestoringRef.current = false;
   }, [events, onScrollTopChange, scrollViewportRef]);
+  useLayoutEffect(() => {
+    const element = scrollViewportRef.current;
+    if (!element || isRestoringRef.current) return;
+    anchorRef.current = findViewportAnchor(element);
+  });
   return <CalendarListView {...props} events={events} scrollViewportRef={scrollViewportRef} onScrollTopChange={handleScrollTopChange} />;
 };
 
