@@ -1,9 +1,15 @@
 import type { SVGProps } from "react";
 import { cn } from "@/lib/utils";
 
+
+
 type OverlayToolbarGlyphProps = SVGProps<SVGSVGElement>;
 
+
+
 const OVERLAY_TOOLBAR_GLYPH_CLASS_NAME = "h-3.5 w-3.5";
+
+
 
 const OverlayToolbarGlyph = ({
   className,
@@ -33,5 +39,7 @@ const PdfNextGlyph = () => (<OverlayToolbarGlyph> <path d="M6.25 3.5 10.75 8l-4.
 const PdfFitWidthGlyph = () => (<OverlayToolbarGlyph> <path d="M3.2 4.15v7.7M12.8 4.15v7.7" stroke="currentColor" strokeWidth="1.45" strokeLinecap="round" opacity="0.58" /> <path d="M6.85 8H3.95M5.1 6.85 3.95 8 5.1 9.15" stroke="currentColor" strokeWidth="1.45" strokeLinecap="round" strokeLinejoin="round" /> <path d="M9.15 8h2.9M10.9 6.85 12.05 8 10.9 9.15" stroke="currentColor" strokeWidth="1.45" strokeLinecap="round" strokeLinejoin="round" /> </OverlayToolbarGlyph>);
 const PdfSinglePageGlyph = () => (<OverlayToolbarGlyph> <rect x="4.75" y="2.75" width="6.5" height="10.5" rx="1.6" stroke="currentColor" strokeWidth="1.45" /> <path d="M6.55 5.55h2.9M6.55 8h2.9M6.55 10.45h1.95" stroke="currentColor" strokeWidth="1.05" strokeLinecap="round" opacity="0.48" /> </OverlayToolbarGlyph>);
 const PdfDoublePageGlyph = () => (<OverlayToolbarGlyph> <rect x="2.65" y="3.2" width="4.55" height="9.6" rx="1.25" stroke="currentColor" strokeWidth="1.35" /> <rect x="8.8" y="3.2" width="4.55" height="9.6" rx="1.25" stroke="currentColor" strokeWidth="1.35" opacity="0.72" /> </OverlayToolbarGlyph>);
+
+
 
 export { FixedDisplayGlyph, FluidDisplayGlyph, StackGlyph, FlipGlyph, SplitGlyph, SelectionCaptureGlyph, PdfPrevGlyph, PdfNextGlyph, PdfFitWidthGlyph, PdfSinglePageGlyph, PdfDoublePageGlyph };
