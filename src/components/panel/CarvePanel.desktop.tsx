@@ -28,6 +28,7 @@ type CarvePanelShellProps = {
 const CARVE_PANEL_SHELL_CLASS = "relative flex h-full min-h-0 w-full flex-col bg-[var(--carvepanel-surface)]";
 const CARVE_PANEL_BODY_CLASS = "relative isolate flex min-h-0 flex-1 bg-[var(--carvepanel-surface)]";
 const CARVE_PANEL_TOOLBAR_SPACER_CLASS = "h-[var(--ds-semantic-breadcrumb-height)] w-full shrink-0 bg-[var(--carvepanel-surface)]";
+const CARVE_PANEL_CONTENT_TOOLBAR_CLASS = "h-[var(--app-top-inset,44px)] w-full shrink-0";
 const CARVE_PANEL_LEFT_SPACER_CLASS = "w-[232px] shrink-0";
 const CARVE_PANEL_LEFT_PANEL_CLASS = "pointer-events-auto relative z-[80] w-[232px] shrink-0 overflow-hidden";
 const CARVE_PANEL_VIEWPORT_BASE_CLASS = "relative z-0 isolate flex min-h-0 min-w-0 flex-1 flex-col bg-[var(--carvepanel-surface)]";
@@ -47,6 +48,7 @@ const CarvePanelBase = ({ children, className }: CarvePanelProps) => {
 };
 const CarvePanelShell = ({ children, toolbar = null, contentToolbar = null, overlay = null, leftPanel = null, isLeftPanelCollapsed = false, reserveToolbar = false, reserveLeftPanel = false, viewportRef, className, bodyClassName, viewportClassName }: CarvePanelShellProps) => {
   const toolbarNode = toolbar ?? (reserveToolbar ? <div aria-hidden="true" className={CARVE_PANEL_TOOLBAR_SPACER_CLASS} /> : null);
+  const contentToolbarNode = contentToolbar ? <div className={CARVE_PANEL_CONTENT_TOOLBAR_CLASS}>{contentToolbar}</div> : null;
   const leftPanelNode = leftPanel && !isLeftPanelCollapsed ? <div className={CARVE_PANEL_LEFT_PANEL_CLASS}>{leftPanel}</div> : reserveLeftPanel && !isLeftPanelCollapsed ? <div aria-hidden="true" className={CARVE_PANEL_LEFT_SPACER_CLASS} /> : null;
 
   return (
@@ -58,7 +60,7 @@ const CarvePanelShell = ({ children, toolbar = null, contentToolbar = null, over
         {leftPanelNode}
 
         <CarvePanelViewport ref={viewportRef} className={viewportClassName}>
-          {contentToolbar}
+          {contentToolbarNode}
           {children}
         </CarvePanelViewport>
       </div>
