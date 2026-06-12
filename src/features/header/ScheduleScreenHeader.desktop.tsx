@@ -1,4 +1,4 @@
-import type { ChangeEvent, ReactNode, RefObject } from "react";
+import type { ChangeEvent, ReactNode, Ref } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useT } from "@shared/i18n/useT";
 import { TodayBar } from "@/chip/bar/TodayBar";
@@ -45,7 +45,7 @@ type ToolbarActionButtonProps = {
   title?: string;
   isActive?: boolean;
   disabled?: boolean;
-  buttonRef?: RefObject<HTMLButtonElement | null>;
+  buttonRef?: Ref<HTMLButtonElement>;
   ariaHasPopup?: "dialog";
   ariaExpanded?: boolean;
   onClick: () => void;
