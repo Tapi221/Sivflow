@@ -48,5 +48,4 @@ const createFailedUploadedImage = (file: File): UploadedImage => {
   };
 };
 
-export { generateUploadedImageId };
-export { createUploadedImage, createFailedUploadedImage };
+export { generateUploadedImageId, createUploadedImage, createFailedUploadedImage };
