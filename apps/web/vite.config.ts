@@ -38,6 +38,7 @@ const pdfjsAssetRoute = "/pdfjs/";
 const pdfjsAssetDirectories = ["cmaps", "standard_fonts", "wasm"];
 const eventChipDesignRoute = "/__sivflow/eventchip-design";
 const eventChipDesignOutputPath = "src/chip/eventchip/eventChipDesign.generated.ts";
+const browserExternalizedWarningText = "has been externalized for browser compatibility";
 
 let hasCleanedDistOutput = false;
 
@@ -399,7 +400,16 @@ export default defineConfig(({ command }) => ({
     emptyOutDir: false,
     sourcemap: true,
     chunkSizeWarningLimit: 1000,
-    rollupOptions: { output: {} },
+    rollupOptions: {
+      onwarn(warning, warn) {
+        if (warning.message.includes(browserExternalizedWarningText)) {
+          throw new Error(warning.message);
+        }
+
+        warn(warning);
+      },
+      output: {},
+    },
   },
   define: {
     "process.env.FORCE_COLOR": true,
