@@ -1,8 +1,7 @@
 import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 import { WEB_STORAGE_KEYS } from "@platform/storage/webStorageKeys.constants";
 import { collection, doc, getDocs, writeBatch } from "firebase/firestore";
-import { requireFirestoreDb } from "@/infrastructure/firebase/client";
-import { auth } from "@/services/firebase";
+import { auth, requireFirestoreDb } from "@/infrastructure/firebase/client";
 import { auditAndRepairTags } from "@/services/localdb/audit/tags";
 import { getLocalDb, getLocalDbSync, LocalDB } from "./LocalDB";
 import { LOCALDB_GENERATION_KEY_PREFIX, LOCALDB_GENERATION_MAX, LOCALDB_LEGACY_NAME_PREFIX, LOCALDB_NAME_PREFIX, LOCALDB_SCHEMA_VERSION_FOR_NAME } from "./localdb.constants";
@@ -292,30 +291,33 @@ const isFirebaseFolderEmpty = async (userId: string, folderId: string): Promise<
 const getLocalFolderMatches = async (db: unknown, names: string[], includeDeleted: boolean, onlyEmpty: boolean): Promise<FolderMatchResult> => {
   const folders = await getTableItems(db, "folders");
   const cards = onlyEmpty ? await getTableItems(db, "cards") : [];
-  const childFolders = onlyEmpty ? folders : [];
   const documents = onlyEmpty ? await getTableItems(db, "documents") : [];
   const matchedFolderIds: string[] = [];
   const skippedNonEmptyFolderIds: string[] = [];
 
   for (const folder of folders) {
-    if (!isRecord(folder)) continue;
-    const folderName = getFolderRecordName(folder);
-    if (!folderName || !names.includes(folderName)) continue;
+    const id = getFolderRecordId(folder);
+    const name = getFolderRecordName(folder);
+    if (!id || !name || !names.includes(name)) continue;
     if (!includeDeleted && isFolderRecordDeleted(folder)) continue;
-    const folderId = getFolderRecordId(folder);
-    if (!folderId) continue;
-    const hasCard = cards.some((card) => getEntityFolderId(card) === folderId);
-    const hasChildFolder = childFolders.some((childFolder) => getFolderRecordParentId(childFolder) === folderId);
-    const hasDocument = documents.some((document) => getEntityFolderId(document) === folderId);
-    if (onlyEmpty && (hasCard || hasChildFolder || hasDocument)) {
-      skippedNonEmptyFolderIds.push(folderId);
+
+    const hasChildFolder = onlyEmpty && folders.some((candidate) => getFolderRecordParentId(candidate) === id);
+    const hasCard = onlyEmpty && cards.some((card) => getEntityFolderId(card) === id);
+    const hasDocument = onlyEmpty && documents.some((document) => getEntityFolderId(document) === id);
+    if (hasChildFolder || hasCard || hasDocument) {
+      skippedNonEmptyFolderIds.push(id);
       continue;
     }
 
-    matchedFolderIds.push(folderId);
+    matchedFolderIds.push(id);
   }
 
   return { matchedFolderIds, skippedNonEmptyFolderIds };
+};
+const deleteLocalFolders = async (db: unknown, folderIds: string[]): Promise<string[]> => {
+  if (folderIds.length === 0) return [];
+  await getFolderTable(db).bulkDelete(folderIds);
+  return folderIds;
 };
 const deleteFirebaseFolders = async (userId: string, folderIds: string[]): Promise<string[]> => {
   if (folderIds.length === 0) return [];
@@ -326,37 +328,31 @@ const deleteFirebaseFolders = async (userId: string, folderIds: string[]): Promi
   await batch.commit();
   return folderIds;
 };
-const deleteLocalFolders = async (db: unknown, folderIds: string[]): Promise<string[]> => {
-  if (folderIds.length === 0) return [];
-
-  const folders = getFolderTable(db);
-  await folders.bulkDelete(folderIds);
-  return folderIds;
-};
 const maybeReload = (reload: boolean): void => {
-  if (reload) window.location.reload();
+  if (reload && typeof window !== "undefined") window.location.reload();
 };
 const installLocalDbDevtools = (): void => {
-  if (!import.meta.env.DEV || typeof window === "undefined") return;
+  if (typeof window === "undefined" || !import.meta.env.DEV) return;
 
   const w = window as WindowWithLocalDbDevtools;
 
-  w.clearDevModeCache = async (options) => {
+  w.clearDevModeCache = async (options?: string | ClearDevModeCacheOptions) => {
     const normalized = normalizeClearDevModeCacheOptions(options);
     const userId = normalized.userId || getAuthUid(w) || null;
     const removedLocalStorageKeys = removeDevelopmentLocalStorageKeys();
     const clearedSessionStorage = clearDevelopmentSessionStorage();
     const { deletedIndexedDbNames, failedIndexedDbNames } = await clearDevelopmentIndexedDbs(userId);
     const deletedCacheStorageKeys = await clearDevelopmentCacheStorage();
+
     maybeReload(normalized.reload);
     return { userId, deletedIndexedDbNames, failedIndexedDbNames, removedLocalStorageKeys, clearedSessionStorage, deletedCacheStorageKeys, reloaded: normalized.reload };
   };
 
   w.clearDevCache = w.clearDevModeCache;
 
-  w.deleteDefaultNewFolders = async (options) => {
+  w.deleteDefaultNewFolders = async (options?: string | string[] | DeleteDefaultNewFoldersOptions) => {
     const normalized = normalizeDeleteDefaultNewFoldersOptions(options);
-    const userId = normalized.userId || getAuthUid(w) || null;
+    const userId = normalized.userId || getAuthUid(w);
     if (!userId) throw new Error("deleteDefaultNewFolders: userId is required");
 
     const targetNames = getUniqueNames(normalized.names);
@@ -400,7 +396,7 @@ const installLocalDbDevtools = (): void => {
     const targetUserId = userId || getAuthUid(w);
     if (!targetUserId) throw new Error("repairTags: userId is required");
     assertRepairTagsAllowed(targetUserId);
-    return auditAndRepairTags(targetUserId, { apply: true });
+    return auditAndRepairTags(targetUserId);
   };
 
   w.__dbHelpers = {
