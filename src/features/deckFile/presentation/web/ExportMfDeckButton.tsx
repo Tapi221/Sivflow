@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useToast } from "@web-renderer/contexts/ToastContext";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/chip/ui/button";
 import { exportMfDeckBytes } from "@/features/deckFile/application/exportMfDeck";
 import type { MfDeckTagLookup } from "@/features/deckFile/application/mfDeck.types";
 import { MfDeckExportError } from "@/features/deckFile/domain/mfDeck.types";

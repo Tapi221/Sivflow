@@ -11,7 +11,7 @@ import type { PlateEditor } from "platejs/react";
 import { useEditorRef, useEditorVersion, usePluginOption } from "platejs/react";
 import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
-import type { TComment } from "@/components/ui/comment";
+import type { TComment } from "@/chip/ui/comment";
 
 interface ResolvedSuggestion extends TResolvedSuggestion {
   comments: TComment[];

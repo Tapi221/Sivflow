@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/chip/ui/button";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";

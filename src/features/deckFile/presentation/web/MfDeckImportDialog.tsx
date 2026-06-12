@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ChangeEvent } from "react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/chip/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/chip/ui/dialog";
+import { Input } from "@/chip/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/chip/ui/select";
 import { useToast } from "@/contexts/ToastContext";
 import type { CreateMfDeckCard, CreateMfDeckCardSet, EnsureMfDeckTagByName, UpdateMfDeckCardSet } from "@/features/deckFile/application/importMfDeck";
 import { importMfDeckArchive } from "@/features/deckFile/application/importMfDeck";

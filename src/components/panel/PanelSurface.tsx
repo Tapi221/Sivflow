@@ -1,6 +1,6 @@
 import type { HTMLAttributes, ReactNode } from "react";
-import type { FloatingSurfaceVariantProps } from "@/components/ui/floating-surface";
-import { floatingSurfaceVariants } from "@/components/ui/floating-surface";
+import type { FloatingSurfaceVariantProps } from "@/chip/ui/floating-surface";
+import { floatingSurfaceVariants } from "@/chip/ui/floating-surface";
 import { cn } from "@/lib/utils";
 
 type PanelSurfaceProps = HTMLAttributes<HTMLDivElement> &

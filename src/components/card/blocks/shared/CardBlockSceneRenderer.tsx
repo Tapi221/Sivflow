@@ -13,7 +13,7 @@ import { QuestionBlockContent } from "@/components/card/blocks/question/Question
 import { TextBlockContent } from "@/components/card/blocks/text/TextBlockContent";
 import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
 import { AudioPlayer } from "@/components/card/media/CardMedia";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/chip/ui/select";
 import { cn } from "@/lib/utils";
 import type { CodeBlockData } from "@/types/core/code-block";
 import type { UploadedImage } from "@/types/domain/assets";

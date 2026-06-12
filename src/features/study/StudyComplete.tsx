@@ -1,6 +1,6 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/chip/ui/button";
+import { Card, CardContent } from "@/chip/ui/card";
 import type { PracticeFilterRating } from "@/features/study/hooks/usePracticeMode";
 import { RatingCountTiles } from "./RatingCountTiles";
 

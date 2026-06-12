@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/chip/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/chip/ui/dialog";
 import { useToast } from "@/contexts/ToastContext";
 import type { CreateMfDeckCard, CreateMfDeckCardSet, EnsureMfDeckTagByName, UpdateMfDeckCardSet } from "@/features/deckFile/application/importMfDeck";
 import type { PortableImportBatchItem } from "@/features/import/application/importPortableFileBatch";

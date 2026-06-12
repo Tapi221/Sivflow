@@ -4,7 +4,7 @@ import type { BaseCommentConfig } from "@platejs/comment";
 import { BaseCommentPlugin, getDraftCommentKey } from "@platejs/comment";
 import type { ExtendConfig, Path } from "platejs";
 import { toTPlatePlugin } from "platejs/react";
-import { CommentLeaf } from "@/components/ui/comment-node";
+import { CommentLeaf } from "@/chip/ui/comment-node";
 import { getDiscussionClickTarget } from "./discussion-kit";
 
 type CommentConfig = ExtendConfig<

@@ -1,5 +1,5 @@
 import React from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/chip/ui/dialog";
 import type { ReferenceBlockData } from "@/types";
 import { ExternalLink, Globe, Link as LinkIcon } from "@/ui/icons";
 

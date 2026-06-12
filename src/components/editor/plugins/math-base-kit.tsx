@@ -1,5 +1,5 @@
 import { BaseEquationPlugin, BaseInlineEquationPlugin } from "@platejs/math";
-import { EquationElementStatic, InlineEquationElementStatic } from "@/components/ui/equation-node-static";
+import { EquationElementStatic, InlineEquationElementStatic } from "@/chip/ui/equation-node-static";
 
 const BaseMathKit = [
   BaseInlineEquationPlugin.withComponent(InlineEquationElementStatic),

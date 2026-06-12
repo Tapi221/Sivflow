@@ -1,5 +1,5 @@
 import type { Ref } from "react";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/chip/ui/input";
 import { cn } from "@/lib/utils";
 import { Search } from "@/ui/icons";
 

@@ -6,8 +6,8 @@ import cloneDeep from "lodash/cloneDeep.js";
 import { ElementApi, getPluginType, KEYS, PathApi } from "platejs";
 import { usePluginOption } from "platejs/react";
 import { useChat } from "@/components/editor/use-chat";
-import { AILoadingBar, AIMenu } from "@/components/ui/ai-menu";
-import { AIAnchorElement, AILeaf } from "@/components/ui/ai-node";
+import { AILoadingBar, AIMenu } from "@/chip/ui/ai-menu";
+import { AIAnchorElement, AILeaf } from "@/chip/ui/ai-node";
 import { CursorOverlayKit } from "./cursor-overlay-kit";
 import { MarkdownKit } from "./markdown-kit";
 

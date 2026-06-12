@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { toAssetRecordFromSnapshotAsset } from "@/application/snapshot/snapshotAssetManifest";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Button } from "@/chip/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/chip/ui/dialog";
+import { Label } from "@/chip/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/chip/ui/radio-group";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { getLocalDb, getLocalDBRuntimeStatus, subscribeLocalDBRuntimeStatus } from "@/services/localdb";
 import { snapshotService } from "@/services/SnapshotService";

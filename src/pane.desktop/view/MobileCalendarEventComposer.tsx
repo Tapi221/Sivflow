@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, addHours, format, startOfDay } from "date-fns";
 import type { SVGProps, UIEvent } from "react";
-import { Switch } from "@/components/ui/switch";
+import { Switch } from "@/chip/ui/switch";
 import type { GoogleAccountDisplay, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
 import type { GCalWritableEventInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
