@@ -1,7 +1,7 @@
 import { BaseBlockquotePlugin, BaseH1Plugin, BaseH2Plugin, BaseH3Plugin, BaseH4Plugin, BaseH5Plugin, BaseH6Plugin, BaseHorizontalRulePlugin } from "@platejs/basic-nodes";
 import { BaseParagraphPlugin } from "platejs";
-import { BlockquoteElementStatic } from "@/chip/ui/blockquote-node-static";
-import { H1ElementStatic, H2ElementStatic, H3ElementStatic, H4ElementStatic, H5ElementStatic, H6ElementStatic } from "@/chip/ui/heading-node-static";
+import { BlockquoteElementStatic } from "@/chip/ui/node/blockquote-node-static";
+import { H1ElementStatic, H2ElementStatic, H3ElementStatic, H4ElementStatic, H5ElementStatic, H6ElementStatic } from "@/chip/ui/node/heading-node-static";
 import { HrElementStatic } from "@/chip/ui/hr-node-static";
 import { ParagraphElementStatic } from "@/chip/ui/paragraph-node-static";
 

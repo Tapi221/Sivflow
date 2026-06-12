@@ -7,7 +7,7 @@ import { ElementApi, getPluginType, KEYS, PathApi } from "platejs";
 import { usePluginOption } from "platejs/react";
 import { useChat } from "@/components/editor/use-chat";
 import { AILoadingBar, AIMenu } from "@/chip/ui/ai-menu";
-import { AIAnchorElement, AILeaf } from "@/chip/ui/ai-node";
+import { AIAnchorElement, AILeaf } from "@/chip/ui/node/ai-node";
 import { CursorOverlayKit } from "./cursor-overlay-kit";
 import { MarkdownKit } from "./markdown-kit";
 

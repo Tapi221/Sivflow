@@ -4,7 +4,7 @@ import { useToast } from "@web-renderer/contexts/ToastContext";
 import type { KeyboardEvent } from "react";
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/chip/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/chip/ui/dialog/dialog";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { MessageSquare, Plus, Sparkles } from "@/ui/icons";

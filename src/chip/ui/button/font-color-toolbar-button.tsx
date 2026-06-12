@@ -9,9 +9,9 @@ import type { PlateEditor } from "platejs/react";
 import { useEditorRef, useEditorSelector } from "platejs/react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "./button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu";
-import { ToolbarButton, ToolbarMenuGroup } from "./toolbar";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../menu/dropdown-menu";
+import { ToolbarButton, ToolbarMenuGroup } from "../toolbar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../tooltip";
 
 type TColor = {
   isBrightColor: boolean;

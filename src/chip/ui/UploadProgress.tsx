@@ -1,7 +1,7 @@
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, FileText, X } from "@/ui/icons";
-import { Button } from "./button";
+import { Button } from "./button/button";
 import { Progress } from "./progress";
 
 interface UploadProgressProps {

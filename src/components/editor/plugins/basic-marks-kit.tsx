@@ -2,7 +2,7 @@
 
 import { BoldRules, CodeRules, HighlightRules, ItalicRules, MarkComboRules, StrikethroughRules, SubscriptRules, SuperscriptRules, UnderlineRules } from "@platejs/basic-nodes";
 import { BoldPlugin, CodePlugin, HighlightPlugin, ItalicPlugin, KbdPlugin, StrikethroughPlugin, SubscriptPlugin, SuperscriptPlugin, UnderlinePlugin } from "@platejs/basic-nodes/react";
-import { CodeLeaf } from "@/chip/ui/code-node";
+import { CodeLeaf } from "@/chip/ui/node/code-node";
 import { HighlightLeaf } from "@/chip/ui/highlight-node";
 import { KbdLeaf } from "@/chip/ui/kbd-node";
 

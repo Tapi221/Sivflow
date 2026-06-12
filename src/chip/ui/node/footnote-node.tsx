@@ -8,11 +8,11 @@ import { PathApi } from "platejs";
 import type { PlateEditor, PlateElementProps } from "platejs/react";
 import { PlateElement, useEditorSelector, useFocused, useNavigationHighlight, usePath, useSelected } from "platejs/react";
 import { cn } from "@/lib/utils";
-import { Button } from "./button";
-import { Command, CommandGroup, CommandItem, CommandList } from "./command";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "./hover-card";
-import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem } from "./inline-combobox";
-import { Popover, PopoverAnchor, PopoverContent } from "./popover";
+import { Button } from "../button/button";
+import { Command, CommandGroup, CommandItem, CommandList } from "../command";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "../hover-card";
+import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem } from "../inline-combobox";
+import { Popover, PopoverAnchor, PopoverContent } from "../popover";
 
 const NUMERIC_FOOTNOTE_QUERY = /^\d+$/;
 

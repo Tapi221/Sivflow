@@ -1,5 +1,5 @@
-import { Button } from "@/chip/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/chip/ui/dialog";
+import { Button } from "@/chip/ui/button/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/chip/ui/dialog/dialog";
 
 type ImportFormat = "xlsx" | "mfdeck" | "mfcard";
 type ImportFormatDialogProps = {
