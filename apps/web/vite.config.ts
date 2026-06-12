@@ -226,7 +226,7 @@ export const eventChipDesign: EventChipDesign = {
   },
   tooltip: {
     monthRadiusPx: ${values.tooltipMonthRadius},
-    weekdayRadiusPx: ${values.weekdayRadius},
+    weekdayRadiusPx: ${values.tooltipWeekdayRadius},
   },
 };
 `;
