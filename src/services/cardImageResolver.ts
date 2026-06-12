@@ -1,5 +1,5 @@
 import { getDownloadURL, ref as storageRef } from "firebase/storage";
-import { storage } from "@/services/firebase";
+import { storage } from "@/infrastructure/firebase/client";
 import { getLocalDb } from "@/services/localdb";
 import type { AssetRecord, ResolvableImageRef, UploadedImage } from "@/types";
 import { getOrCreateImageBlobUrl } from "./imageBlobUrlSessionCache";
