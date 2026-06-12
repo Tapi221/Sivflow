@@ -3,8 +3,8 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent, ReactNode, RefObject } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
-import { Panel } from "@/chip/panel/panel";
 import { TagFilterPopover } from "@/chip/panel/popover/Popover.TagFilter";
+import { RightClickPanel } from "@/chip/panel/rightclickpanel.desktop/rightclickpanel";
 import { clampRightClickPanelPosition, resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, useRightClickPanelDismiss } from "@/chip/panel/rightclickpanel.desktop/rightClickPanel.utils";
 import { useCardSets } from "@/components/card/hooks/useCardSets";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
@@ -171,13 +171,13 @@ const ProjectAddMenu = ({ x, y, menuRef, onCreateNote, onCreateCardSet, onCreate
   };
 
   return (
-    <Panel id={PROJECT_ADD_MENU_PANEL_ID} x={x} y={y} width={PROJECT_ADD_MENU_WIDTH} panelRef={menuRef} style={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} role="menu" ariaLabel="project add menu" preventContextMenu>
+    <RightClickPanel id={PROJECT_ADD_MENU_PANEL_ID} x={x} y={y} width={PROJECT_ADD_MENU_WIDTH} panelRef={menuRef} style={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} ariaLabel="project add menu">
       {PROJECT_ADD_MENU_ITEM_DEFINITIONS.map((item) => (
         <button key={item.id} type="button" className="panel__item" role="menuitem" onClick={(event) => handleItemClick(event, item.id)}>
           <span>{item.label}</span>
         </button>
       ))}
-    </Panel>
+    </RightClickPanel>
   );
 };
 const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSettings }: SidebarLayeredDirectoryProps) => {
