@@ -85,6 +85,10 @@ a:hover,
   transition-duration: 0ms;
 }
 
+.slate-blockToolbar .lucide-grip-vertical {
+  transform: translateY(-4px);
+}
+
 *::-webkit-scrollbar {
   width: var(--scrollbar-size);
   height: var(--scrollbar-size);
