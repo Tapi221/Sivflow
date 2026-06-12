@@ -7,8 +7,8 @@ import { ArrowDownToLineIcon } from "lucide-react";
 import { createSlateEditor } from "platejs";
 import { useEditorRef } from "platejs/react";
 import { serializeHtml } from "platejs/static";
-import { EditorStatic } from "@/chip/ui/editor-static";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
+import { EditorStatic } from "@/chip/ui/editor-static";
 import { ToolbarButton } from "@/chip/ui/toolbar";
 import { BaseEditorKit } from "@/components/editor/editor-base-kit";
 
