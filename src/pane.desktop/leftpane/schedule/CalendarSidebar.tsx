@@ -42,6 +42,7 @@ const CALENDAR_SIDEBAR_CONTENT_CLASS_NAME = "pt-2";
 const CALENDAR_SIDEBAR_GOOGLE_LIST_CLASS_NAME = "min-h-0 flex-1 overflow-y-auto px-4 pt-1";
 const CALENDAR_SIDEBAR_HEADING_ROW_CLASS_NAME = "flex min-h-[22px] items-center gap-[3px] px-4";
 const CALENDAR_SIDEBAR_PROJECT_LIST_CLASS_NAME = "max-h-[55%] shrink-0 overflow-y-auto px-4 pb-1";
+const CALENDAR_SIDEBAR_ROW_CONTENT_CLASS_NAME = "pl-0";
 const COLOR_INPUT_STYLE: CSSProperties = { position: "fixed", left: -9999, top: -9999, width: 1, height: 1, opacity: 0, pointerEvents: "none" };
 const CONNECTING_GOOGLE_CALENDAR_LABEL = "接続中...";
 const DEFAULT_CALENDAR_COLOR = "#74798b";
@@ -92,11 +93,11 @@ const IconPlus = ({ className }: IconProps) => <svg viewBox="0 0 16 16" fill="no
 const GoogleCalendarHeadingSvg = () => <svg aria-hidden="true" className="block h-4 w-[118px] text-[#111]" viewBox="0 0 118 16" fill="none" xmlns="http://www.w3.org/2000/svg"><text x="0" y="13" fill="currentColor" fontFamily="var(--app-font-family-sidebar)" fontSize="13" fontWeight="700" letterSpacing="0" textRendering="geometricPrecision">{GOOGLE_CALENDAR_SECTION_LABEL}</text></svg>;
 const GoogleCalendarSourceRow = ({ account, calendar, color, onToggleCalendar, onOpenCalendarContextMenu }: GoogleCalendarSourceRowProps) => (
   <div onContextMenu={(event) => onOpenCalendarContextMenu(event, account, calendar)}>
-    <SelectableGoogleSourceRow id={calendar.id} label={calendar.summary} checked={account.selectedCalendarIds.has(calendar.id)} color={color} onToggle={onToggleCalendar} />
+    <SelectableGoogleSourceRow id={calendar.id} label={calendar.summary} checked={account.selectedCalendarIds.has(calendar.id)} color={color} className={CALENDAR_SIDEBAR_ROW_CONTENT_CLASS_NAME} onToggle={onToggleCalendar} />
   </div>
 );
 const ProjectLinkedGoogleCalendarRow = ({ accountId, calendar, color }: { accountId: string; calendar: GoogleCalendarListItem; color: string; }) => (
-  <div className={cn(GOOGLE_SOURCE_ROW_CLASS_NAME, "text-[#6d7380]")} title={getGoogleCalendarName(calendar)} data-calendar-account-id={accountId}>
+  <div className={cn(GOOGLE_SOURCE_ROW_CLASS_NAME, CALENDAR_SIDEBAR_ROW_CONTENT_CLASS_NAME, "text-[#6d7380]")} title={getGoogleCalendarName(calendar)} data-calendar-account-id={accountId}>
     <span className="flex h-5 w-5 shrink-0 items-center justify-center" aria-hidden="true">
       <span className="h-2.5 w-2.5 rounded-full border border-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)]" style={{ backgroundColor: color }} />
     </span>
@@ -150,7 +151,7 @@ const AppProjectsSection = ({ projects, isAdding, onAddProject, onToggleProject,
 
   return (
     <div className="mt-0.5 flex flex-col gap-0.5">
-      {projects.map((project) => <div key={project.id} onContextMenu={(event) => onOpenProjectLinksContextMenu(event, project)}><SelectableGoogleSourceRow id={project.id} label={project.label} checked={project.checked} color={project.color} onToggle={onToggleProject} /></div>)}
+      {projects.map((project) => <div key={project.id} onContextMenu={(event) => onOpenProjectLinksContextMenu(event, project)}><SelectableGoogleSourceRow id={project.id} label={project.label} checked={project.checked} color={project.color} className={CALENDAR_SIDEBAR_ROW_CONTENT_CLASS_NAME} onToggle={onToggleProject} /></div>)}
       {isAdding ? (
         <div className="mx-2 ml-2 mt-1 flex flex-col gap-1">
           <form className="flex h-7 items-center gap-1.5" onSubmit={handleSubmit}>
