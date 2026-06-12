@@ -28,6 +28,9 @@ type RebuildFailure = {
   error: string;
   fixes?: BlobUrlFix[];
 };
+type ClosableLocalDb = {
+  close: () => void;
+};
 
 const REBUILD_TABLE_BY_TYPE: RebuildTableByType = {
   card: "cards",
@@ -132,9 +135,7 @@ class IndexedDBRebuildOrchestrator {
       onProgress?.("データベースを再構築中...");
 
       const oldDb = await getLocalDb(userId);
-      if (oldDb) {
-        oldDb.close();
-      }
+      (oldDb as ClosableLocalDb).close();
 
       const { LocalDB: LocalDBClass } = await import("@/services/localdb");
       LocalDBClass.clearInstance();
