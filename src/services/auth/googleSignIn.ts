@@ -5,7 +5,11 @@ import { createSignInWithGoogleUseCase } from "@/application/auth/SignInWithGoog
 import type { GoogleAuthPort } from "@/application/ports/GoogleAuthPort";
 import { getRuntimeKind } from "@/platform/runtimeKind";
 
+
+
 let pendingSignInWithGoogle: Promise<void> | null = null;
+
+
 
 const executeSignInWithGoogle = async (): Promise<void> => {
   const auth: GoogleAuthPort = selectGoogleAuthPort({
@@ -27,5 +31,7 @@ const signInWithGoogle = async (): Promise<void> => {
 
   return pendingSignInWithGoogle;
 };
+
+
 
 export { selectGoogleAuthPort, signInWithGoogle };

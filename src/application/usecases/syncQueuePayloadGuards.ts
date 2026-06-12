@@ -122,4 +122,5 @@ const assertDeletePayload = (payload: unknown): SyncDeletePayload => {
 };
 
 export { assertUpsertPayload, assertDeletePayload };
+
 export type { UpsertEntity, DeleteEntity, UpsertQueueItem };

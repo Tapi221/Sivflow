@@ -1,14 +1,23 @@
 "use client";
 
 import * as React from "react";
+
 import { FloatingMedia as FloatingMediaPrimitive, FloatingMediaStore, useFloatingMediaValue, useImagePreviewValue } from "@platejs/media/react";
+
 import { cva } from "class-variance-authority";
+
 import { Link, Trash2Icon } from "lucide-react";
+
 import type { WithRequiredKey } from "platejs";
+
 import { useEditorRef, useEditorSelector, useElement, useFocusedLast, useReadOnly, useRemoveNodeButton, useSelected } from "platejs/react";
+
 import { Button, buttonVariants } from "./button";
+
 import { CaptionButton } from "./caption";
+
 import { Popover, PopoverAnchor, PopoverContent } from "./popover";
+
 import { Separator } from "./separator";
 
 const inputVariants = cva(

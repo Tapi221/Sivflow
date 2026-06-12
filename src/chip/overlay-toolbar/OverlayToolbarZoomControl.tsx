@@ -112,4 +112,5 @@ const OverlayToolbarZoomControl = (props: OverlayToolbarZoomControlProps) => {
 };
 
 export { OverlayToolbarZoomControl };
+
 export type { OverlayToolbarZoomControlProps };
