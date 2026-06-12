@@ -14,6 +14,8 @@ import { normalizeVisibleDayCount } from "./calendarTimetable.storage";
 import { CalendarTimetableSyllabusCatalogPanel } from "./CalendarTimetableSyllabusCatalogPanel";
 import { useCalendarTimetable } from "./useCalendarTimetable";
 
+
+
 type TimetableSlot = { dayIndex: CalendarTimetableWeekdayIndex; periodId: string; };
 type CalendarTimetableDensity = "default" | "compact";
 type CalendarTimetableViewProps = { weekDate: Date; weekStartDay?: CalendarWeekStartDay; density?: CalendarTimetableDensity; className?: string; addRequestToken?: number; };
@@ -21,6 +23,8 @@ type CalendarTimetableCourseEditorProps = { course: CalendarTimetableCourse | nu
 type CalendarTimetableSettingsPanelProps = { periods: CalendarTimetablePeriod[]; visibleDayCount: CalendarTimetableVisibleDayCount; onChangeVisibleDayCount: (visibleDayCount: CalendarTimetableVisibleDayCount) => Promise<void>; onAddPeriod: () => Promise<void>; onUpdatePeriod: (period: CalendarTimetablePeriod) => Promise<void>; onDeletePeriod: (periodId: string) => Promise<void>; onClose: () => void; };
 type CalendarTimetableGridStyle = CSSProperties & { "--calendar-timetable-day-count": CalendarTimetableVisibleDayCount; };
 type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
+
+
 
 const STRATIS_ICON_COMPONENTS = stratisIcons as Record<string, StratisIconComponent | undefined>;
 const STRATIS_CHECK_ICON_NAMES = ["StratisCheckIcon", "StratisCheck01Icon", "StratisCheckCircleContainedIcon"] as const;
@@ -35,6 +39,8 @@ const EMPTY_SLOT_LIST: CalendarTimetableSlot[] = [];
 const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);
 const StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);
 const StratisSettingsIcon = resolveStratisIcon(STRATIS_SETTINGS_ICON_NAMES);
+
+
 
 const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
 const createTimetableSlotKey = ({ dayIndex, periodId }: TimetableSlot): string => `${dayIndex}:${periodId}`;
@@ -51,6 +57,8 @@ const getTimetableGridTemplateColumns = (density: CalendarTimetableDensity): str
 const createTimetableGridStyle = (density: CalendarTimetableDensity, visibleDayCount: CalendarTimetableVisibleDayCount): CalendarTimetableGridStyle => ({ gridTemplateColumns: getTimetableGridTemplateColumns(density), "--calendar-timetable-day-count": visibleDayCount });
 const isSameTimetableSlot = (left: CalendarTimetableSlot, right: CalendarTimetableSlot): boolean => left.dayIndex === right.dayIndex && left.periodId === right.periodId;
 const createEditorSlots = (course: CalendarTimetableCourse | null, initialSlot: CalendarTimetableSlot | null): CalendarTimetableSlot[] => course?.slots ?? (initialSlot ? [initialSlot] : EMPTY_SLOT_LIST);
+
+
 
 const CalendarTimetableSettingsPanel = ({ periods, visibleDayCount, onChangeVisibleDayCount, onAddPeriod, onUpdatePeriod, onDeletePeriod, onClose }: CalendarTimetableSettingsPanelProps) => {
   return (
@@ -280,6 +288,8 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
     </div>
   );
 };
+
+
 
 const CalendarTimetableView = memo(CalendarTimetableViewComponent);
 CalendarTimetableView.displayName = "CalendarTimetableView";
