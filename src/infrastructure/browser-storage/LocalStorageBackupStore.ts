@@ -1,8 +1,6 @@
 import { WEB_STORAGE_KEYS } from "@platform/storage/webStorageKeys.constants";
 import type { AutoBackupRecord, BackupStorePort } from "@/application/ports/BackupStorePort";
 
-const localStorageBackupStore: BackupStorePort = { isAvailable: isStorageAvailable, loadBackups, saveBackups, saveLastBackupAt, getLastBackupAt, clearBackups };
-
 const isStorageAvailable = (): boolean => {
   if (typeof window === "undefined") {
     return false;
@@ -25,6 +23,7 @@ const isStorageAvailable = (): boolean => {
     );
   }
 };
+
 const loadBackups = (): AutoBackupRecord[] => {
   if (!isStorageAvailable()) {
     return [];
@@ -42,6 +41,7 @@ const loadBackups = (): AutoBackupRecord[] => {
     return [];
   }
 };
+
 const saveBackups = (backups: AutoBackupRecord[]): void => {
   if (!isStorageAvailable()) {
     return;
@@ -81,6 +81,7 @@ const saveBackups = (backups: AutoBackupRecord[]): void => {
     }
   }
 };
+
 const saveLastBackupAt = (value: string): void => {
   if (!isStorageAvailable()) {
     return;
@@ -92,6 +93,7 @@ const saveLastBackupAt = (value: string): void => {
     // noop
   }
 };
+
 const getLastBackupAt = (): string | null => {
   if (!isStorageAvailable()) {
     return null;
@@ -103,6 +105,7 @@ const getLastBackupAt = (): string | null => {
     return null;
   }
 };
+
 const clearBackups = (): void => {
   if (!isStorageAvailable()) {
     return;
@@ -114,5 +117,7 @@ const clearBackups = (): void => {
     // noop
   }
 };
+
+const localStorageBackupStore: BackupStorePort = { isAvailable: isStorageAvailable, loadBackups, saveBackups, saveLastBackupAt, getLastBackupAt, clearBackups };
 
 export { localStorageBackupStore };
