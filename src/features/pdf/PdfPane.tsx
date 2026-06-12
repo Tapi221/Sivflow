@@ -1,20 +1,37 @@
 import "pdfjs-dist/legacy/web/pdf_viewer.css";
+
 import "./PdfPane.css";
+
 import { useCallback, useEffect, useRef, useState } from "react";
+
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+
 import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
+
 import { EventBus, PDFLinkService, PDFViewer, RenderingStates } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
+
 import type { ChangeEvent, ComponentType, KeyboardEvent as ReactKeyboardEvent, SVGProps } from "react";
+
 import * as stratisIcons from "stratis-ui-icons";
+
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+
 import { cn } from "@/lib/utils";
+
 import { hasDesktopRuntime } from "@/platform/detectDesktopBridge";
+
 import type { PdfViewerState } from "@/types";
+
 import type { PdfDocumentSource } from "./pdfDocumentSource";
+
 import { releasePdfDocumentSourceSoon, retainPdfDocumentSource, toPdfDocumentLoadSource } from "./pdfDocumentSource";
+
 import { waitForPdfLoadingTask } from "./pdfLoadingTaskTimeout";
+
 import type { PdfPageWindowMetric } from "./pdfPageWindow";
+
 import { getPdfPageWindowKeepSet, getSafePdfPageNumber } from "./pdfPageWindow";
+
 import { PDF_TRACKPAD_ZOOM_SENSITIVITY, PDF_ZOOM_BUTTON_SCALE_FACTOR, PDF_ZOOM_MAX_SCALE, PDF_ZOOM_MIN_SCALE, PDF_ZOOM_SCALE_EPSILON } from "./pdfZoom.constants";
 
 type PdfViewerStateChangePersistence = "immediate" | "deferred" | "none";
