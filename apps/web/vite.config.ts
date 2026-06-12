@@ -226,7 +226,7 @@ export const eventChipDesign: EventChipDesign = {
   },
   tooltip: {
     monthRadiusPx: ${values.tooltipMonthRadius},
-    weekdayRadiusPx: ${values.tooltipWeekdayRadius},
+    weekdayRadiusPx: ${values.weekdayRadius},
   },
 };
 `;
@@ -378,6 +378,7 @@ export default defineConfig(({ command }) => ({
       { find: "@core", replacement: resolveFromRoot("packages/core/src") },
       { find: "@platform", replacement: resolveFromRoot("packages/platform/src") },
       { find: "@web-renderer", replacement: resolveFromRoot("packages/web-renderer/src") },
+      { find: "@web", replacement: resolveFromRoot("apps/web/src") },
       { find: "@shared", replacement: resolveFromRoot("shared") },
       { find: "@", replacement: resolveFromRoot("src") },
     ],
