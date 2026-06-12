@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import type { Notification } from "@/types/notification";
-import { AlertCircle, ChevronDown, X } from "@/ui/icons";
+import { AlertCircle, ChevronDown } from "@/ui/icons";
 
 interface ErrorDialogProps {
   notification: Notification;
@@ -15,11 +16,16 @@ interface ErrorDialogProps {
  * - 続行不可
  * - closeable の場合のみ閉じられる
  */
-const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification, onDismiss }) => {
+const ErrorDialog = ({ notification, onDismiss }: ErrorDialogProps) => {
   const [showDetails, setShowDetails] = useState(false);
+  const handleBackdropMouseDown = (event: ReactMouseEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) return;
+    if (!notification.closeable) return;
+    onDismiss?.();
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70" onMouseDown={handleBackdropMouseDown}>
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
         {/* ヘッダー */}
         <div className="flex items-start gap-3 p-6 border-b border-slate-200">
@@ -31,14 +37,6 @@ const ErrorDialog: React.FC<ErrorDialogProps> = ({ notification, onDismiss }) =>
               {notification.title}
             </h3>
           </div>
-          {notification.closeable && onDismiss ? (
-            <button
-              onClick={onDismiss}
-              className="flex-shrink-0 text-slate-400 hover:text-slate-600"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          ) : null}
         </div>
 
         {/* コンテンツ */}
