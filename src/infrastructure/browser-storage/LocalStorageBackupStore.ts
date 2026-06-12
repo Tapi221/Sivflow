@@ -23,7 +23,6 @@ const isStorageAvailable = (): boolean => {
     );
   }
 };
-
 const loadBackups = (): AutoBackupRecord[] => {
   if (!isStorageAvailable()) {
     return [];
@@ -41,7 +40,6 @@ const loadBackups = (): AutoBackupRecord[] => {
     return [];
   }
 };
-
 const saveBackups = (backups: AutoBackupRecord[]): void => {
   if (!isStorageAvailable()) {
     return;
@@ -81,7 +79,6 @@ const saveBackups = (backups: AutoBackupRecord[]): void => {
     }
   }
 };
-
 const saveLastBackupAt = (value: string): void => {
   if (!isStorageAvailable()) {
     return;
@@ -93,7 +90,6 @@ const saveLastBackupAt = (value: string): void => {
     // noop
   }
 };
-
 const getLastBackupAt = (): string | null => {
   if (!isStorageAvailable()) {
     return null;
@@ -105,7 +101,6 @@ const getLastBackupAt = (): string | null => {
     return null;
   }
 };
-
 const clearBackups = (): void => {
   if (!isStorageAvailable()) {
     return;

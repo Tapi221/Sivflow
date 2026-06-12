@@ -11,8 +11,8 @@ import { ExternalLink, Link, Text, Unlink } from "lucide-react";
 import type { TLinkElement } from "platejs";
 import { KEYS } from "platejs";
 import { useEditorRef, useEditorSelection, useFormInputProps, usePluginOption } from "platejs/react";
-import { buttonVariants } from "../button/button";
-import { Separator } from "../separator";
+import { buttonVariants } from "@/chip/ui/button/button";
+import { Separator } from "@/chip/ui/separator";
 
 const popoverVariants = cva(
   "z-50 w-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md outline-hidden",

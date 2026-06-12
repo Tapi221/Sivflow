@@ -1,4 +1,4 @@
-import { getImageBlob } from "./imageFileStore";
+import { getImageBlob } from "@/services/imageFileStore";
 
 type BlobScopeOptions = {
   userId?: string | null;

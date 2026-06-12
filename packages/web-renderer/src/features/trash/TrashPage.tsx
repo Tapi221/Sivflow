@@ -3,7 +3,7 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Button } from "@/chip/ui/button/button";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { Card, CardSet, Document, Folder } from "@/types";
-import { useTrashItems } from "./useTrashItems";
+import { useTrashItems } from "@web-renderer/features/trash/useTrashItems";
 
 type TrashItemKind = "folder" | "card" | "cardSet" | "document";
 type TrashItemRow = {

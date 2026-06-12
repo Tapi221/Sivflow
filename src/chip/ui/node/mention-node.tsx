@@ -9,7 +9,7 @@ import { PlateElement, useFocused, useReadOnly, useSelected } from "platejs/reac
 import { useMounted } from "@/hooks/use-mounted";
 import { inlineSuggestionVariants } from "@/lib/suggestion";
 import { cn } from "@/lib/utils";
-import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem } from "../inline-combobox";
+import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem } from "@/chip/ui/inline-combobox";
 
 const onSelectItem = getMentionOnSelectItem();
 const MENTIONABLES = [

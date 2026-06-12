@@ -1,3 +1,3 @@
 
 
-export * from "./calendar";
+export * from "@core/calendar";

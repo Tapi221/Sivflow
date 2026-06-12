@@ -1,6 +1,6 @@
-import "./SettingsWorkspaceDialog.css";
+import "@/features/settings/SettingsWorkspaceDialog.css";
 import type { MouseEvent as ReactMouseEvent } from "react";
-import { SettingsWorkspaceScreen } from "./SettingsWorkspaceScreen";
+import { SettingsWorkspaceScreen } from "@/features/settings/SettingsWorkspaceScreen";
 
 type SettingsWorkspaceDialogProps = {
   open: boolean;

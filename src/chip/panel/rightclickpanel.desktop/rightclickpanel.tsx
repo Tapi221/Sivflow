@@ -1,7 +1,7 @@
-import "./rightclickpanel.css";
+import "@/chip/panel/rightclickpanel.desktop/rightclickpanel.css";
 import { memo } from "react";
 import type { CSSProperties, MouseEvent as ReactMouseEvent, ReactNode, RefObject } from "react";
-import { Panel } from "../panel";
+import { Panel } from "@/chip/panel/panel";
 
 type RightClickPanelProps = {
   id?: string;

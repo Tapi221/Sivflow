@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import type { UploadedImage } from "@/types/domain/assets";
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardFaceAttachmentAudio, CardFaceAttachments } from "@/types/domain/card";
-import { sanitizeReferences } from "./cardEditorUtils";
+import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
 
 type Side = "question" | "answer";
 type UseCardMediaDialogsParams = {

@@ -7,11 +7,11 @@ import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { Tag } from "@/ui/icons";
-import { LayeredTreeDropIndicator } from "./layeredTreeDnd";
-import { LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX, LAYERED_TREE_ROOT_LEVEL } from "./layeredTreeDnd.constants";
-import type { LayeredTreeDragState } from "./layeredTreeDnd.types";
-import { getLayeredTreeDropIndicatorLeft, isLayeredTreeAppendDropTarget } from "./layeredTreeDnd.utils";
-import { useLayeredTreeDragDrop } from "./useLayeredTreeDragDrop";
+import { LayeredTreeDropIndicator } from "@/pane.desktop/leftpane/folder/layeredTreeDnd";
+import { LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX, LAYERED_TREE_ROOT_LEVEL } from "@/pane.desktop/leftpane/folder/layeredTreeDnd.constants";
+import type { LayeredTreeDragState } from "@/pane.desktop/leftpane/folder/layeredTreeDnd.types";
+import { getLayeredTreeDropIndicatorLeft, isLayeredTreeAppendDropTarget } from "@/pane.desktop/leftpane/folder/layeredTreeDnd.utils";
+import { useLayeredTreeDragDrop } from "@/pane.desktop/leftpane/folder/useLayeredTreeDragDrop";
 
 type TagTreeNode = {
   id: string;

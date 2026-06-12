@@ -1,6 +1,6 @@
 import { startTabPresence } from "@/utils/tabPresence";
-import { initGlobalChunkRecovery } from "./initGlobalChunkRecovery";
-import { initServiceWorkerLifecycle } from "./initServiceWorkerLifecycle";
+import { initGlobalChunkRecovery } from "@web/runtime/initGlobalChunkRecovery";
+import { initServiceWorkerLifecycle } from "@web/runtime/initServiceWorkerLifecycle";
 
 let started = false;
 

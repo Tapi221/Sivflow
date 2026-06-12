@@ -1,5 +1,5 @@
-import type { AnimatedCheckboxBaseProps } from "./AnimatedCheckboxBase";
-import { AnimatedCheckboxBase } from "./AnimatedCheckboxBase";
+import type { AnimatedCheckboxBaseProps } from "@/chip/checkbox/AnimatedCheckboxBase";
+import { AnimatedCheckboxBase } from "@/chip/checkbox/AnimatedCheckboxBase";
 
 type AnimatedIndeterminateCheckboxProps = Omit<
   AnimatedCheckboxBaseProps,

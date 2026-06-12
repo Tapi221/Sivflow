@@ -10,7 +10,6 @@ const exchangeCodeForFirebaseToken = async (input: { code: string; codeVerifier:
   const result = await exchangeGoogleSignInCodeCallable(input);
   return result.data.firebaseToken;
 };
-
 const signIn: GoogleAuthPort["signIn"] = async () => {
   const input = await requestGoogleSignInServerCode();
   const firebaseToken = await exchangeCodeForFirebaseToken(input);

@@ -1,6 +1,7 @@
 import type { PlatformApi } from "@platform/desktopApi";
 
 const WEB_APP_VERSION = import.meta.env.VITE_BUILD_VERSION ?? import.meta.env.MODE;
+
 const unavailable = async (): Promise<never> => {
   throw new Error("Desktop bridge is not available in web runtime");
 };
@@ -10,6 +11,7 @@ const openExternal = async (url: string): Promise<void> => {
   }
   window.open(url, "_blank", "noopener,noreferrer");
 };
+
 const webPlatform: PlatformApi = {
   app: {
     getVersion: async () => WEB_APP_VERSION,

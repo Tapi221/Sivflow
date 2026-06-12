@@ -1,5 +1,5 @@
-import { openSupportContact } from "./appInitSupportContact";
-import { notificationService } from "./NotificationService";
+import { openSupportContact } from "@/services/appInitSupportContact";
+import { notificationService } from "@/services/NotificationService";
 
 const notifyLocalDbFallbackMode = (args: { recoveryGuideUrl: string;
 }): void => {

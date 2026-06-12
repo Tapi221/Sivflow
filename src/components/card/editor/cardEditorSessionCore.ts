@@ -5,9 +5,9 @@ import { resolveCardTagNames } from "@/features/settings/hooks/useTags";
 import type { UploadedImage } from "@/types/domain/assets";
 import type { Card, CardBlock, CardFaceAttachments, CardPatch } from "@/types/domain/card";
 import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
-import type { EditorDraft } from "./cardEditorUtils";
-import { makeEmptyCardFaceAttachments, normalizeOrderIndex, sanitizeReferences } from "./cardEditorUtils";
-import { waitForDraftImageUploads } from "./cardImageUploadSaveBarrier";
+import type { EditorDraft } from "@/components/card/editor/cardEditorUtils";
+import { makeEmptyCardFaceAttachments, normalizeOrderIndex, sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
+import { waitForDraftImageUploads } from "@/components/card/editor/cardImageUploadSaveBarrier";
 
 type BuildSavePayloadParams = {
   draft: EditorDraft;

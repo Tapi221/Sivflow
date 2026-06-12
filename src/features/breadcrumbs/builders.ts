@@ -1,7 +1,7 @@
 import { getCardText } from "@/domain/card/content";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
-import type { BreadcrumbCrumb, ExplorerBreadcrumbContext } from "./breadcrumbs.types";
+import type { BreadcrumbCrumb, ExplorerBreadcrumbContext } from "@/features/breadcrumbs/breadcrumbs.types";
 
 type FolderLike = Pick<Folder, "id" | "folderName" | "parentFolderId">;
 

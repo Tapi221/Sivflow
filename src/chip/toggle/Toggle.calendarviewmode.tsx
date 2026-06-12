@@ -183,6 +183,7 @@ const ToggleCalendarViewMode = ({
     </div>
   );
 };
+
 const ViewModeDropdown = ToggleCalendarViewMode;
 
 export { ToggleCalendarViewMode, ViewModeDropdown };

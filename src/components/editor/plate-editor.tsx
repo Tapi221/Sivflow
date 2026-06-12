@@ -3,8 +3,8 @@
 import type { Value } from "platejs";
 import { Plate, usePlateEditor } from "platejs/react";
 import { Editor, EditorContainer } from "@/chip/ui/editor";
-import { EditorKit } from "./editor-kit";
-import { SettingsDialog } from "./settings-dialog";
+import { EditorKit } from "@/components/editor/editor-kit";
+import { SettingsDialog } from "@/components/editor/settings-dialog";
 
 type PlateEditorProps = {
   initialValue: Value;

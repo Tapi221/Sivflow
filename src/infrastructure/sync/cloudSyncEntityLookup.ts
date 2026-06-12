@@ -3,7 +3,7 @@ import { getDoc, getDocs } from "firebase/firestore";
 import type { CloudEntityType, PullableEntityType } from "@/application/usecases/cloudSyncShared";
 import { COLLECTION_BY_TYPE, sanitizeSyncDataFromCloud } from "@/application/usecases/cloudSyncShared";
 import type { SyncChange } from "@/services/interfaces/ISyncService";
-import { getUserSettingsRef, queryEntityById } from "./cloudSyncFirestoreRefs";
+import { getUserSettingsRef, queryEntityById } from "@/infrastructure/sync/cloudSyncFirestoreRefs";
 
 type LookupContext = {
   firestore: Firestore;

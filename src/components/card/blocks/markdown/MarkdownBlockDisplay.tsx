@@ -3,7 +3,7 @@ import type { CSSProperties, KeyboardEventHandler, MouseEventHandler } from "rea
 import { TEXT_BLOCK_CONTENT_CLASS } from "@/components/card/blocks/text/textBlockStyles";
 import { buildTypographyStyle, mergeStyles } from "@/components/card/common/cardSetViewZoom";
 import { cn } from "@/lib/utils";
-import { MarkdownBlockView } from "./MarkdownBlockPreview";
+import { MarkdownBlockView } from "@/components/card/blocks/markdown/MarkdownBlockPreview";
 
 type MarkdownBlockDisplayProps = {
   markdown: string;

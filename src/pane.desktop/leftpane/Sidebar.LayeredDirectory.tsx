@@ -1,4 +1,4 @@
-import "./sidebar.layered-directory.css";
+import "@/pane.desktop/leftpane/sidebar.layered-directory.css";
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent, ReactNode, RefObject } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";

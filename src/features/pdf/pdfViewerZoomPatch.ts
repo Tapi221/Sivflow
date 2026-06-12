@@ -1,6 +1,6 @@
 import { PDFViewer } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
-import { PDF_TRACKPAD_ZOOM_SENSITIVITY, PDF_ZOOM_MAX_SCALE, PDF_ZOOM_MIN_SCALE, PDF_ZOOM_SCALE_EPSILON, PDF_ZOOM_STEP } from "./pdfZoom.constants";
-import { computeNextScaleFromWheel, resolveTrackpadDeltaYForScaleRatio } from "./pdfZoom.utils";
+import { PDF_TRACKPAD_ZOOM_SENSITIVITY, PDF_ZOOM_MAX_SCALE, PDF_ZOOM_MIN_SCALE, PDF_ZOOM_SCALE_EPSILON, PDF_ZOOM_STEP } from "@/features/pdf/pdfZoom.constants";
+import { computeNextScaleFromWheel, resolveTrackpadDeltaYForScaleRatio } from "@/features/pdf/pdfZoom.utils";
 
 type PatchedPdfViewerConstructor = typeof PDFViewer & {
   __sivflowZoomPatchApplied?: boolean;
@@ -135,7 +135,7 @@ const patchPdfViewerSetDocument = (prototype: PatchedPdfViewerPrototype): void =
   const originalSetDocument = prototype.setDocument;
   if (typeof originalSetDocument !== "function") return;
 
-  prototype.setDocument = function (this: PatchedPdfViewerPrototype, ...args: unknown[]) {
+  prototype.setDocument = (this: PatchedPdfViewerPrototype, ...args: unknown[]) => {
     if (this.container) pdfZoomViewers.add(this);
     return originalSetDocument.apply(this, args);
   };
@@ -152,7 +152,7 @@ const applyPdfViewerZoomPatch = (): void => {
   const originalScrollPageIntoView = prototype.scrollPageIntoView;
   if (typeof originalScrollPageIntoView !== "function") return;
 
-  prototype.scrollPageIntoView = function (this: PatchedPdfViewerPrototype, ...args: unknown[]) {
+  prototype.scrollPageIntoView = (this: PatchedPdfViewerPrototype, ...args: unknown[]) => {
     if (shouldSuppressPdfViewerScaleScroll(this)) return undefined;
     return originalScrollPageIntoView.apply(this, args);
   };

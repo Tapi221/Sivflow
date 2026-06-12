@@ -29,7 +29,7 @@ import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.
 import { CalendarSelectedViewsSplitView } from "@/pane.desktop/leftpane/schedule/Calendar.SelectedViewsSplitView.desktop";
 import { CalendarSidebar } from "@/pane.desktop/leftpane/schedule/CalendarSidebar";
 import { TabsBar } from "@/pane.desktop/tab.desktopnative/TabsBar";
-import { MobileCalendarEventComposer } from "./MobileCalendarEventComposer";
+import { MobileCalendarEventComposer } from "@/pane.desktop/view/MobileCalendarEventComposer";
 
 type CalendarEventDisplayRange = {
   start: Date; end: Date; };

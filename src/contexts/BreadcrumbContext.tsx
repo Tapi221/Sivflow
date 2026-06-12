@@ -14,8 +14,10 @@ type BreadcrumbProviderProps = {
   children: ReactNode;
 };
 
-const noopSetExtraCrumbs = (_crumbs: BreadcrumbCrumb[]): void => {};
 const BreadcrumbExtraCrumbsContext = createContext<BreadcrumbCrumb[]>([]);
+
+const noopSetExtraCrumbs = (_crumbs: BreadcrumbCrumb[]): void => {};
+
 const BreadcrumbActionsContext = createContext<BreadcrumbActionsContextValue>({
   setExtraCrumbs: noopSetExtraCrumbs,
 });
@@ -23,11 +25,9 @@ const BreadcrumbActionsContext = createContext<BreadcrumbActionsContextValue>({
 const useBreadcrumbExtraCrumbs = (): BreadcrumbCrumb[] => {
   return useContext(BreadcrumbExtraCrumbsContext);
 };
-
 const useSetBreadcrumbCrumbs = (): BreadcrumbActionsContextValue["setExtraCrumbs"] => {
   return useContext(BreadcrumbActionsContext).setExtraCrumbs;
 };
-
 const useBreadcrumbContext = (): BreadcrumbContextValue => {
   const extraCrumbs = useBreadcrumbExtraCrumbs();
   const setExtraCrumbs = useSetBreadcrumbCrumbs();

@@ -6,8 +6,8 @@ import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
 import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
 import { CheckIcon, EyeIcon, PencilLineIcon, PenIcon } from "lucide-react";
 import { useEditorReadOnly, useEditorRef, usePluginOption } from "platejs/react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "../menu/dropdown-menu";
-import { ToolbarButton } from "../toolbar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/ui/menu/dropdown-menu";
+import { ToolbarButton } from "@/chip/ui/toolbar";
 
 const Indicator = () => {
   return (

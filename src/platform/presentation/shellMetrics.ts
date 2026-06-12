@@ -1,4 +1,4 @@
-import type { PresentationTarget } from "./getPresentationTarget";
+import type { PresentationTarget } from "@/platform/presentation/getPresentationTarget";
 
 const APP_DESKTOP_TOP_INSET_PX = 44;
 

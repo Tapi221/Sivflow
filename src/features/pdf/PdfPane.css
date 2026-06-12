@@ -73,7 +73,7 @@
   position: relative;
   flex: 0 0 auto;
   max-width: none;
-  background: #ffffff;
+  background: #fff;
   box-shadow: 0 12px 28px rgb(15 23 42 / 0.14);
 }
 
@@ -83,14 +83,14 @@
   display: block;
   width: 100%;
   height: auto;
-  background: #ffffff;
+  background: #fff;
 }
 
 .pdf-pane__page-placeholder {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: #ffffff;
+  background: #fff;
 }
 
 .pdf-pane__page-error {

@@ -4,8 +4,8 @@ import { getNormalizedGridOffsetRows, getNormalizedRowOffset, getRowOffsetStyle,
 import { CARD_ROW_PX } from "@/domain/card/cardGeometry.constants";
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
-import { shouldRenderInterBlockSeparator } from "./blockDisplayPolicy";
-import { BlockSeparator } from "./BlockSeparator";
+import { shouldRenderInterBlockSeparator } from "@/components/card/blocks/core/blockDisplayPolicy";
+import { BlockSeparator } from "@/components/card/blocks/core/BlockSeparator";
 
 type BlockListRowMeta = {
   index: number;

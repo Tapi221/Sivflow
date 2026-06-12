@@ -5,9 +5,9 @@ import { NetworkMonitor } from "@/services/logic/NetworkMonitor";
 import { QueueManager } from "@/services/logic/QueueManager";
 import { TelemetryService } from "@/services/logic/TelemetryService";
 import type { SyncContextSource } from "@/types/domain/telemetry";
-import type { LocalDBLike } from "./localdb";
-import { getLocalDb, getLocalDBTelemetrySnapshot, telemetryOncePerSession } from "./localdb";
-import { SyncServiceV2 } from "./SyncServiceV2";
+import type { LocalDBLike } from "@/services/localdb";
+import { getLocalDb, getLocalDBTelemetrySnapshot, telemetryOncePerSession } from "@/services/localdb";
+import { SyncServiceV2 } from "@/services/SyncServiceV2";
 
 type SyncServiceInternals = {
   cloudAdapter: ICloudSyncAdapter;

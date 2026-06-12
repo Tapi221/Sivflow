@@ -4,15 +4,15 @@ import * as React from "react";
 import { BoldIcon, Code2Icon, ItalicIcon, StrikethroughIcon, UnderlineIcon, WandSparklesIcon } from "lucide-react";
 import { KEYS } from "platejs";
 import { useEditorReadOnly } from "platejs/react";
-import { AIToolbarButton } from "./ai-toolbar-button";
-import { CommentToolbarButton } from "./comment-toolbar-button";
-import { InlineEquationToolbarButton } from "./equation-toolbar-button";
-import { LinkToolbarButton } from "./link-toolbar-button";
-import { MarkToolbarButton } from "./mark-toolbar-button";
-import { MoreToolbarButton } from "./more-toolbar-button";
-import { SuggestionToolbarButton } from "./suggestion-toolbar-button";
-import { ToolbarGroup } from "../toolbar";
-import { TurnIntoToolbarButton } from "../turn-into-toolbar-button";
+import { AIToolbarButton } from "@/chip/ui/button/ai-toolbar-button";
+import { CommentToolbarButton } from "@/chip/ui/button/comment-toolbar-button";
+import { InlineEquationToolbarButton } from "@/chip/ui/button/equation-toolbar-button";
+import { LinkToolbarButton } from "@/chip/ui/button/link-toolbar-button";
+import { MarkToolbarButton } from "@/chip/ui/button/mark-toolbar-button";
+import { MoreToolbarButton } from "@/chip/ui/button/more-toolbar-button";
+import { SuggestionToolbarButton } from "@/chip/ui/button/suggestion-toolbar-button";
+import { ToolbarGroup } from "@/chip/ui/toolbar";
+import { TurnIntoToolbarButton } from "@/chip/ui/turn-into-toolbar-button";
 
 const FloatingToolbarButtons = () => {
   const readOnly = useEditorReadOnly();

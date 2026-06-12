@@ -22,6 +22,7 @@ const increment = (): number => {
   localStorage.removeItem(LEGACY_GENERATION_COUNTER_KEY);
   return next;
 };
+
 const localGenerationCounterStore: GenerationCounterStorePort = { get, increment };
 
 export { localGenerationCounterStore };

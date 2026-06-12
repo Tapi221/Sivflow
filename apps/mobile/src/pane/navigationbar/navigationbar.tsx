@@ -1,4 +1,4 @@
-import "./navigationbar.css";
+import "@mobile/pane/navigationbar/navigationbar.css";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { GalleryIcon, HomeIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";

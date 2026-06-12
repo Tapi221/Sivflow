@@ -3,7 +3,7 @@ import { CardPane } from "@/components/folder/panes/CardPane";
 import { useDocumentCommands } from "@/features/document/hooks/useDocumentCommands";
 import { PdfDocumentPane } from "@/features/pdf/PdfDocumentPane";
 import type { Card, DocumentItem } from "@/types";
-import type { WorkspaceEntityTab } from "./Tab";
+import type { WorkspaceEntityTab } from "@/pane.desktop/tab.desktopnative/Tab";
 
 type WorkspaceTabPanelProps = {
   activeTab: WorkspaceEntityTab;

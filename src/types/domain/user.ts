@@ -1,5 +1,5 @@
 import { Timestamp } from "firebase/firestore";
-import type { BaseEntity, BlockConfig } from "./base";
+import type { BaseEntity, BlockConfig } from "@/types/domain/base";
 
 interface User {
   id: string;

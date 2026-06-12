@@ -53,12 +53,14 @@ const compressAndConvertToBase64Internal = (file: File, maxWidth: number = 1920,
     reader.readAsDataURL(file);
   });
 };
+
 /**
  * @deprecated 後方互換性のため残すが、compressImageToBlob を使用すること
  *
  * @internal
  */
 const compressAndConvertToBase64 = compressAndConvertToBase64Internal;
+
 /**
  * 画像を圧縮して Blob に変換（推奨）
  * Base64 を経由するが、最終的に Blob を返すため安全
