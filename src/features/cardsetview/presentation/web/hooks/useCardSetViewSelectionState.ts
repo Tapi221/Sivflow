@@ -5,6 +5,8 @@ import { clampCardIndex, createCardSetViewSourceKey, resolveCardIndexById, resol
 import { getCardSetViewFlippedCardIds, setCardSetViewFlippedCardIds } from "@/services/cardSetViewFlippedFacePreferences";
 import type { Card } from "@/types";
 
+
+
 type KeyedNumberState = {
   sourceKey: string;
   value: number | null;
@@ -27,6 +29,8 @@ interface UseCardSetViewSelectionStateOptions {
   sortedCards: Card[];
   cardIndexById: Map<string, number>;
 }
+
+
 
 const useCardSetViewSelectionState = ({ initialIndex, targetCardId, deviceScope, cardSetId, sortedCards, cardIndexById }: UseCardSetViewSelectionStateOptions) => {
   const sourceKey = useMemo(() => createCardSetViewSourceKey(cardSetId), [cardSetId]);
@@ -192,5 +196,7 @@ const useCardSetViewSelectionState = ({ initialIndex, targetCardId, deviceScope,
     handlePagerIndexChange,
   };
 };
+
+
 
 export { useCardSetViewSelectionState };

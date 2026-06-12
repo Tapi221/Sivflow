@@ -1,11 +1,18 @@
 "use client";
 
 import type { BaseCommentConfig } from "@platejs/comment";
+
 import { BaseCommentPlugin, getDraftCommentKey } from "@platejs/comment";
+
 import type { ExtendConfig, Path } from "platejs";
+
 import { toTPlatePlugin } from "platejs/react";
+
 import { CommentLeaf } from "@/components/ui/comment-node";
+
 import { getDiscussionClickTarget } from "./discussion-kit";
+
+
 
 type CommentConfig = ExtendConfig<
   BaseCommentConfig,
@@ -15,6 +22,8 @@ type CommentConfig = ExtendConfig<
     hoverId: string | null;
   }
 >;
+
+
 
 const commentPlugin = toTPlatePlugin<CommentConfig>(BaseCommentPlugin, { handlers: { onClick: ({ api, event, setOption, type }) => {
   const activeTarget = getDiscussionClickTarget({ selector: `.slate-${type}`, target: event.target });
@@ -65,6 +74,9 @@ options: {
       setDraft: { keys: "mod+shift+m" },
     },
   });
+
 const CommentKit = [commentPlugin];
+
+
 
 export { commentPlugin, CommentKit };
