@@ -51,6 +51,10 @@ type ToolbarActionButtonProps = {
   onClick: () => void;
 };
 
+const SCHEDULE_SCREEN_HEADER_CLASS_NAME = "mb-2 flex shrink-0 items-center justify-between gap-4 px-5 pt-4";
+const SCHEDULE_SCREEN_HEADER_TITLE_CLASS_NAME = "min-w-[128px] max-w-[220px] shrink-0 truncate text-[17px] font-semibold leading-[1.2] tracking-[-0.01em] text-[#1c1c1e]";
+const SCHEDULE_SCREEN_HEADER_ACTIONS_CLASS_NAME = "ml-auto flex min-w-0 shrink-0 items-center gap-2";
+const SCHEDULE_SCREEN_HEADER_LABEL_CLASS_NAME = "min-w-0 truncate whitespace-nowrap";
 const TOOLBAR_ACTION_BUTTON_CLASS_NAME = "relative z-10 flex h-7 min-h-0 min-w-[64px] shrink-0 items-center justify-center gap-1 rounded-[7px] border-0 bg-transparent px-2 text-[12px] font-semibold leading-none tracking-[-0.012em] text-[#85827e] shadow-none outline-none ring-0 transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eee] hover:text-[#2f343b] active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-[#eee] focus-visible:text-[#2f343b] focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100 disabled:cursor-wait disabled:opacity-60";
 const TOOLBAR_ACTION_BUTTON_ACTIVE_CLASS_NAME = "bg-[#eee] text-[#2f343b]";
 const CALENDAR_PRINT_MENU_CLASS_NAME = "relative flex shrink-0";
@@ -167,11 +171,11 @@ const ScheduleScreenHeaderDesktop = ({
     };
   }, [isPrintPopoverOpen]);
   return (
-    <div className={className} data-calendar-print-toolbar="">
-      <h1 className="w-32 shrink-0 truncate text-[17px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
+    <div className={cn(SCHEDULE_SCREEN_HEADER_CLASS_NAME, className)} data-calendar-print-toolbar="">
+      <h1 className={SCHEDULE_SCREEN_HEADER_TITLE_CLASS_NAME}>
         {titleLabel}
       </h1>
-      <div className="ml-auto flex shrink-0 items-center gap-2">
+      <div className={SCHEDULE_SCREEN_HEADER_ACTIONS_CLASS_NAME}>
         <TodayBar
           onPrevious={onPrevious}
           onNext={onNext}
@@ -203,13 +207,13 @@ const ScheduleScreenHeaderDesktop = ({
         {onAddEvent && (
           <ToolbarActionButton label="予定を追加" onClick={onAddEvent}>
             <Plus className="h-3.5 w-3.5" />
-            <span className="min-w-0 truncate whitespace-nowrap">追加</span>
+            <span className={SCHEDULE_SCREEN_HEADER_LABEL_CLASS_NAME}>追加</span>
           </ToolbarActionButton>
         )}
         <div className={CALENDAR_PRINT_MENU_CLASS_NAME}>
           <ToolbarActionButton buttonRef={printButtonRef} label={t.exportCalendarPdf} isActive={isPrintPopoverOpen} ariaHasPopup="dialog" ariaExpanded={isPrintPopoverOpen} onClick={handleTogglePrintPopover}>
             <Download className="h-3.5 w-3.5" />
-            <span className="min-w-0 truncate whitespace-nowrap">PDF</span>
+            <span className={SCHEDULE_SCREEN_HEADER_LABEL_CLASS_NAME}>PDF</span>
             <ChevronDown className="h-3 w-3 text-[#a6a19c]" />
           </ToolbarActionButton>
           {isPrintPopoverOpen && (
