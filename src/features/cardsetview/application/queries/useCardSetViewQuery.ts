@@ -35,7 +35,7 @@ interface UseCardSetViewQueryResult {
 const useCardSetViewQuery = ({ cardSetId }: UseCardSetViewQueryOptions): UseCardSetViewQueryResult => {
   const { cardSet: selectedCardSet, loading: cardSetLoading, updateCardSet } = useCardSetById(cardSetId);
 
-  const { folders, loading: foldersLoading } = useFolderLineage(
+  const folders = useFolderLineage(
     selectedCardSet?.folderId ?? null,
   );
 
@@ -86,7 +86,7 @@ const useCardSetViewQuery = ({ cardSetId }: UseCardSetViewQueryOptions): UseCard
   );
 
   return {
-    folders: folders as Folder[],
+    folders,
     cardSetById,
     selectedCardSet,
     sortedCards,
@@ -95,7 +95,7 @@ const useCardSetViewQuery = ({ cardSetId }: UseCardSetViewQueryOptions): UseCard
     updateCard,
     updateCardSet,
     reorderCardsInCardSet,
-    isLoading: cardSetLoading || foldersLoading || cardsLoading,
+    isLoading: cardSetLoading || cardsLoading,
   };
 };
 
