@@ -1,4 +1,5 @@
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
+import type { QueryableTable } from "@/services/localdb/types";
 import type { DocumentItem } from "@/types";
 
 type BlobScopeOptions = {
@@ -14,9 +15,12 @@ type SaveDocumentWithBlobParams = {
   document: DocumentItem;
   blob: Blob;
 };
+type LocalDbWithDocumentFiles = Awaited<ReturnType<typeof getLocalDb>> & {
+  documentFiles: QueryableTable<StoredDocumentFile, string>;
+};
 
 const getDocumentFilesTable = (db: Awaited<ReturnType<typeof getLocalDb>>) =>
-  db.table<StoredDocumentFile, string>("documentFiles");
+  (db as LocalDbWithDocumentFiles).documentFiles;
 const resolveDocumentFileId = (
   document: Pick<DocumentItem, "id" | "localFileId">,
 ): string => {
