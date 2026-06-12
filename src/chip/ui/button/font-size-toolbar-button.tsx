@@ -8,8 +8,8 @@ import type { TElement } from "platejs";
 import { KEYS } from "platejs";
 import { useEditorPlugin, useEditorSelector } from "platejs/react";
 import { cn } from "@/lib/utils";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
-import { ToolbarButton } from "./toolbar";
+import { Popover, PopoverContent, PopoverTrigger } from "../popover";
+import { ToolbarButton } from "../toolbar";
 
 const DEFAULT_FONT_SIZE = "16";
 const FONT_SIZE_MAP = {
