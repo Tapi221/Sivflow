@@ -8,10 +8,10 @@ import type { PlateElementProps } from "platejs/react";
 import { PlateElement, withHOC } from "platejs/react";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import { Tweet } from "react-tweet";
+import { Caption, CaptionTextarea } from "@/chip/ui/caption";
+import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "@/chip/ui/resize-handle";
+import { MediaToolbar } from "@/chip/ui/toolbar/media-toolbar";
 import { cn } from "@/lib/utils";
-import { Caption, CaptionTextarea } from "./caption";
-import { MediaToolbar } from "./media-toolbar";
-import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "./resize-handle";
 
 const MediaEmbedElementBase = (props: PlateElementProps<TMediaEmbedElement>) => {
   const { align = "center", embed, focused, isTweet, isVideo, isYoutube, readOnly, selected } = useMediaState({
