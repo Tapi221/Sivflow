@@ -38,6 +38,11 @@ const loadCalendarTimetableState = async (): Promise<UseCalendarTimetableState> 
 const useCalendarTimetable = (): UseCalendarTimetableReturn => {
   const [state, setState] = useState<UseCalendarTimetableState>(createInitialState);
 
+  const reloadCalendarTimetableState = useCallback(async () => {
+    const nextState = await loadCalendarTimetableState();
+    setState(nextState);
+  }, []);
+
   useEffect(() => {
     const subscription = liveQuery(loadCalendarTimetableState).subscribe({
       next: setState,
@@ -49,14 +54,38 @@ const useCalendarTimetable = (): UseCalendarTimetableReturn => {
     };
   }, []);
 
-  const saveCourse = useCallback((draft: CalendarTimetableCourseDraft) => saveCalendarTimetableCourse(draft), []);
-  const deleteCourse = useCallback((courseId: string) => deleteCalendarTimetableCourse(courseId), []);
-  const updateVisibleDayCount = useCallback((visibleDayCount: CalendarTimetableVisibleDayCount) => updateCalendarTimetableVisibleDayCount(visibleDayCount), []);
-  const addPeriod = useCallback(() => addCalendarTimetablePeriod(), []);
-  const updatePeriod = useCallback((period: CalendarTimetablePeriod) => updateCalendarTimetablePeriod(period), []);
-  const deletePeriod = useCallback((periodId: string) => deleteCalendarTimetablePeriod(periodId), []);
-  const saveSyllabusCourse = useCallback((draft: CalendarTimetableSyllabusCourseDraft) => saveCalendarTimetableSyllabusCourse(draft), []);
-  const addCourseFromSyllabus = useCallback((syllabusCourse: CalendarTimetableSyllabusCourse, semesterId: string) => addCalendarTimetableCourseFromSyllabus(syllabusCourse, semesterId), []);
+  const saveCourse = useCallback(async (draft: CalendarTimetableCourseDraft) => {
+    await saveCalendarTimetableCourse(draft);
+    await reloadCalendarTimetableState();
+  }, [reloadCalendarTimetableState]);
+  const deleteCourse = useCallback(async (courseId: string) => {
+    await deleteCalendarTimetableCourse(courseId);
+    await reloadCalendarTimetableState();
+  }, [reloadCalendarTimetableState]);
+  const updateVisibleDayCount = useCallback(async (visibleDayCount: CalendarTimetableVisibleDayCount) => {
+    await updateCalendarTimetableVisibleDayCount(visibleDayCount);
+    await reloadCalendarTimetableState();
+  }, [reloadCalendarTimetableState]);
+  const addPeriod = useCallback(async () => {
+    await addCalendarTimetablePeriod();
+    await reloadCalendarTimetableState();
+  }, [reloadCalendarTimetableState]);
+  const updatePeriod = useCallback(async (period: CalendarTimetablePeriod) => {
+    await updateCalendarTimetablePeriod(period);
+    await reloadCalendarTimetableState();
+  }, [reloadCalendarTimetableState]);
+  const deletePeriod = useCallback(async (periodId: string) => {
+    await deleteCalendarTimetablePeriod(periodId);
+    await reloadCalendarTimetableState();
+  }, [reloadCalendarTimetableState]);
+  const saveSyllabusCourse = useCallback(async (draft: CalendarTimetableSyllabusCourseDraft) => {
+    await saveCalendarTimetableSyllabusCourse(draft);
+    await reloadCalendarTimetableState();
+  }, [reloadCalendarTimetableState]);
+  const addCourseFromSyllabus = useCallback(async (syllabusCourse: CalendarTimetableSyllabusCourse, semesterId: string) => {
+    await addCalendarTimetableCourseFromSyllabus(syllabusCourse, semesterId);
+    await reloadCalendarTimetableState();
+  }, [reloadCalendarTimetableState]);
   const searchSyllabusCourses = useCallback((query: string, institutionId?: string | null, departmentId?: string | null) => searchCalendarTimetableSyllabusCourses(query, institutionId, departmentId), []);
 
   return { ...state, saveCourse, deleteCourse, updateVisibleDayCount, addPeriod, updatePeriod, deletePeriod, saveSyllabusCourse, addCourseFromSyllabus, searchSyllabusCourses };
