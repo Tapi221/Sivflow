@@ -5,11 +5,7 @@ const RUNTIME_KINDS = {
   android: "android",
 } as const;
 
-
-
 type RuntimeKind = (typeof RUNTIME_KINDS)[keyof typeof RUNTIME_KINDS];
-
-
 
 const RUNTIME_RELOAD_KEYS = {
   chunk: "__hard_reload_once__",
@@ -25,9 +21,5 @@ const RUNTIME_CHUNK_ERROR_PATTERNS = [
   "MIME type of \"text/html\"",
 ] as const;
 
-
-
 export { RUNTIME_CHUNK_ERROR_PATTERNS, RUNTIME_KINDS, RUNTIME_RELOAD_KEYS };
-
-
 export type { RuntimeKind };

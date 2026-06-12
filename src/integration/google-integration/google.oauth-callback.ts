@@ -2,8 +2,6 @@ import appIconSrc from "@shared/assets/icons/app-icon.svg";
 import type { Locale } from "@shared/i18n/locale.store";
 import { readStoredLocale } from "@shared/i18n/locale.store";
 
-
-
 type GoogleOAuthCallbackPayload = { type: "sivflow:google-oauth-callback";
   url: string;
   state: string | null;
@@ -19,8 +17,6 @@ type OAuthCallbackText = {
   linkText: string;
   linkSuffix: string;
 };
-
-
 
 const GOOGLE_OAUTH_CALLBACK_CHANNEL = "sivflow:google-oauth-callback";
 const GOOGLE_OAUTH_CALLBACK_STORAGE_KEY = "sivflow.google-oauth-callback";
@@ -48,8 +44,6 @@ const GOOGLE_OAUTH_CALLBACK_TEXT_BY_LOCALE: Record<Locale, OAuthCallbackText> = 
     linkSuffix: "。",
   },
 };
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 const isNullableString = (value: unknown): value is string | null => value === null || typeof value === "string";
@@ -217,9 +211,5 @@ const renderGoogleOAuthCallback = (): boolean => {
   return true;
 };
 
-
-
 export { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, createGoogleOAuthCallbackPayload, isGoogleOAuthCallbackPayload, renderGoogleOAuthCallback };
-
-
 export type { GoogleOAuthCallbackPayload };

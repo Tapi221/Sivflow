@@ -70,6 +70,4 @@ const ContextService = class {
 };
 const contextService = new ContextService();
 
-
-
 export { contextService };

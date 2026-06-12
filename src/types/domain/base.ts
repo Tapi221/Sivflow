@@ -1,7 +1,5 @@
 import { Timestamp } from "firebase/firestore";
 
-
-
 interface BaseEntity { [key: string]: unknown;
   id: string;
   userId: string;

@@ -24,8 +24,6 @@ const TEXT_COLORS = [
   "#2E7D32", // Light Green 800
 ];
 
-
-
 /**
  * Generates a deterministic color pair (bg, text) from a string input (e.g. username)
  */
@@ -51,7 +49,5 @@ const getInitials = (name: string | undefined | null) => {
   if (!name) return "U";
   return name.charAt(0).toUpperCase();
 };
-
-
 
 export { getAvatarColors, getInitials };

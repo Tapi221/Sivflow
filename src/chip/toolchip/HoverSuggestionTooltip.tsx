@@ -3,8 +3,6 @@ import { createPortal } from "react-dom";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-
-
 type TooltipSide = "top" | "right" | "bottom" | "left";
 type TooltipPosition = {
   x: number;
@@ -28,8 +26,6 @@ type HoverSuggestionTooltipProps = {
   tooltipClassName?: string;
   disabled?: boolean;
 };
-
-
 
 const getTransform = (side: TooltipSide) => {
   if (side === "top") return "translate(-50%, -100%)";
@@ -64,8 +60,6 @@ const getArrowClassName = (side: TooltipSide) => {
 
   return "left-[-3px] top-1/2 -translate-y-1/2";
 };
-
-
 
 const HoverSuggestionTooltip = ({ children, items, side = "right", offset = 10, title, emptyLabel, className, tooltipClassName, disabled = false }: HoverSuggestionTooltipProps) => {
   const anchorRef = useRef<HTMLDivElement | null>(null);
@@ -227,9 +221,5 @@ const HoverSuggestionTooltip = ({ children, items, side = "right", offset = 10, 
   );
 };
 
-
-
 export { HoverSuggestionTooltip };
-
-
 export type { HoverSuggestionItem };

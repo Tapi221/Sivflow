@@ -1,14 +1,9 @@
 "use client";
 
 import * as React from "react";
-
 import type { PlateElementProps } from "platejs/react";
-
 import { PlateElement, useFocused, useReadOnly, useSelected } from "platejs/react";
-
 import { cn } from "@/lib/utils";
-
-
 
 const HrElement = (props: PlateElementProps) => {
   const readOnly = useReadOnly();
@@ -24,7 +19,5 @@ const HrElement = (props: PlateElementProps) => {
     </PlateElement>
   );
 };
-
-
 
 export { HrElement };

@@ -1,10 +1,7 @@
 "use client";
 
 import { MentionInputPlugin, MentionPlugin } from "@platejs/mention/react";
-
 import { MentionElement, MentionInputElement } from "@/components/ui/mention-node";
-
-
 
 const MentionKit = [
   MentionPlugin.configure({
@@ -14,7 +11,5 @@ const MentionKit = [
   }).withComponent(MentionElement),
   MentionInputPlugin.withComponent(MentionInputElement),
 ];
-
-
 
 export { MentionKit };
