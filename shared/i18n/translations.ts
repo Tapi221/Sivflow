@@ -14,7 +14,8 @@ const formatCountTemplate = (template: string, count: number): string =>
   template.replace("{{count}}", String(count));
 const toTranslations = (translations: RawTranslations): Translations => ({
   ...translations,
-  overflowEvents: (count: number) => formatCountTemplate(translations.overflowEvents, count),
+  overflowEvents: (count: number) =>
+    formatCountTemplate(translations.overflowEvents, count),
 });
 
 const TRANSLATIONS: Record<Locale, Translations> = {
