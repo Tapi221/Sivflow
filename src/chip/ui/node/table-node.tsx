@@ -10,6 +10,11 @@ import { cn } from "@/lib/utils";
 type TableCellElementProps = PlateElementProps<TTableCellElement> & {
   isHeader?: boolean;
 };
+type TableCellElementWithAttributes = TTableCellElement & {
+  attributes?: {
+    colwidth?: number[];
+  };
+};
 
 const TABLE_DEFAULT_CELL_WIDTH = 120;
 const TABLE_DEFAULT_CELL_MAX_WIDTH = 240;
@@ -39,7 +44,8 @@ const TableRowElement = (props: PlateElementProps) => {
 };
 const TableCellElement = ({ isHeader = false, ...props }: TableCellElementProps) => {
   const { children, element } = props;
-  const width = element.attributes?.colwidth?.[0] ?? TABLE_DEFAULT_CELL_WIDTH;
+  const cellElement = element as TableCellElementWithAttributes;
+  const width = cellElement.attributes?.colwidth?.[0] ?? TABLE_DEFAULT_CELL_WIDTH;
 
   return (
     <PlateElement
@@ -53,8 +59,8 @@ const TableCellElement = ({ isHeader = false, ...props }: TableCellElementProps)
       style={
         {
           "--cellBackground": element.background,
-          maxWidth: width ?? TABLE_DEFAULT_CELL_MAX_WIDTH,
-          minWidth: width ?? TABLE_DEFAULT_CELL_WIDTH,
+          maxWidth: width,
+          minWidth: width,
         } as React.CSSProperties
       }
     >
