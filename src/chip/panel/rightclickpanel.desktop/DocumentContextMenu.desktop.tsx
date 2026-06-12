@@ -2,7 +2,7 @@ import { memo } from "react";
 import type { CSSProperties, RefObject } from "react";
 import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE } from "./rightClickPanel.utils";
-import { RightClickPanelSurface } from "./rightClickPanelCommon";
+import { RightClickPanelSurface } from "../rightClickPanelCommon";
 
 type DocumentContextMenuActionId = "rename" | "delete";
 type DocumentContextMenuAction = {

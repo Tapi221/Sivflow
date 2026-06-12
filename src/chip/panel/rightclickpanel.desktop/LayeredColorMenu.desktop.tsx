@@ -5,7 +5,7 @@ import type { TagColorKey } from "@/chip/tag/tagColor";
 import { getTagColorSwatchStyle, TAG_COLOR_KEYS } from "@/chip/tag/tagColor";
 import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING } from "./rightClickPanel.utils";
-import { RightClickPanelSurface } from "./rightClickPanelCommon";
+import { RightClickPanelSurface } from "../rightClickPanelCommon";
 
 type LayeredColorMenuOption = {
   id: TagColorKey;
