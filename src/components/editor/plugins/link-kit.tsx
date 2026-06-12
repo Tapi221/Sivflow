@@ -2,8 +2,8 @@
 
 import { LinkRules } from "@platejs/link";
 import { LinkPlugin } from "@platejs/link/react";
-import { LinkElement } from "@/chip/ui/link-node";
-import { LinkFloatingToolbar } from "@/chip/ui/link-toolbar";
+import { LinkElement } from "@/chip/ui/node/link-node";
+import { LinkFloatingToolbar } from "@/chip/ui/toolbar/link-toolbar";
 
 const LinkKit = [
   LinkPlugin.configure({

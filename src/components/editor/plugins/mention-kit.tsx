@@ -1,7 +1,7 @@
 "use client";
 
 import { MentionInputPlugin, MentionPlugin } from "@platejs/mention/react";
-import { MentionElement, MentionInputElement } from "@/chip/ui/mention-node";
+import { MentionElement, MentionInputElement } from "@/chip/ui/node/mention-node";
 
 const MentionKit = [
   MentionPlugin.configure({

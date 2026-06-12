@@ -5,8 +5,8 @@ import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
 import { KeyboardIcon, MoreHorizontalIcon, SubscriptIcon, SuperscriptIcon } from "lucide-react";
 import { KEYS } from "platejs";
 import { useEditorRef } from "platejs/react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "./menu/dropdown-menu";
-import { ToolbarButton } from "./toolbar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "../menu/dropdown-menu";
+import { ToolbarButton } from "../toolbar";
 
 const MoreToolbarButton = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
