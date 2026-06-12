@@ -1,6 +1,6 @@
 import "./panel.css";
 import { memo } from "react";
-import type { CSSProperties, MouseEvent as ReactMouseEvent, ReactNode, RefObject } from "react";
+import type { AriaRole, CSSProperties, MouseEvent as ReactMouseEvent, ReactNode, RefObject } from "react";
 
 type PanelProps = {
   id?: string;
@@ -10,7 +10,7 @@ type PanelProps = {
   panelRef?: RefObject<HTMLDivElement | null>;
   style?: CSSProperties;
   className?: string;
-  role?: string;
+  role?: AriaRole;
   ariaLabel?: string;
   preventContextMenu?: boolean;
   children?: ReactNode;
