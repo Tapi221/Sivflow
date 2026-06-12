@@ -4,14 +4,25 @@ import type { DocumentItem } from "@/types";
 
 const {
   downloadPdfFromGoogleDriveMock,
+  getBlobMock,
   getDocumentBlobMock,
+  refMock,
   requestGoogleDriveFileAccessTokenMock,
   saveDocumentBlobMock,
+  storageMock,
 } = vi.hoisted(() => ({
   downloadPdfFromGoogleDriveMock: vi.fn(),
+  getBlobMock: vi.fn(),
   getDocumentBlobMock: vi.fn(),
+  refMock: vi.fn(),
   requestGoogleDriveFileAccessTokenMock: vi.fn(),
   saveDocumentBlobMock: vi.fn(),
+  storageMock: { app: { name: "test-app" } },
+}));
+
+vi.mock("firebase/storage", () => ({
+  getBlob: getBlobMock,
+  ref: refMock,
 }));
 
 vi.mock("@/services/documentFileStore", () => ({
@@ -27,8 +38,9 @@ vi.mock("@/integration/google-integration/googleDrive.pdfDownload", () => ({
   downloadPdfFromGoogleDrive: downloadPdfFromGoogleDriveMock,
 }));
 
-vi.mock("@/services/firebase", () => ({
+vi.mock("@/infrastructure/firebase/client", () => ({
   auth: { currentUser: { uid: "user-1" } },
+  storage: storageMock,
 }));
 
 const createDocument = (
@@ -62,6 +74,7 @@ const createDocument = (
 describe("resolvePdfDocumentBlob", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    refMock.mockReturnValue({ fullPath: "users/user-1/documents/doc-1/source.pdf" });
   });
 
   it("ローカル Blob が見つかれば Drive に行かない", async () => {
@@ -103,7 +116,29 @@ describe("resolvePdfDocumentBlob", () => {
     );
   });
 
-  it("Google Drive file id が無ければ null を返す", async () => {
+  it("Firebase Storage path があれば取得してキャッシュする", async () => {
+    const storageBlob = new Blob(["storage"], { type: "application/pdf" });
+    const storageRef = { fullPath: "users/user-1/documents/doc-1/source.pdf" };
+    getDocumentBlobMock.mockResolvedValue(null);
+    refMock.mockReturnValue(storageRef);
+    getBlobMock.mockResolvedValue(storageBlob);
+    saveDocumentBlobMock.mockResolvedValue(undefined);
+
+    await expect(
+      resolvePdfDocumentBlob(
+        createDocument({ localFileId: null, storagePath: "users/user-1/documents/doc-1/source.pdf" }),
+        "user-1",
+      ),
+    ).resolves.toBe(storageBlob);
+
+    expect(refMock).toHaveBeenCalledWith(storageMock, "users/user-1/documents/doc-1/source.pdf");
+    expect(getBlobMock).toHaveBeenCalledWith(storageRef);
+    expect(requestGoogleDriveFileAccessTokenMock).not.toHaveBeenCalled();
+    expect(downloadPdfFromGoogleDriveMock).not.toHaveBeenCalled();
+    expect(saveDocumentBlobMock).toHaveBeenCalledWith("doc-1", storageBlob, { userId: "user-1" });
+  });
+
+  it("Google Drive file id と storagePath が無ければ null を返す", async () => {
     getDocumentBlobMock.mockResolvedValue(null);
 
     await expect(
@@ -112,5 +147,6 @@ describe("resolvePdfDocumentBlob", () => {
 
     expect(requestGoogleDriveFileAccessTokenMock).not.toHaveBeenCalled();
     expect(downloadPdfFromGoogleDriveMock).not.toHaveBeenCalled();
+    expect(getBlobMock).not.toHaveBeenCalled();
   });
 });
