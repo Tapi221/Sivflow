@@ -4,6 +4,8 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { getAdminAuth, getDb, serverTimestamp } from "#src/firebaseAdmin.js";
 
+
+
 type TimetableSyllabusSlot = {
   dayIndex: number;
   periodLabel: string;
@@ -48,6 +50,8 @@ type RobotsRuleGroup = {
   allow: string[];
 };
 
+
+
 const REGION = "asia-northeast1";
 const CRAWLER_VERSION = 1;
 const DEFAULT_MAX_PAGES = 24;
@@ -87,6 +91,8 @@ const runTimetableSyllabusCatalogCrawl = onSchedule({ schedule: "every 24 hours"
     await crawlSyllabusSource({ sourceId: doc.id, seedUrl: getStringValue(data.seedUrl), institutionName: getStringValue(data.institutionName), facultyName: getStringValue(data.facultyName), departmentName: getStringValue(data.departmentName), maxPages: clampMaxPages(data.maxPages) }, null);
   }
 });
+
+
 
 const requireUid = (request: { auth?: { uid?: string; }; }) => {
   const uid = request.auth?.uid;
@@ -300,5 +306,7 @@ const crawlSyllabusSource = async (source: CrawlSource, uid: string | null): Pro
 
   return await saveCrawlResult(jobId, uid, source, courses, seen.size, skippedUrlCount);
 };
+
+
 
 export { crawlTimetableSyllabusUrl, upsertTimetableSyllabusSource, runTimetableSyllabusCatalogCrawl };

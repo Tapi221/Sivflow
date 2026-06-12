@@ -2,8 +2,6 @@ import { generateText } from "ai";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-
-
 const POST = async (req: NextRequest) => {
   const { apiKey: key, model = "gpt-4o-mini", prompt, system } = await req.json();
 
@@ -38,7 +36,5 @@ const POST = async (req: NextRequest) => {
     );
   }
 };
-
-
 
 export { POST };

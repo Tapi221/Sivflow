@@ -3,8 +3,12 @@ import { format } from "date-fns";
 import { normalizeDate } from "@/shared/codec/date";
 import type { CalendarStudyLogLike, CalendarTimestampLike, CalendarWeekStartDay } from "./calendar.types";
 
+
+
 type CalendarArrowKey = "ArrowLeft" | "ArrowRight" | "ArrowUp" | "ArrowDown";
 type CalendarWeekDayLabel = "SUN" | "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT";
+
+
 
 const CALENDAR_WEEK_DAYS_SUNDAY: CalendarWeekDayLabel[] = [
   "SUN",
@@ -34,6 +38,8 @@ const DEFAULT_TODAY_DESCRIPTION_LABELS: Pick<Translations, "todayDescriptionEmpt
   todayDescriptionEmpty: "今日の復習はありません",
   todayDescriptionDue: "今日の復習があります",
 };
+
+
 
 const toDate = (value: CalendarTimestampLike): Date | null => {
   return normalizeDate(value);
@@ -112,5 +118,7 @@ const getStreakFromLogs = (logs: CalendarStudyLogLike[]) => {
 
   return count;
 };
+
+
 
 export { buildStudyDateSet, getArrowDayDiff, getCalendarIntensity, getLogDate, getStreakFromLogs, getTodayDescription, getWeekDays, isFocusableInputTarget, normalizeDateOnly, toDate, toDateKey };

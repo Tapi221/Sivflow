@@ -6,13 +6,19 @@ import type { SlateLeafProps } from "platejs/static";
 import { SlateLeaf } from "platejs/static";
 import { cn } from "@/lib/utils";
 
+
+
 const voidRemoveSuggestionClass = 'relative overflow-hidden before:pointer-events-none before:absolute before:top-1/2 before:left-1/2 before:z-20 before:flex before:size-10 before:-translate-x-1/2 before:-translate-y-1/2 before:items-center before:justify-center before:rounded-full before:bg-red-500/90 before:text-2xl before:font-semibold before:text-white before:shadow-lg before:content-["X"] after:pointer-events-none after:absolute after:inset-0 after:z-10 after:rounded-[inherit] after:border after:border-red-300/80 after:bg-zinc-950/35 after:content-[""]';
 const voidRemoveSuggestionOverlayVariants = cva("pointer-events-none absolute inset-0 z-20 overflow-hidden rounded-[inherit]", { defaultVariants: { active: false }, variants: { active: { false: "hidden", true: 'before:-translate-x-1/2 before:-translate-y-1/2 before:pointer-events-none before:absolute before:top-1/2 before:left-1/2 before:z-20 before:flex before:size-10 before:items-center before:justify-center before:rounded-full before:bg-red-500/90 before:font-semibold before:text-2xl before:text-white before:shadow-lg before:content-["X"] after:pointer-events-none after:absolute after:inset-0 after:z-10 after:rounded-[inherit] after:border after:border-red-300/80 after:bg-zinc-950/35 after:content-[""]' } } });
 const voidRemoveSuggestionVariants = cva("", { defaultVariants: { active: false }, variants: { active: { false: "", true: voidRemoveSuggestionClass } } });
 
+
+
 const isStaticVoidRemoveSuggestion = (element: TElement) => {
   return ((element as TElement & { suggestion?: { type?: string; }; }).suggestion?.type === "remove");
 };
+
+
 
 const VoidRemoveSuggestionOverlayStatic = ({ editor, element }: { editor: any;
   element: TElement;
@@ -59,5 +65,7 @@ const SuggestionLeafStatic = (props: SlateLeafProps<TSuggestionText>) => {
     </SlateLeaf>
   );
 };
+
+
 
 export { voidRemoveSuggestionClass, voidRemoveSuggestionOverlayVariants, voidRemoveSuggestionVariants, isStaticVoidRemoveSuggestion, VoidRemoveSuggestionOverlayStatic, SuggestionLeafStatic };
