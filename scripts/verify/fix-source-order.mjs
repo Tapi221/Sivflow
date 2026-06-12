@@ -97,11 +97,25 @@ const isPascalCaseName = (name) => /^[A-Z][A-Za-z0-9]*$/.test(name);
 
 const isUpperCaseConstantName = (name) => /^[A-Z0-9_]+$/.test(name);
 
-const getVariableStatementNames = (statement) => statement.declarationList.declarations.flatMap((declaration) => ts.isIdentifier(declaration.name) ? [declaration.name.text] : []);
+const getBindingNameIdentifiers = (name) => {
+  if (ts.isIdentifier(name)) return [name.text];
+  if (ts.isObjectBindingPattern(name) || ts.isArrayBindingPattern(name)) return name.elements.flatMap((element) => ts.isBindingElement(element) ? getBindingNameIdentifiers(element.name) : []);
+
+  return [];
+};
+
+const getVariableStatementNames = (statement) => statement.declarationList.declarations.flatMap((declaration) => getBindingNameIdentifiers(declaration.name));
 
 const getTopLevelStatementNames = (statement) => {
   if (ts.isVariableStatement(statement)) return getVariableStatementNames(statement);
   if ((ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement) || ts.isEnumDeclaration(statement) || ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement)) && statement.name) return [statement.name.text];
+
+  return [];
+};
+
+const getRuntimeDeclarationNames = (statement) => {
+  if (ts.isVariableStatement(statement)) return getVariableStatementNames(statement);
+  if ((ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement) || ts.isEnumDeclaration(statement)) && statement.name) return [statement.name.text];
 
   return [];
 };
@@ -160,6 +174,36 @@ const isConstDependentTypeStatement = (source, statement, highestRank) => {
 const isIdentifierUsedInStatement = (source, statement, name) => {
   const statementSource = source.slice(statement.getStart(), statement.getEnd());
   return new RegExp(`\\b${escapeRegExp(name)}\\b`, "u").test(statementSource);
+};
+
+const isRuntimeForwardDependencyTarget = (statement) => {
+  if (isDirectiveStatement(statement)) return false;
+  if (isImportStatement(statement)) return false;
+  if (ts.isExportDeclaration(statement) || ts.isExportAssignment(statement)) return false;
+  if (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isModuleDeclaration(statement)) return false;
+  if (ts.isVariableStatement(statement) || ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement) || ts.isEnumDeclaration(statement)) return false;
+
+  return true;
+};
+
+const findForwardRuntimeDependencyMove = (source, sourceFile) => {
+  const statements = [...sourceFile.statements];
+
+  for (let index = 0; index < statements.length; index += 1) {
+    const statement = statements[index];
+    if (!isRuntimeForwardDependencyTarget(statement)) continue;
+
+    let dependencyIndex = -1;
+
+    for (let laterIndex = index + 1; laterIndex < statements.length; laterIndex += 1) {
+      const names = getRuntimeDeclarationNames(statements[laterIndex]);
+      if (names.some((name) => isIdentifierUsedInStatement(source, statement, name))) dependencyIndex = laterIndex;
+    }
+
+    if (dependencyIndex >= 0) return { fromIndex: index, targetIndex: dependencyIndex };
+  }
+
+  return null;
 };
 
 const isDependentOnEarlierHigherRankStatement = (source, statement, statements, fromIndex, rank) => {
@@ -247,6 +291,12 @@ const applySourceOrderFix = (filePath, source) => {
   for (let pass = 0; pass < maxPassCount; pass += 1) {
     const sourceFile = createSourceFile(filePath, nextSource);
     if (sourceFile.parseDiagnostics.length > 0) return nextSource;
+
+    const forwardDependencyMove = findForwardRuntimeDependencyMove(nextSource, sourceFile);
+    if (forwardDependencyMove) {
+      nextSource = moveStatement(nextSource, sourceFile, forwardDependencyMove);
+      continue;
+    }
 
     const move = findFirstOrderMove(nextSource, sourceFile);
     if (!move) return nextSource;
