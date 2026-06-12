@@ -1,7 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
 import type { Folder } from "@/types/domain/folder";
 
 const normalizeFolderId = (value: string | null | undefined) => {
@@ -35,7 +35,7 @@ const useFolderLineage = (folderId: string | null) => {
 
         const folder = normalizeFolder(rawFolder);
         lineage.unshift(folder);
-        currentFolderId = normalizeFolderId(folder.parentId);
+        currentFolderId = normalizeFolderId(folder.parentFolderId);
       }
 
       return lineage;
