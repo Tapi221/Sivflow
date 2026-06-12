@@ -30,8 +30,8 @@ declare global {
 }
 
 const FIREBASE_ENV_FAILURE_MARKER = "[env] Missing required Firebase env vars";
-const STARTUP_FAILURE_TITLE = "起動設定が不足しています";
-const STARTUP_FAILURE_DESCRIPTION = "必要な設定を読み込めなかったため、画面を表示できません。";
+const STARTUP_FAILURE_TITLE = "起動に失敗しました";
+const STARTUP_FAILURE_DESCRIPTION = "アプリの読み込み中にエラーが発生しました。";
 const FIREBASE_ENV_SETUP_GUIDE = ".env.example を .env.local にコピーして VITE_FIREBASE_* を設定し、dev server を再起動してください。";
 const TEST_BYPASS_SEARCH_PARAM = "test_bypass";
 const ROOT_ELEMENT_ID = "root";
@@ -90,14 +90,23 @@ const STARTUP_LOGO_STYLE = `
 }
 `;
 
+const getErrorMessage = (error: unknown): string => {
+  return error instanceof Error ? error.message : String(error);
+};
+const isFirebaseEnvStartupFailure = (error: unknown): boolean => {
+  return getErrorMessage(error).includes(FIREBASE_ENV_FAILURE_MARKER);
+};
+const shouldRethrowStartupLoadFailure = (error: unknown): boolean => {
+  return import.meta.env.DEV && !isFirebaseEnvStartupFailure(error);
+};
 const getStartupFailureMessage = (error: unknown): string => {
-  const message = error instanceof Error ? error.message : String(error);
+  const message = getErrorMessage(error);
 
-  if (message.includes(FIREBASE_ENV_FAILURE_MARKER)) {
+  if (isFirebaseEnvStartupFailure(error)) {
     return `${message}\n\n${FIREBASE_ENV_SETUP_GUIDE}`;
   }
 
-  return message ?? "起動に必要なモジュールの読み込みに失敗しました。";
+  return message || "起動に必要なモジュールの読み込みに失敗しました。";
 };
 const startAppRuntimeSafely = async (): Promise<void> => {
   try {
@@ -216,6 +225,9 @@ const AppBootstrap = () => {
         })
         .catch((error) => {
           console.error("[Startup] PDF performance route loading failed", error);
+          if (shouldRethrowStartupLoadFailure(error)) {
+            throw error;
+          }
           if (!mounted) return;
           setState({ status: "failed", message: getStartupFailureMessage(error) });
         });
@@ -233,6 +245,9 @@ const AppBootstrap = () => {
       })
       .catch((error) => {
         console.error("[Startup] App module loading failed", error);
+        if (shouldRethrowStartupLoadFailure(error)) {
+          throw error;
+        }
         if (!mounted) return;
         setState({ status: "failed", message: getStartupFailureMessage(error) });
       });
