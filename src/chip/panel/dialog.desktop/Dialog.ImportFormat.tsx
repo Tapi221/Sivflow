@@ -1,4 +1,3 @@
-import { Button } from "@/chip/ui/button/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/chip/ui/dialog/dialog";
 
 type ImportFormat = "xlsx" | "mfdeck" | "mfcard";
@@ -16,7 +15,7 @@ const ImportFormatDialog = ({ open, onOpenChange, onSelect }: ImportFormatDialog
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>インポート形式を選択</DialogTitle>
           <DialogDescription>
@@ -54,11 +53,6 @@ const ImportFormatDialog = ({ open, onOpenChange, onSelect }: ImportFormatDialog
               .mfcard の単体カードを取り込みます。1枚だけ共有する用途です。
             </p>
           </button>
-        </div>
-        <div className="flex justify-end">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            閉じる
-          </Button>
         </div>
       </DialogContent>
     </Dialog>
