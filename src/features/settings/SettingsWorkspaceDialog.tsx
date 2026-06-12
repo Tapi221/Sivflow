@@ -1,5 +1,5 @@
 import "@/features/settings/SettingsWorkspaceDialog.css";
-import type { MouseEvent as ReactMouseEvent } from "react";
+import { DialogDesktopPanel } from "@/chip/panel/dialog.desktop/dialog";
 import { SettingsWorkspaceScreen } from "@/features/settings/SettingsWorkspaceScreen";
 
 type SettingsWorkspaceDialogProps = {
@@ -9,18 +9,13 @@ type SettingsWorkspaceDialogProps = {
 
 const SettingsWorkspaceDialog = ({ open, onOpenChange }: SettingsWorkspaceDialogProps) => {
   const handleClose = () => onOpenChange(false);
-  const handleBackdropMouseDown = (event: ReactMouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) handleClose();
-  };
 
   if (!open) return null;
 
   return (
-    <div className="app-modal-backdrop" onMouseDown={handleBackdropMouseDown}>
-      <section className="app-modal-surface settings-workspace-dialog" aria-label="Settings">
-        <SettingsWorkspaceScreen />
-      </section>
-    </div>
+    <DialogDesktopPanel surfaceClassName="settings-workspace-dialog" ariaLabel="Settings" onClose={handleClose}>
+      <SettingsWorkspaceScreen />
+    </DialogDesktopPanel>
   );
 };
 
