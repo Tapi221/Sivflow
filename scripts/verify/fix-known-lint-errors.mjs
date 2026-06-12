@@ -17,11 +17,11 @@ const SIMPLE_MEMBER_EXPRESSION_PATTERN = String.raw`[A-Za-z_$][\w$]*(?:\?\.[A-Za
 const NUMBER_NULLISH_ZERO_PATTERN = new RegExp(String.raw`Number\((${SIMPLE_MEMBER_EXPRESSION_PATTERN})\) \?\? 0`, "gu");
 const JOIN_NULLISH_FALLBACK_PATTERN = new RegExp(String.raw`(${SIMPLE_MEMBER_EXPRESSION_PATTERN})\.join\(([^()\n]*)\) \?\? ("[^"\n]*"|'[^'\n]*')`, "gu");
 const RESOLVE_STRATIS_ICON_DECLARATION_PATTERN = /^const resolveStratisIcon = \(names: readonly string\[\]\): StratisIconComponent \| null => .*;$/mu;
+const STRATIS_ICON_DECLARATION_PATTERN = /^const Stratis(?:Bookmark|Check|Plus|Settings)Icon = resolveStratisIcon\(STRATIS_(?:BOOKMARK|CHECK|PLUS|SETTINGS)_ICON_NAMES\);\n?/gmu;
 const CALENDAR_TIMETABLE_ICON_DECLARATIONS = "const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);\nconst StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);\nconst StratisSettingsIcon = resolveStratisIcon(STRATIS_SETTINGS_ICON_NAMES);\n";
 const SCHEDULE_SCREEN_ICON_DECLARATIONS = "const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);\nconst StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);\n";
 const PDF_PANE_ICON_DECLARATIONS = "const StratisBookmarkIcon = resolveStratisIcon(STRATIS_BOOKMARK_ICON_NAMES);\n";
 const PDF_DOCUMENT_SOURCE_RESOLUTION_REPLACEMENT = "const waitForPdfSourceResolution: PdfSourceResolutionWaiter = async (promise) => {";
-const STRATIS_ICON_DECLARATION_BLOCKS = [CALENDAR_TIMETABLE_ICON_DECLARATIONS, SCHEDULE_SCREEN_ICON_DECLARATIONS, PDF_PANE_ICON_DECLARATIONS];
 
 const normalizeLineEndings = (source) => source.split("\r\n").join("\n").split("\r").join("\n");
 
@@ -61,7 +61,7 @@ const removeBlock = (source, startText) => {
   return `${source.slice(0, startIndex)}${source.slice(endIndex + "\n};\n".length)}`;
 };
 
-const removeStratisIconDeclarations = (source) => STRATIS_ICON_DECLARATION_BLOCKS.reduce((currentSource, declarations) => replaceAll(currentSource, declarations, ""), source);
+const removeStratisIconDeclarations = (source) => source.replace(STRATIS_ICON_DECLARATION_PATTERN, "");
 
 const insertAfterResolveStratisIcon = (source, declarations) => {
   const sourceWithoutDeclarations = removeStratisIconDeclarations(source);
