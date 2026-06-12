@@ -18,25 +18,25 @@ type GoogleTaskItem = {
 };
 type GoogleTasksApiTaskListsResponse = {
   items?: Array<{ id?: string;
-  title?: string;
-  updated?: string;
-}>;
-nextPageToken?: string;
+    title?: string;
+    updated?: string;
+  }>;
+  nextPageToken?: string;
 };
 type GoogleTasksApiTasksResponse = {
   items?: Array<{ id?: string;
-  title?: string;
-  notes?: string;
-  status?: GoogleTaskStatus;
-  due?: string;
-  completed?: string;
-  updated?: string;
-  parent?: string;
-  position?: string;
-  deleted?: boolean;
-  hidden?: boolean;
-}>;
-nextPageToken?: string;
+    title?: string;
+    notes?: string;
+    status?: GoogleTaskStatus;
+    due?: string;
+    completed?: string;
+    updated?: string;
+    parent?: string;
+    position?: string;
+    deleted?: boolean;
+    hidden?: boolean;
+  }>;
+  nextPageToken?: string;
 };
 
 export type { GoogleTaskListItem, GoogleTaskStatus, GoogleTaskItem, GoogleTasksApiTaskListsResponse, GoogleTasksApiTasksResponse };

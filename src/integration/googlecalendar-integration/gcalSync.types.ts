@@ -65,15 +65,15 @@ type GCalEventsListResponse = {
 };
 type GoogleCalendarApiListResponse = {
   items?: Array<{ id?: string;
-  summary?: string;
-  summaryOverride?: string;
-  description?: string;
-  backgroundColor?: string;
-  foregroundColor?: string;
-  primary?: boolean;
-  selected?: boolean;
-}>;
-nextPageToken?: string;
+    summary?: string;
+    summaryOverride?: string;
+    description?: string;
+    backgroundColor?: string;
+    foregroundColor?: string;
+    primary?: boolean;
+    selected?: boolean;
+  }>;
+  nextPageToken?: string;
 };
 type GoogleCalendarApiCalendarResponse = {
   id?: string;

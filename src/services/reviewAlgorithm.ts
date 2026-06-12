@@ -7,17 +7,17 @@ import { toMillis } from "@/utils/toMillis";
 
 type ReviewAlgorithmInput = {
   card: { memoryStability?: number | null;
-  currentLevel?: number | null;
-  level?: number | null;
-  nextReviewDate?: Date | Timestamp | null;
-  next_review_date?: Date | Timestamp | string | number | null;
-  lastReviewAt?: Date | Timestamp | null;
-  recoveryRemaining?: number | null;
-  reviewCount?: number | null;
-  difficulty?: number | null;
-};
-subjectiveScore: SubjectiveScore;
-now?: Date;
+    currentLevel?: number | null;
+    level?: number | null;
+    nextReviewDate?: Date | Timestamp | null;
+    next_review_date?: Date | Timestamp | string | number | null;
+    lastReviewAt?: Date | Timestamp | null;
+    recoveryRemaining?: number | null;
+    reviewCount?: number | null;
+    difficulty?: number | null;
+  };
+  subjectiveScore: SubjectiveScore;
+  now?: Date;
 };
 type ReviewAlgorithmResult = {
   memoryStability: number;
