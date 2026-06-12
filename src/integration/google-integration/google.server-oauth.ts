@@ -183,8 +183,8 @@ const getServerStoredGoogleCalendarAccessToken = async (input: GetGoogleCalendar
     throw toUserTransparentAutoRecoveryError(error);
   }
 };
-const exchangeGoogleConnectedServiceCode = exchangeGoogleCalendarCode;
-const getServerStoredGoogleConnectedServiceAccessToken = getServerStoredGoogleCalendarAccessToken;
+const exchangeGoogleConnectedServiceCode = async (input: ExchangeGoogleCalendarCodeInput): Promise<ServerGoogleCalendarAccess> => exchangeGoogleCalendarCode(input);
+const getServerStoredGoogleConnectedServiceAccessToken = async (input: GetGoogleCalendarAccessTokenInput): Promise<ServerGoogleCalendarAccess> => getServerStoredGoogleCalendarAccessToken(input);
 const disconnectServerStoredGoogleCalendarAccount = async (input: DisconnectGoogleCalendarAccountInput): Promise<void> => {
   await waitForCallableAuth();
   await disconnectGoogleCalendarAccountCallable(input);
