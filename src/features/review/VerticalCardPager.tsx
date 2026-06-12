@@ -78,7 +78,7 @@ const clampIndex = (idx: number, count: number) => {
   return Math.max(0, Math.min(count - 1, Math.trunc(idx)));
 };
 
-const VerticalCardPagerFn = <T,>({
+function VerticalCardPagerFn<T>({
   cards,
   activeIndex,
   onActiveIndexChange,
@@ -99,7 +99,7 @@ const VerticalCardPagerFn = <T,>({
   preserveScrollAnchorKey = null,
   scrollToActiveIndexRequestKey = null,
   scrollToActiveIndexBehavior = "auto",
-}: VerticalCardPagerProps<T>) => {
+}: VerticalCardPagerProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<string, HTMLDivElement | null>>(new Map());
   const activeIndexRef = useRef(activeIndex);
@@ -345,7 +345,7 @@ const VerticalCardPagerFn = <T,>({
       </div>
     </div>
   );
-};
+}
 
 const VerticalCardPager = React.memo(VerticalCardPagerFn) as typeof VerticalCardPagerFn;
 
