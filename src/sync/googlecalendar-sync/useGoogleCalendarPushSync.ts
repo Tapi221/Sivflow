@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import type { Unsubscribe } from "firebase/firestore";
 import { collection, onSnapshot, query } from "firebase/firestore";
-import { firestoreDb } from "@/services/firebase";
+import { firestoreDb } from "@/infrastructure/firebase/client";
 
 type UseGoogleCalendarPushSyncOptions = {
   userId: string | null;
