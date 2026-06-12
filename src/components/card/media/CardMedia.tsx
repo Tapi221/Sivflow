@@ -7,7 +7,7 @@ import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
 import { resolveCardImageUrl } from "@/services/cardImageResolver";
 import type { ResolvableImageRef } from "@/types/domain/assets";
 import { Copy, Download, Image as ImageIcon, Pause, Play, Volume2 } from "@/ui/icons";
-import type { ImageGalleryItem } from "./types";
+import type { ImageGalleryItem } from "./media.types";
 
 interface AudioPlayerProps {
   urls: string[];
