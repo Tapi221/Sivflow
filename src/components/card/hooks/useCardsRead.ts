@@ -6,7 +6,7 @@ import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { buildCardSetById, filterCardsByFolderId } from "@/domain/card/selectors/cardFolder";
 import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
 import type { Card } from "@/types";
 import { toMillis } from "@/utils/toMillis";
 
