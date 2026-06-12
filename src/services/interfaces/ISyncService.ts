@@ -118,5 +118,4 @@ interface ISyncService { synchronize(onProgress?: (msg: string) => void): Promis
   dismissSecurityAlert(alertId: string): Promise<void>;
 }
 
-export type { SyncEntity };
-export type { JsonPrimitive, JsonValue, JsonObject, JsonArray, SyncTaskType, SyncPriority, SyncOperationType, MergeStrategy, CloudDeviceStatus, SyncConflict, SyncTask, BatchConstraint, INetworkMonitor, IQueueManager, FolderLike, IDiffEngine, SyncChange, ICloudSyncAdapter, SyncStats, UserSettingsSnapshot, SyncProcessingError, SecurityAlert, SecurityState, ISyncService };
+export type { SyncEntity, JsonPrimitive, JsonValue, JsonObject, JsonArray, SyncTaskType, SyncPriority, SyncOperationType, MergeStrategy, CloudDeviceStatus, SyncConflict, SyncTask, BatchConstraint, INetworkMonitor, IQueueManager, FolderLike, IDiffEngine, SyncChange, ICloudSyncAdapter, SyncStats, UserSettingsSnapshot, SyncProcessingError, SecurityAlert, SecurityState, ISyncService };

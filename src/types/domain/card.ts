@@ -84,5 +84,4 @@ type CardPatch = Omit<Partial<Card>, "front" | "back" | "cardSetId" | "folderId"
   back?: Partial<CardFace>;
 };
 
-export type { UploadedImage };
-export type { CardBlock, CardFaceAttachmentAudio, CardFaceAttachments, CardFace, Card, CardPatch };
+export type { UploadedImage, CardBlock, CardFaceAttachmentAudio, CardFaceAttachments, CardFace, Card, CardPatch };

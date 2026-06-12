@@ -84,6 +84,4 @@ const normalizeZoomPercent = ({ value, minZoomPercent, maxZoomPercent, stepPerce
   });
 };
 
-export { CARD_VIEW_DEFAULT_ZOOM_PERCENT, CARD_VIEW_MIN_ZOOM_PERCENT };
-export { CARD_VIEW_ZOOM_STEP_PERCENT };
-export { zoomPercentToFactor, zoomPercentToFixedCardWidthPx, computeDynamicMaxZoomPercent, clampZoomPercent, snapZoomPercent, normalizeZoomPercent, CARD_VIEW_DEFAULT_WIDTH_PX, CARD_VIEW_MIN_WIDTH_PX };
+export { CARD_VIEW_DEFAULT_ZOOM_PERCENT, CARD_VIEW_MIN_ZOOM_PERCENT, CARD_VIEW_ZOOM_STEP_PERCENT, zoomPercentToFactor, zoomPercentToFixedCardWidthPx, computeDynamicMaxZoomPercent, clampZoomPercent, snapZoomPercent, normalizeZoomPercent, CARD_VIEW_DEFAULT_WIDTH_PX, CARD_VIEW_MIN_WIDTH_PX };

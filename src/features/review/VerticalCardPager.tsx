@@ -342,7 +342,6 @@ const VerticalCardPagerFn = <T,>({
   );
 };
 
-export { VerticalCardPager };
-export { ACTIVE_INDEX_RENDER_RADIUS };
+export { VerticalCardPager, ACTIVE_INDEX_RENDER_RADIUS };
 export type { VerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";
 export type { VerticalCardPagerProps };
