@@ -7,7 +7,7 @@ import { DOCUMENT_CONTEXT_MENU_HEIGHT, DOCUMENT_CONTEXT_MENU_PANEL_ID, DOCUMENT_
 import { LAYERED_COLOR_MENU_HEIGHT, LAYERED_COLOR_MENU_WIDTH, LayeredColorMenu } from "@/chip/panel/rightclickpanel.desktop/LayeredColorMenu.desktop";
 import type { LayeredProjectMenuAction, LayeredProjectMenuActionId, LayeredProjectMenuSubmenuAnchor } from "@/chip/panel/rightclickpanel.desktop/LayeredProjectMenu";
 import { LAYERED_PROJECT_MENU_HEIGHT, LAYERED_PROJECT_MENU_PANEL_ID, LAYERED_PROJECT_MENU_WIDTH, LayeredProjectMenu } from "@/chip/panel/rightclickpanel.desktop/LayeredProjectMenu";
-import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, useRightClickPanelDismiss } from "@/chip/panel/rightclickpanel.desktop/rightClickPanel.utils";
+import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, useRightClickPanelDismiss } from "@/chip/panel/rightClickPanel.utils";
 import { useCardSets } from "@/components/card/hooks/useCardSets";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { ExplorerChromeCardSetIcon, ExplorerChromeFolderIcon, ExplorerChromePdfIcon } from "@/components/explorer/icons";

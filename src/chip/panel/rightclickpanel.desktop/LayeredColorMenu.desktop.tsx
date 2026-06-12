@@ -1,9 +1,9 @@
 import { memo } from "react";
 import { TAG_COLOR_PALETTE } from "@shared/design-tokens/tag.palette";
 import type { CSSProperties, RefObject } from "react";
-import { RightClickPanel } from "@/chip/panel/rightclickpanel.desktop/rightclickpanel";
-import type { RightClickPanelId } from "@/chip/panel/rightclickpanel.desktop/rightClickPanel.utils";
-import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING } from "@/chip/panel/rightclickpanel.desktop/rightClickPanel.utils";
+import { RightClickPanel } from "@/chip/panel/rightclickpanel";
+import type { RightClickPanelId } from "@/chip/panel/rightClickPanel.utils";
+import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING } from "@/chip/panel/rightClickPanel.utils";
 import type { TagColorKey } from "@/chip/tag/tagColor";
 import { getTagColorSwatchStyle, TAG_COLOR_KEYS } from "@/chip/tag/tagColor";
 
