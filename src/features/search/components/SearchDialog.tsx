@@ -102,7 +102,6 @@ const SearchDialog = () => {
         className="gs-dialog !w-[min(600px,calc(100vw-32px))] !max-w-none !p-0"
         overlayClassName="gs-dialog__overlay"
         contentWrapperClassName="gs-dialog__positioner"
-        showCloseButton={false}
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           inputRef.current?.focus();
