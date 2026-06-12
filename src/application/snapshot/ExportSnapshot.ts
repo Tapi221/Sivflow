@@ -29,4 +29,5 @@ const createExportSnapshotUseCase = ({ fileExporter }: ExportSnapshotDependencie
 };
 
 export { createExportSnapshotUseCase };
+
 export type { ExportSnapshotDependencies };

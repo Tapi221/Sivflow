@@ -3,6 +3,8 @@ import { VerticalCardPager } from "@/features/review/VerticalCardPager";
 import type { StudyReviewProps } from "@/features/study/presentation/shared/studyReviewProps";
 import StudyCard from "@/features/study/StudyCard";
 
+
+
 const StudyReviewDesktop = ({ cards, sessionCurrentIndex, onResult, onToggleUncertainty, onToggleBookmark, onEdit, showHard, showEasy }: StudyReviewProps) => {
   const [flipTrigger, setFlipTrigger] = useState(0);
 
@@ -35,5 +37,7 @@ const StudyReviewDesktop = ({ cards, sessionCurrentIndex, onResult, onToggleUnce
     </div>
   );
 };
+
+
 
 export { StudyReviewDesktop };

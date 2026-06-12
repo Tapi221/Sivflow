@@ -273,4 +273,5 @@ const createPanelCard = ({ selectedCard, draft, isEditing }: CreatePanelCardPara
 
 export { toDateOrNull } from "@/utils/toMillis";
 export { NEW_SENTINEL, AUTOSAVE_DELAY_MS, cloneBlock, cloneAttachments, snapshotDraft, draftSignature, sanitizeBlocksForSave, sanitizeAttachmentsForSave, hasMeaningfulBlock, hasMeaningfulAttachments, hasMeaningfulDraft, extractCreatedCardId, buildDraftFromCard, buildPatchFromDraft, prepareDraftForPersist, buildSavePayload, buildCardPatchForToggle, createPanelCard };
+
 export type { TagNameLookup, PersistOperation, PersistResult };

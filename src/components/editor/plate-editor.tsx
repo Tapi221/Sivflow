@@ -1,9 +1,13 @@
 "use client";
 
 import type { Value } from "platejs";
+
 import { Plate, usePlateEditor } from "platejs/react";
+
 import { Editor, EditorContainer } from "@/components/ui/editor";
+
 import { EditorKit } from "./editor-kit";
+
 import { SettingsDialog } from "./settings-dialog";
 
 type PlateEditorProps = {

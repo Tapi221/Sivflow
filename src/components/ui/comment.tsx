@@ -1,21 +1,37 @@
 "use client";
 
 import * as React from "react";
+
 import { getCommentKey, getDraftCommentKey } from "@platejs/comment";
+
 import { CommentPlugin, useCommentId } from "@platejs/comment/react";
+
 import { differenceInDays, differenceInHours, differenceInMinutes, format } from "date-fns";
+
 import { ArrowUpIcon, CheckIcon, MoreHorizontalIcon, PencilIcon, TrashIcon, XIcon } from "lucide-react";
+
 import type { NodeEntry, TCommentText, Value } from "platejs";
+
 import { KEYS, nanoid, NodeApi } from "platejs";
+
 import type { CreatePlateEditorOptions } from "platejs/react";
+
 import { Plate, useEditorPlugin, useEditorRef, usePlateEditor, usePluginOption } from "platejs/react";
+
 import { BasicMarksKit } from "@/components/editor/plugins/basic-marks-kit";
+
 import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
+
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
+
 import { cn } from "@/lib/utils";
+
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
+
 import { Button } from "./button";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu";
+
 import { Editor, EditorContainer } from "./editor";
 
 type TComment = { id: string;
@@ -42,6 +58,7 @@ const useCommentEditor = (
 
   return commentEditor;
 };
+
 const formatCommentDate = (date: Date) => {
   const now = new Date();
   const diffMinutes = differenceInMinutes(now, date);
@@ -160,6 +177,7 @@ const CommentMoreDropdown = (props: {
     </DropdownMenu>
   );
 };
+
 const Comment = (props: { comment: TComment;
   discussionLength: number;
   editingId: string | null;
@@ -388,6 +406,7 @@ const Comment = (props: { comment: TComment;
     </div>
   );
 };
+
 const CommentCreateForm = ({ autoFocus = false, className, discussionId: discussionIdProp, focusOnMount = false }: { autoFocus?: boolean;
   className?: string;
   discussionId?: string;
@@ -576,4 +595,5 @@ const CommentCreateForm = ({ autoFocus = false, className, discussionId: discuss
 };
 
 export { Comment, CommentCreateForm, formatCommentDate };
+
 export type { TComment };

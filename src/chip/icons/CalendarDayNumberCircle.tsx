@@ -56,4 +56,5 @@ const CalendarDayNumberCircle = ({
 };
 
 export { CalendarDayNumberCircle };
+
 export type { CalendarDayNumberCircleProps };

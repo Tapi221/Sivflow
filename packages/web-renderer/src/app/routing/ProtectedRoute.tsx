@@ -4,6 +4,8 @@ import { LoadingFallback } from "@/components/common/LoadingFallback";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { isTestBypassEnabled } from "./testBypass";
 
+
+
 const ProtectedRoute = ({ children }: { children: ReactNode; }) => {
   const { currentUser, loading } = useAuthSession();
 
@@ -17,5 +19,7 @@ const ProtectedRoute = ({ children }: { children: ReactNode; }) => {
 
   return children;
 };
+
+
 
 export { ProtectedRoute };

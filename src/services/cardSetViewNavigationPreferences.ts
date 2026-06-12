@@ -15,9 +15,13 @@ type CardSetViewNavigationPreferencesStore = {
   byScope: Record<string, CardSetViewNavigationPreference>;
 };
 
+
+
 const CARD_SET_VIEW_NAVIGATION_PREFERENCES_STORAGE_KEY = "sivflow:cardsetview-navigation-preferences:v1";
 const LEGACY_CARD_SET_VIEW_NAVIGATION_PREFERENCES_STORAGE_KEY = "flashcard-master:cardsetview-navigation-preferences:v1";
 const NO_CARD_SET_SCOPE_KEY = "__no_card_set__";
+
+
 
 const emptyStore = (): CardSetViewNavigationPreferencesStore => ({
   version: 1,
@@ -127,5 +131,9 @@ const setCardSetViewNavigationPreference = (scope: CardSetViewNavigationPreferen
   writeStore(store);
 };
 
+
+
 export { getCardSetViewNavigationPreference, setCardSetViewNavigationPreference };
+
+
 export type { CardSetViewNavigationPreference };

@@ -137,4 +137,5 @@ LayeredProjectMenu.displayName = "LayeredProjectMenu";
 
 export { LayeredProjectMenu };
 export { LAYERED_PROJECT_MENU_PANEL_ID, LAYERED_PROJECT_MENU_WIDTH, LAYERED_PROJECT_MENU_HEIGHT, LAYERED_PROJECT_MENU_MARGIN };
+
 export type { LayeredProjectMenuActionId, LayeredProjectMenuAction, LayeredProjectMenuSubmenuAnchor };

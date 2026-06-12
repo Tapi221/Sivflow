@@ -147,4 +147,5 @@ const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
 CardFrame.displayName = "CardFrame";
 
 export { CardFrame };
+
 export type { CardFrameProps };

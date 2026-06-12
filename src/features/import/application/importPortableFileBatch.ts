@@ -6,6 +6,8 @@ import { readMfDeckFile } from "@/features/deckFile/infra/web/readMfDeckFile";
 import type { PortableImportFileKind } from "@/features/import/domain/importFileKind";
 import { detectImportFileKind, IMPORT_FILE_LABELS, isPortableImportFileKind } from "@/features/import/domain/importFileKind";
 
+
+
 type PortableImportBatchItemStatus = | "queued" | "parsing" | "importing" | "imported" | "failed" | "skipped";
 type PortableImportBatchItem = { id: string;
   file: File;
@@ -35,6 +37,8 @@ type ImportPortableFileBatchParams = { files: File[];
   ensureTagByName?: EnsureMfDeckTagByName;
   onItemChange?: (item: PortableImportBatchItem) => void;
 };
+
+
 
 const genId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -235,5 +239,9 @@ const formatPortableImportBatchItemSubtitle = (item: Pick<PortableImportBatchIte
   return `${IMPORT_FILE_LABELS[item.kind]} / ${formatFileSize(item.size)}`;
 };
 
+
+
 export { buildPortableImportBatchItems, importPortableFileBatch, formatPortableImportBatchItemSubtitle };
+
+
 export type { PortableImportBatchItemStatus, PortableImportBatchItem, PortableImportBatchResult, ImportPortableFileBatchParams };

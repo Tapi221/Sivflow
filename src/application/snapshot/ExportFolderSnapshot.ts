@@ -117,4 +117,5 @@ const createExportFolderSnapshotUseCase = ({ fileExporter }: ExportFolderSnapsho
 };
 
 export { createExportFolderSnapshotUseCase };
+
 export type { ExportFolderSnapshotDependencies };

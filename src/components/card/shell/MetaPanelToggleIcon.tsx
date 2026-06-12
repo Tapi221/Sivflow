@@ -37,4 +37,5 @@ const MetaPanelToggleIcon = ({ className, open = false, ...props }: MetaPanelTog
 };
 
 export { MetaPanelToggleIcon };
+
 export type { MetaPanelToggleIconProps };

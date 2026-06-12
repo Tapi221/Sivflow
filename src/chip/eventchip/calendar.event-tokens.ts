@@ -4,4 +4,5 @@ const CALENDAR_EVENT_TOKENS = { purple: { bg: "#EEEDFE", border: "#534AB7", text
 >;
 
 export { CALENDAR_EVENT_TOKENS };
+
 export type { CalendarEventVariant };
