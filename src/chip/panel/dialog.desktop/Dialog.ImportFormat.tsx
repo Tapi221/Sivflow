@@ -15,7 +15,7 @@ const ImportFormatDialog = ({ open, onOpenChange, onSelect }: ImportFormatDialog
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl" showCloseButton={false}>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>インポート形式を選択</DialogTitle>
           <DialogDescription>

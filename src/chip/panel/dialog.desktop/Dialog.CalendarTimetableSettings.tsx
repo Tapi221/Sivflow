@@ -1,3 +1,4 @@
+import type { MouseEvent as ReactMouseEvent } from "react";
 import type { CalendarTimetablePeriod, CalendarTimetableVisibleDayCount } from "@core/domain/calendar/timetable/timetable.types";
 import { normalizeVisibleDayCount } from "@/features/calendar/timetable/calendarTimetable.storage";
 import { cn } from "@/lib/utils";
@@ -15,15 +16,18 @@ type CalendarTimetableSettingsDialogProps = {
 const VISIBLE_DAY_COUNT_OPTIONS = [5, 6, 7] as const;
 
 const CalendarTimetableSettingsDialog = ({ periods, visibleDayCount, onChangeVisibleDayCount, onAddPeriod, onUpdatePeriod, onDeletePeriod, onClose }: CalendarTimetableSettingsDialogProps) => {
+  const handleBackdropMouseDown = (event: ReactMouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) onClose();
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 px-4 py-6" role="dialog" aria-modal="true" aria-label="時間割設定">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 px-4 py-6" role="dialog" aria-modal="true" aria-label="時間割設定" onMouseDown={handleBackdropMouseDown}>
       <div className="flex max-h-full w-full max-w-[520px] flex-col overflow-hidden rounded-[22px] border border-[#e5e5ea] bg-white shadow-[0_18px_60px_rgba(0,0,0,0.18)]">
         <div className="flex shrink-0 items-center justify-between border-b border-[#f0f0f2] px-5 py-4">
           <div className="min-w-0">
             <h2 className="text-[17px] font-bold tracking-[-0.03em] text-[#1c1c1e]">時間割設定</h2>
             <p className="mt-1 text-[12px] font-medium text-[#8e8e93]">曜日数と時限テンプレートを編集</p>
           </div>
-          <button type="button" className="rounded-full px-3 py-1.5 text-[13px] font-semibold text-[#6e6e73] hover:bg-[#f7f7f8]" onClick={onClose}>閉じる</button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
           <div className="mb-5">

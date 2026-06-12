@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { hasDesktopRuntime } from "@platform/runtime";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
 import { addDays, endOfDay, endOfMonth, format, startOfDay, startOfMonth, subDays } from "date-fns";
 import type { PlanResultMode } from "@/chip/toggle/Toggle.planresult";
@@ -29,7 +28,6 @@ import { cn } from "@/lib/utils";
 import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
 import { CalendarSelectedViewsSplitView } from "@/pane.desktop/leftpane/schedule/Calendar.SelectedViewsSplitView.desktop";
 import { CalendarSidebar } from "@/pane.desktop/leftpane/schedule/CalendarSidebar";
-import { TabsBar } from "@/pane.desktop/tab.desktopnative/TabsBar";
 import { MobileCalendarEventComposer } from "@/pane.desktop/view/MobileCalendarEventComposer";
 
 type CalendarEventDisplayRange = {
@@ -93,7 +91,7 @@ const createInitialCalendarPrintRange = (date: Date): CalendarPrintRangeState =>
 };
 const createInitialMonthVisibleEventCount = (): number => readStoredScheduleMonthVisibleEventCount() ?? DEFAULT_MONTH_VISIBLE_EVENT_COUNT;
 
-const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose }: ScheduleScreenProps) => {
+const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose, contentToolbar = null }: ScheduleScreenProps) => {
   const pane = useScheduleScreen();
   const t = useT();
   const dateFnsLocale = useDateFnsLocale();
@@ -162,7 +160,6 @@ const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose }: Sch
   const headerTitleDate = isSplitCalendarView ? selectedDate : primaryViewMode === "month" || isListCalendarView ? monthTitleDate : isPieChartCalendarView ? selectedDate : titleDate;
   const headerTitleLabel = primaryViewMode === "year" ? format(headerTitleDate, "yyyy年", { locale: dateFnsLocale }) : format(headerTitleDate, isPieChartCalendarView || isSplitCalendarView ? "yyyy年M月d日" : monthLabelFormat, { locale: dateFnsLocale });
   const printRangeLabel = useMemo(() => getCalendarPrintRangeLabel(printDisplayRange, printRange.mode, primaryViewMode), [primaryViewMode, printDisplayRange, printRange.mode]);
-  const contentToolbar = hasDesktopRuntime() ? <TabsBar variant="titlebar" /> : null;
 
   const handleBeforePrintCalendar = useCallback(async () => {
     await syncGoogleCalendarRange(printDisplayRange);
