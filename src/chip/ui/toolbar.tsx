@@ -6,7 +6,7 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import { ChevronDown } from "lucide-react";
-import { DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuSeparator } from "@/chip/panel/popover/dropdown-menu";
+import { DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuSeparator } from "@/chip/panel/dropdown-menu";
 import { Separator } from "@/chip/ui/separator";
 import { Tooltip, TooltipTrigger } from "@/chip/ui/tooltip";
 import { cn } from "@/lib/utils";

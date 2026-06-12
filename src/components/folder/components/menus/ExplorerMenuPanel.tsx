@@ -1,5 +1,5 @@
 import React from "react";
-import { DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/chip/panel/popover/dropdown-menu";
+import { DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/chip/panel/dropdown-menu";
 import { floatingPanelPresets } from "@/chip/ui/menu-styles";
 import type { MenuAction } from "@/components/folder/components/menus/menuActions";
 import { cn } from "@/lib/utils";
