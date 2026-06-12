@@ -11,13 +11,13 @@ import { PathApi } from "platejs";
 import type { PlateElementProps, RenderNodeWrapper } from "platejs/react";
 import { useEditorRef, usePluginOption } from "platejs/react";
 import { BlockSuggestionCard, isResolvedSuggestion } from "@/chip/ui/block/block-suggestion";
+import { Button } from "@/chip/ui/button/button";
+import { Comment, CommentCreateForm } from "@/chip/ui/comment";
+import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
 import { commentPlugin } from "@/components/editor/plugins/comment-kit";
 import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
 import { suggestionPlugin } from "@/components/editor/plugins/suggestion-kit";
 import { useBlockDiscussionItems } from "@/lib/block-discussion-index";
-import { Button } from "./button/button";
-import { Comment, CommentCreateForm } from "./comment";
-import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "./popover";
 
 const BlockComment = ({ discussion, isLast }: { discussion: TDiscussion; isLast: boolean; }) => {
   const [editingId, setEditingId] = React.useState<string | null>(null);
