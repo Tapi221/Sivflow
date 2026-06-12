@@ -44,6 +44,7 @@ type TableResizeHandleProps = {
 type TableCellMetrics = {
   colIndex: number;
   colSpan: number;
+  marginLeft: number;
   minHeight: number;
   nextWidth: number | null;
   rowIndex: number;
@@ -77,11 +78,12 @@ const getCellRowSpan = (element: TTableCellElement) => getCellAttributes(element
 const getCellWidthFromAttributes = (element: TTableCellElement) => getCellAttributes(element)?.colwidth?.[0];
 const clampColumnWidth = (width: number, minColumnWidth: number) => Math.max(Math.round(width), Math.max(minColumnWidth, TABLE_MIN_CELL_WIDTH));
 const clampRowHeight = (height: number) => Math.max(Math.round(height), 24);
-const getTableColSizes = (editor: PlateEditor, tablePath: Path | null) => {
-  if (!tablePath) return [];
-  const tableEntry = editor.api.node<TTableElement>(tablePath);
-  return tableEntry?.[0].colSizes ?? [];
+const getTableEntry = (editor: PlateEditor, tablePath: Path | null) => {
+  if (!tablePath) return null;
+  return editor.api.node<TTableElement>(tablePath) ?? null;
 };
+const getTableColSizes = (editor: PlateEditor, tablePath: Path | null) => getTableEntry(editor, tablePath)?.[0].colSizes ?? [];
+const getTableMarginLeft = (editor: PlateEditor, tablePath: Path | null) => getTableEntry(editor, tablePath)?.[0].marginLeft ?? 0;
 const getRowSize = (editor: PlateEditor, rowPath: Path | null) => {
   if (!rowPath) return 0;
   const rowEntry = editor.api.node<TTableRowElement>(rowPath);
@@ -98,11 +100,13 @@ const getCellMetrics = (editor: PlateEditor, element: TTableCellElement): TableC
   const colSizes = getTableColSizes(editor, tablePath);
   const attributeWidth = getCellWidthFromAttributes(element);
   const width = colSizes.length > 0 ? colSizes.slice(colIndex, colIndex + colSpan).reduce((total, colSize) => total + (colSize || TABLE_DEFAULT_CELL_WIDTH), 0) : attributeWidth ?? TABLE_DEFAULT_CELL_WIDTH;
+  const marginLeft = getTableMarginLeft(editor, tablePath);
   const nextWidth = colSizes[colIndex + colSpan] ?? null;
   const minHeight = getRowSize(editor, rowPath);
   return {
     colIndex,
     colSpan,
+    marginLeft,
     minHeight,
     nextWidth,
     rowIndex,
@@ -255,7 +259,6 @@ const TableCellElement = ({ isHeader = false, ...props }: TableCellElementProps)
   const { editor, getOptions } = useEditorPlugin(TablePlugin);
   const { disableMarginLeft = false, minColumnWidth = TABLE_MIN_CELL_WIDTH } = getOptions();
   const metrics = getCellMetrics(editor, element);
-  const marginLeft = props.element.marginLeft ?? 0;
   return (
     <PlateElement
       {...props}
@@ -281,9 +284,9 @@ const TableCellElement = ({ isHeader = false, ...props }: TableCellElementProps)
       <div className="relative z-20 box-border h-full px-4 py-2" style={{ minHeight: metrics.minHeight || undefined }}>
         {children}
       </div>
-      {metrics.tablePath && metrics.colIndex === 0 && !disableMarginLeft && <TableResizeHandle colIndex={metrics.colIndex} direction="left" editor={editor} marginLeft={marginLeft} minColumnWidth={minColumnWidth} nextWidth={metrics.nextWidth} rowIndex={metrics.rowIndex} tablePath={metrics.tablePath} width={metrics.width} />}
-      {metrics.tablePath && <TableResizeHandle colIndex={metrics.colIndex} direction="right" editor={editor} marginLeft={marginLeft} minColumnWidth={minColumnWidth} nextWidth={metrics.nextWidth} rowIndex={metrics.rowIndex} tablePath={metrics.tablePath} width={metrics.width} />}
-      {metrics.tablePath && <TableResizeHandle colIndex={metrics.colIndex} direction="bottom" editor={editor} marginLeft={marginLeft} minColumnWidth={minColumnWidth} nextWidth={metrics.nextWidth} rowIndex={metrics.rowIndex} tablePath={metrics.tablePath} width={metrics.minHeight || 24} />}
+      {metrics.tablePath && metrics.colIndex === 0 && !disableMarginLeft && <TableResizeHandle colIndex={metrics.colIndex} direction="left" editor={editor} marginLeft={metrics.marginLeft} minColumnWidth={minColumnWidth} nextWidth={metrics.nextWidth} rowIndex={metrics.rowIndex} tablePath={metrics.tablePath} width={metrics.width} />}
+      {metrics.tablePath && <TableResizeHandle colIndex={metrics.colIndex} direction="right" editor={editor} marginLeft={metrics.marginLeft} minColumnWidth={minColumnWidth} nextWidth={metrics.nextWidth} rowIndex={metrics.rowIndex} tablePath={metrics.tablePath} width={metrics.width} />}
+      {metrics.tablePath && <TableResizeHandle colIndex={metrics.colIndex} direction="bottom" editor={editor} marginLeft={metrics.marginLeft} minColumnWidth={minColumnWidth} nextWidth={metrics.nextWidth} rowIndex={metrics.rowIndex} tablePath={metrics.tablePath} width={metrics.minHeight || 24} />}
     </PlateElement>
   );
 };
