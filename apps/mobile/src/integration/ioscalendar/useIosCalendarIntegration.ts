@@ -127,7 +127,7 @@ const useIosCalendarIntegration = () => {
     setSelectedCalendarIds(new Set(nextSelectedCalendarIds));
 
     return nextCalendars;
-  }, []);
+  }, [setCalendars, setSelectedCalendarIds]);
 
   const syncCurrentRange = useCallback(async (nextCalendars: IosCalendarListItem[] = calendarsRef.current) => {
     await loadEvents({
@@ -240,7 +240,7 @@ const useIosCalendarIntegration = () => {
     } finally {
       setIsConnecting(false);
     }
-  }, [loadCalendars, loadEvents, supported]);
+  }, [loadCalendars, loadEvents, setError, setIsConnecting, setIsEnabled, setPermissionStatus, supported]);
 
   const disconnect = useCallback(() => {
     calendarsRef.current = [];
@@ -252,7 +252,7 @@ const useIosCalendarIntegration = () => {
     setEvents([]);
     setError(null);
     setLastSyncedAt(null);
-  }, []);
+  }, [setCalendars, setError, setEvents, setIsEnabled, setLastSyncedAt, setSelectedCalendarIds]);
 
   const toggleCalendar = useCallback((calendarId: string) => {
     setSelectedCalendarIds((currentIds) => {
@@ -267,14 +267,14 @@ const useIosCalendarIntegration = () => {
       selectedCalendarIdsRef.current = nextIds;
       return nextIds;
     });
-  }, []);
+  }, [setSelectedCalendarIds]);
 
   const syncRange = useCallback((nextRange: IosCalendarRange) => {
     const normalizedRange = normalizeRange(nextRange);
     rangeRef.current = normalizedRange;
 
     setRange((currentRange) => isSameRange(currentRange, normalizedRange) ? currentRange : normalizedRange);
-  }, []);
+  }, [setRange]);
 
   const forceSync = useCallback(async (nextRange?: Partial<IosCalendarRange>) => {
     const requestedRange = nextRange?.rangeStart && nextRange.rangeEnd

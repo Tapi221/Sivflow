@@ -7,5 +7,4 @@ type StorageLike = Record<string, unknown>;
 const denormalizeFolderForStorage = (value: Partial<Folder> | StorageLike): StorageLike => cloneStorageRecord(value);
 const normalizeFolderFromStorage = (value: unknown): Folder => normalizeFolder(value);
 
-export { normalizeFolderWithSilent };
-export { denormalizeFolderForStorage, normalizeFolderFromStorage };
+export { normalizeFolderWithSilent, denormalizeFolderForStorage, normalizeFolderFromStorage };

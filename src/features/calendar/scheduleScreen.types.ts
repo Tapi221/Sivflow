@@ -111,5 +111,4 @@ type CalendarWeekDayGridProps = { headerScrollRef: RefObject<HTMLDivElement | nu
   onReorderAllDayEvents?: CalendarAllDayEventReorderHandler;
 };
 
-export type { CalendarViewMode, CalendarViewModeSelection };
-export type { CalendarProvider, ProjectCalendarSyncDirection, GoogleCalendarColorOverrideMap, CalendarAllDayEventOrderMap, CalendarBufferDays, CalendarGridStyle, CalendarEventLabelStyle, ScheduleScreenProps, AppCalendarItem, ProjectCalendarLink, ProjectEventLink, GoogleAccountDisplay, CalendarSelectionRange, CalendarEventMoveRequest, CalendarEventMoveHandler, CalendarAllDayEventReorderRequest, CalendarAllDayEventReorderHandler, CalendarSidebarProps, CalendarWeekDayGridProps };
+export type { CalendarViewMode, CalendarViewModeSelection, CalendarProvider, ProjectCalendarSyncDirection, GoogleCalendarColorOverrideMap, CalendarAllDayEventOrderMap, CalendarBufferDays, CalendarGridStyle, CalendarEventLabelStyle, ScheduleScreenProps, AppCalendarItem, ProjectCalendarLink, ProjectEventLink, GoogleAccountDisplay, CalendarSelectionRange, CalendarEventMoveRequest, CalendarEventMoveHandler, CalendarAllDayEventReorderRequest, CalendarAllDayEventReorderHandler, CalendarSidebarProps, CalendarWeekDayGridProps };

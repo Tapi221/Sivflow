@@ -185,5 +185,4 @@ const ToggleCalendarViewMode = ({
   );
 };
 
-export { ToggleCalendarViewMode };
-export { ViewModeDropdown };
+export { ToggleCalendarViewMode, ViewModeDropdown };

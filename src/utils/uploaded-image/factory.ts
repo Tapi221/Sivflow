@@ -50,12 +50,12 @@ const createFailedUploadedImage = (file: File): UploadedImage => {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
-export { generateUploadedImageId, createUploadedImage, createFailedUploadedImage };
-=======
 
+=======
 
 =======
 >>>>>>> b62265d03 (re)
-export { generateUploadedImageId };
-export { createUploadedImage, createFailedUploadedImage };
+
 >>>>>>> f6207c71b (r)
+
+export { generateUploadedImageId, createUploadedImage, createFailedUploadedImage };
