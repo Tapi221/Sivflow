@@ -11,7 +11,7 @@ import { TagBadge } from "@/components/tag/TagBadge";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
-import { StratisTagIcon as Tag } from "stratis-ui-icons";
+import { Tag } from "@/ui/icons";
 
 type ContentTypeFilter = "card" | "pdf";
 type ToggleableFlag = "any" | "on" | "off";
