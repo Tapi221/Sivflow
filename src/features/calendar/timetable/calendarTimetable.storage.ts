@@ -16,6 +16,7 @@ type CalendarTimetableSettingsRecord = Partial<CalendarTimetableSettings> | null
 const TIMETABLE_SETTINGS_ID = "default";
 const DEFAULT_SEMESTER_ID = "default-semester";
 const DEFAULT_VISIBLE_DAY_COUNT: CalendarTimetableVisibleDayCount = 5;
+const DEFAULT_UNTITLED_COURSE_TITLE = "授業";
 const DEFAULT_TIMETABLE_PERIODS: readonly CalendarTimetablePeriod[] = [
   { id: "period-1", label: "1", startTime: "08:50", endTime: "10:20", order: 0 },
   { id: "period-2", label: "2", startTime: "10:30", endTime: "12:00", order: 1 },
@@ -142,10 +143,10 @@ const searchCalendarTimetableSyllabusCourses = async (query: string, institution
 const saveCalendarTimetableCourse = async (draft: CalendarTimetableCourseDraft): Promise<void> => {
   const periods = await listCalendarTimetablePeriods();
   const slots = normalizeSlots(draft.slots, periods);
-  const title = normalizeText(draft.title);
+  const title = normalizeText(draft.title) || DEFAULT_UNTITLED_COURSE_TITLE;
   const now = createTimestamp();
 
-  if (!title || slots.length === 0) return;
+  if (slots.length === 0) return;
 
   await timetableDb.courses.put({ id: draft.id ?? createCourseId(), semesterId: normalizeSemesterId(draft.semesterId), syllabusCourseId: draft.syllabusCourseId, institutionId: draft.institutionId, departmentId: draft.departmentId, title, room: normalizeText(draft.room), teacher: normalizeText(draft.teacher), memo: normalizeText(draft.memo), colorKey: draft.colorKey, slots, createdAt: draft.createdAt ?? now, updatedAt: now });
 };
