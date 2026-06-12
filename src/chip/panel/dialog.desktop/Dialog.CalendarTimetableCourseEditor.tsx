@@ -20,16 +20,14 @@ type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
 const STRATIS_ICON_COMPONENTS = stratisIcons as Record<string, StratisIconComponent | undefined>;
 const STRATIS_CHECK_ICON_NAMES = ["StratisCheckIcon", "StratisCheck01Icon", "StratisCheckCircleContainedIcon"] as const;
+const STRATIS_CHECK_ICON = STRATIS_CHECK_ICON_NAMES.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
 const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] as const;
 const DEFAULT_COURSE_COLOR_KEY: CalendarTimetableColorKey = "blue";
 const EMPTY_SLOT_LIST: CalendarTimetableSlot[] = [];
 
-const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
 const isSameTimetableSlot = (left: CalendarTimetableSlot, right: CalendarTimetableSlot): boolean => left.dayIndex === right.dayIndex && left.periodId === right.periodId;
 const createEditorSlots = (course: CalendarTimetableCourse | null, initialSlot: CalendarTimetableSlot | null): CalendarTimetableSlot[] => course?.slots ?? (initialSlot ? [initialSlot] : EMPTY_SLOT_LIST);
 const getTimetableEntryStyle = (colorKey: CalendarTimetableColorKey) => getTagColorStyle(colorKey);
-
-const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);
 
 const CalendarTimetableCourseEditorDialog = ({ course, semesterId, initialSlot, periods, visibleDayCount, onSave, onDelete, onClose }: CalendarTimetableCourseEditorDialogProps) => {
   const [title, setTitle] = useState(course?.title ?? "");
@@ -38,7 +36,6 @@ const CalendarTimetableCourseEditorDialog = ({ course, semesterId, initialSlot, 
   const [memo, setMemo] = useState(course?.memo ?? "");
   const [colorKey, setColorKey] = useState<CalendarTimetableColorKey>(course?.colorKey ?? DEFAULT_COURSE_COLOR_KEY);
   const [slots, setSlots] = useState<CalendarTimetableSlot[]>(() => createEditorSlots(course, initialSlot));
-
   useEffect(() => {
     setTitle(course?.title ?? "");
     setRoom(course?.room ?? "");
@@ -47,22 +44,17 @@ const CalendarTimetableCourseEditorDialog = ({ course, semesterId, initialSlot, 
     setColorKey(course?.colorKey ?? DEFAULT_COURSE_COLOR_KEY);
     setSlots(createEditorSlots(course, initialSlot));
   }, [course, initialSlot]);
-
   const toggleSlot = useCallback((slot: CalendarTimetableSlot) => {
     setSlots((currentSlots) => currentSlots.some((currentSlot) => isSameTimetableSlot(currentSlot, slot)) ? currentSlots.filter((currentSlot) => !isSameTimetableSlot(currentSlot, slot)) : [...currentSlots, slot]);
   }, []);
-
   const handleSave = useCallback(() => {
     void onSave({ id: course?.id, semesterId, syllabusCourseId: course?.syllabusCourseId, institutionId: course?.institutionId, departmentId: course?.departmentId, title, room, teacher, memo, colorKey, slots, createdAt: course?.createdAt }).then(onClose);
   }, [colorKey, course, memo, onClose, onSave, room, semesterId, slots, teacher, title]);
-
   const handleDelete = useCallback(() => {
     if (!course) return;
     void onDelete(course.id).then(onClose);
   }, [course, onClose, onDelete]);
-
   const isSaveDisabled = slots.length === 0;
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 px-4 py-6" role="dialog" aria-modal="true" aria-label="授業編集">
       <div className="flex max-h-full w-full max-w-[560px] flex-col overflow-hidden rounded-[22px] border border-[#e5e5ea] bg-white shadow-[0_18px_60px_rgba(0,0,0,0.18)]">
@@ -92,7 +84,7 @@ const CalendarTimetableCourseEditorDialog = ({ course, semesterId, initialSlot, 
                 {periods.map((period) => <div key={period.id} className="contents"><div className="flex items-center justify-end pr-2 text-[12px] font-bold text-[#6e6e73]">{period.label}</div>{TIMETABLE_DAY_LABELS.slice(0, visibleDayCount).map((_, dayIndex) => {
                   const slot = { dayIndex: dayIndex as CalendarTimetableWeekdayIndex, periodId: period.id };
                   const selected = slots.some((currentSlot) => isSameTimetableSlot(currentSlot, slot));
-                  return <button key={`${dayIndex}-${period.id}`} type="button" className={cn("flex h-9 items-center justify-center rounded-[10px] border text-[12px] font-bold", selected ? "border-[#007aff] bg-[#e8f2ff] text-[#007aff]" : "border-[#e5e5ea] bg-white text-[#c7c7cc]")} onClick={() => toggleSlot(slot)}>{selected && StratisCheckIcon ? <StratisCheckIcon className="h-4 w-4" aria-hidden="true" focusable="false" /> : null}</button>;
+                  return <button key={`${dayIndex}-${period.id}`} type="button" className={cn("flex h-9 items-center justify-center rounded-[10px] border text-[12px] font-bold", selected ? "border-[#007aff] bg-[#e8f2ff] text-[#007aff]" : "border-[#e5e5ea] bg-white text-[#c7c7cc]")} onClick={() => toggleSlot(slot)}>{selected && STRATIS_CHECK_ICON ? <STRATIS_CHECK_ICON className="h-4 w-4" aria-hidden="true" focusable="false" /> : null}</button>;
                 })}</div>)}
               </div>
             </>
