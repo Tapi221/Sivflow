@@ -1,5 +1,5 @@
 import React from "react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/ui/dropdown-menu";
 import { cardHeightPxToLayoutRows, layoutRowsToCardHeightPx, snapMinCardHeightPx } from "@/domain/card/cardGeometry.constants";
 import { cn } from "@/lib/utils";
 import type { CssVars } from "@/types/style";

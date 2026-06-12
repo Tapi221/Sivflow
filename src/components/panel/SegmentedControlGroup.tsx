@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { SurfaceButton } from "@/components/ui/surface-button";
+import { SurfaceButton } from "@/chip/ui/surface-button";
 import { cn } from "@/lib/utils";
 
 type SegmentedOption<T extends string> = {

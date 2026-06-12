@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
-import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
+import AutoResizeTextarea from "@/chip/ui/AutoResizeTextarea";
 import { QuestionBlockLayout } from "./QuestionBlockLayout";
 import { QUESTION_BLOCK_ANSWER_TEXT_CLASS, QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX, QUESTION_BLOCK_TITLE_TEXT_CLASS } from "./questionBlockTextStyles";
 

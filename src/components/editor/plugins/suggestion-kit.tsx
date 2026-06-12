@@ -5,7 +5,7 @@ import { BaseSuggestionPlugin } from "@platejs/suggestion";
 import type { ExtendConfig, TElement, TInlineSuggestionData, TSuggestionData, TSuggestionText } from "platejs";
 import { KEYS, TextApi, TrailingBlockPlugin } from "platejs";
 import { toTPlatePlugin } from "platejs/react";
-import { SuggestionLeaf, SuggestionLineBreak, VoidRemoveSuggestionOverlay } from "@/components/ui/suggestion-node";
+import { SuggestionLeaf, SuggestionLineBreak, VoidRemoveSuggestionOverlay } from "@/chip/ui/suggestion-node";
 import { discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarget } from "./discussion-kit";
 
 type SuggestionConfig = ExtendConfig<

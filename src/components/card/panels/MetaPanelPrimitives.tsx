@@ -1,7 +1,7 @@
 import * as React from "react";
-import type { SurfaceButtonProps } from "@/components/ui/surface-button";
-import { SurfaceButton } from "@/components/ui/surface-button";
-import { Switch } from "@/components/ui/switch";
+import type { SurfaceButtonProps } from "@/chip/ui/surface-button";
+import { SurfaceButton } from "@/chip/ui/surface-button";
+import { Switch } from "@/chip/ui/switch";
 import { cn } from "@/lib/utils";
 
 type MetaPanelActionRowAlign = "start" | "between" | "end";

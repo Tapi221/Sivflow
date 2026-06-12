@@ -1,5 +1,5 @@
 import React from "react";
-import { Slider } from "@/components/ui/slider";
+import { Slider } from "@/chip/ui/slider";
 import { Minus, Plus, RefreshCw } from "@/ui/icons";
 
 interface CardPaneWidthAdjusterProps {

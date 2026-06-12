@@ -8,7 +8,7 @@ import { StrictMode } from "react";
 import type { Root } from "react-dom/client";
 import { createRoot } from "react-dom/client";
 import { ErrorBoundary } from "@/components/common/ErrorScreen";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/chip/ui/tooltip";
 import { renderGoogleOAuthCallback } from "@/integration/google-integration/google.oauth-callback";
 import App from "@web-renderer/App";
 

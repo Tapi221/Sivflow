@@ -1,5 +1,5 @@
 import React from "react";
-import { Slider } from "@/components/ui/slider";
+import { Slider } from "@/chip/ui/slider";
 import { cn } from "@/lib/utils";
 
 type ScrollBarProps = {

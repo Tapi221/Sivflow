@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/chip/ui/button";
+import { Input } from "@/chip/ui/input";
 import { cn } from "@/lib/utils";
 import type { ReferenceBlockData } from "@/types";
 import { Plus } from "@/ui/icons";

@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useToast } from "@web-renderer/contexts/ToastContext";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/chip/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/chip/ui/dialog";
+import { Input } from "@/chip/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/chip/ui/select";
 import type { CreateCard, CreateCardSet } from "@/features/import/application/xlsxImportUseCases";
 import { executeXlsxImport, loadXlsxImportFile } from "@/features/import/application/xlsxImportUseCases";
 import type { ImportParseResult } from "@/features/import/domain/import.types";

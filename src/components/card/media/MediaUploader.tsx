@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
+import { Button } from "@/chip/ui/button";
+import { Slider } from "@/chip/ui/slider";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
 import type { ResolvedCardImage } from "@/services/cardImageResolver";
