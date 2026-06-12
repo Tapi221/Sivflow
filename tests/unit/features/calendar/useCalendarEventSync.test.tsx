@@ -12,7 +12,7 @@ vi.mock("firebase/auth", () => ({
   onAuthStateChanged: vi.fn(() => vi.fn()),
 }));
 
-vi.mock("@/services/firebase", () => ({
+vi.mock("@/infrastructure/firebase/client", () => ({
   auth: { currentUser: null },
 }));
 

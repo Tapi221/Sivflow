@@ -17,7 +17,7 @@ vi.mock("@/services/imageBlobUrlSessionCache", () => ({
   getOrCreateImageBlobUrl: vi.fn(async () => "blob:preview"),
 }));
 
-vi.mock("@/services/localDB", () => ({
+vi.mock("@/services/localdb", () => ({
   getLocalDb: vi.fn(async () => ({ upsert })),
 }));
 

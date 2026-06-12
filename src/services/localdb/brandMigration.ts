@@ -2,7 +2,7 @@ import { Dexie } from "dexie";
 import { LOCALDB_BRAND_MIGRATION_KEY_PREFIX, LOCALDB_GENERATION_MAX, LOCALDB_LEGACY_NAME_PREFIX, LOCALDB_NAME_PREFIX, LOCALDB_SCHEMA_VERSION_FOR_NAME } from "@/services/localdb/localdb.constants";
 import { defineNoteSchema } from "@/services/localdb/noteSchema";
 import { defineSchema } from "@/services/localdb/schema";
-import { warnOncePerSession } from "@/services/localDBRuntimeState";
+import { warnOncePerSession } from "@/services/localdbRuntimeState";
 
 type MigratableDexie = Dexie & Record<MigratableTableName, Dexie.Table<unknown, unknown>>;
 
