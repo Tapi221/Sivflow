@@ -1,4 +1,3 @@
-/* PDF.js viewer layout */
 .pdf-pane {
   position: relative;
   display: flex;
@@ -49,11 +48,9 @@
   background: rgb(0 0 0 / 0.12);
 }
 
-/* PDF.js requires the container passed to PDFViewer to be absolutely positioned. */
 .pdf-pane__scroll-container {
   position: absolute;
   inset: 0;
-  contain: layout paint style;
   overflow: auto;
   overflow-anchor: none;
   overscroll-behavior: contain;
@@ -62,130 +59,51 @@
   touch-action: pan-x pan-y;
 }
 
-.pdf-pane__scroll-container.pdf-pane--zooming {
-  overscroll-behavior: none;
-  touch-action: none;
-}
-
-/* Viewer element optimization */
-.pdf-pane__scroll-container .pdfViewer {
-  contain: layout paint style;
-  min-width: 100%;
-  overflow-anchor: none;
-  width: max-content;
-}
-
-.pdf-pane__scroll-container.pdf-pane--zooming .pdfViewer {
-  contain: layout style;
-  will-change: transform;
-  transform-box: border-box;
-}
-
-.pdf-pane__single-page {
+.pdf-pane__pages {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
   min-width: 100%;
   padding: 4.5rem 1.5rem 1.5rem;
   box-sizing: border-box;
 }
 
-.pdf-pane__canvas {
-  display: block;
+.pdf-pane__page {
+  position: relative;
+  flex: 0 0 auto;
   max-width: none;
-  height: auto;
   background: #ffffff;
   box-shadow: 0 12px 28px rgb(15 23 42 / 0.14);
 }
 
-/* PDF.js scale rerendering conflicts with content-visibility:auto and can create blank pages. */
-.pdf-pane__scroll-container .pdfViewer .page {
-  contain: layout paint style;
-  overflow-anchor: none;
-}
-
-.pdf-pane__scroll-container.pdf-pane--zooming .pdfViewer .page {
-  pointer-events: none;
-}
-
-.pdf-pane__zoom-snapshot {
-  position: sticky;
-  left: 0;
-  top: 0;
-  z-index: 10;
-  overflow: hidden;
-  pointer-events: none;
-  contain: strict;
-  background: transparent;
-  overflow-anchor: none;
-}
-
-.pdf-pane__zoom-snapshot img,
-.pdf-pane__zoom-snapshot canvas {
-  position: absolute;
+.pdf-pane__page-canvas {
+  position: relative;
+  z-index: 1;
   display: block;
-  max-width: none;
-  user-select: none;
+  width: 100%;
+  height: auto;
+  background: #ffffff;
 }
 
-/* Disable heavy overlay layers outside the retained DOM page window. */
-.pdf-pane__scroll-container .pdfViewer .page[data-window-retained="false"] .textLayer,
-.pdf-pane__scroll-container .pdfViewer .page[data-window-retained="false"] .annotationLayer,
-.pdf-pane__scroll-container .pdfViewer .page[data-window-retained="false"] .annotationEditorLayer,
-.pdf-pane__scroll-container .pdfViewer .page[data-window-retained="false"] .xfaLayer,
-.pdf-pane__scroll-container .pdfViewer .page[data-window-retained="false"] .structTreeLayer {
-  pointer-events: none;
-  visibility: hidden;
+.pdf-pane__page-placeholder {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: #ffffff;
 }
 
-/* Enable the GPU compositing layer only while scrolling to avoid persistent memory cost. */
-.pdf-pane__scroll-container.pdf-pane--scrolling {
-  will-change: scroll-position;
-}
-
-.pdf-pane__scroll-container.pdf-pane--scrolling .pdfViewer .canvasWrapper,
-.pdf-pane__scroll-container.pdf-pane--scrolling .pdfViewer canvas {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
-
-/* Disable overlay layer events while scrolling. */
-.pdf-pane__scroll-container.pdf-pane--scrolling .pdfViewer .textLayer,
-.pdf-pane__scroll-container.pdf-pane--scrolling .pdfViewer .annotationLayer,
-.pdf-pane__scroll-container.pdf-pane--scrolling .pdfViewer .annotationEditorLayer,
-.pdf-pane__scroll-container.pdf-pane--scrolling .pdfViewer .xfaLayer,
-.pdf-pane__scroll-container.pdf-pane--scrolling .pdfViewer .structTreeLayer {
-  pointer-events: none;
-}
-
-/* Hide text and annotation layers while scrolling to reduce rendering cost. */
-.pdf-pane__scroll-container.pdf-pane--scrolling .pdfViewer .textLayer,
-.pdf-pane__scroll-container.pdf-pane--scrolling .pdfViewer .annotationLayer,
-.pdf-pane__scroll-container.pdf-pane--scrolling .pdfViewer .annotationEditorLayer {
-  visibility: hidden;
-}
-
-.pdf-pane__scroll-container.pdf-pane--zooming.pdf-pane--scrolling {
-  will-change: auto;
-}
-
-.pdf-pane__scroll-container.pdf-pane--zooming.pdf-pane--scrolling .pdfViewer .canvasWrapper,
-.pdf-pane__scroll-container.pdf-pane--zooming.pdf-pane--scrolling .pdfViewer canvas {
-  transform: none;
-  backface-visibility: visible;
-}
-
-.pdf-pane__scroll-container.pdf-pane--zooming.pdf-pane--scrolling .pdfViewer .textLayer,
-.pdf-pane__scroll-container.pdf-pane--zooming.pdf-pane--scrolling .pdfViewer .annotationLayer,
-.pdf-pane__scroll-container.pdf-pane--zooming.pdf-pane--scrolling .pdfViewer .annotationEditorLayer,
-.pdf-pane__scroll-container.pdf-pane--zooming.pdf-pane--scrolling .pdfViewer .xfaLayer,
-.pdf-pane__scroll-container.pdf-pane--zooming.pdf-pane--scrolling .pdfViewer .structTreeLayer,
-.pdf-pane__scroll-container.pdf-pane--zooming .pdfViewer .textLayer,
-.pdf-pane__scroll-container.pdf-pane--zooming .pdfViewer .annotationLayer,
-.pdf-pane__scroll-container.pdf-pane--zooming .pdfViewer .annotationEditorLayer,
-.pdf-pane__scroll-container.pdf-pane--zooming .pdfViewer .xfaLayer,
-.pdf-pane__scroll-container.pdf-pane--zooming .pdfViewer .structTreeLayer {
-  pointer-events: auto;
-  visibility: visible;
+.pdf-pane__page-error {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgb(255 255 255 / 0.86);
+  text-align: center;
+  color: #b42318;
 }
 
 .pdf-pane__overlay,
