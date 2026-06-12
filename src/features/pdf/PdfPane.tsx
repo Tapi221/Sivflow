@@ -144,7 +144,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const pdfDocumentRef = useRef<PdfDocumentProxy | null>(null);
   const renderTaskRef = useRef<PdfRenderTask | null>(null);
-  const sourceReleaseTimerRef = useRef<number | null>(null);
+  const sourceReleaseTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | null>(null);
   const viewerStateRef = useRef<PdfViewerState | null>(viewerState);
   const [pdfDocument, setPdfDocument] = useState<PdfDocumentProxy | null>(null);
   const [isLoading, setIsLoading] = useState(Boolean(source));
@@ -493,7 +493,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         </button>
         <span className="pdf-pane__toolbar-separator" aria-hidden="true" />
         <button className={PDF_TOOLBAR_BUTTON_CLASS_NAME} type="button" onClick={toggleBookmark} disabled={!isReady} aria-pressed={toolbarState.isBookmarked} aria-label={toolbarState.isBookmarked ? "ブックマークを解除" : "ブックマークを追加"}>
-          {toolbarState.isBookmarked ? "★" : "☆"}
+          {toolbarState.isBookmarked ? "解除" : "保存"}
         </button>
         <button className={PDF_TOOLBAR_BUTTON_CLASS_NAME} type="button" onClick={goBackInHistory} disabled={!isReady || getViewerStateHistoryBackPages(viewerStateRef.current).length < 2}>
           戻る
