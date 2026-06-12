@@ -49,10 +49,10 @@ const TableCellElementStatic = ({ isHeader, ...props }: SlateElementProps<TTable
         "before:absolute before:box-border before:select-none before:content-['']",
         borders &&
         cn(
-          borders.bottom?.size && "before:border-b before:border-b-border",
-          borders.right?.size && "before:border-r before:border-r-border",
-          borders.left?.size && "before:border-l before:border-l-border",
-          borders.top?.size && "before:border-t before:border-t-border",
+          borders.bottom?.size && "before:border-b before:border-b-[var(--card-border-default)]",
+          borders.right?.size && "before:border-r before:border-r-[var(--card-border-default)]",
+          borders.left?.size && "before:border-l before:border-l-[var(--card-border-default)]",
+          borders.top?.size && "before:border-t before:border-t-[var(--card-border-default)]",
         ),
       )}
       style={
