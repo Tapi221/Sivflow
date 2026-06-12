@@ -51,7 +51,7 @@ const TableCellElement = ({ isHeader = false, ...props }: TableCellElementProps)
       {...props}
       as={isHeader ? "th" : "td"}
       className={cn(
-        "h-full overflow-visible border border-border bg-background p-0",
+        "h-full overflow-visible border border-[var(--card-border-default)] bg-background p-0",
         element.background ? "bg-(--cellBackground)" : "bg-background",
         isHeader && "text-left font-normal *:m-0",
       )}
