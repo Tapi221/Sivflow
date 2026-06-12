@@ -27,6 +27,10 @@ const EMPTY_SLOT_DRAFTS: SyllabusSlotDraft[] = [];
 
 const createInitialSlotDraft = (periods: CalendarTimetablePeriod[]): SyllabusSlotDraft[] => periods[0] ? [{ dayIndex: 0, periodLabel: periods[0].label }] : EMPTY_SLOT_DRAFTS;
 const formatSyllabusCourseSlots = (course: CalendarTimetableSyllabusCourse): string => course.slots.map((slot) => `${TIMETABLE_DAY_LABELS[slot.dayIndex]}${slot.periodLabel}`).join(" / ");
+const getSyllabusCourseSlotsLabel = (course: CalendarTimetableSyllabusCourse): string => {
+  const slotsLabel = formatSyllabusCourseSlots(course);
+  return slotsLabel.trim() === "" ? "時限未設定" : slotsLabel;
+};
 
 const CalendarTimetableSyllabusCatalogDialog = ({ activeSemesterId, institutions, periods, syllabusCourses, onSearch, onSaveSyllabusCourse, onAddCourseFromSyllabus, onClose }: CalendarTimetableSyllabusCatalogDialogProps) => {
   const [query, setQuery] = useState("");
@@ -44,37 +48,29 @@ const CalendarTimetableSyllabusCatalogDialog = ({ activeSemesterId, institutions
   const [syllabusUrl, setSyllabusUrl] = useState("");
   const [colorKey, setColorKey] = useState<CalendarTimetableColorKey>(DEFAULT_COURSE_COLOR_KEY);
   const [slots, setSlots] = useState<SyllabusSlotDraft[]>(() => createInitialSlotDraft(periods));
-
   const canSave = institutionName.trim().length > 0 && departmentName.trim().length > 0 && title.trim().length > 0;
   const catalogCountLabel = useMemo(() => `${syllabusCourses.length}件`, [syllabusCourses.length]);
-
   const handleSearch = useCallback(() => {
     void onSearch(query).then(setResults);
   }, [onSearch, query]);
-
   const handleAddSlot = useCallback(() => {
     const firstPeriod = periods[0];
     if (!firstPeriod) return;
     setSlots((currentSlots) => [...currentSlots, { dayIndex: 0, periodLabel: firstPeriod.label }]);
   }, [periods]);
-
   const handleUpdateSlot = useCallback((index: number, slot: SyllabusSlotDraft) => {
     setSlots((currentSlots) => currentSlots.map((currentSlot, currentIndex) => currentIndex === index ? slot : currentSlot));
   }, []);
-
   const handleDeleteSlot = useCallback((index: number) => {
     setSlots((currentSlots) => currentSlots.filter((_, currentIndex) => currentIndex !== index));
   }, []);
-
   const handleSave = useCallback(() => {
     if (!canSave) return;
     void onSaveSyllabusCourse({ institutionName, institutionKind, facultyName, departmentName, title, room, teacher, semesterLabel, credits, memo, syllabusUrl, colorKey, slots }).then(() => onSearch(query).then(setResults));
   }, [canSave, colorKey, credits, departmentName, facultyName, institutionKind, institutionName, memo, onSaveSyllabusCourse, onSearch, query, room, semesterLabel, slots, syllabusUrl, teacher, title]);
-
   const handleAddCourse = useCallback((course: CalendarTimetableSyllabusCourseDisplay) => {
     void onAddCourseFromSyllabus(course, activeSemesterId);
   }, [activeSemesterId, onAddCourseFromSyllabus]);
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 px-4 py-6" role="dialog" aria-modal="true" aria-label="授業DB">
       <div className="flex max-h-full w-full max-w-[980px] flex-col overflow-hidden rounded-[22px] border border-[#e5e5ea] bg-white shadow-[0_18px_60px_rgba(0,0,0,0.18)]">
@@ -103,7 +99,7 @@ const CalendarTimetableSyllabusCatalogDialog = ({ activeSemesterId, institutions
           </div>
           <div className="flex min-h-0 flex-col overflow-hidden px-5 py-4">
             <div className="mb-3 flex gap-2"><input className="h-10 min-w-0 flex-1 rounded-[12px] border px-3 text-[13px] font-semibold" value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") handleSearch(); }} placeholder="大学名・学部・授業名・教員で検索" /><button type="button" className="h-10 rounded-full border px-4 text-[13px] font-bold text-[#007aff]" onClick={handleSearch}>検索</button></div>
-            <div className="min-h-0 flex-1 overflow-y-auto"><div className="grid gap-2">{results.map((course) => <div key={course.id} className="rounded-[16px] border border-[#eee] bg-[#fafafa] p-3"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="truncate text-[14px] font-bold text-[#1c1c1e]">{course.title}</div><div className="mt-1 truncate text-[12px] font-semibold text-[#6e6e73]">{course.institutionName} / {course.facultyName}{course.facultyName && course.departmentName ? "・" : ""}{course.departmentName}</div><div className="mt-1 truncate text-[12px] font-medium text-[#8e8e93]">{course.teacher ?? "教員未設定"} / {course.room ?? "教室未設定"} / {formatSyllabusCourseSlots(course) || "時限未設定"}</div></div><button type="button" className="shrink-0 rounded-full bg-[#007aff] px-3 py-1.5 text-[12px] font-bold text-white" onClick={() => handleAddCourse(course)}>追加</button></div>{course.memo ? <div className="mt-2 line-clamp-2 text-[12px] font-medium text-[#6e6e73]">{course.memo}</div> : null}</div>)}</div>{results.length === 0 ? <div className="rounded-[16px] border border-dashed px-4 py-8 text-center text-[13px] font-semibold text-[#8e8e93]">授業DBは空です。</div> : null}</div>
+            <div className="min-h-0 flex-1 overflow-y-auto"><div className="grid gap-2">{results.map((course) => <div key={course.id} className="rounded-[16px] border border-[#eee] bg-[#fafafa] p-3"><div className="flex items-start justify-between gap-3"><div className="min-w-0"><div className="truncate text-[14px] font-bold text-[#1c1c1e]">{course.title}</div><div className="mt-1 truncate text-[12px] font-semibold text-[#6e6e73]">{course.institutionName} / {course.facultyName}{course.facultyName && course.departmentName ? "・" : ""}{course.departmentName}</div><div className="mt-1 truncate text-[12px] font-medium text-[#8e8e93]">{course.teacher ?? "教員未設定"} / {course.room ?? "教室未設定"} / {getSyllabusCourseSlotsLabel(course)}</div></div><button type="button" className="shrink-0 rounded-full bg-[#007aff] px-3 py-1.5 text-[12px] font-bold text-white" onClick={() => handleAddCourse(course)}>追加</button></div>{course.memo ? <div className="mt-2 line-clamp-2 text-[12px] font-medium text-[#6e6e73]">{course.memo}</div> : null}</div>)}</div>{results.length === 0 ? <div className="rounded-[16px] border border-dashed px-4 py-8 text-center text-[13px] font-semibold text-[#8e8e93]">授業DBは空です。</div> : null}</div>
           </div>
         </div>
       </div>
