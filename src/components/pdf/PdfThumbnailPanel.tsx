@@ -1,20 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, } from "react";
-
+import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState  } from "react";
 import { createPortal } from "react-dom";
-
-import { DragDropContext, Draggable, Droppable, type DropResult, } from "@hello-pangea/dnd";
-
-import type { PdfPageLayoutMode } from "@/types";
-
+import { DragDropContext, Draggable, Droppable, type DropResult } from "@hello-pangea/dnd";
 import { cn } from "@/lib/utils";
-
+import type { PdfPageLayoutMode } from "@/types";
 import type { PdfDocumentController } from "./hooks/usePdfDocument";
-
 import { PdfThumbnailItem } from "./PdfThumbnailItem";
-
 import { isPdfTextItem } from "./pdfViewerTypes";
-
-
 
 type PdfSidePanelTab = "markdown" | "outline" | "thumbnails";
 
@@ -48,8 +39,6 @@ interface MarkdownItem {
   content: string;
 }
 
-
-
 const DESKTOP_PANEL_WIDTH_PX = 320;
 
 const DESKTOP_PANEL_COLLAPSED_WIDTH_PX = 56;
@@ -74,7 +63,11 @@ const SIDE_PANEL_TABS = [
   label: string;
 }>;
 
-
+const TAB_ICONS: Record<PdfSidePanelTab, (props: IconProps) => JSX.Element> = {
+  markdown: MarkdownIcon,
+  outline: OutlineIcon,
+  thumbnails: GridIcon,
+};
 
 const buildNaturalPageNumbers = (numPages: number) => {
   return Array.from({ length: numPages }, (_, index) => index + 1);
@@ -145,8 +138,6 @@ const buildMarkdownTextFromItems = (items: readonly unknown[]) => {
     .filter((text) => text.length > 0)
     .join("\n");
 };
-
-
 
 const GridIcon = ({ className }: IconProps) => {
   return (
@@ -251,17 +242,8 @@ const OutlineIcon = ({ className }: IconProps) => {
   );
 };
 
-
-
-const TAB_ICONS: Record<PdfSidePanelTab, (props: IconProps) => JSX.Element> = {
-  markdown: MarkdownIcon,
-  outline: OutlineIcon,
-  thumbnails: GridIcon,
-};
-
-
-
-export const PdfThumbnailPanel = ({ documentController, currentPage, pageLayoutMode, bookmarkedPageNumbers, isMobileViewport, isOpen, onOpenChange, onSelectPage, onToggleBookmark, selectedTab = "thumbnails", onTabChange, orderedThumbnailPageNumbers, onThumbnailOrderChange, }: PdfThumbnailPanelProps) => { const [scrollRootElement, setScrollRootElement] = useState<HTMLElement | null>(null);
+const PdfThumbnailPanel = ({ documentController, currentPage, pageLayoutMode, bookmarkedPageNumbers, isMobileViewport, isOpen, onOpenChange, onSelectPage, onToggleBookmark, selectedTab = "thumbnails", onTabChange, orderedThumbnailPageNumbers, onThumbnailOrderChange }: PdfThumbnailPanelProps) => {
+  const [scrollRootElement, setScrollRootElement] = useState<HTMLElement | null>(null);
   const [markdownItems, setMarkdownItems] = useState<MarkdownItem[]>([]);
   const [isTextLoading, setIsTextLoading] = useState(false);
   const [previewOrderedThumbnailPageNumbers, setPreviewOrderedThumbnailPageNumbers] =
@@ -458,13 +440,13 @@ export const PdfThumbnailPanel = ({ documentController, currentPage, pageLayoutM
             {!documentController.loading &&
             !documentController.error &&
             displayedOrderedThumbnailPageNumbers.length === 0 ? (
-              <div
-                className="px-4 py-6 text-sm"
-                style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textMuted }}
-              >
-                ページ情報を読み込み中です。
-              </div>
-            ) : null}
+                <div
+                  className="px-4 py-6 text-sm"
+                  style={{ color: PDF_THUMBNAIL_PANEL_COLORS.textMuted }}
+                >
+                  ページ情報を読み込み中です。
+                </div>
+              ) : null}
 
             {displayedOrderedThumbnailPageNumbers.length > 0 ? (
               <div className="grid grid-cols-2 gap-3 p-4">
@@ -808,3 +790,5 @@ export const PdfThumbnailPanel = ({ documentController, currentPage, pageLayoutM
     </aside>
   );
 };
+
+export { PdfThumbnailPanel };
