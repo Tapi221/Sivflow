@@ -4,7 +4,7 @@ import * as React from "react";
 import { ArrowUpToLineIcon, BaselineIcon, BoldIcon, Code2Icon, HighlighterIcon, ItalicIcon, PaintBucketIcon, StrikethroughIcon, UnderlineIcon, WandSparklesIcon } from "lucide-react";
 import { KEYS } from "platejs";
 import { useEditorReadOnly } from "platejs/react";
-import { TableToolbarButton } from "@/chip/dropdownchip/table-toolbar-button";
+import { TableToolbarButton } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Table";
 import { AIToolbarButton } from "@/chip/ui/button/ai-toolbar-button";
 import { AlignToolbarButton } from "@/chip/ui/button/align-toolbar-button";
 import { CommentToolbarButton } from "@/chip/ui/button/comment-toolbar-button";
