@@ -7,7 +7,7 @@ import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuSeparator } from "./dropdown-menu";
+import { DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuSeparator } from "./menu/dropdown-menu";
 import { Separator } from "./separator";
 import { Tooltip, TooltipTrigger } from "./tooltip";
 

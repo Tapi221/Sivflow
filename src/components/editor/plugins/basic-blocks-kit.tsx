@@ -3,7 +3,7 @@
 import { BlockquoteRules, HeadingRules, HorizontalRuleRules } from "@platejs/basic-nodes";
 import { BlockquotePlugin, H1Plugin, H2Plugin, H3Plugin, H4Plugin, H5Plugin, H6Plugin, HorizontalRulePlugin } from "@platejs/basic-nodes/react";
 import { ParagraphPlugin } from "platejs/react";
-import { BlockquoteElement } from "@/chip/ui/blockquote-node";
+import { BlockquoteElement } from "@/chip/ui/node/blockquote-node";
 import { H1Element, H2Element, H3Element, H4Element, H5Element, H6Element } from "@/chip/ui/heading-node";
 import { HrElement } from "@/chip/ui/hr-node";
 import { ParagraphElement } from "@/chip/ui/paragraph-node";

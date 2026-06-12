@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "@/chip/ui/button";
+import { Button } from "@/chip/ui/button/button";
 import { Card, CardContent } from "@/chip/ui/card";
 
 type PracticeSummaryState = {

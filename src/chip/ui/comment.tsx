@@ -14,8 +14,8 @@ import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
-import { Button } from "./button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu";
+import { Button } from "./button/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "./menu/dropdown-menu";
 import { Editor, EditorContainer } from "./editor";
 
 type TComment = {

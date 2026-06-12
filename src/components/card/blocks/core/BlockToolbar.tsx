@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { overlayGlassActionButtonClassName, overlayGlassPillClassName, overlayGlassToolbarClassName } from "@/components/card/shell/overlaySurfaceClassNames";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/ui/menu/dropdown-menu";
 import type { EditorBlockIconName, EditorBlockType } from "@/lib/editorBlockSettings";
 import { getEditorBlockDefinition, parseEditorBlockSettings } from "@/lib/editorBlockSettings";
 import { cn } from "@/lib/utils";

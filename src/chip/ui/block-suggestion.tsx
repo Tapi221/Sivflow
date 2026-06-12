@@ -10,7 +10,7 @@ import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 import type { ResolvedSuggestion } from "@/lib/block-discussion-index";
 import { BLOCK_SUGGESTION_TOKEN } from "@/lib/block-discussion-index";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
-import { Button } from "./button";
+import { Button } from "./button/button";
 import { Comment, CommentCreateForm, formatCommentDate } from "./comment";
 
 const isResolvedSuggestion = (suggestion: ResolvedSuggestion | TDiscussion): suggestion is ResolvedSuggestion => "suggestionId" in suggestion;

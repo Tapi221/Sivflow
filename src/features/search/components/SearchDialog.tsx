@@ -3,7 +3,7 @@ import { Command as CommandPrimitive } from "cmdk";
 import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
 import { EXPLORER_ENTITY_ROW_DENSITY_COMPACT_CLASS, EXPLORER_ENTITY_ROW_INTERACTIVE_CLASS, EXPLORER_ENTITY_ROW_SHELL_BASE_CLASS, EXPLORER_ROW_BASE_CLASS_NAME, EXPLORER_ROW_CONTENT_CLASS, EXPLORER_ROW_ICON_SLOT_CLASS, FOLDER_ROW_ICON_SIZE_CLASS, FOLDER_ROW_TITLE_CLASS } from "@/components/folder/explorer/rows/shared";
 import { Command, CommandItem, CommandList } from "@/chip/ui/command";
-import { Dialog, DialogContent } from "@/chip/ui/dialog";
+import { Dialog, DialogContent } from "@/chip/ui/dialog/dialog";
 import { useSearchHotkey } from "@/features/hotkey/useSearchHotkey";
 import { rankSearchResults } from "@/features/search/lib/rankSearchResults";
 import type { SearchIconKind, SearchItem } from "@/features/search/model/search.types";

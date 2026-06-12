@@ -6,7 +6,7 @@ import { cva } from "class-variance-authority";
 import { Link, Trash2Icon } from "lucide-react";
 import type { WithRequiredKey } from "platejs";
 import { useEditorRef, useEditorSelector, useElement, useFocusedLast, useReadOnly, useRemoveNodeButton, useSelected } from "platejs/react";
-import { Button, buttonVariants } from "./button";
+import { Button, buttonVariants } from "./button/button";
 import { CaptionButton } from "./caption";
 import { Popover, PopoverAnchor, PopoverContent } from "./popover";
 import { Separator } from "./separator";

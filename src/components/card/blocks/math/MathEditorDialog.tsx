@@ -1,6 +1,6 @@
 import React from "react";
 import AutoResizeTextarea from "@/chip/ui/AutoResizeTextarea";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/chip/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/chip/ui/dialog/dialog";
 import { cn } from "@/lib/utils";
 import type { MathBlockData } from "@/types/domain/base";
 import { MathRenderer } from "./MathBlockContent";

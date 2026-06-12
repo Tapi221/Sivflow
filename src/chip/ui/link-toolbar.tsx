@@ -11,7 +11,7 @@ import { ExternalLink, Link, Text, Unlink } from "lucide-react";
 import type { TLinkElement } from "platejs";
 import { KEYS } from "platejs";
 import { useEditorRef, useEditorSelection, useFormInputProps, usePluginOption } from "platejs/react";
-import { buttonVariants } from "./button";
+import { buttonVariants } from "./button/button";
 import { Separator } from "./separator";
 
 const popoverVariants = cva(

@@ -8,9 +8,9 @@ import { createSlateEditor } from "platejs";
 import { useEditorRef } from "platejs/react";
 import { serializeHtml } from "platejs/static";
 import { BaseEditorKit } from "@/components/editor/editor-base-kit";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu";
-import { EditorStatic } from "./editor-static";
-import { ToolbarButton } from "./toolbar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "../menu/dropdown-menu";
+import { EditorStatic } from "../editor-static";
+import { ToolbarButton } from "../toolbar";
 
 const siteUrl = "https://platejs.org";
 

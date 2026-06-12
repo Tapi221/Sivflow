@@ -14,9 +14,9 @@ import { PlateElement, useComposedRef, useEditorPlugin, useEditorRef, useEditorS
 import { useElementSelector } from "platejs/react";
 import { cn } from "@/lib/utils";
 import { blockSelectionVariants } from "./block-selection";
-import { Button } from "./button";
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuPortal, DropdownMenuTrigger } from "./dropdown-menu";
-import { ColorDropdownMenuItems, DEFAULT_COLORS } from "./font-color-toolbar-button";
+import { Button } from "./button/button";
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuPortal, DropdownMenuTrigger } from "./menu/dropdown-menu";
+import { ColorDropdownMenuItems, DEFAULT_COLORS } from "./button/font-color-toolbar-button";
 import { Popover, PopoverAnchor, PopoverContent } from "./popover";
 import { BorderAllIcon, BorderBottomIcon, BorderLeftIcon, BorderNoneIcon, BorderRightIcon, BorderTopIcon } from "./table-icons";
 import { Toolbar, ToolbarButton, ToolbarGroup, ToolbarMenuGroup } from "./toolbar";

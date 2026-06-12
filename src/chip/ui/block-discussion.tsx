@@ -15,7 +15,7 @@ import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
 import { suggestionPlugin } from "@/components/editor/plugins/suggestion-kit";
 import { useBlockDiscussionItems } from "@/lib/block-discussion-index";
 import { BlockSuggestionCard, isResolvedSuggestion } from "./block-suggestion";
-import { Button } from "./button";
+import { Button } from "./button/button";
 import { Comment, CommentCreateForm } from "./comment";
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "./popover";
 

@@ -1,5 +1,5 @@
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import { Button } from "@/chip/ui/button";
+import { Button } from "@/chip/ui/button/button";
 import { Plus } from "@/ui/icons";
 
 type NewCardIdleStateProps = {

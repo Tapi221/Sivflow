@@ -1,6 +1,6 @@
 import { useMemo, useRef } from "react";
 import type { ReactNode } from "react";
-import { DropdownMenu, DropdownMenuTrigger } from "@/chip/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuTrigger } from "@/chip/ui/menu/dropdown-menu";
 import type { ExplorerMenuPanelVariant } from "./ExplorerMenuPanel";
 import { ExplorerMenuPanel } from "./ExplorerMenuPanel";
 import type { MenuAction } from "./menuActions";
