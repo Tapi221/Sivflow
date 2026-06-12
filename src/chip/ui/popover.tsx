@@ -2,10 +2,11 @@
 
 import * as React from "react";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
+import type { FloatingSurfaceVariantProps } from "@/chip/ui/floating-surface";
 import { cn } from "@/lib/utils";
 
 type PopoverContentProps = React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> & {
-  surface?: "menu" | "plain";
+  surface?: FloatingSurfaceVariantProps["surface"];
 };
 
 const Popover = PopoverPrimitive.Root;
