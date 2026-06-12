@@ -81,6 +81,22 @@
   transform-box: border-box;
 }
 
+.pdf-pane__single-page {
+  display: flex;
+  justify-content: center;
+  min-width: 100%;
+  padding: 4.5rem 1.5rem 1.5rem;
+  box-sizing: border-box;
+}
+
+.pdf-pane__canvas {
+  display: block;
+  max-width: none;
+  height: auto;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgb(15 23 42 / 0.14);
+}
+
 /* PDF.js scale rerendering conflicts with content-visibility:auto and can create blank pages. */
 .pdf-pane__scroll-container .pdfViewer .page {
   contain: layout paint style;
