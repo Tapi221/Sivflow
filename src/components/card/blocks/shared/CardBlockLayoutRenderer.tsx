@@ -1,3 +1,7 @@
+import { CardBlockSceneRenderer } from "./CardBlockSceneRenderer";
+import type { CardBlockLayoutReplaceBlock, EditorProps, ViewerProps } from "./CardBlockSceneRenderer";
 
+const CardBlockLayoutRenderer = CardBlockSceneRenderer;
 
-export { CardBlockSceneRenderer as CardBlockLayoutRenderer, type CardBlockLayoutReplaceBlock, type EditorProps, type ViewerProps } from "./CardBlockSceneRenderer";
+export { CardBlockLayoutRenderer };
+export type { CardBlockLayoutReplaceBlock, EditorProps, ViewerProps };
