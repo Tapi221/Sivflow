@@ -11,8 +11,8 @@ import type { TextareaAutosizeProps } from "react-textarea-autosize";
 import TextareaAutosize from "react-textarea-autosize";
 import { inlineSuggestionVariants } from "@/lib/suggestion";
 import { cn } from "@/lib/utils";
-import { Button } from "../button/button";
-import { Popover, PopoverContent, PopoverTrigger } from "../popover";
+import { Button } from "@/chip/ui/button/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
 
 const EquationInput = createPrimitiveComponent(TextareaAutosize)({
   propsHook: useEquationInput,

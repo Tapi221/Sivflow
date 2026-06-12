@@ -1,5 +1,5 @@
 import "pdfjs-dist/legacy/web/pdf_viewer.css";
-import "./LoadingSpinner.css";
+import "@/components/common/LoadingSpinner.css";
 import { cn } from "@/lib/utils";
 
 type LoadingSpinnerProps = {
@@ -19,6 +19,7 @@ const getLoadingIconClassName = (size: string | undefined, iconClassName: string
   if (size === "lg") return "h-6 w-6";
   return DEFAULT_LOADING_ICON_CLASS_NAME;
 };
+
 const LoadingSpinner = ({ className, iconClassName, label, size, text }: LoadingSpinnerProps) => {
   const resolvedLabel = label ?? text ?? DEFAULT_LOADING_LABEL;
 

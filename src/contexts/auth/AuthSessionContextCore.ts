@@ -12,6 +12,7 @@ type AuthSessionProviderProps = {
 };
 
 const noopLogout = async () => {};
+
 const AuthSessionContext = createContext<AuthSessionContextType>({
   currentUser: null,
   loading: true,

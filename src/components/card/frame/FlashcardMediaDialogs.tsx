@@ -11,7 +11,7 @@ import { Button } from "@/chip/ui/button/button";
 import { Dialog, DialogContent } from "@/chip/ui/dialog/dialog";
 import type { ReferenceBlockData } from "@/types";
 import { Volume2, X } from "@/ui/icons";
-import type { FlashcardMediaLike } from "./flashcard.types";
+import type { FlashcardMediaLike } from "@/components/card/frame/flashcard.types";
 
 interface FlashcardMediaDialogsProps {
   isImagePopupOpen: boolean;

@@ -8,7 +8,7 @@
  */
 
 import type { Card, Folder } from "@/types";
-import type { CardSet } from "./cardSet";
+import type { CardSet } from "@/types/domain/cardSet";
 
 /** スナップショットのメタデータ */
 interface SnapshotMetadata {

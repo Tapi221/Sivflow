@@ -1,7 +1,7 @@
 import "@/styles/index.css";
 import "@/services/localdb";
-import "./runtime/disableNativeTitleTooltips";
-import "./runtime/installProductionConsoleFilter";
+import "@web/runtime/disableNativeTitleTooltips";
+import "@web/runtime/installProductionConsoleFilter";
 import "@platform/desktop/installTauriDesktopBridge";
 import "katex/dist/katex.min.css";
 import { StrictMode } from "react";
@@ -16,7 +16,6 @@ type SivflowReactRootStore = {
   container: HTMLElement;
   root: Root;
 };
-
 declare global {
   interface Window {
     __sivflowReactRootStore?: SivflowReactRootStore;
@@ -32,7 +31,6 @@ const ensureRootElement = (): HTMLElement => {
   if (!rootElement) throw new Error(ROOT_ELEMENT_MISSING_MESSAGE);
   return rootElement;
 };
-
 const unmountExistingRoot = (): void => {
   const existingStore = window.__sivflowReactRootStore;
   if (!existingStore) return;
@@ -45,13 +43,11 @@ const unmountExistingRoot = (): void => {
     delete window.__sivflowReactRootStore;
   }
 };
-
 const createSivflowRoot = (container: HTMLElement): Root => {
   const root = createRoot(container);
   window.__sivflowReactRootStore = { container, root };
   return root;
 };
-
 const mountApp = (): void => {
   const rootElement = ensureRootElement();
   unmountExistingRoot();
@@ -67,7 +63,6 @@ const mountApp = (): void => {
     </StrictMode>,
   );
 };
-
 if (!renderGoogleOAuthCallback()) {
   mountApp();
 }

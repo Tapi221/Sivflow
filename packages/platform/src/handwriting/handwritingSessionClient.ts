@@ -1,4 +1,4 @@
-import type { HandwritingSession, HandwritingSessionMessage, HandwritingSessionStatus, HandwritingStrokeDeltaMessage } from "./handwritingSession.types";
+import type { HandwritingSession, HandwritingSessionMessage, HandwritingSessionStatus, HandwritingStrokeDeltaMessage } from "@platform/handwriting/handwritingSession.types";
 
 type HandwritingSessionUnsubscribe = () => void;
 type HandwritingSessionMessageHandler = (message: HandwritingSessionMessage) => void;

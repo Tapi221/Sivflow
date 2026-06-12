@@ -1,5 +1,5 @@
 import type { InkSide } from "@core/domain/card/ink/inkDocument";
-import type { HandwritingDeviceInfo, HandwritingSession, HandwritingSessionStatus } from "./handwritingSession.types";
+import type { HandwritingDeviceInfo, HandwritingSession, HandwritingSessionStatus } from "@platform/handwriting/handwritingSession.types";
 
 type CreateDesktopHandwritingSessionInput = {
   id: string;

@@ -6,7 +6,7 @@ import { buildPdfDashboardRows } from "@/features/library-pdf/model/pdfLibraryRo
 import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
 import type { DocumentItem, Folder } from "@/types";
-import { PdfLibraryWorkspaceToolbar } from "./PdfLibraryWorkspaceToolbar";
+import { PdfLibraryWorkspaceToolbar } from "@/features/library-pdf/components/PdfLibraryWorkspaceToolbar";
 
 type PdfLibraryDashboardProps = {
   documents: DocumentItem[];

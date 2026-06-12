@@ -1,6 +1,6 @@
 import { removeDocumentBlobUrl } from "@/services/documentBlobUrlSessionCache";
 import { deleteDocumentBlob } from "@/services/documentFileStore";
-import { safeRevokeBlobUrl } from "./blobUrl";
+import { safeRevokeBlobUrl } from "@/services/localdb/blobUrl";
 
 type DocumentRecord = {
   id?: string;

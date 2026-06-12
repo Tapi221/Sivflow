@@ -1,5 +1,5 @@
 import type { CardBlock } from "@/types";
-import { createSelectionCaptureImageAsset } from "./createSelectionCaptureImageAsset";
+import { createSelectionCaptureImageAsset } from "@/features/selection-capture/createSelectionCaptureImageAsset";
 
 type ApplyCardSelectionCaptureSide = "question" | "answer";
 type CapturedCardImage = Awaited<ReturnType<typeof createSelectionCaptureImageAsset>>;

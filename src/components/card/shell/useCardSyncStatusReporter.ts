@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import type { CardSyncStatus } from "./cardSyncStatus";
+import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 
 type UseCardSyncStatusReporterOptions = Readonly<{
   status: CardSyncStatus;

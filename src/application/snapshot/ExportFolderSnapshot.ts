@@ -3,7 +3,7 @@ import { buildCardSetById, filterCardsByFolderId } from "@/domain/card/selectors
 import { localGenerationCounterStore } from "@/infrastructure/browser-storage/LocalGenerationCounterStore";
 import type { Card } from "@/types";
 import type { AppSnapshot } from "@/types/domain/snapshot";
-import { createCreateSnapshotUseCase } from "./CreateSnapshot";
+import { createCreateSnapshotUseCase } from "@/application/snapshot/CreateSnapshot";
 
 interface ExportFolderSnapshotDependencies {
   fileExporter: JsonFileExportPort;

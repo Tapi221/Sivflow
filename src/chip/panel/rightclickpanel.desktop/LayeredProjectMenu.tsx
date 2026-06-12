@@ -1,8 +1,8 @@
 import { Fragment, memo } from "react";
 import type { CSSProperties, ReactNode, RefObject } from "react";
-import { RightClickPanel } from "./rightclickpanel";
-import type { RightClickPanelId } from "./rightClickPanel.utils";
-import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE } from "./rightClickPanel.utils";
+import { RightClickPanel } from "@/chip/panel/rightclickpanel.desktop/rightclickpanel";
+import type { RightClickPanelId } from "@/chip/panel/rightclickpanel.desktop/rightClickPanel.utils";
+import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE } from "@/chip/panel/rightclickpanel.desktop/rightClickPanel.utils";
 
 type LayeredProjectMenuActionId = "change-color" | "rename" | "create-note" | "create-card-set" | "create-folder" | "import-pdf" | "add-to-favorites" | "hide" | "delete";
 type LayeredProjectMenuItemDefinition = {

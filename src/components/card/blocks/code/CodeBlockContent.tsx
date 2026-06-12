@@ -25,8 +25,8 @@ import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/co
 import { cn } from "@/lib/utils";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
 import { Check, Copy } from "@/ui/icons";
-import { CodeBlockFrame } from "./CodeBlockFrame";
-import { getViewerLanguageLabels, normalizeEditorLanguage, normalizeViewerLanguage } from "./codeBlockLanguage";
+import { CodeBlockFrame } from "@/components/card/blocks/code/CodeBlockFrame";
+import { getViewerLanguageLabels, normalizeEditorLanguage, normalizeViewerLanguage } from "@/components/card/blocks/code/codeBlockLanguage";
 
 type CodeBlockContentProps =
   | {
@@ -56,11 +56,9 @@ const CODE_EDITOR_TAB_TEXT = "  ";
 const clampTextOffset = (offset: number, textLength: number) => {
   return Math.max(0, Math.min(offset, textLength));
 };
-
 const isNodeInside = (parent: HTMLElement, node: Node | null) => {
   return node !== null && (node === parent || parent.contains(node));
 };
-
 const getNodeTextOffset = (root: HTMLElement, node: Node, offset: number) => {
   const range = document.createRange();
   range.selectNodeContents(root);
@@ -72,7 +70,6 @@ const getNodeTextOffset = (root: HTMLElement, node: Node, offset: number) => {
     return 0;
   }
 };
-
 const getEditorSelectionRange = (root: HTMLElement): EditorTextSelection | null => {
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return null;
@@ -95,7 +92,6 @@ const getEditorSelectionRange = (root: HTMLElement): EditorTextSelection | null 
     end: Math.max(anchorOffset, focusOffset),
   };
 };
-
 const getTextPositionAtOffset = (root: HTMLElement, offset: number) => {
   const safeOffset = clampTextOffset(offset, root.textContent?.length ?? 0);
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -122,7 +118,6 @@ const getTextPositionAtOffset = (root: HTMLElement, offset: number) => {
 
   return { node: root, offset: 0 };
 };
-
 const restoreEditorSelection = (root: HTMLElement, selectionRange: EditorTextSelection) => {
   const selection = root.ownerDocument.getSelection();
   if (!selection) return;
@@ -135,7 +130,6 @@ const restoreEditorSelection = (root: HTMLElement, selectionRange: EditorTextSel
   selection.removeAllRanges();
   selection.addRange(range);
 };
-
 const setHighlightedEditorCode = (editor: HTMLElement, code: string, grammar: PrismGrammar, language: string) => {
   const nextHtml = Prism.highlight(code, grammar, language);
   if (editor.innerHTML !== nextHtml) {

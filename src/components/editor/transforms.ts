@@ -39,7 +39,6 @@ const insertList = (editor: PlateEditor, type: string) => {
     { select: true },
   );
 };
-
 const setList = (editor: PlateEditor, type: string, entry: NodeEntry<TElement>) => {
   editor.tf.setNodes(
     editor.api.create.block({
@@ -90,7 +89,6 @@ const createBlockquote = (editor: PlateEditor) => ({
   children: [editor.api.create.block({ type: KEYS.p })],
   type: KEYS.blockquote,
 });
-
 const selectBlockquoteStart = (editor: PlateEditor, path: Path) => {
   const start = editor.api.start(path.concat([0]));
 
@@ -98,13 +96,11 @@ const selectBlockquoteStart = (editor: PlateEditor, path: Path) => {
     editor.tf.select(start);
   }
 };
-
 const insertInlineElement = (editor: PlateEditor, type: string) => {
   if (insertInlineMap[type]) {
     insertInlineMap[type](editor, type);
   }
 };
-
 const setBlockType = (editor: PlateEditor, type: string, { at }: { at?: Path } = {}) => {
   editor.tf.withoutNormalizing(() => {
     if (type === KEYS.blockquote) {
@@ -153,7 +149,6 @@ const setBlockType = (editor: PlateEditor, type: string, { at }: { at?: Path } =
     });
   });
 };
-
 const getBlockType = (block: TElement) => {
   if (block[KEYS.listType]) {
     if (block[KEYS.listType] === KEYS.ol) {
@@ -167,7 +162,6 @@ const getBlockType = (block: TElement) => {
 
   return block.type;
 };
-
 const insertBlock = (editor: PlateEditor, type: string, options: InsertBlockOptions = {}) => {
   const { upsert = false } = options;
 

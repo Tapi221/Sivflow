@@ -1,5 +1,5 @@
-import type { MfDeckMediaEntryV1, MfDeckMediaKindV1 } from "./mfDeck.types";
-import { MF_DECK_MEDIA_DIRECTORY, MF_DECK_MEDIA_URI_PREFIX } from "./mfDeck.types";
+import type { MfDeckMediaEntryV1, MfDeckMediaKindV1 } from "@/features/deckFile/domain/mfDeck.types";
+import { MF_DECK_MEDIA_DIRECTORY, MF_DECK_MEDIA_URI_PREFIX } from "@/features/deckFile/domain/mfDeck.types";
 
 const EXTENSION_BY_MIME_TYPE: Record<string, string> = {
   "image/jpeg": "jpg",

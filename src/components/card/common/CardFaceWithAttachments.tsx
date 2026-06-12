@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import type { CardFaceAttachments } from "@/types/domain/card";
-import { SharedCardAttachments } from "./SharedCardAttachments";
+import { SharedCardAttachments } from "@/components/card/common/SharedCardAttachments";
 
 type CardFaceWithAttachmentsProps = Readonly<{
   faceNode: React.ReactNode;

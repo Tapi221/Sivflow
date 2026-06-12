@@ -1,5 +1,5 @@
 import type { BlobUrl, StorageUrl } from "@/types/core/branded";
-import type { BaseEntity } from "./base";
+import type { BaseEntity } from "@/types/domain/base";
 
 type DocumentKind = "pdf";
 type PdfPageLayoutMode = "single" | "double";

@@ -4,7 +4,7 @@ import { BulletedListRules, isOrderedList, OrderedListRules, TaskListRules } fro
 import { ListPlugin } from "@platejs/list/react";
 import { KEYS } from "platejs";
 import { BlockList } from "@/chip/ui/block-list";
-import { IndentKit } from "./indent-kit";
+import { IndentKit } from "@/components/editor/plugins/indent-kit";
 
 const ListKit = [
   ...IndentKit,

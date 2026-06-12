@@ -228,7 +228,7 @@ class IndexedDBRebuildOrchestrator {
       }
 
       try {
-        const { IndexedDBMetadataService } = await import("./IndexedDBMetadataService");
+        const { IndexedDBMetadataService } = await import("@/services/IndexedDBMetadataService");
         const metadataService = new IndexedDBMetadataService(newDb, userId);
         await metadataService.markClean();
       } catch (error) {

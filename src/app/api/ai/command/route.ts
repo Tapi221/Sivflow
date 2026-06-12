@@ -7,8 +7,8 @@ import type { SlateEditor } from "platejs";
 import { createSlateEditor, nanoid } from "platejs";
 import { z } from "zod";
 import { buildEditTableMultiCellPrompt, getChooseToolPrompt, getCommentPrompt, getEditPrompt, getGeneratePrompt } from "@/app/api/ai/command/prompt";
-import { AI_COMMAND_PLATE_PLUGINS } from "./editorKit";
-import type { ChatMessage, ToolName } from "./types";
+import { AI_COMMAND_PLATE_PLUGINS } from "@/app/api/ai/command/editorKit";
+import type { ChatMessage, ToolName } from "@/app/api/ai/command/types";
 
 const POST = async (req: NextRequest) => {
   const { apiKey: key, ctx, messages: messagesRaw, model } = await req.json();

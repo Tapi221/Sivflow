@@ -1,5 +1,5 @@
-import * as C from "./calendar.constants.desktop";
-import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScreen.types";
+import * as C from "@/features/calendar/calendar.constants.desktop";
+import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/calendar/scheduleScreen.types";
 
 type StoredScheduleNavigationState = {
   currentDate?: unknown;

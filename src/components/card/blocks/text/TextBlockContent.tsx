@@ -3,7 +3,7 @@ import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
 import { buildRuledTextareaStyle } from "@/components/card/blocks/core/ruledTextareaStyle";
 import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
 import AutoResizeTextarea from "@/chip/ui/AutoResizeTextarea";
-import { TEXT_BLOCK_CONTENT_CLASS, TEXT_BLOCK_LINE_HEIGHT_PX } from "./textBlockStyles";
+import { TEXT_BLOCK_CONTENT_CLASS, TEXT_BLOCK_LINE_HEIGHT_PX } from "@/components/card/blocks/text/textBlockStyles";
 
 type TextBlockContentProps =
   | {

@@ -1,4 +1,5 @@
 import platform from "@/platform";
+
 import type { Notification, NotificationOptions } from "@/types/notification";
 
 type NotificationListener = (notification: Notification) => void;
@@ -15,6 +16,7 @@ const createDismissedNotification = (id: string): Notification => {
     duration: 0,
   };
 };
+
 const NotificationService = class {
   private readonly listeners = new Set<NotificationListener>();
   private readonly notifications = new Map<string, Notification>();
@@ -110,6 +112,7 @@ const NotificationService = class {
     return Array.from(this.notifications.values());
   };
 };
+
 const notificationService = new NotificationService();
 
 export { notificationService };

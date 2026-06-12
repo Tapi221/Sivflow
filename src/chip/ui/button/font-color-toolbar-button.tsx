@@ -8,10 +8,10 @@ import { CheckIcon, EraserIcon, PlusIcon } from "lucide-react";
 import type { PlateEditor } from "platejs/react";
 import { useEditorRef, useEditorSelector } from "platejs/react";
 import { cn } from "@/lib/utils";
-import { buttonVariants } from "./button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../menu/dropdown-menu";
-import { ToolbarButton, ToolbarMenuGroup } from "../toolbar";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../tooltip";
+import { buttonVariants } from "@/chip/ui/button/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/ui/menu/dropdown-menu";
+import { ToolbarButton, ToolbarMenuGroup } from "@/chip/ui/toolbar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/ui/tooltip";
 
 type TColor = {
   isBrightColor: boolean;

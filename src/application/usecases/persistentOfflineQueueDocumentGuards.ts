@@ -1,4 +1,4 @@
-import type { QueueItem } from "./persistentOfflineQueueTypes";
+import type { QueueItem } from "@/application/usecases/persistentOfflineQueueTypes";
 
 type DocumentLike = {
   uploadStatus?: string | null;

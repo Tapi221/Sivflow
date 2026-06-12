@@ -1,7 +1,7 @@
 import { encodeMfDeckArchive } from "@/features/deckFile/infra/web/mfDeckZipCodec";
 import type { Card, CardSet } from "@/types";
-import { buildMfDeckArchive } from "./mapCardToMfDeck";
-import type { MfDeckTagLookup } from "./mfDeck.types";
+import { buildMfDeckArchive } from "@/features/deckFile/application/mapCardToMfDeck";
+import type { MfDeckTagLookup } from "@/features/deckFile/application/mfDeck.types";
 
 const exportMfDeckBytes = async ({ cardSet, cards, tagById, appVersion }: { cardSet: CardSet;
   cards: Card[];

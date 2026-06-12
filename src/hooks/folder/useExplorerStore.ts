@@ -47,21 +47,17 @@ const normalizeTagFilter = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
   return value.filter((entry): entry is string => typeof entry === "string");
 };
-
 const normalizePinnedFolderIds = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
   return value.filter((entry): entry is string => typeof entry === "string");
 };
-
 const normalizeTagMatchMode = (value: unknown): TagMatchMode => {
   return value === "all" ? "all" : "any";
 };
-
 const normalizeToggleableFlag = (value: unknown): ToggleableFlag => {
   if (value === "on" || value === "off") return value;
   return "any";
 };
-
 const normalizeExplorerLayoutMode = (value: unknown): ExplorerLayoutMode => {
   if (value === "list" || value === "card" || value === "icon" || value === "column") {
     return value;
@@ -69,7 +65,6 @@ const normalizeExplorerLayoutMode = (value: unknown): ExplorerLayoutMode => {
 
   return DEFAULT_EXPLORER_LAYOUT_MODE;
 };
-
 const normalizeContentTypeFilter = (value: unknown): ContentTypeFilter[] => {
   if (!Array.isArray(value)) return [...DEFAULT_CONTENT_TYPE_FILTER];
 
@@ -77,7 +72,6 @@ const normalizeContentTypeFilter = (value: unknown): ContentTypeFilter[] => {
 
   return next.length > 0 ? next : [...DEFAULT_CONTENT_TYPE_FILTER];
 };
-
 const normalizeDirectoryBadgeVisibility = (value: unknown): DirectoryBadgeVisibility => {
   if (!value || typeof value !== "object") {
     return { ...DEFAULT_DIRECTORY_BADGE_VISIBILITY };
@@ -91,7 +85,6 @@ const normalizeDirectoryBadgeVisibility = (value: unknown): DirectoryBadgeVisibi
     tags: typeof record.tags === "boolean" ? record.tags : DEFAULT_DIRECTORY_BADGE_VISIBILITY.tags,
   };
 };
-
 const createDefaultState = (): Pick<
   ExplorerState,
   | "tagFilter"

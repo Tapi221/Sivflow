@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { CardCarousel3D } from "@/features/review/presentation/web/ui/components/CardCarousel3D";
 import type { Card } from "@/types";
-import StudyCard from "./StudyCard";
+import StudyCard from "@/features/study/StudyCard";
 
 type StudyCardProps = React.ComponentProps<typeof StudyCard>;
 type ReviewResultHandler = Extract<StudyCardProps, { mode: "review"; }>["onResult"];

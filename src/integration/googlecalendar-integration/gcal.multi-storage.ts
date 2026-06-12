@@ -1,5 +1,5 @@
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
-import { clearCachedGoogleCalendarAccount } from "./googleCalendarEventCache";
+import { clearCachedGoogleCalendarAccount } from "@/integration/googlecalendar-integration/googleCalendarEventCache";
 
 // ─────────────────────────────────────────────────────────────
 // Types

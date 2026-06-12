@@ -1,6 +1,6 @@
 
 
-export * from "./locale.store";
-export * from "./translations";
-export * from "./translate";
-export * from "./useT";
+export * from "@shared/i18n/locale.store";
+export * from "@shared/i18n/translations";
+export * from "@shared/i18n/translate";
+export * from "@shared/i18n/useT";

@@ -18,6 +18,7 @@ const exportJson: JsonFileExportPort["exportJson"] = async ({
   document.body.removeChild(anchor);
   URL.revokeObjectURL(url);
 };
+
 const browserJsonFileExportAdapter: JsonFileExportPort = { exportJson };
 
 export { browserJsonFileExportAdapter };

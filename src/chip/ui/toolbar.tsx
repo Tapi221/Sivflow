@@ -7,9 +7,9 @@ import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuSeparator } from "./menu/dropdown-menu";
-import { Separator } from "./separator";
-import { Tooltip, TooltipTrigger } from "./tooltip";
+import { DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuSeparator } from "@/chip/ui/menu/dropdown-menu";
+import { Separator } from "@/chip/ui/separator";
+import { Tooltip, TooltipTrigger } from "@/chip/ui/tooltip";
 
 type ToolbarButtonProps = {
   isDropdown?: boolean;

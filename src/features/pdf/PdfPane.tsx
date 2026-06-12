@@ -1,4 +1,4 @@
-import "./PdfPane.css";
+import "@/features/pdf/PdfPane.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
@@ -6,11 +6,11 @@ import type { ChangeEvent, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
 import type { PdfViewerState } from "@/types";
-import type { PdfDocumentSource } from "./pdfDocumentSource";
-import { releasePdfDocumentSourceSoon, retainPdfDocumentSource, toPdfDocumentLoadSource } from "./pdfDocumentSource";
-import { waitForPdfLoadingTask } from "./pdfLoadingTaskTimeout";
-import { getSafePdfPageNumber } from "./pdfPageWindow";
-import { PDF_ZOOM_BUTTON_SCALE_FACTOR, PDF_ZOOM_MAX_SCALE, PDF_ZOOM_MIN_SCALE } from "./pdfZoom.constants";
+import type { PdfDocumentSource } from "@/features/pdf/pdfDocumentSource";
+import { releasePdfDocumentSourceSoon, retainPdfDocumentSource, toPdfDocumentLoadSource } from "@/features/pdf/pdfDocumentSource";
+import { waitForPdfLoadingTask } from "@/features/pdf/pdfLoadingTaskTimeout";
+import { getSafePdfPageNumber } from "@/features/pdf/pdfPageWindow";
+import { PDF_ZOOM_BUTTON_SCALE_FACTOR, PDF_ZOOM_MAX_SCALE, PDF_ZOOM_MIN_SCALE } from "@/features/pdf/pdfZoom.constants";
 
 type PdfViewerStateChangePersistence = "immediate" | "deferred" | "none";
 type PdfViewerStateChangeOptions = {
@@ -77,7 +77,6 @@ const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
-
 const createDefaultToolbarState = (): PdfToolbarState => ({
   currentPage: 1,
   pageCount: 0,
@@ -234,7 +233,7 @@ const PdfPageCanvas = ({ pdfDocument, pageNumber, pageSize, registerPageElement,
       const baseViewport = page.getViewport({ scale: 1 });
       onPageSizeChange(pageNumber, { width: baseViewport.width, height: baseViewport.height });
       const viewport = page.getViewport({ scale: clampPdfViewerScale(scale) });
-      const outputScale = Math.min(Math.max(globalThis.devicePixelRatio || 1, 1), PDF_RENDER_OUTPUT_SCALE_MAX);
+      const outputScale = Math.min(Math.max(globalThis.devicePixelRatio ?? 1, 1), PDF_RENDER_OUTPUT_SCALE_MAX);
       const canvasContext = canvas.getContext("2d");
       if (!canvasContext) throw new Error("PDF Canvas を初期化できませんでした。");
 
@@ -272,7 +271,6 @@ const PdfPageCanvas = ({ pdfDocument, pageNumber, pageSize, registerPageElement,
     </div>
   );
 };
-
 const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadError, onViewerStateChange }: PdfPaneProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const pageElementsRef = useRef<Map<number, HTMLElement>>(new Map());
@@ -598,13 +596,13 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
           className={PDF_TOOLBAR_INPUT_CLASS_NAME}
           type="number"
           min={1}
-          max={toolbarState.pageCount || 1}
+          max={toolbarState.pageCount ?? 1}
           value={toolbarState.currentPage}
           onChange={handlePageInputChange}
           disabled={!isReady}
           aria-label="ページ番号"
         />
-        <span className="pdf-pane__toolbar-label">/ {toolbarState.pageCount || "-"}</span>
+        <span className="pdf-pane__toolbar-label">/ {toolbarState.pageCount ?? "-"}</span>
         <button className={PDF_TOOLBAR_BUTTON_CLASS_NAME} type="button" onClick={goToNextPage} disabled={!isReady || toolbarState.currentPage >= toolbarState.pageCount}>
           次
         </button>

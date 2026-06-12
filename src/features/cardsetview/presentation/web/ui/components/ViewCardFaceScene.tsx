@@ -9,7 +9,7 @@ import { useFlashcardInk } from "@/components/card/frame/useFlashcardInk";
 import { useFlashcardMediaState } from "@/components/card/frame/useFlashcardMediaState";
 import type { Card } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { CardFaceScene } from "./CardFaceScene";
+import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
 
 type Side = "question" | "answer";
 type ViewCardFaceSceneProps = Readonly<{ card: Card;
