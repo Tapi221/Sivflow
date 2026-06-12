@@ -3,11 +3,15 @@ import type { CardLayoutMode, CardSetInteractionMode } from "@/features/cardsetv
 import { normalizeCardLayoutMode, resolveDefaultCardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 interface CardLayoutModePreferenceScope { deviceScope: string;
   cardSetId: string | null | undefined;
   displayMode: CardDisplayMode;
   interactionMode: CardSetInteractionMode;
 }
+
+
 
 const normalizeDeviceScope = (value: string | null | undefined) => {
   const trimmed = typeof value === "string" ? value.trim() : "";
@@ -66,5 +70,9 @@ const setCardLayoutModePreference = (scope: CardLayoutModePreferenceScope, mode:
   writeStorageValue(buildStorageKey(scope), normalizeCardLayoutMode(mode));
 };
 
+
+
 export { getCardLayoutModePreference, resolveCardLayoutModePreference, setCardLayoutModePreference };
+
+
 export type { CardLayoutModePreferenceScope };

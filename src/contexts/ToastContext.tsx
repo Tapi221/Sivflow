@@ -11,4 +11,4 @@ const useToast = RendererToastContext.useToast;
 export { ToastProvider, useToast };
 
 
-export type { Toa
+export type { Toast };

@@ -1,8 +1,12 @@
 import type { CardBlock } from "@/types/domain/card";
 
+
+
 const GRID_OFFSET_ROWS_MIN = 0;
 const GRID_OFFSET_ROWS_MAX = 999;
 const GRID_OFFSET_TYPES = new Set<CardBlock["type"]>(["math"]);
+
+
 
 const isGridOffsetType = (type: CardBlock["type"]) => {
   return GRID_OFFSET_TYPES.has(type);
@@ -17,5 +21,7 @@ const getNormalizedGridOffsetRows = (block: CardBlock): number => {
     Math.min(GRID_OFFSET_ROWS_MAX, Math.round(value)),
   );
 };
+
+
 
 export { isGridOffsetType, getNormalizedGridOffsetRows };

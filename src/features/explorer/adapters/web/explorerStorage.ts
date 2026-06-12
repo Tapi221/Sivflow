@@ -1,5 +1,7 @@
 import { WEB_STORAGE_KEYS } from "@platform/storage/webStorageKeys.constants";
 
+
+
 const getLastSelectedFolderId = (): string | null => {
   if (typeof window === "undefined") return null;
 
@@ -18,5 +20,7 @@ const setLastSelectedFolderId = (folderId: string | null) => {
 
   window.localStorage.removeItem(WEB_STORAGE_KEYS.lastSelectedFolderId);
 };
+
+
 
 export { getLastSelectedFolderId, setLastSelectedFolderId };
