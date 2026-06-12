@@ -1,7 +1,8 @@
 /**
  * IndexedDB メタデータの型定義
  */
-interface IndexedDBMetadata { key: "main"; // 固定キー
+interface IndexedDBMetadata {
+  key: "main"; // 固定キー
   schemaVersion: number;
   lastFullSyncAt: Date;
   expectedEntityCounts: {

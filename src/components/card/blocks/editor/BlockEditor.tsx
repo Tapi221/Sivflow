@@ -35,7 +35,8 @@ interface BlockEditorProps {
   displayMode?: CardDisplayMode;
   zoom?: number;
 }
-interface BlockEditorHandle { addBlock: (type: CardBlock["type"]) => void;
+interface BlockEditorHandle {
+  addBlock: (type: CardBlock["type"]) => void;
 }
 
 const ROW_STEP_PX = CARD_ROW_PX;

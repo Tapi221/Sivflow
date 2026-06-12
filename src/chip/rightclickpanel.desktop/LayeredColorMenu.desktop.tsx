@@ -7,7 +7,8 @@ import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING } from "./rightClickPanel.utils";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 
-type LayeredColorMenuOption = { id: TagColorKey;
+type LayeredColorMenuOption = {
+  id: TagColorKey;
   label: string;
   value: string;
 };

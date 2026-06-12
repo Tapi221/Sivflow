@@ -6,7 +6,8 @@ type CardSetViewNavigationPreferenceUpdates = {
   cardId?: string | null;
   scrollTop?: number;
 };
-type CardSetViewNavigationPreference = { cardId: string | null;
+type CardSetViewNavigationPreference = {
+  cardId: string | null;
   scrollTop: number;
   updatedAt: number;
 };

@@ -15,7 +15,8 @@ interface UseFolderDocumentUploadParams {
   getNextOrderIndex: (folderId: string | null) => number;
   setExpandedFolders: React.Dispatch<React.SetStateAction<Set<string>>>;
 }
-type LegacyEntityFields = { blobUrl?: string | null; };
+type LegacyEntityFields = {
+  blobUrl?: string | null; };
 
 const withLegacyFields = <T extends object>(value: T): T & LegacyEntityFields => value as T & LegacyEntityFields;
 const getErrorMessage = (error: unknown, fallback: string): string => {

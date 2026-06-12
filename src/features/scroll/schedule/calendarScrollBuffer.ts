@@ -1,7 +1,8 @@
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 
 type CalendarScrollBufferSurface = "calendar";
-type CalendarScrollBuffer = { before: number;
+type CalendarScrollBuffer = {
+  before: number;
   after: number;
 };
 type CalendarScrollBufferConfig = {

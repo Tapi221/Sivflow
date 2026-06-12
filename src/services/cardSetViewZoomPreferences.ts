@@ -10,7 +10,8 @@ interface LegacyCardSetViewZoomPreferencesStore {
   version: 1;
   byCardSet: Record<string, number>;
 }
-interface CardSetViewZoomPreferenceScope { deviceScope: string;
+interface CardSetViewZoomPreferenceScope {
+  deviceScope: string;
   cardSetId: string | null | undefined;
   displayMode?: CardDisplayMode;
   interactionMode?: CardSetInteractionMode;

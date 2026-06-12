@@ -1,4 +1,5 @@
-type CardSetDeleteCard = { id: string;
+type CardSetDeleteCard = {
+  id: string;
   isDeleted?: boolean;
 };
 type CardSetDeleteRepository<TCard extends CardSetDeleteCard = CardSetDeleteCard> = { listCardsByCardSetId: (userId: string, cardSetId: string) => Promise<TCard[]>;

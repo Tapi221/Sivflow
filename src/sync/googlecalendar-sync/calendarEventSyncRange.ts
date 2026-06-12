@@ -5,10 +5,12 @@ import type { CalendarDateRange } from "@/features/calendar/calendarRange.types"
 import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
 
-type CalendarEventSyncRange = { rangeStart: Date;
+type CalendarEventSyncRange = {
+  rangeStart: Date;
   rangeEnd: Date;
 };
-type BuildCalendarEventSyncRangeOptions = { selectedViewMode: CalendarViewMode;
+type BuildCalendarEventSyncRangeOptions = {
+  selectedViewMode: CalendarViewMode;
   visibleDays: Date[];
   monthTitleDate: Date;
   weekStartDay?: CalendarWeekStartDay;

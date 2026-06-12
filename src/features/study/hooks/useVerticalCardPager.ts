@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useReviewCardPagerHotkeys } from "@/features/hotkey/useReviewCardPagerHotkeys";
 
-type UseVerticalCardPagerOptions = { /** カード総数 */ count: number;
+type UseVerticalCardPagerOptions = {
+  /** カード総数 */ count: number;
   /** 外部管理のアクティブインデックス */
   activeIndex: number;
   /** 自然スクロールでアクティブカードが変わったときに呼ぶ */
@@ -20,7 +21,8 @@ type UseVerticalCardPagerOptions = { /** カード総数 */ count: number;
    */
   onNearestIndexImmediate?: (idx: number) => void;
 };
-type UseVerticalCardPagerReturn = { /** 各カード要素への ref 配列 */ itemRefs: React.MutableRefObject<(HTMLElement | null)[]>;
+type UseVerticalCardPagerReturn = {
+  /** 各カード要素への ref 配列 */ itemRefs: React.MutableRefObject<(HTMLElement | null)[]>;
   /** idx のカードを中央にスクロール */
   scrollToIndex: (idx: number, behavior?: ScrollBehavior) => void;
   goNext: () => void;

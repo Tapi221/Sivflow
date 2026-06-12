@@ -1,5 +1,6 @@
 type LocalAiProvider = "ollama";
-type LocalAiSettings = { enabled: boolean;
+type LocalAiSettings = {
+  enabled: boolean;
   provider: LocalAiProvider;
   baseUrl: string;
   model: string;

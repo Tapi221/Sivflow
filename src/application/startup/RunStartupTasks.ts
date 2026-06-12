@@ -4,7 +4,8 @@ import { localStorageBackupStore } from "@/infrastructure/browser-storage/LocalS
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
-interface RunStartupTasksParams { userId: string;
+interface RunStartupTasksParams {
+  userId: string;
   isDisposed?: () => boolean;
 }
 

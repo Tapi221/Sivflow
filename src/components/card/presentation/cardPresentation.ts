@@ -1,13 +1,15 @@
 import { CARD_SHELL_COMMON_CLASS_NAME } from "@/components/card/frame/cardShellClassNames";
 import { cn } from "@/lib/utils";
 
-type CardPresentationContext = { inPager: boolean;
+type CardPresentationContext = {
+  inPager: boolean;
   isCurrentCard: boolean;
   isEditing: boolean;
   isStandaloneEditor: boolean;
   hasFocusWithin: boolean;
 };
-type CardPresentationState = { isActiveCard: boolean;
+type CardPresentationState = {
+  isActiveCard: boolean;
   isInteractiveCard: boolean;
   showEditingOutline: boolean;
   showActiveChrome: boolean;

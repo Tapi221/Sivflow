@@ -7,11 +7,13 @@ import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
 import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
 import type { AppCalendarItem } from "./scheduleScreen.types";
 
-type CreateRootFolderProjectInput = { label: string;
+type CreateRootFolderProjectInput = {
+  label: string;
   color?: string;
   checked?: boolean;
 };
-type UseRootFolderProjectsResult = { appProjects: AppCalendarItem[];
+type UseRootFolderProjectsResult = {
+  appProjects: AppCalendarItem[];
   rootFolders: FolderTreeNode[];
   loading: boolean;
   error: string | null;

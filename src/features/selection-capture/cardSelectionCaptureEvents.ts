@@ -2,7 +2,8 @@ import type { SelectionCaptureArea, SelectionCaptureRect } from "./selectionCapt
 
 type CardSelectionCaptureSide = "question" | "answer";
 type CardSelectionCaptureTaskResult = string | void;
-type CardSelectionCaptureEventPayload = { readonly blob: Blob;
+type CardSelectionCaptureEventPayload = {
+  readonly blob: Blob;
   readonly rect: SelectionCaptureRect;
   readonly area?: SelectionCaptureArea;
   readonly target: HTMLElement;
@@ -12,7 +13,8 @@ type CardSelectionCaptureEventPayload = { readonly blob: Blob;
 type CardSelectionCaptureEventDetail = CardSelectionCaptureEventPayload & { readonly area: SelectionCaptureArea;
   addTask: (task: Promise<CardSelectionCaptureTaskResult>) => void;
 };
-type DispatchedCardSelectionCaptureEvent = { handled: boolean;
+type DispatchedCardSelectionCaptureEvent = {
+  handled: boolean;
   tasks: Promise<CardSelectionCaptureTaskResult>[];
 };
 

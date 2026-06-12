@@ -13,7 +13,8 @@ type MfCardValidationResult = | { ok: true;
 const MF_CARD_FORMAT = "sivflow.card" as const;
 const MF_CARD_VERSION = 1 as const;
 
-type MfCardFileV1 = { format: typeof MF_CARD_FORMAT;
+type MfCardFileV1 = {
+  format: typeof MF_CARD_FORMAT;
   version: typeof MF_CARD_VERSION;
   exportedAt: string;
   app: {
@@ -31,7 +32,8 @@ type MfCardFileV1 = { format: typeof MF_CARD_FORMAT;
 const MF_CARD_FILE_EXTENSION = ".mfcard" as const;
 const MF_CARD_MIME_TYPE = "application/vnd.sivflow.card+json" as const;
 
-class MfCardValidationError extends Error { readonly issues: MfCardIssue[];
+class MfCardValidationError extends Error {
+  readonly issues: MfCardIssue[];
 
   constructor(message: string, issues: MfCardIssue[]) {
     super(message);
@@ -39,7 +41,8 @@ class MfCardValidationError extends Error { readonly issues: MfCardIssue[];
     this.issues = issues;
   }
 }
-class MfCardExportError extends Error { readonly issues: MfCardIssue[];
+class MfCardExportError extends Error {
+  readonly issues: MfCardIssue[];
 
   constructor(message: string, issues: MfCardIssue[]) {
     super(message);

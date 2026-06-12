@@ -5,8 +5,10 @@ import { TAG_COLOR_KEYS } from "@/chip/tag/tag.constants";
 import { getTagColorStyle } from "@/chip/tag/tag.style";
 import { cn } from "@/lib/utils";
 
-type CalendarTimetableSyllabusCatalogPanelProps = { activeSemesterId: string; institutions: CalendarTimetableInstitution[]; periods: CalendarTimetablePeriod[]; syllabusCourses: CalendarTimetableSyllabusCourseDisplay[]; onSearch: (query: string, institutionId?: string | null, departmentId?: string | null) => Promise<CalendarTimetableSyllabusCourseDisplay[]>; onSaveSyllabusCourse: (draft: CalendarTimetableSyllabusCourseDraft) => Promise<void>; onAddCourseFromSyllabus: (syllabusCourse: CalendarTimetableSyllabusCourse, semesterId: string) => Promise<void>; onClose: () => void; };
-type SyllabusSlotDraft = { dayIndex: CalendarTimetableWeekdayIndex; periodLabel: string; };
+type CalendarTimetableSyllabusCatalogPanelProps = {
+  activeSemesterId: string; institutions: CalendarTimetableInstitution[]; periods: CalendarTimetablePeriod[]; syllabusCourses: CalendarTimetableSyllabusCourseDisplay[]; onSearch: (query: string, institutionId?: string | null, departmentId?: string | null) => Promise<CalendarTimetableSyllabusCourseDisplay[]>; onSaveSyllabusCourse: (draft: CalendarTimetableSyllabusCourseDraft) => Promise<void>; onAddCourseFromSyllabus: (syllabusCourse: CalendarTimetableSyllabusCourse, semesterId: string) => Promise<void>; onClose: () => void; };
+type SyllabusSlotDraft = {
+  dayIndex: CalendarTimetableWeekdayIndex; periodLabel: string; };
 
 const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] as const;
 const DEFAULT_COURSE_COLOR_KEY: CalendarTimetableColorKey = "blue";

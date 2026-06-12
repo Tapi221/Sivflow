@@ -1,4 +1,5 @@
-type TrashEntityBase = { [key: string]: unknown;
+type TrashEntityBase = {
+  [key: string]: unknown;
   id: string;
   isDeleted?: boolean;
   deletedAt?: unknown;
@@ -19,7 +20,8 @@ type TrashContext<TFolder extends TrashFolderBase = TrashFolderBase, TCard exten
   documents: TDocument[];
   resolveCardFolderId: (card: TCard) => string | null | undefined;
 };
-type TrashItemIds = { folderIds?: string[];
+type TrashItemIds = {
+  folderIds?: string[];
   cardIds?: string[];
   cardSetIds?: string[];
   documentIds?: string[];

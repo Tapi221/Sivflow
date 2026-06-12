@@ -5,7 +5,8 @@ import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIG
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 
 type DocumentContextMenuActionId = "rename" | "delete";
-type DocumentContextMenuAction = { id: DocumentContextMenuActionId;
+type DocumentContextMenuAction = {
+  id: DocumentContextMenuActionId;
   label: string;
   danger?: boolean;
   disabled?: boolean;

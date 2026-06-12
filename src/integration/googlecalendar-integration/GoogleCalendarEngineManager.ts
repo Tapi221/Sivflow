@@ -18,7 +18,8 @@ type WatchRegistrationResult = {
   calendarId: string;
 };
 
-class GoogleCalendarEngineManager { private engines = new Map<string, GoogleCalendarSyncEngine>();
+class GoogleCalendarEngineManager {
+  private engines = new Map<string, GoogleCalendarSyncEngine>();
 
   private state = new Map<string, EngineState>();
 

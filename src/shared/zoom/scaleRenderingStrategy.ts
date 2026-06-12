@@ -1,9 +1,11 @@
 type ScaleRenderingMode = "none" | "zoom" | "transform";
-interface ResolveScaleRenderingStrategyArgs { readonly disableScale: boolean;
+interface ResolveScaleRenderingStrategyArgs {
+  readonly disableScale: boolean;
   readonly effectiveScale: number;
   readonly supportsCssZoom: boolean;
 }
-interface ScaleRenderingStrategy { readonly mode: ScaleRenderingMode;
+interface ScaleRenderingStrategy {
+  readonly mode: ScaleRenderingMode;
   readonly shouldApplyScale: boolean;
   readonly zoom: number | undefined;
   readonly transform: string;

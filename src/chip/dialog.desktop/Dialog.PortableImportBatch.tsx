@@ -7,7 +7,8 @@ import type { PortableImportBatchItem } from "@/features/import/application/impo
 import { buildPortableImportBatchItems, formatPortableImportBatchItemSubtitle, importPortableFileBatch } from "@/features/import/application/importPortableFileBatch";
 import { cn } from "@/lib/utils";
 
-type PortableImportBatchCompletedPayload = { cardSetId: string;
+type PortableImportBatchCompletedPayload = {
+  cardSetId: string;
   cardSetName: string;
   folderId: string;
   createdCount: number;

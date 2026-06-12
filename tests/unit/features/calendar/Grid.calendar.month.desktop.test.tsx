@@ -6,9 +6,11 @@ import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GridCalendarMonthDesktop } from "@/features/calendar/grid/Grid.calendar.month.desktop";
 
-type CalendarMonthGridDay = { date: Date; key: string; dayOfMonth: number; isCurrentMonth: boolean; };
+type CalendarMonthGridDay = {
+  date: Date; key: string; dayOfMonth: number; isCurrentMonth: boolean; };
 
-type CalendarMonthGridWeek = { key: string; days: CalendarMonthGridDay[]; };
+type CalendarMonthGridWeek = {
+  key: string; days: CalendarMonthGridDay[]; };
 
 const MONTH_ROW_HEIGHT = 120;
 

@@ -1,14 +1,16 @@
 import { addDays, differenceInCalendarDays, isSameDay, max, min, startOfDay } from "date-fns";
 import type { CalendarEvent } from "./calendarEvent.types";
 
-type CalendarEventSegment = { event: CalendarEvent;
+type CalendarEventSegment = {
+  event: CalendarEvent;
   span: number;
   left: number;
   right: number;
   startsBeforeRange: boolean;
   endsAfterRange: boolean;
 };
-type CalendarEventLevelsResult = { levels: CalendarEventSegment[][];
+type CalendarEventLevelsResult = {
+  levels: CalendarEventSegment[][];
   extra: CalendarEventSegment[];
 };
 

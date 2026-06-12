@@ -14,8 +14,10 @@ import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
 import { useCalendarWeekStartSetting } from "./useCalendarWeekStartSetting";
 import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
 
-type UseScheduleScreenOptions = { allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay; };
-type UseScheduleScreenReturn = { contentViewportRef: RefObject<HTMLDivElement | null>;
+type UseScheduleScreenOptions = {
+  allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay; };
+type UseScheduleScreenReturn = {
+  contentViewportRef: RefObject<HTMLDivElement | null>;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   headerScrollRef: RefObject<HTMLDivElement | null>;
   allDayScrollRef: RefObject<HTMLDivElement | null>;

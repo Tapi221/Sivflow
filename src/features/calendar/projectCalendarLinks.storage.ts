@@ -1,6 +1,7 @@
 import type { CalendarProvider, ProjectCalendarLink, ProjectCalendarSyncDirection } from "./scheduleScreen.types";
 
-type CreateProjectCalendarLinkInput = { projectId: string;
+type CreateProjectCalendarLinkInput = {
+  projectId: string;
   provider: CalendarProvider;
   accountId: string;
   externalCalendarId: string;

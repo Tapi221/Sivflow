@@ -1,6 +1,7 @@
 import type { AutoBackupRecord, BackupStorePort } from "@/application/ports/BackupStorePort";
 
-interface PerformAutoBackupDependencies { backupStore: BackupStorePort;
+interface PerformAutoBackupDependencies {
+  backupStore: BackupStorePort;
   buildSnapshot?: (userId: string) => Promise<AutoBackupRecord>;
   collectUserData?: (userId: string) => Promise<unknown>;
 }

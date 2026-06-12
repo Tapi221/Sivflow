@@ -11,7 +11,8 @@ interface MarkdownBlockViewProps {
   style?: React.CSSProperties;
   zoom?: number;
 }
-type MarkdownBlockPreviewProps = { markdown: string;
+type MarkdownBlockPreviewProps = {
+  markdown: string;
   align?: "left" | "center";
   className?: string;
   bleedX?: boolean;

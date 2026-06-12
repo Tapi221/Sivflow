@@ -1,9 +1,11 @@
 import { useEffect } from "react";
 import type { CSSProperties, RefObject } from "react";
 
-type RightClickPanelPosition = { x: number; y: number; };
+type RightClickPanelPosition = {
+  x: number; y: number; };
 type RightClickPanelNoDragStyle = CSSProperties & { WebkitAppRegion?: "drag" | "no-drag"; };
-type RightClickPanelDimensions = { width: number; height: number; };
+type RightClickPanelDimensions = {
+  width: number; height: number; };
 type RightClickPanelId = string;
 
 const RIGHT_CLICK_PANEL_MARGIN = 8;

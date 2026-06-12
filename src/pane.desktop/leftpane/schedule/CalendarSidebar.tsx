@@ -14,17 +14,26 @@ import type { GoogleCalendarListItem } from "@/integration/googlecalendar-integr
 import { cn } from "@/lib/utils";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 
-type CalendarContextMenuState = { accountId: string; calendarId: string; color: string; x: number; y: number; };
-type CalendarColorPickerTarget = { accountId: string; calendarId: string; };
+type CalendarContextMenuState = {
+  accountId: string; calendarId: string; color: string; x: number; y: number; };
+type CalendarColorPickerTarget = {
+  accountId: string; calendarId: string; };
 type ContextMenuTriggerEvent = ReactMouseEvent<HTMLElement>;
-type MatchingGoogleCalendarTarget = { account: GoogleAccountDisplay; calendar: GoogleCalendarListItem; };
-type ProjectLinksContextMenuState = { project: AppCalendarItem; links: ProjectCalendarLink[]; matchingGoogleCalendars: MatchingGoogleCalendarTarget[]; x: number; y: number; };
+type MatchingGoogleCalendarTarget = {
+  account: GoogleAccountDisplay; calendar: GoogleCalendarListItem; };
+type ProjectLinksContextMenuState = {
+  project: AppCalendarItem; links: ProjectCalendarLink[]; matchingGoogleCalendars: MatchingGoogleCalendarTarget[]; x: number; y: number; };
 type CalendarSidebarContentProps = CalendarSidebarProps & { className?: string; };
-type AppProjectsSectionProps = { projects: AppCalendarItem[]; isAdding: boolean; onAddProject: (projectName: string) => void; onToggleProject: (projectId: string) => void; onOpenProjectLinksContextMenu: (event: ContextMenuTriggerEvent, project: AppCalendarItem) => void; onAddingChange: (isAdding: boolean) => void; };
-type GoogleCalendarSourceRowProps = { account: GoogleAccountDisplay; calendar: GoogleCalendarListItem; color: string; onToggleCalendar: (calendarId: string) => void; onOpenCalendarContextMenu: (event: ContextMenuTriggerEvent, account: GoogleAccountDisplay, calendar: GoogleCalendarListItem) => void; };
-type GoogleAccountSectionProps = { account: GoogleAccountDisplay; projectCalendarLinks: ProjectCalendarLink[]; googleCalendarColorOverrides: GoogleCalendarColorOverrideMap; onToggleCalendar: (calendarId: string) => void; onOpenCalendarContextMenu: (event: ContextMenuTriggerEvent, account: GoogleAccountDisplay, calendar: GoogleCalendarListItem) => void; onReconnect: () => void; };
-type GoogleAccountsSectionProps = { accounts: GoogleAccountDisplay[]; isConnecting: boolean; projectCalendarLinks: ProjectCalendarLink[]; googleCalendarColorOverrides: GoogleCalendarColorOverrideMap; onAddCalendar: () => void; onToggleCalendar: (accountId: string, calendarId: string) => void; onOpenCalendarContextMenu: (event: ContextMenuTriggerEvent, account: GoogleAccountDisplay, calendar: GoogleCalendarListItem) => void; onReconnectAccount: (accountId: string) => void; };
-type IconProps = { className?: string; };
+type AppProjectsSectionProps = {
+  projects: AppCalendarItem[]; isAdding: boolean; onAddProject: (projectName: string) => void; onToggleProject: (projectId: string) => void; onOpenProjectLinksContextMenu: (event: ContextMenuTriggerEvent, project: AppCalendarItem) => void; onAddingChange: (isAdding: boolean) => void; };
+type GoogleCalendarSourceRowProps = {
+  account: GoogleAccountDisplay; calendar: GoogleCalendarListItem; color: string; onToggleCalendar: (calendarId: string) => void; onOpenCalendarContextMenu: (event: ContextMenuTriggerEvent, account: GoogleAccountDisplay, calendar: GoogleCalendarListItem) => void; };
+type GoogleAccountSectionProps = {
+  account: GoogleAccountDisplay; projectCalendarLinks: ProjectCalendarLink[]; googleCalendarColorOverrides: GoogleCalendarColorOverrideMap; onToggleCalendar: (calendarId: string) => void; onOpenCalendarContextMenu: (event: ContextMenuTriggerEvent, account: GoogleAccountDisplay, calendar: GoogleCalendarListItem) => void; onReconnect: () => void; };
+type GoogleAccountsSectionProps = {
+  accounts: GoogleAccountDisplay[]; isConnecting: boolean; projectCalendarLinks: ProjectCalendarLink[]; googleCalendarColorOverrides: GoogleCalendarColorOverrideMap; onAddCalendar: () => void; onToggleCalendar: (accountId: string, calendarId: string) => void; onOpenCalendarContextMenu: (event: ContextMenuTriggerEvent, account: GoogleAccountDisplay, calendar: GoogleCalendarListItem) => void; onReconnectAccount: (accountId: string) => void; };
+type IconProps = {
+  className?: string; };
 
 const ADD_GOOGLE_CALENDAR_LABEL = "Googleカレンダーを追加";
 const ADD_PROJECT_EMPTY_MESSAGE = "プロジェクト名を入力してください";

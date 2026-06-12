@@ -5,13 +5,15 @@ import type { ApplyHandwritingStrokeDeltaResult } from "./handwritingStrokeMessa
 import { applyHandwritingStrokeDelta } from "./handwritingStrokeMessages";
 
 type DesktopHandwritingReceiverSession = Pick<HandwritingSession, "id" | "cardId" | "side" | "status">;
-type ReceiveDesktopHandwritingMessageInput = { document: InkDocument | null | undefined;
+type ReceiveDesktopHandwritingMessageInput = {
+  document: InkDocument | null | undefined;
   session: DesktopHandwritingReceiverSession;
   message: HandwritingSessionMessage;
   now?: number;
 };
 type DesktopHandwritingReceiverReason = | ApplyHandwritingStrokeDeltaResult["reason"] | "control-message" | "session-mismatch";
-type ReceiveDesktopHandwritingMessageResult = { document: InkDocument;
+type ReceiveDesktopHandwritingMessageResult = {
+  document: InkDocument;
   applied: boolean;
   status: HandwritingSessionStatus;
   reason?: DesktopHandwritingReceiverReason;

@@ -1,4 +1,5 @@
-type LocalTextGenerationOptions = { prompt: string;
+type LocalTextGenerationOptions = {
+  prompt: string;
   systemPrompt?: string;
 };
 

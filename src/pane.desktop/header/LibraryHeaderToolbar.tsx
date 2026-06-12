@@ -7,7 +7,8 @@ import { cn } from "@/lib/utils";
 
 type LibraryHeaderToolbarIconProps = SVGProps<SVGSVGElement> & { className?: string;
 };
-type LibraryHeaderToolbarActionRenderProps = { className: string;
+type LibraryHeaderToolbarActionRenderProps = {
+  className: string;
   iconClassName: string;
   label: string;
 };

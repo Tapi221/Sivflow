@@ -5,7 +5,8 @@ import type { Card } from "@/types";
 import type { AppSnapshot } from "@/types/domain/snapshot";
 import { createCreateSnapshotUseCase } from "./CreateSnapshot";
 
-interface ExportFolderSnapshotDependencies { fileExporter: JsonFileExportPort;
+interface ExportFolderSnapshotDependencies {
+  fileExporter: JsonFileExportPort;
 }
 
 const createSnapshotUseCase = createCreateSnapshotUseCase({

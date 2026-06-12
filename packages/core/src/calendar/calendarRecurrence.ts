@@ -1,6 +1,7 @@
 type CalendarRecurrenceFrequency = "daily" | "weekly" | "monthly" | "yearly";
 type CalendarWeekday = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-type CalendarRecurrenceRule = { frequency: CalendarRecurrenceFrequency;
+type CalendarRecurrenceRule = {
+  frequency: CalendarRecurrenceFrequency;
   interval?: number;
   endDate?: Date;
   occurrence?: number;

@@ -30,8 +30,10 @@ import { CalendarSelectedViewsSplitView } from "@/pane.desktop/leftpane/schedule
 import { CalendarSidebar } from "@/pane.desktop/leftpane/schedule/CalendarSidebar";
 import { MobileCalendarEventComposer } from "./MobileCalendarEventComposer";
 
-type CalendarEventDisplayRange = { start: Date; end: Date; };
-type CalendarEventDisplayRangeOptions = { primaryViewMode: CalendarViewMode; currentDate: Date; selectedDate: Date; monthTitleDate: Date; visibleDays: Date[]; monthRenderedRange: CalendarDateRange; yearRenderedRange: CalendarDateRange | null; };
+type CalendarEventDisplayRange = {
+  start: Date; end: Date; };
+type CalendarEventDisplayRangeOptions = {
+  primaryViewMode: CalendarViewMode; currentDate: Date; selectedDate: Date; monthTitleDate: Date; visibleDays: Date[]; monthRenderedRange: CalendarDateRange; yearRenderedRange: CalendarDateRange | null; };
 
 const IOS_CALENDAR_MONTH_SURFACE_CLASS = "border-transparent bg-[rgba(255,255,255,0.92)] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]";
 const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS = "border-transparent bg-white shadow-none";

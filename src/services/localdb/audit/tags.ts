@@ -4,7 +4,8 @@ type CardTagFields = {
   tagIds?: unknown;
   updatedAt?: Date;
 };
-type TagRepairSummary = { removedOrphanTagRefs: number;
+type TagRepairSummary = {
+  removedOrphanTagRefs: number;
   dedupedTagRefs: number;
   duplicateNameLowerPairs: Array<{
     userId: string;

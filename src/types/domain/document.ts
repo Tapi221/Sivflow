@@ -4,8 +4,10 @@ import type { BaseEntity } from "./base";
 type DocumentKind = "pdf";
 type PdfPageLayoutMode = "single" | "double";
 type PdfSidePanelTab = "bookmarks" | "highlights" | "ocr" | "outline" | "thumbnails";
-type LegacyDocumentFields = { folder_id?: string | null; file_name?: string | null; order_index?: number; };
-interface PdfViewerState { currentPage?: number;
+type LegacyDocumentFields = {
+  folder_id?: string | null; file_name?: string | null; order_index?: number; };
+interface PdfViewerState {
+  currentPage?: number;
   scale?: number;
   fitMode?: "width" | "manual";
   pageLayoutMode?: PdfPageLayoutMode;
@@ -16,7 +18,8 @@ interface PdfViewerState { currentPage?: number;
   historyBackPages?: number[];
   historyForwardPages?: number[];
 }
-interface DocumentItem extends BaseEntity, LegacyDocumentFields { kind: DocumentKind;
+interface DocumentItem extends BaseEntity, LegacyDocumentFields {
+  kind: DocumentKind;
   folderId: string;
   orderIndex: number;
   title: string;

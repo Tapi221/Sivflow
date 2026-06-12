@@ -1,8 +1,10 @@
-type InkHistoryState = { canUndo: boolean;
+type InkHistoryState = {
+  canUndo: boolean;
   canRedo: boolean;
   strokeCount: number;
 };
-interface InkLayerHandle { undo: () => void;
+interface InkLayerHandle {
+  undo: () => void;
   redo: () => void;
   clear: () => void;
 }

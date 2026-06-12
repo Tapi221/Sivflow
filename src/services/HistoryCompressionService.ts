@@ -61,7 +61,8 @@ const toHistoryEvent = (value: unknown): HistoryEvent | null => {
     interval: toFiniteNumber(value.interval),
   };
 };
-class HistoryCompressionService { public readonly compress = async (userId: string): Promise<void> => {
+class HistoryCompressionService {
+  public readonly compress = async (userId: string): Promise<void> => {
   if (StorageStateManager.isReadOnly(userId)) {
     console.log(`[Compression:${userId}] Skipped (READ_ONLY mode)`);
     return;

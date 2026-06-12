@@ -2,7 +2,8 @@ import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 
-type EditorDraft = { title: string;
+type EditorDraft = {
+  title: string;
   tags: string[];
   isDraft: boolean;
   frontBlocks: CardBlock[];

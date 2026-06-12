@@ -20,7 +20,8 @@ type MfDeckImportDestination = | { kind: "new-card-set";
     cardSetId: string;
     cardSetName: string;
   };
-type ImportMfDeckArchiveParams = { archive: MfDeckArchiveV1;
+type ImportMfDeckArchiveParams = {
+  archive: MfDeckArchiveV1;
   folderId: string;
   createCardSet: CreateMfDeckCardSet;
   updateCardSet?: UpdateMfDeckCardSet;
@@ -28,7 +29,8 @@ type ImportMfDeckArchiveParams = { archive: MfDeckArchiveV1;
   ensureTagByName?: EnsureMfDeckTagByName;
   destination: MfDeckImportDestination;
 };
-type ImportMfDeckArchiveResult = { createdCardSetId: string;
+type ImportMfDeckArchiveResult = {
+  createdCardSetId: string;
   createdCardSetName: string;
   folderId: string;
   createdCount: number;

@@ -1,5 +1,6 @@
 type PresentationTarget = "desktop" | "mobile";
-type PresentationCapabilities = { viewportWidth: number;
+type PresentationCapabilities = {
+  viewportWidth: number;
   canHover: boolean;
   hasFinePointer: boolean;
 };

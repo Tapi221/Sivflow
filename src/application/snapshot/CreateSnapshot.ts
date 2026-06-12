@@ -6,7 +6,8 @@ import type { AppSnapshot, SnapshotAsset, SnapshotData, SnapshotMetadata } from 
 import { APP_VERSION, CURRENT_SCHEMA_VERSION } from "@/types/domain/snapshot";
 import { toSnapshotAsset } from "./snapshotAssetManifest";
 
-interface CreateSnapshotDependencies { generationCounterStore: GenerationCounterStorePort;
+interface CreateSnapshotDependencies {
+  generationCounterStore: GenerationCounterStorePort;
 }
 
 const createCreateSnapshotUseCase = ({ generationCounterStore }: CreateSnapshotDependencies) => {

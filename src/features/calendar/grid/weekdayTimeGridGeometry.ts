@@ -9,12 +9,14 @@ type WeekdayTimedEventPositionStyle = CSSProperties & { left: string;
   height: string;
   minHeight: string;
 };
-type WeekdayTimedEventFrame = { leftPercent: number;
+type WeekdayTimedEventFrame = {
+  leftPercent: number;
   topHours: number;
   widthPercent: number;
   heightHours: number;
 };
-type WeekdayTimedEventPositionOptions = { maxMinHeightHours?: number;
+type WeekdayTimedEventPositionOptions = {
+  maxMinHeightHours?: number;
   suppressMinHeight?: boolean;
 };
 type WeekdayTimedEventHorizontalInsets = {

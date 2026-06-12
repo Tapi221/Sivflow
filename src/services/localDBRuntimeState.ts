@@ -1,6 +1,7 @@
 type LocalDBMode = "persistent" | "fallback";
 type LocalDBFallbackReasonCode = | "none" | "backing_store_open_error" | "quota_exceeded" | "indexeddb_blocked" | "upgrade_needed_or_blocked" | "unknown";
-interface LocalDBRuntimeStatus { mode: LocalDBMode;
+interface LocalDBRuntimeStatus {
+  mode: LocalDBMode;
   userId: string | null;
   dbName: string | null;
   fallbackReason: string | null;
@@ -9,7 +10,8 @@ interface LocalDBRuntimeStatus { mode: LocalDBMode;
   resetFailedReason: string | null;
   updatedAt: number;
 }
-interface LocalDBTelemetrySnapshot { localdb_mode: LocalDBMode;
+interface LocalDBTelemetrySnapshot {
+  localdb_mode: LocalDBMode;
   localdb_reason_code: LocalDBFallbackReasonCode;
   localdb_fallback_reason: string;
   localdb_generation_bumped: boolean;

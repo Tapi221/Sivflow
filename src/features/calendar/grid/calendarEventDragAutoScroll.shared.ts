@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 
-type CalendarEventDragPointerSnapshot = { pointerId: number;
+type CalendarEventDragPointerSnapshot = {
+  pointerId: number;
   buttons: number;
   clientX: number;
   clientY: number;

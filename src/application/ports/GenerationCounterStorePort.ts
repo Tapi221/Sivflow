@@ -1,4 +1,5 @@
-interface GenerationCounterStorePort { get: () => number;
+interface GenerationCounterStorePort {
+  get: () => number;
   increment: () => number;
 }
 

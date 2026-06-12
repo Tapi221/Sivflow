@@ -17,7 +17,8 @@ import { buildCardSurfaceMetrics } from "./cardSurfacePresentation";
 
 type Side = "question" | "answer";
 type EditorSettings = Partial<UserSettings> | null | undefined;
-interface DesktopEmbeddedCardEditorSurfaceProps { selectedCardId: string;
+interface DesktopEmbeddedCardEditorSurfaceProps {
+  selectedCardId: string;
   folderId: string | null;
   cardSetId: string | null;
   cardsOverride?: Card[];

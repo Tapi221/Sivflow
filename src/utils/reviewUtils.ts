@@ -2,7 +2,8 @@ import type { SubjectiveScore } from "@/domain/card/review/stability";
 import { normalizeMemoryStability } from "@/domain/card/review/stability";
 import { calculateRetentionProbability } from "./reviewMetrics";
 
-type StabilityPhase = { key: "unstable" | "fragile" | "growing" | "stable" | "solid";
+type StabilityPhase = {
+  key: "unstable" | "fragile" | "growing" | "stable" | "solid";
   label: string;
   shortLabel: string;
   colorClass: string;

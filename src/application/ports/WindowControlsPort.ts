@@ -1,4 +1,5 @@
-interface WindowControlsPort { minimize(): Promise<void>;
+interface WindowControlsPort {
+  minimize(): Promise<void>;
   maximizeToggle(): Promise<void>;
   close(): Promise<void>;
   isMaximized(): Promise<boolean>;

@@ -13,7 +13,8 @@ interface UseFlashcardInkOptions {
   contentRef: React.RefObject<HTMLDivElement | null>;
   onInkDocumentChange?: (side: "question" | "answer", nextDocument: InkDocument) => void;
 }
-interface FlashcardInkResult { previewInkRef: React.RefObject<InkLayerHandle | null>;
+interface FlashcardInkResult {
+  previewInkRef: React.RefObject<InkLayerHandle | null>;
   previewInkTool: InkEditTool | null;
   setPreviewInkTool: React.Dispatch<React.SetStateAction<InkEditTool | null>>;
   previewInkHistory: InkHistoryState;

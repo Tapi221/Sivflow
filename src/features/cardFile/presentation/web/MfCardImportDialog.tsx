@@ -12,7 +12,8 @@ import { readMfCardFile } from "@/features/cardFile/infra/web/readMfCardFile";
 import type { CreateMfDeckCard, CreateMfDeckCardSet, EnsureMfDeckTagByName, UpdateMfDeckCardSet } from "@/features/deckFile/application/importMfDeck";
 import type { CardSet } from "@/types";
 
-type MfCardImportCompletedPayload = { cardSetId: string;
+type MfCardImportCompletedPayload = {
+  cardSetId: string;
   cardSetName: string;
   folderId: string;
   createdCount: number;

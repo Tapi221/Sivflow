@@ -3,7 +3,8 @@ import type { HandwritingSession, HandwritingSessionMessage, HandwritingSessionS
 type HandwritingSessionUnsubscribe = () => void;
 type HandwritingSessionMessageHandler = (message: HandwritingSessionMessage) => void;
 type HandwritingSessionStatusHandler = (status: HandwritingSessionStatus) => void;
-type HandwritingSessionClient = { readonly session: HandwritingSession;
+type HandwritingSessionClient = {
+  readonly session: HandwritingSession;
   connect(): Promise<void>;
   disconnect(reason?: string): Promise<void>;
   sendStrokeDelta(message: HandwritingStrokeDeltaMessage): Promise<void>;

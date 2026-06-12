@@ -1,4 +1,5 @@
-type GoogleDrivePdfDownloadInput = { accessToken: string;
+type GoogleDrivePdfDownloadInput = {
+  accessToken: string;
   fileId: string;
 };
 

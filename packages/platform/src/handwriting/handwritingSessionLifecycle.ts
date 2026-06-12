@@ -1,18 +1,21 @@
 import type { InkSide } from "@core/domain/card/ink/inkDocument";
 import type { HandwritingDeviceInfo, HandwritingSession, HandwritingSessionStatus } from "./handwritingSession.types";
 
-type CreateDesktopHandwritingSessionInput = { id: string;
+type CreateDesktopHandwritingSessionInput = {
+  id: string;
   userId: string;
   cardId: string;
   side: InkSide;
   desktopDevice: HandwritingDeviceInfo;
   now?: number;
 };
-type AttachMobileDeviceToHandwritingSessionInput = { session: HandwritingSession;
+type AttachMobileDeviceToHandwritingSessionInput = {
+  session: HandwritingSession;
   mobileDevice: HandwritingDeviceInfo;
   now?: number;
 };
-type UpdateHandwritingSessionStatusInput = { session: HandwritingSession;
+type UpdateHandwritingSessionStatusInput = {
+  session: HandwritingSession;
   status: HandwritingSessionStatus;
   now?: number;
 };

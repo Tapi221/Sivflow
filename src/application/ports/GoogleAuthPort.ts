@@ -1,4 +1,5 @@
-interface GoogleAuthPort { signIn: () => Promise<void>;
+interface GoogleAuthPort {
+  signIn: () => Promise<void>;
 }
 
 export type { GoogleAuthPort };

@@ -1,6 +1,7 @@
 import type { SecurityEventType } from "@/types/domain/telemetry";
 
-type SecurityEventCatalogEntry = { severity: "info" | "warning" | "critical";
+type SecurityEventCatalogEntry = {
+  severity: "info" | "warning" | "critical";
   isUserVisible: boolean;
   description: string;
 };

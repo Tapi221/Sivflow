@@ -18,12 +18,18 @@ import * as COLOR from "./grid.color.constants.desktop";
 import * as GRID from "./grid.layout.constants.desktop";
 import { getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle, WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX } from "./weekdayTimeGridGeometry";
 
-type CalendarWeekDayGridRef = { scrollToHour: (hour: number) => void; };
-type WeekdayEventsByDay = { allDayEvents: Map<string, GoogleCalendarEvent[]>; };
-type WeekdayEventDragState = { eventKey: string; event: GoogleCalendarEvent; pointerId: number; pointerOffsetMinutes: number; durationMs: number; sourceDayKey: string; previewStartsAt: Date; previewEndsAt: Date; previewIsAllDay: boolean; previewAllDayIndex: number | null; previewColumnDayKey: string | null; };
-type WeekdayDayColumnHit = { day: Date; element: HTMLDivElement; };
-type WeekdayEventDragPreview = { previewStartsAt: Date; previewEndsAt: Date; previewIsAllDay: boolean; previewAllDayIndex: number | null; previewColumnDayKey: string | null; };
-type WeekdayAllDayRenderItem = { event: GoogleCalendarEvent; eventKey: string; isDragPreview: boolean; };
+type CalendarWeekDayGridRef = {
+  scrollToHour: (hour: number) => void; };
+type WeekdayEventsByDay = {
+  allDayEvents: Map<string, GoogleCalendarEvent[]>; };
+type WeekdayEventDragState = {
+  eventKey: string; event: GoogleCalendarEvent; pointerId: number; pointerOffsetMinutes: number; durationMs: number; sourceDayKey: string; previewStartsAt: Date; previewEndsAt: Date; previewIsAllDay: boolean; previewAllDayIndex: number | null; previewColumnDayKey: string | null; };
+type WeekdayDayColumnHit = {
+  day: Date; element: HTMLDivElement; };
+type WeekdayEventDragPreview = {
+  previewStartsAt: Date; previewEndsAt: Date; previewIsAllDay: boolean; previewAllDayIndex: number | null; previewColumnDayKey: string | null; };
+type WeekdayAllDayRenderItem = {
+  event: GoogleCalendarEvent; eventKey: string; isDragPreview: boolean; };
 
 const WEEKDAY_HOURS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, hour) => hour);
 const CURRENT_TIME_TICK_MS = GRID.WEEKDAY_CURRENT_TIME_UPDATE_INTERVAL_MS;

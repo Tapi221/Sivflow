@@ -2,19 +2,22 @@ import type { InkDocument, InkSide, InkStroke } from "@core/domain/card/ink/inkD
 import { INK_DOCUMENT_VERSION, normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
 import type { HandwritingStrokeDeltaMessage } from "./handwritingSession.types";
 
-type CreateHandwritingStrokeDeltaInput = { sessionId: string;
+type CreateHandwritingStrokeDeltaInput = {
+  sessionId: string;
   cardId: string;
   side: InkSide;
   stroke: InkStroke;
 };
-type ApplyHandwritingStrokeDeltaInput = { document: InkDocument | null | undefined;
+type ApplyHandwritingStrokeDeltaInput = {
+  document: InkDocument | null | undefined;
   message: HandwritingStrokeDeltaMessage;
   expectedSessionId?: string;
   expectedCardId?: string;
   expectedSide?: InkSide;
   now?: number;
 };
-type ApplyHandwritingStrokeDeltaResult = { document: InkDocument;
+type ApplyHandwritingStrokeDeltaResult = {
+  document: InkDocument;
   applied: boolean;
   reason?: "session-mismatch" | "card-mismatch" | "side-mismatch" | "invalid-stroke" | "duplicate-stroke";
 };

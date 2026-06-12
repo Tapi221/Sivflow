@@ -5,7 +5,8 @@ import { createProjectCalendarLink, persistProjectCalendarLinks, readStoredProje
 import type { AppCalendarItem, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink } from "./scheduleScreen.types";
 import { clearLegacyStoredAppProjects, normalizeRootFolderProjectLabel, readLegacyStoredAppProjects, useRootFolderProjects } from "./useRootFolderProjects";
 
-type CreateGoogleProjectCalendarLinkInput = { project: AppCalendarItem; accountId: string; calendar: GoogleCalendarListItem; color: string; createdByApp: boolean; };
+type CreateGoogleProjectCalendarLinkInput = {
+  project: AppCalendarItem; accountId: string; calendar: GoogleCalendarListItem; color: string; createdByApp: boolean; };
 type UseProjectCalendarActionsInput = {
   googleAccounts: GoogleAccountDisplay[];
   reconnectGoogleAccount: (accountId: string) => void | Promise<void>;

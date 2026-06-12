@@ -7,7 +7,8 @@ import { CardSurface } from "./CardSurface";
 import { ScaleToFitFrame } from "./ScaleToFitFrame";
 
 type CardShellProps = React.ComponentProps<typeof CardShell>;
-interface CardFrameProps extends Omit<CardShellProps, "children" | "className" | "ref"> { children: React.ReactNode;
+interface CardFrameProps extends Omit<CardShellProps, "children" | "className" | "ref"> {
+  children: React.ReactNode;
   baseWidth?: number;
   contentPaddingPx?: number;
   allowUpscale?: boolean;

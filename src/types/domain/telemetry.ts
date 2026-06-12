@@ -3,7 +3,8 @@ type LogLevel = "debug" | "info" | "warn" | "error";
 type SyncContextSource = | "user_initiated" | "background" | "periodic" | "force_resync" | "system";
 type NetworkStatus = "excellent" | "good" | "poor" | "offline";
 type TelemetryEventName = | "startup_degraded" | "sanitize_blob_url_from_cloud" | "rebuild_item_failed" | "rebuild_partial_failures";
-interface LogContext { userId?: string;
+interface LogContext {
+  userId?: string;
   deviceId?: string;
   networkStatus?: NetworkStatus;
   syncContext?: SyncContextSource;
@@ -12,16 +13,19 @@ interface LogContext { userId?: string;
   [key: string]: unknown;
 }
 // System SLIs (Technical Health)
-interface SystemMetrics { syncAvailability: number; // 1 = success, 0 = 5xx error
+interface SystemMetrics {
+  syncAvailability: number; // 1 = success, 0 = 5xx error
   throughput: number; // records / sec
   memoryUsage?: number; // MB
 }
 // User Experience SLIs (Perceived Quality)
-interface UserMetrics { perceivedLatency: number; // ms (Action to UI feedback)
+interface UserMetrics {
+  perceivedLatency: number; // ms (Action to UI feedback)
   consistencyRate: number; // 1 = consistent, 0 = inconsistent
   isSilentFailure: boolean; // true if failed without user notification
 }
-interface SyncLogEntry { timestamp: string;
+interface SyncLogEntry {
+  timestamp: string;
   level: LogLevel;
   message: string;
   eventName?: TelemetryEventName;
@@ -36,7 +40,8 @@ interface SyncLogEntry { timestamp: string;
   | "checksum_error";
   isFallback?: boolean;
 }
-interface ITelemetryService { log(level: LogLevel, message: string, context?: LogContext, error?: Error,): void;
+interface ITelemetryService {
+  log(level: LogLevel, message: string, context?: LogContext, error?: Error,): void;
   logEvent(
     eventName: TelemetryEventName,
     level: LogLevel,
@@ -53,13 +58,15 @@ interface ITelemetryService { log(level: LogLevel, message: string, context?: Lo
     end: (status: "success" | "failure") => void;
   };
 }
-interface SecurityMetadata { ipAddress?: string; // (serverのみ信頼可能)
+interface SecurityMetadata {
+  ipAddress?: string; // (serverのみ信頼可能)
   userAgent?: string;
   path?: string; // アクセスしようとしたリソース
   reason?: string; // エラー詳細
   [key: string]: unknown;
 }
-interface SecurityLog { logId: string; // UUID
+interface SecurityLog {
+  logId: string; // UUID
   userId: string;
   deviceId: string; // アクセス元デバイスID (不明な場合は 'unknown')
   deviceName?: string; // 記録時点でのデバイス名

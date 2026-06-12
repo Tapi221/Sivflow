@@ -8,7 +8,8 @@ type UploadSource = "cloud" | "local_fallback";
 type UploadFallbackReason = | "timeout" | "network_error" | "permission_error" | "unknown";
 type AssetRemoteStatus = "none" | "uploading" | "ready" | "failed";
 type AssetLocalStatus = "present" | "missing";
-interface AssetRecord { id: string;
+interface AssetRecord {
+  id: string;
   userId: string;
   mime: string;
   size: number;
@@ -24,17 +25,20 @@ interface AssetRecord { id: string;
   height?: number | null;
   sha256?: string | null;
 }
-interface ImageBlockLayout { /** fixed 本文座標系での画像論理幅。fixed / fluid 共通の正本。 */ baseWidthPx?: number | null;
+interface ImageBlockLayout {
+  /** fixed 本文座標系での画像論理幅。fixed / fluid 共通の正本。 */ baseWidthPx?: number | null;
   cropX?: number | null;
 }
-interface CardImageRef { assetId: string;
+interface CardImageRef {
+  assetId: string;
   scale?: number | null;
   x?: number | null;
   layout?: ImageBlockLayout | null;
   naturalW?: number | null;
   naturalH?: number | null;
 }
-type ResolvableImageRef = { id?: string | null;
+type ResolvableImageRef = {
+  id?: string | null;
   assetId?: string | null;
   localFileId?: string | null;
   remoteUrl?: string | null;
@@ -47,7 +51,8 @@ type ResolvableImageRef = { id?: string | null;
   naturalW?: number | null;
   naturalH?: number | null;
 };
-interface UploadedImage { id: string;
+interface UploadedImage {
+  id: string;
   assetId?: string | null;
   localUrl?: BlobUrl | null;
   remoteUrl?: StorageUrl | null;
@@ -75,7 +80,8 @@ interface UploadedImage { id: string;
   fallbackReason?: UploadFallbackReason;
   updatedAt?: Date | Timestamp | null;
 }
-interface UploadedPdf { id: string;
+interface UploadedPdf {
+  id: string;
   assetId?: string | null;
   filename: string;
   localUrl?: BlobUrl | null;
@@ -93,14 +99,16 @@ interface UploadedPdf { id: string;
   fallbackReason?: UploadFallbackReason;
   updatedAt?: Date | Timestamp | null;
 }
-interface UploadedFile { id: string;
+interface UploadedFile {
+  id: string;
   name: string;
   remoteUrl: string;
   storagePath: string;
   contentType?: string | null;
   size?: number | null;
 }
-interface UploadMetadata { id: string;
+interface UploadMetadata {
+  id: string;
   userId: string;
   originalFilename: string;
   storagePath: string;

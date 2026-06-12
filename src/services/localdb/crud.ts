@@ -6,14 +6,16 @@ import { cleanupBeforeDocumentDelete, cleanupBeforeDocumentSoftDelete, cleanupBe
 import { CURRENT_TAG_STORE } from "./tagStoreNames";
 
 type EnqueueSync = (table: string, type: "upload" | "download", payload: unknown) => Promise<void>;
-interface TableLike<T extends object> { add(item: T): PromiseLike<unknown> | unknown;
+interface TableLike<T extends object> {
+  add(item: T): PromiseLike<unknown> | unknown;
   get(id: unknown): PromiseLike<T | undefined> | T | undefined;
   update(id: unknown, changes: unknown): PromiseLike<number> | number;
   put(item: T): PromiseLike<unknown> | unknown;
   bulkPut(items: ReadonlyArray<T>): PromiseLike<unknown> | unknown;
   delete(id: unknown): PromiseLike<void> | void;
 }
-interface DbLike { table<T extends object, _TKey = string>(name: string): TableLike<T>;
+interface DbLike {
+  table<T extends object, _TKey = string>(name: string): TableLike<T>;
   name?: string;
 }
 type QueueSyncApi = {

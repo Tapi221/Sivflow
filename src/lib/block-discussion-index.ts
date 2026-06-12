@@ -13,7 +13,8 @@ import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 import type { TComment } from "@/components/ui/comment";
 
-interface ResolvedSuggestion extends TResolvedSuggestion { comments: TComment[];
+interface ResolvedSuggestion extends TResolvedSuggestion {
+  comments: TComment[];
 }
 type BlockDiscussionEntry = NodeEntry<
   TCommentText | TElement | TSuggestionText

@@ -1,4 +1,5 @@
-interface PreloadCacheStats { remoteUrlCacheSize: number;
+interface PreloadCacheStats {
+  remoteUrlCacheSize: number;
   decodedUrlSetSize: number;
   remoteUrlCacheMax: number;
   decodedUrlSetMax: number;

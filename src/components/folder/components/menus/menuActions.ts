@@ -3,7 +3,8 @@ import type { ReactNode } from "react";
 /**
  * メニューのアクションを定義する型
  */
-type MenuAction = { id: string;
+type MenuAction = {
+  id: string;
   label: string;
   icon?: ReactNode;
   danger?: boolean;

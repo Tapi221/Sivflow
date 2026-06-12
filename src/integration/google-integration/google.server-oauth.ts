@@ -4,9 +4,11 @@ import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import type { GoogleCalendarAccess } from "./google.oauth";
 import { consumeGoogleCalendarServerCodeVerifier } from "./google.oauth";
 
-type GoogleOAuthReconnectDiagnosis = { cause: string; reconnectRequired: boolean; action: string; };
+type GoogleOAuthReconnectDiagnosis = {
+  cause: string; reconnectRequired: boolean; action: string; };
 type GoogleOAuthCallableErrorReason = "invalid_grant" | "server_oauth_configuration" | "token_encryption_key_invalid" | "stored_refresh_token_decrypt_failed" | "stored_refresh_token_missing" | "insufficient_google_scope" | "token_endpoint_failed";
-type CallableErrorDetails = { reason?: GoogleOAuthCallableErrorReason; reconnectRequired?: boolean; userAction?: string; adminAction?: string; };
+type CallableErrorDetails = {
+  reason?: GoogleOAuthCallableErrorReason; reconnectRequired?: boolean; userAction?: string; adminAction?: string; };
 type GoogleOAuthReasonedError = Error & { code?: string; googleOAuthReason?: GoogleOAuthCallableErrorReason; };
 type ServerGoogleCalendarAccess = GoogleCalendarAccess & {
   accessToken: string;

@@ -7,7 +7,8 @@ type ImageUrlField = "remoteUrl" | "localUrl" | "thumbnailUrl";
  * 画像ドメインの不変条件違反を示すエラー
  * このエラーが発生した場合、設計上の重大な問題がある
  */
-class ImageInvariantViolation extends Error { constructor(message: string, public readonly imageId?: string) {
+class ImageInvariantViolation extends Error {
+  constructor(message: string, public readonly imageId?: string) {
   super(`[ImageInvariant] ${message}`);
   this.name = "ImageInvariantViolation";
 }

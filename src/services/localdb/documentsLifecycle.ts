@@ -22,7 +22,8 @@ type DocumentsTable = {
     first(): Promise<DocumentRecord | undefined>;
   };
 };
-type DocDbCtx = { documents: DocumentsTable; userId?: string; };
+type DocDbCtx = {
+  documents: DocumentsTable; userId?: string; };
 
 const canDeleteDocumentBlob = async (
   documents: DocumentsTable,

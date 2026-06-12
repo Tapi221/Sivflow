@@ -11,7 +11,8 @@ type CalendarMonthGridWeek = {
   key: string;
   days: CalendarMonthGridDay[];
 };
-type CalendarDayModel = { key: string;
+type CalendarDayModel = {
+  key: string;
   date: Date;
   dayOfMonth: number;
   isCurrentMonth: boolean;
@@ -19,10 +20,12 @@ type CalendarDayModel = { key: string;
   isSelected: boolean;
   monthAnnotation: string | null;
 };
-type CalendarWeekModel = { key: string;
+type CalendarWeekModel = {
+  key: string;
   days: CalendarDayModel[];
 };
-type CalendarGridModel = { weeks: CalendarWeekModel[];
+type CalendarGridModel = {
+  weeks: CalendarWeekModel[];
 };
 type Params = {
   monthWeeks: CalendarMonthGridWeek[];

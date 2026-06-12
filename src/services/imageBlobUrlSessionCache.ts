@@ -9,7 +9,8 @@ type CacheEntry = {
   pinCount: number;
   staleUrls: string[];
 };
-interface BlobCacheStats { cacheSize: number;
+interface BlobCacheStats {
+  cacheSize: number;
   cacheMax: number;
   pinnedCount: number;
   evictCount: number;

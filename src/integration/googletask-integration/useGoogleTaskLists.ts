@@ -5,7 +5,8 @@ import type { GoogleConnectedServiceAccountEntry, GoogleConnectedServiceAccountT
 import type { GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
 import { fetchGoogleTaskLists } from "./gtask.api";
 
-type GoogleTaskListAccountState = { taskLists: GoogleTaskListItem[];
+type GoogleTaskListAccountState = {
+  taskLists: GoogleTaskListItem[];
   isLoading: boolean;
   error: string | null;
 };

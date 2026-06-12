@@ -55,23 +55,31 @@ type EditorValues = {
   tooltipWeekdayRadius: number;
 };
 
-type NumberKey = { [Key in keyof EditorValues]: EditorValues[Key] extends number ? Key : never }[keyof EditorValues];
+type NumberKey = {
+  [Key in keyof EditorValues]: EditorValues[Key] extends number ? Key : never }[keyof EditorValues];
 
-type Control = { valueKey: NumberKey; label: string; min: number; max: number; step?: number; unit?: string; };
+type Control = {
+  valueKey: NumberKey; label: string; min: number; max: number; step?: number; unit?: string; };
 
-type Section = { title: string; controls: readonly Control[]; };
+type Section = {
+  title: string; controls: readonly Control[]; };
 
 type NumberControlProps = Control & { value: number; onChange: (key: NumberKey, value: number) => void; };
 
-type ControlPanelProps = { section: Section; values: EditorValues; onChange: (key: NumberKey, value: number) => void; };
+type ControlPanelProps = {
+  section: Section; values: EditorValues; onChange: (key: NumberKey, value: number) => void; };
 
-type SampleTitlePanelProps = { sampleTitle: string; allDayTitle: string; onChangeSampleTitle: (value: string) => void; onChangeAllDayTitle: (value: string) => void; };
+type SampleTitlePanelProps = {
+  sampleTitle: string; allDayTitle: string; onChangeSampleTitle: (value: string) => void; onChangeAllDayTitle: (value: string) => void; };
 
-type RealWeekdayGridPreviewProps = { title: string; heightClassName: string; gridStyle: CalendarGridStyle; visibleEvents: GoogleCalendarEvent[]; };
+type RealWeekdayGridPreviewProps = {
+  title: string; heightClassName: string; gridStyle: CalendarGridStyle; visibleEvents: GoogleCalendarEvent[]; };
 
-type MonthPreviewProps = { values: EditorValues; event: GoogleCalendarEvent; allDayEvent: GoogleCalendarEvent; };
+type MonthPreviewProps = {
+  values: EditorValues; event: GoogleCalendarEvent; allDayEvent: GoogleCalendarEvent; };
 
-type ListPreviewProps = { event: GoogleCalendarEvent; allDayEvent: GoogleCalendarEvent; };
+type ListPreviewProps = {
+  event: GoogleCalendarEvent; allDayEvent: GoogleCalendarEvent; };
 
 const AUTOSAVE_ENDPOINT = "/__sivflow/eventchip-design";
 const AUTOSAVE_DELAY_MS = 450;

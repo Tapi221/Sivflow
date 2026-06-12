@@ -1,4 +1,5 @@
-type FeatureFlags = { newEditor: boolean;
+type FeatureFlags = {
+  newEditor: boolean;
   enableMarkdownImages: boolean;
   experimentalPasteSplit: boolean;
   postReviewPractice: boolean;

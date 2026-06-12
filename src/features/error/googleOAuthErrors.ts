@@ -2,7 +2,8 @@ import type { GoogleOAuthCallableErrorReason } from "@/integration/google-integr
 import { getGoogleOAuthCallableErrorReason, isGoogleOAuthDeterministicErrorReason } from "@/integration/google-integration/google.server-oauth";
 
 type GoogleOAuthCooldownReason = GoogleOAuthCallableErrorReason | "auto_recovery_pending" | "internal";
-type GoogleOAuthCooldownEntry = { reason: GoogleOAuthCooldownReason;
+type GoogleOAuthCooldownEntry = {
+  reason: GoogleOAuthCooldownReason;
   message: string;
   until: number;
 };

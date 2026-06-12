@@ -199,8 +199,10 @@ describe("MarkdownBlock", () => {
       },
     });
 
-    type CodeBlock = { type: "code"; code: { language: string; code: string; }; };
-    type MarkdownBlockOut = { type: "markdown"; markdown: string; };
+    type CodeBlock = {
+      type: "code"; code: { language: string; code: string; }; };
+    type MarkdownBlockOut = {
+      type: "markdown"; markdown: string; };
     type OutputBlock = CodeBlock | MarkdownBlockOut;
 
     const blocks = onReplaceWithBlocks.mock.calls[0][0] as OutputBlock[];

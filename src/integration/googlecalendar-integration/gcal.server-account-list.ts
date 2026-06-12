@@ -4,7 +4,8 @@ import { auth, functionsClient } from "@/services/firebase";
 import type { StoredGoogleAccount } from "./gcal.multi-storage";
 import { buildTokenExpiry, readStoredAccounts, writeStoredAccounts } from "./gcal.multi-storage";
 
-type ServerStoredGoogleCalendarAccount = { accountId: string;
+type ServerStoredGoogleCalendarAccount = {
+  accountId: string;
   email: string | null;
   name: string | null;
   photoUrl: string | null;

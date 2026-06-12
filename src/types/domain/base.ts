@@ -1,6 +1,7 @@
 import { Timestamp } from "firebase/firestore";
 
-interface BaseEntity { [key: string]: unknown;
+interface BaseEntity {
+  [key: string]: unknown;
   id: string;
   userId: string;
   deviceId: string;
@@ -12,15 +13,18 @@ interface BaseEntity { [key: string]: unknown;
   conflictDescription?: string;
 }
 type SubjectiveScoreValue = 0 | 1 | 2 | 3;
-type ReviewLog = { reviewedAt: string;
+type ReviewLog = {
+  reviewedAt: string;
   rating: 1 | 2 | 3 | 4;
   resistanceScore: number;
   durationMinutes?: number | null;
 };
-type ReferenceBlockData = { url: string;
+type ReferenceBlockData = {
+  url: string;
   name?: string;
 };
-interface BlockConfig { id: string;
+interface BlockConfig {
+  id: string;
   type:
   | "text"
   | "code"
@@ -34,7 +38,8 @@ interface BlockConfig { id: string;
   isVisible: boolean;
   orderIndex: number;
 }
-type MathBlockData = { latex: string;
+type MathBlockData = {
+  latex: string;
   displayMode: "block" | "inline";
   note?: string;
 };

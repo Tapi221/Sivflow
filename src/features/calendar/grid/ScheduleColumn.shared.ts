@@ -4,10 +4,12 @@ import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 
-type ScheduleColumnBuffer = { before: number;
+type ScheduleColumnBuffer = {
+  before: number;
   after: number;
 };
-type ScheduleVirtualRail = { startDate: Date;
+type ScheduleVirtualRail = {
+  startDate: Date;
   anchorIndex: number;
   totalDayCount: number;
 };

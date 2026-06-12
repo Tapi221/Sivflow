@@ -1,7 +1,8 @@
 import type { FunctionsErrorCode } from "firebase-functions/v2/https";
 
 type GoogleOAuthTokenErrorReason = | "invalid_grant" | "server_oauth_configuration" | "token_endpoint_failed";
-type ClassifiedGoogleTokenEndpointFailure = { code: FunctionsErrorCode;
+type ClassifiedGoogleTokenEndpointFailure = {
+  code: FunctionsErrorCode;
   message: string;
   details: {
     reason: GoogleOAuthTokenErrorReason;

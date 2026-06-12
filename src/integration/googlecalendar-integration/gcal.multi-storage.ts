@@ -4,7 +4,8 @@ import { clearCachedGoogleCalendarAccount } from "./googleCalendarEventCache";
 // ─────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────
-type StoredGoogleAccount = { /** メールアドレス or ランダムUUID（メール不明時） */ id: string;
+type StoredGoogleAccount = {
+  /** メールアドレス or ランダムUUID（メール不明時） */ id: string;
   email: string | null;
   name?: string | null;
   photoUrl?: string | null;
@@ -14,7 +15,8 @@ type StoredGoogleAccount = { /** メールアドレス or ランダムUUID（メ
   selectedCalendarIds: string[];
   cachedCalendars?: { id: string; summary: string; backgroundColor?: string; }[];
 };
-type StoredGoogleAccountProfile = { name?: string | null;
+type StoredGoogleAccountProfile = {
+  name?: string | null;
   photoUrl?: string | null;
 };
 

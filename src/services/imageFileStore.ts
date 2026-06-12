@@ -6,10 +6,12 @@ type StoredImageFile = {
   blob: Blob;
   updatedAt: number;
 };
-type PutImageBlobOptions = { userId: string;
+type PutImageBlobOptions = {
+  userId: string;
   assetId: string;
 };
-type ImageBlobRecord = { localBlobId: string;
+type ImageBlobRecord = {
+  localBlobId: string;
   size: number;
   mime: string;
 };
