@@ -96,7 +96,7 @@ const getRecoverableAccessToken = async (
   }
 
   if (!account.refreshToken) {
-    const { auth } = await import("@/services/firebase");
+    const { auth } = await import("@/infrastructure/firebase/client");
     const result = await requestConnectedServiceAccessToken(auth, true);
     return applyRecoveredToken(result);
   }
