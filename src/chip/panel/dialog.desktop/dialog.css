@@ -1,22 +1,23 @@
-.dialog-desktop-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 50px;
-  background: rgba(15, 16, 18, 0.28);
-}
-
-.dialog-desktop-surface {
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(31, 35, 40, 0.12);
-  border-radius: 16px;
-  background: #fff;
-  color: #1c1c1e;
-  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.24);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+@layer components {
+  .dialog-desktop-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 50px;
+    background: rgba(15, 16, 18, 0.28);
+  }
+  .dialog-desktop-surface {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(31, 35, 40, 0.12);
+    border-radius: 16px;
+    background: #fff;
+    color: #1c1c1e;
+    box-shadow: 0 24px 80px rgba(15, 23, 42, 0.24);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }
