@@ -276,6 +276,7 @@ const PdfPageCanvas = ({ pdfDocument, pageNumber, pageSize, registerPageElement,
 const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadError, onViewerStateChange }: PdfPaneProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const pageElementsRef = useRef<Map<number, HTMLElement>>(new Map());
+  const pdfDocumentRef = useRef<PdfDocumentProxy | null>(null);
   const scrollIdleTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | null>(null);
   const sourceReleaseTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | null>(null);
   const viewerStateRef = useRef<PdfViewerState | null>(viewerState);
@@ -302,10 +303,11 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
   }, []);
 
   const setActiveDocument = useCallback((nextDocument: PdfDocumentProxy | null) => {
-    const currentDocument = pdfDocument;
+    const currentDocument = pdfDocumentRef.current;
     if (currentDocument && currentDocument !== nextDocument) void currentDocument.destroy();
+    pdfDocumentRef.current = nextDocument;
     setPdfDocument(nextDocument);
-  }, [pdfDocument]);
+  }, []);
 
   const emitViewerStateChange = useCallback((nextState: PdfViewerState, options?: PdfViewerStateChangeOptions) => {
     void onViewerStateChange?.(nextState, options);
