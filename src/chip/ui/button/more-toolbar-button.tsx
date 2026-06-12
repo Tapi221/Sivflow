@@ -5,7 +5,7 @@ import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
 import { KeyboardIcon, MoreHorizontalIcon, SubscriptIcon, SuperscriptIcon } from "lucide-react";
 import { KEYS } from "platejs";
 import { useEditorRef } from "platejs/react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/ui/menu/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/popover/dropdown-menu";
 import { ToolbarButton } from "@/chip/ui/toolbar";
 
 const MoreToolbarButton = (props: DropdownMenuProps) => {
