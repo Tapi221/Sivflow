@@ -20,5 +20,6 @@ const IosCalendarScheduleYearComponent = (props: IosCalendarScheduleYearProps) =
 
 const IosCalendarScheduleYear = memo(IosCalendarScheduleYearComponent);
 IosCalendarScheduleYear.displayName = "IosCalendarScheduleYear";
+
 export { IosCalendarScheduleYear };
 export type { IosCalendarScheduleYearProps };

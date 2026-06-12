@@ -420,4 +420,5 @@ const SplitDaySection = memo(SplitDaySectionComponent);
 SplitDaySection.displayName = "SplitDaySection";
 const CalendarListPieChartSplitView = memo(CalendarListPieChartSplitViewComponent);
 CalendarListPieChartSplitView.displayName = "CalendarListPieChartSplitView";
+
 export { CalendarListPieChartSplitView };

@@ -156,5 +156,6 @@ const HandwritingModeScreen = ({ session }: HandwritingModeScreenProps) => {
 
 const MemoizedHandwritingModeScreen = memo(HandwritingModeScreen);
 MemoizedHandwritingModeScreen.displayName = "HandwritingModeScreen";
+
 export default MemoizedHandwritingModeScreen;
 export type { HandwritingModeScreenProps, HandwritingModeSession };

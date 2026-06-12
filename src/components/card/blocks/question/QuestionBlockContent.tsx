@@ -4,8 +4,6 @@ import AutoResizeTextarea from "@/components/ui/AutoResizeTextarea";
 import { QuestionBlockLayout } from "./QuestionBlockLayout";
 import { QUESTION_BLOCK_ANSWER_TEXT_CLASS, QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX, QUESTION_BLOCK_TITLE_TEXT_CLASS } from "./questionBlockTextStyles";
 
-
-
 type QuestionBlockContentProps =
   | {
     mode: "view";
@@ -52,8 +50,6 @@ type QuestionBlockViewContentProps = {
   zoom?: number;
 };
 
-
-
 const buildQuestionFieldStyle = (zoom?: number) =>
   buildTypographyStyle({
     fontSizePx: 12,
@@ -71,8 +67,6 @@ const buildViewResetKey = ({
   questionAnswer?: string;
   answerDisplayMode: "always" | "tap_to_reveal";
 }) => [answerDisplayMode, questionTitle ?? "", questionAnswer ?? ""].join("::");
-
-
 
 const QuestionField = (props: QuestionFieldProps) => {
   const style = buildQuestionFieldStyle(props.zoom);
@@ -238,7 +232,5 @@ const QuestionBlockContent = (props: QuestionBlockContentProps) => {
     />
   );
 };
-
-
 
 export { QuestionBlockContent };
