@@ -1,6 +1,6 @@
 "use client";
 
-import "@/chip/panel/popover/dropdown-menu.css";
+import "@/chip/panel/dropdown-menu.css";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react";
 import type * as React from "react";
