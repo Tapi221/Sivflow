@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getDownloadURL, ref as storageRef } from "firebase/storage";
 import { getCardImages } from "@/domain/card/content";
-import { storage } from "@/services/firebase";
+import { storage } from "@/infrastructure/firebase/client";
 import { getBlobCacheStats, getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
 import { getCachedRemoteUrl, getPreloadCacheStats, isUrlDecoded, markUrlDecoded, setCachedRemoteUrl } from "@/services/imagePreloadCache";
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
 import type { Card, UploadedImage } from "@/types/domain/card";
 
 type IdleHandle = ReturnType<typeof setTimeout>;
