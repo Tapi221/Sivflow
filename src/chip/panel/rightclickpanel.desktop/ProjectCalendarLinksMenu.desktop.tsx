@@ -1,5 +1,5 @@
 import type { CSSProperties, RefObject } from "react";
-import { Panel } from "../panel";
+import { RightClickPanel } from "./rightclickpanel";
 import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE } from "./rightClickPanel.utils";
 
@@ -41,7 +41,7 @@ const ProjectCalendarLinksMenu = ({
   panelId = PROJECT_CALENDAR_LINKS_MENU_PANEL_ID,
 }: ProjectCalendarLinksMenuProps) => {
   return (
-    <Panel id={panelId} x={x} y={y} width={PROJECT_CALENDAR_LINKS_MENU_WIDTH} panelRef={menuRef} style={noDragStyle} role="menu" ariaLabel="project calendar links context menu" preventContextMenu>
+    <RightClickPanel id={panelId} x={x} y={y} width={PROJECT_CALENDAR_LINKS_MENU_WIDTH} panelRef={menuRef} style={noDragStyle} ariaLabel="project calendar links context menu">
       {actions.map((action) => (
         <button
           key={action.id}
@@ -61,7 +61,7 @@ const ProjectCalendarLinksMenu = ({
           {action.label}
         </button>
       ))}
-    </Panel>
+    </RightClickPanel>
   );
 };
 
