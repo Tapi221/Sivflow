@@ -256,5 +256,4 @@ const computeMonthEventsByDay = ({ visibleEvents, eventIndex, monthWeeks, monthR
 };
 
 export { EMPTY_MONTH_DAY_EVENTS, createMonthEventIndex, getVisibleMonthEventChipCount, computeMonthEventsByDay };
-
 export type { CalendarMonthDayEvents, CalendarMonthPlacementDay, CalendarMonthPlacementWeek, CalendarMonthEventIndex };

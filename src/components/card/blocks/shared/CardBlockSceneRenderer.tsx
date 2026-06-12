@@ -225,5 +225,4 @@ const CardBlockSceneRenderer = (props: CardBlockSceneRendererProps) => {
 };
 
 export { CardBlockSceneRenderer };
-
 export type { CardBlockLayoutReplaceBlock, ViewerProps, EditorProps };

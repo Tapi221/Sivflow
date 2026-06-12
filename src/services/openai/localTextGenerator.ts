@@ -2,12 +2,8 @@ type LocalTextGenerationOptions = { prompt: string;
   systemPrompt?: string;
 };
 
-
-
 const MAX_SOURCE_CHARS = 1_200;
 const MAX_SENTENCES = 6;
-
-
 
 const normalizePrompt = (value: string) =>
   value
@@ -51,9 +47,5 @@ const generateTextLocally = ({ prompt, systemPrompt }: LocalTextGenerationOption
   return buildFlashcardDraft(sentences);
 };
 
-
-
 export { generateTextLocally };
-
-
 export type { LocalTextGenerationOptions };

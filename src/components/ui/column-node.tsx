@@ -1,39 +1,22 @@
 "use client";
 
 import * as React from "react";
-
 import { useDraggable, useDropLine } from "@platejs/dnd";
-
 import { setColumns } from "@platejs/layout";
-
 import { ResizableProvider } from "@platejs/resizable";
-
 import { BlockSelectionPlugin } from "@platejs/selection/react";
-
 import { useComposedRef } from "@udecode/cn";
-
 import type { LucideProps } from "lucide-react";
-
 import { Trash2Icon } from "lucide-react";
-
 import { GripHorizontal } from "lucide-react";
-
 import type { TColumnElement } from "platejs";
-
 import { PathApi } from "platejs";
-
 import type { PlateElementProps } from "platejs/react";
-
 import { PlateElement, useEditorRef, useEditorSelector, useElement, useFocusedLast, usePluginOption, useReadOnly, useRemoveNodeButton, useSelected, withHOC } from "platejs/react";
-
 import { cn } from "@/lib/utils";
-
 import { Button } from "./button";
-
 import { Popover, PopoverAnchor, PopoverContent } from "./popover";
-
 import { Separator } from "./separator";
-
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
 
 const DropLine = () => {
@@ -54,7 +37,6 @@ const DropLine = () => {
     />
   );
 };
-
 const DoubleColumnOutlined = (props: LucideProps) => (
   <svg
     fill="none"
@@ -72,7 +54,6 @@ const DoubleColumnOutlined = (props: LucideProps) => (
     />
   </svg>
 );
-
 const ThreeColumnOutlined = (props: LucideProps) => (
   <svg
     fill="none"
@@ -90,7 +71,6 @@ const ThreeColumnOutlined = (props: LucideProps) => (
     />
   </svg>
 );
-
 const RightSideDoubleColumnOutlined = (props: LucideProps) => (
   <svg
     fill="none"
@@ -108,7 +88,6 @@ const RightSideDoubleColumnOutlined = (props: LucideProps) => (
     />
   </svg>
 );
-
 const LeftSideDoubleColumnOutlined = (props: LucideProps) => (
   <svg
     fill="none"
@@ -126,7 +105,6 @@ const LeftSideDoubleColumnOutlined = (props: LucideProps) => (
     />
   </svg>
 );
-
 const DoubleSideDoubleColumnOutlined = (props: LucideProps) => (
   <svg
     fill="none"
@@ -144,7 +122,6 @@ const DoubleSideDoubleColumnOutlined = (props: LucideProps) => (
     />
   </svg>
 );
-
 const ColumnFloatingToolbar = ({ children }: React.PropsWithChildren) => {
   const editor = useEditorRef();
   const readOnly = useReadOnly();
@@ -221,11 +198,9 @@ const ColumnFloatingToolbar = ({ children }: React.PropsWithChildren) => {
     </Popover>
   );
 };
-
 const ColumnGroupElement = (props: PlateElementProps) => {
   return (<PlateElement className="mb-2" {...props}> <ColumnFloatingToolbar> <div className="flex size-full rounded">{props.children}</div> </ColumnFloatingToolbar> </PlateElement>);
 };
-
 const ColumnElement = withHOC(ResizableProvider, (props: PlateElementProps<TColumnElement>) => {
   const { width } = props.element;
   const readOnly = useReadOnly();

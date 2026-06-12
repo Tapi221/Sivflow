@@ -11,8 +11,6 @@ import type { Card } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { CardFaceScene } from "./CardFaceScene";
 
-
-
 type PreparedViewCardFaceSceneProps = Readonly<{ card: Card;
   sharedDerived: FlashcardSharedDerivedSnapshot;
   sideDerived: FlashcardSideDerivedSnapshot;
@@ -31,8 +29,6 @@ type PreparedViewCardFaceSceneProps = Readonly<{ card: Card;
   onToggleBookmark?: (card: Card) => void | Promise<void>;
 }>;
 
-
-
 const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   id: card.id,
   cardId: card.cardId,
@@ -46,8 +42,6 @@ const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   inkQuestion: card.front.ink ?? null,
   inkAnswer: card.back.ink ?? null,
 });
-
-
 
 const PreparedViewCardFaceScene = ({ card, sharedDerived, sideDerived, displayMode, fixedScale, fixedHeightPx = null, contentZoom, headerIconVisualScale, previewMode, showInkLayer, drawMode = false, inkEditingEnabled, fillHeight = false, onFlip, onToggleUncertainty, onToggleBookmark }: PreparedViewCardFaceSceneProps) => {
   const contentRef = React.useRef<HTMLDivElement | null>(null);
@@ -224,9 +218,5 @@ const PreparedViewCardFaceScene = ({ card, sharedDerived, sideDerived, displayMo
   );
 };
 
-
-
 export { PreparedViewCardFaceScene };
-
-
 export type { PreparedViewCardFaceSceneProps };

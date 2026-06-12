@@ -65,5 +65,4 @@ const createPerformAutoBackupUseCase = ({ backupStore, buildSnapshot, collectUse
 };
 
 export { createPerformAutoBackupUseCase };
-
 export type { PerformAutoBackupDependencies };

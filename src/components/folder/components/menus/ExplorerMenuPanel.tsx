@@ -138,5 +138,4 @@ const ExplorerMenuPanel = ({ actions, closeMenu, className, variant = "default",
 };
 
 export { ExplorerMenuPanel };
-
 export type { ExplorerMenuPanelVariant };

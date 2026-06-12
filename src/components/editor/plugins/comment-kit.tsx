@@ -1,15 +1,10 @@
 "use client";
 
 import type { BaseCommentConfig } from "@platejs/comment";
-
 import { BaseCommentPlugin, getDraftCommentKey } from "@platejs/comment";
-
 import type { ExtendConfig, Path } from "platejs";
-
 import { toTPlatePlugin } from "platejs/react";
-
 import { CommentLeaf } from "@/components/ui/comment-node";
-
 import { getDiscussionClickTarget } from "./discussion-kit";
 
 type CommentConfig = ExtendConfig<
@@ -70,7 +65,6 @@ options: {
       setDraft: { keys: "mod+shift+m" },
     },
   });
-
 const CommentKit = [commentPlugin];
 
 export { commentPlugin, CommentKit };

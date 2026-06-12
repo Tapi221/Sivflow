@@ -66,5 +66,4 @@ const ImportFormatDialog = ({ open, onOpenChange, onSelect }: ImportFormatDialog
 };
 
 export { ImportFormatDialog };
-
 export type { ImportFormat };

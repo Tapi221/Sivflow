@@ -1,37 +1,21 @@
 "use client";
 
 import * as React from "react";
-
 import { AIChatPlugin, AIPlugin, useEditorChat, useLastAssistantMessage } from "@platejs/ai/react";
-
 import { getTransientCommentKey } from "@platejs/comment";
-
 import { BlockSelectionPlugin, useIsSelecting } from "@platejs/selection/react";
-
 import { getTransientSuggestionKey } from "@platejs/suggestion";
-
 import { Command as CommandPrimitive } from "cmdk";
-
 import { Album, BadgeHelp, BookOpenCheck, Check, CornerUpLeft, FeatherIcon, ListEnd, ListMinus, ListPlus, Loader2Icon, PauseIcon, PenLine, SmileIcon, Wand, X } from "lucide-react";
-
 import type { NodeEntry, SlateEditor } from "platejs";
-
 import { isHotkey, KEYS, NodeApi, TextApi } from "platejs";
-
 import type { PlateEditor } from "platejs/react";
-
 import { useEditorPlugin, useEditorRef, useFocusedLast, useHotkeys, usePluginOption } from "platejs/react";
-
 import { commentPlugin } from "@/components/editor/plugins/comment-kit";
-
 import { cn } from "@/lib/utils";
-
 import { AIChatEditor } from "./ai-chat-editor";
-
 import { Button } from "./button";
-
 import { Command, CommandGroup, CommandItem, CommandList } from "./command";
-
 import { Popover, PopoverAnchor, PopoverContent } from "./popover";
 
 type EditorChatState =
@@ -39,7 +23,6 @@ type EditorChatState =
   | "cursorSuggestion"
   | "selectionCommand"
   | "selectionSuggestion";
-
 type AIChatItem = {
   icon: React.ReactNode;
   label: string;
@@ -58,12 +41,10 @@ type AIChatItem = {
     input: string;
   }) => void;
 };
-
 type MenuStateGroup = {
   items: AIChatItem[];
   heading?: string;
 };
-
 type AIMenuItemsProps = {
   input: string;
   setInput: (value: string) => void;
@@ -89,7 +70,6 @@ const AI_COMMENT_ICON = (
     <path d="M17.8 20.817l-2.172 1.138a.392 .392 0 0 1 -.568 -.41l.415 -2.411l-1.757 -1.707a.389 .389 0 0 1 .217 -.665l2.428 -.352l1.086 -2.193a.392 .392 0 0 1 .702 0l1.086 2.193l2.428 .352a.39 .39 0 0 1 .217 .665l-1.757 1.707l.414 2.41a.39 .39 0 0 1 -.567 .411l-2.172 -1.138z" />
   </svg>
 );
-
 const AI_CHAT_ITEMS = {
   accept: {
     icon: <Check />,
@@ -305,7 +285,6 @@ Start writing a new paragraph AFTER <Document> ONLY ONE SENTENCE`
     },
   },
 } satisfies Record<string, AIChatItem>;
-
 const MENU_STATE_ITEMS: Record<EditorChatState, MenuStateGroup[]> = {
   cursorCommand: [
     {
@@ -398,7 +377,6 @@ const AIMenuItems = ({ input, setInput, setValue }: AIMenuItemsProps) => {
     </CommandGroup>
   ));
 };
-
 const AIMenu = () => {
   const { api, editor } = useEditorPlugin(AIChatPlugin);
   const mode = usePluginOption(AIChatPlugin, "mode");
@@ -584,7 +562,6 @@ const AIMenu = () => {
     </Popover>
   );
 };
-
 const AILoadingBar = () => {
   const editor = useEditorRef();
 

@@ -1,7 +1,5 @@
 import type { SecurityEventType } from "#src/security/contract.js";
 
-
-
 type SecurityRiskLevel = "normal" | "warning" | "high" | "critical";
 type DetectionOutcome = { triggered: boolean;
   scoreAdded: number;
@@ -10,8 +8,6 @@ type RiskScoreCalculation = { previousScore: number;
   nextScore: number;
   riskLevel: SecurityRiskLevel;
 };
-
-
 
 const RISK_SCORE_THRESHOLDS = { warning: 30, require2FA: 70, accountLock: 100, } as const;
 const SECURITY_EVENT_SCORE: Partial<Record<SecurityEventType, number>> = {
@@ -29,8 +25,6 @@ const WINDOWED_EVENT_THRESHOLDS: Partial<Record<SecurityEventType, number>> = {
   LOCK_CONTENTION_EXCESS: 5,
 } as const;
 const RISK_DECAY_PER_HOUR = 3;
-
-
 
 const clampRiskScore = (score: number): number => Math.max(0, Math.min(RISK_SCORE_THRESHOLDS.accountLock, Math.round(score)));
 const getRiskLevel = (score: number): SecurityRiskLevel => {
@@ -70,9 +64,5 @@ const calculateNextRiskScore = ({ persistedScore, lastUpdateMs, nowMs, scoreAdde
   };
 };
 
-
-
 export { RISK_SCORE_THRESHOLDS, getRiskLevel, resolveDetectionOutcome, applyRiskDecay, calculateNextRiskScore };
-
-
 export type { SecurityRiskLevel, DetectionOutcome, RiskScoreCalculation };

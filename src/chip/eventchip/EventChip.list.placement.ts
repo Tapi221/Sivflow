@@ -156,5 +156,4 @@ const getListVisibleDate = (days: CalendarListPlacementDay[], metrics: CalendarL
 };
 
 export { LIST_DAY_SECTION_MIN_HEIGHT_PX, LIST_DAY_GAP_PX, LIST_EMPTY_DAY_HEIGHT_PX, LIST_EVENT_ROW_HEIGHT_PX, LIST_EVENT_CHIP_HEIGHT_PX, LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX, LIST_ALL_DAY_EVENT_CHIP_HEIGHT_PX, LIST_EVENT_ROW_GAP_PX, LIST_VIRTUAL_OVERSCAN_PX, getEventInstanceKey, buildListPlacementDays, getListDayEstimatedHeight, getListDayHeight, buildListVirtualMetrics, getListVirtualRange, areListVirtualRangesEqual, getListVisibleDate };
-
 export type { CalendarListPlacementDay, CalendarListVirtualMetrics, CalendarListVirtualRange };

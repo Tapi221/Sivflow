@@ -3,8 +3,6 @@ import type { ForwardRefExoticComponent, RefAttributes, SVGProps } from "react";
 import * as stratisIcons from "stratis-ui-icons";
 import { UiIcon } from "./UiIcon";
 
-
-
 type IconProps = SVGProps<SVGSVGElement> & { size?: number;
   label?: string;
   title?: string;
@@ -15,8 +13,6 @@ type StratisDataIcon = {
 };
 type StratisIconExport = StratisDataIcon | StratisIconComponent;
 type GlyphKind = "alert-circle" | "alert-triangle" | "arrow-left" | "arrow-right" | "arrow-up-down" | "calendar" | "check" | "chevron-down" | "chevron-left" | "chevron-right" | "chevron-up" | "circle" | "clock" | "code" | "copy" | "download" | "edit" | "external-link" | "file-edit" | "filter" | "globe" | "help" | "image" | "info" | "keyboard" | "link" | "logout" | "minus" | "pin" | "plus" | "refresh" | "search" | "settings" | "shield" | "star" | "tag" | "trash" | "type" | "user" | "volume" | "wrench" | "x" | "default";
-
-
 
 const stratisIconRegistry = stratisIcons as unknown as Record<string, StratisIconExport | undefined>;
 const svgTextEscapes: Record<string, string> = {
@@ -217,8 +213,6 @@ const FileText = ExplorerFileTextIcon;
 const Folder = ExplorerFolderOpenIcon;
 const FolderOutlineIcon = ExplorerFolderOutlineIcon;
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 const isStratisDataIcon = (value: unknown): value is StratisDataIcon => isRecord(value) && typeof value.data === "string";
 const isStratisIconComponent = (value: unknown): value is StratisIconComponent => typeof value === "function" || (isRecord(value) && "$$typeof" in value);
@@ -280,8 +274,6 @@ const makeStratisIcon = (exportName: string, name: string) => {
   return makeIcon(name);
 };
 
-
-
 const MoreVerticalIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, ...rest }, ref) => {
   const resolvedLabel = label ?? rest["aria-label"];
   const decorative = (resolvedLabel === null || resolvedLabel === undefined);
@@ -336,8 +328,6 @@ const ExplorerFolderOutlineIcon = forwardRef<SVGSVGElement, IconProps>(({ size =
   );
 });
 
-
-
 MoreVerticalIcon.displayName = "MoreVerticalIcon";
 ExplorerChevronDownIcon.displayName = "ExplorerChevronDownIcon";
 ExplorerChevronRightIcon.displayName = "ExplorerChevronRightIcon";
@@ -346,6 +336,4 @@ ExplorerFolderOpenIcon.displayName = "ExplorerFolderOpenIcon";
 ExplorerFolderOutlineIcon.displayName = "ExplorerFolderOutlineIcon";
 
 export { AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, ArrowUpDown, BookOpen, Brain, Calendar, Camera, Check, CheckCheck, CheckCircle, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, Clock, Cloud, CloudOff, Construction, Copy, Database, Download, Edit, Eraser, ExternalLink, FileAudio, FileEdit, FileJson, FileText, FileWarning, FileX, Filter, Flame, Folder, FolderInput, FolderTree, GitMerge, Globe, GripVertical, HardDrive, HelpCircle, History, Image, Info, Keyboard, Layers, Link, List, Loader2, LogOut, Merge, MessageSquare, Minus, MoreVertical, Move, Palette, Pause, PenLine, Pencil, Pin, Play, Plus, Redo2, RefreshCw, RotateCcw, Search, SearchX, Settings2, Shield, Smartphone, Sparkles, Star, Tag, Trash2, Trophy, Type, Undo2, Upload, User, Volume2, X, XCircle, Zap, Code, FolderIcon, FolderOutlineIcon, ImageIcon, CircleHelp, Sigma, NotebookPen };
-
-
 export type { IconProps };

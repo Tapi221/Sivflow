@@ -102,5 +102,4 @@ const BlockList = ({ blocks, className, rowClassName, getRowRef, getRowContainer
 };
 
 export { BlockList };
-
 export type { BlockListRowMeta };
