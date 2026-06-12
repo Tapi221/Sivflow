@@ -1,6 +1,10 @@
 import type { SVGProps } from "react";
 
+
+
 type ExplorerNavIconProps = SVGProps<SVGSVGElement>;
+
+
 
 const ExplorerFolderNavIcon = ({ className, ...rest }: ExplorerNavIconProps) => {
   return (<svg viewBox="0 0 16 16" width="1em" height="1em" fill="none" className={className} aria-hidden="true" {...rest} > <path d="M1.75 3.75a1 1 0 0 1 1-1H6l1.45 1.45h5.8a1 1 0 0 1 1 1v6.95a1 1 0 0 1-1 1H2.75a1 1 0 0 1-1-1V3.75Z" stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" strokeLinejoin="round" /> </svg>);
@@ -14,5 +18,7 @@ const ExplorerDictionaryNavIcon = ({ className, ...rest }: ExplorerNavIconProps)
 const ExplorerQuestionNavIcon = ({ className, ...rest }: ExplorerNavIconProps) => {
   return (<svg viewBox="0 0 16 16" width="1em" height="1em" fill="none" className={className} aria-hidden="true" {...rest} > <path d="M8 10.95v-.62c0-.82.38-1.22.94-1.6.64-.43 1.42-.96 1.42-2 0-1.38-1.1-2.46-2.61-2.46-1.28 0-2.33.86-2.57 2.03" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" /> <circle cx="8" cy="12.7" r="0.66" fill="currentColor" /> <path d="M8 1.6a6.4 6.4 0 1 0 0 12.8A6.4 6.4 0 0 0 8 1.6Z" stroke="currentColor" strokeWidth="1.1" /> </svg>);
 };
+
+
 
 export { ExplorerFolderNavIcon, ExplorerTagMapNavIcon, ExplorerDictionaryNavIcon, ExplorerQuestionNavIcon };

@@ -1,6 +1,8 @@
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
+
+
 interface AutoResizeTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
@@ -13,6 +15,8 @@ interface AutoResizeTextareaProps extends React.TextareaHTMLAttributes<HTMLTextA
   allowInternalScroll?: boolean;
   readOnly?: boolean;
 }
+
+
 
 const AutoResizeTextarea = ({
   value,
@@ -104,5 +108,7 @@ const AutoResizeTextarea = ({
     />
   );
 };
+
+
 
 export default AutoResizeTextarea;

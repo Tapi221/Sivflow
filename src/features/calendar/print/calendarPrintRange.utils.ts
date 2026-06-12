@@ -6,6 +6,8 @@ import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 import type { CalendarPrintRangeState } from "./calendarPrint.types";
 
+
+
 type CalendarPrintRangeInput = {
   printRange: CalendarPrintRangeState;
   primaryViewMode: CalendarViewMode;
@@ -15,6 +17,8 @@ type CalendarPrintRangeInput = {
   currentDisplayRange: CalendarDateRange;
   weekStartDay?: CalendarWeekStartDay;
 };
+
+
 
 const normalizeRange = (left: Date, right: Date): CalendarDateRange => {
   if (left.getTime() <= right.getTime()) {
@@ -77,5 +81,7 @@ const getCalendarPrintRangeLabel = (range: CalendarDateRange, mode: CalendarPrin
 
   return `${startLabel} - ${endLabel}`;
 };
+
+
 
 export { createCalendarPrintDateInputValue, getCalendarPrintRange, getCalendarPrintRangeLabel };
