@@ -129,12 +129,16 @@ const createUpsertQueueItem = <TEntity extends UpsertEntity>({ entity, operation
     payload: checkedPayload,
   } as UpsertQueueItem<TEntity>;
 };
-const createDeleteQueueItem = ({ entity, targetId, priority = "high", type = "upload" }: { entity: DeleteEntity;
-  targetId: string;
+const createDeleteQueueItem = ({ entity, targetId, id, priority = "high", type = "upload" }: { entity: DeleteEntity;
+  targetId?: string;
+  id?: string;
+  userId?: string;
   priority?: SyncPriority;
   type?: SyncDirection;
 }): SyncQueueItem => {
-  const deletePayload = assertDeletePayload({ id: targetId });
+  const resolvedTargetId = targetId ?? id;
+  if (!resolvedTargetId) throw new Error("Delete queue item targetId is required");
+  const deletePayload = assertDeletePayload({ id: resolvedTargetId });
 
   return {
     ...createBaseQueueFields({
@@ -142,7 +146,7 @@ const createDeleteQueueItem = ({ entity, targetId, priority = "high", type = "up
       operationType: "delete",
       payload: deletePayload,
       priority,
-      targetId,
+      targetId: resolvedTargetId,
       type,
     }),
     entity,
