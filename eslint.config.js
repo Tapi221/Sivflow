@@ -50,6 +50,9 @@ const UI_RESTRICTED_IMPORT_PATTERNS = [
     message: "UI layer must not import desktop bridge.",
   },
 ];
+const SIMPLE_IMPORT_SORT_GROUPS = [
+  [String.raw`^\x00`, "^react$", "^react-dom$", "^react/", "^react-dom/", "^@?\\w", "^@/", String.raw`^\.`],
+];
 const COMMA_DANGLE_STYLE = {
   arrays: "always-multiline",
   objects: "always-multiline",
@@ -67,7 +70,7 @@ const STYLISTIC_FIXABLE_RULES = {
   "@stylistic/comma-dangle": ["error", COMMA_DANGLE_STYLE],
   "@stylistic/comma-spacing": "warn",
   "@stylistic/computed-property-spacing": ["warn", "never"],
-  "@stylistic/function-call-spacing": ["warn", "never"],
+  "@stylistic/function-call-spacing": "warn",
   "@stylistic/indent": ["warn", 2, { SwitchCase: 1 }],
   "@stylistic/jsx-closing-bracket-location": ["warn", "line-aligned"],
   "@stylistic/jsx-curly-spacing": ["warn", "never"],
@@ -151,9 +154,7 @@ export default defineConfig([
       "simple-import-sort/imports": [
         "warn",
         {
-          groups: [
-            ["^\\x00", "^react$", "^react-dom$", "^react/", "^react-dom/", "^@?\\w", "^@/", "^."],
-          ],
+          groups: SIMPLE_IMPORT_SORT_GROUPS,
         },
       ],
     },
