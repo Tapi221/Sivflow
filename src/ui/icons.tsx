@@ -119,31 +119,31 @@ const glyphByIconName: Record<string, GlyphKind> = {
   XCircle: "x",
 };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
-}
+};
 
-function isStratisDataIcon(value: unknown): value is StratisDataIcon {
+const isStratisDataIcon = (value: unknown): value is StratisDataIcon => {
   return isRecord(value) && typeof value.data === "string";
-}
+};
 
-function isStratisIconComponent(value: unknown): value is StratisIconComponent {
+const isStratisIconComponent = (value: unknown): value is StratisIconComponent => {
   return typeof value === "function" || (isRecord(value) && "$$typeof" in value);
-}
+};
 
-function escapeSvgText(value: string): string {
+const escapeSvgText = (value: string): string => {
   return value.replace(/[&<>"']/g, (char) => svgTextEscapes[char] ?? char);
-}
+};
 
-function getStratisSvgViewBox(source: string): string {
+const getStratisSvgViewBox = (source: string): string => {
   return source.match(/\sviewBox="([^"]+)"/)?.[1] ?? "0 0 24 24";
-}
+};
 
-function normalizeStratisSvgBody(source: string): string {
+const normalizeStratisSvgBody = (source: string): string => {
   return source.replace(/^[\s\S]*?<svg\b[^>]*>/, "").replace(/<\/svg>[\s\S]*$/, "").replace(/\s(width|height)="[^"]*"/g, "").replace(/\sstroke="(?!none|currentColor)[^"]*"/g, " stroke=\"currentColor\"").replace(/\sfill="(?!none|currentColor|url\()[^"]*"/g, " fill=\"currentColor\"");
-}
+};
 
-function wrapStratisIcon(BaseIcon: StratisIconComponent, name: string) {
+const wrapStratisIcon = (BaseIcon: StratisIconComponent, name: string) => {
   const Icon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, strokeWidth, ...rest }, ref) => {
     const resolvedLabel = label ?? rest["aria-label"];
     const decorative = resolvedLabel === null || resolvedLabel === undefined;
@@ -154,9 +154,9 @@ function wrapStratisIcon(BaseIcon: StratisIconComponent, name: string) {
 
   Icon.displayName = name;
   return Icon;
-}
+};
 
-function wrapStratisDataIcon(source: StratisDataIcon, name: string) {
+const wrapStratisDataIcon = (source: StratisDataIcon, name: string) => {
   const viewBox = getStratisSvgViewBox(source.data);
   const body = normalizeStratisSvgBody(source.data);
 
@@ -171,9 +171,9 @@ function wrapStratisDataIcon(source: StratisDataIcon, name: string) {
 
   Icon.displayName = name;
   return Icon;
-}
+};
 
-function makeIcon(name: string) {
+const makeIcon = (name: string) => {
   const glyph = glyphByIconName[name] ?? "default";
 
   const Icon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, strokeWidth = 1.5, ...rest }, ref) => {
@@ -191,15 +191,15 @@ function makeIcon(name: string) {
 
   Icon.displayName = name;
   return Icon;
-}
+};
 
-function makeStratisIcon(exportName: string, name: string) {
+const makeStratisIcon = (exportName: string, name: string) => {
   const candidate = stratisIconRegistry[exportName];
 
   if (isStratisDataIcon(candidate)) return wrapStratisDataIcon(candidate, name);
   if (isStratisIconComponent(candidate)) return wrapStratisIcon(candidate, name);
   return makeIcon(name);
-}
+};
 
 const MoreVertical = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, ...rest }, ref) => {
   const resolvedLabel = label ?? rest["aria-label"];
