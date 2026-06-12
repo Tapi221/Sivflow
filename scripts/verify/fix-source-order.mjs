@@ -95,6 +95,13 @@ const isUpperCaseConstantName = (name) => /^[A-Z0-9_]+$/.test(name);
 
 const getVariableStatementNames = (statement) => statement.declarationList.declarations.flatMap((declaration) => ts.isIdentifier(declaration.name) ? [declaration.name.text] : []);
 
+const getTopLevelStatementNames = (statement) => {
+  if (ts.isVariableStatement(statement)) return getVariableStatementNames(statement);
+  if ((ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement) || ts.isEnumDeclaration(statement) || ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement)) && statement.name) return [statement.name.text];
+
+  return [];
+};
+
 const isConstVariableStatement = (statement) => (statement.declarationList.flags & ts.NodeFlags.Const) !== 0;
 
 const isFunctionLikeInitializer = (initializer) => Boolean(initializer && (ts.isArrowFunction(initializer) || ts.isFunctionExpression(initializer)));
@@ -146,8 +153,23 @@ const isConstDependentTypeStatement = (source, statement, highestRank) => {
   return source.slice(statement.getStart(), statement.getEnd()).includes("typeof ");
 };
 
-const canKeepStatementAfterHigherRank = (source, statement, highestRank) => {
-  return isTypeOnlyExportDeclaration(statement) || canAppearInExportBlock(statement) || isConstDependentTypeStatement(source, statement, highestRank);
+const isIdentifierUsedInStatement = (source, statement, name) => {
+  const statementSource = source.slice(statement.getStart(), statement.getEnd());
+  return new RegExp(`\\b${name}\\b`, "u").test(statementSource);
+};
+
+const isDependentOnEarlierHigherRankStatement = (source, statement, statements, fromIndex, rank) => {
+  if (!ts.isVariableStatement(statement)) return false;
+
+  return statements.slice(0, fromIndex).some((previousStatement) => {
+    if (ORDER_RANKS[getStatementOrderCategory(previousStatement)] <= rank) return false;
+
+    return getTopLevelStatementNames(previousStatement).some((name) => isIdentifierUsedInStatement(source, statement, name));
+  });
+};
+
+const canKeepStatementAfterHigherRank = (source, statement, highestRank, statements, fromIndex, rank) => {
+  return isTypeOnlyExportDeclaration(statement) || canAppearInExportBlock(statement) || isConstDependentTypeStatement(source, statement, highestRank) || isDependentOnEarlierHigherRankStatement(source, statement, statements, fromIndex, rank);
 };
 
 const findMoveTargetIndex = (statements, rank, fromIndex) => {
@@ -172,7 +194,7 @@ const findFirstOrderMove = (source, sourceFile) => {
     const rank = ORDER_RANKS[category];
 
     if (rank < highestRank) {
-      if (canKeepStatementAfterHigherRank(source, statement, highestRank)) continue;
+      if (canKeepStatementAfterHigherRank(source, statement, highestRank, statements, index, rank)) continue;
 
       const targetIndex = findMoveTargetIndex(statements, rank, index);
       if (targetIndex >= 0) return { fromIndex: index, targetIndex };
