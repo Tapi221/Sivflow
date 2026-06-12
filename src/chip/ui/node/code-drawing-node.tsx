@@ -7,10 +7,10 @@ import debounce from "lodash/debounce.js";
 import { DownloadIcon, Trash2 } from "lucide-react";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement, useEditorRef, useEditorSelector, useElement, useFocusedLast, useReadOnly, useSelected } from "platejs/react";
+import { Button } from "@/chip/ui/button/button";
+import { Popover, PopoverAnchor, PopoverContent } from "@/chip/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/chip/ui/select";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Button } from "./button";
-import { Popover, PopoverAnchor, PopoverContent } from "./popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
 
 const createDebouncedCodeDrawingRenderer = (setImage: React.Dispatch<React.SetStateAction<string>>, setLoading: React.Dispatch<React.SetStateAction<boolean>>, setError: React.Dispatch<React.SetStateAction<string | null>>) => {
   let lastRequestId = 0;
