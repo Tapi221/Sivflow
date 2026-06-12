@@ -7,10 +7,10 @@ import { AudioElement } from "@/chip/ui/media-audio-node";
 import { MediaEmbedElement } from "@/chip/ui/media-embed-node";
 import { FileElement } from "@/chip/ui/media-file-node";
 import { ImageElement } from "@/chip/ui/media-image-node";
-import { PlaceholderElement } from "@/chip/ui/media-placeholder-node";
-import { MediaPreviewDialog } from "@/chip/ui/media-preview-dialog";
+import { PlaceholderElement } from "@/chip/ui/node/media-placeholder-node";
+import { MediaPreviewDialog } from "@/chip/ui/dialog/media-preview-dialog";
 import { MediaUploadToast } from "@/chip/ui/media-upload-toast";
-import { VideoElement } from "@/chip/ui/media-video-node";
+import { VideoElement } from "@/chip/ui/node/media-video-node";
 
 const MediaKit = [
   ImagePlugin.configure({

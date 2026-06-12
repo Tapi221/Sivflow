@@ -3,7 +3,7 @@ import { BaseParagraphPlugin } from "platejs";
 import { BlockquoteElementStatic } from "@/chip/ui/node/blockquote-node-static";
 import { H1ElementStatic, H2ElementStatic, H3ElementStatic, H4ElementStatic, H5ElementStatic, H6ElementStatic } from "@/chip/ui/node/heading-node-static";
 import { HrElementStatic } from "@/chip/ui/node/hr-node-static";
-import { ParagraphElementStatic } from "@/chip/ui/paragraph-node-static";
+import { ParagraphElementStatic } from "@/chip/ui/node/paragraph-node-static";
 
 const BaseBasicBlocksKit = [BaseParagraphPlugin.withComponent(ParagraphElementStatic), BaseH1Plugin.withComponent(H1ElementStatic), BaseH2Plugin.withComponent(H2ElementStatic), BaseH3Plugin.withComponent(H3ElementStatic), BaseH4Plugin.withComponent(H4ElementStatic), BaseH5Plugin.withComponent(H5ElementStatic), BaseH6Plugin.withComponent(H6ElementStatic), BaseBlockquotePlugin.withComponent(BlockquoteElementStatic), BaseHorizontalRulePlugin.withComponent(HrElementStatic)];
 
