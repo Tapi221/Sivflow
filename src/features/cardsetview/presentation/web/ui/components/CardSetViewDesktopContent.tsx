@@ -2,6 +2,8 @@ import type { CSSProperties } from "react";
 import { CardSetViewDesktop } from "@/features/cardsetview/presentation/web/ui/CardSetViewDesktop";
 import type { CardSetViewContentProps } from "./cardSetViewContentProps";
 
+
+
 type CardSetViewChromeResetStyle = CSSProperties & {
   "--card-selected-surface": string;
   "--card-border-selected": string;
@@ -10,6 +12,8 @@ type CardSetViewChromeResetStyle = CSSProperties & {
   "--card-selected-outline-neutral": string;
   "--card-selected-outline-accent": string;
 };
+
+
 
 const cardSetViewChromeResetStyle: CardSetViewChromeResetStyle = {
   "--card-selected-surface": "#fff",
@@ -20,6 +24,8 @@ const cardSetViewChromeResetStyle: CardSetViewChromeResetStyle = {
   "--card-selected-outline-neutral": "transparent",
   "--card-selected-outline-accent": "transparent",
 };
+
+
 
 const CardSetViewDesktopContent = ({ controller }: CardSetViewContentProps) => {
   const { folderId, cardSetId, settings, data, state, zoom, effectiveCardLayoutMode } = controller;
@@ -58,5 +64,7 @@ const CardSetViewDesktopContent = ({ controller }: CardSetViewContentProps) => {
     </div>
   );
 };
+
+
 
 export { CardSetViewDesktopContent };

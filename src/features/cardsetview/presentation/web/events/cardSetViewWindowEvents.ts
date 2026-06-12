@@ -1,5 +1,7 @@
 import { CARD_SET_VIEW_EVENTS } from "@/features/cardsetview/events/cardSetViewEvents.constants";
 
+
+
 type CardSetViewEditingDraftPatch = { cardId: string;
   patch: {
     title?: string;
@@ -15,6 +17,8 @@ type CardSetViewWindowEventMap = { [CARD_SET_VIEW_EVENTS.editingChange]: boolean
   [CARD_SET_VIEW_EVENTS.toggleMetaPanelRequest]: undefined;
 };
 type CardSetViewWindowEventName = keyof CardSetViewWindowEventMap;
+
+
 
 const dispatchCardSetViewWindowEvent = <TEventName extends CardSetViewWindowEventName>(eventName: TEventName, detail: CardSetViewWindowEventMap[TEventName]) => {
   if (typeof window === "undefined") return;
@@ -37,5 +41,9 @@ const subscribeCardSetViewWindowEvent = <TEventName extends CardSetViewWindowEve
   };
 };
 
+
+
 export { dispatchCardSetViewWindowEvent, subscribeCardSetViewWindowEvent };
+
+
 export type { CardSetViewEditingDraftPatch, CardSetViewWindowEventMap };

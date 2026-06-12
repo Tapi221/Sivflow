@@ -4,10 +4,14 @@ import { createPdfDocumentDataSourceFromBlob, releasePdfDocumentSource } from "@
 import { PdfPane } from "@/features/pdf/PdfPane";
 import type { PdfViewerState } from "@/types";
 
+
+
 type PdfObject = {
   id: number;
   body: string;
 };
+
+
 
 const PDF_PERFORMANCE_TEST_PAGE_COUNT = 36;
 const PDF_PAGE_WIDTH = 612;
@@ -15,6 +19,8 @@ const PDF_PAGE_HEIGHT = 792;
 const PDF_TEXT_X = 72;
 const PDF_TITLE_Y = 720;
 const PDF_BODY_Y = 690;
+
+
 
 const escapePdfText = (text: string): string => text.replaceAll("\\", "\\\\").replaceAll("(", "\\(").replaceAll(")", "\\)");
 const createPdfStreamObject = (content: string): string => `<< /Length ${content.length} >>\nstream\n${content}\nendstream`;
@@ -56,6 +62,8 @@ const createSyntheticPdfBlob = (pageCount: number): Blob => {
 
   return new Blob([content], { type: "application/pdf" });
 };
+
+
 
 const PdfPerformanceTest = () => {
   const canRender = useMemo(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("test_bypass") === "true", []);
@@ -106,5 +114,7 @@ const PdfPerformanceTest = () => {
     </main>
   );
 };
+
+
 
 export default PdfPerformanceTest;
