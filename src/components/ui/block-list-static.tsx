@@ -5,7 +5,7 @@ import type { RenderStaticNodeWrapper, TListElement } from "platejs";
 import type { SlateRenderElementProps } from "platejs/static";
 import { cn } from "@/lib/utils";
 
-const TodoMarkerStatic = (props: SlateRenderElementProps) => {
+function TodoMarkerStatic(props: SlateRenderElementProps) {
   const checked = props.element.checked as boolean;
 
   return (
@@ -22,9 +22,9 @@ const TodoMarkerStatic = (props: SlateRenderElementProps) => {
       </button>
     </div>
   );
-};
+}
 
-const TodoLiStatic = (props: SlateRenderElementProps) => {
+function TodoLiStatic(props: SlateRenderElementProps) {
   return (
     <li
       className={cn(
@@ -35,7 +35,7 @@ const TodoLiStatic = (props: SlateRenderElementProps) => {
       {props.children}
     </li>
   );
-};
+}
 
 const config: Record<
   string,
@@ -50,14 +50,13 @@ const config: Record<
   },
 };
 
-const List = (props: SlateRenderElementProps) => {
+function List(props: SlateRenderElementProps) {
   const { indent, listStart, listStyleType } = props.element as TListElement & {
     indent?: number;
   };
   const { Li, Marker } = config[listStyleType] ?? {};
   const List = isOrderedList(props.element) ? "ol" : "ul";
 
-  // Apply margin-left for indent (24px per level) for DOCX export compatibility
   const marginLeft = indent ? `${indent * 24}px` : undefined;
 
   return (
@@ -70,7 +69,7 @@ const List = (props: SlateRenderElementProps) => {
       {Li ? <Li {...props} /> : <li>{props.children}</li>}
     </List>
   );
-};
+}
 
 const BlockListStatic: RenderStaticNodeWrapper = (props) => {
   if (!props.element.listStyleType) return;
