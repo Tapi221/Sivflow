@@ -30,7 +30,6 @@ const CALENDAR_VIEW_MODE_MOTION_TRANSITION: Transition = {
   duration: 0.12,
   ease: "easeOut",
 };
-const ViewModeDropdown = ToggleCalendarViewMode;
 
 const isViewModeSelectionArray = (value: CalendarViewModeSelection): value is readonly CalendarViewMode[] => Array.isArray(value);
 const isMultiSelectViewMode = (viewMode: CalendarViewMode): boolean => MULTI_SELECT_VIEW_MODE_SET.has(viewMode);
@@ -184,5 +183,6 @@ const ToggleCalendarViewMode = ({
     </div>
   );
 };
+const ViewModeDropdown = ToggleCalendarViewMode;
 
 export { ToggleCalendarViewMode, ViewModeDropdown };
