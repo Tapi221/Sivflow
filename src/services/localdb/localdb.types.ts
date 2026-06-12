@@ -1,5 +1,5 @@
 import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueuePayloadGuards";
-import type { AssetRecord, Card, CardSet, DocumentItem as Document, Folder, Note, SyncError, SyncHistory, SyncSettings, UploadedImage, UserSettings, UserStats } from "@/types";
+import type { AssetRecord, Card, CardSet, DocumentItem as Document, Folder, Note, SyncConflict, SyncError, SyncHistory, SyncSettings, UploadedImage, UserSettings, UserStats } from "@/types";
 import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
 
 type CardRelation = {
@@ -38,6 +38,11 @@ type TagRecord = {
   categoryId?: string;
   parentId?: string;
   orderIndex?: number;
+};
+type DocumentFileRecord = {
+  id: string;
+  blob: Blob;
+  updatedAt: number;
 };
 type LocalDBTableMap = {
   cards: Card;
@@ -147,10 +152,15 @@ type LocalDBInstance = LocalDBSyncApi;
 type LocalDBLike = LocalDBSyncApi & { cardSets: QueryableTable<CardSet, string>;
   documents: QueryableTable<Document, string>;
   tagRecords: QueryableTable<TagRecord, string>;
+  documentFiles: QueryableTable<DocumentFileRecord, string>;
   images: QueryableTable<AssetRecord | UploadedImage, string>;
   userSettings: QueryableTable<UserSettings, string>;
   syncErrors: QueryableTable<SyncError, string>;
+  conflicts: QueryableTable<SyncConflict, string>;
 
+  transaction<T>(mode: string, ...args: unknown[]): Promise<T>;
+  close(): void;
+  delete(): Promise<void>;
   runSyncTransaction<T>(scope: () => Promise<T>): Promise<T>;
   clearSyncTables(tables: readonly SyncableEntityTable[]): Promise<void>;
   putSyncRecord<TTable extends SyncableEntityTable>(
@@ -160,8 +170,10 @@ type LocalDBLike = LocalDBSyncApi & { cardSets: QueryableTable<CardSet, string>;
   getQueuedItemsOldestFirst(): Promise<import("@/types/domain/sync").SyncQueueItem[]>;
   removeSyncQueueItem(id: string): Promise<void>;
   putSyncQueueItem(item: import("@/types/domain/sync").SyncQueueItem): Promise<void>;
-  getConflicts(): Promise<import("@/types/domain/sync").SyncConflict[]>;
-  putConflict(conflict: import("@/types/domain/sync").SyncConflict): Promise<void>;
+  getConflict(id: string): Promise<SyncConflict | undefined>;
+  getConflicts(): Promise<SyncConflict[]>;
+  putConflict(conflict: SyncConflict): Promise<void>;
+  removeConflict(id: string): Promise<void>;
   listCardsByUser(userId: string): Promise<Card[]>;
   listFoldersByUser(userId: string): Promise<Folder[]>;
   listCardSetsByUser(userId: string): Promise<CardSet[]>;
