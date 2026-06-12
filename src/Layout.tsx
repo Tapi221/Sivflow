@@ -70,6 +70,18 @@ const Layout = () => {
         },
       },
       {
+        id: "action:materials",
+        value: "action:materials",
+        kind: "action",
+        iconKind: "folders",
+        title: "教材登録",
+        keywords: ["教材", "教材登録", "material", "materials", "textbook", "resource"],
+        priority: 92,
+        onSelect: () => {
+          void navigate("/materials");
+        },
+      },
+      {
         id: "action:trash",
         value: "action:trash",
         kind: "action",
