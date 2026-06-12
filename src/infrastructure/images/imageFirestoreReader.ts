@@ -21,8 +21,17 @@ const isImageFirestoreDiagnosticsEnabled = (): boolean => {
     return false;
   }
 };
+const resolveImageReaderUserId = (userId: string | undefined): string | null => {
+  const trimmedUserId = userId?.trim() ?? "";
+  if (trimmedUserId.length > 0) return trimmedUserId;
+
+  const trimmedAuthUid = auth.currentUser?.uid?.trim() ?? "";
+  if (trimmedAuthUid.length > 0) return trimmedAuthUid;
+
+  return null;
+};
 const getImageFromFirestore = async ({ imageId, userId, inFlightTouchMigrations: _inFlightTouchMigrations }: GetImageFromFirestoreOptions): Promise<UploadedImage | null> => {
-  const uid = userId?.trim() || auth.currentUser?.uid?.trim() || null;
+  const uid = resolveImageReaderUserId(userId);
   if (!uid) {
     throw new Error("[ImageDB] getFromFirestore requires authenticated userId");
   }
