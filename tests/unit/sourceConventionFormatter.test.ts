@@ -62,7 +62,6 @@ export { Component };
     const formatted = runFormatterOnSource(`const value = 1;
 type Value = typeof value;
 
-
 export { value };
 
 export type { Value };
@@ -116,11 +115,7 @@ export type { Value };
   it("連続空行を1行に正規化する", () => {
     const formatted = runFormatterOnSource(`import * as React from "react";
 
-
-
 const useValue = () => React.useState(false);
-
-
 
 export { useValue };
 `, FIX_REPEATED_BLANK_LINES_SCRIPT);
