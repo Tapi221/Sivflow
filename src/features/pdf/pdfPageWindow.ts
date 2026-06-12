@@ -83,14 +83,14 @@ const getPdfPageWindowAroundPage = (pageNumber: number, pageCount: number, overs
 };
 function getPdfPageWindowKeepSet(pageMetrics: PdfPageWindowMetric[], viewportTop: number, viewportHeight: number, pageCount: number, options?: PdfPageWindowOptions): Set<number>;
 function getPdfPageWindowKeepSet(fallbackPageNumber: number, pageCount: number, overscanPageCount?: number): Set<number>;
-function getPdfPageWindowKeepSet(first: PdfPageWindowMetric[] | number, second: number, third: number, fourth?: number | PdfPageWindowOptions, fifth: PdfPageWindowOptions = {}): Set<number> {
+function getPdfPageWindowKeepSet(first: PdfPageWindowMetric[] | number, second: number, third?: number, fourth?: number | PdfPageWindowOptions, fifth: PdfPageWindowOptions = {}): Set<number> {
   if (typeof first === "number") {
     return getPdfPageWindowAroundPage(first, second, third);
   }
 
   const pageMetrics = first;
   const viewportTop = second;
-  const viewportHeight = third;
+  const viewportHeight = third ?? 0;
   const pageCount = typeof fourth === "number" ? fourth : DEFAULT_PDF_PAGE;
   const options = typeof fourth === "object" && fourth !== null ? fourth : fifth;
   const safePageCount = Math.max(pageCount, DEFAULT_PDF_PAGE);
