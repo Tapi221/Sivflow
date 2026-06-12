@@ -4,12 +4,8 @@ import { MF_DECK_CARDS_PATH, MF_DECK_MANIFEST_PATH, MF_DECK_MEDIA_DIRECTORY, MF_
 import { validateMfDeckArchive } from "@/features/deckFile/domain/mfDeckGuards";
 import { isMfDeckMediaPath, MF_DECK_MAX_MEDIA_ENTRY_BYTES, MF_DECK_MAX_MEDIA_TOTAL_BYTES } from "@/features/deckFile/domain/mfDeckMedia";
 
-
-
 const MF_DECK_MAX_FILE_BYTES = 128 * 1024 * 1024;
 const MF_DECK_MAX_JSON_BYTES = 24 * 1024 * 1024;
-
-
 
 const parseJsonEntry = (text: string, path: string): unknown => {
   try {
@@ -251,7 +247,5 @@ const decodeMfDeckArchive = (buffer: ArrayBuffer): MfDeckArchiveV1 => {
 
   return validation.value;
 };
-
-
 
 export { MF_DECK_MAX_FILE_BYTES, MF_DECK_MAX_JSON_BYTES, encodeMfDeckArchive, decodeMfDeckArchive };

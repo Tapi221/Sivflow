@@ -7,8 +7,6 @@ import { SlateElement } from "platejs/static";
 import { inlineSuggestionVariants } from "@/lib/suggestion";
 import { cn } from "@/lib/utils";
 
-
-
 const EquationElementStatic = (props: SlateElementProps<TEquationElement>) => {
   const { element } = props;
 
@@ -142,7 +140,5 @@ const InlineEquationElementDocx = (props: SlateElementProps<TEquationElement>) =
     </SlateElement>
   );
 };
-
-
 
 export { EquationElementStatic, InlineEquationElementStatic, EquationElementDocx, InlineEquationElementDocx };
