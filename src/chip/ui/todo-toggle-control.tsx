@@ -1,7 +1,22 @@
+import type { MouseEventHandler } from "react";
 import { CheckIcon as TickIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const C = ({ checked, className }) => {
+type TodoToggleControlProps = {
+  checked?: boolean;
+  className?: string;
+  disabled?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+  onClick?: MouseEventHandler<HTMLButtonElement>;
+};
+
+const C = ({
+  checked,
+  className,
+  disabled,
+  onCheckedChange,
+  onClick,
+}: TodoToggleControlProps) => {
   const isChecked = checked === true;
 
   return (
@@ -11,6 +26,12 @@ const C = ({ checked, className }) => {
         className,
       )}
       data-state={isChecked ? "checked" : "unchecked"}
+      disabled={disabled}
+      onClick={(event) => {
+        onClick?.(event);
+        if (event.defaultPrevented || disabled) return;
+        onCheckedChange?.(!isChecked);
+      }}
       type="button"
     >
       <span className="flex items-center justify-center text-current transition-none">
