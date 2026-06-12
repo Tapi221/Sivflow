@@ -1,13 +1,22 @@
 "use client";
 
 import * as React from "react";
+
 import type { Alignment } from "@platejs/basic-styles";
+
 import { TextAlignPlugin } from "@platejs/basic-styles/react";
+
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
+
 import { AlignCenterIcon, AlignJustifyIcon, AlignLeftIcon, AlignRightIcon } from "lucide-react";
+
 import { useEditorPlugin, useSelectionFragmentProp } from "platejs/react";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "./dropdown-menu";
+
 import { ToolbarButton } from "./toolbar";
+
+
 
 const items = [
   {
@@ -27,6 +36,8 @@ const items = [
     value: "justify",
   },
 ];
+
+
 
 const AlignToolbarButton = (props: DropdownMenuProps) => {
   const { editor, tf } = useEditorPlugin(TextAlignPlugin);
@@ -69,5 +80,7 @@ const AlignToolbarButton = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
+
+
 
 export { AlignToolbarButton };
