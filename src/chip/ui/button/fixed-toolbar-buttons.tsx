@@ -5,7 +5,7 @@ import { ArrowUpToLineIcon, BaselineIcon, BoldIcon, Code2Icon, HighlighterIcon, 
 import { KEYS } from "platejs";
 import { useEditorReadOnly } from "platejs/react";
 import { AIToolbarButton } from "./ai-toolbar-button";
-import { AlignToolbarButton } from "../align-toolbar-button";
+import { AlignToolbarButton } from "./align-toolbar-button";
 import { CommentToolbarButton } from "./comment-toolbar-button";
 import { EmojiToolbarButton } from "./emoji-toolbar-button";
 import { ExportToolbarButton } from "./export-toolbar-button";
