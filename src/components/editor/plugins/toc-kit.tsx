@@ -1,7 +1,7 @@
 "use client";
 
 import { TocPlugin } from "@platejs/toc/react";
-import { TocElement } from "@/chip/ui/toc-node";
+import { TocElement } from "@/chip/ui/node/toc-node";
 
 const TocKit = [
   TocPlugin.configure({
