@@ -1,7 +1,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
 import type { Folder } from "@/types";
 
 const isDatabaseClosedError = (error: unknown) => {
