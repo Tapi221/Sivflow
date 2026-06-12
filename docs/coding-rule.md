@@ -4,7 +4,7 @@
 
 import パスがズレている時、互換パスを追加することは禁止する。互換用の再 export や別名入口を増やさず、呼び出し元の import パスを正しい責務の module へ修正する。
 
-import は複数行に展開せず、各 import 文を1行にまとめる。同一階層の参照は相対パスを使用し、階層をまたぐ参照は @/ エイリアスを使用する。
+project 内の import/export-from は alias に統一し、`./` と `../` で始まる相対パスは禁止する。利用する alias は tsconfig、Vite、または package imports に定義された `@/`、`@web/`、`@mobile/`、`@core/`、`@platform/`、`@web-renderer/`、`@mobile-renderer/`、`@shared/`、`#src/` を使う。
 
 named import 内に `type` 修飾子を書くことは禁止する。型だけを import する場合は `import type` を使う。値 import と型 import が同じ module から混在する場合は、値 import と `import type` を分ける。
 
@@ -27,7 +27,7 @@ import * as ExpoCalendar from "expo-calendar";
 import type { Calendar as ExpoCalendarItem, Event as ExpoCalendarEvent } from "expo-calendar";
 import { normalizeCalendarRecurrenceRule } from "@core/calendar";
 import type { CalendarRecurrenceRule } from "@core/calendar";
-import type { IosCalendarEvent } from "./iosCalendar.types";
+import type { IosCalendarEvent } from "@platform/ioscalendar/iosCalendar.types";
 ```
 
 ファイル内では、import、型定義、定数、helper 関数、component 本体、memo / displayName / export の順に記述する。依存関係がある場合は、依存されるものを先に記述する。
@@ -53,8 +53,8 @@ import、型定義、定数、helper 関数、component 本体、memo / displayN
 JSX の同一 parent 内で、連続する JSX tag child の間に意味のない空行を入れない。視覚的なグルーピングが必要な場合は component 分割、変数化、またはコメントで意図を明示する。
 
 ```ts
-import { value } from "./value";
-import type { Value } from "./value.types";
+import { value } from "@/value";
+import type { Value } from "@/value.types";
 
 type LocalValue = Value;
 type LocalValueId = string;
