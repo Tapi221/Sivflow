@@ -5,12 +5,15 @@ import { cn } from "@/lib/utils";
 import type { DocumentItem, PdfViewerState } from "@/types";
 import type { PdfDocumentSource } from "./pdfDocumentSource";
 import { createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource, releasePdfDocumentSource } from "./pdfDocumentSource";
-import type { PdfViewerStateChangeOptions } from "./PdfPane";
 import { PdfPane } from "./PdfPane";
 import { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerformanceMeasure } from "./pdfPerformance";
 import { findLocalPdfBlob, resolvePdfDocumentBlob } from "./resolvePdfDocumentBlob";
 import { resolvePdfDocumentSourceUrl } from "./resolvePdfDocumentSourceUrl";
 
+type PdfViewerStateChangePersistence = "immediate" | "deferred" | "none";
+type PdfViewerStateChangeOptions = {
+  persistence?: PdfViewerStateChangePersistence;
+};
 type LocalPdfSourceState = {
   documentId: string;
   isResolved: boolean;
