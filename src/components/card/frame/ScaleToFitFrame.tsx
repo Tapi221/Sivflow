@@ -3,8 +3,6 @@ import { cn } from "@/lib/utils";
 import { detectCssZoomSupport, resolveCardScaleRenderingStrategy } from "./cardScaleRenderingStrategy";
 import { observeElementRect } from "./elementRectObserver";
 
-
-
 interface ScaleToFitFrameProps {
   children: React.ReactNode;
   className?: string;
@@ -20,11 +18,7 @@ interface ScaleToFitFrameProps {
   intrinsicHeightPx?: number | null;
 }
 
-
-
 const CONTENT_HEIGHT_EPSILON_PX = 2;
-
-
 
 const resolveLogicalHeight = ({
   contentElement,
@@ -41,8 +35,6 @@ const resolveLogicalHeight = ({
 
   return Math.max(0, visualHeight / safeMeasurementScale);
 };
-
-
 
 const ScaleToFitFrame = ({ children, className, baseWidth = 480, scaleMultiplier = 1, fixedScale, disableScale = false, fitHeight = false, centerContent = false, allowUpscale = false, maxScale = 1.6, contentPaddingPx = 0, intrinsicHeightPx = null }: ScaleToFitFrameProps) => {
   const frameRef = React.useRef<HTMLDivElement | null>(null);
@@ -263,10 +255,5 @@ const ScaleToFitFrame = ({ children, className, baseWidth = 480, scaleMultiplier
   );
 };
 
-
-
 export { ScaleToFitFrame };
-
-
-
 export type { ScaleToFitFrameProps };

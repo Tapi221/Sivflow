@@ -1,11 +1,7 @@
 type SubjectiveScore = 0 | 1 | 2 | 3;
 
-
-
 const MIN_STABILITY = 0.01;
 const MAX_STABILITY = 1.0;
-
-
 
 const clampStability = (value: number): number => {
   return Math.min(MAX_STABILITY, Math.max(MIN_STABILITY, value));
@@ -32,10 +28,5 @@ const normalizeMemoryStability = (value?: number | null, legacyLevel?: number | 
   return 0;
 };
 
-
-
 export { normalizeMemoryStability };
-
-
-
 export type { SubjectiveScore };

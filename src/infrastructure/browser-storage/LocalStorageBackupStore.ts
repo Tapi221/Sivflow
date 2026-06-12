@@ -1,11 +1,7 @@
 import { WEB_STORAGE_KEYS } from "@platform/storage/webStorageKeys.constants";
 import type { AutoBackupRecord, BackupStorePort } from "@/application/ports/BackupStorePort";
 
-
-
 const localStorageBackupStore: BackupStorePort = { isAvailable: isStorageAvailable, loadBackups, saveBackups, saveLastBackupAt, getLastBackupAt, clearBackups };
-
-
 
 const isStorageAvailable = (): boolean => {
   if (typeof window === "undefined") {
@@ -118,7 +114,5 @@ const clearBackups = (): void => {
     // noop
   }
 };
-
-
 
 export { localStorageBackupStore };

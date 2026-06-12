@@ -3,8 +3,6 @@ import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { getLocalDb } from "@/services/localdb";
 import type { TagRecord } from "@/services/localdb/types";
 
-
-
 type TagTreePositionPatch = {
   parentId: string | null;
   orderIndex: number;
@@ -12,8 +10,6 @@ type TagTreePositionPatch = {
 type TagUpdateCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   updateItem: (table: "tagRecords", id: string, changes: Record<string, unknown>) => Promise<number>;
 };
-
-
 
 const getNormalizedParentId = (parentId: string | null): string | undefined => typeof parentId === "string" && parentId.trim().length > 0 ? parentId : undefined;
 const isTagAncestorOf = (sourceId: string, candidateParentId: string | undefined, tagById: ReadonlyMap<string, TagRecord>): boolean => {
@@ -49,7 +45,5 @@ const useTagTreeCommands = (tagById: ReadonlyMap<string, TagRecord>) => {
 
   return { setTagTreePosition };
 };
-
-
 
 export { useTagTreeCommands };

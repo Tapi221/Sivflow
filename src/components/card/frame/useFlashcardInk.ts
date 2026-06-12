@@ -4,8 +4,6 @@ import { INK_DOCUMENT_VERSION } from "@core/domain/card/ink/inkDocument";
 import { useCards } from "@/components/card/hooks/useCards";
 import type { InkHistoryState, InkLayerHandle } from "@/components/ink/inkLayer.types";
 
-
-
 interface UseFlashcardInkOptions {
   cardId: string | null;
   effectiveIsFlipped: boolean;
@@ -25,8 +23,6 @@ interface FlashcardInkResult {
   shouldMountInkLayer: boolean;
   handleInkDocumentChange: (side: "question" | "answer", nextDocument: InkDocument) => void;
 }
-
-
 
 const readFontsReady = () => (document as Document & { fonts?: { ready?: Promise<unknown>; }; }).fonts?.ready;
 const waitForImages = async (root: HTMLDivElement) => {
@@ -151,10 +147,5 @@ const useFlashcardInk = ({ cardId, effectiveIsFlipped, showInkLayer, inkEditingE
   };
 };
 
-
-
 export { useFlashcardInk };
-
-
-
 export type { FlashcardInkResult };

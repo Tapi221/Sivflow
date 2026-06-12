@@ -5,8 +5,6 @@ import { addDays, addYears, eachMonthOfInterval, endOfYear, format, isSameDay, i
 import type { NativeScrollEvent, NativeSyntheticEvent, ViewStyle } from "react-native";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
-
-
 type CalendarWeekStartDay = "sunday" | "monday";
 type CalendarWeekStartsOn = 0 | 1;
 type ScheduleYearProps = {
@@ -40,8 +38,6 @@ type ScheduleYearBlock = {
   label: string;
   months: ScheduleYearMonth[];
 };
-
-
 
 const YEAR_MONTH_GRID_DAY_COUNT = 42;
 const INITIAL_YEAR_BUFFER = 1;
@@ -154,8 +150,6 @@ const styles = StyleSheet.create({
   },
 });
 
-
-
 const rotateCalendarWeekdayLabels = <T,>(weekdayLabels: readonly T[], weekStartDay: CalendarWeekStartDay): readonly T[] => {
   if (weekStartDay === "sunday") return weekdayLabels;
 
@@ -247,8 +241,6 @@ const getMonthItemStyle = (monthIndex: number): ViewStyle => ({
   width: `${100 / MONTH_COLUMNS}%`,
 });
 const getCalendarWeekStartsOn = (weekStartDay: CalendarWeekStartDay): CalendarWeekStartsOn => weekStartDay === "sunday" ? 0 : 1;
-
-
 
 const ScheduleYearComponent = ({ yearDate, selectedDate, weekStartDay = DEFAULT_WEEK_START_DAY, visibleEvents = [], onSelectDate, onRenderedRangeChange }: ScheduleYearProps) => {
   const today = useMemo(() => new Date(), []);
@@ -379,13 +371,8 @@ const ScheduleYearComponent = ({ yearDate, selectedDate, weekStartDay = DEFAULT_
   );
 };
 
-
-
 const ScheduleYear = memo(ScheduleYearComponent);
 ScheduleYear.displayName = "ScheduleYear";
 
 export { ScheduleYear };
-
-
-
 export type { CalendarWeekStartDay, ScheduleYearProps };

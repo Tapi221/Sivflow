@@ -1,12 +1,8 @@
 import type { GoogleAuthPort } from "@/application/ports/GoogleAuthPort";
 
-
-
 interface SignInWithGoogleDependencies {
   auth: GoogleAuthPort;
 }
-
-
 
 const createSignInWithGoogleUseCase = ({ auth }: SignInWithGoogleDependencies) => {
   const execute = async (): Promise<void> => {
@@ -18,10 +14,5 @@ const createSignInWithGoogleUseCase = ({ auth }: SignInWithGoogleDependencies) =
   };
 };
 
-
-
 export { createSignInWithGoogleUseCase };
-
-
-
 export type { SignInWithGoogleDependencies };

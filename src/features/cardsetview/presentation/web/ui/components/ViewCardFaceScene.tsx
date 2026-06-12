@@ -11,8 +11,6 @@ import type { Card } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { CardFaceScene } from "./CardFaceScene";
 
-
-
 type Side = "question" | "answer";
 type ViewCardFaceSceneProps = Readonly<{ card: Card;
   side: Side;
@@ -31,8 +29,6 @@ type ViewCardFaceSceneProps = Readonly<{ card: Card;
   onToggleBookmark?: (card: Card) => void | Promise<void>;
 }>;
 
-
-
 const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   id: card.id,
   cardId: card.cardId,
@@ -46,8 +42,6 @@ const toFlashcardCardLike = (card: Card): FlashcardCardLike => ({
   inkQuestion: card.front.ink ?? null,
   inkAnswer: card.back.ink ?? null,
 });
-
-
 
 const ViewCardFaceScene = ({ card, side, displayMode, fixedScale, fixedHeightPx = null, contentZoom, headerIconVisualScale, previewMode, showInkLayer, drawMode = false, inkEditingEnabled, fillHeight = false, onFlip, onToggleUncertainty, onToggleBookmark }: ViewCardFaceSceneProps) => {
   const contentRef = React.useRef<HTMLDivElement | null>(null);
@@ -225,10 +219,5 @@ const ViewCardFaceScene = ({ card, side, displayMode, fixedScale, fixedHeightPx 
   );
 };
 
-
-
 export { ViewCardFaceScene };
-
-
-
 export type { ViewCardFaceSceneProps };

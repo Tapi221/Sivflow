@@ -5,8 +5,6 @@ import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import type { SubjectiveScore } from "@/utils/reviewUtils";
 import { toMillis } from "@/utils/toMillis";
 
-
-
 type ReviewAlgorithmInput = {
   card: { memoryStability?: number | null;
     currentLevel?: number | null;
@@ -63,8 +61,6 @@ type LatestReviewLogPatchParams =
     reviewStartNextDay?: boolean;
   };
 
-
-
 const MIN_STABILITY = 0.01;
 const MAX_STABILITY = 1.0;
 const MAX_INTERVAL_DAYS = 90;
@@ -73,8 +69,6 @@ const MIN_DIFFICULTY = 0.0;
 const MAX_DIFFICULTY = 1.0;
 const DIFFICULTY_ALPHA = 0.1;
 const DIFFICULTY_INTERVAL_BRAKE = 0.3;
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
@@ -581,10 +575,5 @@ const createLatestReviewLogPatch = (params: LatestReviewLogPatchParams) => {
   };
 };
 
-
-
 export { computeNextReview, ratingToSubjectiveScore, createReviewLogEntry, createReviewPatchFromRating, createLatestReviewLogPatch };
-
-
-
 export type { ReviewAlgorithmInput, ReviewAlgorithmResult, MultipleChoiceConfidence, MultipleChoiceReviewMeta };

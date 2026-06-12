@@ -4,8 +4,6 @@ import IpadInkCanvasHost from "@mobile-renderer/components/ipad/ink/IpadInkCanva
 import IpadInkToolbar from "@mobile-renderer/components/ipad/ink/IpadInkToolbar";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-
-
 type HandwritingModeSession = {
   id: string;
   cardId: string;
@@ -14,8 +12,6 @@ type HandwritingModeSession = {
 type HandwritingModeScreenProps = {
   session?: HandwritingModeSession | null;
 };
-
-
 
 const ERASE_RADIUS = 44;
 const styles = StyleSheet.create({
@@ -104,8 +100,6 @@ const styles = StyleSheet.create({
   },
 });
 
-
-
 const hasPointNear = (stroke: InkStroke, point: InkPoint) => {
   return stroke.points.some((candidate) => {
     const dx = candidate.x - point.x;
@@ -113,8 +107,6 @@ const hasPointNear = (stroke: InkStroke, point: InkPoint) => {
     return Math.sqrt(dx * dx + dy * dy) <= ERASE_RADIUS;
   });
 };
-
-
 
 const HandwritingModeScreen = ({ session }: HandwritingModeScreenProps) => {
   const [tool, setTool] = useState<InkEditTool>("pen");
@@ -160,13 +152,8 @@ const HandwritingModeScreen = ({ session }: HandwritingModeScreenProps) => {
   );
 };
 
-
-
 const MemoizedHandwritingModeScreen = memo(HandwritingModeScreen);
 MemoizedHandwritingModeScreen.displayName = "HandwritingModeScreen";
 
 export default MemoizedHandwritingModeScreen;
-
-
-
 export type { HandwritingModeScreenProps, HandwritingModeSession };

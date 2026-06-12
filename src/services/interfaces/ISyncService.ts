@@ -1,8 +1,6 @@
 import type { SyncConflict as DomainSyncConflict, SyncEntity, SyncResult } from "@/types/domain/sync";
 import type { NetworkStatus, SyncContextSource } from "@/types/domain/telemetry";
 
-
-
 type JsonPrimitive = string | number | boolean | null;
 type JsonValue = JsonPrimitive | JsonObject | JsonArray;
 type JsonObject = {

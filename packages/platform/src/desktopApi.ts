@@ -94,10 +94,5 @@ declare global {
   }
 }
 
-
-
 export {};
-
-
-
 export type { PlatformAppApi, PlatformShellApi, DesktopAiGenerateInput, DesktopAiListModelsInput, DesktopAiGenerateResult, DesktopAiListModelsResult, DesktopAiApi, DesktopImportFileOpenPayload, DesktopImportFileReadResult, DesktopPdfOpenInput, DesktopPdfOpenResult, DesktopImportFileOpenHandler, DesktopFileApi, DesktopPdfApi, DesktopOauthCallbackPayload, DesktopOauthCallbackHandler, PlatformOauthApi, DesktopWindowApi, PlatformApi, DesktopOauthApi, DesktopBridgeApi };

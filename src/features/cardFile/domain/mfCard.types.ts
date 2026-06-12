@@ -1,7 +1,5 @@
 import type { MfDeckCardV1, MfDeckIssue } from "@/features/deckFile/domain/mfDeck.types";
 
-
-
 type MfCardIssue = MfDeckIssue;
 type MfCardValidationResult = | { ok: true;
   value: MfCardFileV1;
@@ -12,12 +10,8 @@ type MfCardValidationResult = | { ok: true;
     issues: MfCardIssue[];
   };
 
-
-
 const MF_CARD_FORMAT = "sivflow.card" as const;
 const MF_CARD_VERSION = 1 as const;
-
-
 
 type MfCardFileV1 = {
   format: typeof MF_CARD_FORMAT;
@@ -35,12 +29,8 @@ type MfCardFileV1 = {
   };
 };
 
-
-
 const MF_CARD_FILE_EXTENSION = ".mfcard" as const;
 const MF_CARD_MIME_TYPE = "application/vnd.sivflow.card+json" as const;
-
-
 
 class MfCardValidationError extends Error {
   readonly issues: MfCardIssue[];
@@ -61,10 +51,5 @@ class MfCardExportError extends Error {
   }
 }
 
-
-
 export { MF_CARD_FORMAT, MF_CARD_VERSION, MF_CARD_FILE_EXTENSION, MF_CARD_MIME_TYPE, MfCardValidationError, MfCardExportError };
-
-
-
 export type { MfCardIssue, MfCardFileV1, MfCardValidationResult };

@@ -1,7 +1,5 @@
 import type { Card, SubjectiveScoreValue } from "@/types";
 
-
-
 type StudyReviewProps = {
   cards: Card[];
   sessionCurrentIndex: number;
