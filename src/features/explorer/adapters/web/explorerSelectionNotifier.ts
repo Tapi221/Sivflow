@@ -8,6 +8,4 @@ const notifySelectedFolderChanged = (folderId: string | null) => {
   );
 };
 
-
-
 export { notifySelectedFolderChanged };

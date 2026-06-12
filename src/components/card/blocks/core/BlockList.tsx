@@ -7,8 +7,6 @@ import type { CardBlock } from "@/types/domain/card";
 import { shouldRenderInterBlockSeparator } from "./blockDisplayPolicy";
 import { BlockSeparator } from "./BlockSeparator";
 
-
-
 type BlockListRowMeta = {
   index: number;
   rowOffsetRows: number;
@@ -32,8 +30,6 @@ interface BlockListProps {
   ) => HTMLAttributes<HTMLDivElement> | undefined;
   renderBlock: (block: CardBlock, meta: BlockListRowMeta) => ReactNode;
 }
-
-
 
 const BlockList = ({ blocks, className, rowClassName, getRowRef, getRowContainerProps, renderBlock }: BlockListProps) => {
   return (<div className={cn("w-full max-w-full", className)}> {blocks.map((block, index) => {
@@ -106,10 +102,5 @@ const BlockList = ({ blocks, className, rowClassName, getRowRef, getRowContainer
   );
 };
 
-
-
 export { BlockList };
-
-
-
 export type { BlockListRowMeta };

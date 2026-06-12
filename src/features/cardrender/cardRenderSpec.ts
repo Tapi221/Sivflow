@@ -1,7 +1,5 @@
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-
-
 type CardSurfaceMode = "card" | "fluid";
 type CardInteractionMode = "view" | "edit";
 type CardChromeScaleMode = "fixed";
@@ -13,12 +11,8 @@ interface CardRenderSpec {
   showInk: boolean;
 }
 
-
-
 const MIN_ZOOM_SCALE = 0.5;
 const MAX_ZOOM_SCALE = 4;
-
-
 
 const clampCardRenderZoomScale = (value: number) => {
   if (!Number.isFinite(value)) return 1;
@@ -59,10 +53,5 @@ const resolveCardDisablesFrameScale = (spec: CardRenderSpec) => {
   return spec.surfaceMode === "fluid";
 };
 
-
-
 export { clampCardRenderZoomScale, resolveCardSurfaceMode, buildCardRenderSpec, resolveCardSurfaceScale, resolveCardContentZoom, resolveCardUsesSurfaceScale, resolveCardUsesStretchWidth, resolveCardDisablesFrameScale };
-
-
-
 export type { CardSurfaceMode, CardInteractionMode, CardChromeScaleMode, CardRenderSpec };

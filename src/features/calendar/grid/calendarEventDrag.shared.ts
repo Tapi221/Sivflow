@@ -3,8 +3,6 @@ import type { CSSProperties, RefObject } from "react";
 import type { CalendarEventMoveHandler } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
-
-
 type CalendarEventDragAutoScrollDirection = "up" | "down";
 type CalendarEventDragPointerSnapshot = {
   pointerId: number;
@@ -17,14 +15,10 @@ type CalendarEventDragAutoScrollOptions<TElement extends HTMLElement> = {
   onScroll: (snapshot: CalendarEventDragPointerSnapshot) => void;
 };
 
-
-
 const CALENDAR_EVENT_DRAGGING_STYLE: CSSProperties = { filter: "drop-shadow(0 14px 22px rgba(15, 23, 42, 0.22))", transform: "scale(1.015)", zIndex: 30 };
 const CALENDAR_EVENT_DRAG_SCROLL_EDGE_PX = 88;
 const CALENDAR_EVENT_DRAG_SCROLL_STEP_PX = 28;
 const CALENDAR_EVENT_DRAG_SCROLL_INTERVAL_MS = 16;
-
-
 
 const createCalendarEventKey = (event: GoogleCalendarEvent): string => `${event.accountId ?? ""}:${event.calendarId}:${event.id}`;
 const createCalendarEventDragPointerSnapshot = (pointerId: number, buttons: number, clientX: number, clientY: number): CalendarEventDragPointerSnapshot => ({ pointerId, buttons, clientX, clientY });
@@ -148,10 +142,5 @@ const useCalendarEventDragAutoScroll = <TElement extends HTMLElement>({ scrollCo
   return { stopDragAutoScroll, updateDragAutoScroll };
 };
 
-
-
 export { CALENDAR_EVENT_DRAGGING_STYLE, areSameCalendarEventTimes, createCalendarEventDragPointerSnapshot, createCalendarEventDragPreview, createCalendarEventKey, getCalendarEventDateOrNull, isCalendarEventDraggable, isSameCalendarEventMove, useCalendarEventDragAutoScroll, useCalendarEventDragBodyStyle };
-
-
-
 export type { CalendarEventDragPointerSnapshot };

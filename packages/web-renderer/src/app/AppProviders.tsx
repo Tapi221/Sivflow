@@ -9,13 +9,9 @@ import { NotificationProvider } from "@/components/notifications/NotificationPro
 import { AuthProvider } from "@/contexts/AuthProvider";
 import { BreadcrumbProvider } from "@/contexts/BreadcrumbContext";
 
-
-
 type AppProvidersProps = {
   children: ReactNode;
 };
-
-
 
 const AppProviders = ({ children }: AppProvidersProps) => (
   <MantineProvider defaultColorScheme="light">
@@ -34,10 +30,5 @@ const AppProviders = ({ children }: AppProvidersProps) => (
   </MantineProvider>
 );
 
-
-
 export { AppProviders };
-
-
-
 export type { AppProvidersProps };

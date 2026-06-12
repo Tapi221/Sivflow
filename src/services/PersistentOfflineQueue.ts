@@ -6,11 +6,7 @@ import { handleQueuedUploadPermanentFailure, handleQueuedUploadSuccess, shouldSk
 import { uploadQueuedAsset } from "@/infrastructure/offlineQueue/uploadQueuedAsset";
 import type { UploadedImage } from "@/types";
 
-
-
 const persistentQueue = new PersistentOfflineQueue();
-
-
 
 class PersistentOfflineQueue {
   private isProcessing = false;
@@ -98,10 +94,5 @@ class PersistentOfflineQueue {
   };
 }
 
-
-
 export { persistentQueue };
-
-
-
 export type { AssetUploadRequest };

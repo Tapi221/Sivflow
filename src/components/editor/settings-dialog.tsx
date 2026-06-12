@@ -3,35 +3,21 @@
 /* DEMO ONLY, DO NOT USE IN PRODUCTION */
 
 import * as React from "react";
-
 import { CopilotPlugin } from "@platejs/ai/react";
-
 import { Check, ChevronsUpDown, ExternalLinkIcon, Eye, EyeOff, Settings, Wand2Icon } from "lucide-react";
-
 import { useEditorRef } from "platejs/react";
-
 import { aiChatPlugin } from "@/components/editor/plugins/ai-kit";
-
 import { Button } from "@/components/ui/button";
-
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-
 import { Input } from "@/components/ui/input";
-
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-
 import { cn } from "@/lib/utils";
-
-
 
 type Model = {
   label: string;
   value: string;
 };
-
-
 
 const models: Model[] = [
   { label: "GPT-3.5 Turbo", value: "openai/gpt-3.5-turbo" },
@@ -146,16 +132,10 @@ const models: Model[] = [
   { label: "GLM 4.5 Air", value: "zai/glm-4.5-air" },
   { label: "GLM 4.5V", value: "zai/glm-4.5v" },
 ];
-
 const DEFAULT_MODEL_VALUE = "openai/gpt-4o-mini";
-
 const FALLBACK_MODEL: Model = { label: "GPT-4o Mini", value: DEFAULT_MODEL_VALUE };
 
-
-
 const getDefaultModel = () => models.find((model) => model.value === DEFAULT_MODEL_VALUE) ?? models[0] ?? FALLBACK_MODEL;
-
-
 
 const SettingsDialog = () => {
   const editor = useEditorRef();
@@ -316,7 +296,5 @@ const SettingsDialog = () => {
     </Dialog>
   );
 };
-
-
 
 export { SettingsDialog, models };

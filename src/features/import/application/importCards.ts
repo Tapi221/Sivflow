@@ -1,8 +1,6 @@
 import type { ImportBlock, ImportPayload } from "@/features/import/domain/import.types";
 import type { Card, CardBlock, CardSet } from "@/types";
 
-
-
 type CreateCardSet = (
   name: string,
   targetFolderId?: string | null,
@@ -33,8 +31,6 @@ type ImportCardsFromPayloadParams = {
   createCard: CreateCard;
   destination: ImportDestination;
 };
-
-
 
 const buildImportCardSetName = (fileName: string) => {
   const baseName = fileName.replace(/\.xlsx$/i, "").trim();
@@ -155,10 +151,5 @@ const importCardsFromPayload = async ({
   };
 };
 
-
-
 export { buildImportCardSetName, importCardsFromPayload };
-
-
-
 export type { ImportDestination };

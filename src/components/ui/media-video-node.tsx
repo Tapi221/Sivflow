@@ -1,32 +1,18 @@
 "use client";
 
 import * as React from "react";
-
 import { useDraggable } from "@platejs/dnd";
-
 import { parseTwitterUrl, parseVideoUrl } from "@platejs/media";
-
 import { useMediaState } from "@platejs/media/react";
-
 import { ResizableProvider, useResizableValue } from "@platejs/resizable";
-
 import type { TResizableProps, TVideoElement } from "platejs";
-
 import type { PlateElementProps } from "platejs/react";
-
 import { PlateElement, useEditorMounted, withHOC } from "platejs/react";
-
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
-
 import ReactPlayer from "react-player";
-
 import { cn } from "@/lib/utils";
-
 import { Caption, CaptionTextarea } from "./caption";
-
 import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "./resize-handle";
-
-
 
 const VideoElement = withHOC(ResizableProvider, (props: PlateElementProps<TVideoElement & TResizableProps>) => {
   const { align = "center", embed, isVideo, isUpload, isYoutube, readOnly, unsafeUrl } = useMediaState({ urlParsers: [parseTwitterUrl, parseVideoUrl] });
@@ -125,7 +111,5 @@ const VideoElement = withHOC(ResizableProvider, (props: PlateElementProps<TVideo
   );
 },
 );
-
-
 
 export { VideoElement };

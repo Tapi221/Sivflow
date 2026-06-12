@@ -2,8 +2,6 @@ import type { QueueItem } from "@/application/usecases/persistentOfflineQueueMod
 import { isBackingStoreOpenError } from "@/infrastructure/localdb/errors";
 import { warnOncePerSession } from "@/infrastructure/localdb/runtimeState";
 
-
-
 class IndexedDbPersistentOfflineQueueStore {
   private readonly dbName: string;
   private readonly storeName: string;
@@ -167,7 +165,5 @@ class IndexedDbPersistentOfflineQueueStore {
     warnOncePerSession("persistent-queue:idb-fallback", reason, error);
   };
 }
-
-
 
 export { IndexedDbPersistentOfflineQueueStore };

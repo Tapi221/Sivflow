@@ -1,8 +1,6 @@
 import { CARD_SHELL_COMMON_CLASS_NAME } from "@/components/card/frame/cardShellClassNames";
 import { cn } from "@/lib/utils";
 
-
-
 type CardPresentationContext = {
   inPager: boolean;
   isCurrentCard: boolean;
@@ -17,8 +15,6 @@ type CardPresentationState = {
   showActiveChrome: boolean;
 };
 type CardPresentationContextInput = Partial<Pick<CardPresentationContext, "isCurrentCard" | "isStandaloneEditor" | "hasFocusWithin">>;
-
-
 
 const resolveCardPresentationState = (context: CardPresentationContext): CardPresentationState => {
   const isActiveCard = context.isStandaloneEditor || context.isCurrentCard;
@@ -45,10 +41,5 @@ const buildCardChromeClassName = (state: CardPresentationState, options?: { hove
     options?.className,
   );
 
-
-
 export { resolveCardPresentationState, buildCardShellClassName, buildCardChromeClassName };
-
-
-
 export type { CardPresentationContext, CardPresentationState, CardPresentationContextInput };

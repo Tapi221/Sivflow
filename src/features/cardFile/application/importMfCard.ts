@@ -4,8 +4,6 @@ import { importMfDeckArchive } from "@/features/deckFile/application/importMfDec
 import type { MfDeckArchiveV1 } from "@/features/deckFile/domain/mfDeck.types";
 import { MF_DECK_FORMAT, MF_DECK_VERSION } from "@/features/deckFile/domain/mfDeck.types";
 
-
-
 type ImportMfCardFileParams = {
   cardFile: MfCardFileV1;
   folderId: string;
@@ -15,8 +13,6 @@ type ImportMfCardFileParams = {
   ensureTagByName?: EnsureMfDeckTagByName;
   destination: MfDeckImportDestination;
 };
-
-
 
 const resolveCardSetName = (cardFile: MfCardFileV1) => {
   const title = cardFile.card.title?.trim();
@@ -52,10 +48,5 @@ const importMfCardFile = async ({ cardFile, folderId, createCardSet, updateCardS
   return importMfDeckArchive({ archive: buildSingleCardArchive(cardFile), folderId, createCardSet, updateCardSet, createCard, ensureTagByName, destination });
 };
 
-
-
 export { importMfCardFile };
-
-
-
 export type { ImportMfCardFileParams };

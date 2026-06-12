@@ -1,7 +1,5 @@
 import type { CalendarProvider, ProjectCalendarLink, ProjectCalendarSyncDirection } from "./scheduleScreen.types";
 
-
-
 type CreateProjectCalendarLinkInput = {
   projectId: string;
   provider: CalendarProvider;
@@ -15,15 +13,11 @@ type CreateProjectCalendarLinkInput = {
 };
 type StoredProjectCalendarLink = Partial<ProjectCalendarLink>;
 
-
-
 const PROJECT_CALENDAR_LINKS_STORAGE_KEY = "sivflow:schedule:project-calendar-links";
 const LEGACY_PROJECT_CALENDAR_LINKS_STORAGE_KEY = "flashcard-master:schedule:project-calendar-links";
 const DEFAULT_SYNC_DIRECTION: ProjectCalendarSyncDirection = "twoWay";
 const SUPPORTED_CALENDAR_PROVIDERS = new Set<CalendarProvider>(["local", "google", "appleEventKit", "appleCalDav"]);
 const SUPPORTED_SYNC_DIRECTIONS = new Set<ProjectCalendarSyncDirection>(["importOnly", "exportOnly", "twoWay"]);
-
-
 
 const encodeLinkIdPart = (value: string): string => encodeURIComponent(value.trim());
 const readString = (value: unknown): string | null => {
@@ -127,10 +121,5 @@ const persistProjectCalendarLinks = (links: ProjectCalendarLink[]) => {
   }
 };
 
-
-
 export { PROJECT_CALENDAR_LINKS_STORAGE_KEY, buildProjectCalendarLinkId, createProjectCalendarLink, readStoredProjectCalendarLinks, persistProjectCalendarLinks };
-
-
-
 export type { CreateProjectCalendarLinkInput };

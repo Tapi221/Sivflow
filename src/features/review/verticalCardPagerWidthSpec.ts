@@ -1,7 +1,5 @@
 import type { CSSProperties } from "react";
 
-
-
 type VerticalCardPagerItemWidthSpec = {
   mode: "fixed"; widthPx: number; } | { mode: "stretch"; };
 type ResolveVerticalCardPagerItemWidthSpecOptions<T> = {
@@ -12,8 +10,6 @@ type ResolveVerticalCardPagerItemWidthSpecOptions<T> = {
   getCardWidth?: (card: T, idx: number, isActive: boolean) => number;
   getCardWidthSpec?: (card: T, idx: number, isActive: boolean) => VerticalCardPagerItemWidthSpec;
 };
-
-
 
 const clampWidthPx = (widthPx: number): number => Math.max(1, widthPx);
 const resolveFixedWidthSpec = (widthPx: number): VerticalCardPagerItemWidthSpec => ({
@@ -47,10 +43,5 @@ const buildVerticalCardPagerItemStyle = (widthSpec: VerticalCardPagerItemWidthSp
   };
 };
 
-
-
 export { resolveVerticalCardPagerItemWidthSpec, buildVerticalCardPagerItemStyle };
-
-
-
 export type { VerticalCardPagerItemWidthSpec };
