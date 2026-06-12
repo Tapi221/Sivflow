@@ -12,6 +12,8 @@
   *::before,
   *::after {
     box-sizing: border-box;
+    border-color: hsl(var(--border));
+    outline-color: hsl(var(--ring) / 0.5);
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
   }
