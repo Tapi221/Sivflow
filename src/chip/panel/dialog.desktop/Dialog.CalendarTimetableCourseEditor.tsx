@@ -20,7 +20,7 @@ type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
 const STRATIS_ICON_COMPONENTS = stratisIcons as Record<string, StratisIconComponent | undefined>;
 const STRATIS_CHECK_ICON_NAMES = ["StratisCheckIcon", "StratisCheck01Icon", "StratisCheckCircleContainedIcon"] as const;
-const STRATIS_CHECK_ICON = STRATIS_CHECK_ICON_NAMES.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
+const StratisCheckIcon = STRATIS_CHECK_ICON_NAMES.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
 const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] as const;
 const DEFAULT_COURSE_COLOR_KEY: CalendarTimetableColorKey = "blue";
 const EMPTY_SLOT_LIST: CalendarTimetableSlot[] = [];
@@ -84,7 +84,7 @@ const CalendarTimetableCourseEditorDialog = ({ course, semesterId, initialSlot, 
                 {periods.map((period) => <div key={period.id} className="contents"><div className="flex items-center justify-end pr-2 text-[12px] font-bold text-[#6e6e73]">{period.label}</div>{TIMETABLE_DAY_LABELS.slice(0, visibleDayCount).map((_, dayIndex) => {
                   const slot = { dayIndex: dayIndex as CalendarTimetableWeekdayIndex, periodId: period.id };
                   const selected = slots.some((currentSlot) => isSameTimetableSlot(currentSlot, slot));
-                  return <button key={`${dayIndex}-${period.id}`} type="button" className={cn("flex h-9 items-center justify-center rounded-[10px] border text-[12px] font-bold", selected ? "border-[#007aff] bg-[#e8f2ff] text-[#007aff]" : "border-[#e5e5ea] bg-white text-[#c7c7cc]")} onClick={() => toggleSlot(slot)}>{selected && STRATIS_CHECK_ICON ? <STRATIS_CHECK_ICON className="h-4 w-4" aria-hidden="true" focusable="false" /> : null}</button>;
+                  return <button key={`${dayIndex}-${period.id}`} type="button" className={cn("flex h-9 items-center justify-center rounded-[10px] border text-[12px] font-bold", selected ? "border-[#007aff] bg-[#e8f2ff] text-[#007aff]" : "border-[#e5e5ea] bg-white text-[#c7c7cc]")} onClick={() => toggleSlot(slot)}>{selected && StratisCheckIcon ? <StratisCheckIcon className="h-4 w-4" aria-hidden="true" focusable="false" /> : null}</button>;
                 })}</div>)}
               </div>
             </>
