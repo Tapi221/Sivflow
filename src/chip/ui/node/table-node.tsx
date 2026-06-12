@@ -17,7 +17,6 @@ type TableCellElementWithAttributes = TTableCellElement & {
 };
 
 const TABLE_DEFAULT_CELL_WIDTH = 120;
-const TABLE_DEFAULT_CELL_MAX_WIDTH = 240;
 
 const TableElement = (props: PlateElementProps<TTableElement>) => {
   const { children, element } = props;
