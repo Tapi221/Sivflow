@@ -1,6 +1,8 @@
 import { getLocalDb } from "./localDB";
 import { StorageStateManager } from "./StorageStateManager";
 
+
+
 interface CompressedHistory {
   id: string;
   userId: string;
@@ -18,6 +20,8 @@ type HistoryEvent = {
   oldLevel?: number;
   interval?: number;
 };
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
@@ -159,5 +163,7 @@ class HistoryCompressionService {
     return compressed;
   };
 }
+
+
 
 export { HistoryCompressionService };

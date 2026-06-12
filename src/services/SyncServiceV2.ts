@@ -7,7 +7,11 @@ import type { SyncConflict as StoredSyncConflict, SyncQueueItem, SyncResult } fr
 import type { SyncContextSource } from "@/types/domain/telemetry";
 import type { LocalDBLike } from "./localDB";
 
+
+
 type SyncableRecord = Record<string, unknown> & { id?: string; isDeleted?: boolean; };
+
+
 
 const SYNC_TABLE_BY_TYPE = {
   card: "cards",
@@ -20,7 +24,11 @@ const SYNC_TABLE_BY_TYPE = {
 } as const;
 const FULL_RESYNC_TABLES = ["folders", "cardSets", "cards", "documents", "tagRecords", "userSettings", "images"] as const;
 
+
+
 type SyncableTableName = (typeof FULL_RESYNC_TABLES)[number];
+
+
 
 const ROOT_FOLDER_KEY = "__root__";
 const DEFAULT_FOLDER_NAME = "インポート済みカード";
@@ -34,6 +42,8 @@ const SYNC_ENTITY_BY_TABLE: Record<SyncableTableName, SyncTask["entity"]> = {
   images: "asset",
 };
 const DELETE_CAPABLE_SYNC_ENTITIES = new Set<SyncTask["entity"]>(["folder", "cardSet", "card", "document", "tag", "asset"]);
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return value !== null && typeof value === "object";
@@ -634,5 +644,7 @@ class SyncServiceV2 implements ISyncService {
     }
   }
 }
+
+
 
 export { SyncServiceV2 };

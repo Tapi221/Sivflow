@@ -6,6 +6,8 @@ import type { CalendarDateRange } from "@/features/calendar/calendarRange.types"
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 
+
+
 type CalendarPrintRangeDay = {
   date: Date;
   key: string;
@@ -24,10 +26,14 @@ type CalendarPrintDocumentPortalProps = {
   children: ReactNode;
 };
 
+
+
 const CALENDAR_PRINT_DOCUMENT_HOST_CLASS_NAME = "calendar-print-document-host";
 const CALENDAR_PRINT_RANGE_MAX_COLUMNS = 7;
 const CALENDAR_PRINT_RANGE_WEEKDAY_LABELS = ["日", "月", "火", "水", "木", "金", "土"];
 const CALENDAR_PRINT_RANGE_EMPTY_EVENTS: GoogleCalendarEvent[] = [];
+
+
 
 const createPrintDateKey = (date: Date): string => format(date, "yyyy-MM-dd");
 const createPrintRangeDays = (range: CalendarDateRange): CalendarPrintRangeDay[] => {
@@ -55,6 +61,8 @@ const eventOverlapsDay = (event: GoogleCalendarEvent, date: Date): boolean => {
 const getEventsForDay = (events: GoogleCalendarEvent[], date: Date): GoogleCalendarEvent[] => {
   return events.filter((event) => eventOverlapsDay(event, date));
 };
+
+
 
 const CalendarPrintDocumentPortal = ({ children }: CalendarPrintDocumentPortalProps) => {
   if (typeof document === "undefined" || !document.body) return null;
@@ -101,5 +109,7 @@ const CalendarPrintRangeView = ({ titleLabel, rangeLabel, focusDate, range, even
     </CalendarPrintDocumentPortal>
   );
 };
+
+
 
 export { CalendarPrintRangeView };

@@ -1,13 +1,22 @@
 "use client";
 
 import * as React from "react";
+
 import { SuggestionPlugin } from "@platejs/suggestion/react";
+
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
+
 import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
+
 import { CheckIcon, EyeIcon, PencilLineIcon, PenIcon } from "lucide-react";
+
 import { useEditorReadOnly, useEditorRef, usePluginOption } from "platejs/react";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "./dropdown-menu";
+
 import { ToolbarButton } from "./toolbar";
+
+
 
 const Indicator = () => {
   return (
@@ -18,6 +27,7 @@ const Indicator = () => {
     </span>
   );
 };
+
 const ModeToolbarButton = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
   const readOnly = useEditorReadOnly();
@@ -108,5 +118,7 @@ const ModeToolbarButton = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
+
+
 
 export { ModeToolbarButton };

@@ -5,9 +5,13 @@ import * as ExpoCalendar from "expo-calendar";
 import { Platform } from "react-native";
 import type { IosCalendarEvent, IosCalendarListItem, IosCalendarPermissionStatus, IosCalendarWritableEventDeleteInput, IosCalendarWritableEventInput, IosCalendarWritableEventUpdateInput } from "./iosCalendar.types";
 
+
+
 type ExpoCalendarCreateEventDetails = NonNullable<Parameters<typeof ExpoCalendar.createEventAsync>[1]>;
 type ExpoCalendarUpdateEventDetails = NonNullable<Parameters<typeof ExpoCalendar.updateEventAsync>[1]>;
 type IosCalendarWritableEventDetails = Partial<ExpoCalendarCreateEventDetails & ExpoCalendarUpdateEventDetails>;
+
+
 
 const IOS_CALENDAR_ACCOUNT_ID = "ios";
 const IOS_CALENDAR_EVENT_ID_PREFIX = "ios";
@@ -48,6 +52,8 @@ const WEEKDAY_BY_EXPO_DAY: Record<number, CalendarWeekday> = {
   [ExpoCalendar.DayOfTheWeek.Friday]: 5,
   [ExpoCalendar.DayOfTheWeek.Saturday]: 6,
 };
+
+
 
 const normalizePermissionStatus = (response: PermissionResponse): IosCalendarPermissionStatus => {
   if (response.granted || response.status === "granted") return "granted";
@@ -262,5 +268,7 @@ const deleteIosCalendarEvent = async ({ event, calendars }: { event: IosCalendar
 
   await ExpoCalendar.deleteEventAsync(resolveExternalEventId(event.calendarId, event.eventId));
 };
+
+
 
 export { isIosCalendarSupported, getIosCalendarPermissionStatus, requestIosCalendarPermission, fetchIosCalendars, fetchIosEvents, createIosCalendarEvent, updateIosCalendarEvent, deleteIosCalendarEvent };

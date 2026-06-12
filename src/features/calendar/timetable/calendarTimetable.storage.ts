@@ -3,6 +3,8 @@ import type { CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTim
 import type { Table } from "dexie";
 import Dexie from "dexie";
 
+
+
 const TIMETABLE_SETTINGS_ID = "default";
 const DEFAULT_SEMESTER_ID = "default-semester";
 const DEFAULT_VISIBLE_DAY_COUNT: CalendarTimetableVisibleDayCount = 5;
@@ -16,6 +18,8 @@ const DEFAULT_TIMETABLE_PERIODS: readonly CalendarTimetablePeriod[] = [
   { id: "period-7", label: "7", startTime: "19:40", endTime: "21:10", order: 6 },
 ];
 const timetableDb = new CalendarTimetableDatabase();
+
+
 
 class CalendarTimetableDatabase extends Dexie {
   courses!: Table<CalendarTimetableCourse, string>;
@@ -198,5 +202,7 @@ const deleteCalendarTimetablePeriod = async (periodId: string): Promise<void> =>
     }));
   });
 };
+
+
 
 export { addCalendarTimetableCourseFromSyllabus, addCalendarTimetablePeriod, deleteCalendarTimetableCourse, deleteCalendarTimetablePeriod, ensureCalendarTimetableSeedData, getCalendarTimetableSettings, listCalendarTimetableCourses, listCalendarTimetableDepartments, listCalendarTimetableInstitutions, listCalendarTimetablePeriods, normalizeVisibleDayCount, saveCalendarTimetableCourse, saveCalendarTimetableSyllabusCourse, searchCalendarTimetableSyllabusCourses, updateCalendarTimetablePeriod, updateCalendarTimetableVisibleDayCount };
