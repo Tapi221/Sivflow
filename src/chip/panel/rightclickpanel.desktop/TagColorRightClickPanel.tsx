@@ -4,7 +4,7 @@ import { getTagColorSwatchStyle } from "@/chip/tag/tagColor";
 import { cn } from "@/lib/utils";
 import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING } from "./rightClickPanel.utils";
-import { RightClickPanelSurface } from "./rightClickPanelCommon";
+import { RightClickPanelSurface } from "../rightClickPanelCommon";
 
 type TagColorRightClickPanelProps = {
   x: number;

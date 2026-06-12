@@ -2,7 +2,7 @@ import { Fragment, memo } from "react";
 import type { CSSProperties, ReactNode, RefObject } from "react";
 import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE } from "./rightClickPanel.utils";
-import { RightClickPanelSurface } from "./rightClickPanelCommon";
+import { RightClickPanelSurface } from "../rightClickPanelCommon";
 
 type LayeredProjectMenuActionId = "change-color" | "rename" | "create-note" | "create-card-set" | "create-folder" | "import-pdf" | "add-to-favorites" | "hide" | "delete";
 type LayeredProjectMenuItemDefinition = {

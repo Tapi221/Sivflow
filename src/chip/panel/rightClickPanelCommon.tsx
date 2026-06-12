@@ -1,7 +1,7 @@
 import { memo } from "react";
 import type { CSSProperties, ReactNode, RefObject } from "react";
-import type { RightClickPanelId } from "./rightClickPanel.utils";
-import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_SURFACE_PADDING } from "./rightClickPanel.utils";
+import type { RightClickPanelId } from "./rightclickpanel.desktop/rightClickPanel.utils";
+import { RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_SURFACE_PADDING } from "./rightclickpanel.desktop/rightClickPanel.utils";
 
 type RightClickPanelSurfaceProps = {
   x: number;
