@@ -6,7 +6,7 @@ import type * as SharedCardContentModule from "@/components/card/common/SharedCa
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import type * as CardFrameModule from "@/components/card/frame/CardFrame";
 import type * as ReferencePopupModule from "@/components/card/overlays/ReferencePopup";
-import type * as DialogModule from "@/components/ui/dialog";
+import type * as DialogModule from "@/chip/ui/dialog/dialog";
 import { layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
 
 vi.mock("@/components/card/frame/CardFrame", () => ({
@@ -25,7 +25,7 @@ vi.mock("@/components/card/overlays/ReferencePopup", () => ({
   ReferencePopup: () => null,
 } satisfies Partial<Record<keyof typeof ReferencePopupModule, unknown>>));
 
-vi.mock("@/components/ui/dialog", () => ({
+vi.mock("@/chip/ui/dialog/dialog", () => ({
   Dialog: ({ children }: { children: React.ReactNode; }) => children,
   DialogContent: ({ children }: { children: React.ReactNode; }) => children,
 } satisfies Partial<Record<keyof typeof DialogModule, unknown>>));
