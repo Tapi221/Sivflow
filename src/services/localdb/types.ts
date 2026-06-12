@@ -1,5 +1,6 @@
 import type { CardRelation, LocalDBInstance, LocalDBLike as BaseLocalDBLike, LocalDBSyncApi, LocalDBTableMap, ProjectMap, QueryableCollection, QueryableKeyPath, QueryableTable, QueryableWhereClause, QueryableWhereFunction, SyncableEntityTable, TagRecord } from "./localdb.types";
-import type { SyncConflict } from "@/types/domain/sync";
+import type { SyncConflict, SyncQueueItem, SyncSettings } from "@/types/domain/sync";
+
 
 type LocalDBLike = BaseLocalDBLike & {
   table<T extends object = Record<string, unknown>, TKey = string>(name: string): QueryableTable<T, TKey>;
@@ -22,6 +23,8 @@ type LocalDBLike = BaseLocalDBLike & {
   cardRelations: QueryableTable<Record<string, unknown>, string>;
   projectMaps: QueryableTable<ProjectMap, string>;
   studyLogs: QueryableTable<Record<string, unknown>, string>;
+  syncQueue: QueryableTable<SyncQueueItem, string>;
+  syncSettings: QueryableTable<SyncSettings, string>;
 };
 type LocalDBSyncStore = LocalDBLike;
 
