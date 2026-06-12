@@ -9,10 +9,11 @@ type LocaleState = {
 
 const SIVFLOW_LOCALE_STORAGE_KEY = "sivflow.locale";
 const LEGACY_LOCALE_STORAGE_KEY = "flashcard-master.locale";
-const useLocaleStore = create<LocaleState>()(persist((set) => ({ locale: readStoredLocale() ?? "ja", setLocale: (locale) => set({ locale }), }), { name: SIVFLOW_LOCALE_STORAGE_KEY, },),);
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
+
 const isLocale = (value: unknown): value is Locale => value === "ja" || value === "en" || value === "zh";
+
 const parseStoredLocale = (raw: string | null): Locale | null => {
   if (!raw) return null;
 
@@ -26,6 +27,7 @@ const parseStoredLocale = (raw: string | null): Locale | null => {
     return null;
   }
 };
+
 const readStorageItem = (key: string): string | null => {
   if (typeof localStorage === "undefined") return null;
 
@@ -35,7 +37,11 @@ const readStorageItem = (key: string): string | null => {
     return null;
   }
 };
+
 const readStoredLocaleByKey = (key: string): Locale | null => parseStoredLocale(readStorageItem(key));
+
+const readStoredLocale = (): Locale | null => readStoredLocaleByKey(SIVFLOW_LOCALE_STORAGE_KEY) ?? readStoredLocaleByKey(LEGACY_LOCALE_STORAGE_KEY);
+
 const migrateLegacyLocaleStorage = (): void => {
   if (typeof localStorage === "undefined") return;
   if (readStorageItem(SIVFLOW_LOCALE_STORAGE_KEY)) return;
@@ -50,8 +56,20 @@ const migrateLegacyLocaleStorage = (): void => {
     // localStorage を書き換えられない環境では、起動中の locale だけ fallback する。
   }
 };
-const readStoredLocale = (): Locale | null => readStoredLocaleByKey(SIVFLOW_LOCALE_STORAGE_KEY) ?? readStoredLocaleByKey(LEGACY_LOCALE_STORAGE_KEY);
+
 migrateLegacyLocaleStorage();
+
+const useLocaleStore = create<LocaleState>()(
+  persist(
+    (set) => ({
+      locale: readStoredLocale() ?? "ja",
+      setLocale: (locale) => set({ locale }),
+    }),
+    {
+      name: SIVFLOW_LOCALE_STORAGE_KEY,
+    },
+  ),
+);
 
 export { readStoredLocale, useLocaleStore };
 export type { Locale };
