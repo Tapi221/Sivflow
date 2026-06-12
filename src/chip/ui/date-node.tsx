@@ -35,7 +35,6 @@ const DateElement = (props: PlateElementProps<TDateElement>) => {
                 editor.tf.setNodes({ date: formatDateValue(date), rawDate: undefined }, { at: element });
               }}
               mode="single"
-              initialFocus
             />
           </PopoverContent>
         </Popover>
