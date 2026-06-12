@@ -1,8 +1,14 @@
-type PdfPageWindowMetric = {
+type PdfPageWindowOffsetMetric = {
   pageNumber: number;
   offsetTop: number;
   offsetHeight: number;
 };
+type PdfPageWindowBoundingMetric = {
+  pageNumber: number;
+  top: number;
+  bottom: number;
+};
+type PdfPageWindowMetric = PdfPageWindowOffsetMetric | PdfPageWindowBoundingMetric;
 type PdfPageWindowOptions = {
   fallbackPageNumber?: number | null;
   overscanPageCount?: number;
@@ -21,12 +27,17 @@ const getNormalizedPdfPageWindowOverscan = (overscanPageCount: number | null | u
   if (typeof overscanPageCount !== "number" || !Number.isFinite(overscanPageCount)) return DEFAULT_PDF_PAGE_WINDOW_OVERSCAN;
   return Math.max(0, Math.floor(overscanPageCount));
 };
+const getMetricOffsetTop = (metric: PdfPageWindowMetric): number => "offsetTop" in metric ? metric.offsetTop : metric.top;
+const getMetricOffsetHeight = (metric: PdfPageWindowMetric): number => "offsetHeight" in metric ? metric.offsetHeight : metric.bottom - metric.top;
 const isValidPdfPageWindowMetric = (metric: PdfPageWindowMetric, pageCount: number): boolean => {
-  return Number.isFinite(metric.pageNumber) && Number.isFinite(metric.offsetTop) && Number.isFinite(metric.offsetHeight) && metric.offsetHeight > 0 && metric.pageNumber >= DEFAULT_PDF_PAGE && metric.pageNumber <= pageCount;
+  const offsetTop = getMetricOffsetTop(metric);
+  const offsetHeight = getMetricOffsetHeight(metric);
+  return Number.isFinite(metric.pageNumber) && Number.isFinite(offsetTop) && Number.isFinite(offsetHeight) && offsetHeight > 0 && metric.pageNumber >= DEFAULT_PDF_PAGE && metric.pageNumber <= pageCount;
 };
 const isPdfPageMetricVisible = (metric: PdfPageWindowMetric, viewportTop: number, viewportBottom: number): boolean => {
-  const pageBottom = metric.offsetTop + metric.offsetHeight;
-  return pageBottom > viewportTop && metric.offsetTop < viewportBottom;
+  const offsetTop = getMetricOffsetTop(metric);
+  const pageBottom = offsetTop + getMetricOffsetHeight(metric);
+  return pageBottom > viewportTop && offsetTop < viewportBottom;
 };
 const getPdfPageWindowScanStartIndex = (pageMetrics: PdfPageWindowMetric[], viewportTop: number): number => {
   let low = 0;
@@ -35,7 +46,7 @@ const getPdfPageWindowScanStartIndex = (pageMetrics: PdfPageWindowMetric[], view
   while (low < high) {
     const middle = Math.floor((low + high) / 2);
     const metric = pageMetrics[middle];
-    const pageBottom = metric.offsetTop + metric.offsetHeight;
+    const pageBottom = getMetricOffsetTop(metric) + getMetricOffsetHeight(metric);
 
     if (pageBottom < viewportTop) {
       low = middle + 1;
@@ -53,13 +64,35 @@ const getPdfVisiblePageNumbers = (pageMetrics: PdfPageWindowMetric[], viewportTo
   for (let index = startIndex; index < pageMetrics.length; index += 1) {
     const metric = pageMetrics[index];
     if (!isValidPdfPageWindowMetric(metric, pageCount)) continue;
-    if (metric.offsetTop > viewportBottom) break;
+    if (getMetricOffsetTop(metric) > viewportBottom) break;
     if (isPdfPageMetricVisible(metric, viewportTop, viewportBottom)) visiblePageNumbers.push(getSafePdfPageNumber(metric.pageNumber, pageCount));
   }
 
   return visiblePageNumbers;
 };
-const getPdfPageWindowKeepSet = (pageMetrics: PdfPageWindowMetric[], viewportTop: number, viewportHeight: number, pageCount: number, options: PdfPageWindowOptions = {}): Set<number> => {
+const getPdfPageWindowAroundPage = (pageNumber: number, pageCount: number, overscanPageCount?: number): Set<number> => {
+  const safePageCount = Math.max(pageCount, DEFAULT_PDF_PAGE);
+  const safePageNumber = getSafePdfPageNumber(pageNumber, safePageCount);
+  const overscan = getNormalizedPdfPageWindowOverscan(overscanPageCount);
+  const firstPage = Math.max(DEFAULT_PDF_PAGE, safePageNumber - overscan);
+  const lastPage = Math.min(safePageCount, safePageNumber + overscan);
+  const pageWindow = new Set<number>();
+
+  for (let page = firstPage; page <= lastPage; page += 1) pageWindow.add(page);
+  return pageWindow;
+};
+function getPdfPageWindowKeepSet(pageMetrics: PdfPageWindowMetric[], viewportTop: number, viewportHeight: number, pageCount: number, options?: PdfPageWindowOptions): Set<number>;
+function getPdfPageWindowKeepSet(fallbackPageNumber: number, pageCount: number, overscanPageCount?: number): Set<number>;
+function getPdfPageWindowKeepSet(first: PdfPageWindowMetric[] | number, second: number, third: number, fourth?: number | PdfPageWindowOptions, fifth: PdfPageWindowOptions = {}): Set<number> {
+  if (typeof first === "number") {
+    return getPdfPageWindowAroundPage(first, second, third);
+  }
+
+  const pageMetrics = first;
+  const viewportTop = second;
+  const viewportHeight = third;
+  const pageCount = typeof fourth === "number" ? fourth : DEFAULT_PDF_PAGE;
+  const options = typeof fourth === "object" && fourth !== null ? fourth : fifth;
   const safePageCount = Math.max(pageCount, DEFAULT_PDF_PAGE);
   const safeViewportTop = Number.isFinite(viewportTop) ? viewportTop : 0;
   const safeViewportHeight = Number.isFinite(viewportHeight) ? Math.max(0, viewportHeight) : 0;
@@ -77,7 +110,7 @@ const getPdfPageWindowKeepSet = (pageMetrics: PdfPageWindowMetric[], viewportTop
 
   for (let page = firstPage; page <= lastPage; page += 1) idsToKeep.add(page);
   return idsToKeep;
-};
+}
 
 export { getPdfPageWindowKeepSet, getSafePdfPageNumber };
 export type { PdfPageWindowMetric, PdfPageWindowOptions };
