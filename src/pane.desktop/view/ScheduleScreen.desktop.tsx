@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
 import { CalendarSelectedViewsSplitView } from "@/pane.desktop/leftpane/schedule/Calendar.SelectedViewsSplitView.desktop";
 import { CalendarSidebar } from "@/pane.desktop/leftpane/schedule/CalendarSidebar";
+import { TabsBar } from "@/pane.desktop/tab.desktopnative/TabsBar";
 import { MobileCalendarEventComposer } from "./MobileCalendarEventComposer";
 
 type CalendarEventDisplayRange = {
@@ -183,7 +184,7 @@ const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose }: Sch
   return (
     <CarvePanelShell isLeftPanelCollapsed={isLeftPanelCollapsed} leftPanel={<CalendarSidebar appProjects={appProjects} projectCalendarLinks={projectCalendarLinks} googleCalendarColorOverrides={googleCalendarColorOverrides} googleAccounts={googleAccountsWithColorOverrides} isAnyCalendarConnecting={isAnyCalendarConnecting} onAddCalendar={addGoogleCalendar} onAddProject={handleAddAppProject} onToggleProject={handleToggleAppProject} onLinkGoogleCalendarAsProject={handleLinkGoogleCalendarAsProject} onLinkProjectToGoogleCalendar={handleLinkProjectToGoogleCalendar} onCreateProjectGoogleCalendar={handleCreateProjectGoogleCalendar} onUnlinkProjectCalendar={handleUnlinkProjectCalendar} onChangeGoogleCalendarColor={handleChangeGoogleCalendarColor} onReconnectAccount={(accountId) => {
       void reconnectGoogleAccount(accountId); }} onToggleCalendar={toggleGoogleCalendar}
-    />} viewportRef={contentViewportRef}
+    />} viewportRef={contentViewportRef} contentToolbar={<TabsBar variant="titlebar" />}
     >
       <CarvePanel>
         <div className="flex min-h-0 flex-1 flex-col">
