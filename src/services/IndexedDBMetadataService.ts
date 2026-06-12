@@ -1,6 +1,6 @@
 import type { IndexedDBMetadata } from "@/types/domain/storage";
 import { CURRENT_SCHEMA_VERSION } from "@/types/domain/storage";
-import type { LocalDBLike } from "./localDB";
+import type { LocalDBLike } from "./localdb";
 import { SafeIndexedDBWriter } from "./SafeIndexedDBWriter";
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
