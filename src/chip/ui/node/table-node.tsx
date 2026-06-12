@@ -4,7 +4,6 @@ import * as React from "react";
 import { setTableColSize } from "@platejs/table";
 import { TablePlugin } from "@platejs/table/react";
 import type { Path, TTableCellElement, TTableElement } from "platejs";
-import { PathApi } from "platejs";
 import type { PlateEditor, PlateElementProps } from "platejs/react";
 import { PlateElement, useEditorPlugin } from "platejs/react";
 import { cn } from "@/lib/utils";
@@ -144,7 +143,7 @@ const TableCellElement = ({ isHeader = false, ...props }: TableCellElementProps)
   const { children, element } = props;
   const { editor, getOptions } = useEditorPlugin(TablePlugin);
   const { minColumnWidth = TABLE_MIN_CELL_WIDTH } = getOptions();
-  const cellPath = PathApi.find(editor, element);
+  const cellPath = editor.api.findPath(element);
   const tablePath = getTablePathFromCellPath(cellPath);
   const colIndex = getColumnIndexFromCellPath(cellPath);
   const width = getCellWidth(element);
