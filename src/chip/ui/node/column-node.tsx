@@ -13,11 +13,11 @@ import type { TColumnElement } from "platejs";
 import { PathApi } from "platejs";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement, useEditorRef, useEditorSelector, useElement, useFocusedLast, usePluginOption, useReadOnly, useRemoveNodeButton, useSelected, withHOC } from "platejs/react";
+import { Button } from "@/chip/ui/button";
+import { Popover, PopoverAnchor, PopoverContent } from "@/chip/ui/popover";
+import { Separator } from "@/chip/ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { Button } from "./button";
-import { Popover, PopoverAnchor, PopoverContent } from "./popover";
-import { Separator } from "./separator";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
 
 const DropLine = () => {
   const { dropLine } = useDropLine({ orientation: "horizontal" });
