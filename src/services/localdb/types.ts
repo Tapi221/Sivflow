@@ -5,6 +5,13 @@ type LocalDBLike = BaseLocalDBLike & {
   table<T extends object = Record<string, unknown>, TKey = string>(name: string): QueryableTable<T, TKey>;
   transaction<T>(mode: string, first: unknown, ...rest: unknown[]): Promise<T>;
   close(): void;
+  addItem(table: string, item: unknown, skipSync?: boolean): Promise<string>;
+  updateItem(table: string, id: string, changes: Record<string, unknown>, skipSync?: boolean): Promise<number>;
+  deleteItem(table: string, id: string): Promise<void>;
+  softDelete(table: string, id: string): Promise<number>;
+  restore(table: string, id: string): Promise<number>;
+  clearTable(table: string): Promise<void>;
+  bulkUpsert(table: string, items: unknown[], skipSync?: boolean): Promise<void>;
   cleanupSyncHistory(): Promise<void>;
   cleanupSyncErrors(): Promise<void>;
   getConflict(id: string): Promise<SyncConflict | undefined>;
