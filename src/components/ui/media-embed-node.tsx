@@ -103,4 +103,5 @@ const MediaEmbedElementBase = (props: PlateElementProps<TMediaEmbedElement>) => 
 };
 
 MediaEmbedElementBase.displayName = "MediaEmbedElement";
+
 export { MediaEmbedElement };

@@ -44,4 +44,5 @@ const TrashScreen = () => {
 
 const MemoizedTrashScreen = memo(TrashScreen);
 MemoizedTrashScreen.displayName = "TrashScreen";
+
 export default MemoizedTrashScreen;

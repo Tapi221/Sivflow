@@ -420,4 +420,5 @@ const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDay
 });
 CalendarMonthWeekRow.displayName = "CalendarMonthWeekRow";
 GridCalendarMonthDesktop.displayName = "GridCalendarMonthDesktop";
+
 export { GridCalendarMonthDesktop };

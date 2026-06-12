@@ -2,8 +2,6 @@ import React from "react";
 import { BlockEditor } from "@/components/card/blocks/editor/BlockEditor";
 import type { SharedCardContentEditProps } from "./SharedCardContent.types";
 
-
-
 const SharedCardEditSceneInner = ({
   blocks,
   onChange,
@@ -50,8 +48,7 @@ const SharedCardEditSceneInner = ({
   );
 };
 
-
-
 const SharedCardEditScene = React.memo(SharedCardEditSceneInner);
 SharedCardEditScene.displayName = "SharedCardEditScene";
+
 export { SharedCardEditScene };

@@ -23,4 +23,5 @@ const SidebarCollapsedToggleBase = ({ isVisible, onToggleLeftPanel }: SidebarCol
 SidebarCollapsedToggleBase.displayName = "SidebarCollapsedToggleBase";
 const SidebarCollapsedToggle = memo(SidebarCollapsedToggleBase);
 SidebarCollapsedToggle.displayName = "SidebarCollapsedToggle";
+
 export { SidebarCollapsedToggle };

@@ -1330,4 +1330,5 @@ const TableCellResizeControls = React.memo(({
   );
 });
 TableCellResizeControls.displayName = "TableCellResizeControls";
+
 export { TableElement, TableRowElement, TableCellElement, TableCellHeaderElement };
