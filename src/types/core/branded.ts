@@ -26,6 +26,8 @@ type StorageUrl = string & { readonly __brand: "StorageUrl"; };
  */
 type Base64DataUrl = string & { readonly __brand: "Base64DataUrl"; };
 
+
+
 // ============================================
 // Type Guards（型判定）
 // ============================================
@@ -89,5 +91,9 @@ const revokeBlobUrl = (url: BlobUrl): void => {
   URL.revokeObjectURL(url);
 };
 
+
+
 export { isBlobUrl, isStorageUrl, isBase64DataUrl, createBlobUrl, createStorageUrl, createBase64DataUrl, revokeBlobUrl };
+
+
 export type { BlobUrl, StorageUrl, Base64DataUrl };

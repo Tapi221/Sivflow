@@ -44,4 +44,6 @@ const convertHeicToJpeg = async (file: File): Promise<File> => {
   return new File([blob], name, { type: blob.type ?? "image/jpeg" });
 };
 
+
+
 export { isHeicFile, convertHeicToJpeg };
