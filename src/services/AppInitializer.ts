@@ -6,6 +6,8 @@ import { ensureLegacyCardsBackfilled } from "./legacyCardSetMigrationBackfill";
 import { getLocalDb, getLocalDBRuntimeStatus, LOCALDB_RECOVERY_GUIDE_URL } from "./localDB";
 import { warnOncePerSession } from "./localDBRuntimeState";
 
+
+
 // NOTE: 初期化時のユーザー向け INFO 通知は UI 上で邪魔になるため表示しない。
 
 /**
@@ -176,5 +178,7 @@ class AppInitializer { private static initialized = false;
 
   // NOTE: backfill 実処理は src/services/legacyCardSetMigrationBackfill.ts へ抽出
 }
+
+
 
 export { AppInitializer };

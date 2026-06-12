@@ -5,6 +5,8 @@ import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerR
 import type { WorkspaceCardTab, WorkspaceDocumentTab, WorkspaceExplorerTab, WorkspaceNoteTab, WorkspaceRouteTab, WorkspaceSidebarSection, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 import { createDefaultExplorerRouteState, resolveRouteTabBySection, WORKSPACE_DEFAULT_EXPLORER_TAB_ID } from "@/pane.desktop/tab.desktopnative/Tab";
 
+
+
 type OpenExplorerTabParams = {
   id?: WorkspaceExplorerTab["id"];
   title?: string;
@@ -43,6 +45,8 @@ type WorkspaceTabsState = {
   updateTabTitle: (tabId: WorkspaceTab["id"], title: string) => void;
 };
 type WorkspaceTabsPersistedState = Pick<WorkspaceTabsState, "tabs" | "activeTabId" | "lastOpenedTabId">;
+
+
 
 const EXPLORER_TAB_TITLE = "Library";
 const useWorkspaceTabsStore = create<WorkspaceTabsState>()(persist((set, get) => ({ tabs: [], activeTabId: null, lastOpenedTabId: null, openExplorerTab: (params = {}) => {
@@ -326,6 +330,8 @@ updateTabTitle: (tabId, title) => {
 ),
 );
 
+
+
 const createRandomIdSegment = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
@@ -455,5 +461,7 @@ const createRouteTabFromSection = (
 ): WorkspaceRouteTab => {
   return { ...resolveRouteTabBySection(sectionKey) };
 };
+
+
 
 export { useWorkspaceTabsStore };

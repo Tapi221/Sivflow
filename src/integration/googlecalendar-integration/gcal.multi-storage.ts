@@ -1,6 +1,8 @@
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import { clearCachedGoogleCalendarAccount } from "./googleCalendarEventCache";
 
+
+
 // ─────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────
@@ -17,6 +19,8 @@ type StoredGoogleAccount = { /** メールアドレス or ランダムUUID（メ
 type StoredGoogleAccountProfile = { name?: string | null;
   photoUrl?: string | null;
 };
+
+
 
 /**
  * gcal.multi-storage.ts
@@ -40,6 +44,8 @@ const LEGACY_EMAIL_KEY = "flashcard-master.gcal.account_email";
 const LEGACY_CALENDAR_IDS_KEY = "flashcard-master.gcal.selected_calendar_ids";
 const LEGACY_WAS_CONNECTED_KEY = "flashcard-master.gcal.was_connected";
 const pendingLegacyDesktopRefreshTokens = new Map<string, string>();
+
+
 
 // ─────────────────────────────────────────────────────────────
 // Token validity
@@ -260,5 +266,9 @@ const updateStoredAccountCalendarIds = (accountId: string, selectedCalendarIds: 
   writeStoredAccounts(accounts);
 };
 
+
+
 export { isStoredTokenValid, buildTokenExpiry, readStoredAccounts, writeStoredAccounts, upsertStoredAccount, removeStoredAccount, updateStoredAccountToken, updateStoredAccountCalendarIds };
+
+
 export type { StoredGoogleAccount, StoredGoogleAccountProfile };
