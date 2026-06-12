@@ -1,6 +1,6 @@
 import * as React from "react";
-import type { SurfaceButtonProps } from "@/chip/ui/surface-button";
-import { SurfaceButton } from "@/chip/ui/surface-button";
+import type { SurfaceButtonProps } from "@/chip/ui/button/surface-button";
+import { SurfaceButton } from "@/chip/ui/button/surface-button";
 import { Switch } from "@/chip/ui/switch";
 import { cn } from "@/lib/utils";
 

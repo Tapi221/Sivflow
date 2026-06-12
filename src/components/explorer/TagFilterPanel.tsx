@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent, MouseEvent } from "react";
 import type { TagColorKey } from "@/chip/tag/tagColor";
 import { getTagColorKey } from "@/chip/tag/tagColor";
-import { SurfaceButton } from "@/chip/ui/surface-button";
+import { SurfaceButton } from "@/chip/ui/button/surface-button";
 import { FilterPanelShell } from "@/components/panel/FilterPanelShell";
 import { PanelEmptyState } from "@/components/panel/PanelEmptyState";
 import type { SegmentedOption } from "@/components/panel/SegmentedControlGroup";
