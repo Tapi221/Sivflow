@@ -8,6 +8,8 @@ import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardFaceAttachmentAudio, CardFaceAttachments } from "@/types/domain/card";
 import { sanitizeReferences } from "./cardEditorUtils";
 
+
+
 type Side = "question" | "answer";
 type UseCardMediaDialogsParams = {
   getSideAttachments: (side: Side) => CardFaceAttachments;
@@ -18,6 +20,8 @@ type StratisComponentIconProps = {
   icon: StratisIconComponent;
   className?: string;
 };
+
+
 
 const normalizeAttachments = (attachments: CardFaceAttachments | null | undefined): CardFaceAttachments => ({
   images: attachments?.images ?? [],
@@ -131,6 +135,10 @@ const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: UseCard
   );
 };
 
+
+
 const StratisComponentIcon = ({ icon: Icon, className }: StratisComponentIconProps) => <Icon aria-hidden="true" focusable="false" className={className} />;
+
+
 
 export { useCardMediaDialogs };

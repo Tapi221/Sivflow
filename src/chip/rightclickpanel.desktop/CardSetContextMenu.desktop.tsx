@@ -4,6 +4,8 @@ import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE } from "./rightClickPanel.utils";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 
+
+
 type CardSetContextMenuActionId = "rename" | "delete";
 type CardSetContextMenuAction = { id: CardSetContextMenuActionId;
   label: string;
@@ -19,6 +21,8 @@ type CardSetContextMenuProps = {
   noDragStyle: CSSProperties;
   panelId?: RightClickPanelId;
 };
+
+
 
 const CARD_SET_CONTEXT_MENU_PANEL_ID = "card-set-context-menu";
 const CARD_SET_CONTEXT_MENU_LABELS = [
@@ -38,6 +42,8 @@ const CARD_SET_CONTEXT_MENU_STYLE = `
   background: #fef2f2;
 }
 `;
+
+
 
 const CardSetContextMenuBase = ({
   x,
@@ -75,9 +81,13 @@ const CardSetContextMenuBase = ({
   );
 };
 
+
+
 const CardSetContextMenu = memo(CardSetContextMenuBase);
 CardSetContextMenu.displayName = "CardSetContextMenu";
 
 export { CardSetContextMenu };
 export { CARD_SET_CONTEXT_MENU_PANEL_ID, CARD_SET_CONTEXT_MENU_WIDTH, CARD_SET_CONTEXT_MENU_HEIGHT, CARD_SET_CONTEXT_MENU_MARGIN };
+
+
 export type { CardSetContextMenuActionId, CardSetContextMenuAction };

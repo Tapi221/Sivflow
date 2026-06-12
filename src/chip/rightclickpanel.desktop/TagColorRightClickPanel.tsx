@@ -6,6 +6,8 @@ import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING } from "./rightClickPanel.utils";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 
+
+
 type TagColorRightClickPanelProps = {
   x: number;
   y: number;
@@ -17,6 +19,8 @@ type TagColorRightClickPanelProps = {
   panelId?: RightClickPanelId;
   onSelectColor: (colorKey: TagColorKey) => void;
 };
+
+
 
 const TAG_COLOR_LABELS: Record<TagColorKey, string> = {
   gray: "グレー",
@@ -54,6 +58,8 @@ const TAG_COLOR_GRID_STYLE = `
 }
 `;
 
+
+
 const TagColorRightClickPanel = ({ x, y, availableColors, currentColorKey, tagName, menuRef, noDragStyle, panelId, onSelectColor }: TagColorRightClickPanelProps) => {
   return (<> <style>{TAG_COLOR_GRID_STYLE}</style> <RightClickPanelSurface x={x} y={y} width={TAG_COLOR_CONTEXT_MENU_WIDTH} panelRef={menuRef} noDragStyle={noDragStyle} ariaLabel={`${tagName} tag color menu`} panelId={panelId} > <div className="right-click-panel-title">{TAG_COLOR_CONTEXT_MENU_TITLE}</div> <div className="tag-color-context-menu-grid"> {availableColors.map((colorKey) => {
     const isSelected = colorKey === currentColorKey;
@@ -89,5 +95,7 @@ const TagColorRightClickPanel = ({ x, y, availableColors, currentColorKey, tagNa
   </>
   );
 };
+
+
 
 export { TAG_COLOR_CONTEXT_MENU_WIDTH, TAG_COLOR_CONTEXT_MENU_HEIGHT, TAG_COLOR_CONTEXT_MENU_MARGIN, TagColorRightClickPanel };
