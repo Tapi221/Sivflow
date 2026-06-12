@@ -332,7 +332,6 @@ const MobileCalendarInlineTimeWheel = ({ value, onChange }: MobileCalendarInline
         {/* Fade overlays */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[72px] bg-gradient-to-b from-[#fbfbfd] to-transparent" />
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[72px] bg-gradient-to-t from-[#fbfbfd] to-transparent" />
-
         <div className="relative z-10 grid h-[220px] grid-cols-[1fr_28px_1fr] items-center">
           {/* Hour wheel */}
           <div
@@ -787,7 +786,6 @@ const MobileCalendarEventComposer = ({
               <div className="border-b border-[#e5e5ea] bg-[#f2f2f7] px-4 py-2">
                 <span className="text-[13px] font-semibold uppercase tracking-[0.04em] text-[#8e8e93]">ビデオ通話</span>
               </div>
-
               <button
                 type="button"
                 className="flex min-h-[60px] w-full items-center gap-4 border-b border-[#e5e5ea] px-4 text-left active:bg-[#f2f2f7] transition-colors"

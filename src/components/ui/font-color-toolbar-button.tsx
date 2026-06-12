@@ -504,7 +504,6 @@ const FontColorToolbarButton = ({ children, nodeType, tooltip }: { nodeType: str
           {children}
         </ToolbarButton>
       </DropdownMenuTrigger>
-
       <DropdownMenuContent align="start">
         <ColorPicker
           clearColor={clearColor}

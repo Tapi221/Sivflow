@@ -23,7 +23,6 @@ const ImportFormatDialog = ({ open, onOpenChange, onSelect }: ImportFormatDialog
             XLSX テンプレート、MFDeck、MFCard のいずれかを選択してください。
           </DialogDescription>
         </DialogHeader>
-
         <div className="grid gap-3 md:grid-cols-3">
           <button
             type="button"
@@ -35,7 +34,6 @@ const ImportFormatDialog = ({ open, onOpenChange, onSelect }: ImportFormatDialog
               blocks シートのテンプレートからカードを一括作成します。
             </p>
           </button>
-
           <button
             type="button"
             onClick={() => handleSelect("mfdeck")}
@@ -46,7 +44,6 @@ const ImportFormatDialog = ({ open, onOpenChange, onSelect }: ImportFormatDialog
               .mfdeck のカードセットを取り込みます。共有・バックアップ用です。
             </p>
           </button>
-
           <button
             type="button"
             onClick={() => handleSelect("mfcard")}
@@ -58,7 +55,6 @@ const ImportFormatDialog = ({ open, onOpenChange, onSelect }: ImportFormatDialog
             </p>
           </button>
         </div>
-
         <div className="flex justify-end">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             閉じる

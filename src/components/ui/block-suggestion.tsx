@@ -83,14 +83,12 @@ const BlockSuggestionCard = ({ idx, isLast, suggestion }: { idx: number;
             </span>
           </div>
         </div>
-
         <div className="relative mt-1 mb-4 pl-[32px]">
           <div className="flex flex-col gap-2">
             {suggestion.type === "remove" &&
               getRemoveSummaryItems(suggestion.text!).map((text, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <span className="text-muted-foreground text-sm">Delete:</span>
-
                   <span key={index} className="text-sm">
                     {text}
                   </span>
@@ -101,7 +99,6 @@ const BlockSuggestionCard = ({ idx, isLast, suggestion }: { idx: number;
               suggestionText2Array(suggestion.newText!).map((text, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <span className="text-muted-foreground text-sm">Add:</span>
-
                   <span key={index} className="text-sm">
                     {text ?? "line breaks"}
                   </span>
@@ -173,7 +170,6 @@ const BlockSuggestionCard = ({ idx, isLast, suggestion }: { idx: number;
             >
               <CheckIcon className="size-4" />
             </Button>
-
             <Button
               variant="ghost"
               className="size-6 p-1 text-muted-foreground"

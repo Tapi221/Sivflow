@@ -34,7 +34,6 @@ const TodayBar = ({ onPrevious, onNext, onToday, className }: Props) => {
       >
         <ChevronLeft className="h-3.5 w-3.5" />
       </button>
-
       <HoverTooltip label={todayTooltipLabel} side="bottom">
         <button
           type="button"
@@ -45,7 +44,6 @@ const TodayBar = ({ onPrevious, onNext, onToday, className }: Props) => {
           <span className="min-w-0 truncate whitespace-nowrap">{t.todayButton}</span>
         </button>
       </HoverTooltip>
-
       <button
         type="button"
         onClick={onNext}

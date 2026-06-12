@@ -47,7 +47,6 @@ const VideoElement = withHOC(ResizableProvider, (props: PlateElementProps<TVideo
               className={mediaResizeHandleVariants({ direction: "left" })}
               options={{ direction: "left" }}
             />
-
             <ResizeHandle
               className={mediaResizeHandleVariants({ direction: "right" })}
               options={{ direction: "right" }}
@@ -100,7 +99,6 @@ const VideoElement = withHOC(ResizableProvider, (props: PlateElementProps<TVideo
             )}
           </div>
         </Resizable>
-
         <Caption style={{ width }} align={align}>
           <CaptionTextarea
             readOnly={readOnly}

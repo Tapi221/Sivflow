@@ -126,11 +126,9 @@ const Layout = () => {
       }
     >
       <SearchDialog />
-
       <LocalDBStatusBanner />
       <SecurityAlertBanner />
       <DesktopWindowControls />
-
       <AppLayout />
     </div>
   );

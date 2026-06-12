@@ -14,7 +14,6 @@ const UpgradePanel = ({ compact = false }: UpgradePanelProps) => {
         <br />
         すべての機能をお試しいただけます。
       </p>
-
       <button type="button">アップグレード</button>
     </div>
   );

@@ -290,7 +290,6 @@ const Comment = (props: { comment: TComment;
           {/* Replace to your own backend or refer to potion */}
           {userInfo?.name}
         </h4>
-
         <div className="text-muted-foreground/80 text-xs leading-none">
           <span className="mr-1">
             {formatCommentDate(new Date(comment.createdAt))}
@@ -369,7 +368,6 @@ const Comment = (props: { comment: TComment;
                     <XIcon className="size-3 stroke-[3px] text-background" />
                   </div>
                 </Button>
-
                 <Button
                   size="icon"
                   variant="ghost"
@@ -535,7 +533,6 @@ const CommentCreateForm = ({ autoFocus = false, className, discussionId: discuss
           <AvatarFallback>{userInfo?.name?.[0]}</AvatarFallback>
         </Avatar>
       </div>
-
       <div className="relative flex grow gap-2">
         <Plate
           onChange={({ value }) => {
@@ -557,7 +554,6 @@ const CommentCreateForm = ({ autoFocus = false, className, discussionId: discuss
               autoComplete="off"
               autoFocus={autoFocus}
             />
-
             <Button
               size="icon"
               variant="ghost"

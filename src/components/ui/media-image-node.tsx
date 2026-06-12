@@ -52,7 +52,6 @@ const ImageElement = withHOC(ResizableProvider, (props: PlateElementProps<TImage
               options={{ direction: "right" }}
             />
           </Resizable>
-
           <Caption style={{ width }} align={align}>
             <CaptionTextarea
               readOnly={readOnly}

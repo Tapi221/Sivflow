@@ -58,7 +58,6 @@ const MultiSelectDropdown = ({ value, onChange, options, placeholder = "Select" 
           </span>
         </button>
       </Popover.Trigger>
-
       <Popover.Portal>
         <Popover.Content
           side="bottom"
@@ -96,7 +95,6 @@ const MultiSelectDropdown = ({ value, onChange, options, placeholder = "Select" 
               bg-white
             "
           />
-
           <div className="px-2 py-1 text-[10px] font-medium text-[#a0a4b0]">
             Filters
           </div>
@@ -127,7 +125,6 @@ const MultiSelectDropdown = ({ value, onChange, options, placeholder = "Select" 
                 "
               >
                 <span>{label}</span>
-
                 <span
                   className={`
                     h-3 w-3

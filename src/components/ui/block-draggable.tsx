@@ -345,7 +345,6 @@ const Draggable = (props: PlateElementProps) => {
         style={{ top: `${-previewTop}px` }}
         contentEditable={false}
       />
-
       <div
         ref={nodeRef}
         className="slate-blockWrapper flow-root"

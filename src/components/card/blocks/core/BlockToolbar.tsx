@@ -546,7 +546,6 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
       <div
         className={cn(
           "hidden md:flex items-center",

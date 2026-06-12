@@ -120,7 +120,6 @@ const CardViewCompactToolbar = ({
           >
             <Edit size={14} />
           </ModeButton>
-
           <OverlayToolbarDivider className={CARD_VIEW_COMPACT_DIVIDER_CLASS_NAME} />
         </>
       ) : null}
@@ -136,7 +135,6 @@ const CardViewCompactToolbar = ({
           <FluidDisplayGlyph />
         )}
       </ModeButton>
-
       <div className="flex items-center gap-1">
         <ModeButton
           isActive={cardLayoutMode === "stack"}
@@ -167,7 +165,6 @@ const CardViewCompactToolbar = ({
       {indexNavigator ? (
         <>
           <OverlayToolbarDivider className={CARD_VIEW_COMPACT_DIVIDER_CLASS_NAME} />
-
           <OverlayToolbarIndexNavigator
             value={indexNavigator.current}
             total={indexNavigator.total}
@@ -183,7 +180,6 @@ const CardViewCompactToolbar = ({
       {zoom ? (
         <>
           <OverlayToolbarDivider className={CARD_VIEW_COMPACT_DIVIDER_CLASS_NAME} />
-
           <OverlayToolbarZoomControl
             value={zoom.value}
             min={zoom.min}

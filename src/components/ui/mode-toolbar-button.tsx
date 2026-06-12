@@ -54,7 +54,6 @@ const ModeToolbarButton = (props: DropdownMenuProps) => {
           <span className="hidden lg:inline">{item[value].label}</span>
         </ToolbarButton>
       </DropdownMenuTrigger>
-
       <DropdownMenuContent align="start" className="min-w-[180px]">
         <DropdownMenuRadioGroup
           onValueChange={(newValue) => {
@@ -88,7 +87,6 @@ const ModeToolbarButton = (props: DropdownMenuProps) => {
             {item.editing.icon}
             {item.editing.label}
           </DropdownMenuRadioItem>
-
           <DropdownMenuRadioItem
             className="pl-2 *:first:[span]:hidden *:[svg]:text-muted-foreground"
             value="viewing"
@@ -97,7 +95,6 @@ const ModeToolbarButton = (props: DropdownMenuProps) => {
             {item.viewing.icon}
             {item.viewing.label}
           </DropdownMenuRadioItem>
-
           <DropdownMenuRadioItem
             className="pl-2 *:first:[span]:hidden *:[svg]:text-muted-foreground"
             value="suggestion"

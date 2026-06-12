@@ -150,7 +150,6 @@ const PortableImportBatchDialog = ({ open, onOpenChange, folderId, folderName, f
               : "選択中のフォルダに MFDeck / MFCard をまとめて追加します。"}
           </DialogDescription>
         </DialogHeader>
-
         <div className="grid gap-4">
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             <div className="rounded-xl border border-slate-200 p-3">
@@ -178,7 +177,6 @@ const PortableImportBatchDialog = ({ open, onOpenChange, folderId, folderName, f
               </p>
             </div>
           </div>
-
           <div className="max-h-80 overflow-auto rounded-xl border border-slate-200">
             {items.length === 0 ? (
               <div className="p-5 text-sm text-slate-500">
@@ -228,7 +226,6 @@ const PortableImportBatchDialog = ({ open, onOpenChange, folderId, folderName, f
             )}
           </div>
         </div>
-
         <DialogFooter>
           <Button
             type="button"

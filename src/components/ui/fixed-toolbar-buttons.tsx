@@ -38,58 +38,47 @@ const FixedToolbarButtons = () => {
             <UndoToolbarButton />
             <RedoToolbarButton />
           </ToolbarGroup>
-
           <ToolbarGroup>
             <AIToolbarButton tooltip="AI commands">
               <WandSparklesIcon />
             </AIToolbarButton>
           </ToolbarGroup>
-
           <ToolbarGroup>
             <ExportToolbarButton>
               <ArrowUpToLineIcon />
             </ExportToolbarButton>
-
             <ImportToolbarButton />
           </ToolbarGroup>
-
           <ToolbarGroup>
             <InsertToolbarButton />
             <TurnIntoToolbarButton />
             <FontSizeToolbarButton />
           </ToolbarGroup>
-
           <ToolbarGroup>
             <MarkToolbarButton nodeType={KEYS.bold} tooltip="Bold (⌘+B)">
               <BoldIcon />
             </MarkToolbarButton>
-
             <MarkToolbarButton nodeType={KEYS.italic} tooltip="Italic (⌘+I)">
               <ItalicIcon />
             </MarkToolbarButton>
-
             <MarkToolbarButton
               nodeType={KEYS.underline}
               tooltip="Underline (⌘+U)"
             >
               <UnderlineIcon />
             </MarkToolbarButton>
-
             <MarkToolbarButton
               nodeType={KEYS.strikethrough}
               tooltip="Strikethrough (⌘+⇧+M)"
             >
               <StrikethroughIcon />
             </MarkToolbarButton>
-
             <MarkToolbarButton nodeType={KEYS.code} tooltip="Code (⌘+E)">
               <Code2Icon />
             </MarkToolbarButton>
-
             <FontColorToolbarButton nodeType={KEYS.color} tooltip="Text color">
               <BaselineIcon />
             </FontColorToolbarButton>
-
             <FontColorToolbarButton
               nodeType={KEYS.backgroundColor}
               tooltip="Background color"
@@ -97,35 +86,29 @@ const FixedToolbarButtons = () => {
               <PaintBucketIcon />
             </FontColorToolbarButton>
           </ToolbarGroup>
-
           <ToolbarGroup>
             <AlignToolbarButton />
-
             <NumberedListToolbarButton />
             <BulletedListToolbarButton />
             <TodoListToolbarButton />
             <ToggleToolbarButton />
           </ToolbarGroup>
-
           <ToolbarGroup>
             <LinkToolbarButton />
             <TableToolbarButton />
             <EmojiToolbarButton />
           </ToolbarGroup>
-
           <ToolbarGroup>
             <MediaToolbarButton nodeType={KEYS.img} />
             <MediaToolbarButton nodeType={KEYS.video} />
             <MediaToolbarButton nodeType={KEYS.audio} />
             <MediaToolbarButton nodeType={KEYS.file} />
           </ToolbarGroup>
-
           <ToolbarGroup>
             <LineHeightToolbarButton />
             <OutdentToolbarButton />
             <IndentToolbarButton />
           </ToolbarGroup>
-
           <ToolbarGroup>
             <MoreToolbarButton />
           </ToolbarGroup>
@@ -133,14 +116,12 @@ const FixedToolbarButtons = () => {
       )}
 
       <div className="grow" />
-
       <ToolbarGroup>
         <MarkToolbarButton nodeType={KEYS.highlight} tooltip="Highlight">
           <HighlighterIcon />
         </MarkToolbarButton>
         <CommentToolbarButton />
       </ToolbarGroup>
-
       <ToolbarGroup>
         <ModeToolbarButton />
       </ToolbarGroup>

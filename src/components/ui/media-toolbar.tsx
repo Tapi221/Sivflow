@@ -48,7 +48,6 @@ const MediaToolbar = ({ children, plugin }: { children: React.ReactNode;
   return (
     <Popover open={open} modal={false}>
       <PopoverAnchor>{children}</PopoverAnchor>
-
       <PopoverContent
         className="w-auto p-1"
         onOpenAutoFocus={(e) => e.preventDefault()}
@@ -59,7 +58,6 @@ const MediaToolbar = ({ children, plugin }: { children: React.ReactNode;
               <div className="flex items-center pr-1 pl-2 text-muted-foreground">
                 <Link className="size-4" />
               </div>
-
               <FloatingMediaPrimitive.UrlInput
                 className={inputVariants()}
                 placeholder="Paste the embed link..."
@@ -74,13 +72,10 @@ const MediaToolbar = ({ children, plugin }: { children: React.ReactNode;
             >
               Edit link
             </FloatingMediaPrimitive.EditButton>
-
             <CaptionButton size="sm" variant="ghost">
               Caption
             </CaptionButton>
-
             <Separator orientation="vertical" className="mx-1 h-6" />
-
             <Button size="sm" variant="ghost" {...buttonProps}>
               <Trash2Icon />
             </Button>

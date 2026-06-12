@@ -234,7 +234,6 @@ const SettingsDialog = () => {
           <DialogTitle className="text-xl">Settings</DialogTitle>
           <DialogDescription>Configure your API keys and preferences.</DialogDescription>
         </DialogHeader>
-
         <form className="space-y-10" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div className="flex items-center gap-2">
@@ -243,7 +242,6 @@ const SettingsDialog = () => {
               </div>
               <h4 className="font-semibold">AI</h4>
             </div>
-
             <div className="space-y-4">
               {renderApiKeyInput("aiGatewayApiKey", "AI Gateway API Key")}
 
@@ -288,12 +286,10 @@ const SettingsDialog = () => {
               </div>
             </div>
           </div>
-
           <Button size="lg" className="w-full" type="submit">
             Save changes
           </Button>
         </form>
-
         <p className="text-muted-foreground text-sm">Not stored anywhere. Used only for current session requests.</p>
       </DialogContent>
     </Dialog>

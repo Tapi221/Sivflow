@@ -40,7 +40,6 @@ const TurnIntoToolbarButton = (props: DropdownMenuProps) => {
           {selectedItem.label}
         </ToolbarButton>
       </DropdownMenuTrigger>
-
       <DropdownMenuContent
         className="ignore-click-outside/toolbar min-w-0"
         onCloseAutoFocus={(e) => {

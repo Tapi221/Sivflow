@@ -97,12 +97,10 @@ const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: UseCard
             <StratisComponentIcon icon={StratisImageIcon} className={iconClassName} />
             {imageCount > 0 ? <span>x{imageCount}</span> : null}
           </button>
-
           <button type="button" className={base} onClick={() => setAudioDialogSide(side)} aria-label="音声を追加">
             <StratisComponentIcon icon={StratisAudioSettings01Icon} className={iconClassName} />
             {audioCount > 0 ? <span>x{audioCount}</span> : null}
           </button>
-
           <button type="button" className={base} onClick={openLinkDialog} aria-label="リンクを追加">
             <StratisComponentIcon icon={StratisLinkAngledIcon} className={iconClassName} />
             {linkCount > 0 ? <span>x{linkCount}</span> : null}

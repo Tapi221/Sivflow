@@ -106,7 +106,6 @@ const withTooltip = <T extends React.ElementType,>(Component: T) => {
           <TooltipTrigger asChild {...tooltipTriggerProps}>
             {component}
           </TooltipTrigger>
-
           <TooltipContent {...tooltipContentProps}>{tooltip}</TooltipContent>
         </Tooltip>
       );

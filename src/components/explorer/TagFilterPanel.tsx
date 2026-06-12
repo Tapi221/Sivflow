@@ -319,13 +319,11 @@ const TagFilterPanel = ({ allTags, isOpen = false, className }: TagFilterPanelPr
               onChange={setTagMatchMode}
             />
           </div>
-
           <div className="ds-filter-section ds-floating-panel__section ds-floating-panel__section--dense space-y-2 bg-transparent">
             <div className="flex items-center justify-between gap-2 text-[11px]">
               <span className="ds-filter-section__label ds-floating-panel__label">
                 表示:
               </span>
-
               <div className="ds-filter-toggle-group">
                 {CONTENT_TYPE_OPTIONS.map((item) => {
                   const isSelected = contentTypeFilter.includes(item.value);
@@ -352,7 +350,6 @@ const TagFilterPanel = ({ allTags, isOpen = false, className }: TagFilterPanelPr
                 <span className="ds-filter-section__label ds-floating-panel__label">
                   {item.label}:
                 </span>
-
                 <SegmentedControlGroup
                   value={item.value}
                   options={TOGGLEABLE_FLAG_OPTIONS}
@@ -391,7 +388,6 @@ const TagFilterPanel = ({ allTags, isOpen = false, className }: TagFilterPanelPr
                 )}
               >
                 <TagFilterSelectionSwitch label={item.name} checked={isSelected} onToggle={() => toggleTag(item.name)} />
-
                 <div className="min-w-0 flex-1">
                   <TagBadge
                     label={item.name}

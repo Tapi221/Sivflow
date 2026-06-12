@@ -204,7 +204,6 @@ const StudyCardInner = ({
           不安
         </span>
       </button>
-
       <button
         className="group flex h-20 w-24 flex-col items-center justify-center gap-2 rounded-2xl border border-[var(--surface-border)] bg-white surface-convex transition-all hover:-translate-y-1 active:scale-95 md:h-24 md:w-28"
         onClick={(event) => {

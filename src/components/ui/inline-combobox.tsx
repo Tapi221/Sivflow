@@ -249,7 +249,6 @@ const InlineComboboxInput = ({
         >
           {value ?? "\u200B"}
         </span>
-
         <Combobox
           ref={ref}
           className={cn(

@@ -77,12 +77,10 @@ const CalendarEventChipListComponent = ({ event }: CalendarEventChipListProps) =
   return (
     <div className={LIST_EVENT_ROW_CLASS_NAME} style={rowStyle}>
       <div className={LIST_EVENT_START_TIME_CLASS_NAME}>{startLabel}</div>
-
       <div className="relative flex justify-center">
         <span className={LIST_EVENT_LINE_CLASS_NAME} aria-hidden="true" />
         <span className={LIST_EVENT_DOT_CLASS_NAME} style={{ borderColor: tokens.border, boxShadow: `0 0 0 3px ${tokens.bg}` }} aria-hidden="true" />
       </div>
-
       <div className={cn(LIST_EVENT_CHIP_CLASS_NAME, event.isAllDay && LIST_ALL_DAY_EVENT_CHIP_CLASS_NAME)} style={chipStyle}>
         {timeRangeLabel ? <div className={LIST_EVENT_TIME_CLASS_NAME} style={createEventTimeStyle()}>{timeRangeLabel}</div> : null}
         <div className={cn(LIST_EVENT_TITLE_CLASS_NAME, event.isAllDay && LIST_ALL_DAY_EVENT_TITLE_CLASS_NAME)} style={createEventTitleStyle()}>{title}</div>

@@ -61,9 +61,7 @@ const CardModeToolbar = ({ displayMode, cardLayoutMode, disabledCardLayoutModes,
           <FluidDisplayGlyph />
         )}
       </ModeButton>
-
       <OverlayToolbarDivider className="h-5 bg-[rgba(218,207,197,0.92)]" />
-
       <div className="flex items-center gap-1">
         <ModeButton
           isActive={cardLayoutMode === "stack"}

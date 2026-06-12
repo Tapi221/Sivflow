@@ -271,7 +271,6 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
   return (
     <>
       <style>{TAB_OPEN_ANIMATION_STYLE}</style>
-
       <div
         style={{
           ...tabsSurfaceStyle,
@@ -349,7 +348,6 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
                       )}
                     >
                       <span aria-hidden="true" className="absolute bottom-[-1px] left-[-16px] h-[18px] w-[18px]" style={ACTIVE_TAB_LEFT_CURVE_STYLE} />
-
                       <span aria-hidden="true" className="absolute bottom-[-1px] right-[-16px] h-[18px] w-[18px]" style={ACTIVE_TAB_RIGHT_CURVE_STYLE} />
                     </div>
                   ) : null}
@@ -372,7 +370,6 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
                     }}
                   >
                     <Icon className={cn("h-4 w-4 shrink-0 transition-transform duration-300 ease-[cubic-bezier(.22,1,.36,1)]", iconStateClassName)} />
-
                     <span className="min-w-0 flex-1 truncate">{tab.title}</span>
                   </button>
 
@@ -398,7 +395,6 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
             );
           })}
         </WorkspaceTabDndList>
-
         <button
           type="button"
           style={interactiveStyle}
@@ -412,7 +408,6 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
         >
           <PlusLineIcon className="h-4 w-4" />
         </button>
-
         <div className="h-full min-w-0 flex-1" style={TABS_DRAG_SPACER_STYLE} aria-hidden="true" />
       </div>
 

@@ -100,7 +100,6 @@ const BulkTagDialog = ({
             </div>
           )}
         </div>
-
         <label className="mt-3 flex items-center gap-2 text-sm text-slate-600">
           <input
             type="checkbox"

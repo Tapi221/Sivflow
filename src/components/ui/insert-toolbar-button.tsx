@@ -205,7 +205,6 @@ const InsertToolbarButton = (props: DropdownMenuProps) => {
           <PlusIcon />
         </ToolbarButton>
       </DropdownMenuTrigger>
-
       <DropdownMenuContent
         className="flex max-h-[500px] min-w-0 flex-col overflow-y-auto"
         align="start"

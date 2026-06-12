@@ -715,13 +715,11 @@ const TreeViewLayout = ({
         }}
         folderSelectionNonce={folderSelectionNonce}
       />
-
       <ImportFormatDialog
         open={isImportFormatDialogOpen}
         onOpenChange={setIsImportFormatDialogOpen}
         onSelect={handleImportFormatSelect}
       />
-
       <XlsxImportDialog
         open={isXlsxImportDialogOpen}
         onOpenChange={setIsXlsxImportDialogOpen}
@@ -738,7 +736,6 @@ const TreeViewLayout = ({
         createCardSet={createCardSet}
         createCard={createCard}
       />
-
       <PortableImportBatchDialog
         open={isPortableImportBatchDialogOpen}
         onOpenChange={setIsPortableImportBatchDialogOpen}
@@ -758,7 +755,6 @@ const TreeViewLayout = ({
         createCard={createCard}
         ensureTagByName={ensureMfDeckTagByName}
       />
-
       <MfDeckImportDialog
         open={isMfDeckImportDialogOpen}
         onOpenChange={handleMfDeckImportDialogOpenChange}
@@ -779,7 +775,6 @@ const TreeViewLayout = ({
         initialFile={pendingMfDeckFile}
         initialFileRevision={pendingMfDeckFileRevision}
       />
-
       <MfCardImportDialog
         open={isMfCardImportDialogOpen}
         onOpenChange={handleMfCardImportDialogOpenChange}

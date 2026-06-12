@@ -45,7 +45,6 @@ const CardPaneWidthAdjuster = ({ modeLabel, value, min, max, defaultValue, step 
       >
         <Minus className="h-3.5 w-3.5" />
       </button>
-
       <div className="w-24 px-0.5">
         <Slider
           min={min}
@@ -83,7 +82,6 @@ const CardPaneWidthAdjuster = ({ modeLabel, value, min, max, defaultValue, step 
       >
         <Plus className="h-3.5 w-3.5" />
       </button>
-
       <button
         type="button"
         className="grid h-7 w-7 place-items-center rounded-full border border-slate-200/70 bg-white/55 text-slate-500 transition hover:bg-white hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-35"

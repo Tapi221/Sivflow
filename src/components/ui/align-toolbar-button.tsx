@@ -47,7 +47,6 @@ const AlignToolbarButton = (props: DropdownMenuProps) => {
           <IconValue />
         </ToolbarButton>
       </DropdownMenuTrigger>
-
       <DropdownMenuContent className="min-w-0" align="start">
         <DropdownMenuRadioGroup
           value={value}

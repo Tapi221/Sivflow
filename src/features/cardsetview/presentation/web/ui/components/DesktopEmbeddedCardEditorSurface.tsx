@@ -454,7 +454,6 @@ const DesktopEmbeddedCardEditorSurface = ({ selectedCardId, folderId, cardSetId,
           flipNode={flipFace}
         />
       </div>
-
       <CardEditorPaneMediaDialogs
         imageDialogSide={content.imageDialogSide}
         setImageDialogSide={content.setImageDialogSide}

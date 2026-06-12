@@ -31,7 +31,6 @@ const FileElement = withHOC(ResizableProvider, (props: PlateElementProps<TFileEl
           <FileUp className="size-5" />
           {name}
         </div>
-
         <Caption align="left">
           <CaptionTextarea
             className="text-left"

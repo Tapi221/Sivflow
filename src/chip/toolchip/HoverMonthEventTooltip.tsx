@@ -255,7 +255,6 @@ const HoverMonthEventTooltip = ({
                     className={TOOLTIP_ACCENT_DOT_CLASS_NAME}
                     style={{ backgroundColor: accentColor }}
                   />
-
                   <span className={TOOLTIP_TITLE_CLASS_NAME}>
                     {tooltipTitle}
                   </span>

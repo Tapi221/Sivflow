@@ -40,7 +40,6 @@ const TagFilterPopover = ({ allTags, className, iconClassName, ariaLabel = "ã‚¿ã
           <Filter className={cn("h-4 w-4", iconClassName)} />
         </button>
       </PopoverTrigger>
-
       <PopoverContent
         align="center"
         className={cn(panelPreset.className, "w-64")}

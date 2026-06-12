@@ -19,7 +19,6 @@ const MoreToolbarButton = (props: DropdownMenuProps) => {
           <MoreHorizontalIcon />
         </ToolbarButton>
       </DropdownMenuTrigger>
-
       <DropdownMenuContent
         className="ignore-click-outside/toolbar flex max-h-[500px] min-w-[180px] flex-col overflow-y-auto"
         align="start"
@@ -35,7 +34,6 @@ const MoreToolbarButton = (props: DropdownMenuProps) => {
             <KeyboardIcon />
             Keyboard input
           </DropdownMenuItem>
-
           <DropdownMenuItem
             onSelect={() => {
               editor.tf.toggleMark(KEYS.sup, {

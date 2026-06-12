@@ -131,7 +131,6 @@ const HandwritingModeScreen = ({ session }: HandwritingModeScreenProps) => {
         <Text style={styles.title}>手書きモード</Text>
         <Text style={styles.description}>Desktopで開いているカードに接続して、Apple Pencil用の手書きUIを表示します。スマホにはこの画面を表示しません。</Text>
       </View>
-
       <View style={styles.sessionCard}>
         <View style={styles.sessionTextBlock}>
           <Text style={styles.sessionLabel}>Session</Text>
@@ -140,7 +139,6 @@ const HandwritingModeScreen = ({ session }: HandwritingModeScreenProps) => {
         </View>
         <Text style={styles.strokeCount}>{strokes.length} strokes</Text>
       </View>
-
       <IpadInkCanvasHost cardId={session?.cardId} tool={tool} strokes={strokes} onErasePoint={handleErasePoint} onStrokeComplete={handleStrokeComplete} />
       <View style={styles.toolbarRow}>
         <View style={styles.toolbarHost}>

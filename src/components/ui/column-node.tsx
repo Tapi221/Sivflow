@@ -189,7 +189,6 @@ const ColumnFloatingToolbar = ({ children }: React.PropsWithChildren) => {
           >
             <DoubleSideDoubleColumnOutlined />
           </Button>
-
           <Separator orientation="vertical" className="mx-1 h-6" />
           <Button variant="ghost" className="size-8" {...buttonProps}>
             <Trash2Icon />
@@ -273,7 +272,6 @@ const ColumnDragHandle = React.memo(() => {
             />
           </Button>
         </TooltipTrigger>
-
         <TooltipContent>Drag to move column</TooltipContent>
       </Tooltip>
     </TooltipProvider>

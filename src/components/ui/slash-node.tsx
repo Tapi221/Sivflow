@@ -204,7 +204,6 @@ const SlashInputElement = (props: PlateElementProps<TComboboxInputElement>) => {
     <PlateElement {...props} as="span">
       <InlineCombobox element={element} trigger="/">
         <InlineComboboxInput />
-
         <InlineComboboxContent>
           <InlineComboboxEmpty>No results</InlineComboboxEmpty>
 

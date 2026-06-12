@@ -657,7 +657,6 @@ const MarkdownBlockContent = (props: MarkdownBlockContentProps) => {
         }}
         zoom={props.zoom}
       />
-
       <MarkdownEditorDialog
         open={props.open}
         onOpenChange={props.onOpenChange}

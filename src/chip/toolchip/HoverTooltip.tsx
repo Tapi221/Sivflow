@@ -259,7 +259,6 @@ const HoverTooltip = ({ label, children, side = "top", align = "center", offset 
               <span className="block overflow-visible leading-[inherit]">
                 {tooltipLabel}
               </span>
-
               <span
                 className={cn(
                   TOOLTIP_ARROW_SURFACE_CLASS_NAME,

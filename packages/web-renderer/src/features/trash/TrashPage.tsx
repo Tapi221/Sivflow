@@ -128,7 +128,6 @@ const TrashPage = () => {
             <h1 className="mt-2 text-2xl font-semibold text-slate-950">ゴミ箱</h1>
             <p className="mt-2 text-sm text-slate-600">削除済みのフォルダ、カードセット、カード、ドキュメントを復元、または完全に削除します。</p>
           </>
-
           <div className="flex flex-wrap gap-2">
             <Button type="button" variant="outline" onClick={() => void refresh()} disabled={isBusy}>
               再読み込み
@@ -169,7 +168,6 @@ const TrashPage = () => {
               <span>Item</span>
               <span>Actions</span>
             </div>
-
             <div className="divide-y divide-slate-100">
               {rows.map((row) => (
                 <article key={`${row.kind}:${row.id}`} className="grid grid-cols-[1fr_auto] gap-3 px-4 py-4">
@@ -177,7 +175,6 @@ const TrashPage = () => {
                     <h2 className="truncate text-sm font-medium text-slate-950">{row.title}</h2>
                     <p className="mt-1 text-xs text-slate-500">{row.subtitle}</p>
                   </div>
-
                   <div className="flex flex-wrap justify-end gap-2">
                     <Button type="button" variant="outline" size="sm" onClick={() => void handleRestore(row)} disabled={isBusy}>
                       復元

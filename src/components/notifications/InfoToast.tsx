@@ -26,7 +26,6 @@ const InfoToast = ({ notification, onDismiss }: InfoToastProps) => {
         <div className="flex-shrink-0">
           <Info className="w-5 h-5 text-primary-500" />
         </div>
-
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold text-slate-700">
             {notification.title}

@@ -35,7 +35,6 @@ const MarkdownEditorDialog: React.FC<MarkdownEditorDialogProps> = ({ open, onOpe
             Markdownを編集するダイアログ
           </DialogDescription>
         </DialogHeader>
-
         <div className="markdownBlockEditor px-3 pt-3 pb-4">
           <AutoResizeTextarea
             value={value}

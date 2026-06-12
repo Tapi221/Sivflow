@@ -202,7 +202,6 @@ const PreparedViewCardFaceScene = ({ card, sharedDerived, sideDerived, displayMo
           shouldBindFlipHandlers ? handlePointerCancelCapture : undefined
         }
       />
-
       <FlashcardMediaDialogs
         isImagePopupOpen={media.isImagePopupOpen}
         setIsImagePopupOpen={media.setIsImagePopupOpen}

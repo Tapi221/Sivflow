@@ -63,7 +63,6 @@ const CalendarTimeGrid = memo(({ events, rangeStart, rangeEnd, layoutMode = "no-
             </div>
           ))}
         </div>
-
         <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/80" style={{ height: contentHeight }}>
           {hourLabels.map((hour) => (
             <div key={`${hour.label}-line-${hour.top}`} className="absolute left-0 right-0 border-t border-slate-800/80" style={{ top: `${hour.top}%` }} />

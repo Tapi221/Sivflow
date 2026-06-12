@@ -38,7 +38,6 @@ const PdfLibraryContinueSection = ({ cardClassName, continueRows, formatDateTime
           すべて見る
         </span>
       </div>
-
       <div className="mt-4 space-y-2.5">
         {continueRows.map((row) => (
           <button

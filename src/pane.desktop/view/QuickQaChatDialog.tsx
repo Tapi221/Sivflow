@@ -191,7 +191,6 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
             </div>
           </div>
         </div>
-
         <div className="max-h-[420px] min-h-[260px] overflow-y-auto px-5 py-4">
           <div className="flex flex-col gap-2.5">
             {messages.map((message) => (
@@ -202,7 +201,6 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
             {isCreating || isGeneratingAiAnswer ? <LoadingStatusPill label={isGeneratingAiAnswer ? "AI回答案を作成中" : "カード作成中"} /> : null}
           </div>
         </div>
-
         <div className="border-t border-[#eceae4] bg-white/80 px-4 py-3">
           {latestQuestionLabel ? (
             <div className="mb-2 rounded-[10px] border border-[#eceae4] bg-[#f7f6f2] px-2.5 py-1.5 text-[11px] text-[#77736d]">

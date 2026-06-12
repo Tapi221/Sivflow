@@ -35,12 +35,10 @@ const BulletedListToolbarButton = () => {
       >
         <List className="size-4" />
       </ToolbarSplitButtonPrimary>
-
       <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
         <DropdownMenuTrigger asChild>
           <ToolbarSplitButtonSecondary />
         </DropdownMenuTrigger>
-
         <DropdownMenuContent align="start" alignOffset={-32}>
           <DropdownMenuGroup>
             <DropdownMenuItem
@@ -114,12 +112,10 @@ const NumberedListToolbarButton = () => {
       >
         <ListOrdered className="size-4" />
       </ToolbarSplitButtonPrimary>
-
       <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
         <DropdownMenuTrigger asChild>
           <ToolbarSplitButtonSecondary />
         </DropdownMenuTrigger>
-
         <DropdownMenuContent align="start" alignOffset={-32}>
           <DropdownMenuGroup>
             <DropdownMenuItem

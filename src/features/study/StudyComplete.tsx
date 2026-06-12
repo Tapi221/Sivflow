@@ -41,7 +41,6 @@ const StudyComplete = ({ ratingTiles, ratingCounts, isPracticeFeatureEnabled, re
             >
               全てのカードを学習しました
             </p>
-
             <div
               className={`grid grid-cols-2 md:grid-cols-4 max-w-2xl mx-auto ${compact ? "gap-2 md:gap-2.5 mb-6" : "gap-2 md:gap-3 mb-8"}`}
             >

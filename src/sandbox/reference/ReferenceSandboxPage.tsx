@@ -33,7 +33,6 @@ const ReferenceSandboxPage = ({
             {description}
           </p>
         </section>
-
         <section className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
             <h2 className="text-xl font-semibold text-white">見るポイント</h2>
@@ -45,7 +44,6 @@ const ReferenceSandboxPage = ({
               ))}
             </div>
           </div>
-
           <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
             <h2 className="text-xl font-semibold text-white">Sivflow での扱い</h2>
             <div className="mt-5 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm leading-7 text-emerald-50">
@@ -53,7 +51,6 @@ const ReferenceSandboxPage = ({
             </div>
           </div>
         </section>
-
         <section className="grid gap-4 md:grid-cols-3">
           {links.map((link) => (
             <a

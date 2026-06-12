@@ -239,21 +239,18 @@ const MfDeckImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
               : "選択中のフォルダに .mfdeck のカードセットを追加します。"}
           </DialogDescription>
         </DialogHeader>
-
         <div className="grid gap-4">
           <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
             <div className="grid gap-3">
               <p className="text-sm font-medium text-slate-800">
                 MFDeck ファイルを選択
               </p>
-
               <Input
                 type="file"
                 accept={`.mfdeck,${MF_DECK_MIME_TYPE},application/zip`}
                 onChange={handleFileChange}
                 disabled={isParsing || isImporting}
               />
-
               <div className="grid gap-2">
                 <p className="text-sm font-medium text-slate-800">取り込み先</p>
                 <Select
@@ -305,14 +302,12 @@ const MfDeckImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
                   </Select>
                 ) : null}
               </div>
-
               <p className="text-xs leading-relaxed text-slate-500">
                 v1
                 ではカード本文・数式・コード・タグ名を取り込みます。復習履歴は共有データに含めず、取り込み先の環境で新規カードとして扱います。
               </p>
             </div>
           </div>
-
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-xl border border-slate-200 p-3">
               <p className="text-xs text-slate-500">ファイル</p>
@@ -340,7 +335,6 @@ const MfDeckImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
               </p>
             </div>
           </div>
-
           <div className="grid gap-3 md:grid-cols-2">
             <div className="rounded-xl border border-slate-200">
               <div className="border-b border-slate-200 px-4 py-3 text-sm font-medium text-slate-800">
@@ -376,7 +370,6 @@ const MfDeckImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
                 )}
               </div>
             </div>
-
             <div className="rounded-xl border border-slate-200">
               <div className="border-b border-slate-200 px-4 py-3 text-sm font-medium text-slate-800">
                 Issues
@@ -405,7 +398,6 @@ const MfDeckImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
             </div>
           </div>
         </div>
-
         <DialogFooter>
           <Button variant="outline" onClick={() => handleClose(false)}>
             閉じる

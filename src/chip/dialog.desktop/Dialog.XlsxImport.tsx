@@ -189,7 +189,6 @@ const XlsxImportDialog = ({
               : "選択中のフォルダにカードをまとめて追加します。"}
           </DialogDescription>
         </DialogHeader>
-
         <div className="grid gap-4">
           <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
             <div className="grid gap-2">
@@ -206,7 +205,6 @@ const XlsxImportDialog = ({
                   テンプレートをダウンロード
                 </Button>
               </div>
-
               <div className="grid gap-2">
                 <p className="text-sm font-medium text-slate-800">取り込み先</p>
                 <Select
@@ -266,14 +264,12 @@ const XlsxImportDialog = ({
                   </p>
                 ) : null}
               </div>
-
               <Input
                 type="file"
                 accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 onChange={handleFileChange}
                 disabled={isParsing || isImporting}
               />
-
               <div className="grid gap-1 text-xs text-slate-500">
                 <p>
                   phase 1 では text / markdown / math / code のみ取り込みます。
@@ -287,7 +283,6 @@ const XlsxImportDialog = ({
               </div>
             </div>
           </div>
-
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-xl border border-slate-200 p-3">
               <p className="text-xs text-slate-500">ファイル</p>
@@ -317,7 +312,6 @@ const XlsxImportDialog = ({
               </p>
             </div>
           </div>
-
           <div className="grid gap-3 md:grid-cols-2">
             <div className="rounded-xl border border-slate-200">
               <div className="border-b border-slate-200 px-4 py-3 text-sm font-medium text-slate-800">
@@ -366,7 +360,6 @@ const XlsxImportDialog = ({
                 )}
               </div>
             </div>
-
             <div className="rounded-xl border border-slate-200">
               <div className="border-b border-slate-200 px-4 py-3 text-sm font-medium text-slate-800">
                 Issues
@@ -394,7 +387,6 @@ const XlsxImportDialog = ({
             </div>
           </div>
         </div>
-
         <DialogFooter>
           <Button
             type="button"

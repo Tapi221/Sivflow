@@ -91,7 +91,6 @@ const CalendarTimeGridSandboxPage = () => {
             core の layoutCalendarTimeGridEvents を web-renderer の TimeGrid / EventChip に接続し、重なりイベントの横並び表示を確認する sandbox です。
           </p>
         </section>
-
         <section className="grid gap-4 lg:grid-cols-[0.7fr_1.3fr]">
           <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
             <h2 className="text-xl font-semibold text-white">確認対象</h2>
@@ -107,7 +106,6 @@ const CalendarTimeGridSandboxPage = () => {
               </div>
             </div>
           </div>
-
           <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
             <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
               <>

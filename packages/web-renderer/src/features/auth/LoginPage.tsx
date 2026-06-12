@@ -266,7 +266,6 @@ const LoginPage = () => {
   return (
     <main style={styles.page}>
       <div style={styles.backgroundOverlay} />
-
       <section style={styles.card}>
         <div style={styles.leftPanel}>
           <div style={styles.brandBlock}>
@@ -279,11 +278,9 @@ const LoginPage = () => {
             </p>
           </div>
         </div>
-
         <div style={styles.rightPanel}>
           <div style={styles.form}>
             <h2 style={styles.heading}>ログイン</h2>
-
             <button type="button" onClick={handleGoogleLogin} disabled={isLoading} style={{ ...styles.button, opacity: isLoading ? 0.64 : 1 }}>
               {isLoading ? (
                 <>
@@ -297,13 +294,11 @@ const LoginPage = () => {
                 </>
               )}
             </button>
-
             <div style={styles.divider}>
               <div style={styles.line} />
               <span style={styles.dividerText}>または</span>
               <div style={styles.line} />
             </div>
-
             <div style={styles.secureRow}>
               <ShieldIcon />
               <p style={styles.secureText}>
@@ -312,9 +307,7 @@ const LoginPage = () => {
                 安全に同期・バックアップされます。
               </p>
             </div>
-
             <div style={styles.bottomLine} />
-
             <div style={styles.startRow}>
               <SparkleIcon />
               <p style={styles.startText}>初めての方も、Googleでそのまま開始できます</p>

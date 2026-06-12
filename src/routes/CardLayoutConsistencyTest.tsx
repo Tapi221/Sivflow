@@ -51,7 +51,6 @@ const CardLayoutConsistencyTest = () => {
             <Flashcard card={FIXTURE_CARD} />
           </MobileScalableCard>
         </section>
-
         <section data-testid="card-layout-edit-shot" className="w-full">
           <MobileScalableCard
             cardDesignWidth={CANONICAL_CARD_WIDTH}

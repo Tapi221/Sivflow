@@ -311,7 +311,6 @@ const FlashcardInner = ({
           {contentNode}
         </CardFrame>
       </div>
-
       <FlashcardMediaDialogs
         isImagePopupOpen={media.isImagePopupOpen}
         setIsImagePopupOpen={media.setIsImagePopupOpen}
