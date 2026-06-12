@@ -5,6 +5,12 @@ import ts from "typescript";
 const ROOT_DIR = process.cwd();
 const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src", "tests", "scripts/dev", "scripts/verify"].map((directory) => path.join(ROOT_DIR, directory));
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
+const CONFLICT_MARKER_PATTERN = /^(?:<{7}|={7}|>{7})(?:\s|$)/u;
+const INLINE_MEMBER_CONTAINER_PATTERNS = [
+  /^(\s*(?:export\s+)?(?:declare\s+)?(?:abstract\s+)?(?:class|interface)\b[^{}]*\{\s*)(\S.*)$/u,
+  /^(\s*(?:export\s+)?type\b[^=]*=\s*\{\s*)(\S.*)$/u,
+];
+const INLINE_COMMENT_CODE_PATTERN = /^(.*?)(\s+(?:return|const|let|var|if|for|while|switch|throw|await|try)\b[\s\S]*)$/u;
 
 const walkSourceFiles = (directory) => {
   if (!existsSync(directory)) return [];
@@ -33,6 +39,129 @@ const getScriptKind = (filePath) => {
 const createSourceFile = (filePath, source) => ts.createSourceFile(filePath, source, ts.ScriptTarget.Latest, true, getScriptKind(filePath));
 
 const getNewline = (source) => source.includes("\r\n") ? "\r\n" : "\n";
+
+const splitLines = (source) => source.split(/\r?\n/u);
+
+const isConflictMarkerLine = (line) => CONFLICT_MARKER_PATTERN.test(line.trimStart());
+
+const stripEmptyConflictMarkerBlocks = (source) => {
+  const newline = getNewline(source);
+  const lines = splitLines(source);
+  const nextLines = [];
+  let changed = false;
+
+  for (let index = 0; index < lines.length;) {
+    const line = lines[index];
+
+    if (!isConflictMarkerLine(line)) {
+      nextLines.push(line);
+      index += 1;
+      continue;
+    }
+
+    let endIndex = index;
+    let hasMarker = false;
+    let hasNonBlankContent = false;
+
+    while (endIndex < lines.length && (lines[endIndex].trim() === "" || isConflictMarkerLine(lines[endIndex]))) {
+      if (isConflictMarkerLine(lines[endIndex])) {
+        hasMarker = true;
+      } else if (lines[endIndex].trim() !== "") {
+        hasNonBlankContent = true;
+      }
+      endIndex += 1;
+    }
+
+    if (hasMarker && !hasNonBlankContent) {
+      changed = true;
+      index = endIndex;
+      continue;
+    }
+
+    nextLines.push(line);
+    index += 1;
+  }
+
+  return changed ? nextLines.join(newline) : source;
+};
+
+const splitCommentAndCode = (value) => {
+  const match = value.match(INLINE_COMMENT_CODE_PATTERN);
+  if (!match) return { codeText: null, commentText: value.trim() };
+
+  return {
+    codeText: match[2].trim(),
+    commentText: match[1].trimEnd(),
+  };
+};
+
+const splitInlineOpeningBraceCommentLines = (source) => {
+  const newline = getNewline(source);
+  const nextLines = [];
+  let changed = false;
+
+  for (const line of splitLines(source)) {
+    const match = line.match(/^(?<prefix>.*\{\s*)\/\/\s*(?<comment>.*)$/u);
+    if (!match?.groups) {
+      nextLines.push(line);
+      continue;
+    }
+
+    const indentation = line.match(/^\s*/u)?.[0] ?? "";
+    const childIndentation = `${indentation}  `;
+    const { codeText, commentText } = splitCommentAndCode(match.groups.comment);
+
+    nextLines.push(match.groups.prefix.trimEnd());
+    if (commentText.length > 0) nextLines.push(`${childIndentation}// ${commentText}`);
+    if (codeText) nextLines.push(`${childIndentation}${codeText}`);
+    changed = true;
+  }
+
+  return changed ? nextLines.join(newline) : source;
+};
+
+const matchInlineMemberContainer = (line) => {
+  for (const pattern of INLINE_MEMBER_CONTAINER_PATTERNS) {
+    const match = line.match(pattern);
+    if (match) return match;
+  }
+
+  return null;
+};
+
+const splitInlineMemberContainerLines = (source) => {
+  const newline = getNewline(source);
+  const nextLines = [];
+  let changed = false;
+
+  for (const line of splitLines(source)) {
+    const match = matchInlineMemberContainer(line);
+    if (!match || match[2].trim() === "}") {
+      nextLines.push(line);
+      continue;
+    }
+
+    const indentation = line.match(/^\s*/u)?.[0] ?? "";
+    nextLines.push(match[1].trimEnd());
+    nextLines.push(`${indentation}  ${match[2]}`);
+    changed = true;
+  }
+
+  return changed ? nextLines.join(newline) : source;
+};
+
+const applySourceLayoutFix = (source) => {
+  let nextSource = source;
+  const maxPassCount = 20;
+
+  for (let pass = 0; pass < maxPassCount; pass += 1) {
+    const fixedSource = splitInlineMemberContainerLines(splitInlineOpeningBraceCommentLines(stripEmptyConflictMarkerBlocks(nextSource)));
+    if (fixedSource === nextSource) return nextSource;
+    nextSource = fixedSource;
+  }
+
+  return nextSource;
+};
 
 const isNamedImports = (namedBindings) => Boolean(namedBindings && ts.isNamedImports(namedBindings));
 
@@ -101,9 +230,10 @@ const collectTypeOnlyImportReplacements = (filePath, source) => {
 };
 
 const applyTypeOnlyImportFix = (filePath, source) => {
-  const replacements = collectTypeOnlyImportReplacements(filePath, source);
+  const sourceLayoutSource = applySourceLayoutFix(source);
+  const replacements = collectTypeOnlyImportReplacements(filePath, sourceLayoutSource);
 
-  return replacements.length === 0 ? source : applyReplacements(source, replacements);
+  return replacements.length === 0 ? sourceLayoutSource : applyReplacements(sourceLayoutSource, replacements);
 };
 
 const updateFile = (filePath) => {
@@ -119,5 +249,5 @@ const updateFile = (filePath) => {
 const updatedFiles = SOURCE_DIRECTORIES.flatMap(walkSourceFiles).filter(updateFile);
 
 if (updatedFiles.length > 0) {
-  console.log(`type-only import 規約の整形を ${updatedFiles.length} file(s) 修正しました。`);
+  console.log(`type-only import / source layout 規約の整形を ${updatedFiles.length} file(s) 修正しました。`);
 }
