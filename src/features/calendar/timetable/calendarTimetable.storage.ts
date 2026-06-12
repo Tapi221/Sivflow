@@ -11,6 +11,7 @@ type CalendarTimetableDatabase = Dexie & {
   settings: Table<CalendarTimetableSettings, string>;
   syllabusCourses: Table<CalendarTimetableSyllabusCourse, string>;
 };
+type CalendarTimetableSettingsRecord = Partial<CalendarTimetableSettings> | null | undefined;
 
 const TIMETABLE_SETTINGS_ID = "default";
 const DEFAULT_SEMESTER_ID = "default-semester";
@@ -51,6 +52,11 @@ const createSyllabusCourseId = (): string => `syllabus-course-${Date.now().toStr
 const createDefaultSettings = (): CalendarTimetableSettings => ({ id: TIMETABLE_SETTINGS_ID, activeSemesterId: DEFAULT_SEMESTER_ID, visibleDayCount: DEFAULT_VISIBLE_DAY_COUNT, updatedAt: createTimestamp() });
 const createDefaultPeriods = (): CalendarTimetablePeriod[] => DEFAULT_TIMETABLE_PERIODS.map((period) => ({ ...period }));
 const getComparableTimestamp = (value: unknown): string => typeof value === "string" ? value : "";
+const getRecordTextValue = (value: unknown): string => typeof value === "string" ? normalizeText(value) : "";
+const normalizeSemesterId = (value: unknown): string => getRecordTextValue(value) || DEFAULT_SEMESTER_ID;
+const normalizeSettingsVisibleDayCount = (value: unknown): CalendarTimetableVisibleDayCount => typeof value === "number" ? normalizeVisibleDayCount(value) : DEFAULT_VISIBLE_DAY_COUNT;
+const normalizeCalendarTimetableSettings = (settings: CalendarTimetableSettingsRecord): CalendarTimetableSettings => ({ id: TIMETABLE_SETTINGS_ID, activeSemesterId: normalizeSemesterId(settings?.activeSemesterId), visibleDayCount: normalizeSettingsVisibleDayCount(settings?.visibleDayCount), updatedAt: getRecordTextValue(settings?.updatedAt) || createTimestamp() });
+const hasCalendarTimetableSettingsChanged = (settings: CalendarTimetableSettingsRecord, normalizedSettings: CalendarTimetableSettings): boolean => settings?.id !== normalizedSettings.id || settings?.activeSemesterId !== normalizedSettings.activeSemesterId || settings?.visibleDayCount !== normalizedSettings.visibleDayCount || settings?.updatedAt !== normalizedSettings.updatedAt;
 const getCourseSearchText = (course: CalendarTimetableSyllabusCourse): string => course.searchText || createSearchText([course.title, course.teacher, course.room, course.semesterLabel, course.credits, course.memo, course.syllabusUrl]);
 const restoreDefaultPeriods = async (): Promise<CalendarTimetablePeriod[]> => {
   const periods = createDefaultPeriods();
@@ -82,8 +88,9 @@ const createCourseSlotsFromSyllabusCourse = (syllabusCourse: CalendarTimetableSy
 const ensureCalendarTimetableSeedData = async (): Promise<void> => {
   await timetableDb.transaction("rw", timetableDb.periods, timetableDb.settings, async () => {
     const [periodCount, settings] = await Promise.all([timetableDb.periods.count(), timetableDb.settings.get(TIMETABLE_SETTINGS_ID)]);
+    const normalizedSettings = settings ? normalizeCalendarTimetableSettings(settings) : createDefaultSettings();
     if (periodCount === 0) await restoreDefaultPeriods();
-    if (!settings) await timetableDb.settings.put(createDefaultSettings());
+    if (!settings || hasCalendarTimetableSettingsChanged(settings, normalizedSettings)) await timetableDb.settings.put(normalizedSettings);
   });
 };
 const listCalendarTimetablePeriods = async (): Promise<CalendarTimetablePeriod[]> => {
@@ -94,11 +101,14 @@ const listCalendarTimetablePeriods = async (): Promise<CalendarTimetablePeriod[]
 };
 const listCalendarTimetableCourses = async (semesterId: string): Promise<CalendarTimetableCourse[]> => {
   await ensureCalendarTimetableSeedData();
-  return timetableDb.courses.where("semesterId").equals(semesterId).sortBy("updatedAt");
+  return timetableDb.courses.where("semesterId").equals(normalizeSemesterId(semesterId)).sortBy("updatedAt");
 };
 const getCalendarTimetableSettings = async (): Promise<CalendarTimetableSettings> => {
   await ensureCalendarTimetableSeedData();
-  return await timetableDb.settings.get(TIMETABLE_SETTINGS_ID) ?? createDefaultSettings();
+  const settings = await timetableDb.settings.get(TIMETABLE_SETTINGS_ID);
+  const normalizedSettings = settings ? normalizeCalendarTimetableSettings(settings) : createDefaultSettings();
+  if (!settings || hasCalendarTimetableSettingsChanged(settings, normalizedSettings)) await timetableDb.settings.put(normalizedSettings);
+  return normalizedSettings;
 };
 const listCalendarTimetableInstitutions = async (): Promise<CalendarTimetableInstitution[]> => {
   await ensureCalendarTimetableSeedData();
@@ -137,7 +147,7 @@ const saveCalendarTimetableCourse = async (draft: CalendarTimetableCourseDraft):
 
   if (!title || slots.length === 0) return;
 
-  await timetableDb.courses.put({ id: draft.id ?? createCourseId(), semesterId: draft.semesterId, syllabusCourseId: draft.syllabusCourseId, institutionId: draft.institutionId, departmentId: draft.departmentId, title, room: normalizeText(draft.room), teacher: normalizeText(draft.teacher), memo: normalizeText(draft.memo), colorKey: draft.colorKey, slots, createdAt: draft.createdAt ?? now, updatedAt: now });
+  await timetableDb.courses.put({ id: draft.id ?? createCourseId(), semesterId: normalizeSemesterId(draft.semesterId), syllabusCourseId: draft.syllabusCourseId, institutionId: draft.institutionId, departmentId: draft.departmentId, title, room: normalizeText(draft.room), teacher: normalizeText(draft.teacher), memo: normalizeText(draft.memo), colorKey: draft.colorKey, slots, createdAt: draft.createdAt ?? now, updatedAt: now });
 };
 const addCalendarTimetableCourseFromSyllabus = async (syllabusCourse: CalendarTimetableSyllabusCourse, semesterId: string): Promise<void> => {
   const periods = await listCalendarTimetablePeriods();
