@@ -139,7 +139,6 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
               )}
             </Droppable>
           </DragDropContext>
-
           <PopoverTrigger asChild>
             <button
               className={cn(
@@ -197,7 +196,6 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
                 >
                   <Plus className="w-4 h-4" />「{inputValue}」を新しく作成
                 </div>
-
                 <div className="px-1">
                   <div className="ds-command__group-title mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest">
                     <Palette className="w-3.5 h-3.5" /> カラーを選択

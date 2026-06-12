@@ -172,7 +172,6 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
             style={{ width: `${rangeRatio}%` }}
           />
         </div>
-
         <input
           {...rest}
           ref={ref}

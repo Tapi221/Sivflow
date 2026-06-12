@@ -122,7 +122,6 @@ const BlockContextMenu = ({ children }: { children: React.ReactNode; }) => {
                 <ContextMenuItem onClick={() => handleTurnInto(KEYS.p)}>
                   Paragraph
                 </ContextMenuItem>
-
                 <ContextMenuItem onClick={() => handleTurnInto(KEYS.h1)}>
                   Heading 1
                 </ContextMenuItem>
@@ -145,7 +144,6 @@ const BlockContextMenu = ({ children }: { children: React.ReactNode; }) => {
               </ContextMenuSubContent>
             </ContextMenuSub>
           </ContextMenuGroup>
-
           <ContextMenuGroup>
             <ContextMenuItem
               onClick={() =>

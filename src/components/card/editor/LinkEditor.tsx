@@ -48,7 +48,6 @@ const LinkEditor = ({ items, onChange }: LinkEditorProps) => {
               <path d="m6 6 12 12" />
             </svg>
           </button>
-
           <div className="flex items-center gap-2">
             <div className="rounded-lg bg-slate-50 p-1.5 text-slate-400">
               <Link className="h-3.5 w-3.5" />

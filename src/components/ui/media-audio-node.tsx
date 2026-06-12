@@ -21,7 +21,6 @@ const AudioElement = withHOC(ResizableProvider, (props: PlateElementProps<TAudio
         <div className={cn("h-16 rounded-sm")}>
           <audio className="size-full" src={unsafeUrl} controls />
         </div>
-
         <Caption style={{ width: "100%" }} align={align}>
           <CaptionTextarea
             className="h-20"

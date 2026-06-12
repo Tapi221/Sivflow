@@ -29,7 +29,6 @@ const CodeBlockVisualTest = () => {
             <CodeRenderer code={SAMPLE_CODE} language="typescript" />
           </div>
         </section>
-
         <section className="rounded-2xl bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-sm font-bold tracking-wide text-slate-600">
             Code Block Editor

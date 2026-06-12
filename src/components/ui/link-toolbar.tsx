@@ -119,7 +119,6 @@ const LinkFloatingToolbar = ({ state }: { state?: LinkFloatingToolbarState;
         <div className="flex items-center pr-1 pl-2 text-muted-foreground">
           <Link className="size-4" />
         </div>
-
         <FloatingLinkUrlInput
           className={inputVariants()}
           placeholder="Paste link"
@@ -152,13 +151,9 @@ const LinkFloatingToolbar = ({ state }: { state?: LinkFloatingToolbarState;
       >
         Edit link
       </button>
-
       <Separator orientation="vertical" />
-
       <LinkOpenButton />
-
       <Separator orientation="vertical" />
-
       <button
         className={buttonVariants({
           size: "sm",
@@ -177,7 +172,6 @@ const LinkFloatingToolbar = ({ state }: { state?: LinkFloatingToolbarState;
       <div ref={insertRef} className={popoverVariants()} {...insertProps}>
         {input}
       </div>
-
       <div ref={editRef} className={popoverVariants()} {...editProps}>
         {editContent}
       </div>

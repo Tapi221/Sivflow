@@ -59,7 +59,6 @@ const TablePicker = () => {
           )),
         )}
       </div>
-
       <div className="text-center text-current text-xs">
         {tablePicker.size.rowCount} x {tablePicker.size.colCount}
       </div>
@@ -80,7 +79,6 @@ const TableToolbarButton = (props: DropdownMenuProps) => {
           <Table />
         </ToolbarButton>
       </DropdownMenuTrigger>
-
       <DropdownMenuContent
         className="flex w-[180px] min-w-0 flex-col"
         align="start"
@@ -95,7 +93,6 @@ const TableToolbarButton = (props: DropdownMenuProps) => {
               <TablePicker />
             </DropdownMenuSubContent>
           </DropdownMenuSub>
-
           <DropdownMenuSub>
             <DropdownMenuSubTrigger
               className="gap-2 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
@@ -129,7 +126,6 @@ const TableToolbarButton = (props: DropdownMenuProps) => {
               </DropdownMenuItem>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
-
           <DropdownMenuSub>
             <DropdownMenuSubTrigger
               className="gap-2 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
@@ -174,7 +170,6 @@ const TableToolbarButton = (props: DropdownMenuProps) => {
               </DropdownMenuItem>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
-
           <DropdownMenuSub>
             <DropdownMenuSubTrigger
               className="gap-2 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
@@ -219,7 +214,6 @@ const TableToolbarButton = (props: DropdownMenuProps) => {
               </DropdownMenuItem>
             </DropdownMenuSubContent>
           </DropdownMenuSub>
-
           <DropdownMenuItem
             className="min-w-[180px]"
             disabled={!tableSelected}

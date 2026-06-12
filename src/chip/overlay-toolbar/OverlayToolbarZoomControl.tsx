@@ -88,7 +88,6 @@ const OverlayToolbarZoomControl = (props: OverlayToolbarZoomControlProps) => {
         rangeClassName={rangeClassName}
         thumbClassName={thumbClassName}
       />
-
       <div
         className={cn(
           "min-w-[2.25rem] text-center text-[10px] font-semibold tabular-nums text-[#74798B]",

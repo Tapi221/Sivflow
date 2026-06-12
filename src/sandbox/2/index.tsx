@@ -148,7 +148,6 @@ const SelectionCaptureSandboxPage = () => {
             </button>
           </div>
         </section>
-
         <section className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
           <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-4">
             <div
@@ -158,7 +157,6 @@ const SelectionCaptureSandboxPage = () => {
               <div data-selection-capture-ignore="true" className="absolute right-4 top-4 z-20 rounded-full border border-white/15 bg-slate-950/70 px-3 py-1 text-xs font-medium text-slate-200 shadow-sm backdrop-blur">
                 このラベルは capture から除外
               </div>
-
               <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
                 <div className="rounded-3xl border border-white/10 bg-white/10 p-5 shadow-2xl shadow-black/20 backdrop-blur">
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">Workspace</p>
@@ -171,7 +169,6 @@ const SelectionCaptureSandboxPage = () => {
                     <p className="mt-2 font-mono text-sm text-cyan-200">{formatRect(lastRect)}</p>
                   </div>
                 </div>
-
                 <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-1">
                   {SAMPLE_CARDS.map((card) => (
                     <article key={card.title} className="rounded-3xl border border-white/10 bg-white/95 p-5 text-slate-950 shadow-xl shadow-black/20">
@@ -185,7 +182,6 @@ const SelectionCaptureSandboxPage = () => {
                   ))}
                 </div>
               </div>
-
               <div className="mt-5 grid gap-4 md:grid-cols-3">
                 <div className="rounded-2xl border border-cyan-300/20 bg-cyan-300/10 p-4">
                   <p className="text-sm font-semibold text-cyan-100">DOM clone</p>
@@ -200,17 +196,14 @@ const SelectionCaptureSandboxPage = () => {
                   <p className="mt-2 text-xs leading-6 text-amber-50/80">ClipboardItem が使えない場合は PNG ダウンロードに切り替えます。</p>
                 </div>
               </div>
-
               <SelectionCaptureOverlay targetRef={targetRef} active={isActive} busy={isBusy} onCancel={handleCancelCapture} onCapture={handleCapture} />
             </div>
           </div>
-
           <aside className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6">
             <h2 className="text-xl font-semibold text-white">状態</h2>
             <div className="mt-4 rounded-2xl border border-slate-800 bg-slate-950/70 p-4 text-sm leading-7 text-slate-300">
               {STATUS_LABELS[status]}
             </div>
-
             <h2 className="mt-6 text-xl font-semibold text-white">プレビュー</h2>
             <div className="mt-4 flex min-h-[260px] items-center justify-center overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
               {previewUrl ? (

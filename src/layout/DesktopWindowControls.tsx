@@ -73,7 +73,6 @@ const DesktopWindowControls = () => {
       >
         <span className="desktop-window-controls__minimize" aria-hidden />
       </button>
-
       <button
         type="button"
         className="desktop-window-controls__button"
@@ -92,7 +91,6 @@ const DesktopWindowControls = () => {
           aria-hidden
         />
       </button>
-
       <button
         type="button"
         className="desktop-window-controls__button desktop-window-controls__button--close"

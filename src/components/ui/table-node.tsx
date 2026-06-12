@@ -589,7 +589,6 @@ const TableBordersDropdownMenuContent = (props: React.ComponentProps<typeof Drop
           Left Border
         </DropdownMenuCheckboxItem>
       </DropdownMenuGroup>
-
       <DropdownMenuGroup>
         <DropdownMenuCheckboxItem
           checked={hasNoBorders}
@@ -645,7 +644,6 @@ const ColorDropdownMenu = ({
       <DropdownMenuTrigger asChild>
         <ToolbarButton tooltip={tooltip}>{children}</ToolbarButton>
       </DropdownMenuTrigger>
-
       <DropdownMenuContent align="start">
         <ToolbarMenuGroup label="Colors">
           <ColorDropdownMenuItems
@@ -732,7 +730,6 @@ const TableFloatingToolbarContent = ({
                 <Grid2X2Icon />
               </ToolbarButton>
             </DropdownMenuTrigger>
-
             <DropdownMenuPortal>
               <TableBordersDropdownMenuContent />
             </DropdownMenuPortal>

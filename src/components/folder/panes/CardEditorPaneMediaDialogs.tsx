@@ -105,7 +105,6 @@ const CardEditorPaneMediaDialogsInner = ({
           />
         )}
       </MediaDialog>
-
       <MediaDialog
         title="音声を追加"
         open={Boolean(audioDialogSide)}
@@ -122,7 +121,6 @@ const CardEditorPaneMediaDialogsInner = ({
           />
         )}
       </MediaDialog>
-
       <MediaDialog
         title="リンクを追加"
         open={Boolean(linkDialogSide)}

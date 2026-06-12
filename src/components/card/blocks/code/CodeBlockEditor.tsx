@@ -125,7 +125,6 @@ const CodeBlockEditor = ({ value, onChange, className, zoom }: CodeBlockEditorPr
       >
         <SelectValue placeholder="Language" />
       </SelectTrigger>
-
       <SelectContent className="bg-white">
         {recentLangItems.length > 0 && (
           <>

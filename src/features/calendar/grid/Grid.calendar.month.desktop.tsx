@@ -339,7 +339,6 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, weekStartDay, visibleEv
           </div>
         ))}
       </div>
-
       <div className="calendar-month-grid bg-white">
         <div aria-hidden="true" className="calendar-month-grid-spacer" style={{ height: topSpacerHeight }} />
 

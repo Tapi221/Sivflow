@@ -318,7 +318,6 @@ const ImageGallery = ({ items, displayMode = "fixed", zoom = 1 }: ImageGalleryPr
                   });
                 }}
               />
-
               <div className={IMAGE_ACTION_BAR_CLASS_NAME}>
                 <button
                   type="button"

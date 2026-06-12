@@ -53,7 +53,6 @@ const UploadProgress = ({
           {Math.round(progress)}%
         </span>
       </div>
-
       <Progress
         value={progress}
         className={cn("h-1.5", status === "failed" ? "bg-red-100" : "")}

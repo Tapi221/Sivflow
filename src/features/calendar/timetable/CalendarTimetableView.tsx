@@ -240,7 +240,6 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
           <button type="button" aria-label="時間割設定" className={cn("flex items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[#6e6e73] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "h-8 w-8" : "h-9 w-9")} onClick={handleOpenSettings}>{StratisSettingsIcon ? <StratisSettingsIcon className={cn(isCompact ? "h-3.5 w-3.5" : "h-4 w-4")} aria-hidden="true" focusable="false" /> : null}</button>
         </div>
       </div>
-
       <div className={cn("min-h-0 flex-1 text-center scrollbar-hidden", isCompact ? "overflow-y-auto overflow-x-hidden px-4 pb-3" : "overflow-auto px-5 pb-5")}>
         <div className={cn("gap-y-2 text-left", isCompact ? "grid w-full min-w-0 gap-x-1" : "inline-grid w-max gap-x-2")} style={timetableGridStyle}>
           <div aria-hidden="true" className={isCompact ? "h-7" : "h-8"} />

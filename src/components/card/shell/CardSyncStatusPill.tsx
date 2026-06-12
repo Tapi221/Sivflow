@@ -28,7 +28,6 @@ const CardSyncStatusPill = ({ lastSyncedAtMs, hasError = false, isRetrying = fal
       )}
     >
       <span className="truncate">{label}</span>
-
       <button
         type="button"
         className={cn(

@@ -29,7 +29,6 @@ const EmojiInputElement = (props: PlateElementProps) => {
     <PlateElement as="span" {...props}>
       <InlineCombobox value={value} element={element} filter={false} setValue={setValue} trigger=":" hideWhenNoValue>
         <InlineComboboxInput />
-
         <InlineComboboxContent>
           {!isPending && <InlineComboboxEmpty>No results</InlineComboboxEmpty>}
 

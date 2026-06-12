@@ -449,7 +449,6 @@ const CalendarYearViewComponent = ({
             <h2 className="mb-4 px-1 text-[17px] font-semibold leading-none tracking-[-0.01em] text-[#1c1c1e]">
               {year.label}
             </h2>
-
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
               {year.months.map((month) => (
                 <section
@@ -460,7 +459,6 @@ const CalendarYearViewComponent = ({
                   <h3 className="mb-3 text-[15px] font-semibold leading-none tracking-[-0.01em] text-[#1c1c1e]">
                     {month.label}
                   </h3>
-
                   <div className="grid grid-cols-7 gap-y-1 text-center text-[11px] font-semibold leading-none text-[#8e8e93]">
                     {weekdayLabels.map((weekday, index) => (
                       <div key={`${weekday}-${index}`} className="flex h-5 items-center justify-center">
@@ -468,7 +466,6 @@ const CalendarYearViewComponent = ({
                       </div>
                     ))}
                   </div>
-
                   <div className="mt-1 space-y-1 text-center text-[12px] leading-none">
                     {month.weeks.map((week) => (
                       <div key={week.key} data-calendar-week-key={week.key} className="grid grid-cols-7 gap-y-1">

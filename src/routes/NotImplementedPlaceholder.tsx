@@ -12,14 +12,12 @@ const NotImplementedPlaceholder = () => {
         <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-400">
           <Construction className="w-10 h-10" />
         </div>
-
         <h1 className="text-2xl font-bold text-slate-800 mb-2">未実装機能</h1>
         <p className="text-slate-500 mb-8">
           申し訳ありませんが、このモードは現在開発中です。
           <br />
           今後のアップデートをお待ちください。
         </p>
-
         <Button
           onClick={() => navigate(-1)}
           className="w-full h-12 rounded-xl font-bold"

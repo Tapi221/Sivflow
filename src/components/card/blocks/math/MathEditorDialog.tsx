@@ -38,7 +38,6 @@ const MathEditorDialog: React.FC<MathEditorDialogProps> = ({ open, onOpenChange,
             数式を編集するダイアログ
           </DialogDescription>
         </DialogHeader>
-
         <div className="space-y-3 px-3 pt-3 pb-4">
           <AutoResizeTextarea
             value={latex}
@@ -63,7 +62,6 @@ const MathEditorDialog: React.FC<MathEditorDialogProps> = ({ open, onOpenChange,
             )}
             style={{ "--tw-ring-color": ringColor } as CSSCustomProperties}
           />
-
           <div className="px-1">
             <span
               className={cn(

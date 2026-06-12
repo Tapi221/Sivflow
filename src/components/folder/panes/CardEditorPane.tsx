@@ -1010,7 +1010,6 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
             )
           )}
         </CardWorkspaceShell>
-
         <CardEditorPaneMediaDialogs
           imageDialogSide={imageDialogSide}
           setImageDialogSide={setImageDialogSide}

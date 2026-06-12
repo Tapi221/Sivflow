@@ -107,7 +107,6 @@ const MathBlockInner: React.FC<MathBlockProps> = ({
           className={cn("rounded-lg transition-colors", "hover:bg-slate-50")}
           zoom={zoom}
         />
-
         <MathEditorDialog
           open={isEditorOpen}
           onOpenChange={setIsEditorOpen}

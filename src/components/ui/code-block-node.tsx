@@ -151,7 +151,6 @@ const CodeBlockCombobox = () => {
             placeholder="Search language..."
           />
           <CommandEmpty>No language found.</CommandEmpty>
-
           <CommandList className="h-[344px] overflow-y-auto">
             <CommandGroup>
               {items.map((language) => (
@@ -229,7 +228,6 @@ const CodeBlockElement = (props: PlateElementProps<TCodeBlockElement>) => {
         <pre className="overflow-x-auto p-8 pr-4 font-mono text-sm leading-[normal] [tab-size:2] print:break-inside-avoid">
           <code>{props.children}</code>
         </pre>
-
         <div
           className="absolute top-1 right-1 z-10 flex select-none gap-0.5"
           contentEditable={false}
@@ -247,7 +245,6 @@ const CodeBlockElement = (props: PlateElementProps<TCodeBlockElement>) => {
           )}
 
           <CodeBlockCombobox />
-
           <CopyButton
             size="icon"
             variant="ghost"

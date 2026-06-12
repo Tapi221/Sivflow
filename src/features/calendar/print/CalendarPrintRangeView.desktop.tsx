@@ -77,7 +77,6 @@ const CalendarPrintRangeView = ({ titleLabel, rangeLabel, focusDate, range, even
           <h1 className="calendar-print-range-title">{titleLabel}</h1>
           <p className="calendar-print-range-subtitle">{rangeLabel}</p>
         </div>
-
         <div className="calendar-print-range-grid" style={gridStyle}>
           {days.map((day) => {
             const dayEvents = getEventsForDay(events, day.date);
@@ -89,7 +88,6 @@ const CalendarPrintRangeView = ({ titleLabel, rangeLabel, focusDate, range, even
                   <span className="calendar-print-range-day-number">{format(day.date, "d")}</span>
                   <span className="calendar-print-range-weekday">{CALENDAR_PRINT_RANGE_WEEKDAY_LABELS[day.date.getDay()]}</span>
                 </div>
-
                 <div className="calendar-print-range-events">
                   {(dayEvents.length > 0 ? dayEvents : CALENDAR_PRINT_RANGE_EMPTY_EVENTS).map((event) => (
                     <CalendarEventChipMonth key={event.id} event={event} tooltipDisabled />

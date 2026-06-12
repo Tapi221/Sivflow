@@ -151,14 +151,12 @@ const ScheduleScreenHeaderDesktop = ({
       <h1 className="w-32 shrink-0 truncate text-[17px] font-semibold tracking-[-0.01em] text-[#1c1c1e]">
         {titleLabel}
       </h1>
-
       <div className="ml-auto flex shrink-0 items-center gap-2">
         <TodayBar
           onPrevious={onPrevious}
           onNext={onNext}
           onToday={onToday}
         />
-
         <ViewModeDropdown
           value={selectedViewMode}
           onChange={onSelectViewMode}
@@ -211,7 +209,6 @@ const ScheduleScreenHeaderDesktop = ({
           {isPrintPopoverOpen && (
             <div ref={printPopoverRef} className={CALENDAR_PRINT_POPOVER_CLASS_NAME} role="dialog" aria-label={t.exportCalendarPdf}>
               <div className={CALENDAR_PRINT_POPOVER_TITLE_CLASS_NAME}>{t.printRangeLabel}</div>
-
               <div role="group" aria-label={t.printRangeLabel}>
                 {printRangeOptions.map((option) => {
                   const isActive = resolvedPrintRange.mode === option.value;

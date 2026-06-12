@@ -86,7 +86,6 @@ const FontSizeToolbarButton = () => {
       <ToolbarButton onClick={() => handleFontSizeChange(-1)}>
         <Minus />
       </ToolbarButton>
-
       <Popover open={isFocused} modal={false}>
         <PopoverTrigger asChild>
           <input
@@ -135,7 +134,6 @@ const FontSizeToolbarButton = () => {
           ))}
         </PopoverContent>
       </Popover>
-
       <ToolbarButton onClick={() => handleFontSizeChange(1)}>
         <Plus />
       </ToolbarButton>

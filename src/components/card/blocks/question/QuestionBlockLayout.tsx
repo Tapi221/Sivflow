@@ -91,7 +91,6 @@ const QuestionBlockLayout = ({ questionContent, answerContent, className, contai
           </span>
           {questionContent}
         </div>
-
         <div
           className="flex items-start border-t border-amber-200/60"
           {...mergedAnswerContainerProps}

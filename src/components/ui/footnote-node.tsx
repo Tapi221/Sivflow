@@ -409,7 +409,6 @@ const FootnoteInputElement = (props: PlateElementProps) => {
         trigger="^"
       >
         <InlineComboboxInput className="min-w-[1ch]" />
-
         <InlineComboboxContent className="my-1.5 w-72">
           {showCreateOption || filteredIdentifiers.length > 0 ? null : (
             <InlineComboboxEmpty>No footnotes</InlineComboboxEmpty>

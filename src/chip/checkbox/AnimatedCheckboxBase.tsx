@@ -55,7 +55,6 @@ const AnimatedCheckboxBase = ({
         )}
         style={{ borderColor: color, borderWidth }}
       />
-
       <span
         className={cn(
           "absolute inset-0 transition-all duration-200",

@@ -28,7 +28,6 @@ const LineHeightToolbarButton = (props: DropdownMenuProps) => {
           <WrapText />
         </ToolbarButton>
       </DropdownMenuTrigger>
-
       <DropdownMenuContent className="min-w-0" align="start">
         <DropdownMenuRadioGroup
           value={value}

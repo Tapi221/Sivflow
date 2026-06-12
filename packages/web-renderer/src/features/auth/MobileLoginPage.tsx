@@ -211,20 +211,17 @@ const MobileLoginPage = () => {
   return (
     <main style={styles.page}>
       <div style={styles.backgroundOverlay} />
-
       <section style={styles.card}>
         <div style={styles.brandBlock}>
           <img src={appIconSrc} alt="Sivflow" style={styles.logoIcon} />
           <p style={styles.tagline}>Write. Connect. Evolve.</p>
         </div>
-
         <h2 style={styles.heading}>ログイン</h2>
         <p style={styles.description}>
           思考をつなぎ、学びを進化させる
           <br />
           フラッシュカードプラットフォーム
         </p>
-
         <button type="button" onClick={handleGoogleLogin} disabled={isLoading} style={{ ...styles.button, opacity: isLoading ? 0.64 : 1 }}>
           {isLoading ? (
             <>
@@ -238,13 +235,11 @@ const MobileLoginPage = () => {
             </>
           )}
         </button>
-
         <div style={styles.divider}>
           <div style={styles.line} />
           <span style={styles.dividerText}>または</span>
           <div style={styles.line} />
         </div>
-
         <div style={styles.secureBox}>
           <ShieldIcon />
           <p style={styles.secureText}>ログインすると、データは安全に同期・バックアップされます。</p>

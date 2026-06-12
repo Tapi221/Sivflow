@@ -53,7 +53,6 @@ const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions, class
           />
         )}
       </DropdownMenuTrigger>
-
       <ExplorerMenuPanel
         actions={actions}
         closeMenu={closeMenu}

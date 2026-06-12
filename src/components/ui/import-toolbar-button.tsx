@@ -76,7 +76,6 @@ const ImportToolbarButton = (props: DropdownMenuProps) => {
           <ArrowUpToLineIcon className="size-4" />
         </ToolbarButton>
       </DropdownMenuTrigger>
-
       <DropdownMenuContent align="start">
         <DropdownMenuGroup>
           <DropdownMenuItem
@@ -86,7 +85,6 @@ const ImportToolbarButton = (props: DropdownMenuProps) => {
           >
             Import from HTML
           </DropdownMenuItem>
-
           <DropdownMenuItem
             onSelect={() => {
               openMdFilePicker();
@@ -94,7 +92,6 @@ const ImportToolbarButton = (props: DropdownMenuProps) => {
           >
             Import from Markdown
           </DropdownMenuItem>
-
           <DropdownMenuItem
             onSelect={() => {
               openDocxFilePicker();

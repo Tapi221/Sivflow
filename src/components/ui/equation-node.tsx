@@ -67,7 +67,6 @@ const EquationPopoverContent = ({
         autoFocus
         {...props}
       />
-
       <Button variant="secondary" className="px-3" onClick={onClose}>
         Done <CornerDownLeftIcon className="size-3.5" />
       </Button>
@@ -126,7 +125,6 @@ const EquationElement = (props: PlateElementProps<TEquationElement>) => {
             {lineBreakBadge}
           </div>
         </PopoverTrigger>
-
         <EquationPopoverContent
           open={open}
           placeholder={String.raw`f(x) = \begin{cases}
@@ -212,7 +210,6 @@ const InlineEquationElement = (props: PlateElementProps<TEquationElement>) => {
             )}
           </div>
         </PopoverTrigger>
-
         <EquationPopoverContent
           className="my-auto"
           open={open}

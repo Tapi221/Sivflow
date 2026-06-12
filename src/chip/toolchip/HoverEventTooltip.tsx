@@ -284,7 +284,6 @@ const HoverEventTooltip = ({
           >
             <div className="relative">
               <span aria-hidden="true" className={TOOLTIP_BACKDROP_FADE_CLASS_NAME} />
-
               <div className={TOOLTIP_SURFACE_CLASS_NAME}>
                 <div className="flex min-w-0 items-start justify-between gap-3">
                   <div className="flex min-w-0 items-start gap-2">
@@ -293,7 +292,6 @@ const HoverEventTooltip = ({
                       className="mt-[5px] h-2 w-2 shrink-0 rounded-full shadow-[0_0_0_3px_rgba(255,255,255,0.72)]"
                       style={{ background: accentColor }}
                     />
-
                     <span className="min-w-0 flex-1">
                       {tooltipTitle && (
                         <span className="block break-words text-[12px] font-semibold leading-snug tracking-[-0.01em] text-[#405162]">
@@ -319,7 +317,6 @@ const HoverEventTooltip = ({
                     </button>
                   )}
                 </div>
-
                 <span
                   className={cn(TOOLTIP_ARROW_CLASS_NAME, getArrowClassName(position.side))}
                   style={{ left: position.arrowX }}

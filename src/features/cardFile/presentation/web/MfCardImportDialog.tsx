@@ -227,14 +227,12 @@ const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
               : "選択中のフォルダに単体カードを追加します。"}
           </DialogDescription>
         </DialogHeader>
-
         <div className="grid gap-4">
           <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
             <div className="grid gap-3">
               <p className="text-sm font-medium text-slate-800">
                 .mfcard ファイルを選択
               </p>
-
               <div className="grid gap-2">
                 <p className="text-sm font-medium text-slate-800">取り込み先</p>
                 <Select
@@ -286,21 +284,18 @@ const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
                   </Select>
                 ) : null}
               </div>
-
               <Input
                 type="file"
                 accept={`.mfcard,${MF_CARD_MIME_TYPE},application/json`}
                 onChange={handleFileChange}
                 disabled={isParsing || isImporting}
               />
-
               <p className="text-xs leading-relaxed text-slate-500">
                 MFCard
                 は単体カードの共有形式です。復習履歴や同期状態は取り込みません。
               </p>
             </div>
           </div>
-
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div className="rounded-xl border border-slate-200 p-3">
               <p className="text-xs text-slate-500">ファイル</p>
@@ -322,7 +317,6 @@ const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
               </p>
             </div>
           </div>
-
           <div className="rounded-xl border border-slate-200">
             <div className="border-b border-slate-200 px-4 py-3 text-sm font-medium text-slate-800">
               プレビュー
@@ -356,7 +350,6 @@ const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
             </div>
           </div>
         </div>
-
         <DialogFooter>
           <Button variant="outline" onClick={() => handleClose(false)}>
             閉じる

@@ -22,7 +22,6 @@ const PlateEditor = ({ initialValue, onChange }: PlateEditorProps) => {
       <EditorContainer>
         <Editor placeholder="本文を入力" spellCheck />
       </EditorContainer>
-
       <SettingsDialog />
     </Plate>
   );

@@ -115,7 +115,6 @@ const EmojiPopover = ({ children, control, isOpen, setIsOpen }: { children: Reac
   return (
     <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
       <Popover.Trigger asChild>{control}</Popover.Trigger>
-
       <Popover.Portal>
         <Popover.Content className="z-100">{children}</Popover.Content>
       </Popover.Portal>
