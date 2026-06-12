@@ -1,26 +1,49 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
+
 import { addDays, endOfDay, endOfMonth, format, startOfDay, startOfMonth, subDays } from "date-fns";
+
 import type { ComponentType, SVGProps } from "react";
+
 import * as stratisIcons from "stratis-ui-icons";
+
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
+
 import { createCalendarYearEventDisplayResolver } from "@/features/calendar/calendarEventSourcePriority";
+
 import { attachCalendarEventDisplayMetadata, filterCalendarEventsBySourceVisibility } from "@/features/calendar/calendarEventVisibility";
+
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
+
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
+
 import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
+
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
+
 import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
+
 import type { AppCalendarItem, CalendarViewMode, CalendarViewModeSelection, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
+
 import { CalendarTimetableView } from "@/features/calendar/timetable/CalendarTimetableView";
+
 import { applyCalendarEventMoveOverrides, useCalendarEventMoveController } from "@/features/calendar/useCalendarEventMoveController";
+
 import { useProjectCalendarActions } from "@/features/calendar/useProjectCalendarActions";
+
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
+
 import { createCalendarEventsScopeKey, useTransientEmptyCalendarEvents } from "@/features/calendar/useTransientEmptyCalendarEvents";
+
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+
 import { cn } from "@/lib/utils";
+
 import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
+
 import { MobileCalendarEventComposer } from "./MobileCalendarEventComposer";
+
 import { MobileCalendarSidebar, MobileCalendarSidebarOpenButton } from "./MobileCalendarSidebar";
 
 type CalendarEventDisplayRange = { start: Date; end: Date; };
@@ -77,9 +100,11 @@ const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);
 
 const StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);
 
-const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
 const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);
+
 const StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);
+
+const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
 
 const buildDaysDisplayRange = (days: Date[], fallbackDate: Date, bufferDays: number): CalendarEventDisplayRange => ({ start: startOfDay(subDays(days[0] ?? fallbackDate, bufferDays)), end: endOfDay(addDays(days.at(-1) ?? fallbackDate, bufferDays)) });
 
@@ -265,7 +290,4 @@ const ScheduleScreen = (_props: ScheduleScreenProps) => {
     return <CarvePanel className={MOBILE_SCHEDULE_PANEL_CLASS}>{renderViewHeader(MOBILE_SCHEDULE_HEADER_CLASS)}<div className={cn(MOBILE_SCHEDULE_SURFACE_CLASS, IOS_CALENDAR_WEEKDAY_SURFACE_CLASS)}><CalendarWeekDayGrid headerScrollRef={headerScrollRef} allDayScrollRef={allDayScrollRef} scrollContainerRef={scrollContainerRef} visibleDays={visibleDays} visibleEvents={mainCalendarEvents} calendarGridStyle={calendarGridStyle} onScroll={handleCalendarScroll} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} /></div></CarvePanel>;
   };
 
-  return <div ref={contentViewportRef} className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-white text-[#1c1c1e]"><style>{MOBILE_SCHEDULE_STYLE}</style><MobileCalendarSidebar isOpen={isSidebarOpen} onClose={handleCloseSidebar} /><MobileCalendarEventComposer isOpen={isEventComposerOpen} selectedDate={selectedDate} accounts={googleAccountsWithColorOverridesForSidebar} projectCalendarLinks={projectCalendarLinks} onClose={handleCloseEventComposer} onAddCalendar={addGoogleCalendar} onCreateEvent={createGoogleCalendarEvent} /><button type="button" className={MOBILE_ADD_EVENT_BUTTON_CLASS} onClick={handleAddScheduleItem} aria-label="新規予定を追加">{StratisPlusIcon ? <StratisPlusIcon className="h-7 w-7" aria-hidden="true" focusable="false" /> : null}</button><main className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white p-0">{renderCalendarContent()}</main></div>;
-};
-
-export { ScheduleScreen };
+  return <div ref={contentViewportRef} className="relative flex h-full min-h-0 w-full flex-col overflow-hidden bg-white text-[#1c1c1e]"><style>{MOBILE_SCHEDULE_STYLE}</style><MobileCalendarSidebar isOpen={isSidebarOpen} onClose={handleCloseSidebar} /><MobileCalendarEventComposer isOpen={isEventComposerOpen} selectedDate={selectedDate} accounts={googleAccountsWithColorOverridesForSidebar} projectCalendarLinks={projectCalendarLinks} onClose={handleCloseEventComposer} onAddCalendar={addGoogleCalendar} onCreateEvent={createGoogleCalendarEvent} /><button type="button" className={MOBILE_ADD_EVENT_BUTTON_CLASS} onClick={handleAddScheduleItem} aria-label="新規予定を追加">{StratisPlusIcon ? <StratisPlusIcon className="h-7 w-7" aria-hidden="true" focusable="false" /> : null}</button><main className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white p-0">{renderCalend

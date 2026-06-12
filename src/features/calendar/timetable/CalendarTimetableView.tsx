@@ -1,17 +1,31 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
+
 import type { CalendarTimetableColorKey, CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTimetablePeriod, CalendarTimetableSlot, CalendarTimetableVisibleDayCount, CalendarTimetableWeekdayIndex } from "@core/domain/calendar/timetable/timetable.types";
+
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
+
 import { ja } from "date-fns/locale";
+
 import type { ComponentType, CSSProperties, SVGProps } from "react";
+
 import * as stratisIcons from "stratis-ui-icons";
+
 import { TAG_COLOR_KEYS } from "@/chip/tag/tag.constants";
+
 import { getTagColorStyle } from "@/chip/tag/tag.style";
+
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
+
 import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
+
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
+
 import { cn } from "@/lib/utils";
+
 import { normalizeVisibleDayCount } from "./calendarTimetable.storage";
+
 import { CalendarTimetableSyllabusCatalogPanel } from "./CalendarTimetableSyllabusCatalogPanel";
+
 import { useCalendarTimetable } from "./useCalendarTimetable";
 
 type TimetableSlot = { dayIndex: CalendarTimetableWeekdayIndex; periodId: string; };
@@ -66,10 +80,13 @@ const StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);
 
 const StratisSettingsIcon = resolveStratisIcon(STRATIS_SETTINGS_ICON_NAMES);
 
-const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
 const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);
+
 const StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);
+
 const StratisSettingsIcon = resolveStratisIcon(STRATIS_SETTINGS_ICON_NAMES);
+
+const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
 
 const createTimetableSlotKey = ({ dayIndex, periodId }: TimetableSlot): string => `${dayIndex}:${periodId}`;
 

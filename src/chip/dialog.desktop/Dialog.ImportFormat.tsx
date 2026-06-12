@@ -1,16 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-
-
 type ImportFormat = "xlsx" | "mfdeck" | "mfcard";
 type ImportFormatDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSelect: (format: ImportFormat) => void;
 };
-
-
 
 const ImportFormatDialog = ({ open, onOpenChange, onSelect }: ImportFormatDialogProps) => {
   const handleSelect = (format: ImportFormat) => {
@@ -69,9 +65,5 @@ const ImportFormatDialog = ({ open, onOpenChange, onSelect }: ImportFormatDialog
   );
 };
 
-
-
 export { ImportFormatDialog };
-
-
 export type { ImportFormat };
