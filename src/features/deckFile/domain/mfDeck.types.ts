@@ -1,6 +1,8 @@
 import type { CardBlock } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 type MfDeckIssueLevel = "error" | "warning";
 type MfDeckIssueCode = | "invalid_extension" | "file_too_large" | "missing_manifest" | "missing_cards" | "missing_media" | "invalid_zip" | "invalid_json" | "invalid_format" | "unsupported_version" | "invalid_manifest" | "invalid_cards" | "invalid_media_manifest" | "empty_deck" | "card_count_mismatch" | "unsupported_media_reference" | "unreadable_media" | "unsafe_path" | "unexpected_value" | "duplicate_card_id" | "duplicate_block_id" | "duplicate_media_path" | "too_many_cards" | "too_many_blocks" | "too_many_media_entries" | "media_size_mismatch" | "unknown_media_entry" | "invalid_media_reference";
 type MfDeckIssue = {
@@ -58,8 +60,12 @@ type MfDeckValidationResult = | { ok: true;
     issues: MfDeckIssue[];
   };
 
+
+
 const MF_DECK_FORMAT = "sivflow.deck" as const;
 const MF_DECK_VERSION = 1 as const;
+
+
 
 type MfDeckMediaManifestV1 = {
   format: "sivflow.deck.media";
@@ -93,6 +99,8 @@ type MfDeckCardsJsonV1 = {
   cards: MfDeckCardV1[];
 };
 
+
+
 const MF_DECK_MANIFEST_PATH = "manifest.json" as const;
 const MF_DECK_CARDS_PATH = "cards.json" as const;
 const MF_DECK_MEDIA_DIRECTORY = "media/" as const;
@@ -103,6 +111,8 @@ const MF_DECK_MEDIA_URI_PREFIX = "mfdeck://media/" as const;
 const MF_DECK_MAX_CARDS = 50000 as const;
 const MF_DECK_MAX_BLOCKS_PER_FACE = 1000 as const;
 const MF_DECK_MAX_MEDIA_ENTRIES = 5000 as const;
+
+
 
 class MfDeckValidationError extends Error {
   readonly issues: MfDeckIssue[];
@@ -123,5 +133,10 @@ class MfDeckExportError extends Error {
   }
 }
 
+
+
 export { MF_DECK_FORMAT, MF_DECK_VERSION, MF_DECK_MANIFEST_PATH, MF_DECK_CARDS_PATH, MF_DECK_MEDIA_DIRECTORY, MF_DECK_MEDIA_MANIFEST_PATH, MF_DECK_FILE_EXTENSION, MF_DECK_MIME_TYPE, MF_DECK_MEDIA_URI_PREFIX, MF_DECK_MAX_CARDS, MF_DECK_MAX_BLOCKS_PER_FACE, MF_DECK_MAX_MEDIA_ENTRIES, MfDeckValidationError, MfDeckExportError };
+
+
+
 export type { MfDeckIssueLevel, MfDeckIssueCode, MfDeckIssue, MfDeckMediaKindV1, MfDeckMediaEntryV1, MfDeckMediaManifestV1, MfDeckManifestV1, MfDeckCardFlagsV1, MfDeckCardFaceV1, MfDeckCardV1, MfDeckCardsJsonV1, MfDeckArchiveV1, MfDeckValidationResult };

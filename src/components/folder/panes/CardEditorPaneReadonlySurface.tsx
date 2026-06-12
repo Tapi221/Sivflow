@@ -9,6 +9,8 @@ import { ViewCardFaceScene } from "@/features/cardsetview/presentation/web/ui/co
 import type { Card } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 type Side = "question" | "answer";
 type CardEditorPaneReadonlySurfaceProps = Readonly<{ card: Card;
   isFlipped: boolean;
@@ -20,6 +22,8 @@ type CardEditorPaneReadonlySurfaceProps = Readonly<{ card: Card;
   zoomScale: number;
   fitScale?: number;
 }>;
+
+
 
 const CardEditorPaneReadonlySurface = ({ card, isFlipped, onFlip, onToggleUncertainty, onToggleBookmark, displayMode, cardLayoutMode, zoomScale, fitScale = 1 }: CardEditorPaneReadonlySurfaceProps) => {
   const metrics = React.useMemo(() => buildCardSurfaceMetrics({ displayMode, cardLayoutMode, interactionMode: "view", zoomScale, fitScale, showInk: displayMode === "fixed" }), [cardLayoutMode, displayMode, fitScale, zoomScale]);
@@ -118,5 +122,10 @@ const CardEditorPaneReadonlySurface = ({ card, isFlipped, onFlip, onToggleUncert
   );
 };
 
+
+
 export { CardEditorPaneReadonlySurface };
+
+
+
 export type { CardEditorPaneReadonlySurfaceProps };

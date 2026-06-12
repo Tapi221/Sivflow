@@ -1,5 +1,7 @@
 import { getImageBlob } from "./imageFileStore";
 
+
+
 type BlobScopeOptions = {
   userId?: string | null;
 };
@@ -17,10 +19,14 @@ interface BlobCacheStats {
   revokeCount: number;
 }
 
+
+
 const MAX_CACHE_ENTRIES = 80;
 const cache = new Map<string, CacheEntry>();
 let _evictCount = 0;
 let _revokeCount = 0;
+
+
 
 const makeScopedId = (id: string, options?: BlobScopeOptions): string => {
   const userId = options?.userId?.trim();
@@ -159,5 +165,10 @@ const getBlobCacheStats = () => {
   };
 };
 
+
+
 export { getOrCreateImageBlobUrl, removeImageBlobUrl, pinImageBlobUrl, unpinImageBlobUrl, getBlobCacheStats };
+
+
+
 export type { BlobCacheStats };

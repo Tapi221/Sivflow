@@ -7,6 +7,8 @@ import { MobileScalableCard } from "@/components/card/frame/MobileScalableCard";
 import { CANONICAL_CARD_WIDTH, CARD_SAFE_PADDING_PX } from "@/domain/card/cardGeometry.constants";
 import type { CardBlock } from "@/types/domain/card";
 
+
+
 const FIXTURE_BLOCKS: CardBlock[] = [
   {
     id: "fixture-code-1",
@@ -30,6 +32,8 @@ const FIXTURE_CARD = {
   questionExtraRows: 2,
   answerExtraRows: 2,
 };
+
+
 
 const CardLayoutConsistencyTest = () => {
   const [editBlocks, setEditBlocks] =
@@ -79,5 +83,7 @@ const CardLayoutConsistencyTest = () => {
     </div>
   );
 };
+
+
 
 export default CardLayoutConsistencyTest;

@@ -2,6 +2,8 @@ import { deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import { requireFirestoreDb } from "@/services/firebase";
 
+
+
 type WatchChannel = {
   channelId: string;
   resourceId: string;
@@ -15,9 +17,13 @@ type GoogleWatchResponse = {
   expiration?: string | number;
 };
 
+
+
 const GCAL_API_BASE = "https://www.googleapis.com/calendar/v3";
 const WATCH_TTL_MS = 6 * 24 * 60 * 60 * 1000;
 const RENEWAL_THRESHOLD_MS = 24 * 60 * 60 * 1000;
+
+
 
 const isLoopbackHost = (hostname: string): boolean => {
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname.endsWith(".localhost");
@@ -269,5 +275,10 @@ class GoogleCalendarWatchManager {
   }
 }
 
+
+
 export { GoogleCalendarWatchManager };
+
+
+
 export type { WatchChannel };

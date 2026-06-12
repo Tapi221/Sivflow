@@ -4,10 +4,14 @@ import type { Document } from "@/types/domain/document";
 import type { AssetSyncPayload, ProjectMapSyncPayload, SyncDeletePayload, SyncEntity, SyncPayloadByEntity, SyncQueueItem, TagSyncPayload } from "@/types/domain/sync";
 import type { UserSettings } from "@/types/domain/user";
 
+
+
 type UpsertEntity = keyof SyncPayloadByEntity;
 type DeleteEntity = Extract<SyncEntity, "card" | "folder" | "cardSet" | "document" | "tag" | "asset" | "projectMap">;
 type UpsertQueueItem<TEntity extends UpsertEntity> = Extract<SyncQueueItem, { entity: TEntity; operationType: "create" | "update"; }>;
 type DateLike = Date | { toDate?: () => Date; } | null | undefined;
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 const hasString = (value: Record<string, unknown>, key: string): boolean => typeof value[key] === "string" && value[key].length > 0;
@@ -121,5 +125,10 @@ const assertDeletePayload = (payload: unknown): SyncDeletePayload => {
   throw new Error("Delete payload must include a string id");
 };
 
+
+
 export { assertUpsertPayload, assertDeletePayload };
+
+
+
 export type { UpsertEntity, DeleteEntity, UpsertQueueItem };

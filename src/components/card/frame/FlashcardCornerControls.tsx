@@ -6,6 +6,8 @@ import { CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CL
 import { CardCornerActions } from "./CardCornerActions";
 import type { FlashcardCardLike, FlashcardMediaLike } from "./flashcard.types";
 
+
+
 interface FlashcardCornerControlsProps {
   card: FlashcardCardLike;
   hasUncertainty: boolean;
@@ -25,6 +27,8 @@ interface FlashcardCornerControlsResult {
   actionsTopLeft: React.ReactNode[] | undefined;
   actionsTopRight: React.ReactNode[] | undefined;
 }
+
+
 
 const resolveSafeVisualScale = (value?: number) => {
   if (typeof value !== "number") return 1;
@@ -222,5 +226,10 @@ const useFlashcardCornerControls = ({ card, hasUncertainty, isBookmarked, active
   ]);
 };
 
+
+
 export { useFlashcardCornerControls };
+
+
+
 export type { FlashcardCornerControlsResult };

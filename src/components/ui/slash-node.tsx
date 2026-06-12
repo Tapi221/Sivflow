@@ -1,14 +1,24 @@
 "use client";
 
 import * as React from "react";
+
 import { AIChatPlugin } from "@platejs/ai/react";
+
 import { CalendarIcon, ChevronRightIcon, Code2, Columns3Icon, Heading1Icon, Heading2Icon, Heading3Icon, LightbulbIcon, ListIcon, ListOrdered, PenToolIcon, PilcrowIcon, Quote, RadicalIcon, SparklesIcon, Square, SuperscriptIcon, Table, TableOfContentsIcon } from "lucide-react";
+
 import type { TComboboxInputElement } from "platejs";
+
 import { KEYS } from "platejs";
+
 import type { PlateEditor, PlateElementProps } from "platejs/react";
+
 import { PlateElement } from "platejs/react";
+
 import { insertBlock, insertInlineElement } from "@/components/editor/transforms";
+
 import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxGroupLabel, InlineComboboxInput, InlineComboboxItem } from "./inline-combobox";
+
+
 
 type Group = {
   group: string;
@@ -22,6 +32,8 @@ type Group = {
     label?: string;
   }[];
 };
+
+
 
 const groups: Group[] = [
   {
@@ -197,6 +209,8 @@ const groups: Group[] = [
   },
 ];
 
+
+
 const SlashInputElement = (props: PlateElementProps<TComboboxInputElement>) => {
   const { editor, element } = props;
 
@@ -236,5 +250,7 @@ const SlashInputElement = (props: PlateElementProps<TComboboxInputElement>) => {
     </PlateElement>
   );
 };
+
+
 
 export { SlashInputElement };

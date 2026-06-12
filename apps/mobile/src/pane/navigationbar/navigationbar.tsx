@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceSidebarSection } from "@/pane.desktop/tab.desktopnative/Tab";
 
+
+
 type NavigationBarItemId = "explore" | "library" | "home" | "settings";
 type SidebarIconComponent = (props: { className?: string; }) => ReactNode;
 type NavigationBarItem = {
@@ -25,6 +27,8 @@ type NavigationBarMobileStyle = CSSProperties & {
   "--mobile-navigation-bar-active-x": string;
 };
 
+
+
 const DEFAULT_ACTIVE_ITEM_ID: NavigationBarItemId = "home";
 const NAVIGATION_BAR_ITEMS: readonly NavigationBarItem[] = [
   { id: "explore", label: "探す", Icon: GalleryIcon },
@@ -33,11 +37,15 @@ const NAVIGATION_BAR_ITEMS: readonly NavigationBarItem[] = [
   { id: "settings", label: "設定", Icon: SettingIcon, sectionKey: "settings" },
 ];
 
+
+
 const getNavigationBarItemIndex = (itemId: NavigationBarItemId) => {
   const itemIndex = NAVIGATION_BAR_ITEMS.findIndex((item) => item.id === itemId);
   return itemIndex >= 0 ? itemIndex : NAVIGATION_BAR_ITEMS.findIndex((item) => item.id === DEFAULT_ACTIVE_ITEM_ID);
 };
 const getNavigationBarActiveX = (itemIndex: number) => `${((itemIndex + 0.5) / NAVIGATION_BAR_ITEMS.length) * 100}%`;
+
+
 
 const NavigationBarMobileComponent = ({ activeItemId, className, onItemSelect, onOpenSettings }: NavigationBarMobileProps) => {
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
@@ -99,8 +107,13 @@ const NavigationBarMobileComponent = ({ activeItemId, className, onItemSelect, o
   );
 };
 
+
+
 const NavigationBarMobile = memo(NavigationBarMobileComponent);
 NavigationBarMobile.displayName = "NavigationBarMobile";
 
 export { NavigationBarMobile };
+
+
+
 export type { NavigationBarItemId, NavigationBarMobileProps };

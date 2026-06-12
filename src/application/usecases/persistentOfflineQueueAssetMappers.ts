@@ -1,6 +1,10 @@
 import type { AssetRecord, UploadedImage } from "@/types";
 
+
+
 type AssetLikeRecord = Partial<AssetRecord> & Partial<UploadedImage>;
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -79,5 +83,10 @@ const makeAssetRecord = ({ existing, itemId, userId, mime, size, localBlobId, re
   };
 };
 
+
+
 export { toAssetLikeRecord, makeAssetRecord };
+
+
+
 export type { AssetLikeRecord };
