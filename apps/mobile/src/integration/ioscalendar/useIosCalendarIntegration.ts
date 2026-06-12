@@ -4,23 +4,17 @@ import { AppState } from "react-native";
 import { createIosCalendarEvent, deleteIosCalendarEvent, fetchIosCalendars, fetchIosEvents, getIosCalendarPermissionStatus, isIosCalendarSupported, requestIosCalendarPermission, updateIosCalendarEvent } from "./iosCalendar.api";
 import type { IosCalendarConnectionStatus, IosCalendarEvent, IosCalendarListItem, IosCalendarPermissionStatus, IosCalendarRange, IosCalendarWritableEventDeleteInput, IosCalendarWritableEventInput, IosCalendarWritableEventUpdateInput } from "./iosCalendar.types";
 
-
-
 type LoadEventsInput = {
   calendarIds: string[];
   calendars: IosCalendarListItem[];
   range: IosCalendarRange | null;
 };
 
-
-
 const IOS_CALENDAR_PERMISSION_ERROR = "iOSカレンダーへのアクセス許可が必要です";
 const IOS_CALENDAR_UNSUPPORTED_ERROR = "iOSカレンダー連携はiOS端末でのみ利用できます";
 const IOS_CALENDAR_CREATE_ERROR = "iOSカレンダー予定の作成に失敗しました";
 const IOS_CALENDAR_UPDATE_ERROR = "iOSカレンダー予定の更新に失敗しました";
 const IOS_CALENDAR_DELETE_ERROR = "iOSカレンダー予定の削除に失敗しました";
-
-
 
 const normalizeRange = (range: IosCalendarRange): IosCalendarRange => range.rangeStart <= range.rangeEnd
   ? range
@@ -411,7 +405,5 @@ const useIosCalendarIntegration = () => {
     updateEvent,
   };
 };
-
-
 
 export { useIosCalendarIntegration };

@@ -15,16 +15,10 @@ interface IndexedDBMetadata {
   rebuildCount: number; // 再構築回数（無限ループ検知）
 }
 
-
-
 /**
  * 現在のスキーマバージョン
  */
 const CURRENT_SCHEMA_VERSION = 29;
 
-
-
 export { CURRENT_SCHEMA_VERSION };
-
-
 export type { IndexedDBMetadata };

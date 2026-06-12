@@ -6,8 +6,6 @@ import { getLocalDb } from "@/services/localDB";
 import type { SyncError } from "@/types";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
-
-
 interface HardDeleteOrphanedCardsResult {
   targetCardIds: string[];
   deletedCardIds: string[];
@@ -29,8 +27,6 @@ type CardRelationRecord = {
   toCardId?: unknown;
   id?: unknown;
 };
-
-
 
 const isInvalidFolderRefCardIssue = (
   issue: IntegrityIssue,
@@ -216,9 +212,5 @@ const createHardDeleteOrphanedCardsUseCase = () => {
   };
 };
 
-
-
 export { createHardDeleteOrphanedCardsUseCase };
-
-
 export type { HardDeleteOrphanedCardsResult };

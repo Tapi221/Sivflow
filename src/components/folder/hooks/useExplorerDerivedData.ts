@@ -6,8 +6,6 @@ import { useDocumentCommands } from "@/features/document/hooks/useDocumentComman
 import { compareOrderableEntities } from "@/lib/orderableEntity";
 import type { Card, CardSet, DocumentItem, ExplorerItem, Note } from "@/types";
 
-
-
 type LegacyEntityFields = {
   isDeleted?: boolean; is_deleted?: boolean; folder_id?: string | null; card_set_id?: string | null; orderIndex?: number; order_index?: number; };
 type DraftFolderFields = {
@@ -21,11 +19,7 @@ interface Params {
   isFiltering: boolean;
 }
 
-
-
 const ORPHAN_DOCUMENT_CLEANUP_LOG_PREFIX = "[useExplorerDerivedData] orphan PDF purge";
-
-
 
 const isSoftDeleted = (entity?: { isDeleted?: boolean; is_deleted?: boolean; } | null) => Boolean(entity?.isDeleted ?? entity?.is_deleted);
 const isDraftFolder = (folder: FolderTreeNode) => {
@@ -358,7 +352,5 @@ const useExplorerDerivedData = ({ treeFolders, treeCards, cardSets = [], documen
     getNextOrderIndex,
   };
 };
-
-
 
 export { useExplorerDerivedData };
