@@ -7,7 +7,8 @@ import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import type { GoogleOAuthCallbackPayload } from "./google.oauth-callback";
 import { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, isGoogleOAuthCallbackPayload } from "./google.oauth-callback";
 
-type GoogleCalendarAccess = { accessToken: string;
+type GoogleCalendarAccess = {
+  accessToken: string;
   accountEmail: string | null;
   accountName: string | null;
   accountPhotoUrl: string | null;

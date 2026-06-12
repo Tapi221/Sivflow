@@ -72,7 +72,8 @@ if (import.meta.env.DEV && typeof window !== "undefined") {
     .then((m) => m.installLocalDbDevtools?.())
     .catch(() => {});
 }
-class LocalDB extends Dexie { users!: Dexie.Table<User, string>;
+class LocalDB extends Dexie {
+  users!: Dexie.Table<User, string>;
   folders!: Dexie.Table<Folder, string>;
   cardSets!: Dexie.Table<CardSet, string>;
   cards!: Dexie.Table<Card, string>;

@@ -1,11 +1,13 @@
-type SelectionCapturePoint = { x: number;
+type SelectionCapturePoint = {
+  x: number;
   y: number;
 };
 type SelectionCaptureRect = SelectionCapturePoint & { width: number;
   height: number;
 };
 type SelectionCaptureShape = "rectangle" | "freehand";
-type SelectionCaptureArea = { readonly shape: SelectionCaptureShape;
+type SelectionCaptureArea = {
+  readonly shape: SelectionCaptureShape;
   readonly rect: SelectionCaptureRect;
   readonly path?: SelectionCapturePoint[];
 };

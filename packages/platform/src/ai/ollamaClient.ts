@@ -1,12 +1,15 @@
 import { getLocalAiSettings } from "./localAiSettings";
 
-type GenerateOllamaAnswerInput = { question: string;
+type GenerateOllamaAnswerInput = {
+  question: string;
   model?: string;
 };
-type GenerateOllamaAnswerResult = { answer: string;
+type GenerateOllamaAnswerResult = {
+  answer: string;
   model: string;
 };
-type TestOllamaConnectionResult = { ok: boolean;
+type TestOllamaConnectionResult = {
+  ok: boolean;
   modelAvailable: boolean;
   model: string;
   baseUrl: string;

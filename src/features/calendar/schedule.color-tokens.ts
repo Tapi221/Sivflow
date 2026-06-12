@@ -1,6 +1,7 @@
 import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 
-type CalendarColorTokens = { bg: string;
+type CalendarColorTokens = {
+  bg: string;
   border: string;
   text: string;
 };

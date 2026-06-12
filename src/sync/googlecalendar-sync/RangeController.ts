@@ -9,7 +9,8 @@ type RangeState = {
   end: Date | null;
 };
 
-class RangeController { private engineMap = new Map<string, GoogleCalendarSyncEngine>();
+class RangeController {
+  private engineMap = new Map<string, GoogleCalendarSyncEngine>();
 
   private state: RangeState = {
     start: null,

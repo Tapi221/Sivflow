@@ -16,7 +16,8 @@ type DirectoryBadgeVisibility = {
   bookmarked: boolean;
   tags: boolean;
 };
-interface ExplorerState { tagFilter: string[];
+interface ExplorerState {
+  tagFilter: string[];
   tagMatchMode: TagMatchMode;
   uncertaintyFilter: ToggleableFlag;
   bookmarkedFilter: ToggleableFlag;

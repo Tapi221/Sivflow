@@ -9,7 +9,8 @@ import { normalizeMemoryStability } from "@/utils/reviewUtils";
 import type { PracticeFilterRating } from "./usePracticeMode";
 
 type StudySessionRating = PracticeFilterRating;
-type StudySessionResult = { cardId: string;
+type StudySessionResult = {
+  cardId: string;
   rating: StudySessionRating;
   subjectiveScore: SubjectiveScoreValue;
   responseTimeMs: number;

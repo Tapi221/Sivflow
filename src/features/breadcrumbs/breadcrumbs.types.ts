@@ -1,10 +1,12 @@
-type BreadcrumbCrumb = { label: string;
+type BreadcrumbCrumb = {
+  label: string;
   /** react-router-dom の to 文字列。省略時はクリック不可。 */
   to?: string;
   /** クリック時にサイドバー選択を同期するフォルダ ID。null はルートへ戻す。 */
   folderId?: string | null;
 };
-type ExplorerBreadcrumbContext = { folderId: string | null;
+type ExplorerBreadcrumbContext = {
+  folderId: string | null;
   cardSet: { id: string; label: string; } | null;
 };
 

@@ -14,7 +14,8 @@ type GoogleCalendarEvent = CalendarEvent;
 // ─────────────────────────────────────────────────────────────
 // カレンダー一覧
 // ─────────────────────────────────────────────────────────────
-interface GoogleCalendarListItem { id: string;
+interface GoogleCalendarListItem {
+  id: string;
 
   summary: string;
 
@@ -31,7 +32,8 @@ interface GoogleCalendarListItem { id: string;
 // ─────────────────────────────────────────────────────────────
 // Hook options
 // ─────────────────────────────────────────────────────────────
-interface UseGoogleCalendarIntegrationOptions { authInstance?: Auth;
+interface UseGoogleCalendarIntegrationOptions {
+  authInstance?: Auth;
 }
 // ─────────────────────────────────────────────────────────────
 // 同期状態
@@ -40,7 +42,8 @@ interface UseGoogleCalendarIntegrationOptions { authInstance?: Auth;
 /** エンジンの現在の動作状態 */
 type GCalSyncState = "idle" | "syncing" | "needsReconnect" | "error";
 type GCalConnectionStatus = "connected" | "needsReconnect" | "error";
-type GCalSyncRange = { rangeStart: Date;
+type GCalSyncRange = {
+  rangeStart: Date;
   rangeEnd: Date;
 };
 type GCalForceSyncOptions = Partial<GCalSyncRange>;
@@ -59,7 +62,8 @@ type GCalSyncTokenMap = Record<string, string>;
  * インクリメンタル同期では
  * `status: "cancelled"` が削除を表す。
  */
-interface GCalRawIncrementalEvent { id?: string;
+interface GCalRawIncrementalEvent {
+  id?: string;
 
   summary?: string;
 
@@ -80,7 +84,8 @@ interface GCalRawIncrementalEvent { id?: string;
   };
 }
 /** events.list API レスポンス全体 */
-interface GCalEventsListResponse { items?: GCalRawIncrementalEvent[];
+interface GCalEventsListResponse {
+  items?: GCalRawIncrementalEvent[];
 
   /**
    * 次回インクリメンタル同期に使う
@@ -98,7 +103,8 @@ interface GCalEventsListResponse { items?: GCalRawIncrementalEvent[];
 // ─────────────────────────────────────────────────────────────
 // エンジンのオプション
 // ─────────────────────────────────────────────────────────────
-interface GCalSyncEngineOptions { accountId?: string;
+interface GCalSyncEngineOptions {
+  accountId?: string;
 
   /**
    * イベント追加
@@ -165,7 +171,8 @@ interface GCalSyncEngineOptions { accountId?: string;
 // ─────────────────────────────────────────────────────────────
 // Sync start context
 // ─────────────────────────────────────────────────────────────
-interface GCalSyncStartContext { /** * 現在有効な accessToken */ accessToken: string;
+interface GCalSyncStartContext {
+  /** * 現在有効な accessToken */ accessToken: string;
 
   /**
    * 同期対象カレンダー

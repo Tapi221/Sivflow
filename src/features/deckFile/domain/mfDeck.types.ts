@@ -3,7 +3,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 type MfDeckIssueLevel = "error" | "warning";
 type MfDeckIssueCode = | "invalid_extension" | "file_too_large" | "missing_manifest" | "missing_cards" | "missing_media" | "invalid_zip" | "invalid_json" | "invalid_format" | "unsupported_version" | "invalid_manifest" | "invalid_cards" | "invalid_media_manifest" | "empty_deck" | "card_count_mismatch" | "unsupported_media_reference" | "unreadable_media" | "unsafe_path" | "unexpected_value" | "duplicate_card_id" | "duplicate_block_id" | "duplicate_media_path" | "too_many_cards" | "too_many_blocks" | "too_many_media_entries" | "media_size_mismatch" | "unknown_media_entry" | "invalid_media_reference";
-type MfDeckIssue = { level: MfDeckIssueLevel;
+type MfDeckIssue = {
+  level: MfDeckIssueLevel;
   code: MfDeckIssueCode;
   message: string;
   path?: string;
@@ -11,23 +12,27 @@ type MfDeckIssue = { level: MfDeckIssueLevel;
   blockId?: string;
 };
 type MfDeckMediaKindV1 = "image" | "audio" | "unknown";
-type MfDeckMediaEntryV1 = { path: string;
+type MfDeckMediaEntryV1 = {
+  path: string;
   kind: MfDeckMediaKindV1;
   mimeType: string;
   sizeBytes: number;
   sourceName?: string;
   sourceUrlHash?: string;
 };
-type MfDeckCardFlagsV1 = { isDraft?: boolean;
+type MfDeckCardFlagsV1 = {
+  isDraft?: boolean;
   isSilent?: boolean;
   isBookmarked?: boolean;
   hasUncertainty?: boolean;
 };
-type MfDeckCardFaceV1 = { blocks: CardBlock[];
+type MfDeckCardFaceV1 = {
+  blocks: CardBlock[];
   extraRows?: number;
   ink?: unknown | null;
 };
-type MfDeckCardV1 = { id: string;
+type MfDeckCardV1 = {
+  id: string;
   sourceCardId?: string;
   questionNumber?: string;
   title?: string;
@@ -38,7 +43,8 @@ type MfDeckCardV1 = { id: string;
   layoutRows?: unknown;
   flags?: MfDeckCardFlagsV1;
 };
-type MfDeckArchiveV1 = { manifest: MfDeckManifestV1;
+type MfDeckArchiveV1 = {
+  manifest: MfDeckManifestV1;
   cardsJson: MfDeckCardsJsonV1;
   mediaManifest?: MfDeckMediaManifestV1;
   media?: Record<string, Uint8Array>;
@@ -55,11 +61,13 @@ type MfDeckValidationResult = | { ok: true;
 const MF_DECK_FORMAT = "sivflow.deck" as const;
 const MF_DECK_VERSION = 1 as const;
 
-type MfDeckMediaManifestV1 = { format: "sivflow.deck.media";
+type MfDeckMediaManifestV1 = {
+  format: "sivflow.deck.media";
   version: typeof MF_DECK_VERSION;
   media: MfDeckMediaEntryV1[];
 };
-type MfDeckManifestV1 = { format: typeof MF_DECK_FORMAT;
+type MfDeckManifestV1 = {
+  format: typeof MF_DECK_FORMAT;
   version: typeof MF_DECK_VERSION;
   exportedAt: string;
   app: {
@@ -79,7 +87,8 @@ type MfDeckManifestV1 = { format: typeof MF_DECK_FORMAT;
     reviewProgressIncluded: boolean;
   };
 };
-type MfDeckCardsJsonV1 = { format: "sivflow.deck.cards";
+type MfDeckCardsJsonV1 = {
+  format: "sivflow.deck.cards";
   version: typeof MF_DECK_VERSION;
   cards: MfDeckCardV1[];
 };
@@ -95,7 +104,8 @@ const MF_DECK_MAX_CARDS = 50000 as const;
 const MF_DECK_MAX_BLOCKS_PER_FACE = 1000 as const;
 const MF_DECK_MAX_MEDIA_ENTRIES = 5000 as const;
 
-class MfDeckValidationError extends Error { readonly issues: MfDeckIssue[];
+class MfDeckValidationError extends Error {
+  readonly issues: MfDeckIssue[];
 
   constructor(message: string, issues: MfDeckIssue[]) {
     super(message);
@@ -103,7 +113,8 @@ class MfDeckValidationError extends Error { readonly issues: MfDeckIssue[];
     this.issues = issues;
   }
 }
-class MfDeckExportError extends Error { readonly issues: MfDeckIssue[];
+class MfDeckExportError extends Error {
+  readonly issues: MfDeckIssue[];
 
   constructor(message: string, issues: MfDeckIssue[]) {
     super(message);

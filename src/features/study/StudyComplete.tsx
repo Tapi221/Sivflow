@@ -4,7 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import type { PracticeFilterRating } from "@/features/study/hooks/usePracticeMode";
 import { RatingCountTiles } from "./RatingCountTiles";
 
-type Tile = { rating: PracticeFilterRating; score: number; Icon: unknown; };
+type Tile = {
+  rating: PracticeFilterRating; score: number; Icon: unknown; };
 type Props = {
   ratingTiles: Tile[];
   ratingCounts: Record<PracticeFilterRating, number>;

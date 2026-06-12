@@ -3,7 +3,8 @@
  */
 import { useCallback, useState } from "react";
 
-interface FlashcardMediaState { isImageModalOpen: boolean;
+interface FlashcardMediaState {
+  isImageModalOpen: boolean;
   isImagePopupOpen: boolean;
   isAudioPopupOpen: boolean;
   isReferencePopupOpen: boolean;

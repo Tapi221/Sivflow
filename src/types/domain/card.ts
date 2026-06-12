@@ -4,7 +4,8 @@ import type { CodeBlockData } from "@/types/core/code-block";
 import type { UploadedImage, UploadedPdf } from "./assets";
 import type { BaseEntity, CardState, MathBlockData, ReferenceBlockData, ReviewLog, SubjectiveScoreValue } from "./base";
 
-type CardBlock = { id: string;
+type CardBlock = {
+  id: string;
   type:
   | "text"
   | "question"
@@ -31,15 +32,18 @@ type CardBlock = { id: string;
   math?: MathBlockData;
   markdown?: string;
 };
-type CardFaceAttachmentAudio = { url: string;
+type CardFaceAttachmentAudio = {
+  url: string;
   filename: string;
   order: number;
 };
-type CardFaceAttachments = { images?: UploadedImage[];
+type CardFaceAttachments = {
+  images?: UploadedImage[];
   audios?: CardFaceAttachmentAudio[];
   references?: ReferenceBlockData[];
 };
-type CardFace = { blocks: CardBlock[];
+type CardFace = {
+  blocks: CardBlock[];
   ink?: InkDocument | null;
   extraRows?: number;
   attachments?: CardFaceAttachments;

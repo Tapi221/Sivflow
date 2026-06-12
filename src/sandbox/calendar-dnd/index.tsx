@@ -13,7 +13,8 @@ type CalendarDndViewMode = "week" | "month";
 
 type CalendarDndPageDirection = "previous" | "next";
 
-type SampleEventDefinition = { id: string; title: string; startsAt: Date; endsAt: Date; isAllDay?: boolean; accentColor: string; };
+type SampleEventDefinition = {
+  id: string; title: string; startsAt: Date; endsAt: Date; isAllDay?: boolean; accentColor: string; };
 
 type CalendarEventUndoSnapshot = {
   event: GoogleCalendarEvent;

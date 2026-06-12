@@ -3,7 +3,8 @@ import { hasOpenModalDialog } from "@/features/hotkey/modalGuards";
 import type { Card, DocumentItem } from "@/types";
 import { toMillis } from "@/utils/toMillis";
 
-type FolderTreeNode = { id?: string;
+type FolderTreeNode = {
+  id?: string;
   folderId?: string;
   parentFolderId?: string | null;
   parent_folder_id?: string | null;

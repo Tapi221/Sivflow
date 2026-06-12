@@ -3,7 +3,8 @@ import { buildCardRenderSpec, resolveCardContentZoom, resolveCardSurfaceScale } 
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-type SharedCardSurfaceMetrics = { renderSpec: CardRenderSpec;
+type SharedCardSurfaceMetrics = {
+  renderSpec: CardRenderSpec;
   isSplitLayout: boolean;
   isFlipLayout: boolean;
   baseFixedScale?: number;

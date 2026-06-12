@@ -1,7 +1,8 @@
 import { useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 
-type MultiOption = { value: string;
+type MultiOption = {
+  value: string;
   label: string;
 };
 type Props = {

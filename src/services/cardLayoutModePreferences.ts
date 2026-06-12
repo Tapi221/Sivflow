@@ -3,7 +3,8 @@ import type { CardLayoutMode, CardSetInteractionMode } from "@/features/cardsetv
 import { normalizeCardLayoutMode, resolveDefaultCardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-interface CardLayoutModePreferenceScope { deviceScope: string;
+interface CardLayoutModePreferenceScope {
+  deviceScope: string;
   cardSetId: string | null | undefined;
   displayMode: CardDisplayMode;
   interactionMode: CardSetInteractionMode;

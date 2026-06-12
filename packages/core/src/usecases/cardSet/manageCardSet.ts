@@ -1,4 +1,5 @@
-type CardSetCommandEntity = { id: string;
+type CardSetCommandEntity = {
+  id: string;
   folderId: string | null;
   isDeleted?: boolean;
   orderIndex?: number;
@@ -6,11 +7,13 @@ type CardSetCommandEntity = { id: string;
   createdAt?: Date | unknown;
   name?: string;
 };
-type CreateCardSetOptions = { description?: string;
+type CreateCardSetOptions = {
+  description?: string;
   id?: string;
   orderIndex?: number;
 };
-type CardSetCreateDraft = { id: string;
+type CardSetCreateDraft = {
+  id: string;
   userId: string;
   deviceId: string;
   folderId: string;

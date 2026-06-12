@@ -1,9 +1,11 @@
 type NotificationLevel = "info" | "warning" | "error";
-type NotificationAction = { label: string;
+type NotificationAction = {
+  label: string;
   onClick: () => void;
   primary?: boolean;
 };
-interface Notification { id: string;
+interface Notification {
+  id: string;
   level: NotificationLevel;
   title: string;
   message: string;
@@ -14,7 +16,8 @@ interface Notification { id: string;
   duration?: number;
   actions?: NotificationAction[];
 }
-interface NotificationOptions { details?: string;
+interface NotificationOptions {
+  details?: string;
   autoClose?: boolean;
   closeable?: boolean;
   duration?: number;

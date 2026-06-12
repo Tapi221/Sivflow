@@ -19,18 +19,21 @@ import { aiChatPlugin } from "@/components/editor/plugins/ai-kit";
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 
 type ToolName = "comment" | "edit" | "generate";
-type TComment = { comment: { blockId: string;
+type TComment = {
+  comment: { blockId: string;
   comment: string;
   content: string;
 } | null;
 status: "finished" | "streaming";
 };
-type TTableCellUpdate = { cellUpdate: { content: string;
+type TTableCellUpdate = {
+  cellUpdate: { content: string;
   id: string;
 } | null;
 status: "finished" | "streaming";
 };
-type MessageDataPart = { toolName: ToolName;
+type MessageDataPart = {
+  toolName: ToolName;
   comment?: TComment;
   table?: TTableCellUpdate;
 };

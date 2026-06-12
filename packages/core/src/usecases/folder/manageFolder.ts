@@ -1,14 +1,17 @@
-type FolderCommandEntity = { id: string;
+type FolderCommandEntity = {
+  id: string;
   isDeleted?: boolean;
   parentFolderId?: string | null;
   orderIndex?: number;
 };
-type CreateFolderOptions = { color?: string;
+type CreateFolderOptions = {
+  color?: string;
   cloudSyncEnabled?: boolean;
   id?: string;
   orderIndex?: number;
 };
-type FolderCreateDraft = { userId: string;
+type FolderCreateDraft = {
+  userId: string;
   id: string;
   folderId: string;
   folderName: string;

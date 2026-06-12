@@ -1,4 +1,5 @@
-type CardSetQueryEntity = { id: string;
+type CardSetQueryEntity = {
+  id: string;
   folderId: string | null;
   isDeleted?: boolean;
   is_deleted?: boolean;

@@ -1,9 +1,11 @@
-interface AutoBackupRecord { id: string;
+interface AutoBackupRecord {
+  id: string;
   userId: string;
   createdAt: string;
   payload: unknown;
 }
-interface BackupStorePort { isAvailable: () => boolean;
+interface BackupStorePort {
+  isAvailable: () => boolean;
   loadBackups: () => AutoBackupRecord[];
   saveBackups: (backups: AutoBackupRecord[]) => void;
   saveLastBackupAt: (value: string) => void;

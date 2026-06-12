@@ -2,7 +2,8 @@ import appIconSrc from "@shared/assets/icons/app-icon.svg";
 import type { Locale } from "@shared/i18n/locale.store";
 import { readStoredLocale } from "@shared/i18n/locale.store";
 
-type GoogleOAuthCallbackPayload = { type: "sivflow:google-oauth-callback";
+type GoogleOAuthCallbackPayload = {
+  type: "sivflow:google-oauth-callback";
   url: string;
   state: string | null;
   code: string | null;

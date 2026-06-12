@@ -4,7 +4,8 @@ import { importMfDeckArchive } from "@/features/deckFile/application/importMfDec
 import type { MfDeckArchiveV1 } from "@/features/deckFile/domain/mfDeck.types";
 import { MF_DECK_FORMAT, MF_DECK_VERSION } from "@/features/deckFile/domain/mfDeck.types";
 
-type ImportMfCardFileParams = { cardFile: MfCardFileV1;
+type ImportMfCardFileParams = {
+  cardFile: MfCardFileV1;
   folderId: string;
   createCardSet: CreateMfDeckCardSet;
   updateCardSet?: UpdateMfDeckCardSet;

@@ -12,11 +12,13 @@ type LayeredProjectMenuItemDefinition = {
   separatorBefore?: boolean;
   submenu?: boolean;
 };
-type LayeredProjectMenuAction = { id: LayeredProjectMenuActionId;
+type LayeredProjectMenuAction = {
+  id: LayeredProjectMenuActionId;
   disabled?: boolean;
   onSelect: () => void;
 };
-type LayeredProjectMenuSubmenuAnchor = { itemOffsetY: number;
+type LayeredProjectMenuSubmenuAnchor = {
+  itemOffsetY: number;
 };
 type LayeredProjectMenuProps = {
   x: number;

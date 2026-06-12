@@ -2,7 +2,8 @@ import type { CardPaneMode } from "@/components/card/frame/cardPane.constants";
 import { DISPLAY_MODE_LABELS, DISPLAY_MODE_TRIGGER_LABELS } from "@/features/cardsetview/domain/cardDisplayMode.constants";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-type WidthControlViewModel = { modeLabel: string;
+type WidthControlViewModel = {
+  modeLabel: string;
   value: number;
   min: number;
   max: number;

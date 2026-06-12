@@ -1,15 +1,19 @@
-type FolderDeleteEntity = { id: string;
+type FolderDeleteEntity = {
+  id: string;
   isDeleted?: boolean;
   parentFolderId?: string | null;
 };
-type FolderDeleteCardSet = { id: string;
+type FolderDeleteCardSet = {
+  id: string;
   isDeleted?: boolean;
   folderId?: string | null;
 };
-type FolderDeleteCard = { id: string;
+type FolderDeleteCard = {
+  id: string;
   isDeleted?: boolean;
 };
-type FolderDeleteDocument = { id: string;
+type FolderDeleteDocument = {
+  id: string;
   isDeleted?: boolean;
   folderId: string;
 };

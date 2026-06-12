@@ -10,10 +10,12 @@ import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 
-type CalendarYearEventPriority = { group: number;
+type CalendarYearEventPriority = {
+  group: number;
   index: number;
 };
-type CalendarYearEventDisplay = { color?: string;
+type CalendarYearEventDisplay = {
+  color?: string;
   priority: CalendarYearEventPriority;
 };
 type CalendarYearEventDisplayResolver = (event: GoogleCalendarEvent) => CalendarYearEventDisplay;

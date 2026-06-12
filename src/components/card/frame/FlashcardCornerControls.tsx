@@ -21,7 +21,8 @@ interface FlashcardCornerControlsProps {
   onOpenReferencePopup: () => void;
   headerIconVisualScale?: number;
 }
-interface FlashcardCornerControlsResult { actionsTopLeft: React.ReactNode[] | undefined;
+interface FlashcardCornerControlsResult {
+  actionsTopLeft: React.ReactNode[] | undefined;
   actionsTopRight: React.ReactNode[] | undefined;
 }
 

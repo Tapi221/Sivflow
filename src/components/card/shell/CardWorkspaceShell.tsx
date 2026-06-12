@@ -17,7 +17,8 @@ type CardWorkspaceCaptureTarget = {
   element: HTMLElement;
   area: number;
 };
-type CardWorkspaceWidthControlProps = { modeLabel: string;
+type CardWorkspaceWidthControlProps = {
+  modeLabel: string;
   value: number;
   min: number;
   max: number;
@@ -28,7 +29,8 @@ type CardWorkspaceWidthControlProps = { modeLabel: string;
   onStepUp: () => void;
   onReset: () => void;
 };
-type CardWorkspaceShellProps = { children: ReactNode;
+type CardWorkspaceShellProps = {
+  children: ReactNode;
   containerClassName?: string;
   shellClassName?: string;
   contentAreaClassName?: string;

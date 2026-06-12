@@ -1,6 +1,7 @@
 import type { GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 
-type CachedGoogleCalendar = { id: string;
+type CachedGoogleCalendar = {
+  id: string;
   summary: string;
   summaryOverride?: string;
   backgroundColor?: string;

@@ -1,5 +1,6 @@
 type AiProviderMode = "local-template" | "openai-user-api-key";
-type OpenAiSettings = { providerMode: AiProviderMode;
+type OpenAiSettings = {
+  providerMode: AiProviderMode;
   apiKey: string;
   model: string;
   maxOutputTokens: number;

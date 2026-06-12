@@ -3,7 +3,8 @@ import { RAW_TRANSLATIONS } from "./translations";
 import type { RawTranslations } from "./translations";
 
 type TranslationKey = keyof RawTranslations;
-type TranslationParams = { count?: number;
+type TranslationParams = {
+  count?: number;
 };
 
 const interpolate = (template: string, params: TranslationParams = {}): string =>

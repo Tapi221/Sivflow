@@ -6,7 +6,8 @@ import { getLocalDb } from "@/services/localDB";
 import type { SyncError } from "@/types";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
-interface HardDeleteOrphanedCardsResult { targetCardIds: string[];
+interface HardDeleteOrphanedCardsResult {
+  targetCardIds: string[];
   deletedCardIds: string[];
   failedCardIds: string[];
   skippedCardIds: string[];

@@ -6,7 +6,8 @@ import type { SlateEditor } from "platejs";
 import { KEYS, RangeApi } from "platejs";
 import type { ChatMessage } from "./types";
 
-type StructuredPromptSections = { context?: string;
+type StructuredPromptSections = {
+  context?: string;
   examples?: string[] | string;
   history?: string;
   instruction?: string;

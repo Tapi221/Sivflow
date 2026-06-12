@@ -5,7 +5,8 @@ import type { SyncConflict } from "@/types/domain/sync";
 type SyncStatus = "idle" | "syncing" | "success" | "error";
 type SyncNotice = "none" | "wifi_wait" | "offline" | "error";
 type SyncTableName = "cards" | "folders" | "cardSets" | "documents" | "tagRecords" | "userSettings" | "images";
-interface SyncContextType { syncStatus: SyncStatus;
+interface SyncContextType {
+  syncStatus: SyncStatus;
   syncNotice: SyncNotice;
   lastSyncTime: Date | null;
   queueCount: number;
@@ -16,7 +17,8 @@ interface SyncContextType { syncStatus: SyncStatus;
   resolveConflict: (conflictId: string, resolvedData: unknown) => Promise<void>;
   clearSyncErrors: () => Promise<void>;
 }
-interface SyncProviderProps { children: ReactNode;
+interface SyncProviderProps {
+  children: ReactNode;
 }
 
 const defaultSyncContext: SyncContextType = {

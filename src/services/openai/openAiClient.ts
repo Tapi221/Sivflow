@@ -2,11 +2,13 @@ import { generateTextLocally } from "./localTextGenerator";
 import type { OpenAiSettings } from "./openAiSettings";
 import { DEFAULT_OPEN_AI_SETTINGS, loadOpenAiSettings } from "./openAiSettings";
 
-type GenerateTextOptions = { prompt: string;
+type GenerateTextOptions = {
+  prompt: string;
   systemPrompt?: string;
   settings?: OpenAiSettings;
 };
-type GenerateTextResult = { text: string;
+type GenerateTextResult = {
+  text: string;
   model: string;
 };
 type ResponseOutputText = {

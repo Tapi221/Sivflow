@@ -5,7 +5,8 @@ import { getEntityTime, getFolderId, getParentFolderId, normalizeFolderId } from
 
 type ExplorerDetailRowKind = "folder" | "cardSet" | "card" | "document";
 type ExplorerDetailLocalSyncState = | "pending" | "synced" | "error" | "conflict";
-type ExplorerDetailRow = { key: string;
+type ExplorerDetailRow = {
+  key: string;
   kind: ExplorerDetailRowKind;
   id: string;
   name: string;

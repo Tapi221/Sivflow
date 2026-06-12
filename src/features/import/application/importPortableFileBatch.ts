@@ -7,7 +7,8 @@ import type { PortableImportFileKind } from "@/features/import/domain/importFile
 import { detectImportFileKind, IMPORT_FILE_LABELS, isPortableImportFileKind } from "@/features/import/domain/importFileKind";
 
 type PortableImportBatchItemStatus = | "queued" | "parsing" | "importing" | "imported" | "failed" | "skipped";
-type PortableImportBatchItem = { id: string;
+type PortableImportBatchItem = {
+  id: string;
   file: File;
   kind: PortableImportFileKind;
   name: string;
@@ -19,7 +20,8 @@ type PortableImportBatchItem = { id: string;
   warningCount?: number;
   errorMessage?: string;
 };
-type PortableImportBatchResult = { items: PortableImportBatchItem[];
+type PortableImportBatchResult = {
+  items: PortableImportBatchItem[];
   importedCount: number;
   failedCount: number;
   skippedCount: number;
@@ -27,7 +29,8 @@ type PortableImportBatchResult = { items: PortableImportBatchItem[];
   lastImportedCardSetId: string | null;
   lastImportedCardSetName: string | null;
 };
-type ImportPortableFileBatchParams = { files: File[];
+type ImportPortableFileBatchParams = {
+  files: File[];
   folderId: string;
   createCardSet: CreateMfDeckCardSet;
   updateCardSet?: UpdateMfDeckCardSet;

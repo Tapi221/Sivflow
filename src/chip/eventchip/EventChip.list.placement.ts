@@ -3,17 +3,20 @@ import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDate
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { eventChipDesign } from "./eventChipDesign.generated";
 
-type CalendarListPlacementDay = { date: Date;
+type CalendarListPlacementDay = {
+  date: Date;
   dateKey: string;
   events: GoogleCalendarEvent[];
   isSelected: boolean;
   isToday: boolean;
 };
-type CalendarListVirtualMetrics = { heights: number[];
+type CalendarListVirtualMetrics = {
+  heights: number[];
   offsets: number[];
   totalHeight: number;
 };
-type CalendarListVirtualRange = { start: number;
+type CalendarListVirtualRange = {
+  start: number;
   end: number;
 };
 

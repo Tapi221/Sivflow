@@ -11,7 +11,8 @@ import { buildTokenExpiry, isStoredTokenValid, readStoredAccounts, removeStoredA
 import type { GCalConnectionStatus, GCalForceSyncOptions, GCalSilentReconnectResult, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem } from "./gcalSync.types";
 import { GoogleCalendarEngineManager } from "./GoogleCalendarEngineManager";
 
-type GoogleAccountEntry = { id: string;
+type GoogleAccountEntry = {
+  id: string;
   email: string | null;
   name: string | null;
   photoUrl: string | null;
@@ -25,7 +26,8 @@ type GoogleAccountEntry = { id: string;
   isConnecting: boolean;
   error: string | null;
 };
-type GoogleAccountTokenUpdate = { accountId: string;
+type GoogleAccountTokenUpdate = {
+  accountId: string;
   accessToken: string;
   refreshToken?: string | null;
   accountName?: string | null;

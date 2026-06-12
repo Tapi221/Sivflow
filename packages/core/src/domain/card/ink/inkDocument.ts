@@ -1,12 +1,14 @@
 type InkSide = "question" | "answer";
 type InkTool = "pen" | "highlighter";
 type InkEditTool = InkTool | "eraser";
-type InkPoint = { x: number;
+type InkPoint = {
+  x: number;
   y: number;
   t: number;
   p: number;
 };
-type InkStroke = { id: string;
+type InkStroke = {
+  id: string;
   tool: InkTool;
   color: string;
   width: number;
@@ -14,7 +16,8 @@ type InkStroke = { id: string;
   points: InkPoint[];
   createdAt: number;
 };
-type InkDocument = { version: number;
+type InkDocument = {
+  version: number;
   updatedAt: number;
   strokes: InkStroke[];
   deletedStrokeIds?: string[];

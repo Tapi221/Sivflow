@@ -1,8 +1,10 @@
-type LayoutEvent = { id: string;
+type LayoutEvent = {
+  id: string;
   startMinutes: number;
   endMinutes: number;
 };
-type LayoutResult = { left: number;
+type LayoutResult = {
+  left: number;
   width: number;
 };
 

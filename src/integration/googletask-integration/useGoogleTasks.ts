@@ -6,16 +6,19 @@ import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/
 import { createGoogleTask, deleteGoogleTask, fetchGoogleTasks, moveGoogleTask, patchGoogleTask } from "./gtask.api";
 import type { GoogleTaskListAccountState } from "./useGoogleTaskLists";
 
-type GoogleTasksAccountState = { tasks: GoogleTaskItem[];
+type GoogleTasksAccountState = {
+  tasks: GoogleTaskItem[];
   isLoading: boolean;
   error: string | null;
 };
-type GoogleTaskCreateInput = { title: string;
+type GoogleTaskCreateInput = {
+  title: string;
   notes?: string | null;
   due?: string | null;
   status?: GoogleTaskItem["status"];
 };
-type GoogleTaskPatchInput = { title?: string;
+type GoogleTaskPatchInput = {
+  title?: string;
   notes?: string | null;
   due?: string | null;
   status?: GoogleTaskItem["status"];

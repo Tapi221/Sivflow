@@ -18,7 +18,8 @@ import { Button } from "./button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "./dropdown-menu";
 import { Editor, EditorContainer } from "./editor";
 
-type TComment = { id: string;
+type TComment = {
+  id: string;
   contentRich: Value;
   createdAt: Date;
   discussionId: string;

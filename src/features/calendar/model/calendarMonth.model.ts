@@ -3,18 +3,21 @@ import { ja } from "date-fns/locale";
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
 import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
 
-type CalendarMonthGridDay = { date: Date;
+type CalendarMonthGridDay = {
+  date: Date;
   key: string;
   dayOfMonth: number;
   isCurrentMonth: boolean;
   isMonthStart: boolean;
 };
-type CalendarMonthPage = { key: string;
+type CalendarMonthPage = {
+  key: string;
   monthStart: Date;
   label: string;
   days: CalendarMonthGridDay[];
 };
-type CalendarMonthWeek = { key: string;
+type CalendarMonthWeek = {
+  key: string;
   weekStart: Date;
   visibleMonthDate: Date;
   days: CalendarMonthGridDay[];

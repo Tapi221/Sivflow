@@ -1,10 +1,12 @@
 import type { SecurityEventType } from "#src/security/contract.js";
 
 type SecurityRiskLevel = "normal" | "warning" | "high" | "critical";
-type DetectionOutcome = { triggered: boolean;
+type DetectionOutcome = {
+  triggered: boolean;
   scoreAdded: number;
 };
-type RiskScoreCalculation = { previousScore: number;
+type RiskScoreCalculation = {
+  previousScore: number;
   nextScore: number;
   riskLevel: SecurityRiskLevel;
 };

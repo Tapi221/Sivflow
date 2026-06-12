@@ -17,12 +17,18 @@ import { areSameCalendarEventTimes, CALENDAR_EVENT_DRAGGING_STYLE, createCalenda
 import * as COLOR from "./grid.color.constants.desktop";
 import * as GD from "./grid.layout.constants.desktop";
 
-type CalendarMonthGridDay = { date: Date; key: string; dayOfMonth: number; isCurrentMonth: boolean; };
-type CalendarMonthGridWeek = { key: string; days: CalendarMonthGridDay[]; };
-type MonthEventDragState = { eventKey: string; event: GoogleCalendarEvent; pointerId: number; durationMs: number; sourceDayKey: string; previewStartsAt: Date; previewEndsAt: Date; previewIsAllDay: boolean; };
-type MonthDayCellHit = { day: CalendarMonthGridDay; element: HTMLDivElement; };
-type MonthEventDragPreview = { previewStartsAt: Date; previewEndsAt: Date; previewIsAllDay: boolean; };
-type MonthEventRenderItem = { event: GoogleCalendarEvent; eventKey: string; renderKey: string; isDragPreview: boolean; };
+type CalendarMonthGridDay = {
+  date: Date; key: string; dayOfMonth: number; isCurrentMonth: boolean; };
+type CalendarMonthGridWeek = {
+  key: string; days: CalendarMonthGridDay[]; };
+type MonthEventDragState = {
+  eventKey: string; event: GoogleCalendarEvent; pointerId: number; durationMs: number; sourceDayKey: string; previewStartsAt: Date; previewEndsAt: Date; previewIsAllDay: boolean; };
+type MonthDayCellHit = {
+  day: CalendarMonthGridDay; element: HTMLDivElement; };
+type MonthEventDragPreview = {
+  previewStartsAt: Date; previewEndsAt: Date; previewIsAllDay: boolean; };
+type MonthEventRenderItem = {
+  event: GoogleCalendarEvent; eventKey: string; renderKey: string; isDragPreview: boolean; };
 type GridCalendarMonthDesktopProps = {
   today: Date;
   selectedDate: Date;

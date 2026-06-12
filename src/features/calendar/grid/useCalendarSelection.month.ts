@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { toDateKey } from "./calendarKey";
 
-type CalendarSelection = { selectedKey: string;
+type CalendarSelection = {
+  selectedKey: string;
   todayKey: string;
 };
 

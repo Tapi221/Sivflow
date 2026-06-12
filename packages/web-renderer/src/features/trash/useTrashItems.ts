@@ -4,12 +4,14 @@ import { createWebTrashRepository } from "@platform/storage/trashRepository.web"
 import type { Card, CardSet, Document, Folder } from "@/types";
 
 type TrashLoadState = "idle" | "loading" | "ready" | "error";
-type TrashItemsState = { folders: Folder[];
+type TrashItemsState = {
+  folders: Folder[];
   cards: Card[];
   cardSets: CardSet[];
   documents: Document[];
 };
-type TrashItemIdInput = { folderIds?: string[];
+type TrashItemIdInput = {
+  folderIds?: string[];
   cardIds?: string[];
   cardSetIds?: string[];
   documentIds?: string[];

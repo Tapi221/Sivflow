@@ -1,7 +1,8 @@
 import type { InkPoint } from "@core/domain/card/ink/inkDocument";
 import { INK_PAPER_H, INK_PAPER_W } from "@core/domain/card/ink/inkDocument";
 
-type RectLike = { left: number;
+type RectLike = {
+  left: number;
   top: number;
   width: number;
   height: number;

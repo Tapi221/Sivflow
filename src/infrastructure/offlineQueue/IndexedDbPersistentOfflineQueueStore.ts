@@ -2,7 +2,8 @@ import type { QueueItem } from "@/application/usecases/persistentOfflineQueueMod
 import { isBackingStoreOpenError } from "@/infrastructure/localdb/errors";
 import { warnOncePerSession } from "@/infrastructure/localdb/runtimeState";
 
-class IndexedDbPersistentOfflineQueueStore { private readonly dbName: string;
+class IndexedDbPersistentOfflineQueueStore {
+  private readonly dbName: string;
   private readonly storeName: string;
   private idbUnavailable = false;
   private readonly memoryQueue = new Map<string, QueueItem>();

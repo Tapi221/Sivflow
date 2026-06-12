@@ -1,7 +1,8 @@
 import rawTranslations from "./translations.json";
 import type { Locale } from "./locale.store";
 
-type RawTranslations = { weekdayLabels: string[];
+type RawTranslations = {
+  weekdayLabels: string[];
   calendarMonthWeekdays: string[];
   monthRowResizeTitle: string;
   monthRowResizeAriaLabel: string;

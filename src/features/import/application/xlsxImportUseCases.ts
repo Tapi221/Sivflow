@@ -12,7 +12,8 @@ type CreateCardSet = (name: string, targetFolderId?: string | null, opts?: { des
 ) => Promise<CardSet>;
 type CreateCard = (cardData: Partial<Card> & { cardSetId?: string; }) => Promise<Card>;
 type ImportDestinationMode = "new" | "existing";
-type LoadXlsxImportFileResult = { file: File;
+type LoadXlsxImportFileResult = {
+  file: File;
   result: ImportParseResult;
   suggestedCardSetName: string;
 };

@@ -1,9 +1,11 @@
-type GoogleTaskListItem = { id: string;
+type GoogleTaskListItem = {
+  id: string;
   title: string;
   updated?: string;
 };
 type GoogleTaskStatus = "needsAction" | "completed";
-type GoogleTaskItem = { id: string;
+type GoogleTaskItem = {
+  id: string;
   taskListId: string;
   title: string;
   notes?: string;
@@ -14,13 +16,15 @@ type GoogleTaskItem = { id: string;
   parent?: string;
   position?: string;
 };
-type GoogleTasksApiTaskListsResponse = { items?: Array<{ id?: string;
+type GoogleTasksApiTaskListsResponse = {
+  items?: Array<{ id?: string;
   title?: string;
   updated?: string;
 }>;
 nextPageToken?: string;
 };
-type GoogleTasksApiTasksResponse = { items?: Array<{ id?: string;
+type GoogleTasksApiTasksResponse = {
+  items?: Array<{ id?: string;
   title?: string;
   notes?: string;
   status?: GoogleTaskStatus;

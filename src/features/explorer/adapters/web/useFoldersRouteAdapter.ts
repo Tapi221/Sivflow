@@ -5,7 +5,8 @@ import { mapSearchParamsToExplorerRouteState } from "@/features/explorer/mappers
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import { getLastSelectedFolderId, setLastSelectedFolderId } from "./explorerStorage";
 
-type FoldersRouteAdapter = { routeKey: string;
+type FoldersRouteAdapter = {
+  routeKey: string;
   isDesktop: boolean;
   readRouteState: () => ExplorerRouteState;
   writeRouteState: (next: URLSearchParams) => void;

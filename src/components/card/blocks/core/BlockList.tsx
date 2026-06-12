@@ -7,7 +7,8 @@ import type { CardBlock } from "@/types/domain/card";
 import { shouldRenderInterBlockSeparator } from "./blockDisplayPolicy";
 import { BlockSeparator } from "./BlockSeparator";
 
-type BlockListRowMeta = { index: number;
+type BlockListRowMeta = {
+  index: number;
   rowOffsetRows: number;
   rowOffsetPx: number;
   gridOffsetPx: number;

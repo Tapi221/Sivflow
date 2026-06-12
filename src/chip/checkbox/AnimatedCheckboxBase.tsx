@@ -3,7 +3,8 @@ import { cn } from "@/lib/utils";
 
 type AnimatedCheckboxShape = "circle" | "square";
 type AnimatedCheckboxVariant = "filled" | "soft" | "outline" | "radio";
-type AnimatedCheckboxBaseProps = { checked: boolean;
+type AnimatedCheckboxBaseProps = {
+  checked: boolean;
   color: string;
   className?: string;
   shape?: AnimatedCheckboxShape;

@@ -2,7 +2,8 @@ import type { MfDeckIssue, MfDeckMediaEntryV1, MfDeckMediaManifestV1 } from "@/f
 import { buildMfDeckMediaManifest, buildMfDeckMediaPath, inferMfDeckMediaExtension, inferMfDeckMediaKind, MF_DECK_MAX_MEDIA_ENTRY_BYTES, MF_DECK_MAX_MEDIA_TOTAL_BYTES, toMfDeckMediaUri } from "@/features/deckFile/domain/mfDeckMedia";
 import type { CardBlock } from "@/types";
 
-type MfDeckMediaBundle = { media: Record<string, Uint8Array>;
+type MfDeckMediaBundle = {
+  media: Record<string, Uint8Array>;
   mediaManifest?: MfDeckMediaManifestV1;
   issues: MfDeckIssue[];
 };

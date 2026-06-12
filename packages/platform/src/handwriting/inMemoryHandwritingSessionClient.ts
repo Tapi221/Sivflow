@@ -14,7 +14,8 @@ const createInMemoryHandwritingSessionHub = createHub;
 const createHub = (): InMemoryHandwritingSessionHub => ({
   clients: new Set(),
 });
-class InMemoryHandwritingSessionClient implements HandwritingSessionClient { readonly session: HandwritingSession;
+class InMemoryHandwritingSessionClient implements HandwritingSessionClient {
+  readonly session: HandwritingSession;
 
   private readonly hub: InMemoryHandwritingSessionHub;
   private readonly messageHandlers = new Set<HandwritingSessionMessageHandler>();

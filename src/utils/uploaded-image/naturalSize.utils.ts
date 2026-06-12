@@ -1,4 +1,5 @@
-type ImageNaturalSize = { naturalW: number;
+type ImageNaturalSize = {
+  naturalW: number;
   naturalH: number;
 };
 

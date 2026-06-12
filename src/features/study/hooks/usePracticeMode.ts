@@ -2,7 +2,8 @@ import { useCallback, useMemo, useState } from "react";
 import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
 
 type PracticeFilterRating = "forgot" | "vague" | "remembered" | "easy";
-type PracticeSessionState = { sourceSessionId: string;
+type PracticeSessionState = {
+  sourceSessionId: string;
   filterRating: PracticeFilterRating;
   roundNumber: number;
   roundQueue: string[];

@@ -18,7 +18,8 @@ type MediaStatus = "pending" | "uploading" | "ready" | "failed";
  * 2. remoteRef は Storage URL のみ
  * 3. Base64 は一切保存してはならない
  */
-interface MediaAsset { id: string;
+interface MediaAsset {
+  id: string;
   kind: MediaKind;
   localRef?: BlobUrl | null; // ローカル参照（Blob URL）
   remoteRef?: StorageUrl | null; // リモート参照（Storage URL）

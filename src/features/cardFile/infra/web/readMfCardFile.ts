@@ -2,7 +2,8 @@ import type { MfCardFileV1, MfCardIssue } from "@/features/cardFile/domain/mfCar
 import { MF_CARD_FILE_EXTENSION, MfCardValidationError } from "@/features/cardFile/domain/mfCard.types";
 import { decodeMfCardFile } from "./mfCardJsonCodec";
 
-type LoadMfCardFileResult = { file: File;
+type LoadMfCardFileResult = {
+  file: File;
   cardFile: MfCardFileV1;
   issues: MfCardIssue[];
   suggestedCardSetName: string;

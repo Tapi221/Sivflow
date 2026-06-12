@@ -11,7 +11,8 @@ const ORDERED_LIST_PATTERN = /^\d+\.\s+.+/;
 const MDX_TAG_PATTERN = /<([A-Za-z][A-Za-z0-9\-_]*)>/;
 const DIGIT_PATTERN = /^[0-9]$/;
 
-class MarkdownJoiner { delayInMs = DEFAULT_DELAY_IN_MS;
+class MarkdownJoiner {
+  delayInMs = DEFAULT_DELAY_IN_MS;
 
   private buffer = "";
   private documentCharacterCount = 0;

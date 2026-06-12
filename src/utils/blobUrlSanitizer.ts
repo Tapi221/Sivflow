@@ -1,10 +1,12 @@
 type DateLike = {
   toDate?: unknown;
 };
-type BlobUrlFix = { path: string;
+type BlobUrlFix = {
+  path: string;
   before: string;
 };
-type SanitizeResult<T> = { value: T;
+type SanitizeResult<T> = {
+  value: T;
   changed: boolean;
   fixes: BlobUrlFix[];
 };

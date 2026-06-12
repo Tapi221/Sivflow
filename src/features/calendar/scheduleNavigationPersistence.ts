@@ -9,7 +9,8 @@ type StoredScheduleNavigationState = {
   calendarScrollTop?: unknown;
   monthVisibleEventCount?: unknown;
 };
-type ScheduleNavigationState = { currentDate: Date;
+type ScheduleNavigationState = {
+  currentDate: Date;
   selectedDate: Date;
   monthTitleDate: Date;
   selectedViewMode: CalendarViewModeSelection;

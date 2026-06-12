@@ -1,6 +1,7 @@
 type SearchItemKind = "folder" | "cardSet" | "card" | "document" | "action";
 type SearchIconKind = "folder" | "cardSet" | "card" | "document" | "folders" | "calendar" | "gallery" | "directory" | "trash" | "settings" | "tagMap";
-type SearchItem = { id: string;
+type SearchItem = {
+  id: string;
   value: string;
   kind: SearchItemKind;
   title: string;
@@ -11,7 +12,8 @@ type SearchItem = { id: string;
   iconKind?: SearchIconKind;
   onSelect: () => void;
 };
-type SearchSource = { sourceId: string;
+type SearchSource = {
+  sourceId: string;
   items: SearchItem[];
 };
 

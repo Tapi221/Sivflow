@@ -6,14 +6,21 @@ import type { GoogleAccountDisplay, ProjectCalendarLink } from "@/features/calen
 import type { GCalWritableEventInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 
-type MobileCalendarWritableCalendarOption = { key: string; accountId: string; calendarId: string; label: string; accountLabel: string; calendarLabel: string; color: string; projectId?: string; isSelected: boolean; };
-type MobileCalendarEventFormState = { title: string; location: string; isAllDay: boolean; startDate: string; startTime: string; endDate: string; endTime: string; calendarKey: string; description: string; };
-type MobileEventDates = { startsAt: Date; endsAt: Date; isAllDay: boolean; };
+type MobileCalendarWritableCalendarOption = {
+  key: string; accountId: string; calendarId: string; label: string; accountLabel: string; calendarLabel: string; color: string; projectId?: string; isSelected: boolean; };
+type MobileCalendarEventFormState = {
+  title: string; location: string; isAllDay: boolean; startDate: string; startTime: string; endDate: string; endTime: string; calendarKey: string; description: string; };
+type MobileEventDates = {
+  startsAt: Date; endsAt: Date; isAllDay: boolean; };
 type MobileCalendarPickerFieldName = "startDate" | "startTime" | "endDate" | "endTime";
-type MobileCalendarDateButtonProps = { label: string; value: string; isActive: boolean; onClick: () => void; };
-type MobileCalendarTimeButtonProps = { label: string; value: string; isActive: boolean; onClick: () => void; };
-type MobileCalendarInlineDatePickerProps = { value: string; onChange: (value: string) => void; };
-type MobileCalendarInlineTimeWheelProps = { value: string; onChange: (value: string) => void; };
+type MobileCalendarDateButtonProps = {
+  label: string; value: string; isActive: boolean; onClick: () => void; };
+type MobileCalendarTimeButtonProps = {
+  label: string; value: string; isActive: boolean; onClick: () => void; };
+type MobileCalendarInlineDatePickerProps = {
+  value: string; onChange: (value: string) => void; };
+type MobileCalendarInlineTimeWheelProps = {
+  value: string; onChange: (value: string) => void; };
 type MobileCalendarEventComposerProps = {
   isOpen: boolean;
   selectedDate: Date;

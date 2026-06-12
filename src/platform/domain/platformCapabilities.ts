@@ -1,5 +1,6 @@
 type PlatformRuntimeKind = | "web" | "desktop" | "ios-native" | "android-native" | "unknown";
-interface PlatformCapabilities { runtimeKind: PlatformRuntimeKind;
+interface PlatformCapabilities {
+  runtimeKind: PlatformRuntimeKind;
   canOpenExternalUrl: boolean;
   canControlWindow: boolean;
   canUseNativeShare: boolean;

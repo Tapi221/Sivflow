@@ -3,7 +3,8 @@ import { cn } from "@/lib/utils";
 import { detectCssZoomSupport, resolveCardScaleRenderingStrategy } from "./cardScaleRenderingStrategy";
 import { observeElementRect } from "./elementRectObserver";
 
-interface ScaleToFitFrameProps { children: React.ReactNode;
+interface ScaleToFitFrameProps {
+  children: React.ReactNode;
   className?: string;
   baseWidth?: number;
   scaleMultiplier?: number;

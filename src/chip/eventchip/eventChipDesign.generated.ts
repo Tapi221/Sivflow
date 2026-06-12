@@ -1,4 +1,5 @@
-type EventChipDesign = { backgroundAlpha: number;
+type EventChipDesign = {
+  backgroundAlpha: number;
   month: {
     heightPx: number;
     radiusPx: number;

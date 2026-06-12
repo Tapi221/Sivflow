@@ -1,4 +1,5 @@
-type CalendarDateRange = { start: Date;
+type CalendarDateRange = {
+  start: Date;
   end: Date;
 };
 

@@ -15,7 +15,8 @@ type UseMonthInfiniteScrollOptions = {
   weekStartDay: CalendarWeekStartDay;
   onVisibleMonthChange?: (date: Date) => void;
 };
-type UseMonthInfiniteScrollReturn = { monthWeeks: CalendarMonthWeek[];
+type UseMonthInfiniteScrollReturn = {
+  monthWeeks: CalendarMonthWeek[];
   visibleWeekRange: CalendarDateRange;
   topSpacerHeight: number;
   bottomSpacerHeight: number;

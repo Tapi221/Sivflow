@@ -9,14 +9,16 @@ import type { UserSettings } from "./user";
 /**
  * 同期システムの型定義
  */
-interface SyncMetadata { userId: string;
+interface SyncMetadata {
+  userId: string;
   deviceId: string;
   deviceName: string;
   lastSyncTime: Date | Timestamp | null;
   lastHighResSync: Date | Timestamp | null;
   isActive: boolean;
 }
-interface SyncError { id: string;
+interface SyncError {
+  id: string;
   occurredAt: number;
   phase: "upload" | "download" | "merge" | "queue_dlq";
   message: string;
@@ -25,14 +27,16 @@ interface SyncError { id: string;
   retryable: boolean;
   metadata?: unknown;
 }
-interface SyncHistory { id: string;
+interface SyncHistory {
+  id: string;
   startedAt: number;
   finishedAt: number;
   result: "success" | "partial" | "failed" | "skipped_wifi";
   uploaded: number;
   downloaded: number;
 }
-interface SyncSettings { id: string;
+interface SyncSettings {
+  id: string;
   autoSync: boolean;
   intervalMinutes: 5 | 15 | 30 | 60;
   wifiOnly: boolean;
@@ -44,7 +48,8 @@ type SyncDirection = "upload" | "download";
 type SyncPriority = "critical" | "high" | "medium" | "low";
 type SyncQueueStatus = "pending" | "processing" | "completed" | "failed";
 type AssetSyncPayload = Pick<AssetRecord, "id"> & Partial<Omit<AssetRecord, "id">>;
-type ProjectMapSyncPayload = { id: string;
+type ProjectMapSyncPayload = {
+  id: string;
   userId: string;
   folderId?: string;
   name?: string;
@@ -54,7 +59,8 @@ type ProjectMapSyncPayload = { id: string;
   deletedAt?: Date | null;
   [key: string]: unknown;
 };
-type TagSyncPayload = { id: string;
+type TagSyncPayload = {
+  id: string;
   userId: string;
   name: string;
   nameLower: string;
@@ -68,7 +74,8 @@ type TagSyncPayload = { id: string;
   parentId?: string;
   orderIndex?: number;
 };
-type SyncPayloadByEntity = { card: Card;
+type SyncPayloadByEntity = {
+  card: Card;
   folder: Folder;
   cardSet: CardSet;
   document: Document;
@@ -77,7 +84,8 @@ type SyncPayloadByEntity = { card: Card;
   asset: AssetSyncPayload;
   projectMap: ProjectMapSyncPayload;
 };
-type SyncDeletePayload = { id: string; };
+type SyncDeletePayload = {
+  id: string; };
 interface SyncQueueItemBase<
   TEntity extends SyncEntity,
   TOperation extends SyncOperationType,
@@ -125,17 +133,20 @@ type SyncDeleteQueueItem<TEntity extends SyncDeleteEntity> = SyncQueueItemBase<
   SyncDeletePayload
 >;
 type SyncQueueItem = | SyncUpsertQueueItem<"card"> | SyncUpsertQueueItem<"folder"> | SyncUpsertQueueItem<"cardSet"> | SyncUpsertQueueItem<"document"> | SyncUpsertQueueItem<"tag"> | SyncUpsertQueueItem<"userSetting"> | SyncUpsertQueueItem<"asset"> | SyncUpsertQueueItem<"projectMap"> | SyncDeleteQueueItem<"card"> | SyncDeleteQueueItem<"folder"> | SyncDeleteQueueItem<"cardSet"> | SyncDeleteQueueItem<"document"> | SyncDeleteQueueItem<"tag"> | SyncDeleteQueueItem<"asset"> | SyncDeleteQueueItem<"projectMap">;
-interface SyncConflict { id: string;
+interface SyncConflict {
+  id: string;
   entityId: string;
   entityType: SyncEntity;
   autoMerged: unknown;
   conflicts: Record<string, { local: unknown; remote: unknown; }>;
   detectedAt: number;
 }
-interface DiffResult { autoMerged: unknown;
+interface DiffResult {
+  autoMerged: unknown;
   conflicts: Record<string, { local: unknown; remote: unknown; }>;
 }
-interface SyncResult { success: boolean;
+interface SyncResult {
+  success: boolean;
   uploaded: number;
   downloaded: number;
   conflicts: number;

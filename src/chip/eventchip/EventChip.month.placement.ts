@@ -3,13 +3,16 @@ import { compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/f
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { eventChipDesign } from "./eventChipDesign.generated";
 
-type CalendarMonthDayEvents = { visibleEvents: GoogleCalendarEvent[];
+type CalendarMonthDayEvents = {
+  visibleEvents: GoogleCalendarEvent[];
   totalCount: number;
   color: string | null;
 };
-type CalendarMonthPlacementDay = { key: string;
+type CalendarMonthPlacementDay = {
+  key: string;
 };
-type CalendarMonthPlacementWeek = { days: CalendarMonthPlacementDay[];
+type CalendarMonthPlacementWeek = {
+  days: CalendarMonthPlacementDay[];
 };
 type CalendarMonthEventIndex = Map<string, GoogleCalendarEvent[]>;
 type CalendarMonthAllowedDayRange = {

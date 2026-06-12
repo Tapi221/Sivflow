@@ -3,7 +3,8 @@ import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE } from "./rightClickPanel.utils";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 
-type CalendarListMenuAction = { id: "add-project" | "change-color";
+type CalendarListMenuAction = {
+  id: "add-project" | "change-color";
   label: string;
   disabled?: boolean;
   onSelect: () => void;

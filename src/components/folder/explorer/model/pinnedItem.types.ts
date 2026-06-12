@@ -1,5 +1,6 @@
 type PinnedItemType = "folder" | "card" | "document";
-interface PinnedItem { type: PinnedItemType;
+interface PinnedItem {
+  type: PinnedItemType;
   id: string;
 }
 

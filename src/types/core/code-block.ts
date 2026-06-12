@@ -1,4 +1,5 @@
-interface CodeBlockData { language: string;
+interface CodeBlockData {
+  language: string;
   code: string;
 }
 

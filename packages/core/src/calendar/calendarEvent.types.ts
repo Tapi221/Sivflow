@@ -1,6 +1,7 @@
 import type { CalendarRecurrenceRule } from "./calendarRecurrence";
 
-type CalendarEvent = { id: string;
+type CalendarEvent = {
+  id: string;
   externalId?: string;
   accountId?: string;
   calendarId: string;

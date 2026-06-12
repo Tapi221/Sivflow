@@ -8,7 +8,8 @@ type TooltipPosition = {
   x: number;
   y: number;
 };
-type HoverSuggestionItem = { id: string;
+type HoverSuggestionItem = {
+  id: string;
   label: string;
   description?: string;
   icon?: ReactNode;

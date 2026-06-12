@@ -3,19 +3,23 @@ type CalendarTimetableVisibleDayCount = 5 | 6 | 7;
 type CalendarTimetableColorKey = "gray" | "purple" | "teal" | "pink" | "amber" | "blue" | "green" | "red" | "coral" | "sky";
 type CalendarTimetableInstitutionKind = "university" | "vocational" | "college" | "other";
 type CalendarTimetableCatalogSource = "manual" | "userSubmitted" | "syllabus" | "cloud";
-type CalendarTimetablePeriod = { id: string;
+type CalendarTimetablePeriod = {
+  id: string;
   label: string;
   startTime: string;
   endTime: string;
   order: number;
 };
-type CalendarTimetableSlot = { dayIndex: CalendarTimetableWeekdayIndex;
+type CalendarTimetableSlot = {
+  dayIndex: CalendarTimetableWeekdayIndex;
   periodId: string;
 };
-type CalendarTimetableSyllabusSlot = { dayIndex: CalendarTimetableWeekdayIndex;
+type CalendarTimetableSyllabusSlot = {
+  dayIndex: CalendarTimetableWeekdayIndex;
   periodLabel: string;
 };
-type CalendarTimetableInstitution = { id: string;
+type CalendarTimetableInstitution = {
+  id: string;
   name: string;
   kind: CalendarTimetableInstitutionKind;
   region: string;
@@ -23,7 +27,8 @@ type CalendarTimetableInstitution = { id: string;
   createdAt: string;
   updatedAt: string;
 };
-type CalendarTimetableDepartment = { id: string;
+type CalendarTimetableDepartment = {
+  id: string;
   institutionId: string;
   facultyName: string;
   name: string;
@@ -31,7 +36,8 @@ type CalendarTimetableDepartment = { id: string;
   createdAt: string;
   updatedAt: string;
 };
-type CalendarTimetableSyllabusCourse = { id: string;
+type CalendarTimetableSyllabusCourse = {
+  id: string;
   institutionId: string;
   departmentId: string;
   title: string;
@@ -48,7 +54,8 @@ type CalendarTimetableSyllabusCourse = { id: string;
   createdAt: string;
   updatedAt: string;
 };
-type CalendarTimetableSyllabusCourseDraft = { institutionName: string;
+type CalendarTimetableSyllabusCourseDraft = {
+  institutionName: string;
   institutionKind: CalendarTimetableInstitutionKind;
   departmentName: string;
   facultyName: string;
@@ -63,7 +70,8 @@ type CalendarTimetableSyllabusCourseDraft = { institutionName: string;
   slots: CalendarTimetableSyllabusSlot[];
   source?: CalendarTimetableCatalogSource;
 };
-type CalendarTimetableCourse = { id: string;
+type CalendarTimetableCourse = {
+  id: string;
   semesterId: string;
   syllabusCourseId?: string;
   institutionId?: string;
@@ -77,7 +85,8 @@ type CalendarTimetableCourse = { id: string;
   createdAt: string;
   updatedAt: string;
 };
-type CalendarTimetableCourseDraft = { id?: string;
+type CalendarTimetableCourseDraft = {
+  id?: string;
   semesterId: string;
   syllabusCourseId?: string;
   institutionId?: string;
@@ -90,7 +99,8 @@ type CalendarTimetableCourseDraft = { id?: string;
   slots: CalendarTimetableSlot[];
   createdAt?: string;
 };
-type CalendarTimetableSettings = { id: string;
+type CalendarTimetableSettings = {
+  id: string;
   activeSemesterId: string;
   visibleDayCount: CalendarTimetableVisibleDayCount;
   updatedAt: string;

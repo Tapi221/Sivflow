@@ -207,7 +207,8 @@ const SettingsDialog = () => {
         onChange={(e) => setTempKeys((prev) => ({ ...prev, [service]: e.target.value }))}
         placeholder=""
         data-1p-ignore
-        type={showKey[service] ? "text" : "password"}
+        type={
+          showKey[service] ? "text" : "password"}
       />
       <Button size="icon" variant="ghost" className="absolute top-0 right-0 h-full" onClick={() => toggleKeyVisibility(service)} type="button">
         {showKey[service] ? <EyeOff className="size-4" /> : <Eye className="size-4" />}

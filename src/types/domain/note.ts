@@ -3,7 +3,8 @@ import type { BaseEntity } from "./base";
 type NoteEditor = "plate";
 type NoteContentVersion = 2;
 type NoteBlockContent = Record<string, unknown>[];
-interface Note extends BaseEntity { folderId: string;
+interface Note extends BaseEntity {
+  folderId: string;
   orderIndex: number;
   title: string;
   content: NoteBlockContent;

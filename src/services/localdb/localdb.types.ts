@@ -2,7 +2,8 @@ import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueu
 import type { AssetRecord, Card, CardSet, DocumentItem as Document, Folder, Note, SyncError, SyncHistory, SyncSettings, UploadedImage, UserSettings, UserStats } from "@/types";
 import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
 
-type CardRelation = { id: string;
+type CardRelation = {
+  id: string;
   userId: string;
   fromCardId?: string;
   toCardId?: string;
@@ -12,7 +13,8 @@ type CardRelation = { id: string;
   isDeleted?: boolean;
   [key: string]: unknown;
 };
-type ProjectMap = { id: string;
+type ProjectMap = {
+  id: string;
   userId: string;
   folderId?: string;
   name?: string;
@@ -22,7 +24,8 @@ type ProjectMap = { id: string;
   deletedAt?: Date | null;
   [key: string]: unknown;
 };
-type TagRecord = { id: string;
+type TagRecord = {
+  id: string;
   name: string;
   nameLower: string;
   color: string;
@@ -36,7 +39,8 @@ type TagRecord = { id: string;
   parentId?: string;
   orderIndex?: number;
 };
-type LocalDBTableMap = { cards: Card;
+type LocalDBTableMap = {
+  cards: Card;
   folders: Folder;
   cardSets: CardSet;
   documents: Document;
@@ -49,7 +53,8 @@ type LocalDBTableMap = { cards: Card;
 };
 type SyncableEntityTable = keyof LocalDBTableMap;
 type QueryableKeyPath = string | string[];
-interface QueryableCollection<T extends object, TKey = string> { equals(value: unknown): QueryableCollection<T, TKey>;
+interface QueryableCollection<T extends object, TKey = string> {
+  equals(value: unknown): QueryableCollection<T, TKey>;
   and(predicate: (item: T) => boolean): QueryableCollection<T, TKey>;
   filter(predicate: (item: T) => boolean): QueryableCollection<T, TKey>;
   reverse(): QueryableCollection<T, TKey>;
@@ -63,7 +68,8 @@ interface QueryableCollection<T extends object, TKey = string> { equals(value: u
   primaryKeys(): Promise<TKey[]>;
   each(callback: (item: T, cursor?: { primaryKey: TKey; }) => void | Promise<void>): Promise<void>;
 }
-interface QueryableWhereClause<T extends object, TKey = string> { equals(value: unknown): QueryableCollection<T, TKey>;
+interface QueryableWhereClause<T extends object, TKey = string> {
+  equals(value: unknown): QueryableCollection<T, TKey>;
   above(value: unknown): QueryableCollection<T, TKey>;
   aboveOrEqual(value: unknown): QueryableCollection<T, TKey>;
   below(value: unknown): QueryableCollection<T, TKey>;
@@ -76,7 +82,8 @@ type QueryableWhereFunction<T extends object, TKey = string> = { (criteria: { [k
   (index: QueryableKeyPath): QueryableWhereClause<T, TKey>;
   equals(value: unknown): QueryableCollection<T, TKey>;
 };
-interface QueryableTable<T extends object, TKey = string> { count(): Promise<number>;
+interface QueryableTable<T extends object, TKey = string> {
+  count(): Promise<number>;
   get(key: unknown): Promise<T | undefined>;
   put(record: T): Promise<unknown>;
   add(record: T): Promise<unknown>;
@@ -92,7 +99,8 @@ interface QueryableTable<T extends object, TKey = string> { count(): Promise<num
   bulkPut(items: readonly T[]): Promise<unknown>;
   bulkGet(keys: readonly unknown[]): Promise<Array<T | undefined>>;
 }
-interface LocalDBSyncApi { cards: QueryableTable<Card, string>;
+interface LocalDBSyncApi {
+  cards: QueryableTable<Card, string>;
   folders: QueryableTable<Folder, string>;
   notes: QueryableTable<Note, string>;
 

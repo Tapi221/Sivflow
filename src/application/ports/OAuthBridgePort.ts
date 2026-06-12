@@ -1,10 +1,12 @@
-interface OAuthBridgeCallbackPayload { url: string;
+interface OAuthBridgeCallbackPayload {
+  url: string;
   code?: string;
   state?: string;
   error?: string;
   errorDescription?: string;
 }
-interface OAuthBridgePort { start(authorizeUrl: string): Promise<void>;
+interface OAuthBridgePort {
+  start(authorizeUrl: string): Promise<void>;
   cancel(): Promise<void>;
   takePendingCallback(): Promise<OAuthBridgeCallbackPayload | null>;
   storeRefreshToken(input: { accountId: string; refreshToken: string; }): Promise<void>;

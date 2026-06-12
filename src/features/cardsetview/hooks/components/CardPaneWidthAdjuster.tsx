@@ -2,7 +2,8 @@ import React from "react";
 import { Slider } from "@/components/ui/slider";
 import { Minus, Plus, RefreshCw } from "@/ui/icons";
 
-interface CardPaneWidthAdjusterProps { modeLabel: string;
+interface CardPaneWidthAdjusterProps {
+  modeLabel: string;
   value: number;
   min: number;
   max: number;

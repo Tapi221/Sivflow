@@ -2,7 +2,8 @@ import type { ReactNode, Ref } from "react";
 import { cn } from "@/lib/utils";
 import { PanelSearchField } from "./PanelSearchField";
 
-interface FilterPanelShellProps { title?: string;
+interface FilterPanelShellProps {
+  title?: string;
   searchValue?: string;
   searchPlaceholder?: string;
   onSearchChange?: (value: string) => void;

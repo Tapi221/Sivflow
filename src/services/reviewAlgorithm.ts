@@ -5,7 +5,8 @@ import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import type { SubjectiveScore } from "@/utils/reviewUtils";
 import { toMillis } from "@/utils/toMillis";
 
-type ReviewAlgorithmInput = { card: { memoryStability?: number | null;
+type ReviewAlgorithmInput = {
+  card: { memoryStability?: number | null;
   currentLevel?: number | null;
   level?: number | null;
   nextReviewDate?: Date | Timestamp | null;
@@ -18,7 +19,8 @@ type ReviewAlgorithmInput = { card: { memoryStability?: number | null;
 subjectiveScore: SubjectiveScore;
 now?: Date;
 };
-type ReviewAlgorithmResult = { memoryStability: number;
+type ReviewAlgorithmResult = {
+  memoryStability: number;
   nextReviewDate: Date;
   lastReviewAt: Date;
   lastSubjectiveScore: SubjectiveScore;
@@ -29,7 +31,8 @@ type ReviewAlgorithmResult = { memoryStability: number;
   difficulty: number;
 };
 type MultipleChoiceConfidence = "high" | "mid" | "luck";
-type MultipleChoiceReviewMeta = { isCorrect: boolean;
+type MultipleChoiceReviewMeta = {
+  isCorrect: boolean;
   isUnknown?: boolean;
   confidence?: MultipleChoiceConfidence;
   choiceTimeMs?: number;

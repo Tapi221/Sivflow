@@ -1,19 +1,22 @@
 import type { CalendarEvent } from "./calendarEvent.types";
 
 type CalendarTimeGridLayoutMode = "overlap" | "no-overlap";
-type CalendarTimeGridStyle = { top: number;
+type CalendarTimeGridStyle = {
+  top: number;
   height: number;
   width: number;
   xOffset: number;
 };
-type CalendarTimeGridLayoutEntry = { event: CalendarEvent;
+type CalendarTimeGridLayoutEntry = {
+  event: CalendarEvent;
   style: CalendarTimeGridStyle;
   startsBeforeRange: boolean;
   endsAfterRange: boolean;
   columnIndex?: number;
   columnCount?: number;
 };
-type CalendarTimeGridLayoutOptions = { events: readonly CalendarEvent[];
+type CalendarTimeGridLayoutOptions = {
+  events: readonly CalendarEvent[];
   rangeStart: Date;
   rangeEnd: Date;
   layoutMode?: CalendarTimeGridLayoutMode;

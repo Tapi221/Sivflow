@@ -1,6 +1,7 @@
 import type { SelectedExplorerItem } from "@/types";
 
-type ExplorerRouteState = { isHomeOnlyMode: boolean;
+type ExplorerRouteState = {
+  isHomeOnlyMode: boolean;
   isSectionListMode: boolean;
   selectedFolderId: string | null;
   selectedItem: SelectedExplorerItem;

@@ -33,7 +33,8 @@ const SurfaceButton = React.forwardRef<HTMLButtonElement, SurfaceButtonProps>(({
   return (
     <button
       ref={ref}
-      type={type ?? "button"}
+      type={
+        type ?? "button"}
       title={resolvedTitle}
       className={cn(surfaceButtonVariants({ surface, size }), className)}
       {...props}

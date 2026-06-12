@@ -12,7 +12,8 @@ import type { LoadMfDeckFileResult } from "@/features/deckFile/infra/web/readMfD
 import { readMfDeckFile } from "@/features/deckFile/infra/web/readMfDeckFile";
 import type { CardSet } from "@/types";
 
-type MfDeckImportCompletedPayload = { cardSetId: string;
+type MfDeckImportCompletedPayload = {
+  cardSetId: string;
   cardSetName: string;
   folderId: string;
   createdCount: number;

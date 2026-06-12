@@ -1,8 +1,10 @@
 import { IMPORT_FILE_MIME_TYPES } from "@/features/import/domain/importFileKind";
 
-type DesktopImportFileOpenPayload = { paths: string[];
+type DesktopImportFileOpenPayload = {
+  paths: string[];
 };
-type DesktopImportFileReadResult = { path: string;
+type DesktopImportFileReadResult = {
+  path: string;
   name: string;
   size: number;
   data: ArrayBuffer | Uint8Array | number[];

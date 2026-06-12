@@ -3,7 +3,8 @@ import type { CardDisplayMode } from "@/types/domain/cardSet";
 type CardSurfaceMode = "card" | "fluid";
 type CardInteractionMode = "view" | "edit";
 type CardChromeScaleMode = "fixed";
-interface CardRenderSpec { surfaceMode: CardSurfaceMode;
+interface CardRenderSpec {
+  surfaceMode: CardSurfaceMode;
   interactionMode: CardInteractionMode;
   zoomScale: number;
   chromeScaleMode: CardChromeScaleMode;

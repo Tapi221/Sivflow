@@ -1,8 +1,10 @@
-type GoogleDrivePdfUploadInput = { accessToken: string;
+type GoogleDrivePdfUploadInput = {
+  accessToken: string;
   fileName: string;
   pdf: Blob;
 };
-type GoogleDrivePdfUploadResult = { id: string;
+type GoogleDrivePdfUploadResult = {
+  id: string;
   name: string;
   mimeType: string;
   webViewLink: string | null;
