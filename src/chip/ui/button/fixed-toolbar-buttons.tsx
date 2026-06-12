@@ -23,7 +23,7 @@ import { MediaToolbarButton } from "../media-toolbar-button";
 import { ModeToolbarButton } from "./mode-toolbar-button";
 import { MoreToolbarButton } from "./more-toolbar-button";
 import { TableToolbarButton } from "../../dropdownchip/table-toolbar-button";
-import { ToggleToolbarButton } from "../toggle-toolbar-button";
+import { ToggleToolbarButton } from "./toggle-toolbar-button";
 import { ToolbarGroup } from "../toolbar";
 import { TurnIntoToolbarButton } from "../turn-into-toolbar-button";
 
