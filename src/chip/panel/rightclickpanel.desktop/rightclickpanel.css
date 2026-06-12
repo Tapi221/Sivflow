@@ -1,0 +1,4 @@
+.right-click-panel {
+  position: fixed;
+  z-index: 2147483647;
+}
