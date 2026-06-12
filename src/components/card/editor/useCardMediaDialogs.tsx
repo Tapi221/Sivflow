@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ComponentType, SVGProps } from "react";
-import { StratisAudioSettings01Icon, StratisImageIcon, StratisLinkAngledIcon } from "stratis-ui-icons";
+import * as stratisIcons from "stratis-ui-icons";
 import { CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS } from "@/components/card/frame/cardAction.constants";
 import { cn } from "@/lib/utils";
 import type { UploadedImage } from "@/types/domain/assets";
@@ -19,11 +19,22 @@ type StratisComponentIconProps = {
   className?: string;
 };
 
+const STRATIS_ICON_COMPONENTS = stratisIcons as Record<string, StratisIconComponent | undefined>;
+const STRATIS_AUDIO_ICON_NAMES = ["StratisAudioSettings01Icon"] as const;
+const STRATIS_IMAGE_ICON_NAMES = ["StratisImage01Icon", "StratisImageIcon"] as const;
+const STRATIS_LINK_ICON_NAMES = ["StratisLinkAngledIcon"] as const;
+const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
+const StratisAudioIcon = resolveStratisIcon(STRATIS_AUDIO_ICON_NAMES);
+const StratisImageIcon = resolveStratisIcon(STRATIS_IMAGE_ICON_NAMES);
+const StratisLinkIcon = resolveStratisIcon(STRATIS_LINK_ICON_NAMES);
 const normalizeAttachments = (attachments: CardFaceAttachments | null | undefined): CardFaceAttachments => ({
   images: attachments?.images ?? [],
   audios: attachments?.audios ?? [],
   references: attachments?.references ?? [],
 });
+
+const StratisComponentIcon = ({ icon: Icon, className }: StratisComponentIconProps) => <Icon aria-hidden="true" focusable="false" className={className} />;
+
 const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: UseCardMediaDialogsParams) => {
   const [imageDialogSide, setImageDialogSide] = useState<Side | null>(null);
   const [audioDialogSide, setAudioDialogSide] = useState<Side | null>(null);
@@ -94,15 +105,15 @@ const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: UseCard
       return (
         <div className="flex flex-nowrap items-center gap-1.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
           <button type="button" className={base} onClick={() => setImageDialogSide(side)} aria-label="画像を追加">
-            <StratisComponentIcon icon={StratisImageIcon} className={iconClassName} />
+            {StratisImageIcon ? <StratisComponentIcon icon={StratisImageIcon} className={iconClassName} /> : null}
             {imageCount > 0 ? <span>x{imageCount}</span> : null}
           </button>
           <button type="button" className={base} onClick={() => setAudioDialogSide(side)} aria-label="音声を追加">
-            <StratisComponentIcon icon={StratisAudioSettings01Icon} className={iconClassName} />
+            {StratisAudioIcon ? <StratisComponentIcon icon={StratisAudioIcon} className={iconClassName} /> : null}
             {audioCount > 0 ? <span>x{audioCount}</span> : null}
           </button>
           <button type="button" className={base} onClick={openLinkDialog} aria-label="リンクを追加">
-            <StratisComponentIcon icon={StratisLinkAngledIcon} className={iconClassName} />
+            {StratisLinkIcon ? <StratisComponentIcon icon={StratisLinkIcon} className={iconClassName} /> : null}
             {linkCount > 0 ? <span>x{linkCount}</span> : null}
           </button>
         </div>
@@ -130,7 +141,5 @@ const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: UseCard
     [audioDialogSide, getDialogAudios, getDialogImages, getReferenceItems, imageDialogSide, linkDialogSide, renderMediaDialogButtons, setDialogAudios, setDialogImages, setReferenceItems],
   );
 };
-
-const StratisComponentIcon = ({ icon: Icon, className }: StratisComponentIconProps) => <Icon aria-hidden="true" focusable="false" className={className} />;
 
 export { useCardMediaDialogs };
