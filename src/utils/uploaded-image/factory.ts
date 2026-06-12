@@ -48,14 +48,4 @@ const createFailedUploadedImage = (file: File): UploadedImage => {
   };
 };
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
-
-=======
->>>>>>> b62265d03 (re)
-
->>>>>>> f6207c71b (r)
-
 export { generateUploadedImageId, createUploadedImage, createFailedUploadedImage };
