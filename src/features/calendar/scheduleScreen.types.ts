@@ -1,4 +1,4 @@
-import type { CSSProperties, RefObject, UIEvent } from "react";
+import type { CSSProperties, ReactNode, RefObject, UIEvent } from "react";
 import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/calendar/calendar.types";
 import type { GCalConnectionStatus, GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
@@ -25,6 +25,7 @@ type ScheduleScreenProps = {
   isLeftPanelCollapsed?: boolean;
   onClose?: () => void;
   onToggleLeftPanel?: () => void;
+  contentToolbar?: ReactNode;
 };
 type AppCalendarItem = {
   id: string;
