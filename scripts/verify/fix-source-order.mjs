@@ -176,12 +176,49 @@ const isIdentifierUsedInStatement = (source, statement, name) => {
   return new RegExp(`\\b${escapeRegExp(name)}\\b`, "u").test(statementSource);
 };
 
+const isFunctionLikeNode = (node) => ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node) || ts.isArrowFunction(node) || ts.isMethodDeclaration(node) || ts.isConstructorDeclaration(node) || ts.isGetAccessorDeclaration(node) || ts.isSetAccessorDeclaration(node);
+
+const isRuntimeReferenceTraversalExcluded = (node) => ts.isTypeNode(node) || isFunctionLikeNode(node);
+
+const containsRuntimeIdentifierReference = (node, name) => {
+  let found = false;
+
+  const visit = (child) => {
+    if (found) return;
+    if (isRuntimeReferenceTraversalExcluded(child)) return;
+
+    if (ts.isIdentifier(child) && child.text === name) {
+      found = true;
+      return;
+    }
+
+    ts.forEachChild(child, visit);
+  };
+
+  visit(node);
+  return found;
+};
+
+const isRuntimeIdentifierUsedInVariableStatement = (statement, name) => {
+  return statement.declarationList.declarations.some((declaration) => {
+    if (!declaration.initializer) return false;
+
+    return containsRuntimeIdentifierReference(declaration.initializer, name);
+  });
+};
+
+const isRuntimeIdentifierUsedInStatement = (statement, name) => {
+  if (ts.isVariableStatement(statement)) return isRuntimeIdentifierUsedInVariableStatement(statement, name);
+
+  return containsRuntimeIdentifierReference(statement, name);
+};
+
 const isRuntimeForwardDependencyTarget = (statement) => {
   if (isDirectiveStatement(statement)) return false;
   if (isImportStatement(statement)) return false;
   if (ts.isExportDeclaration(statement) || ts.isExportAssignment(statement)) return false;
   if (ts.isInterfaceDeclaration(statement) || ts.isTypeAliasDeclaration(statement) || ts.isModuleDeclaration(statement)) return false;
-  if (ts.isVariableStatement(statement) || ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement) || ts.isEnumDeclaration(statement)) return false;
+  if (ts.isFunctionDeclaration(statement)) return false;
 
   return true;
 };
@@ -197,7 +234,7 @@ const findForwardRuntimeDependencyMove = (source, sourceFile) => {
 
     for (let laterIndex = index + 1; laterIndex < statements.length; laterIndex += 1) {
       const names = getRuntimeDeclarationNames(statements[laterIndex]);
-      if (names.some((name) => isIdentifierUsedInStatement(source, statement, name))) dependencyIndex = laterIndex;
+      if (names.some((name) => isRuntimeIdentifierUsedInStatement(statement, name))) dependencyIndex = laterIndex;
     }
 
     if (dependencyIndex >= 0) return { fromIndex: index, targetIndex: dependencyIndex };
