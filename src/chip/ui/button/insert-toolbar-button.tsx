@@ -7,8 +7,8 @@ import { KEYS } from "platejs";
 import type { PlateEditor } from "platejs/react";
 import { useEditorRef } from "platejs/react";
 import { insertBlock, insertInlineElement } from "@/components/editor/transforms";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./menu/dropdown-menu";
-import { ToolbarButton, ToolbarMenuGroup } from "./toolbar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../menu/dropdown-menu";
+import { ToolbarButton, ToolbarMenuGroup } from "../toolbar";
 
 type Item = {
   icon: React.ReactNode;
