@@ -23,7 +23,14 @@ const walkSourceFiles = (directory) => {
 
 const toPosix = (value) => value.split(path.sep).join("/");
 
-const getScriptKind = (filePath) => path.extname(filePath).endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
+const getScriptKind = (filePath) => {
+  const extension = path.extname(filePath);
+  if (extension === ".tsx") return ts.ScriptKind.TSX;
+  if (extension === ".jsx") return ts.ScriptKind.JSX;
+  if (extension === ".js" || extension === ".mjs") return ts.ScriptKind.JS;
+
+  return ts.ScriptKind.TS;
+};
 
 const createSourceFile = (filePath, source) => ts.createSourceFile(filePath, source, ts.ScriptTarget.Latest, true, getScriptKind(filePath));
 
@@ -32,6 +39,8 @@ const getLineNumber = (sourceFile, position) => sourceFile.getLineAndCharacterOf
 const getNewline = (source) => source.includes("\r\n") ? "\r\n" : "\n";
 
 const isImportStatement = (statement) => ts.isImportDeclaration(statement) || ts.isImportEqualsDeclaration(statement);
+
+const isExportStatement = (statement) => ts.isExportDeclaration(statement) || ts.isExportAssignment(statement);
 
 const getLeadingWhitespaceText = (source, sourceFile, previousStatement, statement) => source.slice(previousStatement.getEnd(), statement.getStart(sourceFile));
 
@@ -45,13 +54,20 @@ const checkImportSpacing = (filePath) => {
   for (let index = 1; index < statements.length; index += 1) {
     const previousStatement = statements[index - 1];
     const statement = statements[index];
-    if (!isImportStatement(previousStatement) || !isImportStatement(statement)) continue;
-
     const leadingWhitespace = getLeadingWhitespaceText(source, sourceFile, previousStatement, statement);
     if (/\S/.test(leadingWhitespace)) continue;
-    if (leadingWhitespace === newline) continue;
 
-    violations.push({ filePath, line: getLineNumber(sourceFile, statement.getStart(sourceFile)), message: "import 文同士の間に空行を入れないでください。" });
+    if (isImportStatement(previousStatement) && isImportStatement(statement) && leadingWhitespace !== newline) {
+      violations.push({ filePath, line: getLineNumber(sourceFile, statement.getStart(sourceFile)), message: "import 文同士の間に空行を入れないでください。" });
+      continue;
+    }
+
+    if (!isExportStatement(statement)) continue;
+
+    const expectedWhitespace = isExportStatement(previousStatement) ? newline : `${newline}${newline}`;
+    if (leadingWhitespace === expectedWhitespace) continue;
+
+    violations.push({ filePath, line: getLineNumber(sourceFile, statement.getStart(sourceFile)), message: "export 文の前の空行が規約と一致していません。" });
   }
 
   return violations;
