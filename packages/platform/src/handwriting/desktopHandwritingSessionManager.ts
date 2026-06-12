@@ -5,8 +5,6 @@ import { receiveDesktopHandwritingMessage } from "./desktopHandwritingReceiver";
 import type { HandwritingDeviceInfo, HandwritingSession, HandwritingSessionMessage } from "./handwritingSession.types";
 import { attachMobileDeviceToHandwritingSession, closeHandwritingSession, createDesktopHandwritingSession, failHandwritingSession } from "./handwritingSessionLifecycle";
 
-
-
 type DesktopHandwritingDocumentKey = `${string}:${InkSide}`;
 type DesktopHandwritingSessionManagerState = { activeSessionId: string | null;
   documents: Record<DesktopHandwritingDocumentKey, InkDocument>;
@@ -34,8 +32,6 @@ type ReceiveDesktopHandwritingSessionManagerMessageResult = { state: DesktopHand
   applied: boolean;
   reason?: DesktopHandwritingReceiverReason | "session-not-found";
 };
-
-
 
 const createDesktopHandwritingSessionManagerState = (): DesktopHandwritingSessionManagerState => ({ activeSessionId: null, documents: {}, sessions: {} });
 const getDesktopHandwritingDocumentKey = (cardId: string, side: InkSide): DesktopHandwritingDocumentKey => {
@@ -130,9 +126,5 @@ const failDesktopHandwritingSession = (state: DesktopHandwritingSessionManagerSt
   };
 };
 
-
-
 export { createDesktopHandwritingSessionManagerState, getDesktopHandwritingDocumentKey, startDesktopHandwritingSession, attachMobileDeviceToDesktopHandwritingSession, receiveDesktopHandwritingSessionManagerMessage, closeDesktopHandwritingSession, failDesktopHandwritingSession };
-
-
 export type { DesktopHandwritingDocumentKey, DesktopHandwritingSessionManagerState, StartDesktopHandwritingSessionInput, AttachMobileDeviceToDesktopHandwritingSessionInput, ReceiveDesktopHandwritingSessionManagerMessageInput, ReceiveDesktopHandwritingSessionManagerMessageResult };

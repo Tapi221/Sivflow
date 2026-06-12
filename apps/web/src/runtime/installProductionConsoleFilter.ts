@@ -1,8 +1,6 @@
 type ConsoleMethodName = "debug" | "log" | "info" | "warn" | "error";
 type ConsoleMethod = (...data: unknown[]) => void;
 
-
-
 const JAPANESE_CONSOLE_LABELS_INSTALLED_KEY = "__sivflowJapaneseConsoleLabelsInstalled";
 const CONSOLE_MESSAGE_LABELS: Record<string, string> = {
   "[GoogleCalendarOAuth] reconnect diagnosis": "[GoogleCalendarOAuth] 再接続診断",
@@ -17,8 +15,6 @@ const CONSOLE_MESSAGE_LABELS: Record<string, string> = {
   "[GoogleCalendar] reconnect failed": "[GoogleCalendar] 再接続に失敗しました",
   "[GoogleCalendar] connect failed": "[GoogleCalendar] 接続に失敗しました",
 };
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);

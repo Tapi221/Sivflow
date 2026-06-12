@@ -6,8 +6,6 @@ import { copyImageBlobToClipboard } from "@/features/selection-capture/clipboard
 import type { SelectionCaptureArea } from "@/features/selection-capture/selectionCapture.types";
 import { recognizeSelectionCaptureText } from "@/features/selection-capture/selectionCaptureOcr";
 
-
-
 type PdfSelectionCaptureTargetRef = {
   readonly current: HTMLElement | null;
 };
@@ -23,11 +21,7 @@ type UsePdfSelectionCaptureResult = {
   handleCaptureSelection: (area: SelectionCaptureArea) => Promise<void>;
 };
 
-
-
 const PDF_SELECTION_CAPTURE_MESSAGE_TIMEOUT_MS = 1800;
-
-
 
 const resolvePdfSelectionCaptureTaskMessage = (results: CardSelectionCaptureTaskResult[]): string | null => {
   return results.find((result): result is string => typeof result === "string" && result.trim().length > 0) ?? null;
@@ -83,9 +77,5 @@ const usePdfSelectionCapture = ({ targetRef, selectionCaptureSide, sourceUnavail
   };
 };
 
-
-
 export { usePdfSelectionCapture };
-
-
 export type { UsePdfSelectionCaptureParams, UsePdfSelectionCaptureResult };

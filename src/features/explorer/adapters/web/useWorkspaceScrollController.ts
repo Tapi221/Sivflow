@@ -1,12 +1,8 @@
 import { useCallback } from "react";
 
-
-
 type Params = {
   isDesktop: boolean;
 };
-
-
 
 /**
  * Explorer 内の選択変更に伴う main pane のスクロールだけを担当する。
@@ -34,7 +30,5 @@ const useWorkspaceScrollController = ({ isDesktop }: Params) => {
     resetExplorerPaneScroll,
   };
 };
-
-
 
 export { useWorkspaceScrollController };

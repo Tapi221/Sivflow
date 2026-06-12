@@ -5,8 +5,6 @@ import type { SecurityState as SyncSecurityState } from "@/services/interfaces/I
 import type { SecurityEventType, SecurityLog, SecurityMetadata } from "@/types/domain/telemetry";
 import { getSecurityEventCatalogEntry } from "./securityEventCatalog";
 
-
-
 interface SecurityAlert {
   id: string;
   type: string;
@@ -20,8 +18,6 @@ interface SecurityState { isLocked: boolean;
   requires2FA: boolean;
   alerts: SecurityAlert[];
 }
-
-
 
 /**
  * SecurityMonitor: セキュリティログ送信とサーバー状態監視を行うクラス
@@ -201,9 +197,5 @@ class SecurityMonitor { private userId: string;
   }
 }
 
-
-
 export { SecurityMonitor };
-
-
 export type { SecurityState };

@@ -3,8 +3,6 @@ import type { CalendarEvent, CalendarTimeGridLayoutMode } from "@core/calendar";
 import { layoutCalendarTimeGridEvents } from "@core/calendar";
 import { CalendarEventChip } from "./CalendarEventChip";
 
-
-
 type CalendarTimeGridProperties = {
   events: readonly CalendarEvent[];
   rangeStart: Date;
@@ -17,14 +15,10 @@ type TimeGridHourLabel = {
   top: number;
 };
 
-
-
 const DEFAULT_HOUR_HEIGHT = 72;
 const HOURS_IN_DAY = 24;
 const MINUTES_IN_HOUR = 60;
 const PERCENT_MAX = 100;
-
-
 
 const getMinutesFromRangeStart = (rangeStart: Date, date: Date): number => {
   return (date.getTime() - rangeStart.getTime()) / 60_000;
@@ -49,8 +43,6 @@ const getHourLabels = (rangeStart: Date, rangeEnd: Date): TimeGridHourLabel[] =>
 
   return labels;
 };
-
-
 
 const CalendarTimeGrid = memo(({ events, rangeStart, rangeEnd, layoutMode = "no-overlap", hourHeight = DEFAULT_HOUR_HEIGHT }: CalendarTimeGridProperties) => {
   const layoutEntries = useMemo(
