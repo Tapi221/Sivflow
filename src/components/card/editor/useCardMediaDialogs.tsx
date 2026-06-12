@@ -19,7 +19,7 @@ type StratisComponentIconProps = {
   className?: string;
 };
 
-const STRATIS_ICON_COMPONENTS = stratisIcons as Record<string, StratisIconComponent | undefined>;
+const STRATIS_ICON_COMPONENTS = stratisIcons as unknown as Record<string, StratisIconComponent | undefined>;
 const STRATIS_AUDIO_ICON_NAMES = ["StratisAudioSettings01Icon"] as const;
 const STRATIS_IMAGE_ICON_NAMES = ["StratisImage01Icon", "StratisImageIcon"] as const;
 const STRATIS_LINK_ICON_NAMES = ["StratisLinkAngledIcon"] as const;
