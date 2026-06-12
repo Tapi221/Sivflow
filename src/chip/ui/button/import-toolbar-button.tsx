@@ -7,8 +7,8 @@ import { ArrowUpToLineIcon } from "lucide-react";
 import { useEditorRef } from "platejs/react";
 import { getEditorDOMFromHtmlString } from "platejs/static";
 import { useFilePicker } from "use-file-picker";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "./menu/dropdown-menu";
-import { ToolbarButton } from "./toolbar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "../menu/dropdown-menu";
+import { ToolbarButton } from "../toolbar";
 
 type ImportType = "html" | "markdown";
 
