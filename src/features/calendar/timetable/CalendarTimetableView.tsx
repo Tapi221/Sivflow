@@ -140,7 +140,7 @@ const CalendarTimetableCourseEditor = ({ course, semesterId, initialSlot, period
     void onDelete(course.id).then(onClose);
   }, [course, onClose, onDelete]);
 
-  const isSaveDisabled = title.trim().length === 0 || slots.length === 0;
+  const isSaveDisabled = slots.length === 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 px-4 py-6" role="dialog" aria-modal="true" aria-label="授業編集">
@@ -151,7 +151,7 @@ const CalendarTimetableCourseEditor = ({ course, semesterId, initialSlot, period
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
           <div className="grid gap-3">
-            <input className="h-11 rounded-[14px] border border-[#e5e5ea] px-3 text-[15px] font-semibold text-[#1c1c1e] outline-none focus:border-[#007aff]" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="授業名" />
+            <input className="h-11 rounded-[14px] border border-[#e5e5ea] px-3 text-[15px] font-semibold text-[#1c1c1e] outline-none focus:border-[#007aff]" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="授業名（空欄なら授業）" />
             <div className="grid grid-cols-2 gap-3">
               <input className="h-10 rounded-[12px] border border-[#e5e5ea] px-3 text-[14px] font-semibold text-[#1c1c1e] outline-none focus:border-[#007aff]" value={room} onChange={(event) => setRoom(event.target.value)} placeholder="教室" />
               <input className="h-10 rounded-[12px] border border-[#e5e5ea] px-3 text-[14px] font-semibold text-[#1c1c1e] outline-none focus:border-[#007aff]" value={teacher} onChange={(event) => setTeacher(event.target.value)} placeholder="担当教員" />
