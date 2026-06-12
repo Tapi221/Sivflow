@@ -53,22 +53,8 @@
   background-clip: padding-box;
 }
 
-.workspace-shell--with-tabs {
-  grid-template-rows: var(--app-top-inset, 44px) minmax(0, 1fr);
-}
-
 .workspace-shell--without-tabs {
   grid-template-rows: minmax(0, 1fr);
-}
-
-.workspace-shell__tabs {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.workspace-shell--with-tabs > .workspace-shell__main,
-.workspace-shell--with-tabs > .app-layout__main {
-  grid-row: 2;
 }
 
 .workspace-shell__main,
