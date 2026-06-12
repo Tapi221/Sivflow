@@ -25,7 +25,9 @@ const CardSetViewMobileContent = ({ controller }: CardSetViewContentProps) => {
       onActiveIndexChange={state.handlePagerIndexChange}
       onFlip={state.handleFlip}
       onActiveScrollAnchorFaceChange={controller.handleActiveScrollAnchorFaceChange}
-      onCreateCard={state.createAndFocusCard}
+      onCreateCard={() => {
+        void state.createAndFocusCard();
+      }}
       onReorderCards={controller.handleReorderCards}
       onToggleUncertainty={state.handleToggleUncertainty}
       onToggleBookmark={state.handleToggleBookmark}
