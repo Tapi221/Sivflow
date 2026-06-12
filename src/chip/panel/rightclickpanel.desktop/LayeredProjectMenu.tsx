@@ -1,8 +1,8 @@
 import { Fragment, memo } from "react";
 import type { CSSProperties, ReactNode, RefObject } from "react";
+import { Panel } from "../panel";
 import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE } from "./rightClickPanel.utils";
-import { RightClickPanelSurface } from "../rightClickPanelCommon";
 
 type LayeredProjectMenuActionId = "change-color" | "rename" | "create-note" | "create-card-set" | "create-folder" | "import-pdf" | "add-to-favorites" | "hide" | "delete";
 type LayeredProjectMenuItemDefinition = {
@@ -52,7 +52,7 @@ const LAYERED_PROJECT_MENU_WIDTH = resolveRightClickPanelTextWidth(LAYERED_PROJE
 const LAYERED_PROJECT_MENU_HEIGHT = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + LAYERED_PROJECT_MENU_SEPARATOR_COUNT * LAYERED_PROJECT_MENU_SEPARATOR_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
 const LAYERED_PROJECT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
 const LAYERED_PROJECT_MENU_STYLE = `
-.right-click-panel.layered-project-menu-panel {
+.panel.layered-project-menu-panel {
   contain: none;
   overflow: visible;
 }
@@ -103,7 +103,7 @@ const LayeredProjectMenuBase = ({ x, y, actions, menuRef, noDragStyle, panelId =
   return (
     <>
       <style>{LAYERED_PROJECT_MENU_STYLE}</style>
-      <RightClickPanelSurface x={x} y={y} width={LAYERED_PROJECT_MENU_WIDTH} panelRef={menuRef} noDragStyle={noDragStyle} className="layered-project-menu-panel" ariaLabel="layered project context menu" panelId={panelId}>
+      <Panel id={panelId} x={x} y={y} width={LAYERED_PROJECT_MENU_WIDTH} panelRef={menuRef} style={noDragStyle} className="layered-project-menu-panel" role="menu" ariaLabel="layered project context menu" preventContextMenu>
         {LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.map((item, index) => {
           const action = getLayeredProjectMenuAction(actions, item.id);
           const isDisabled = action?.disabled ?? false;
@@ -112,13 +112,39 @@ const LayeredProjectMenuBase = ({ x, y, actions, menuRef, noDragStyle, panelId =
           return (
             <Fragment key={item.id}>
               {item.separatorBefore ? <div className="layered-project-menu-separator" role="separator" /> : null}
-              <button type="button" disabled={isDisabled} className={["right-click-panel-item", "layered-project-menu-item", item.danger ? "layered-project-menu-item--danger" : null, isSubmenuOpen ? "layered-project-menu-item--open" : null].filter(Boolean).join(" ")} role="menuitem" aria-haspopup={item.submenu ? "menu" : undefined} aria-expanded={item.submenu ? isSubmenuOpen : undefined} onMouseEnter={() => {
-                if (isDisabled) return; if (item.submenu) {
-                  onOpenSubmenu?.(item.id, getLayeredProjectMenuSubmenuAnchor(index)); return; } onCloseSubmenu?.(); }} onFocus={() => {
-                if (isDisabled || !item.submenu) return; onOpenSubmenu?.(item.id, getLayeredProjectMenuSubmenuAnchor(index)); }} onClick={(event) => {
-                event.preventDefault(); event.stopPropagation(); if (isDisabled) return; if (item.submenu) {
-                  if (onOpenSubmenu) {
-                    onOpenSubmenu(item.id, getLayeredProjectMenuSubmenuAnchor(index)); return; } action?.onSelect(); return; } action?.onSelect(); }}
+              <button
+                type="button"
+                disabled={isDisabled}
+                className={["panel__item", "layered-project-menu-item", item.danger ? "layered-project-menu-item--danger" : null, isSubmenuOpen ? "layered-project-menu-item--open" : null].filter(Boolean).join(" ")}
+                role="menuitem"
+                aria-haspopup={item.submenu ? "menu" : undefined}
+                aria-expanded={item.submenu ? isSubmenuOpen : undefined}
+                onMouseEnter={() => {
+                  if (isDisabled) return;
+                  if (item.submenu) {
+                    onOpenSubmenu?.(item.id, getLayeredProjectMenuSubmenuAnchor(index));
+                    return;
+                  }
+                  onCloseSubmenu?.();
+                }}
+                onFocus={() => {
+                  if (isDisabled || !item.submenu) return;
+                  onOpenSubmenu?.(item.id, getLayeredProjectMenuSubmenuAnchor(index));
+                }}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  if (isDisabled) return;
+                  if (item.submenu) {
+                    if (onOpenSubmenu) {
+                      onOpenSubmenu(item.id, getLayeredProjectMenuSubmenuAnchor(index));
+                      return;
+                    }
+                    action?.onSelect();
+                    return;
+                  }
+                  action?.onSelect();
+                }}
               >
                 <span>{item.label}</span>
                 {item.submenu ? (
@@ -129,7 +155,7 @@ const LayeredProjectMenuBase = ({ x, y, actions, menuRef, noDragStyle, panelId =
           );
         })}
         {submenuElement}
-      </RightClickPanelSurface>
+      </Panel>
     </>
   );
 };
