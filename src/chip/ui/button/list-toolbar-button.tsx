@@ -5,8 +5,8 @@ import { ListStyleType, someList, toggleList } from "@platejs/list";
 import { useIndentTodoToolBarButton, useIndentTodoToolBarButtonState } from "@platejs/list/react";
 import { List, ListOrdered, ListTodoIcon } from "lucide-react";
 import { useEditorRef, useEditorSelector } from "platejs/react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "./menu/dropdown-menu";
-import { ToolbarButton, ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary } from "./toolbar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "../menu/dropdown-menu";
+import { ToolbarButton, ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary } from "../toolbar";
 
 const BulletedListToolbarButton = () => {
   const editor = useEditorRef();
