@@ -1,4 +1,4 @@
-import { getLocalDb } from "./localDB";
+import { getLocalDb } from "./localdb";
 import { StorageStateManager } from "./StorageStateManager";
 
 interface CompressedHistory {
