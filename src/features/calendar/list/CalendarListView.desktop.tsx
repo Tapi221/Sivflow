@@ -62,6 +62,7 @@ type CalendarListVirtualMetrics = {
 type CalendarListEventIndex = Map<string, GoogleCalendarEvent[]>;
 type CalendarListItemRowProps = {
   item: CalendarListVirtualItem;
+  showDayHeader: boolean;
   onSelectDate?: (date: Date) => void;
 };
 
@@ -366,6 +367,7 @@ const EmptyDayCard = () => (
 );
 const CalendarListItemRowComponent = ({
   item,
+  showDayHeader,
   onSelectDate,
 }: CalendarListItemRowProps) => (
   <section
@@ -373,7 +375,7 @@ const CalendarListItemRowComponent = ({
     style={createItemRowStyle(item.rowHeight)}
     aria-label={getCalendarListItemAriaLabel(item)}
   >
-    {item.isFirstDayItem ? (
+    {showDayHeader ? (
       <button
         type="button"
         className="group mt-0.5 flex h-8 items-center justify-end gap-1 rounded-[10px] pr-0.5 text-right transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25"
@@ -571,6 +573,10 @@ const CalendarListViewComponent = ({
             <span className={LIST_GLOBAL_RAIL_CLASS_NAME} aria-hidden="true" />
             {visibleItems.map((item, offset) => {
               const itemIndex = range.start + offset;
+              const previousVisibleItem = visibleItems[offset - 1];
+              const showDayHeader =
+                item.isFirstDayItem ||
+                previousVisibleItem?.day.dateKey !== item.day.dateKey;
               return (
                 <div
                   key={item.key}
@@ -583,6 +589,7 @@ const CalendarListViewComponent = ({
                 >
                   <CalendarListItemRow
                     item={item}
+                    showDayHeader={showDayHeader}
                     onSelectDate={onSelectDate}
                   />
                 </div>
