@@ -3,9 +3,9 @@ import { TAG_COLOR_PALETTE } from "@shared/design-tokens/tag.palette";
 import type { CSSProperties, RefObject } from "react";
 import type { TagColorKey } from "@/chip/tag/tagColor";
 import { getTagColorSwatchStyle, TAG_COLOR_KEYS } from "@/chip/tag/tagColor";
+import { Panel } from "../panel";
 import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING } from "./rightClickPanel.utils";
-import { RightClickPanelSurface } from "../rightClickPanelCommon";
 
 type LayeredColorMenuOption = {
   id: TagColorKey;
@@ -111,7 +111,7 @@ const LayeredColorMenuBase = ({
   return (
     <>
       <style>{LAYERED_COLOR_MENU_STYLE}</style>
-      <RightClickPanelSurface x={x} y={y} width={LAYERED_COLOR_MENU_WIDTH} panelRef={menuRef} noDragStyle={noDragStyle} ariaLabel="color submenu" panelId={panelId}>
+      <Panel id={panelId} x={x} y={y} width={LAYERED_COLOR_MENU_WIDTH} panelRef={menuRef} style={noDragStyle} role="menu" ariaLabel="color submenu" preventContextMenu>
         <div className="layered-color-menu-grid">
           {options.map((option) => {
             const isSelected = normalizeColorValue(option.value) === normalizedCurrentColor;
@@ -121,14 +121,13 @@ const LayeredColorMenuBase = ({
                 event.preventDefault();
                 event.stopPropagation();
                 onSelectColor(option.value);
-              }}
-              >
+              }}>
                 <span className="layered-color-menu-swatch-core" />
               </button>
             );
           })}
         </div>
-      </RightClickPanelSurface>
+      </Panel>
     </>
   );
 };
