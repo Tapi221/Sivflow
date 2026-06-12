@@ -4,21 +4,21 @@
     {
       "label": "TypeScript: check app",
       "type": "shell",
-      "command": "npm exec tsc -- -p tsconfig.app.json --noEmit --pretty false",
+      "command": "npm exec tsc -- -p tsconfig.app.json --noEmit --pretty false --locale ja",
       "group": "build",
       "problemMatcher": "$tsc"
     },
     {
       "label": "TypeScript: check node",
       "type": "shell",
-      "command": "npm exec tsc -- -p tsconfig.node.json --noEmit --pretty false",
+      "command": "npm exec tsc -- -p tsconfig.node.json --noEmit --pretty false --locale ja",
       "group": "build",
       "problemMatcher": "$tsc"
     },
     {
       "label": "TypeScript: check tests",
       "type": "shell",
-      "command": "npm exec tsc -- -p tsconfig.test.json --noEmit --pretty false",
+      "command": "npm exec tsc -- -p tsconfig.test.json --noEmit --pretty false --locale ja",
       "group": "build",
       "problemMatcher": "$tsc"
     },
