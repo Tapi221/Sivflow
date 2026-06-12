@@ -134,17 +134,6 @@ const getCalendarListItemAriaLabel = (item: CalendarListVirtualItem): string => 
 const createItemRowStyle = (height: number): CSSProperties => ({
   height,
 });
-const createVirtualItemStyle = (
-  metrics: CalendarListVirtualMetrics,
-  itemIndex: number,
-  height: number,
-): CSSProperties => ({
-  contain: "layout style paint",
-  contentVisibility: "auto",
-  containIntrinsicSize: `${height}px`,
-  height,
-  top: getItemTop(metrics, itemIndex),
-});
 const buildCalendarListEventIndex = (
   rail: ScheduleVirtualRail,
   totalDayCount: number,
@@ -262,6 +251,17 @@ const getItemTop = (
   if (itemIndex >= metrics.items.length) return metrics.totalHeight;
   return metrics.offsets[itemIndex] ?? 0;
 };
+const createVirtualItemStyle = (
+  metrics: CalendarListVirtualMetrics,
+  itemIndex: number,
+  height: number,
+): CSSProperties => ({
+  contain: "layout style paint",
+  contentVisibility: "auto",
+  containIntrinsicSize: `${height}px`,
+  height,
+  top: getItemTop(metrics, itemIndex),
+});
 const getItemIndexAtOffset = (
   metrics: CalendarListVirtualMetrics,
   offset: number,
