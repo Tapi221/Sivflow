@@ -10,18 +10,22 @@ type Translations = Omit<RawTranslations, "overflowEvents"> & {
 
 const RAW_TRANSLATIONS = rawTranslations as Record<Locale, RawTranslations>;
 
-const formatCountTemplate = (template: string, count: number): string =>
-  template.replace("{{count}}", String(count));
-const toTranslations = (translations: RawTranslations): Translations => ({
-  ...translations,
-  overflowEvents: (count: number) =>
-    formatCountTemplate(translations.overflowEvents, count),
-});
-
 const TRANSLATIONS: Record<Locale, Translations> = {
-  ja: toTranslations(RAW_TRANSLATIONS.ja),
-  en: toTranslations(RAW_TRANSLATIONS.en),
-  zh: toTranslations(RAW_TRANSLATIONS.zh),
+  ja: {
+    ...RAW_TRANSLATIONS.ja,
+    overflowEvents: (count: number) =>
+      RAW_TRANSLATIONS.ja.overflowEvents.replace("{{count}}", String(count)),
+  },
+  en: {
+    ...RAW_TRANSLATIONS.en,
+    overflowEvents: (count: number) =>
+      RAW_TRANSLATIONS.en.overflowEvents.replace("{{count}}", String(count)),
+  },
+  zh: {
+    ...RAW_TRANSLATIONS.zh,
+    overflowEvents: (count: number) =>
+      RAW_TRANSLATIONS.zh.overflowEvents.replace("{{count}}", String(count)),
+  },
 };
 
 export { RAW_TRANSLATIONS, TRANSLATIONS };
