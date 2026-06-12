@@ -37,7 +37,7 @@
     "verify:blank-lines": "node scripts/verify/verify-repeated-blank-lines.mjs",
     "verify:short-hex-colors": "node scripts/verify/verify-short-hex-colors.mjs",
     "verify:nullish-fallback": "node scripts/verify/verify-nullish-fallback.mjs",
-    "verify:jsx-child-spacing": "node scripts/verify/fix-jsx-child-spacing.mjs",
+    "verify:jsx-child-spacing": "node scripts/verify/verify-jsx-child-spacing.mjs",
     "verify:sw": "node scripts/verify/verify-sw.mjs",
     "verify:module-constant-names": "node scripts/verify/verify-module-constant-names.mjs",
     "verify:const-arrow-functions": "node scripts/verify/verify-const-arrow-functions.mjs",
