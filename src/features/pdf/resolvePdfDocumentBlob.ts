@@ -9,7 +9,7 @@ type PdfDocumentBlobFields = Pick<DocumentItem, "id" | "localFileId" | "userId" 
 
 const GOOGLE_DRIVE_STORAGE_PATH_PREFIX = "google-drive://";
 const GOOGLE_DRIVE_FILE_PATH_PATTERN = /\/file\/d\/([^/]+)/;
-const FIREBASE_STORAGE_URL_PROTOCOLS = new Set(["gs:", "http:", "https:"]);
+const FIREBASE_STORAGE_HTTP_HOSTS = new Set(["firebasestorage.googleapis.com", "storage.googleapis.com"]);
 
 const getUniqueValues = (values: Array<string | null | undefined>): string[] => {
   return [...new Set(values.map((value) => value?.trim()).filter((value): value is string => Boolean(value)))];
@@ -30,7 +30,10 @@ const resolveStringValue = (value: string | null | undefined): string | null => 
 };
 const isFirebaseStorageUrl = (value: string): boolean => {
   try {
-    return FIREBASE_STORAGE_URL_PROTOCOLS.has(new URL(value).protocol);
+    const parsedUrl = new URL(value);
+    if (parsedUrl.protocol === "gs:") return true;
+    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") return false;
+    return FIREBASE_STORAGE_HTTP_HOSTS.has(parsedUrl.hostname);
   } catch {
     return false;
   }
