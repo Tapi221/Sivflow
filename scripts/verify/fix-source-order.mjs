@@ -5,7 +5,7 @@ import ts from "typescript";
 
 const ROOT_DIR = process.cwd();
 const ESLINT_BIN_PATH = path.resolve(ROOT_DIR, "node_modules/eslint/bin/eslint.js");
-const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "functions/src"].map((directory) => path.join(ROOT_DIR, directory));
+const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src"].map((directory) => path.join(ROOT_DIR, directory));
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 const ORDER_EXCLUDED_PATH_PARTS = ["/tests/", "/scripts/", "/src/sandbox/"];
 const ORDER_EXCLUDED_FILE_SUFFIXES = [".d.ts"];
