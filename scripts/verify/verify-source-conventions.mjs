@@ -6,18 +6,8 @@ const ROOT_DIR = process.cwd();
 const SOURCE_DIRECTORY_PATTERNS = process.env.SOURCE_CONVENTION_TARGETS?.split(path.delimiter).filter(Boolean) ?? ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src", "tests", "scripts/dev", "scripts/verify"];
 const SOURCE_DIRECTORIES = SOURCE_DIRECTORY_PATTERNS.map((directory) => path.resolve(ROOT_DIR, directory));
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx"]);
-const RESOLVABLE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".json", ".css", ".scss", ".sass", ".less"];
 const ORDER_EXCLUDED_PATH_PARTS = ["/tests/", "/scripts/", "/src/sandbox/"];
 const ORDER_EXCLUDED_FILE_SUFFIXES = [".d.ts"];
-const ALIAS_ROOTS = [
-  { directory: path.join(ROOT_DIR, "src"), prefix: "@" },
-  { directory: path.join(ROOT_DIR, "apps/mobile/src"), prefix: "@mobile" },
-  { directory: path.join(ROOT_DIR, "packages/core/src"), prefix: "@core" },
-  { directory: path.join(ROOT_DIR, "packages/platform/src"), prefix: "@platform" },
-  { directory: path.join(ROOT_DIR, "packages/web-renderer/src"), prefix: "@web-renderer" },
-  { directory: path.join(ROOT_DIR, "packages/mobile-renderer/src"), prefix: "@mobile-renderer" },
-  { directory: path.join(ROOT_DIR, "shared"), prefix: "@shared" },
-];
 const ORDER_RANKS = {
   import: 1,
   type: 2,
@@ -60,39 +50,6 @@ const shouldCheckStatementOrder = (filePath) => {
   if (ORDER_EXCLUDED_FILE_SUFFIXES.some((suffix) => relativePath.endsWith(suffix))) return false;
 
   return !ORDER_EXCLUDED_PATH_PARTS.some((part) => relativePath.includes(part));
-};
-
-const fileExists = (filePath) => {
-  try {
-    return statSync(filePath).isFile();
-  } catch {
-    return false;
-  }
-};
-
-const resolveExistingModulePath = (basePath) => {
-  if (fileExists(basePath)) return basePath;
-
-  for (const extension of RESOLVABLE_EXTENSIONS) {
-    if (fileExists(`${basePath}${extension}`)) return `${basePath}${extension}`;
-  }
-
-  for (const extension of RESOLVABLE_EXTENSIONS) {
-    const indexPath = path.join(basePath, `index${extension}`);
-    if (fileExists(indexPath)) return indexPath;
-  }
-
-  return null;
-};
-
-const findAliasRootByPrefix = (specifier) => ALIAS_ROOTS.find(({ prefix }) => specifier.startsWith(`${prefix}/`));
-
-const resolveSpecifierPath = (filePath, specifier) => {
-  const aliasRoot = findAliasRootByPrefix(specifier);
-  if (aliasRoot) return resolveExistingModulePath(path.join(aliasRoot.directory, specifier.slice(aliasRoot.prefix.length + 1)));
-  if (specifier.startsWith(".")) return resolveExistingModulePath(path.resolve(path.dirname(filePath), specifier));
-
-  return null;
 };
 
 const hasExportModifier = (statement) => ts.canHaveModifiers(statement) && Boolean(ts.getModifiers(statement)?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword));
@@ -205,18 +162,9 @@ const getStatementPreview = (source, statement) => source.slice(statement.getSta
 const checkModuleSpecifier = (filePath, sourceFile, node, specifier) => {
   const line = getLineNumber(sourceFile, node.getStart(sourceFile));
   const violations = [];
-  const targetPath = resolveSpecifierPath(filePath, specifier);
 
-  if (specifier.startsWith("../")) {
-    violations.push({ filePath, line, message: `同一階層以外の import では ${specifier} ではなくエイリアスを使ってください。` });
-  }
-
-  if (/^\.\/[^/]+\//.test(specifier)) {
-    violations.push({ filePath, line, message: `子階層への import では ${specifier} ではなくエイリアスを使ってください。` });
-  }
-
-  if (specifier.startsWith("@") && targetPath && path.dirname(targetPath) === path.dirname(filePath)) {
-    violations.push({ filePath, line, message: `同一階層の import では ${specifier} ではなく相対パスを使ってください。` });
+  if (specifier.startsWith(".")) {
+    violations.push({ filePath, line, message: `project 内の import/export-from では ${specifier} ではなくエイリアスを使ってください。` });
   }
 
   if (specifier === "@constants" || specifier.startsWith("@constants/")) {
