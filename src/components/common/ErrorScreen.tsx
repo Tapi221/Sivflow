@@ -1,8 +1,6 @@
 import { Component } from "react";
 import type { ErrorInfo, ReactNode } from "react";
 
-
-
 interface Props {
   children: ReactNode;
 }
@@ -10,13 +8,9 @@ interface State {
   hasError: boolean;
 }
 
-
-
 const ErrorScreen = () => {
   return "error";
 };
-
-
 
 /**
  * 致命的なクラッシュをキャッチし、開発用の最小限のエラー表示を行うコンポーネント
@@ -42,7 +36,5 @@ class ErrorBoundary extends Component<Props, State> {
     return this.props.children;
   }
 }
-
-
 
 export { ErrorBoundary, ErrorScreen };

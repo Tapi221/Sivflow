@@ -12,8 +12,6 @@ import { readMfCardFile } from "@/features/cardFile/infra/web/readMfCardFile";
 import type { CreateMfDeckCard, CreateMfDeckCardSet, EnsureMfDeckTagByName, UpdateMfDeckCardSet } from "@/features/deckFile/application/importMfDeck";
 import type { CardSet } from "@/types";
 
-
-
 type MfCardImportCompletedPayload = {
   cardSetId: string;
   cardSetName: string;
@@ -35,14 +33,10 @@ type MfCardImportDialogProps = {
   initialFileRevision?: number;
 };
 
-
-
 const emptyLoadedState = {
   file: null as File | null,
   loaded: null as LoadMfCardFileResult | null,
 };
-
-
 
 const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets, onImported, createCardSet, updateCardSet, createCard, ensureTagByName, initialFile = null, initialFileRevision = 0 }: MfCardImportDialogProps) => {
   const toast = useToast();
@@ -379,9 +373,5 @@ const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
   );
 };
 
-
-
 export { MfCardImportDialog };
-
-
 export type { MfCardImportCompletedPayload };
