@@ -7,8 +7,6 @@ import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import type { GoogleOAuthCallbackPayload } from "./google.oauth-callback";
 import { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, isGoogleOAuthCallbackPayload } from "./google.oauth-callback";
 
-
-
 type GoogleCalendarAccess = {
   accessToken: string;
   accountEmail: string | null;
@@ -42,8 +40,6 @@ type GoogleOAuthCallbackLike = {
   errorDescription?: string | null;
 };
 
-
-
 const GOOGLE_SIGN_IN_SCOPE_PARAM = "openid email profile";
 const GOOGLE_CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
 const GOOGLE_CALENDAR_READONLY_SCOPE = "https://www.googleapis.com/auth/calendar.readonly";
@@ -69,8 +65,6 @@ let pendingGoogleCalendarServerCodeVerifier: string | null = null;
 const consumeGoogleConnectedServiceServerCodeVerifier = consumeGoogleCalendarServerCodeVerifier;
 const requestConnectedServiceAccessToken = requestCalendarAccessToken;
 const refreshConnectedServiceAccessToken = refreshCalendarAccessToken;
-
-
 
 const createGoogleCalendarReconnectRequiredError = (): Error => {
   const error = new Error("Google 連携の再認可が必要です");
@@ -379,9 +373,5 @@ const refreshCalendarAccessToken = async ({ refreshToken }: { refreshToken: stri
   return { accessToken: json.access_token, refreshToken: json.refresh_token, expiresInSeconds: json.expires_in, ...getGoogleProfileFromIdToken(json.id_token) };
 };
 
-
-
 export { GOOGLE_CONNECTED_SERVICE_SCOPES, consumeGoogleCalendarServerCodeVerifier, consumeGoogleConnectedServiceServerCodeVerifier, requestGoogleSignInServerCode, requestGoogleCalendarServerCode, requestCalendarAccessToken, requestConnectedServiceAccessToken, refreshCalendarAccessToken, refreshConnectedServiceAccessToken };
-
-
 export type { GoogleCalendarAccess, GoogleConnectedServiceAccess };

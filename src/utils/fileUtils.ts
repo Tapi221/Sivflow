@@ -1,14 +1,10 @@
 import { nanoid } from "nanoid";
 
-
-
 const ALLOWED_EXTENSIONS: Record<string, string[]> = {
   image: ["jpg", "jpeg", "png", "gif", "webp", "heic", "heif", "avif", "svg"],
   audio: ["mp3", "wav", "ogg", "m4a", "aac", "webm"],
   document: ["pdf", "txt", "md"],
 };
-
-
 
 const getValidatedExtension = (
   filename: string,
@@ -42,7 +38,5 @@ const formatBytes = (bytes: number, decimals = 2) => {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
-
-
 
 export { generateSafeStoragePath, formatBytes };

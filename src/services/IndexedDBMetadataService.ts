@@ -3,8 +3,6 @@ import { CURRENT_SCHEMA_VERSION } from "@/types/domain/storage";
 import type { LocalDBLike } from "./localDB";
 import { SafeIndexedDBWriter } from "./SafeIndexedDBWriter";
 
-
-
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
 };
@@ -269,7 +267,5 @@ class IndexedDBMetadataService {
     return meta?.rebuildCount ?? 0;
   };
 }
-
-
 
 export { IndexedDBMetadataService };

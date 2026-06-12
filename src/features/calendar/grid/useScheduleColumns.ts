@@ -4,16 +4,12 @@ import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types"
 import type { ScheduleColumnBuffer } from "./ScheduleColumn.shared";
 import { buildScheduleDisplayDays, buildScheduleInteractionDays, buildScheduleVirtualRail } from "./ScheduleColumn.shared";
 
-
-
 type UseScheduleDaysParams = {
   anchorDate: Date;
   viewMode: CalendarViewMode;
   buffer: ScheduleColumnBuffer;
   weekStartDay: CalendarWeekStartDay;
 };
-
-
 
 const VIRTUAL_RAIL_VIEW_MODES = new Set<CalendarViewMode>([
   "days",
@@ -23,8 +19,6 @@ const VIRTUAL_RAIL_VIEW_MODES = new Set<CalendarViewMode>([
   "list",
   "pieChart",
 ]);
-
-
 
 const useScheduleDays = ({ anchorDate, viewMode, buffer, weekStartDay }: UseScheduleDaysParams) => {
   return useMemo(() => {
@@ -50,7 +44,5 @@ const useScheduleDays = ({ anchorDate, viewMode, buffer, weekStartDay }: UseSche
     };
   }, [anchorDate, buffer, viewMode, weekStartDay]);
 };
-
-
 
 export { useScheduleDays };

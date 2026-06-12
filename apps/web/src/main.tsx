@@ -12,8 +12,6 @@ import { ErrorBoundary } from "@/components/common/ErrorScreen";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { renderGoogleOAuthCallback } from "@/integration/google-integration/google.oauth-callback";
 
-
-
 type AppBootstrapState =
   | { status: "loading"; }
   | { status: "ready"; App: ComponentType; }
@@ -30,8 +28,6 @@ declare global {
     __sivflowReactRootStore?: SivflowReactRootStore;
   }
 }
-
-
 
 const FIREBASE_ENV_FAILURE_MARKER = "[env] Missing required Firebase env vars";
 const STARTUP_FAILURE_TITLE = "起動設定が不足しています";
@@ -94,8 +90,6 @@ const STARTUP_LOGO_STYLE = `
 }
 `;
 
-
-
 const getStartupFailureMessage = (error: unknown): string => {
   const message = error instanceof Error ? error.message : String(error);
 
@@ -105,7 +99,6 @@ const getStartupFailureMessage = (error: unknown): string => {
 
   return message ?? "起動に必要なモジュールの読み込みに失敗しました。";
 };
-
 const startAppRuntimeSafely = async (): Promise<void> => {
   try {
     const { startAppRuntime } = await import("@/../apps/web/src/runtime/startAppRuntime");
@@ -114,14 +107,12 @@ const startAppRuntimeSafely = async (): Promise<void> => {
     console.warn("[Startup] Runtime initialization failed", error);
   }
 };
-
 const isPdfPerformanceStandaloneRoute = (): boolean => {
   if (!import.meta.env.DEV) return false;
   if (window.location.pathname !== "/pdf-performance-test") return false;
   if (new URLSearchParams(window.location.search).get(TEST_BYPASS_SEARCH_PARAM) !== "true") return false;
   return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "::1";
 };
-
 const getReactRootElement = (): HTMLElement => {
   const rootElement = document.getElementById(ROOT_ELEMENT_ID);
 
@@ -131,7 +122,6 @@ const getReactRootElement = (): HTMLElement => {
 
   return rootElement;
 };
-
 const unmountStaleReactRoot = (rootStore: SivflowReactRootStore): void => {
   try {
     rootStore.root.unmount();
@@ -139,7 +129,6 @@ const unmountStaleReactRoot = (rootStore: SivflowReactRootStore): void => {
     console.warn(REACT_ROOT_UNMOUNT_FAILURE_MESSAGE, error);
   }
 };
-
 const getSivflowReactRoot = (): Root => {
   const rootElement = getReactRootElement();
   const rootStore = window.__sivflowReactRootStore;
@@ -157,8 +146,6 @@ const getSivflowReactRoot = (): Root => {
 
   return root;
 };
-
-
 
 const StartupLogoMark = () => {
   return (
@@ -196,7 +183,6 @@ const StartupLogoMark = () => {
     </svg>
   );
 };
-
 const StartupLoadingScreen = () => {
   return (
     <main className="grid min-h-dvh w-full place-items-center bg-white">
@@ -205,7 +191,6 @@ const StartupLoadingScreen = () => {
     </main>
   );
 };
-
 const StartupFailureScreen = ({ message }: StartupFailureScreenProps) => {
   return (
     <main className="flex min-h-dvh w-full items-center justify-center bg-white px-6 text-slate-900">
@@ -217,7 +202,6 @@ const StartupFailureScreen = ({ message }: StartupFailureScreenProps) => {
     </main>
   );
 };
-
 const AppBootstrap = () => {
   const [state, setState] = useState<AppBootstrapState>({ status: "loading" });
 
@@ -269,8 +253,6 @@ const AppBootstrap = () => {
   const LoadedApp = state.App;
   return <LoadedApp />;
 };
-
-
 
 if (!renderGoogleOAuthCallback()) {
   getSivflowReactRoot().render(
