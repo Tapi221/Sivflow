@@ -9,14 +9,10 @@ import type { AuthSessionContextType, AuthSessionProviderProps } from "./AuthSes
 import { AuthSessionContext } from "./AuthSessionContextCore";
 import { bootstrapUser } from "./bootstrapUser";
 
-
-
 const refreshAuthProfile = async (user: FirebaseUser): Promise<FirebaseUser> => {
   await user.reload();
   return auth?.currentUser ?? user;
 };
-
-
 
 const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
@@ -115,9 +111,5 @@ const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
   );
 };
 
-
-
 export { AuthSessionProvider };
-
-
 export type { AuthSessionProviderProps };
