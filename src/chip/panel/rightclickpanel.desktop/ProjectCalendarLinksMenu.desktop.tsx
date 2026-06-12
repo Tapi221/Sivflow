@@ -1,7 +1,7 @@
 import type { CSSProperties, RefObject } from "react";
-import { RightClickPanel } from "@/chip/panel/rightclickpanel.desktop/rightclickpanel";
-import type { RightClickPanelId } from "@/chip/panel/rightclickpanel.desktop/rightClickPanel.utils";
-import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE } from "@/chip/panel/rightclickpanel.desktop/rightClickPanel.utils";
+import { RightClickPanel } from "@/chip/panel/rightclickpanel";
+import type { RightClickPanelId } from "@/chip/panel/rightClickPanel.utils";
+import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE } from "@/chip/panel/rightClickPanel.utils";
 
 type ProjectCalendarLinksMenuAction = {
   id: string;

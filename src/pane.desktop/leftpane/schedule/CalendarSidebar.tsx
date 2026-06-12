@@ -7,7 +7,7 @@ import type { CalendarListMenuAction } from "@/chip/panel/rightclickpanel.deskto
 import { CALENDAR_LIST_MENU_HEIGHT, CALENDAR_LIST_MENU_PANEL_ID, CALENDAR_LIST_MENU_WIDTH, CalendarListMenu } from "@/chip/panel/rightclickpanel.desktop/CalendarListMenu.desktop";
 import type { ProjectCalendarLinksMenuAction } from "@/chip/panel/rightclickpanel.desktop/ProjectCalendarLinksMenu.desktop";
 import { getProjectCalendarLinksMenuHeight, PROJECT_CALENDAR_LINKS_MENU_PANEL_ID, PROJECT_CALENDAR_LINKS_MENU_WIDTH, ProjectCalendarLinksMenu } from "@/chip/panel/rightclickpanel.desktop/ProjectCalendarLinksMenu.desktop";
-import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, useRightClickPanelDismiss } from "@/chip/panel/rightclickpanel.desktop/rightClickPanel.utils";
+import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, useRightClickPanelDismiss } from "@/chip/panel/rightClickPanel.utils";
 import { GOOGLE_SOURCE_ROW_CLASS_NAME, SelectableGoogleSourceRow } from "@/features/calendar/panel/SelectableGoogleSourceRow";
 import type { AppCalendarItem, CalendarSidebarProps, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";

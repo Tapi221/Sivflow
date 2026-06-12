@@ -4,8 +4,8 @@ import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { TagFilterPopover } from "@/chip/panel/clickpanel.desktop/Popover.TagFilter";
-import { RightClickPanel } from "@/chip/panel/rightclickpanel.desktop/rightclickpanel";
-import { clampRightClickPanelPosition, resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, useRightClickPanelDismiss } from "@/chip/panel/rightclickpanel.desktop/rightClickPanel.utils";
+import { RightClickPanel } from "@/chip/panel/rightclickpanel";
+import { clampRightClickPanelPosition, resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, useRightClickPanelDismiss } from "@/chip/panel/rightClickPanel.utils";
 import { useCardSets } from "@/components/card/hooks/useCardSets";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
