@@ -27,6 +27,6 @@
     "packages/platform/src",
     "src",
     "shared"
-  ],
+, "suggestion-node.tsx"  ],
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "tests/**"]
 }
