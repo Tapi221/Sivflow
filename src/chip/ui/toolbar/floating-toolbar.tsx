@@ -6,8 +6,8 @@ import { flip, offset, useFloatingToolbar, useFloatingToolbarState } from "@plat
 import { useComposedRef } from "@udecode/cn";
 import { KEYS } from "platejs";
 import { useEditorId, useEventEditorValue, usePluginOption } from "platejs/react";
+import { Toolbar } from "@/chip/ui/toolbar";
 import { cn } from "@/lib/utils";
-import { Toolbar } from "./toolbar";
 
 const FloatingToolbar = ({ children, className, state, ...props }: React.ComponentProps<typeof Toolbar> & { state?: FloatingToolbarState; }) => {
   const editorId = useEditorId();
