@@ -7,6 +7,10 @@ import { makeNewDraft, normalizeSelectedCardId, shouldAutoOpenEditorForCard } fr
 import { useCardEntity } from "@/components/card/hooks/useCardEntity";
 import type { Card, CardPatch } from "@/types/domain/card";
 
+type CreateCardPayload = CardPatch & {
+  folderId: string;
+  cardSetId?: string;
+};
 type UseCardEditorSessionParams = {
   selectedCardId: string | null;
   selectedCardSnapshot?: Card | null;
@@ -16,7 +20,7 @@ type UseCardEditorSessionParams = {
   autoEdit?: boolean;
 
   updateCard: (id: string, data: CardPatch) => Promise<unknown>;
-  createCard?: (data: Partial<Card>) => Promise<unknown>;
+  createCard?: (data: CreateCardPayload) => Promise<unknown>;
   addTag: (name: string) => Promise<{ id: string; }>;
   tagById: Parameters<typeof buildDraftFromCard>[1];
   toastSuccess?: (message: string) => void;
