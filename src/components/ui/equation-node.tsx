@@ -1,22 +1,38 @@
 "use client";
 
 import * as React from "react";
+
 import { useEquationElement, useEquationInput } from "@platejs/math/react";
+
 import { BlockSelectionPlugin } from "@platejs/selection/react";
+
 import { CornerDownLeftIcon, RadicalIcon } from "lucide-react";
+
 import type { TEquationElement } from "platejs";
+
 import type { PlateElementProps } from "platejs/react";
+
 import { createPrimitiveComponent, PlateElement, useEditorRef, useEditorSelector, useElement, useReadOnly, useSelected } from "platejs/react";
+
 import type { TextareaAutosizeProps } from "react-textarea-autosize";
+
 import TextareaAutosize from "react-textarea-autosize";
+
 import { inlineSuggestionVariants } from "@/lib/suggestion";
+
 import { cn } from "@/lib/utils";
+
 import { Button } from "./button";
+
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+
+
 
 const EquationInput = createPrimitiveComponent(TextareaAutosize)({
   propsHook: useEquationInput,
 });
+
+
 
 const EquationPopoverContent = ({
   className,
@@ -73,6 +89,7 @@ const EquationPopoverContent = ({
     </PopoverContent>
   );
 };
+
 const EquationElement = (props: PlateElementProps<TEquationElement>) => {
   const selected = useSelected();
   const [open, setOpen] = React.useState(selected);
@@ -141,6 +158,7 @@ const EquationElement = (props: PlateElementProps<TEquationElement>) => {
     </PlateElement>
   );
 };
+
 const InlineEquationElement = (props: PlateElementProps<TEquationElement>) => {
   const { element } = props;
   const katexRef = React.useRef<HTMLDivElement | null>(null);
@@ -223,5 +241,7 @@ const InlineEquationElement = (props: PlateElementProps<TEquationElement>) => {
     </PlateElement>
   );
 };
+
+
 
 export { EquationElement, InlineEquationElement };

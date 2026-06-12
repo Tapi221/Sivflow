@@ -1,7 +1,11 @@
 import type { InkDocument, InkSide } from "@core/domain/card/ink/inkDocument";
 import { cloneInkDocument, createEmptyInkDocument, normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
 
+
+
 const INK_STORAGE_PREFIX = "ink:";
+
+
 
 const getStorage = (): Storage | null => {
   if (typeof window === "undefined") return null;
@@ -67,5 +71,7 @@ const resolveInkDocument = (cardId: string | null | undefined, side: InkSide, ca
 
   return cloneInkDocument(resolved);
 };
+
+
 
 export { getInkStorageKey, loadInkFromStorage, saveInkToStorage, clearInkFromStorage, resolveInkDocument };
