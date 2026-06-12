@@ -4,8 +4,10 @@ import path from "node:path";
 import ts from "typescript";
 
 const ROOT_DIR = process.cwd();
+const HAS_CUSTOM_SOURCE_TARGETS = Boolean(process.env.SOURCE_CONVENTION_TARGETS);
+const SOURCE_DIRECTORY_PATTERNS = process.env.SOURCE_CONVENTION_TARGETS?.split(path.delimiter).filter(Boolean) ?? ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src"];
+const SOURCE_DIRECTORIES = SOURCE_DIRECTORY_PATTERNS.map((directory) => path.resolve(ROOT_DIR, directory));
 const ESLINT_BIN_PATH = path.resolve(ROOT_DIR, "node_modules/eslint/bin/eslint.js");
-const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src"].map((directory) => path.join(ROOT_DIR, directory));
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 const ORDER_EXCLUDED_PATH_PARTS = ["/tests/", "/scripts/", "/src/sandbox/"];
 const ORDER_EXCLUDED_FILE_SUFFIXES = [".d.ts"];
@@ -55,6 +57,8 @@ const getScriptKind = (filePath) => {
 const createSourceFile = (filePath, source) => ts.createSourceFile(filePath, source, ts.ScriptTarget.Latest, true, getScriptKind(filePath));
 
 const getNewline = (source) => source.includes("\r\n") ? "\r\n" : "\n";
+
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const isImportStatement = (statement) => ts.isImportDeclaration(statement) || ts.isImportEqualsDeclaration(statement);
 
@@ -155,7 +159,7 @@ const isConstDependentTypeStatement = (source, statement, highestRank) => {
 
 const isIdentifierUsedInStatement = (source, statement, name) => {
   const statementSource = source.slice(statement.getStart(), statement.getEnd());
-  return new RegExp(`\\b${name}\\b`, "u").test(statementSource);
+  return new RegExp(`\\b${escapeRegExp(name)}\\b`, "u").test(statementSource);
 };
 
 const isDependentOnEarlierHigherRankStatement = (source, statement, statements, fromIndex, rank) => {
@@ -165,6 +169,14 @@ const isDependentOnEarlierHigherRankStatement = (source, statement, statements, 
     if (ORDER_RANKS[getStatementOrderCategory(previousStatement)] <= rank) return false;
 
     return getTopLevelStatementNames(previousStatement).some((name) => isIdentifierUsedInStatement(source, statement, name));
+  });
+};
+
+const isDependentOnMovedOverStatement = (source, statement, statements, targetIndex, fromIndex) => {
+  if (fromIndex <= targetIndex) return false;
+
+  return statements.slice(targetIndex, fromIndex).some((movedOverStatement) => {
+    return getTopLevelStatementNames(movedOverStatement).some((name) => isIdentifierUsedInStatement(source, statement, name));
   });
 };
 
@@ -197,7 +209,11 @@ const findFirstOrderMove = (source, sourceFile) => {
       if (canKeepStatementAfterHigherRank(source, statement, highestRank, statements, index, rank)) continue;
 
       const targetIndex = findMoveTargetIndex(statements, rank, index);
-      if (targetIndex >= 0) return { fromIndex: index, targetIndex };
+      if (targetIndex >= 0) {
+        if (isDependentOnMovedOverStatement(source, statement, statements, targetIndex, index)) continue;
+
+        return { fromIndex: index, targetIndex };
+      }
     }
 
     highestRank = Math.max(highestRank, rank);
@@ -242,6 +258,7 @@ const applySourceOrderFix = (filePath, source) => {
 };
 
 const runEslintLayoutFix = () => {
+  if (HAS_CUSTOM_SOURCE_TARGETS) return 0;
   if (!existsSync(ESLINT_BIN_PATH)) return 0;
 
   const result = spawnSync(process.execPath, [ESLINT_BIN_PATH, ...ESLINT_LAYOUT_FIX_TARGETS, "--fix", "--fix-type", "layout", "--no-error-on-unmatched-pattern", "--format", "json"], {
@@ -258,7 +275,6 @@ const runEslintLayoutFix = () => {
   if (result.status && result.status !== 0) {
     if (result.stdout.trim()) console.error(result.stdout.trim());
     if (result.stderr.trim()) console.error(result.stderr.trim());
-    return result.status;
   }
 
   return 0;
