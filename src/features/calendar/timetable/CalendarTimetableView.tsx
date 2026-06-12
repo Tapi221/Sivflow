@@ -32,14 +32,11 @@ type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 const STRATIS_ICON_COMPONENTS = stratisIcons as Record<string, StratisIconComponent | undefined>;
 const STRATIS_PLUS_ICON_NAMES = ["StratisPlus01Icon", "StratisPlusIcon"] as const;
 const STRATIS_SETTINGS_ICON_NAMES = ["StratisSettingsIcon", "StratisSettings01Icon", "StratisWrenchIcon"] as const;
+const StratisPlusIcon = STRATIS_PLUS_ICON_NAMES.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
+const StratisSettingsIcon = STRATIS_SETTINGS_ICON_NAMES.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
 const TIMETABLE_GRID_TEMPLATE_COLUMNS = "56px repeat(var(--calendar-timetable-day-count), 112px)";
 const TIMETABLE_COMPACT_GRID_TEMPLATE_COLUMNS = "34px repeat(var(--calendar-timetable-day-count), minmax(0, 1fr))";
 const DEFAULT_TIMETABLE_ADD_REQUEST_TOKEN = 0;
-
-const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
-
-const StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);
-const StratisSettingsIcon = resolveStratisIcon(STRATIS_SETTINGS_ICON_NAMES);
 
 const createTimetableSlotKey = ({ dayIndex, periodId }: TimetableSlot): string => `${dayIndex}:${periodId}`;
 const buildTimetableWeekDays = (weekDate: Date, weekStartDay: CalendarWeekStartDay, visibleDayCount: CalendarTimetableVisibleDayCount): Date[] => Array.from({ length: visibleDayCount }, (_, index) => addDays(startOfWeek(weekDate, { weekStartsOn: getCalendarWeekStartsOn(weekStartDay) }), index));
@@ -53,6 +50,7 @@ const formatTimetableWeekRange = (weekDays: Date[]): string => `${format(weekDay
 const getTimetableEntryStyle = (colorKey: CalendarTimetableColorKey) => getTagColorStyle(colorKey);
 const getTimetableGridTemplateColumns = (density: CalendarTimetableDensity): string => density === "compact" ? TIMETABLE_COMPACT_GRID_TEMPLATE_COLUMNS : TIMETABLE_GRID_TEMPLATE_COLUMNS;
 const createTimetableGridStyle = (density: CalendarTimetableDensity, visibleDayCount: CalendarTimetableVisibleDayCount): CalendarTimetableGridStyle => ({ gridTemplateColumns: getTimetableGridTemplateColumns(density), "--calendar-timetable-day-count": visibleDayCount });
+const getTimetableCourseSecondaryText = (course: CalendarTimetableCourse): string => course.room.trim() === "" ? course.teacher : course.room;
 
 const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY, density = "default", className, addRequestToken = DEFAULT_TIMETABLE_ADD_REQUEST_TOKEN }: CalendarTimetableViewProps) => {
   const today = new Date();
@@ -71,36 +69,30 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
   const [handledAddRequestToken, setHandledAddRequestToken] = useState(addRequestToken);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSyllabusCatalogOpen, setIsSyllabusCatalogOpen] = useState(false);
-
   const handleOpenCourseEditor = useCallback((course: CalendarTimetableCourse | null, slot: CalendarTimetableSlot) => {
     setEditingCourse(course);
     setEditingSlot(slot);
     setIsCourseEditorOpen(true);
   }, []);
-
   const handleOpenBlankCourseEditor = useCallback(() => {
     setEditingCourse(null);
     setEditingSlot(null);
     setIsCourseEditorOpen(true);
   }, []);
-
   const handleCloseCourseEditor = useCallback(() => {
     setIsCourseEditorOpen(false);
     setEditingCourse(null);
     setEditingSlot(null);
   }, []);
-
   const handleOpenSettings = useCallback(() => setIsSettingsOpen(true), []);
   const handleCloseSettings = useCallback(() => setIsSettingsOpen(false), []);
   const handleOpenSyllabusCatalog = useCallback(() => setIsSyllabusCatalogOpen(true), []);
   const handleCloseSyllabusCatalog = useCallback(() => setIsSyllabusCatalogOpen(false), []);
-
   useEffect(() => {
     if (addRequestToken === handledAddRequestToken) return;
     setHandledAddRequestToken(addRequestToken);
     handleOpenBlankCourseEditor();
   }, [addRequestToken, handleOpenBlankCourseEditor, handledAddRequestToken]);
-
   return (
     <div className={cn("flex h-full min-h-0 min-w-0 flex-col bg-white text-[#1c1c1e]", className)}>
       <div className={cn("flex shrink-0 flex-wrap items-center justify-between gap-3 pb-3 pt-1", isCompact ? "px-4" : "px-5")}>
@@ -140,7 +132,7 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
                 const entry = courseSlotMap.get(createTimetableSlotKey(slot)) ?? null;
                 return (
                   <button key={`${day.toISOString()}-${period.id}`} type="button" aria-label={`${format(day, "M月d日 EEEE", { locale: ja })} ${period.label}限`} className={cn("relative min-w-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "min-h-[48px] rounded-[14px]" : "min-h-[52px] rounded-[18px]", entry ? (isCompact ? "border px-1.5 py-1" : "border px-2.5 py-1") : "border border-dashed border-[#dadde3] bg-[rgba(255,255,255,0.62)] text-[#a1a1aa] hover:border-[#c7c7cc] hover:bg-[#fafafa]")} style={entry ? getTimetableEntryStyle(entry.colorKey) : undefined} onClick={() => handleOpenCourseEditor(entry, slot)}>
-                    {entry ? <span className={cn("flex h-full flex-col items-center justify-center text-center", isCompact ? "min-h-[36px]" : "min-h-[40px]")}><span className={cn("max-w-full truncate font-semibold leading-snug tracking-[-0.01em] text-inherit", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.title}</span><span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-80", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.room || entry.teacher}</span>{entry.memo ? <span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-60", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.memo}</span> : null}</span> : <span className="flex h-full items-center justify-center text-center">{StratisPlusIcon ? <StratisPlusIcon className="h-5 w-5" aria-hidden="true" focusable="false" /> : null}</span>}
+                    {entry ? <span className={cn("flex h-full flex-col items-center justify-center text-center", isCompact ? "min-h-[36px]" : "min-h-[40px]")}><span className={cn("max-w-full truncate font-semibold leading-snug tracking-[-0.01em] text-inherit", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.title}</span><span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-80", isCompact ? "text-[10px]" : "text-[11px]")}>{getTimetableCourseSecondaryText(entry)}</span>{entry.memo ? <span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-60", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.memo}</span> : null}</span> : <span className="flex h-full items-center justify-center text-center">{StratisPlusIcon ? <StratisPlusIcon className="h-5 w-5" aria-hidden="true" focusable="false" /> : null}</span>}
                   </button>
                 );
               })}
