@@ -1,7 +1,8 @@
 /**
  * ユーザーネームのバリデーション結果
  */
-interface ValidationResult { isValid: boolean;
+interface ValidationResult {
+  isValid: boolean;
   message: string;
 }
 
@@ -21,12 +22,16 @@ const USERNAME_VALIDATION = {
  * 文字列をUnicode単位（サロゲートペア対応）でカウントする
  * 日本語、英語、絵文字すべてを1文字としてカウント
  */
-const countUnicodeCharacters = (str: string) => { // Array.from はサロゲートペアを適切に処理する return Array.from(str).length;
+const countUnicodeCharacters = (str: string) => {
+  // Array.from はサロゲートペアを適切に処理する
+  return Array.from(str).length;
 };
 /**
  * ユーザーネームのバリデーションを実行する
  */
-const validateUsername = (username: string) => { // 前後の空白をトリミング（要件：先頭と末尾のスペースは自動的にトリミングする） const trimmedName = username.trim();
+const validateUsername = (username: string) => {
+  // 前後の空白をトリミング（要件：先頭と末尾のスペースは自動的にトリミングする）
+  const trimmedName = username.trim();
 
   // 空白のみのチェック
   if (trimmedName.length === 0) {
