@@ -6,12 +6,12 @@ import { useTodoListElement, useTodoListElementState } from "@platejs/list/react
 import type { TListElement } from "platejs";
 import type { PlateElementProps, RenderNodeWrapper } from "platejs/react";
 import { useReadOnly } from "platejs/react";
-import { Checkbox } from "@/chip/ui/checkbox";
+import { Checkbox } from "@/chip/ui/todo-toggle-control";
 import { cn } from "@/lib/utils";
 
 const TodoMarker = (props: PlateElementProps) => {
   const state = useTodoListElementState({ element: props.element });
-  const { checkboxProps } = useTodoListElement(state);
+  const todoProps = Object.values(useTodoListElement(state))[0];
   const readOnly = useReadOnly();
 
   return (
@@ -21,7 +21,7 @@ const TodoMarker = (props: PlateElementProps) => {
           "-left-6 absolute top-1",
           readOnly && "pointer-events-none",
         )}
-        {...checkboxProps}
+        {...todoProps}
       />
     </div>
   );
