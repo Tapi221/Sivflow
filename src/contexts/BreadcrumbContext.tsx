@@ -10,19 +10,24 @@ type BreadcrumbContextValue = {
 type BreadcrumbActionsContextValue = {
   setExtraCrumbs: (crumbs: BreadcrumbCrumb[]) => void;
 };
+type BreadcrumbProviderProps = {
+  children: ReactNode;
+};
 
+const noopSetExtraCrumbs = (_crumbs: BreadcrumbCrumb[]): void => {};
 const BreadcrumbExtraCrumbsContext = createContext<BreadcrumbCrumb[]>([]);
 const BreadcrumbActionsContext = createContext<BreadcrumbActionsContextValue>({
   setExtraCrumbs: noopSetExtraCrumbs,
 });
 
-const noopSetExtraCrumbs = (_crumbs: BreadcrumbCrumb[]): void => {};
 const useBreadcrumbExtraCrumbs = (): BreadcrumbCrumb[] => {
   return useContext(BreadcrumbExtraCrumbsContext);
 };
+
 const useSetBreadcrumbCrumbs = (): BreadcrumbActionsContextValue["setExtraCrumbs"] => {
   return useContext(BreadcrumbActionsContext).setExtraCrumbs;
 };
+
 const useBreadcrumbContext = (): BreadcrumbContextValue => {
   const extraCrumbs = useBreadcrumbExtraCrumbs();
   const setExtraCrumbs = useSetBreadcrumbCrumbs();
@@ -36,14 +41,11 @@ const useBreadcrumbContext = (): BreadcrumbContextValue => {
   );
 };
 
-const BreadcrumbProvider = ({ children }: { children: ReactNode;
-}) => {
+const BreadcrumbProvider = ({ children }: BreadcrumbProviderProps) => {
   const [extraCrumbs, setExtraCrumbsState] = useState<BreadcrumbCrumb[]>([]);
 
   const setExtraCrumbs = useCallback((crumbs: BreadcrumbCrumb[]) => {
-    setExtraCrumbsState((prev) =>
-      areBreadcrumbCrumbsEqual(prev, crumbs) ? prev : crumbs,
-    );
+    setExtraCrumbsState((prev) => (areBreadcrumbCrumbsEqual(prev, crumbs) ? prev : crumbs));
   }, []);
 
   const actionsValue = useMemo<BreadcrumbActionsContextValue>(
@@ -55,9 +57,7 @@ const BreadcrumbProvider = ({ children }: { children: ReactNode;
 
   return (
     <BreadcrumbActionsContext.Provider value={actionsValue}>
-      <BreadcrumbExtraCrumbsContext.Provider value={extraCrumbs}>
-        {children}
-      </BreadcrumbExtraCrumbsContext.Provider>
+      <BreadcrumbExtraCrumbsContext.Provider value={extraCrumbs}>{children}</BreadcrumbExtraCrumbsContext.Provider>
     </BreadcrumbActionsContext.Provider>
   );
 };
