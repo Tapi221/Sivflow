@@ -9,9 +9,9 @@ type ImageUrlField = "remoteUrl" | "localUrl" | "thumbnailUrl";
  */
 class ImageInvariantViolation extends Error {
   constructor(message: string, public readonly imageId?: string) {
-  super(`[ImageInvariant] ${message}`);
-  this.name = "ImageInvariantViolation";
-}
+    super(`[ImageInvariant] ${message}`);
+    this.name = "ImageInvariantViolation";
+  }
 }
 const assertNoBase64Url = (
   value: string | null | undefined,
