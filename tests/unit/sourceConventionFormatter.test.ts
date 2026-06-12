@@ -8,6 +8,7 @@ const ROOT_DIR = process.cwd();
 const FIX_IMPORT_SPACING_SCRIPT = path.join(ROOT_DIR, "scripts/verify/fix-import-spacing.mjs");
 const FIX_KNOWN_LINT_ERRORS_SCRIPT = path.join(ROOT_DIR, "scripts/verify/fix-known-lint-errors.mjs");
 const FIX_REPEATED_BLANK_LINES_SCRIPT = path.join(ROOT_DIR, "scripts/verify/fix-repeated-blank-lines.mjs");
+const FIX_SOURCE_ORDER_SCRIPT = path.join(ROOT_DIR, "scripts/verify/fix-source-order.mjs");
 const VERIFY_IMPORT_SPACING_SCRIPT = path.join(ROOT_DIR, "scripts/verify/verify-import-spacing.mjs");
 
 const runFormatterOnSource = (source: string, scriptPath = FIX_IMPORT_SPACING_SCRIPT) => {
@@ -61,6 +62,26 @@ export const { uploadFiles, useUploadThing } = createHelpers();
 const { uploadFiles, useUploadThing } = createHelpers();
 
 export { uploadFiles, useUploadThing };
+`);
+  });
+
+  it("依存している定数の前へ定数を移動しない", () => {
+    const formatted = runFormatterOnSource(`const readValue = () => "ja";
+
+const storedValue = readValue();
+
+const useStore = createStore(() => ({ value: storedValue }));
+
+export { useStore };
+`, FIX_SOURCE_ORDER_SCRIPT);
+
+    expect(formatted).toBe(`const readValue = () => "ja";
+
+const storedValue = readValue();
+
+const useStore = createStore(() => ({ value: storedValue }));
+
+export { useStore };
 `);
   });
 
