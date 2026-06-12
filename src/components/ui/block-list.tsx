@@ -9,20 +9,7 @@ import { useReadOnly } from "platejs/react";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "./checkbox";
 
-const config: Record<
-  string,
-  {
-    Li: React.FC<PlateElementProps & { lineBreakBadge?: React.ReactNode; }>;
-    Marker: React.FC<PlateElementProps>;
-  }
-> = {
-  todo: {
-    Li: TodoLi,
-    Marker: TodoMarker,
-  },
-};
-
-const TodoMarker = (props: PlateElementProps) => {
+function TodoMarker(props: PlateElementProps) {
   const state = useTodoListElementState({ element: props.element });
   const { checkboxProps } = useTodoListElement(state);
   const readOnly = useReadOnly();
@@ -38,8 +25,9 @@ const TodoMarker = (props: PlateElementProps) => {
       />
     </div>
   );
-};
-const TodoLi = (props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }) => {
+}
+
+function TodoLi(props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }) {
   return (
     <li
       className={cn(
@@ -52,8 +40,22 @@ const TodoLi = (props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }
       {props.lineBreakBadge}
     </li>
   );
+}
+
+const config: Record<
+  string,
+  {
+    Li: React.FC<PlateElementProps & { lineBreakBadge?: React.ReactNode; }>;
+    Marker: React.FC<PlateElementProps>;
+  }
+> = {
+  todo: {
+    Li: TodoLi,
+    Marker: TodoMarker,
+  },
 };
-const List = (props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }) => {
+
+function List(props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }) {
   const { listStart, listStyleType } = props.element as TListElement;
   const { Li, Marker } = config[listStyleType] ?? {};
   const List = isOrderedList(props.element) ? "ol" : "ul";
@@ -75,7 +77,8 @@ const List = (props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }) 
       )}
     </List>
   );
-};
+}
+
 const BlockList: RenderNodeWrapper = (props) => {
   if (!props.element.listStyleType) return;
   if (!isOrderedList(props.element)) return;
