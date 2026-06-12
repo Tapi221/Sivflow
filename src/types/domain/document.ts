@@ -4,17 +4,21 @@ import type { BaseEntity } from "./base";
 type DocumentKind = "pdf";
 type PdfPageLayoutMode = "single" | "double";
 type PdfSidePanelTab = "bookmarks" | "highlights" | "ocr" | "outline" | "thumbnails";
+type PdfViewerFitMode = "width" | "manual" | "page-width";
 type LegacyDocumentFields = {
   folder_id?: string | null; file_name?: string | null; order_index?: number; };
 interface PdfViewerState {
   currentPage?: number;
+  page?: number;
   scale?: number;
-  fitMode?: "width" | "manual";
+  fitMode?: PdfViewerFitMode;
   pageLayoutMode?: PdfPageLayoutMode;
   bookmarkPages?: number[];
+  bookmark?: boolean;
   sidePanelTab?: PdfSidePanelTab;
   thumbnailOrder?: number[];
   markPages?: Record<string, number>;
+  history?: number[];
   historyBackPages?: number[];
   historyForwardPages?: number[];
 }
@@ -45,4 +49,4 @@ interface DocumentItem extends BaseEntity, LegacyDocumentFields {
 type Document = DocumentItem;
 type PdfDocument = DocumentItem;
 
-export type { DocumentKind, PdfPageLayoutMode, PdfSidePanelTab, LegacyDocumentFields, PdfViewerState, DocumentItem, Document, PdfDocument };
+export type { DocumentKind, PdfPageLayoutMode, PdfSidePanelTab, PdfViewerFitMode, LegacyDocumentFields, PdfViewerState, DocumentItem, Document, PdfDocument };
