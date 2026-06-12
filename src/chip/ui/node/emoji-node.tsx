@@ -5,8 +5,8 @@ import { EmojiInlineIndexSearch, insertEmoji } from "@platejs/emoji";
 import { EmojiPlugin } from "@platejs/emoji/react";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement, usePluginOption } from "platejs/react";
+import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem } from "@/chip/ui/inline-combobox";
 import { useDebounce } from "@/hooks/use-debounce";
-import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem } from "./inline-combobox";
 
 const TRAILING_COLON_REGEX = /:$/;
 
@@ -31,7 +31,6 @@ const EmojiInputElement = (props: PlateElementProps) => {
         <InlineComboboxInput />
         <InlineComboboxContent>
           {!isPending && <InlineComboboxEmpty>No results</InlineComboboxEmpty>}
-
           <InlineComboboxGroup>
             {filteredEmojis.map((emoji) => (
               <InlineComboboxItem key={emoji.id} value={emoji.name} onClick={() => insertEmoji(editor, emoji)}>
@@ -41,7 +40,6 @@ const EmojiInputElement = (props: PlateElementProps) => {
           </InlineComboboxGroup>
         </InlineComboboxContent>
       </InlineCombobox>
-
       {children}
     </PlateElement>
   );
