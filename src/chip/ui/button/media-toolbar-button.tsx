@@ -8,9 +8,9 @@ import { isUrl, KEYS } from "platejs";
 import { useEditorRef } from "platejs/react";
 import { toast } from "sonner";
 import { useFilePicker } from "use-file-picker";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/chip/ui/dialog/alert-dialog";
 import { Input } from "@/chip/ui/input";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary } from "@/chip/ui/toolbar";
 
 const MEDIA_CONFIG: Record<
