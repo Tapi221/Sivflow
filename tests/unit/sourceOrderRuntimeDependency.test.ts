@@ -43,4 +43,52 @@ if (shouldRender) {
 }
 `);
   });
+
+  it("変数宣言を参照先宣言の後ろへ移動する", () => {
+    const formatted = runSourceOrderFix(`const AuthSessionContext = createContext({
+  currentUser: null,
+  loading: true,
+  logout: noopLogout,
+});
+
+const noopLogout = async () => {};
+`);
+
+    expect(formatted).toBe(`const noopLogout = async () => {};
+
+const AuthSessionContext = createContext({
+  currentUser: null,
+  loading: true,
+  logout: noopLogout,
+});
+`);
+  });
+
+  it("変数宣言同士の依存順を維持する", () => {
+    const formatted = runSourceOrderFix(`const isFirebaseClientAvailable = missingFirebaseEnvVars.length === 0;
+
+const getMissingFirebaseEnvVars = () => [];
+
+const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
+`);
+
+    expect(formatted).toBe(`const getMissingFirebaseEnvVars = () => [];
+
+const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
+
+const isFirebaseClientAvailable = missingFirebaseEnvVars.length === 0;
+`);
+  });
+
+  it("関数初期化子の遅延参照は移動しない", () => {
+    const formatted = runSourceOrderFix(`const getLogout = () => noopLogout;
+
+const noopLogout = async () => {};
+`);
+
+    expect(formatted).toBe(`const getLogout = () => noopLogout;
+
+const noopLogout = async () => {};
+`);
+  });
 });
