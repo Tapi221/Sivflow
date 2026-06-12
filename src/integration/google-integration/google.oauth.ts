@@ -62,9 +62,6 @@ const GOOGLE_CONNECTED_SERVICE_SCOPES = [GOOGLE_CALENDAR_SCOPE, GOOGLE_CALENDAR_
 const GOOGLE_SCOPES = GOOGLE_CONNECTED_SERVICE_SCOPES;
 const GOOGLE_CONNECTED_SERVICE_SCOPE_PARAM = `${GOOGLE_SIGN_IN_SCOPE_PARAM} ${GOOGLE_SCOPES.join(" ")}`;
 let pendingGoogleCalendarServerCodeVerifier: string | null = null;
-const consumeGoogleConnectedServiceServerCodeVerifier = consumeGoogleCalendarServerCodeVerifier;
-const requestConnectedServiceAccessToken = requestCalendarAccessToken;
-const refreshConnectedServiceAccessToken = refreshCalendarAccessToken;
 
 const createGoogleCalendarReconnectRequiredError = (): Error => {
   const error = new Error("Google 連携の再認可が必要です");
@@ -373,5 +370,5 @@ const refreshCalendarAccessToken = async ({ refreshToken }: { refreshToken: stri
   return { accessToken: json.access_token, refreshToken: json.refresh_token, expiresInSeconds: json.expires_in, ...getGoogleProfileFromIdToken(json.id_token) };
 };
 
-export { GOOGLE_CONNECTED_SERVICE_SCOPES, consumeGoogleCalendarServerCodeVerifier, consumeGoogleConnectedServiceServerCodeVerifier, requestGoogleSignInServerCode, requestGoogleCalendarServerCode, requestCalendarAccessToken, requestConnectedServiceAccessToken, refreshCalendarAccessToken, refreshConnectedServiceAccessToken };
+export { GOOGLE_CONNECTED_SERVICE_SCOPES, consumeGoogleCalendarServerCodeVerifier, consumeGoogleCalendarServerCodeVerifier as consumeGoogleConnectedServiceServerCodeVerifier, requestGoogleSignInServerCode, requestGoogleCalendarServerCode, requestCalendarAccessToken, requestCalendarAccessToken as requestConnectedServiceAccessToken, refreshCalendarAccessToken, refreshCalendarAccessToken as refreshConnectedServiceAccessToken };
 export type { GoogleCalendarAccess, GoogleConnectedServiceAccess };
