@@ -6,6 +6,7 @@ type SelectableGoogleSourceRowProps = {
   label: string;
   checked: boolean;
   color: string;
+  className?: string;
   onToggle: (id: string) => void;
 };
 type SelectableGoogleSourceSwitchProps = {
@@ -39,7 +40,7 @@ const SelectableGoogleSourceSwitch = ({ label, checked, color, onToggle }: Selec
     </button>
   );
 };
-const SelectableGoogleSourceRow = ({ id, label, checked, color, onToggle }: SelectableGoogleSourceRowProps) => {
+const SelectableGoogleSourceRow = ({ id, label, checked, color, className, onToggle }: SelectableGoogleSourceRowProps) => {
   const handleToggle = () => {
     onToggle(id);
   };
@@ -53,7 +54,7 @@ const SelectableGoogleSourceRow = ({ id, label, checked, color, onToggle }: Sele
   };
 
   return (
-    <div role="button" tabIndex={0} className={cn(GOOGLE_SOURCE_ROW_CLASS_NAME, "cursor-default transition-all duration-150 hover:bg-[#f7f7f7] active:bg-[#f1f1f1] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d7d7d7]")} onClick={handleToggle} onKeyDown={handleRowKeyDown} aria-pressed={checked}>
+    <div role="button" tabIndex={0} className={cn(GOOGLE_SOURCE_ROW_CLASS_NAME, "cursor-default transition-all duration-150 hover:bg-[#f7f7f7] active:bg-[#f1f1f1] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d7d7d7]", className)} onClick={handleToggle} onKeyDown={handleRowKeyDown} aria-pressed={checked}>
       <SelectableGoogleSourceSwitch label={label} checked={checked} color={color} onToggle={handleToggle} />
       <span className={cn("truncate text-[12px] font-medium", checked ? SOURCE_ROW_CHECKED_TEXT_CLASS_NAME : SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME)}>{label}</span>
     </div>
