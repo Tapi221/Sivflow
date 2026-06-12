@@ -2,12 +2,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { ISyncService, UserSettingsSnapshot } from "@/services/interfaces/ISyncService";
 import { getLocalDb } from "@/services/localdb";
-import type { LocalDBTableMap, SyncableEntityTable } from "@/services/localdb/types";
+import type { SyncableEntityTable } from "@/services/localdb/types";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import type { SyncConflict, SyncEntity, SyncSettings } from "@/types/domain/sync";
 import { DEFAULT_SYNC_SETTINGS } from "@/types/domain/sync";
 import type { SyncContextType, SyncNotice, SyncProviderProps, SyncStatus } from "./SyncContextCore";
 import { SyncContext } from "./SyncContextCore";
+
+type ConflictResolvingLocalDb = Awaited<ReturnType<typeof getLocalDb>> & {
+  conflicts: {
+    delete: (key: unknown) => Promise<void>;
+  };
+};
 
 const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, SyncableEntityTable> = {
   card: "cards",
@@ -17,6 +23,7 @@ const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, SyncableEntityTable> = {
   tag: "tagRecords",
   userSetting: "userSettings",
   asset: "images",
+  projectMap: "projectMaps",
 };
 
 const isSyncIntervalMinutes = (value: unknown): value is SyncSettings["intervalMinutes"] => {
@@ -212,13 +219,14 @@ const SyncProvider = ({ children }: SyncProviderProps) => {
 
     try {
       const db = await getLocalDb(userId);
-      const conflict = await db.getConflict(conflictId);
+      const conflicts = await db.getConflicts();
+      const conflict = conflicts.find((item) => item.id === conflictId);
       if (!conflict) return;
 
       const tableName = SYNC_TABLE_BY_ENTITY[conflict.entityType];
       const resolvedRecord = buildResolvedConflictRecord(conflict, resolvedData);
-      await db.upsert(tableName, resolvedRecord as LocalDBTableMap[typeof tableName]);
-      await db.removeConflict(conflict.id);
+      await db.upsert(tableName, resolvedRecord as never);
+      await (db as ConflictResolvingLocalDb).conflicts.delete(conflict.id);
       await updateCounts();
     } catch (error) {
       console.error("[同期] 競合の解決に失敗しました:", error);
