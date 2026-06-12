@@ -3,7 +3,8 @@ import type { ForwardRefExoticComponent, RefAttributes, SVGProps } from "react";
 import * as stratisIcons from "stratis-ui-icons";
 import { UiIcon } from "./UiIcon";
 
-type IconProps = SVGProps<SVGSVGElement> & { size?: number;
+type IconProps = SVGProps<SVGSVGElement> & {
+  size?: number;
   label?: string;
   title?: string;
 };
@@ -117,11 +118,142 @@ const glyphByIconName: Record<string, GlyphKind> = {
   X: "x",
   XCircle: "x",
 };
-const FolderIcon = Folder;
-const ImageIcon = Image;
-const CircleHelp = HelpCircle;
-const Sigma = SigmaIcon;
-const NotebookPen = NotebookPenIcon;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isStratisDataIcon(value: unknown): value is StratisDataIcon {
+  return isRecord(value) && typeof value.data === "string";
+}
+
+function isStratisIconComponent(value: unknown): value is StratisIconComponent {
+  return typeof value === "function" || (isRecord(value) && "$$typeof" in value);
+}
+
+function escapeSvgText(value: string): string {
+  return value.replace(/[&<>"']/g, (char) => svgTextEscapes[char] ?? char);
+}
+
+function getStratisSvgViewBox(source: string): string {
+  return source.match(/\sviewBox="([^"]+)"/)?.[1] ?? "0 0 24 24";
+}
+
+function normalizeStratisSvgBody(source: string): string {
+  return source.replace(/^[\s\S]*?<svg\b[^>]*>/, "").replace(/<\/svg>[\s\S]*$/, "").replace(/\s(width|height)="[^"]*"/g, "").replace(/\sstroke="(?!none|currentColor)[^"]*"/g, " stroke=\"currentColor\"").replace(/\sfill="(?!none|currentColor|url\()[^"]*"/g, " fill=\"currentColor\"");
+}
+
+function wrapStratisIcon(BaseIcon: StratisIconComponent, name: string) {
+  const Icon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, strokeWidth, ...rest }, ref) => {
+    const resolvedLabel = label ?? rest["aria-label"];
+    const decorative = resolvedLabel === null || resolvedLabel === undefined;
+    const pixelSize = typeof size === "number" ? `${size}px` : size;
+
+    return <BaseIcon ref={ref} width={pixelSize} height={pixelSize} className={className} style={{ display: "block", flexShrink: 0, ...style }} role={decorative ? "presentation" : "img"} aria-label={resolvedLabel} aria-hidden={decorative ? true : undefined} {...(title ? { title } : {})} {...((strokeWidth !== null && strokeWidth !== undefined) ? { strokeWidth } : {})} {...rest} />;
+  });
+
+  Icon.displayName = name;
+  return Icon;
+}
+
+function wrapStratisDataIcon(source: StratisDataIcon, name: string) {
+  const viewBox = getStratisSvgViewBox(source.data);
+  const body = normalizeStratisSvgBody(source.data);
+
+  const Icon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, strokeWidth, ...rest }, ref) => {
+    const resolvedLabel = label ?? rest["aria-label"];
+    const decorative = resolvedLabel === null || resolvedLabel === undefined;
+    const pixelSize = typeof size === "number" ? `${size}px` : size;
+    const innerHtml = title ? `<title>${escapeSvgText(title)}</title>${body}` : body;
+
+    return <svg ref={ref} xmlns="http://www.w3.org/2000/svg" viewBox={viewBox} width={pixelSize} height={pixelSize} className={className} style={{ display: "block", flexShrink: 0, ...style }} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" role={decorative ? "presentation" : "img"} aria-label={resolvedLabel} aria-hidden={decorative ? true : undefined} data-icon-source="stratis-ui-icons" data-icon-name={name} {...((strokeWidth !== null && strokeWidth !== undefined) ? { strokeWidth } : {})} {...rest} dangerouslySetInnerHTML={{ __html: innerHtml }} />;
+  });
+
+  Icon.displayName = name;
+  return Icon;
+}
+
+function makeIcon(name: string) {
+  const glyph = glyphByIconName[name] ?? "default";
+
+  const Icon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, strokeWidth = 1.5, ...rest }, ref) => {
+    const resolvedLabel = label ?? rest["aria-label"];
+    const decorative = resolvedLabel === null || resolvedLabel === undefined;
+    const pixelSize = typeof size === "number" ? `${size}px` : size;
+
+    return (
+      <svg ref={ref} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={pixelSize} height={pixelSize} className={className} style={{ display: "block", flexShrink: 0, ...style }} fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" role={decorative ? "presentation" : "img"} aria-label={resolvedLabel} aria-hidden={decorative ? true : undefined} data-icon-source="fallback" data-icon-name={name} {...rest}>
+        {title ? <title>{title}</title> : null}
+        {glyphPaths[glyph].map((d, index) => <path key={`${name}-${index}`} d={d} />)}
+      </svg>
+    );
+  });
+
+  Icon.displayName = name;
+  return Icon;
+}
+
+function makeStratisIcon(exportName: string, name: string) {
+  const candidate = stratisIconRegistry[exportName];
+
+  if (isStratisDataIcon(candidate)) return wrapStratisDataIcon(candidate, name);
+  if (isStratisIconComponent(candidate)) return wrapStratisIcon(candidate, name);
+  return makeIcon(name);
+}
+
+const MoreVertical = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, ...rest }, ref) => {
+  const resolvedLabel = label ?? rest["aria-label"];
+  const decorative = resolvedLabel === null || resolvedLabel === undefined;
+  const pixelSize = typeof size === "number" ? `${size}px` : size;
+
+  return (
+    <svg ref={ref} xmlns="http://www.w3.org/2000/svg" width={pixelSize} height={pixelSize} viewBox="0 0 24 24" fill="none" stroke="none" className={className} style={style} aria-hidden={decorative ? true : undefined} aria-label={decorative ? undefined : resolvedLabel} role={decorative ? undefined : "img"} {...rest}>
+      {title ? <title>{title}</title> : null}
+      <circle cx="7" cy="12" r="1.35" fill="currentColor" />
+      <circle cx="12" cy="12" r="1.35" fill="currentColor" />
+      <circle cx="17" cy="12" r="1.35" fill="currentColor" />
+    </svg>
+  );
+});
+const ChevronDown = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
+  return (
+    <UiIcon ref={ref} size={size} {...props}>
+      <path d="m7 10 5 5 5-5" />
+    </UiIcon>
+  );
+});
+const ChevronRight = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
+  return (
+    <UiIcon ref={ref} size={size} {...props}>
+      <path d="m10 7 5 5-5 5" />
+    </UiIcon>
+  );
+});
+const FileText = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
+  return (
+    <UiIcon ref={ref} size={size} {...props}>
+      <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z" />
+      <path d="M14 2v5h5" />
+      <path d="M9 13h6" />
+      <path d="M9 17h6" />
+    </UiIcon>
+  );
+});
+const Folder = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
+  return (
+    <UiIcon ref={ref} size={size} {...props}>
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H3z" />
+      <path d="M3 10h18l-1.4 8.4A2 2 0 0 1 17.6 20H6.4a2 2 0 0 1-1.98-1.6z" />
+    </UiIcon>
+  );
+});
+const FolderOutlineIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
+  return (
+    <UiIcon ref={ref} size={size} {...props}>
+      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    </UiIcon>
+  );
+});
 const BookOpen = makeIcon("BookOpen");
 const Brain = makeIcon("Brain");
 const Camera = makeIcon("Camera");
@@ -206,134 +338,13 @@ const Volume2 = makeStratisIcon("suIconAudioSettings01", "Volume2");
 const X = makeStratisIcon("suIconX01", "X");
 const XCircle = makeStratisIcon("suIconXCircleContained", "XCircle");
 const Code = makeStratisIcon("suIconCode01", "Code");
-const MoreVertical = MoreVerticalIcon;
-const ChevronDown = ExplorerChevronDownIcon;
-const ChevronRight = ExplorerChevronRightIcon;
-const FileText = ExplorerFileTextIcon;
-const Folder = ExplorerFolderOpenIcon;
-const FolderOutlineIcon = ExplorerFolderOutlineIcon;
 
-const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
-const isStratisDataIcon = (value: unknown): value is StratisDataIcon => isRecord(value) && typeof value.data === "string";
-const isStratisIconComponent = (value: unknown): value is StratisIconComponent => typeof value === "function" || (isRecord(value) && "$$typeof" in value);
-const escapeSvgText = (value: string): string => value.replace(/[&<>"']/g, (char) => svgTextEscapes[char] ?? char);
-const getStratisSvgViewBox = (source: string): string => source.match(/\sviewBox="([^"]+)"/)?.[1] ?? "0 0 24 24";
-const normalizeStratisSvgBody = (source: string): string => source.replace(/^[\s\S]*?<svg\b[^>]*>/, "").replace(/<\/svg>[\s\S]*$/, "").replace(/\s(width|height)="[^"]*"/g, "").replace(/\sstroke="(?!none|currentColor)[^"]*"/g, " stroke=\"currentColor\"").replace(/\sfill="(?!none|currentColor|url\()[^"]*"/g, " fill=\"currentColor\"");
-const wrapStratisIcon = (BaseIcon: StratisIconComponent, name: string) => {
-  const Icon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, strokeWidth, ...rest }, ref) => {
-    const resolvedLabel = label ?? rest["aria-label"];
-    const decorative = (resolvedLabel === null || resolvedLabel === undefined);
-    const pixelSize = typeof size === "number" ? `${size}px` : size;
+MoreVertical.displayName = "MoreVertical";
+ChevronDown.displayName = "ChevronDown";
+ChevronRight.displayName = "ChevronRight";
+FileText.displayName = "FileText";
+Folder.displayName = "Folder";
+FolderOutlineIcon.displayName = "FolderOutlineIcon";
 
-    return <BaseIcon ref={ref} width={pixelSize} height={pixelSize} className={className} style={{ display: "block", flexShrink: 0, ...style }} role={decorative ? "presentation" : "img"} aria-label={resolvedLabel} aria-hidden={decorative ? true : undefined} {...(title ? { title } : {})} {...((strokeWidth !== null && strokeWidth !== undefined) ? { strokeWidth } : {})} {...rest} />;
-  });
-
-  Icon.displayName = name;
-  return Icon;
-};
-const wrapStratisDataIcon = (source: StratisDataIcon, name: string) => {
-  const viewBox = getStratisSvgViewBox(source.data);
-  const body = normalizeStratisSvgBody(source.data);
-
-  const Icon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, strokeWidth, ...rest }, ref) => {
-    const resolvedLabel = label ?? rest["aria-label"];
-    const decorative = (resolvedLabel === null || resolvedLabel === undefined);
-    const pixelSize = typeof size === "number" ? `${size}px` : size;
-    const innerHtml = title ? `<title>${escapeSvgText(title)}</title>${body}` : body;
-
-    return <svg ref={ref} xmlns="http://www.w3.org/2000/svg" viewBox={viewBox} width={pixelSize} height={pixelSize} className={className} style={{ display: "block", flexShrink: 0, ...style }} fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" role={decorative ? "presentation" : "img"} aria-label={resolvedLabel} aria-hidden={decorative ? true : undefined} data-icon-source="stratis-ui-icons" data-icon-name={name} {...((strokeWidth !== null && strokeWidth !== undefined) ? { strokeWidth } : {})} {...rest} dangerouslySetInnerHTML={{ __html: innerHtml }} />;
-  });
-
-  Icon.displayName = name;
-  return Icon;
-};
-const makeIcon = (name: string) => {
-  const glyph = glyphByIconName[name] ?? "default";
-
-  const Icon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, strokeWidth = 1.5, ...rest }, ref) => {
-    const resolvedLabel = label ?? rest["aria-label"];
-    const decorative = (resolvedLabel === null || resolvedLabel === undefined);
-    const pixelSize = typeof size === "number" ? `${size}px` : size;
-
-    return (
-      <svg ref={ref} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={pixelSize} height={pixelSize} className={className} style={{ display: "block", flexShrink: 0, ...style }} fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" role={decorative ? "presentation" : "img"} aria-label={resolvedLabel} aria-hidden={decorative ? true : undefined} data-icon-source="fallback" data-icon-name={name} {...rest}>
-        {title ? <title>{title}</title> : null}
-        {glyphPaths[glyph].map((d, index) => <path key={`${name}-${index}`} d={d} />)}
-      </svg>
-    );
-  });
-
-  Icon.displayName = name;
-  return Icon;
-};
-const makeStratisIcon = (exportName: string, name: string) => {
-  const candidate = stratisIconRegistry[exportName];
-
-  if (isStratisDataIcon(candidate)) return wrapStratisDataIcon(candidate, name);
-  if (isStratisIconComponent(candidate)) return wrapStratisIcon(candidate, name);
-  return makeIcon(name);
-};
-
-const MoreVerticalIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, ...rest }, ref) => {
-  const resolvedLabel = label ?? rest["aria-label"];
-  const decorative = (resolvedLabel === null || resolvedLabel === undefined);
-  const pixelSize = typeof size === "number" ? `${size}px` : size;
-
-  return (
-    <svg ref={ref} xmlns="http://www.w3.org/2000/svg" width={pixelSize} height={pixelSize} viewBox="0 0 24 24" fill="none" stroke="none" className={className} style={style} aria-hidden={decorative ? true : undefined} aria-label={decorative ? undefined : resolvedLabel} role={decorative ? undefined : "img"} {...rest}>
-      {title ? <title>{title}</title> : null}
-      <circle cx="7" cy="12" r="1.35" fill="currentColor" />
-      <circle cx="12" cy="12" r="1.35" fill="currentColor" />
-      <circle cx="17" cy="12" r="1.35" fill="currentColor" />
-    </svg>
-  );
-});
-const ExplorerChevronDownIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
-  return (
-    <UiIcon ref={ref} size={size} {...props}>
-      <path d="m7 10 5 5 5-5" />
-    </UiIcon>
-  );
-});
-const ExplorerChevronRightIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
-  return (
-    <UiIcon ref={ref} size={size} {...props}>
-      <path d="m10 7 5 5-5 5" />
-    </UiIcon>
-  );
-});
-const ExplorerFileTextIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
-  return (
-    <UiIcon ref={ref} size={size} {...props}>
-      <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z" />
-      <path d="M14 2v5h5" />
-      <path d="M9 13h6" />
-      <path d="M9 17h6" />
-    </UiIcon>
-  );
-});
-const ExplorerFolderOpenIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
-  return (
-    <UiIcon ref={ref} size={size} {...props}>
-      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1H3z" />
-      <path d="M3 10h18l-1.4 8.4A2 2 0 0 1 17.6 20H6.4a2 2 0 0 1-1.98-1.6z" />
-    </UiIcon>
-  );
-});
-const ExplorerFolderOutlineIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...props }, ref) => {
-  return (
-    <UiIcon ref={ref} size={size} {...props}>
-      <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-    </UiIcon>
-  );
-});
-
-MoreVerticalIcon.displayName = "MoreVerticalIcon";
-ExplorerChevronDownIcon.displayName = "ExplorerChevronDownIcon";
-ExplorerChevronRightIcon.displayName = "ExplorerChevronRightIcon";
-ExplorerFileTextIcon.displayName = "ExplorerFileTextIcon";
-ExplorerFolderOpenIcon.displayName = "ExplorerFolderOpenIcon";
-ExplorerFolderOutlineIcon.displayName = "ExplorerFolderOutlineIcon";
-
-export { AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, ArrowUpDown, BookOpen, Brain, Calendar, Camera, Check, CheckCheck, CheckCircle, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, Clock, Cloud, CloudOff, Construction, Copy, Database, Download, Edit, Eraser, ExternalLink, FileAudio, FileEdit, FileJson, FileText, FileWarning, FileX, Filter, Flame, Folder, FolderInput, FolderTree, GitMerge, Globe, GripVertical, HardDrive, HelpCircle, History, Image, Info, Keyboard, Layers, Link, List, Loader2, LogOut, Merge, MessageSquare, Minus, MoreVertical, Move, Palette, Pause, PenLine, Pencil, Pin, Play, Plus, Redo2, RefreshCw, RotateCcw, Search, SearchX, Settings2, Shield, Smartphone, Sparkles, Star, Tag, Trash2, Trophy, Type, Undo2, Upload, User, Volume2, X, XCircle, Zap, Code, FolderIcon, FolderOutlineIcon, ImageIcon, CircleHelp, Sigma, NotebookPen };
+export { AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, ArrowUpDown, BookOpen, Brain, Calendar, Camera, Check, CheckCheck, CheckCircle, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, Clock, Cloud, CloudOff, Construction, Copy, Database, Download, Edit, Eraser, ExternalLink, FileAudio, FileEdit, FileJson, FileText, FileWarning, FileX, Filter, Flame, Folder, Folder as FolderIcon, FolderInput, FolderOutlineIcon, FolderTree, GitMerge, Globe, GripVertical, HardDrive, HelpCircle, HelpCircle as CircleHelp, History, Image, Image as ImageIcon, Info, Keyboard, Layers, Link, List, Loader2, LogOut, Merge, MessageSquare, Minus, MoreVertical, Move, NotebookPenIcon as NotebookPen, Palette, Pause, PenLine, Pencil, Pin, Play, Plus, Redo2, RefreshCw, RotateCcw, Search, SearchX, Settings2, Shield, SigmaIcon as Sigma, Smartphone, Sparkles, Star, Tag, Trash2, Trophy, Type, Undo2, Upload, User, Volume2, X, XCircle, Zap, Code };
 export type { IconProps };
