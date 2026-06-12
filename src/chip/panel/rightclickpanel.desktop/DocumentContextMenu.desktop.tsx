@@ -1,8 +1,8 @@
 import { memo } from "react";
 import type { CSSProperties, RefObject } from "react";
+import { Panel } from "../panel";
 import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE } from "./rightClickPanel.utils";
-import { RightClickPanelSurface } from "../rightClickPanelCommon";
 
 type DocumentContextMenuActionId = "rename" | "delete";
 type DocumentContextMenuAction = {
@@ -51,13 +51,13 @@ const DocumentContextMenuBase = ({
   return (
     <>
       <style>{DOCUMENT_CONTEXT_MENU_STYLE}</style>
-      <RightClickPanelSurface x={x} y={y} width={DOCUMENT_CONTEXT_MENU_WIDTH} panelRef={menuRef} noDragStyle={noDragStyle} ariaLabel="document context menu" panelId={panelId}>
+      <Panel id={panelId} x={x} y={y} width={DOCUMENT_CONTEXT_MENU_WIDTH} panelRef={menuRef} style={noDragStyle} role="menu" ariaLabel="document context menu" preventContextMenu>
         {actions.map((action) => (
           <button
             key={action.id}
             type="button"
             disabled={action.disabled}
-            className={["right-click-panel-item", action.danger ? "document-context-menu-item--danger" : null].filter(Boolean).join(" ")}
+            className={["panel__item", action.danger ? "document-context-menu-item--danger" : null].filter(Boolean).join(" ")}
             role="menuitem"
             onClick={(event) => {
               event.preventDefault();
@@ -71,7 +71,7 @@ const DocumentContextMenuBase = ({
             {action.label}
           </button>
         ))}
-      </RightClickPanelSurface>
+      </Panel>
     </>
   );
 };
