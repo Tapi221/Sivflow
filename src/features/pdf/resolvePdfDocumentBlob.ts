@@ -1,6 +1,7 @@
+import { getBlob, ref } from "firebase/storage";
 import { requestGoogleDriveFileAccessToken } from "@/integration/google-integration/googleDrive.oauth";
 import { downloadPdfFromGoogleDrive } from "@/integration/google-integration/googleDrive.pdfDownload";
-import { auth } from "@/infrastructure/firebase/client";
+import { auth, storage } from "@/infrastructure/firebase/client";
 import { getDocumentBlob, saveDocumentBlob } from "@/services/documentFileStore";
 import type { DocumentItem } from "@/types";
 
@@ -8,6 +9,7 @@ type PdfDocumentBlobFields = Pick<DocumentItem, "id" | "localFileId" | "userId" 
 
 const GOOGLE_DRIVE_STORAGE_PATH_PREFIX = "google-drive://";
 const GOOGLE_DRIVE_FILE_PATH_PATTERN = /\/file\/d\/([^/]+)/;
+const FIREBASE_STORAGE_URL_PROTOCOLS = new Set(["gs:", "http:", "https:"]);
 
 const getUniqueValues = (values: Array<string | null | undefined>): string[] => {
   return [...new Set(values.map((value) => value?.trim()).filter((value): value is string => Boolean(value)))];
@@ -26,10 +28,23 @@ const resolveStringValue = (value: string | null | undefined): string | null => 
   const trimmed = value?.trim();
   return trimmed && trimmed.length > 0 ? trimmed : null;
 };
+const isFirebaseStorageUrl = (value: string): boolean => {
+  try {
+    return FIREBASE_STORAGE_URL_PROTOCOLS.has(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+};
 const resolveGoogleDriveFileIdFromStoragePath = (storagePath: string | null | undefined): string | null => {
   const trimmedStoragePath = resolveStringValue(storagePath);
   if (!trimmedStoragePath?.startsWith(GOOGLE_DRIVE_STORAGE_PATH_PREFIX)) return null;
   return resolveStringValue(trimmedStoragePath.slice(GOOGLE_DRIVE_STORAGE_PATH_PREFIX.length));
+};
+const resolveFirebaseStoragePath = (storagePath: string | null | undefined): string | null => {
+  const trimmedStoragePath = resolveStringValue(storagePath);
+  if (!trimmedStoragePath || trimmedStoragePath.startsWith(GOOGLE_DRIVE_STORAGE_PATH_PREFIX)) return null;
+  if (trimmedStoragePath.includes("://") && !isFirebaseStorageUrl(trimmedStoragePath)) return null;
+  return trimmedStoragePath;
 };
 const resolveGoogleDriveFileIdFromUrl = (url: string | null | undefined): string | null => {
   const trimmedUrl = resolveStringValue(url);
@@ -49,6 +64,19 @@ const resolveGoogleDriveFileIdFromUrl = (url: string | null | undefined): string
 const resolveGoogleDriveFileId = (document: Pick<PdfDocumentBlobFields, "googleDriveFileId" | "googleDriveWebContentLink" | "googleDriveWebViewLink" | "storagePath">): string | null => {
   return resolveStringValue(document.googleDriveFileId) ?? resolveGoogleDriveFileIdFromStoragePath(document.storagePath) ?? resolveGoogleDriveFileIdFromUrl(document.googleDriveWebContentLink) ?? resolveGoogleDriveFileIdFromUrl(document.googleDriveWebViewLink);
 };
+const cacheResolvedPdfBlob = (document: Pick<DocumentItem, "id" | "localFileId" | "userId">, currentUserId: string | null | undefined, blob: Blob): void => {
+  const preferredFileId = resolveDocumentFileIds(document)[0];
+  const preferredUserId = resolvePreferredDocumentUserId(document.userId, currentUserId);
+
+  if (preferredFileId && preferredUserId) {
+    void saveDocumentBlob(preferredFileId, blob, { userId: preferredUserId }).catch((error: unknown) => {
+      console.warn("[resolvePdfDocumentBlob] Failed to cache resolved PDF locally", { error, fileId: preferredFileId, userId: preferredUserId });
+    });
+  }
+};
+const downloadPdfFromFirebaseStorage = async (storagePath: string): Promise<Blob> => {
+  return getBlob(ref(storage, storagePath));
+};
 const findLocalPdfBlob = async (document: Pick<DocumentItem, "id" | "localFileId" | "userId">, currentUserId: string | null | undefined): Promise<Blob | null> => {
   const fileIds = resolveDocumentFileIds(document);
   const userIds = resolveDocumentBlobUserIds(document.userId, currentUserId);
@@ -67,19 +95,18 @@ const resolvePdfDocumentBlob = async (document: PdfDocumentBlobFields, currentUs
   if (localBlob) return localBlob;
 
   const googleDriveFileId = resolveGoogleDriveFileId(document);
-  if (!googleDriveFileId) return null;
-
-  const accessToken = await requestGoogleDriveFileAccessToken(auth);
-  const downloadedBlob = await downloadPdfFromGoogleDrive({ accessToken, fileId: googleDriveFileId });
-  const preferredFileId = resolveDocumentFileIds(document)[0];
-  const preferredUserId = resolvePreferredDocumentUserId(document.userId, currentUserId);
-
-  if (preferredFileId && preferredUserId) {
-    void saveDocumentBlob(preferredFileId, downloadedBlob, { userId: preferredUserId }).catch((error: unknown) => {
-      console.warn("[resolvePdfDocumentBlob] Failed to cache Drive PDF locally", { error, fileId: preferredFileId, userId: preferredUserId });
-    });
+  if (googleDriveFileId) {
+    const accessToken = await requestGoogleDriveFileAccessToken(auth);
+    const downloadedBlob = await downloadPdfFromGoogleDrive({ accessToken, fileId: googleDriveFileId });
+    cacheResolvedPdfBlob(document, currentUserId, downloadedBlob);
+    return downloadedBlob;
   }
 
+  const firebaseStoragePath = resolveFirebaseStoragePath(document.storagePath);
+  if (!firebaseStoragePath) return null;
+
+  const downloadedBlob = await downloadPdfFromFirebaseStorage(firebaseStoragePath);
+  cacheResolvedPdfBlob(document, currentUserId, downloadedBlob);
   return downloadedBlob;
 };
 
