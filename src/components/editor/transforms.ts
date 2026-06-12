@@ -23,30 +23,44 @@ type InsertBlockOptions = {
 
 const ACTION_THREE_COLUMNS = "action_three_columns";
 const ACTION_FOOTNOTE = "action_footnote";
-const insertInlineMap: Record<
-  string,
-  (editor: PlateEditor, type: string) => void
-> = {
+const insertInlineMap: Record<string, (editor: PlateEditor, type: string) => void> = {
   [KEYS.date]: (editor) => insertDate(editor, { select: true }),
   [ACTION_FOOTNOTE]: (editor) => insertFootnote(editor, { select: true }),
-  [KEYS.inlineEquation]: (editor) =>
-    insertInlineEquation(editor, "", { select: true }),
+  [KEYS.inlineEquation]: (editor) => insertInlineEquation(editor, "", { select: true }),
   [KEYS.link]: (editor) => triggerFloatingLink(editor, { focused: true }),
 };
-const insertBlockMap: Record<
-  string,
-  (editor: PlateEditor, type: string) => void
-> = {
+
+const insertList = (editor: PlateEditor, type: string) => {
+  editor.tf.insertNodes(
+    editor.api.create.block({
+      indent: 1,
+      listStyleType: type,
+    }),
+    { select: true },
+  );
+};
+
+const setList = (editor: PlateEditor, type: string, entry: NodeEntry<TElement>) => {
+  editor.tf.setNodes(
+    editor.api.create.block({
+      indent: 1,
+      listStyleType: type,
+    }),
+    {
+      at: entry[1],
+    },
+  );
+};
+
+const insertBlockMap: Record<string, (editor: PlateEditor, type: string) => void> = {
   [KEYS.listTodo]: insertList,
   [KEYS.ol]: insertList,
   [KEYS.ul]: insertList,
-  [ACTION_THREE_COLUMNS]: (editor) =>
-    insertColumnGroup(editor, { columns: 3, select: true }),
+  [ACTION_THREE_COLUMNS]: (editor) => insertColumnGroup(editor, { columns: 3, select: true }),
   [KEYS.audio]: (editor) => insertAudioPlaceholder(editor, { select: true }),
   [KEYS.callout]: (editor) => insertCallout(editor, { select: true }),
   [KEYS.codeBlock]: (editor) => insertCodeBlock(editor, { select: true }),
-  [KEYS.codeDrawing]: (editor) =>
-    insertCodeDrawing(editor, {}, { select: true }),
+  [KEYS.codeDrawing]: (editor) => insertCodeDrawing(editor, {}, { select: true }),
   [KEYS.equation]: (editor) => insertEquation(editor, { select: true }),
   [KEYS.excalidraw]: (editor) => insertExcalidraw(editor, {}, { select: true }),
   [KEYS.file]: (editor) => insertFilePlaceholder(editor, { select: true }),
@@ -60,15 +74,11 @@ const insertBlockMap: Record<
       select: true,
       type: KEYS.mediaEmbed,
     }),
-  [KEYS.table]: (editor) =>
-    editor.getTransforms(TablePlugin).insert.table({}, { select: true }),
+  [KEYS.table]: (editor) => editor.getTransforms(TablePlugin).insert.table({}, { select: true }),
   [KEYS.toc]: (editor) => insertToc(editor, { select: true }),
   [KEYS.video]: (editor) => insertVideoPlaceholder(editor, { select: true }),
 };
-const setBlockMap: Record<
-  string,
-  (editor: PlateEditor, type: string, entry: NodeEntry<TElement>) => void
-> = {
+const setBlockMap: Record<string, (editor: PlateEditor, type: string, entry: NodeEntry<TElement>) => void> = {
   [KEYS.listTodo]: setList,
   [KEYS.ol]: setList,
   [KEYS.ul]: setList,
@@ -76,19 +86,11 @@ const setBlockMap: Record<
   [KEYS.codeBlock]: (editor) => toggleCodeBlock(editor),
 };
 
-const insertList = (editor: PlateEditor, type: string) => {
-  editor.tf.insertNodes(
-    editor.api.create.block({
-      indent: 1,
-      listStyleType: type,
-    }),
-    { select: true },
-  );
-};
 const createBlockquote = (editor: PlateEditor) => ({
   children: [editor.api.create.block({ type: KEYS.p })],
   type: KEYS.blockquote,
 });
+
 const selectBlockquoteStart = (editor: PlateEditor, path: Path) => {
   const start = editor.api.start(path.concat([0]));
 
@@ -96,27 +98,14 @@ const selectBlockquoteStart = (editor: PlateEditor, path: Path) => {
     editor.tf.select(start);
   }
 };
+
 const insertInlineElement = (editor: PlateEditor, type: string) => {
   if (insertInlineMap[type]) {
     insertInlineMap[type](editor, type);
   }
 };
-const setList = (
-  editor: PlateEditor,
-  type: string,
-  entry: NodeEntry<TElement>,
-) => {
-  editor.tf.setNodes(
-    editor.api.create.block({
-      indent: 1,
-      listStyleType: type,
-    }),
-    {
-      at: entry[1],
-    },
-  );
-};
-const setBlockType = (editor: PlateEditor, type: string, { at }: { at?: Path; } = {}) => {
+
+const setBlockType = (editor: PlateEditor, type: string, { at }: { at?: Path } = {}) => {
   editor.tf.withoutNormalizing(() => {
     if (type === KEYS.blockquote) {
       const target = at ?? editor.selection;
@@ -164,6 +153,7 @@ const setBlockType = (editor: PlateEditor, type: string, { at }: { at?: Path; } 
     });
   });
 };
+
 const getBlockType = (block: TElement) => {
   if (block[KEYS.listType]) {
     if (block[KEYS.listType] === KEYS.ol) {
@@ -177,6 +167,7 @@ const getBlockType = (block: TElement) => {
 
   return block.type;
 };
+
 const insertBlock = (editor: PlateEditor, type: string, options: InsertBlockOptions = {}) => {
   const { upsert = false } = options;
 
