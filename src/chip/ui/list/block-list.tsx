@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 const TodoMarker = (props: PlateElementProps) => {
   const state = useTodoListElementState({ element: props.element });
-  const todoProps = Object.values(useTodoListElement(state))[0];
+  const todoProps = Object.values(useTodoListElement(state))[0] as React.ComponentProps<typeof Checkbox>;
   const readOnly = useReadOnly();
 
   return (
