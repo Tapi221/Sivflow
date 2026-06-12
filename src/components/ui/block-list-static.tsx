@@ -5,19 +5,6 @@ import type { RenderStaticNodeWrapper, TListElement } from "platejs";
 import type { SlateRenderElementProps } from "platejs/static";
 import { cn } from "@/lib/utils";
 
-const config: Record<
-  string,
-  {
-    Li: React.FC<SlateRenderElementProps>;
-    Marker: React.FC<SlateRenderElementProps>;
-  }
-> = {
-  todo: {
-    Li: TodoLiStatic,
-    Marker: TodoMarkerStatic,
-  },
-};
-
 const TodoMarkerStatic = (props: SlateRenderElementProps) => {
   const checked = props.element.checked as boolean;
 
@@ -31,26 +18,38 @@ const TodoMarkerStatic = (props: SlateRenderElementProps) => {
         data-state={checked ? "checked" : "unchecked"}
         type="button"
       >
-        <div className={cn("flex items-center justify-center text-current")}>
-          {checked && <CheckIcon className="size-4" />}
-        </div>
+        <div className={cn("flex items-center justify-center text-current")}>{checked && <CheckIcon className="size-4" />}</div>
       </button>
     </div>
   );
 };
+
 const TodoLiStatic = (props: SlateRenderElementProps) => {
   return (
     <li
       className={cn(
         "list-none",
-        (props.element.checked as boolean) &&
-        "text-muted-foreground line-through",
+        (props.element.checked as boolean) && "text-muted-foreground line-through",
       )}
     >
       {props.children}
     </li>
   );
 };
+
+const config: Record<
+  string,
+  {
+    Li: React.FC<SlateRenderElementProps>;
+    Marker: React.FC<SlateRenderElementProps>;
+  }
+> = {
+  todo: {
+    Li: TodoLiStatic,
+    Marker: TodoMarkerStatic,
+  },
+};
+
 const List = (props: SlateRenderElementProps) => {
   const { indent, listStart, listStyleType } = props.element as TListElement & {
     indent?: number;
@@ -72,6 +71,7 @@ const List = (props: SlateRenderElementProps) => {
     </List>
   );
 };
+
 const BlockListStatic: RenderStaticNodeWrapper = (props) => {
   if (!props.element.listStyleType) return;
   if (!isOrderedList(props.element)) return;
