@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import type { PresentationTarget } from "./getPresentationTarget";
 import { getPresentationTargetFromWindow } from "./getPresentationTarget";
 
+
+
 const bindMediaQueryChange = (
   mediaQueryList: MediaQueryList,
   handler: () => void,
@@ -53,5 +55,7 @@ const usePresentationTarget = (): PresentationTarget => {
 
   return presentationTarget;
 };
+
+
 
 export { usePresentationTarget };

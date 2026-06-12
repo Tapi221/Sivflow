@@ -3,6 +3,8 @@ import { buildCardRenderSpec, resolveCardContentZoom, resolveCardSurfaceScale } 
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 type SharedCardSurfaceMetrics = {
   renderSpec: CardRenderSpec;
   isSplitLayout: boolean;
@@ -21,6 +23,8 @@ type BuildCardSurfaceMetricsArgs = Readonly<{ displayMode: CardDisplayMode;
   fitScale?: number;
   showInk?: boolean;
 }>;
+
+
 
 const resolveSafeFitScale = (value?: number) => {
   if (typeof value !== "number") return 1;
@@ -88,5 +92,10 @@ const buildSharedCardSurfaceMetrics = ({ displayMode, cardLayoutMode, zoomScale 
   zoomScale: number;
 }) => buildCardSurfaceMetrics({ displayMode, cardLayoutMode, zoomScale });
 
+
+
 export { buildCardSurfaceMetrics, buildSharedCardSurfaceMetrics };
+
+
+
 export type { SharedCardSurfaceMetrics, BuildCardSurfaceMetricsArgs };

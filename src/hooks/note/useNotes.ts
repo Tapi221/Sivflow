@@ -4,6 +4,8 @@ import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { getLocalDb } from "@/services/localdb/LocalDB";
 import type { Note, NoteBlockContent } from "@/types";
 
+
+
 type UseNotesOptions = {
   enabled?: boolean;
 };
@@ -12,7 +14,11 @@ type CreateNoteOptions = {
   orderIndex?: number;
 };
 
+
+
 const DEFAULT_NOTE_CONTENT: NoteBlockContent = [];
+
+
 
 const createId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
@@ -96,5 +102,7 @@ const useNotes = (folderId?: string | null, options?: UseNotesOptions) => {
     deleteNote,
   };
 };
+
+
 
 export { useNotes };

@@ -11,9 +11,13 @@ type GoogleDrivePdfUploadResult = {
   webContentLink: string | null;
 };
 
+
+
 const GOOGLE_DRIVE_UPLOAD_ENDPOINT = "https://www.googleapis.com/upload/drive/v3/files";
 const GOOGLE_DRIVE_PDF_FIELDS = "id,name,mimeType,webViewLink,webContentLink";
 const PDF_MIME_TYPE = "application/pdf";
+
+
 
 const createUploadFormData = (fileName: string, pdf: Blob): FormData => {
   const formData = new FormData();
@@ -78,5 +82,10 @@ const uploadPdfToGoogleDrive = async ({ accessToken, fileName, pdf }: GoogleDriv
   };
 };
 
+
+
 export { uploadPdfToGoogleDrive };
+
+
+
 export type { GoogleDrivePdfUploadInput, GoogleDrivePdfUploadResult };

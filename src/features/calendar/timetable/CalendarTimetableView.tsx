@@ -14,6 +14,8 @@ import { normalizeVisibleDayCount } from "./calendarTimetable.storage";
 import { CalendarTimetableSyllabusCatalogPanel } from "./CalendarTimetableSyllabusCatalogPanel";
 import { useCalendarTimetable } from "./useCalendarTimetable";
 
+
+
 type TimetableSlot = {
   dayIndex: CalendarTimetableWeekdayIndex; periodId: string; };
 type CalendarTimetableDensity = "default" | "compact";
@@ -26,6 +28,8 @@ type CalendarTimetableSettingsPanelProps = {
 type CalendarTimetableGridStyle = CSSProperties & { "--calendar-timetable-day-count": CalendarTimetableVisibleDayCount; };
 type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
+
+
 const STRATIS_ICON_COMPONENTS = stratisIcons as Record<string, StratisIconComponent | undefined>;
 const STRATIS_CHECK_ICON_NAMES = ["StratisCheckIcon", "StratisCheck01Icon", "StratisCheckCircleContainedIcon"] as const;
 const STRATIS_PLUS_ICON_NAMES = ["StratisPlus01Icon", "StratisPlusIcon"] as const;
@@ -37,11 +41,17 @@ const DEFAULT_COURSE_COLOR_KEY: CalendarTimetableColorKey = "blue";
 const DEFAULT_TIMETABLE_ADD_REQUEST_TOKEN = 0;
 const EMPTY_SLOT_LIST: CalendarTimetableSlot[] = [];
 
+
+
 const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
+
 
 const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);
 const StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);
 const StratisSettingsIcon = resolveStratisIcon(STRATIS_SETTINGS_ICON_NAMES);
+
+
+
 
 const createTimetableSlotKey = ({ dayIndex, periodId }: TimetableSlot): string => `${dayIndex}:${periodId}`;
 const buildTimetableWeekDays = (weekDate: Date, weekStartDay: CalendarWeekStartDay, visibleDayCount: CalendarTimetableVisibleDayCount): Date[] => Array.from({ length: visibleDayCount }, (_, index) => addDays(startOfWeek(weekDate, { weekStartsOn: getCalendarWeekStartsOn(weekStartDay) }), index));
@@ -57,6 +67,8 @@ const getTimetableGridTemplateColumns = (density: CalendarTimetableDensity): str
 const createTimetableGridStyle = (density: CalendarTimetableDensity, visibleDayCount: CalendarTimetableVisibleDayCount): CalendarTimetableGridStyle => ({ gridTemplateColumns: getTimetableGridTemplateColumns(density), "--calendar-timetable-day-count": visibleDayCount });
 const isSameTimetableSlot = (left: CalendarTimetableSlot, right: CalendarTimetableSlot): boolean => left.dayIndex === right.dayIndex && left.periodId === right.periodId;
 const createEditorSlots = (course: CalendarTimetableCourse | null, initialSlot: CalendarTimetableSlot | null): CalendarTimetableSlot[] => course?.slots ?? (initialSlot ? [initialSlot] : EMPTY_SLOT_LIST);
+
+
 
 const CalendarTimetableSettingsPanel = ({ periods, visibleDayCount, onChangeVisibleDayCount, onAddPeriod, onUpdatePeriod, onDeletePeriod, onClose }: CalendarTimetableSettingsPanelProps) => {
   return (
@@ -285,6 +297,8 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
     </div>
   );
 };
+
+
 
 const CalendarTimetableView = memo(CalendarTimetableViewComponent);
 CalendarTimetableView.displayName = "CalendarTimetableView";

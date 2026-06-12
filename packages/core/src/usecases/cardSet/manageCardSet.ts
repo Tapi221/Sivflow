@@ -31,6 +31,8 @@ type CardSetCommandRepository<TCardSet extends CardSetCommandEntity = CardSetCom
   updateCardSet: (userId: string, cardSetId: string, changes: Record<string, unknown>) => Promise<void>;
 };
 
+
+
 const isDeletedEntity = (entity: { isDeleted?: boolean; is_deleted?: boolean; }) => {
   return Boolean(entity.isDeleted ?? entity.is_deleted);
 };
@@ -113,5 +115,10 @@ const moveCardSetToFolderUseCase = async <TCardSet extends CardSetCommandEntity>
   });
 };
 
+
+
 export { createCardSetUseCase, updateCardSetUseCase, moveCardSetToFolderUseCase };
+
+
+
 export type { CardSetCommandEntity, CreateCardSetOptions, CardSetCreateDraft, CardSetCommandRepository };

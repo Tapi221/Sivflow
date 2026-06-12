@@ -2,6 +2,8 @@ import { memo } from "react";
 import type { InkEditTool } from "@core/domain/card/ink/inkDocument";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
+
+
 type IpadInkToolbarProps = {
   tool: InkEditTool;
   onToolChange: (tool: InkEditTool) => void;
@@ -10,6 +12,8 @@ type ToolItem = {
   label: string;
   value: InkEditTool;
 };
+
+
 
 const TOOL_ITEMS: readonly ToolItem[] = [
   { label: "Pen", value: "pen" },
@@ -44,6 +48,8 @@ const styles = StyleSheet.create({
   },
 });
 
+
+
 const IpadInkToolbar = ({ tool, onToolChange }: IpadInkToolbarProps) => (
   <View style={styles.container}>
     {TOOL_ITEMS.map((item) => {
@@ -58,8 +64,13 @@ const IpadInkToolbar = ({ tool, onToolChange }: IpadInkToolbarProps) => (
   </View>
 );
 
+
+
 const MemoizedIpadInkToolbar = memo(IpadInkToolbar);
 MemoizedIpadInkToolbar.displayName = "IpadInkToolbar";
 
 export default MemoizedIpadInkToolbar;
+
+
+
 export type { IpadInkToolbarProps };

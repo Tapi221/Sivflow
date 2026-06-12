@@ -1,7 +1,10 @@
 "use client";
 
 import { TableCellHeaderPlugin, TableCellPlugin, TablePlugin, TableRowPlugin } from "@platejs/table/react";
+
 import { TableCellElement, TableCellHeaderElement, TableElement, TableRowElement } from "@/components/ui/table-node";
+
+
 
 const TableKit = [
   TablePlugin.withComponent(TableElement),
@@ -9,5 +12,7 @@ const TableKit = [
   TableCellPlugin.withComponent(TableCellElement),
   TableCellHeaderPlugin.withComponent(TableCellHeaderElement),
 ];
+
+
 
 export { TableKit };

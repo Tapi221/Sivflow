@@ -7,6 +7,8 @@ import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
 import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
 import type { AppCalendarItem } from "./scheduleScreen.types";
 
+
+
 type CreateRootFolderProjectInput = {
   label: string;
   color?: string;
@@ -27,9 +29,13 @@ type LegacyStoredAppProject = AppCalendarItem;
 type ProjectVisibilityMap = Record<string, boolean>;
 type StoredLegacyProject = Partial<AppCalendarItem>;
 
+
+
 const LEGACY_APP_PROJECTS_STORAGE_KEY = "flashcard-master:schedule:app-projects";
 const PROJECT_VISIBILITY_STORAGE_KEY = "flashcard-master:schedule:root-folder-project-visibility";
 const EMPTY_COLLECTION: never[] = [];
+
+
 
 const normalizeRootFolderProjectLabel = (label: string): string => label.trim().toLowerCase();
 const readTrimmedString = (value: unknown): string | null => {
@@ -189,5 +195,10 @@ const useRootFolderProjects = (): UseRootFolderProjectsResult => {
   };
 };
 
+
+
 export { normalizeRootFolderProjectLabel, readLegacyStoredAppProjects, clearLegacyStoredAppProjects, useRootFolderProjects };
+
+
+
 export type { CreateRootFolderProjectInput, UseRootFolderProjectsResult, LegacyStoredAppProject };

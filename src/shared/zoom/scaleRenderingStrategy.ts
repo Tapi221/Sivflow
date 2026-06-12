@@ -12,7 +12,11 @@ interface ScaleRenderingStrategy {
   readonly willChange: "transform" | undefined;
 }
 
+
+
 const SCALE_EPSILON = 0.0001;
+
+
 
 const normalizeScale = (value: number) => {
   if (!Number.isFinite(value) || value <= 0) {
@@ -70,5 +74,10 @@ const resolveScaleRenderingStrategy = ({ disableScale, effectiveScale, supportsC
   };
 };
 
+
+
 export { detectCssZoomSupport, resolveScaleRenderingStrategy };
+
+
+
 export type { ScaleRenderingMode, ResolveScaleRenderingStrategyArgs, ScaleRenderingStrategy };

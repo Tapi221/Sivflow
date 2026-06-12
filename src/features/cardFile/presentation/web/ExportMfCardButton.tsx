@@ -8,11 +8,15 @@ import { downloadBytesAsMfCard } from "@/features/cardFile/infra/web/downloadMfC
 import type { MfDeckTagLookup } from "@/features/deckFile/application/mfDeck.types";
 import type { Card } from "@/types";
 
+
+
 type ExportMfCardButtonProps = {
   card: Card | null | undefined;
   tagById?: MfDeckTagLookup;
   disabled?: boolean;
 };
+
+
 
 const ExportMfCardButton = ({
   card,
@@ -77,5 +81,10 @@ const ExportMfCardButton = ({
   );
 };
 
+
+
 export { ExportMfCardButton };
+
+
+
 export type { ExportMfCardButtonProps };

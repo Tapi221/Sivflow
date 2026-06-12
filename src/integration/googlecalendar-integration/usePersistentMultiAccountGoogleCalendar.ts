@@ -2,12 +2,18 @@ import { useEffect, useMemo, useState } from "react";
 import type { GoogleCalendarEvent } from "./gcalSync.types";
 import { useMultiAccountGoogleCalendar } from "./useMultiAccountGoogleCalendar";
 
+
+
 type CachedGoogleCalendarEvent = Omit<GoogleCalendarEvent, "startsAt" | "endsAt"> & {
   startsAt: string;
   endsAt: string;
 };
 
+
+
 const GOOGLE_CALENDAR_EVENTS_CACHE_KEY = "flashcard-master.gcal.events";
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 const parseCachedDate = (value: unknown): Date | null => {
@@ -139,5 +145,7 @@ const usePersistentMultiAccountGoogleCalendar = () => {
     events,
   };
 };
+
+
 
 export { usePersistentMultiAccountGoogleCalendar };

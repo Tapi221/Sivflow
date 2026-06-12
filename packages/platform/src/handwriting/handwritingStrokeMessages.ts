@@ -2,6 +2,8 @@ import type { InkDocument, InkSide, InkStroke } from "@core/domain/card/ink/inkD
 import { INK_DOCUMENT_VERSION, normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
 import type { HandwritingStrokeDeltaMessage } from "./handwritingSession.types";
 
+
+
 type CreateHandwritingStrokeDeltaInput = {
   sessionId: string;
   cardId: string;
@@ -21,6 +23,8 @@ type ApplyHandwritingStrokeDeltaResult = {
   applied: boolean;
   reason?: "session-mismatch" | "card-mismatch" | "side-mismatch" | "invalid-stroke" | "duplicate-stroke";
 };
+
+
 
 const normalizeStroke = (stroke: InkStroke): InkStroke | null => {
   const document = normalizeInkDocument({ version: INK_DOCUMENT_VERSION, updatedAt: 0, strokes: [stroke] });
@@ -77,5 +81,10 @@ const applyHandwritingStrokeDelta = ({ document, message, expectedSessionId, exp
   return { document: appendStroke(currentDocument, stroke, now), applied: true };
 };
 
+
+
 export { createHandwritingStrokeDeltaMessage, applyHandwritingStrokeDelta };
+
+
+
 export type { CreateHandwritingStrokeDeltaInput, ApplyHandwritingStrokeDeltaInput, ApplyHandwritingStrokeDeltaResult };

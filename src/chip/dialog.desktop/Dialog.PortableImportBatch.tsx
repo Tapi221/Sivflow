@@ -7,6 +7,8 @@ import type { PortableImportBatchItem } from "@/features/import/application/impo
 import { buildPortableImportBatchItems, formatPortableImportBatchItemSubtitle, importPortableFileBatch } from "@/features/import/application/importPortableFileBatch";
 import { cn } from "@/lib/utils";
 
+
+
 type PortableImportBatchCompletedPayload = {
   cardSetId: string;
   cardSetName: string;
@@ -27,6 +29,8 @@ type PortableImportBatchDialogProps = {
   ensureTagByName?: EnsureMfDeckTagByName;
 };
 
+
+
 const STATUS_LABELS: Record<PortableImportBatchItem["status"], string> = {
   queued: "待機中",
   parsing: "解析中",
@@ -43,6 +47,8 @@ const STATUS_CLASS_NAMES: Record<PortableImportBatchItem["status"], string> = {
   failed: "bg-rose-50 text-rose-700",
   skipped: "bg-amber-50 text-amber-700",
 };
+
+
 
 const PortableImportBatchDialog = ({ open, onOpenChange, folderId, folderName, files, filesRevision = 0, onImported, createCardSet, updateCardSet, createCard, ensureTagByName }: PortableImportBatchDialogProps) => {
   const toast = useToast();
@@ -249,5 +255,10 @@ const PortableImportBatchDialog = ({ open, onOpenChange, folderId, folderName, f
   );
 };
 
+
+
 export { PortableImportBatchDialog };
+
+
+
 export type { PortableImportBatchCompletedPayload };
