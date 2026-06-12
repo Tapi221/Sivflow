@@ -5,6 +5,7 @@ type LocalDBLike = BaseLocalDBLike & {
   transaction<T>(mode: string, first: unknown, ...rest: unknown[]): Promise<T>;
   close(): void;
   getConflict(id: string): Promise<unknown>;
+  ["removeConflict"](id: string): Promise<void>;
   metadata: QueryableTable<Record<string, unknown>, string>;
   levelHistories: QueryableTable<Record<string, unknown>, string>;
   deviceMeta: QueryableTable<Record<string, unknown>, string>;
