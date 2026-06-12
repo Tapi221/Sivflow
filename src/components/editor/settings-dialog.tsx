@@ -200,16 +200,7 @@ const SettingsDialog = () => {
           <span className="sr-only">Get {label}</span>
         </a>
       </Button>
-      <Input
-        id={service}
-        className="pr-10"
-        value={tempKeys[service]}
-        onChange={(e) => setTempKeys((prev) => ({ ...prev, [service]: e.target.value }))}
-        placeholder=""
-        data-1p-ignore
-        type={
-          showKey[service] ? "text" : "password"}
-      />
+      <Input id={service} className="pr-10" value={tempKeys[service]} onChange={(e) => setTempKeys((prev) => ({ ...prev, [service]: e.target.value }))} placeholder="" data-1p-ignore type={showKey[service] ? "text" : "password"} />
       <Button size="icon" variant="ghost" className="absolute top-0 right-0 h-full" onClick={() => toggleKeyVisibility(service)} type="button">
         {showKey[service] ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
         <span className="sr-only">
@@ -222,11 +213,7 @@ const SettingsDialog = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          size="icon"
-          variant="default"
-          className={cn("group fixed right-4 bottom-4 z-50 size-10 overflow-hidden", "rounded-full shadow-md hover:shadow-lg")}
-        >
+        <Button size="icon" variant="outline" className="group fixed right-4 bottom-4 z-50 size-10 overflow-hidden rounded-full bg-background text-foreground shadow-md hover:bg-muted hover:text-foreground hover:shadow-lg">
           <Settings className="size-4" />
         </Button>
       </DialogTrigger>
@@ -238,8 +225,8 @@ const SettingsDialog = () => {
         <form className="space-y-10" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="size-8 rounded-full bg-purple-100 p-2 dark:bg-purple-900">
-                <Wand2Icon className="size-4 text-purple-600 dark:text-purple-400" />
+              <div className="size-8 rounded-full bg-muted p-2">
+                <Wand2Icon className="size-4 text-foreground" />
               </div>
               <h4 className="font-semibold">AI</h4>
             </div>
@@ -287,7 +274,7 @@ const SettingsDialog = () => {
               </div>
             </div>
           </div>
-          <Button size="lg" className="w-full" type="submit">
+          <Button size="lg" variant="outline" className="w-full" type="submit">
             Save changes
           </Button>
         </form>
