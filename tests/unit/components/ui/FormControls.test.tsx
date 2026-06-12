@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/chip/ui/checkbox";
+import { Input } from "@/chip/ui/input";
+import { Label } from "@/chip/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/chip/ui/select";
+import { Switch } from "@/chip/ui/switch";
 
 describe("form control primitives", () => {
   it("input、checkbox、switch、label に token-backed class を適用する", () => {
