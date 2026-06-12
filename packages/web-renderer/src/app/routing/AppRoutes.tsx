@@ -4,7 +4,7 @@ import { ProtectedRoute } from "@web-renderer/app/routing/ProtectedRoute";
 import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "@/Layout";
-import Schedule from "@/routes/Schedule";
+import { ScheduleRoute } from "@/routes/Schedule";
 
 const Materials = lazy(() => import("@/routes/Materials"));
 const Settings = lazy(() => import("@/routes/SettingScreen"));
@@ -14,12 +14,11 @@ const REDIRECT_TO_SCHEDULE_ROUTES = ["calendar/*", "CardEdit/*", "CardSetView/*"
 const withRouteFallback = (element: ReactNode) => {
   return <Suspense fallback={null}>{element}</Suspense>;
 };
-
 const DefaultRedirect = () => {
   return <Navigate to="/schedule" replace />;
 };
 const AppRoutes = () => {
-  return (<Routes> <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}> <Route index element={<DefaultRedirect />} /> <Route path="schedule" element={withRouteFallback(<Schedule />)} /> <Route path="materials" element={withRouteFallback(<Materials />)} /> <Route path="settings" element={withRouteFallback(<Settings />)} /> <Route path="trash" element={withRouteFallback(<Trash />)} /> {REDIRECT_TO_SCHEDULE_ROUTES.map((path) => <Route key={path} path={path} element={<DefaultRedirect />} />)} {getDevRouteElements()} </Route> <Route path="*" element={<Navigate to="/schedule" replace />} /> </Routes>);
+  return (<Routes> <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}> <Route index element={<DefaultRedirect />} /> <Route path="schedule" element={withRouteFallback(<ScheduleRoute />)} /> <Route path="materials" element={withRouteFallback(<Materials />)} /> <Route path="settings" element={withRouteFallback(<Settings />)} /> <Route path="trash" element={withRouteFallback(<Trash />)} /> {REDIRECT_TO_SCHEDULE_ROUTES.map((path) => <Route key={path} path={path} element={<DefaultRedirect />} />)} {getDevRouteElements()} </Route> <Route path="*" element={<Navigate to="/schedule" replace />} /> </Routes>);
 };
 
 export { AppRoutes };
