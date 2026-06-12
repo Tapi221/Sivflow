@@ -13,6 +13,7 @@ type CarvePanelViewportProps = {
 type CarvePanelShellProps = {
   children: ReactNode;
   toolbar?: ReactNode;
+  contentToolbar?: ReactNode;
   overlay?: ReactNode;
   leftPanel?: ReactNode;
   isLeftPanelCollapsed?: boolean;
@@ -44,7 +45,7 @@ const CarvePanelViewportBase = forwardRef<HTMLDivElement, CarvePanelViewportProp
 const CarvePanelBase = ({ children, className }: CarvePanelProps) => {
   return <div className={cn(CARVE_PANEL_BASE_CLASS, CARVE_PANEL_CLASS, className)}>{children}</div>;
 };
-const CarvePanelShell = ({ children, toolbar = null, overlay = null, leftPanel = null, isLeftPanelCollapsed = false, reserveToolbar = false, reserveLeftPanel = false, viewportRef, className, bodyClassName, viewportClassName }: CarvePanelShellProps) => {
+const CarvePanelShell = ({ children, toolbar = null, contentToolbar = null, overlay = null, leftPanel = null, isLeftPanelCollapsed = false, reserveToolbar = false, reserveLeftPanel = false, viewportRef, className, bodyClassName, viewportClassName }: CarvePanelShellProps) => {
   const toolbarNode = toolbar ?? (reserveToolbar ? <div aria-hidden="true" className={CARVE_PANEL_TOOLBAR_SPACER_CLASS} /> : null);
   const leftPanelNode = leftPanel && !isLeftPanelCollapsed ? <div className={CARVE_PANEL_LEFT_PANEL_CLASS}>{leftPanel}</div> : reserveLeftPanel && !isLeftPanelCollapsed ? <div aria-hidden="true" className={CARVE_PANEL_LEFT_SPACER_CLASS} /> : null;
 
@@ -57,6 +58,7 @@ const CarvePanelShell = ({ children, toolbar = null, overlay = null, leftPanel =
         {leftPanelNode}
 
         <CarvePanelViewport ref={viewportRef} className={viewportClassName}>
+          {contentToolbar}
           {children}
         </CarvePanelViewport>
       </div>
