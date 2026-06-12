@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 
 type MaterialKind = "textbook" | "pdf" | "video" | "link" | "other";
 type MaterialItem = {
@@ -85,22 +86,22 @@ const Materials = () => {
     persistMaterials(materials);
   }, [materials]);
 
-  const handleTitleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTitleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setFormState((current) => ({ ...current, title: event.target.value }));
   }, []);
-  const handleKindChange = useCallback((event: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleKindChange = useCallback((event: ChangeEvent<HTMLSelectElement>) => {
     setFormState((current) => ({ ...current, kind: event.target.value as MaterialKind }));
   }, []);
-  const handleDescriptionChange = useCallback((event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleDescriptionChange = useCallback((event: ChangeEvent<HTMLTextAreaElement>) => {
     setFormState((current) => ({ ...current, description: event.target.value }));
   }, []);
-  const handleSourceChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSourceChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setFormState((current) => ({ ...current, source: event.target.value }));
   }, []);
   const handleDelete = useCallback((id: string) => {
     setMaterials((current) => current.filter((material) => material.id !== id));
   }, []);
-  const handleSubmit = useCallback((event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = useCallback((event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const title = formState.title.trim();
 
