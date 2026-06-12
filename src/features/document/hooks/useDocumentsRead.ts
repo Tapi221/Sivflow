@@ -5,16 +5,12 @@ import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/us
 import { getLocalDb } from "@/services/localdb";
 import type { DocumentItem } from "@/types";
 
-
-
 type DocumentWithLegacyDelete = DocumentItem & {
   is_deleted?: boolean;
 };
 type UseDocumentsReadOptions = {
   enabled?: boolean;
 };
-
-
 
 const useDocumentsRead = (folderId?: string, options?: UseDocumentsReadOptions) => {
   const { currentUser } = useAuthSession();
@@ -66,7 +62,5 @@ const useDocumentsRead = (folderId?: string, options?: UseDocumentsReadOptions) 
     error,
   };
 };
-
-
 
 export { useDocumentsRead };

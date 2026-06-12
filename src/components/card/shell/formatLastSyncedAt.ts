@@ -30,6 +30,4 @@ const formatLastSyncedAt = (lastSyncedAtMs: number | null) => {
   return `${dateLabel} ${timeLabel}`;
 };
 
-
-
 export { formatLastSyncedAt };

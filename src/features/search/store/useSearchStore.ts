@@ -1,8 +1,6 @@
 import { create } from "zustand";
 import type { SearchSource } from "@/features/search/model/search.types";
 
-
-
 type SearchState = {
   isOpen: boolean;
   query: string;
@@ -14,8 +12,6 @@ type SearchState = {
   registerSource: (source: SearchSource) => void;
   unregisterSource: (sourceId: string) => void;
 };
-
-
 
 const useSearchStore = create<SearchState>((set) => ({ isOpen: false, query: "", sources: {}, open: () => {
   set({ isOpen: true });
@@ -48,7 +44,5 @@ unregisterSource: (sourceId) => {
   });
 },
 }));
-
-
 
 export { useSearchStore };

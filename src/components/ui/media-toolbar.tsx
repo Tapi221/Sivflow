@@ -1,32 +1,19 @@
 "use client";
 
 import * as React from "react";
-
 import { FloatingMedia as FloatingMediaPrimitive, FloatingMediaStore, useFloatingMediaValue, useImagePreviewValue } from "@platejs/media/react";
-
 import { cva } from "class-variance-authority";
-
 import { Link, Trash2Icon } from "lucide-react";
-
 import type { WithRequiredKey } from "platejs";
-
 import { useEditorRef, useEditorSelector, useElement, useFocusedLast, useReadOnly, useRemoveNodeButton, useSelected } from "platejs/react";
-
 import { Button, buttonVariants } from "./button";
-
 import { CaptionButton } from "./caption";
-
 import { Popover, PopoverAnchor, PopoverContent } from "./popover";
-
 import { Separator } from "./separator";
-
-
 
 const inputVariants = cva(
   "flex h-[28px] w-full rounded-md border-none bg-transparent px-1.5 py-1 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-transparent md:text-sm",
 );
-
-
 
 const MediaToolbar = ({ children, plugin }: { children: React.ReactNode;
   plugin: WithRequiredKey;
@@ -98,7 +85,5 @@ const MediaToolbar = ({ children, plugin }: { children: React.ReactNode;
     </Popover>
   );
 };
-
-
 
 export { MediaToolbar };

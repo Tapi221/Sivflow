@@ -7,12 +7,8 @@ type CardLike = {
 type CardSetLike = { id: string; folderId?: string | null; };
 type LegacyFallbackReason = "missing-card-set-id" | "unresolved-card-set-id";
 
-
-
 const legacyFallbackCounters = new Map<LegacyFallbackReason, number>();
 const warnedFallbackCardKeys = new Set<string>();
-
-
 
 const normalizeFolderId = (folderId: string | null | undefined) => {
   if (typeof folderId !== "string") return null;
@@ -102,7 +98,5 @@ const filterCardsByFolderId = <T extends CardLike>(cards: readonly T[], folderId
     (card) => resolveCardFolderIdStrict(card, cardSetById) === targetFolderId,
   );
 };
-
-
 
 export { buildCardSetById, resolveCardFolderIdStrict, didUseLegacyFolderFallback, resolveCardFolderId, getLegacyFolderFallbackUsage, resetLegacyFolderFallbackUsage, isCardInFolder, filterCardsByFolderId };

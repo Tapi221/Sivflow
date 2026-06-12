@@ -3,8 +3,6 @@ import { ja } from "date-fns/locale";
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
 import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
 
-
-
 type CalendarMonthGridDay = { date: Date;
   key: string;
   dayOfMonth: number;
@@ -22,13 +20,9 @@ type CalendarMonthWeek = { key: string;
   days: CalendarMonthGridDay[];
 };
 
-
-
 const CALENDAR_MONTH_GRID_CELL_COUNT = 42;
 const CALENDAR_MONTH_WEEK_DAY_COUNT = 7;
 const DEFAULT_CALENDAR_MONTH_WEEK_START_DAY: CalendarWeekStartDay = "monday";
-
-
 
 const getCalendarMonthKey = (date: Date): string => {
   return format(startOfMonth(date), "yyyy-MM");
@@ -124,9 +118,5 @@ const buildCalendarMonthWeeks = ({ anchorDate, startOffset, endOffset, weekStart
   });
 };
 
-
-
 export { CALENDAR_MONTH_GRID_CELL_COUNT, CALENDAR_MONTH_WEEK_DAY_COUNT, DEFAULT_CALENDAR_MONTH_WEEK_START_DAY, getCalendarMonthKey, getCalendarWeekKey, addCalendarMonths, buildCalendarMonthGridDays, buildCalendarMonthPage, buildCalendarMonthPages, buildCalendarMonthWeeks };
-
-
 export type { CalendarMonthGridDay, CalendarMonthPage, CalendarMonthWeek };

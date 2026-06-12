@@ -1,7 +1,5 @@
 import type { Dispatch, RefObject, SetStateAction } from "react";
 
-
-
 type LayeredTreeDropPosition = "before" | "inside" | "after" | "append";
 type LayeredTreeDropInstruction = { sourceId: string; targetId: string | null; position: LayeredTreeDropPosition; parentId: string | null; };
 type LayeredTreeDragState = { draggingId: string | null; dropInstruction: LayeredTreeDropInstruction | null; };
