@@ -13,7 +13,7 @@ import type { PlateElementProps } from "platejs/react";
 import { PlateElement, useComposedRef, useEditorPlugin, useEditorRef, useEditorSelector, useElement, useFocusedLast, usePluginOption, useReadOnly, useRemoveNodeButton, useSelected, withHOC } from "platejs/react";
 import { useElementSelector } from "platejs/react";
 import { cn } from "@/lib/utils";
-import { blockSelectionVariants } from "./block-selection";
+import { blockSelectionVariants } from "./block/block-selection";
 import { Button } from "./button/button";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuPortal, DropdownMenuTrigger } from "./menu/dropdown-menu";
 import { ColorDropdownMenuItems, DEFAULT_COLORS } from "./button/font-color-toolbar-button";
