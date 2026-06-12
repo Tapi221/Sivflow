@@ -1,15 +1,11 @@
 import { create } from "zustand";
 
-
-
 type ScheduleScreenState = {
   isOpen: boolean;
   open: () => void;
   close: () => void;
   toggle: () => void;
 };
-
-
 
 const useScheduleScreenStore = create<ScheduleScreenState>(
   (set) => ({
@@ -19,7 +15,5 @@ const useScheduleScreenStore = create<ScheduleScreenState>(
     toggle: () => set((state) => ({ isOpen: !state.isOpen })),
   }),
 );
-
-
 
 export { useScheduleScreenStore };

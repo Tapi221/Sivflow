@@ -80,5 +80,4 @@ const makeAssetRecord = ({ existing, itemId, userId, mime, size, localBlobId, re
 };
 
 export { toAssetLikeRecord, makeAssetRecord };
-
 export type { AssetLikeRecord };

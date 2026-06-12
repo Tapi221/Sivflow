@@ -255,5 +255,4 @@ const ScaleToFitFrame = ({ children, className, baseWidth = 480, scaleMultiplier
 };
 
 export { ScaleToFitFrame };
-
 export type { ScaleToFitFrameProps };

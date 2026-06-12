@@ -21,14 +21,10 @@ import { useCardSetViewWindowEvents } from "./useCardSetViewWindowEvents";
 import { useCardSetViewZoom } from "./useCardSetViewZoom";
 import { useCardSetViewZoomInput } from "./useCardSetViewZoomInput";
 
-
-
 type ScrollAnchorFace = "question" | "answer";
 type UseCardSetViewScreenControllerParams = {
   cardSetId?: string | null;
 };
-
-
 
 const buildNavigationScopeKey = ({ deviceScope, cardSetId }: { deviceScope: string; cardSetId: string | null; }) => {
   if (!cardSetId) return null;
@@ -245,7 +241,5 @@ const useCardSetViewScreenController = (params: UseCardSetViewScreenControllerPa
     splitFallbackLayoutMode,
   };
 };
-
-
 
 export { useCardSetViewScreenController };

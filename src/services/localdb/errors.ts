@@ -1,7 +1,5 @@
 import type { LocalDBFallbackReasonCode } from "@/services/localDBRuntimeState";
 
-
-
 type UnknownRecord = Record<string, unknown>;
 type ErrorNameMessage = {
   name?: string;
@@ -10,12 +8,8 @@ type ErrorNameMessage = {
   cause?: unknown;
 };
 
-
-
 const LOCALDB_ERROR_MESSAGE_LIMIT = 400;
 const MAX_ERROR_NESTING_DEPTH = 4;
-
-
 
 const isObject = (value: unknown): value is UnknownRecord =>
   typeof value === "object" && value !== null;
@@ -137,7 +131,5 @@ const classifyFallbackReasonCode = (error: unknown): LocalDBFallbackReasonCode =
 
   return "unknown";
 };
-
-
 
 export { safeStringifyError, isBackingStoreOpenError, classifyFallbackReasonCode };

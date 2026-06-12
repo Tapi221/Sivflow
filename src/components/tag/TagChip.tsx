@@ -35,5 +35,4 @@ const TagChip = ({
 };
 
 export { TagChip };
-
 export type { TagChipProps };

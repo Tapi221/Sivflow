@@ -14,5 +14,4 @@ const createSignInWithGoogleUseCase = ({ auth }: SignInWithGoogleDependencies) =
 };
 
 export { createSignInWithGoogleUseCase };
-
 export type { SignInWithGoogleDependencies };

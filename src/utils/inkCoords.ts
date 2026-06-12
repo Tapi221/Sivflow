@@ -1,15 +1,11 @@
 import type { InkPoint } from "@core/domain/card/ink/inkDocument";
 import { INK_PAPER_H, INK_PAPER_W } from "@core/domain/card/ink/inkDocument";
 
-
-
 type RectLike = { left: number;
   top: number;
   width: number;
   height: number;
 };
-
-
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
@@ -64,9 +60,5 @@ const squaredDistance = (a: Pick<InkPoint, "x" | "y">, b: Pick<InkPoint, "x" | "
   return dx * dx + dy * dy;
 };
 
-
-
 export { clientPointToPaperPoint, paperPointToCanvasPoint, squaredDistance };
-
-
 export type { RectLike };

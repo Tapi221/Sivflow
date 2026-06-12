@@ -90,5 +90,4 @@ const TogglePlanResult = ({ value, onChange, className }: TogglePlanResultProps)
 };
 
 export { TogglePlanResult, TogglePlanResult as PlanResultDropdown };
-
 export type { PlanResultMode };

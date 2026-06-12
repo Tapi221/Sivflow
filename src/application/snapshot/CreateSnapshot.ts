@@ -73,5 +73,4 @@ const createCreateSnapshotUseCase = ({ generationCounterStore }: CreateSnapshotD
 };
 
 export { createCreateSnapshotUseCase };
-
 export type { CreateSnapshotDependencies };

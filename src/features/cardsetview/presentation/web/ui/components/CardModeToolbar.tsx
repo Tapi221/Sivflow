@@ -7,8 +7,6 @@ import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMod
 import { CARD_LAYOUT_MODE_LABELS } from "@/features/cardsetview/domain/cardLayoutMode";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-
-
 type CardModeToolbarProps = {
   displayMode: CardDisplayMode;
   cardLayoutMode: CardLayoutMode;
@@ -23,8 +21,6 @@ type ModeButtonProps = {
   disabled?: boolean;
   children: ReactNode;
 };
-
-
 
 const ModeButton = ({
   isActive,
@@ -95,7 +91,5 @@ const CardModeToolbar = ({ displayMode, cardLayoutMode, disabledCardLayoutModes,
     </OverlayToolbar>
   );
 };
-
-
 
 export { CardModeToolbar };

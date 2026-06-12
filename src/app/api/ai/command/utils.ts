@@ -175,5 +175,4 @@ const isSingleCellSelection = (editor: SlateEditor): boolean => {
 };
 
 export { tag, inlineTag, sections, list, buildStructuredPrompt, getTextFromMessage, formatTextFromMessages, getLastUserInstruction, addSelection, isMultiBlocks, getMarkdownWithSelection, isSelectionInTable, isSingleCellSelection };
-
 export type { StructuredPromptSections };

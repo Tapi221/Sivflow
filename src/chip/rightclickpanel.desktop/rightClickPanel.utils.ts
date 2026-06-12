@@ -97,5 +97,4 @@ const useRightClickPanelDismiss = (panelId: RightClickPanelId, isOpen: boolean, 
 };
 
 export { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_SURFACE_PADDING, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE, RIGHT_CLICK_PANEL_OPEN_EVENT, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, resolveRightClickPanelTextWidth, clampRightClickPanelPosition, useRightClickPanelDismiss };
-
 export type { RightClickPanelPosition, RightClickPanelNoDragStyle, RightClickPanelDimensions, RightClickPanelId };

@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useReviewCardPagerHotkeys } from "@/features/hotkey/useReviewCardPagerHotkeys";
 
-
-
 type UseVerticalCardPagerOptions = { /** カード総数 */ count: number;
   /** 外部管理のアクティブインデックス */
   activeIndex: number;
@@ -29,11 +27,7 @@ type UseVerticalCardPagerReturn = { /** 各カード要素への ref 配列 */ i
   goPrev: () => void;
 };
 
-
-
 const SCROLL_IDLE_COMMIT_DELAY_MS = 110;
-
-
 
 const useVerticalCardPager = ({ count, activeIndex, onActiveIndexChange, scrollContainerRef, onFlip, naturalIndexCommitDelayMs = 0, freezeActiveIndex = false, onNearestIndexImmediate }: UseVerticalCardPagerOptions) => {
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
@@ -309,9 +303,5 @@ const useVerticalCardPager = ({ count, activeIndex, onActiveIndexChange, scrollC
   };
 };
 
-
-
 export { useVerticalCardPager };
-
-
 export type { UseVerticalCardPagerOptions, UseVerticalCardPagerReturn };

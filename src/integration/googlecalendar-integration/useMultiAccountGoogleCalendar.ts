@@ -11,8 +11,6 @@ import { buildTokenExpiry, isStoredTokenValid, readStoredAccounts, removeStoredA
 import type { GCalConnectionStatus, GCalForceSyncOptions, GCalSilentReconnectResult, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem } from "./gcalSync.types";
 import { GoogleCalendarEngineManager } from "./GoogleCalendarEngineManager";
 
-
-
 type GoogleAccountEntry = { id: string;
   email: string | null;
   name: string | null;
@@ -78,14 +76,10 @@ type GoogleOAuthCooldownEntry = {
   until: number;
 };
 
-
-
 const useServerStoredTokens = isServerStoredGoogleOAuthEnabled();
 const useDesktopSecureRefreshTokens = isDesktopLikeRuntime() && !useServerStoredTokens;
 const CALENDAR_LIST_FOCUS_REFRESH_THROTTLE_MS = 10_000;
 const GOOGLE_OAUTH_DETERMINISTIC_ERROR_COOLDOWN_MS = 60_000;
-
-
 
 const overlapsRange = (
   event: GoogleCalendarEvent,
@@ -1264,9 +1258,5 @@ const useMultiAccountGoogleCalendar = () => {
   };
 };
 
-
-
 export { GOOGLE_OAUTH_DETERMINISTIC_ERROR_COOLDOWN_MS, getGoogleOAuthErrorReason, toGoogleCalendarAuthErrorMessage, shouldCooldownGoogleOAuthError, createGoogleOAuthCooldownError, useMultiAccountGoogleCalendar };
-
-
 export type { GoogleAccountEntry, GoogleAccountTokenUpdate };

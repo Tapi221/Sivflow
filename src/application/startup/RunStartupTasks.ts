@@ -101,5 +101,4 @@ const runStartupTasks = async ({ userId, isDisposed = isDisposedDefault }: RunSt
 };
 
 export { resetStartupTasks, runStartupTasks };
-
 export type { RunStartupTasksParams };
