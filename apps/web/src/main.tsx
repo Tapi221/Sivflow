@@ -1,5 +1,5 @@
 import "@/styles/index.css";
-import "@/services/localDB";
+import "@/services/localdb";
 import "@/../apps/web/src/runtime/disableNativeTitleTooltips";
 import "@/../apps/web/src/runtime/installProductionConsoleFilter";
 import "@platform/desktop/installTauriDesktopBridge";
@@ -38,239 +38,107 @@ const ROOT_ELEMENT_ID = "root";
 const ROOT_ELEMENT_MISSING_MESSAGE = "React の描画先 root 要素が見つかりません。";
 const REACT_ROOT_UNMOUNT_FAILURE_MESSAGE = "[Startup] 既存 React root の破棄に失敗しました";
 const STARTUP_LOGO_STYLE = `
-@keyframes sivflow-startup-logo-form {
-  0% {
-    opacity: 0.04;
-    filter: blur(26px) brightness(1.28) saturate(1.08);
-    transform: scale(0.985);
-  }
-
-  34% {
-    opacity: 0.38;
-    filter: blur(17px) brightness(1.16) saturate(1.05);
-    transform: scale(0.99);
-  }
-
-  68% {
-    opacity: 0.84;
-    filter: blur(6px) brightness(1.06) saturate(1.02);
-    transform: scale(0.997);
-  }
-
-  100% {
-    opacity: 1;
-    filter: blur(0) brightness(1) saturate(1);
-    transform: scale(1);
-  }
-}
-
-@keyframes sivflow-startup-ribbons-form {
-  0% {
-    clip-path: inset(42% 38% 42% 38% round 999px);
-  }
-
-  62% {
-    clip-path: inset(5% 3% 5% 3% round 96px);
-  }
-
-  100% {
-    clip-path: inset(0 0 0 0 round 0);
-  }
-}
-
-.sivflow-startup-logo {
-  animation: sivflow-startup-logo-form 1750ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  will-change: filter, opacity, transform;
-}
-
-.sivflow-startup-logo-ribbons {
-  animation: sivflow-startup-ribbons-form 1750ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  transform-box: fill-box;
-  transform-origin: center;
-}
+  width: 56px;
+  height: 56px;
+  display: block;
+  margin: 0 auto 16px;
 `;
 
 const getErrorMessage = (error: unknown): string => {
-  return error instanceof Error ? error.message : String(error);
+  if (error instanceof Error) return error.message;
+  return String(error);
 };
-const isFirebaseEnvStartupFailure = (error: unknown): boolean => {
-  return getErrorMessage(error).includes(FIREBASE_ENV_FAILURE_MARKER);
-};
-const shouldRethrowStartupLoadFailure = (error: unknown): boolean => {
-  return import.meta.env.DEV && !isFirebaseEnvStartupFailure(error);
-};
-const getStartupFailureMessage = (error: unknown): string => {
-  const message = getErrorMessage(error);
-
-  if (isFirebaseEnvStartupFailure(error)) {
-    return `${message}\n\n${FIREBASE_ENV_SETUP_GUIDE}`;
-  }
-
-  return message || "起動に必要なモジュールの読み込みに失敗しました。";
-};
-const startAppRuntimeSafely = async (): Promise<void> => {
-  try {
-    const { startAppRuntime } = await import("@/../apps/web/src/runtime/startAppRuntime");
-    startAppRuntime();
-  } catch (error) {
-    console.warn("[Startup] Runtime initialization failed", error);
-  }
-};
-const isPdfPerformanceStandaloneRoute = (): boolean => {
-  if (!import.meta.env.DEV) return false;
-  if (window.location.pathname !== "/pdf-performance-test") return false;
-  if (new URLSearchParams(window.location.search).get(TEST_BYPASS_SEARCH_PARAM) !== "true") return false;
-  return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "::1";
-};
-const getReactRootElement = (): HTMLElement => {
+const isFirebaseEnvFailure = (error: unknown): boolean => getErrorMessage(error).includes(FIREBASE_ENV_FAILURE_MARKER);
+const renderStartupFailure = (message: string) => {
   const rootElement = document.getElementById(ROOT_ELEMENT_ID);
+  if (!rootElement) return;
 
-  if (!rootElement) {
-    throw new Error(ROOT_ELEMENT_MISSING_MESSAGE);
-  }
-
-  return rootElement;
-};
-const unmountStaleReactRoot = (rootStore: SivflowReactRootStore): void => {
-  try {
-    rootStore.root.unmount();
-  } catch (error) {
-    console.warn(REACT_ROOT_UNMOUNT_FAILURE_MESSAGE, error);
-  }
-};
-const getSivflowReactRoot = (): Root => {
-  const rootElement = getReactRootElement();
-  const rootStore = window.__sivflowReactRootStore;
-
-  if (rootStore?.container === rootElement) {
-    return rootStore.root;
-  }
-
-  if (rootStore) {
-    unmountStaleReactRoot(rootStore);
-  }
-
-  const root = createRoot(rootElement);
-  window.__sivflowReactRootStore = { container: rootElement, root };
-
-  return root;
-};
-
-const StartupLogoMark = () => {
-  return (
-    <svg className="sivflow-startup-logo h-[236px] w-[236px] overflow-visible" xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Sivflow logo">
-      <defs>
-        <linearGradient id="sivflowStartupTop" x1="46" y1="258" x2="486" y2="42" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#00142d" />
-          <stop offset="0.36" stopColor="#062849" />
-          <stop offset="0.58" stopColor="#1f8bc4" />
-          <stop offset="0.78" stopColor="#32bff1" />
-          <stop offset="1" stopColor="#effcff" />
-        </linearGradient>
-        <linearGradient id="sivflowStartupMiddle" x1="133" y1="276" x2="428" y2="213" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#00142d" />
-          <stop offset="0.5" stopColor="#0b355d" />
-          <stop offset="0.82" stopColor="#7ecde9" />
-          <stop offset="1" stopColor="#f7fdff" />
-        </linearGradient>
-        <linearGradient id="sivflowStartupBottom" x1="24" y1="466" x2="476" y2="229" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#00142d" />
-          <stop offset="0.36" stopColor="#062345" />
-          <stop offset="0.66" stopColor="#1daee6" />
-          <stop offset="0.9" stopColor="#58cef3" />
-          <stop offset="1" stopColor="#effcff" />
-        </linearGradient>
-        <filter id="sivflowStartupShadow" x="-10%" y="-10%" width="120%" height="120%" colorInterpolationFilters="sRGB">
-          <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="#001a38" floodOpacity="0.12" />
-        </filter>
-      </defs>
-      <g className="sivflow-startup-logo-ribbons" filter="url(#sivflowStartupShadow)">
-        <path fill="url(#sivflowStartupTop)" d="M485 41C468 73 444 99 410 115C396 121 380 122 377 122H273C231 122 180 127 136 157C88 190 62 240 73 277C82 307 111 335 152 352C79 325 38 271 45 204C51 142 88 87 137 60C171 41 211 31 239 31H452C475 31 495 37 485 41Z" />
-        <path fill="url(#sivflowStartupMiddle)" d="M138 300C149 268 164 246 194 224C214 210 238 207 251 207H427C409 238 389 263 360 284C333 303 298 302 292 302H141C139 302 138 301 138 300Z" />
-        <path fill="url(#sivflowStartupBottom)" d="M466 206C485 252 481 315 463 336C442 388 405 430 348 459C318 474 279 481 210 481H26C25 480 25 478 25 477C46 427 79 397 116 389C126 386 136 385 141 385H259C317 384 369 370 409 326C442 290 461 245 466 206Z" />
-      </g>
-    </svg>
-  );
-};
-const StartupLoadingScreen = () => {
-  return (
-    <main className="grid min-h-dvh w-full place-items-center bg-white">
-      <style>{STARTUP_LOGO_STYLE}</style>
-      <StartupLogoMark />
-    </main>
-  );
-};
-const StartupFailureScreen = ({ message }: StartupFailureScreenProps) => {
-  return (
-    <main className="flex min-h-dvh w-full items-center justify-center bg-white px-6 text-slate-900">
-      <section className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h1 className="m-0 text-lg font-semibold">{STARTUP_FAILURE_TITLE}</h1>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{STARTUP_FAILURE_DESCRIPTION}</p>
-        <pre className="mt-4 max-h-72 overflow-auto whitespace-pre-wrap rounded-xl bg-slate-50 p-4 text-xs leading-5 text-slate-700">{message}</pre>
+  rootElement.innerHTML = `
+    <main style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f7f5ef;color:#2f2f2f;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:24px;box-sizing:border-box;">
+      <section style="max-width:520px;width:100%;border:1px solid #e5ded2;background:#fff;border-radius:20px;padding:28px;box-shadow:0 18px 60px rgba(48,43,34,.12);">
+        <img src="/icon.svg" alt="Sivflow" style="${STARTUP_LOGO_STYLE}" />
+        <h1 style="font-size:20px;margin:0 0 8px;font-weight:700;">${STARTUP_FAILURE_TITLE}</h1>
+        <p style="font-size:14px;line-height:1.7;margin:0 0 14px;color:#6a6257;">${STARTUP_FAILURE_DESCRIPTION}</p>
+        <pre style="white-space:pre-wrap;word-break:break-word;background:#f7f5ef;border-radius:12px;padding:12px;font-size:12px;line-height:1.6;color:#4b4338;">${message}</pre>
       </section>
     </main>
-  );
+  `;
+};
+const resolveStartupFailureMessage = (error: unknown): string => {
+  const message = getErrorMessage(error);
+  if (isFirebaseEnvFailure(error)) return `${message}\n\n${FIREBASE_ENV_SETUP_GUIDE}`;
+  return message;
+};
+const StartupFailureScreen = ({ message }: StartupFailureScreenProps) => (
+  <main className="flex min-h-screen items-center justify-center bg-[#f7f5ef] p-6 text-[#2f2f2f]">
+    <section className="w-full max-w-[520px] rounded-[20px] border border-[#e5ded2] bg-white p-7 shadow-[0_18px_60px_rgba(48,43,34,0.12)]">
+      <img src="/icon.svg" alt="Sivflow" className="mx-auto mb-4 h-14 w-14" />
+      <h1 className="mb-2 text-[20px] font-bold">{STARTUP_FAILURE_TITLE}</h1>
+      <p className="mb-3 text-[14px] leading-7 text-[#6a6257]">{STARTUP_FAILURE_DESCRIPTION}</p>
+      <pre className="whitespace-pre-wrap break-words rounded-[12px] bg-[#f7f5ef] p-3 text-[12px] leading-6 text-[#4b4338]">{message}</pre>
+    </section>
+  </main>
+);
+const loadApp = async (): Promise<ComponentType> => {
+  const module = await import("@/App");
+  return module.default;
+};
+const ensureRootElement = (): HTMLElement => {
+  const rootElement = document.getElementById(ROOT_ELEMENT_ID);
+  if (!rootElement) throw new Error(ROOT_ELEMENT_MISSING_MESSAGE);
+  return rootElement;
+};
+const unmountExistingRoot = (): void => {
+  const existingStore = window.__sivflowReactRootStore;
+  if (!existingStore) return;
+
+  try {
+    existingStore.root.unmount();
+  } catch (error) {
+    console.warn(REACT_ROOT_UNMOUNT_FAILURE_MESSAGE, error);
+  } finally {
+    delete window.__sivflowReactRootStore;
+  }
+};
+const createSivflowRoot = (container: HTMLElement): Root => {
+  const root = createRoot(container);
+  window.__sivflowReactRootStore = { container, root };
+  return root;
 };
 const AppBootstrap = () => {
   const [state, setState] = useState<AppBootstrapState>({ status: "loading" });
 
   useEffect(() => {
-    let mounted = true;
+    let cancelled = false;
 
-    if (isPdfPerformanceStandaloneRoute()) {
-      void import("@/routes/PdfPerformanceTest")
-        .then((module) => {
-          if (!mounted) return;
-          setState({ status: "ready", App: module.default });
-        })
-        .catch((error) => {
-          console.error("[Startup] PDF performance route loading failed", error);
-          if (shouldRethrowStartupLoadFailure(error)) {
-            throw error;
-          }
-          if (!mounted) return;
-          setState({ status: "failed", message: getStartupFailureMessage(error) });
-        });
-
-      return () => {
-        mounted = false;
-      };
-    }
-
-    void startAppRuntimeSafely();
-    void import("@web-renderer/App")
-      .then((module) => {
-        if (!mounted) return;
-        setState({ status: "ready", App: module.default });
+    loadApp()
+      .then((App) => {
+        if (cancelled) return;
+        setState({ status: "ready", App });
       })
       .catch((error) => {
         console.error("[Startup] App module loading failed", error);
-        if (shouldRethrowStartupLoadFailure(error)) {
-          throw error;
-        }
-        if (!mounted) return;
-        setState({ status: "failed", message: getStartupFailureMessage(error) });
+        if (cancelled) return;
+        setState({ status: "failed", message: resolveStartupFailureMessage(error) });
       });
 
     return () => {
-      mounted = false;
+      cancelled = true;
     };
   }, []);
 
-  if (state.status === "loading") {
-    return <StartupLoadingScreen />;
-  }
+  if (state.status === "loading") return null;
+  if (state.status === "failed") return <StartupFailureScreen message={state.message} />;
 
-  if (state.status === "failed") {
-    return <StartupFailureScreen message={state.message} />;
-  }
-
-  const LoadedApp = state.App;
-  return <LoadedApp />;
+  const App = state.App;
+  return <App />;
 };
+const mountApp = async (): Promise<void> => {
+  const rootElement = ensureRootElement();
+  unmountExistingRoot();
+  const root = createSivflowRoot(rootElement);
 
-if (!renderGoogleOAuthCallback()) {
-  getSivflowReactRoot().render(
+  root.render(
     <StrictMode>
       <ErrorBoundary>
         <TooltipProvider>
@@ -279,4 +147,16 @@ if (!renderGoogleOAuthCallback()) {
       </ErrorBoundary>
     </StrictMode>,
   );
+};
+
+try {
+  if (!renderGoogleOAuthCallback()) {
+    void mountApp().catch((error) => {
+      console.error("[Startup] Runtime initialization failed", error);
+      renderStartupFailure(resolveStartupFailureMessage(error));
+    });
+  }
+} catch (error) {
+  console.error("[Startup] Runtime initialization failed", error);
+  renderStartupFailure(resolveStartupFailureMessage(error));
 }
