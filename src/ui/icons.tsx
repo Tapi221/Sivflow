@@ -122,27 +122,21 @@ const glyphByIconName: Record<string, GlyphKind> = {
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
 };
-
 const isStratisDataIcon = (value: unknown): value is StratisDataIcon => {
   return isRecord(value) && typeof value.data === "string";
 };
-
 const isStratisIconComponent = (value: unknown): value is StratisIconComponent => {
   return typeof value === "function" || (isRecord(value) && "$$typeof" in value);
 };
-
 const escapeSvgText = (value: string): string => {
   return value.replace(/[&<>"']/g, (char) => svgTextEscapes[char] ?? char);
 };
-
 const getStratisSvgViewBox = (source: string): string => {
   return source.match(/\sviewBox="([^"]+)"/)?.[1] ?? "0 0 24 24";
 };
-
 const normalizeStratisSvgBody = (source: string): string => {
   return source.replace(/^[\s\S]*?<svg\b[^>]*>/, "").replace(/<\/svg>[\s\S]*$/, "").replace(/\s(width|height)="[^"]*"/g, "").replace(/\sstroke="(?!none|currentColor)[^"]*"/g, " stroke=\"currentColor\"").replace(/\sfill="(?!none|currentColor|url\()[^"]*"/g, " fill=\"currentColor\"");
 };
-
 const wrapStratisIcon = (BaseIcon: StratisIconComponent, name: string) => {
   const Icon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, strokeWidth, ...rest }, ref) => {
     const resolvedLabel = label ?? rest["aria-label"];
@@ -155,7 +149,6 @@ const wrapStratisIcon = (BaseIcon: StratisIconComponent, name: string) => {
   Icon.displayName = name;
   return Icon;
 };
-
 const wrapStratisDataIcon = (source: StratisDataIcon, name: string) => {
   const viewBox = getStratisSvgViewBox(source.data);
   const body = normalizeStratisSvgBody(source.data);
@@ -172,7 +165,6 @@ const wrapStratisDataIcon = (source: StratisDataIcon, name: string) => {
   Icon.displayName = name;
   return Icon;
 };
-
 const makeIcon = (name: string) => {
   const glyph = glyphByIconName[name] ?? "default";
 
@@ -192,7 +184,6 @@ const makeIcon = (name: string) => {
   Icon.displayName = name;
   return Icon;
 };
-
 const makeStratisIcon = (exportName: string, name: string) => {
   const candidate = stratisIconRegistry[exportName];
 
@@ -254,6 +245,7 @@ const FolderOutlineIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...
     </UiIcon>
   );
 });
+
 const BookOpen = makeIcon("BookOpen");
 const Brain = makeIcon("Brain");
 const Camera = makeIcon("Camera");
