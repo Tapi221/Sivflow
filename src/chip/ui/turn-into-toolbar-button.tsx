@@ -7,7 +7,7 @@ import { CheckIcon, ChevronRightIcon, Code2, Columns3Icon, FileCodeIcon, Heading
 import type { TElement } from "platejs";
 import { KEYS } from "platejs";
 import { useEditorRef, useSelectionFragmentProp } from "platejs/react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/ui/menu/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/popover/dropdown-menu";
 import { ToolbarButton, ToolbarMenuGroup } from "@/chip/ui/toolbar";
 import { getBlockType, setBlockType } from "@/components/editor/transforms";
 
