@@ -3,7 +3,8 @@ import path from "node:path";
 import ts from "typescript";
 
 const ROOT_DIR = process.cwd();
-const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src", "tests", "scripts/dev", "scripts/verify"].map((directory) => path.join(ROOT_DIR, directory));
+const SOURCE_DIRECTORY_PATTERNS = process.env.SOURCE_CONVENTION_TARGETS?.split(path.delimiter).filter(Boolean) ?? ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src", "tests", "scripts/dev", "scripts/verify"];
+const SOURCE_DIRECTORIES = SOURCE_DIRECTORY_PATTERNS.map((directory) => path.resolve(ROOT_DIR, directory));
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx"]);
 const RESOLVABLE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".json", ".css", ".scss", ".sass", ".less"];
 const ORDER_EXCLUDED_PATH_PARTS = ["/tests/", "/scripts/", "/src/sandbox/"];
@@ -243,6 +244,11 @@ const isConstDependentTypeStatement = (source, statement, highestRank) => {
   return source.slice(statement.getStart(), statement.getEnd()).includes("typeof ");
 };
 
+const statementReferencesDeclarationNames = (source, sourceFile, statement, names) => {
+  const statementText = source.slice(statement.getStart(sourceFile), statement.getEnd());
+  return names.some((name) => new RegExp(`\\b${escapeRegExp(name)}\\b`).test(statementText));
+};
+
 const statementReferencesPreviousHigherRankDeclaration = (source, sourceFile, statement, previousStatements, rank) => {
   const higherRankNames = previousStatements.flatMap((previousStatement) => {
     const previousCategory = getStatementOrderCategory(previousStatement);
@@ -250,9 +256,20 @@ const statementReferencesPreviousHigherRankDeclaration = (source, sourceFile, st
 
     return getStatementDeclarationNames(previousStatement);
   });
-  const statementText = source.slice(statement.getStart(sourceFile), statement.getEnd());
 
-  return higherRankNames.some((name) => new RegExp(`\b${escapeRegExp(name)}\b`).test(statementText));
+  return statementReferencesDeclarationNames(source, sourceFile, statement, higherRankNames);
+};
+
+const getMovedOverStatements = (previousStatements, rank) => {
+  const targetIndex = previousStatements.findIndex((previousStatement) => ORDER_RANKS[getStatementOrderCategory(previousStatement)] > rank);
+  if (targetIndex < 0) return [];
+
+  return previousStatements.slice(targetIndex);
+};
+
+const statementReferencesMovedOverDeclaration = (source, sourceFile, statement, previousStatements, rank) => {
+  const movedOverNames = getMovedOverStatements(previousStatements, rank).flatMap(getStatementDeclarationNames);
+  return statementReferencesDeclarationNames(source, sourceFile, statement, movedOverNames);
 };
 
 const checkStatementOrder = (filePath, source, sourceFile) => {
@@ -270,7 +287,7 @@ const checkStatementOrder = (filePath, source, sourceFile) => {
     const rank = ORDER_RANKS[category];
 
     if (rank < highestRank) {
-      if (isTypeOnlyExportDeclaration(statement) || canAppearInExportBlock(statement) || isConstDependentTypeStatement(source, statement, highestRank) || statementReferencesPreviousHigherRankDeclaration(source, sourceFile, statement, previousStatements, rank)) {
+      if (isTypeOnlyExportDeclaration(statement) || canAppearInExportBlock(statement) || isConstDependentTypeStatement(source, statement, highestRank) || statementReferencesPreviousHigherRankDeclaration(source, sourceFile, statement, previousStatements, rank) || statementReferencesMovedOverDeclaration(source, sourceFile, statement, previousStatements, rank)) {
         previousStatements.push(statement);
         continue;
       }
