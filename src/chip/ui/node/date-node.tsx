@@ -5,10 +5,10 @@ import { formatDateValue, getDateDisplayLabel, parseCanonicalDateValue } from "@
 import type { TDateElement } from "platejs";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement, useReadOnly } from "platejs/react";
+import { Calendar } from "@/chip/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
 import { inlineSuggestionVariants } from "@/lib/suggestion";
 import { cn } from "@/lib/utils";
-import { Calendar } from "./calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 const DateElement = (props: PlateElementProps<TDateElement>) => {
   const { editor, element } = props;
