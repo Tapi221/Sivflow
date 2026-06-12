@@ -17,11 +17,6 @@ const ALIAS_ROOTS = [
   { directory: path.join(ROOT_DIR, "packages/mobile-renderer/src"), prefix: "@mobile-renderer" },
   { directory: path.join(ROOT_DIR, "shared"), prefix: "@shared" },
 ];
-const SPECIFIER_PATTERNS = [
-  /(\bfrom\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+)(["'])/gu,
-  /(\bimport\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+)(["'])/gu,
-  /(\bimport\s*\(\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+)(["']\s*\))/gu,
-];
 
 const walkSourceFiles = (directory) => {
   if (!existsSync(directory)) return [];
@@ -40,30 +35,19 @@ const walkSourceFiles = (directory) => {
 
 const toPosix = (value) => value.split(path.sep).join("/");
 
-const isInsideDirectory = (filePath, directoryPath) => {
-  const relativePath = path.relative(directoryPath, filePath);
+const withoutResolvableExtension = (filePath) => {
+  const extension = path.extname(filePath);
+  if (!RESOLVABLE_EXTENSIONS.includes(extension)) return filePath;
 
-  return relativePath === "" || (!relativePath.startsWith("..") && !path.isAbsolute(relativePath));
+  return filePath.slice(0, -extension.length);
 };
 
-const shouldCheckFile = (filePath) => {
-  const fileName = path.basename(filePath);
-  if (INDEX_FILE_NAMES.has(fileName)) return false;
-
-  return !EXCLUDED_FILE_SUFFIXES.some((suffix) => filePath.endsWith(suffix));
+const withoutIndexSegment = (filePath) => {
+  const parsed = path.parse(filePath);
+  return parsed.name === "index" ? parsed.dir : filePath;
 };
 
-const hasKnownExtension = (modulePath) => RESOLVABLE_EXTENSIONS.some((extension) => modulePath.endsWith(extension));
-
-const stripKnownExtension = (modulePath) => {
-  for (const extension of RESOLVABLE_EXTENSIONS) {
-    if (modulePath.endsWith(extension)) return modulePath.slice(0, -extension.length);
-  }
-
-  return modulePath;
-};
-
-const stripTrailingIndex = (modulePath) => modulePath.endsWith("/index") ? modulePath.slice(0, -"/index".length) : modulePath;
+const toModulePath = (filePath) => toPosix(withoutIndexSegment(withoutResolvableExtension(filePath)));
 
 const fileExists = (filePath) => {
   try {
@@ -88,43 +72,40 @@ const resolveExistingModulePath = (basePath) => {
   return null;
 };
 
-const findAliasRootByPrefix = (specifier) => ALIAS_ROOTS.find(({ prefix }) => specifier.startsWith(`${prefix}/`));
+const findAliasRootByPrefix = (specifier) => ALIAS_ROOTS.find(({ prefix }) => specifier === prefix || specifier.startsWith(`${prefix}/`));
 
-const findAliasRootByFilePath = (filePath) => ALIAS_ROOTS.find(({ directory }) => isInsideDirectory(filePath, directory));
-
-const resolveSpecifierPath = (importerDir, specifier) => {
+const resolveSpecifierPath = (filePath, specifier) => {
   const aliasRoot = findAliasRootByPrefix(specifier);
   if (aliasRoot) return resolveExistingModulePath(path.join(aliasRoot.directory, specifier.slice(aliasRoot.prefix.length + 1)));
-  if (specifier.startsWith(".")) return resolveExistingModulePath(path.resolve(importerDir, specifier));
+  if (specifier.startsWith(".")) return resolveExistingModulePath(path.resolve(path.dirname(filePath), specifier));
 
   return null;
 };
 
-const toSameDirectoryRelativeSpecifier = (importerDir, targetFilePath, originalSpecifier) => {
-  const originalHadKnownExtension = hasKnownExtension(originalSpecifier);
-  const relativeFromImporter = toPosix(path.relative(importerDir, targetFilePath));
-  const modulePath = originalHadKnownExtension ? relativeFromImporter : stripTrailingIndex(stripKnownExtension(relativeFromImporter));
-
-  return modulePath.startsWith(".") ? modulePath : `./${modulePath}`;
+const findAliasRootByFilePath = (filePath) => {
+  return [...ALIAS_ROOTS].sort((first, second) => second.directory.length - first.directory.length).find(({ directory }) => filePath === directory || filePath.startsWith(`${directory}${path.sep}`));
 };
 
-const toAliasSpecifier = (targetFilePath, aliasRoot, originalSpecifier) => {
-  const originalHadKnownExtension = hasKnownExtension(originalSpecifier);
-  const relativeToAliasRoot = toPosix(path.relative(aliasRoot.directory, targetFilePath));
-  const modulePath = originalHadKnownExtension ? relativeToAliasRoot : stripTrailingIndex(stripKnownExtension(relativeToAliasRoot));
+const getModuleSpecifierForTarget = (fromFilePath, targetFilePath, fallbackSpecifier) => {
+  if (!targetFilePath) return fallbackSpecifier;
 
-  return `${aliasRoot.prefix}/${modulePath}`;
-};
+  const fromDirectory = path.dirname(fromFilePath);
+  const targetDirectory = path.dirname(targetFilePath);
+  const targetModulePath = toModulePath(targetFilePath);
 
-const toPreferredSpecifier = (importerFilePath, targetFilePath, originalSpecifier) => {
-  const importerDir = path.dirname(importerFilePath);
-  const targetDir = path.dirname(targetFilePath);
-  if (targetDir === importerDir) return toSameDirectoryRelativeSpecifier(importerDir, targetFilePath, originalSpecifier);
+  if (fromDirectory === targetDirectory) {
+    const relativeTarget = toPosix(path.relative(fromDirectory, targetModulePath));
+    return relativeTarget.startsWith(".") ? relativeTarget : `./${relativeTarget}`;
+  }
 
   const aliasRoot = findAliasRootByFilePath(targetFilePath);
-  if (aliasRoot) return toAliasSpecifier(targetFilePath, aliasRoot, originalSpecifier);
+  if (aliasRoot) {
+    const relativeTarget = toPosix(path.relative(aliasRoot.directory, targetModulePath));
+    return `${aliasRoot.prefix}/${relativeTarget}`;
+  }
 
-  return toSameDirectoryRelativeSpecifier(importerDir, targetFilePath, originalSpecifier);
+  const relativeTarget = toPosix(path.relative(fromDirectory, targetModulePath));
+  return relativeTarget.startsWith(".") ? relativeTarget : `./${relativeTarget}`;
 };
 
 const getScriptKind = (filePath) => {
@@ -136,47 +117,178 @@ const getScriptKind = (filePath) => {
   return ts.ScriptKind.TS;
 };
 
+const createSourceFile = (filePath, source) => ts.createSourceFile(filePath, source, ts.ScriptTarget.Latest, true, getScriptKind(filePath));
+
+const shouldCheckFile = (filePath) => {
+  const fileName = path.basename(filePath);
+  if (INDEX_FILE_NAMES.has(fileName)) return false;
+
+  return !EXCLUDED_FILE_SUFFIXES.some((suffix) => filePath.endsWith(suffix));
+};
+
 const isDirectiveStatement = (statement) => ts.isExpressionStatement(statement) && ts.isStringLiteral(statement.expression);
 
 const getCheckStatements = (sourceFile) => sourceFile.statements.filter((statement) => !isDirectiveStatement(statement));
 
-const getCompatExportTarget = (filePath) => {
+const getExportedName = (exportSpecifier) => exportSpecifier.name.text;
+
+const getTargetName = (exportSpecifier) => exportSpecifier.propertyName?.text ?? exportSpecifier.name.text;
+
+const getDirectExportMappings = (filePath, sourceFile) => {
   if (!shouldCheckFile(filePath)) return null;
 
-  const source = readFileSync(filePath, "utf8");
-  const sourceFile = ts.createSourceFile(filePath, source, ts.ScriptTarget.Latest, true, getScriptKind(filePath));
   const statements = getCheckStatements(sourceFile);
   if (statements.length === 0) return null;
-  if (!statements.every((statement) => ts.isExportDeclaration(statement) && statement.moduleSpecifier && ts.isStringLiteral(statement.moduleSpecifier))) return null;
+  if (!statements.every((statement) => ts.isExportDeclaration(statement) && Boolean(statement.moduleSpecifier) && statement.exportClause && ts.isNamedExports(statement.exportClause))) return null;
 
-  const targetFilePaths = [...new Set(statements.map((statement) => resolveSpecifierPath(path.dirname(filePath), statement.moduleSpecifier.text)).filter(Boolean))];
-  return targetFilePaths.length === 1 ? targetFilePaths[0] : null;
-};
+  const mappings = new Map();
 
-const createCompatTargetMap = (sourceFiles) => new Map(sourceFiles.map((filePath) => [filePath, getCompatExportTarget(filePath)]).filter(([, targetFilePath]) => targetFilePath));
+  for (const statement of statements) {
+    const moduleSpecifier = statement.moduleSpecifier.text;
+    const targetFilePath = resolveSpecifierPath(filePath, moduleSpecifier);
 
-const rewriteCompatSpecifier = (filePath, source, compatTargetMap) => {
-  let nextSource = source;
-
-  for (const specifierPattern of SPECIFIER_PATTERNS) {
-    nextSource = nextSource.replace(specifierPattern, (match, prefix, specifier, suffix) => {
-      const resolvedPath = resolveSpecifierPath(path.dirname(filePath), specifier);
-      const targetFilePath = resolvedPath ? compatTargetMap.get(resolvedPath) : null;
-      if (!targetFilePath) return match;
-
-      return `${prefix}${toPreferredSpecifier(filePath, targetFilePath, specifier)}${suffix}`;
-    });
+    for (const element of statement.exportClause.elements) {
+      mappings.set(getExportedName(element), {
+        isTypeOnly: Boolean(statement.isTypeOnly || element.isTypeOnly),
+        targetFilePath,
+        targetModuleSpecifier: moduleSpecifier,
+        targetName: getTargetName(element),
+      });
+    }
   }
 
-  return nextSource;
+  return mappings;
 };
 
-const updateImportingFile = (filePath, compatTargetMap) => {
-  const source = readFileSync(filePath, "utf8");
-  const nextSource = rewriteCompatSpecifier(filePath, source, compatTargetMap);
-  if (nextSource === source) return false;
+const collectCompatFiles = (sourceFiles) => {
+  const compatFiles = new Map();
 
-  writeFileSync(filePath, nextSource);
+  for (const filePath of sourceFiles) {
+    const source = readFileSync(filePath, "utf8");
+    const sourceFile = createSourceFile(filePath, source);
+    if (sourceFile.parseDiagnostics.length > 0) continue;
+
+    const directMappings = getDirectExportMappings(filePath, sourceFile);
+    if (!directMappings) continue;
+
+    compatFiles.set(filePath, { directMappings, filePath });
+  }
+
+  return compatFiles;
+};
+
+const resolveExportMapping = (compatFiles, filePath, exportedName, visited = new Set()) => {
+  const visitKey = `${filePath}:${exportedName}`;
+  if (visited.has(visitKey)) return null;
+
+  const compatFile = compatFiles.get(filePath);
+  if (!compatFile) return null;
+
+  const directMapping = compatFile.directMappings.get(exportedName);
+  if (!directMapping) return null;
+
+  if (directMapping.targetFilePath && compatFiles.has(directMapping.targetFilePath)) {
+    const nestedMapping = resolveExportMapping(compatFiles, directMapping.targetFilePath, directMapping.targetName, new Set([...visited, visitKey]));
+    if (nestedMapping) {
+      return {
+        ...nestedMapping,
+        isTypeOnly: directMapping.isTypeOnly || nestedMapping.isTypeOnly,
+      };
+    }
+  }
+
+  return directMapping;
+};
+
+const getImportModuleSpecifier = (node) => ts.isStringLiteral(node.moduleSpecifier) ? node.moduleSpecifier.text : null;
+
+const getNamedImports = (node) => {
+  const namedBindings = node.importClause?.namedBindings;
+  if (!namedBindings || !ts.isNamedImports(namedBindings)) return null;
+
+  return namedBindings.elements;
+};
+
+const getImportedName = (importSpecifier) => importSpecifier.propertyName?.text ?? importSpecifier.name.text;
+
+const createImportSpecifierText = (targetName, localName) => targetName === localName ? targetName : `${targetName} as ${localName}`;
+
+const addImportGroupItem = (groups, key, item) => {
+  const currentGroup = groups.get(key) ?? { isTypeOnly: item.isTypeOnly, moduleSpecifier: item.moduleSpecifier, specifiers: [] };
+  currentGroup.specifiers.push(item.specifierText);
+  groups.set(key, currentGroup);
+};
+
+const createReplacementImports = (groups) => {
+  return [...groups.values()].map((group) => {
+    const uniqueSpecifiers = [...new Set(group.specifiers)].sort((first, second) => first.localeCompare(second));
+    const importKind = group.isTypeOnly ? "import type" : "import";
+
+    return `${importKind} { ${uniqueSpecifiers.join(", ")} } from "${group.moduleSpecifier}";`;
+  }).join("\n");
+};
+
+const createImportReplacement = (filePath, compatFiles, importNode, compatFilePath) => {
+  const importSpecifiers = getNamedImports(importNode);
+  if (!importSpecifiers) return null;
+
+  const groups = new Map();
+
+  for (const importSpecifier of importSpecifiers) {
+    const importedName = getImportedName(importSpecifier);
+    const localName = importSpecifier.name.text;
+    const mapping = resolveExportMapping(compatFiles, compatFilePath, importedName);
+    if (!mapping) return null;
+
+    const isTypeOnly = Boolean(importNode.importClause?.isTypeOnly || importSpecifier.isTypeOnly || mapping.isTypeOnly);
+    const targetModuleSpecifier = getModuleSpecifierForTarget(filePath, mapping.targetFilePath, mapping.targetModuleSpecifier);
+    const groupKey = `${isTypeOnly ? "type" : "value"}:${targetModuleSpecifier}`;
+    const specifierText = createImportSpecifierText(mapping.targetName, localName);
+
+    addImportGroupItem(groups, groupKey, { isTypeOnly, moduleSpecifier: targetModuleSpecifier, specifierText });
+  }
+
+  if (groups.size === 0) return null;
+
+  return createReplacementImports(groups);
+};
+
+const collectImportReplacements = (filePath, sourceFile, compatFiles) => {
+  const replacements = [];
+
+  for (const statement of sourceFile.statements) {
+    if (!ts.isImportDeclaration(statement)) continue;
+
+    const moduleSpecifier = getImportModuleSpecifier(statement);
+    if (!moduleSpecifier) continue;
+
+    const importedFilePath = resolveSpecifierPath(filePath, moduleSpecifier);
+    if (!importedFilePath || !compatFiles.has(importedFilePath)) continue;
+
+    const replacementText = createImportReplacement(filePath, compatFiles, statement, importedFilePath);
+    if (!replacementText) continue;
+
+    replacements.push({ end: statement.getEnd(), start: statement.getStart(sourceFile), text: replacementText });
+  }
+
+  return replacements;
+};
+
+const applyReplacements = (source, replacements) => {
+  return [...replacements].sort((first, second) => second.start - first.start).reduce((nextSource, replacement) => {
+    return `${nextSource.slice(0, replacement.start)}${replacement.text}${nextSource.slice(replacement.end)}`;
+  }, source);
+};
+
+const updateImportsInFile = (filePath, compatFiles) => {
+  const source = readFileSync(filePath, "utf8");
+  const sourceFile = createSourceFile(filePath, source);
+  if (sourceFile.parseDiagnostics.length > 0) return false;
+
+  const replacements = collectImportReplacements(filePath, sourceFile, compatFiles);
+  if (replacements.length === 0) return false;
+
+  writeFileSync(filePath, applyReplacements(source, replacements));
   return true;
 };
 
@@ -186,9 +298,9 @@ const deleteCompatFile = (filePath) => {
 };
 
 const sourceFiles = SOURCE_DIRECTORIES.flatMap(walkSourceFiles);
-const compatTargetMap = createCompatTargetMap(sourceFiles);
-const updatedFiles = sourceFiles.filter((filePath) => updateImportingFile(filePath, compatTargetMap));
-const deletedFiles = [...compatTargetMap.keys()].filter(deleteCompatFile);
+const compatFiles = collectCompatFiles(sourceFiles);
+const updatedFiles = sourceFiles.filter((filePath) => !compatFiles.has(filePath)).filter((filePath) => updateImportsInFile(filePath, compatFiles));
+const deletedFiles = [...compatFiles.keys()].filter(deleteCompatFile);
 
 if (updatedFiles.length > 0 || deletedFiles.length > 0) {
   console.log(`互換 export ファイル規約の自動修正で ${updatedFiles.length} file(s) の import を修正し、${deletedFiles.length} file(s) を削除しました。`);
