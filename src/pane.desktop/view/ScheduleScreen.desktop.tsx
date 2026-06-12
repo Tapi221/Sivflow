@@ -52,6 +52,7 @@ const DEFAULT_PLAN_RESULT_MODES: readonly PlanResultMode[] = ["plan", "actual"];
 const PLAN_RESULT_TOGGLE_VIEW_MODES = new Set(["threeDays", "days", "pieChart"]);
 const LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS = 45;
 const LIST_VISIBLE_MONTH_SYNC_DELAY_MS = 700;
+const LIST_SCROLL_IDLE_DELAY_MS = 180;
 const WEEKDAY_EVENT_BUFFER_DAYS = 1;
 
 const readStoredAllDayEventOrder = (): CalendarAllDayEventOrderMap => {
@@ -116,7 +117,9 @@ const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose, conte
   const [isEventComposerOpen, setIsEventComposerOpen] = useState(false);
   const [timetableAddRequestToken, setTimetableAddRequestToken] = useState(0);
   const [listVisibleTitleDate, setListVisibleTitleDate] = useState(monthTitleDate);
+  const [isListScrollActive, setIsListScrollActive] = useState(false);
   const listVisibleMonthSyncTimeoutRef = useRef<number | null>(null);
+  const listScrollIdleTimeoutRef = useRef<number | null>(null);
   const pendingListVisibleMonthSyncDateRef = useRef<Date | null>(null);
   const lastListVisibleMonthSyncKeyRef = useRef<string | null>(null);
   const viewOptions = useMemo(() => [{ value: "year", label: t.viewYear }, { value: "month", label: t.viewMonth }, { value: "week", label: t.viewWeek }, { value: "threeDays", label: t.viewThreeDays }, { value: "days", label: t.viewDay }, { value: "list", label: t.viewList }, { value: "timetable", label: t.viewTimetable }, { value: "pieChart", label: t.viewPieChart }] as const, [t.viewDay, t.viewList, t.viewMonth, t.viewPieChart, t.viewThreeDays, t.viewTimetable, t.viewWeek, t.viewYear]);
@@ -142,6 +145,9 @@ const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose, conte
   useEffect(() => () => {
     if (listVisibleMonthSyncTimeoutRef.current !== null) {
       window.clearTimeout(listVisibleMonthSyncTimeoutRef.current);
+    }
+    if (listScrollIdleTimeoutRef.current !== null) {
+      window.clearTimeout(listScrollIdleTimeoutRef.current);
     }
   }, []);
   const handleReorderAllDayEvents = useCallback<CalendarAllDayEventReorderHandler>(({ eventKey, sourceDayKey, targetDayKey, orderedEventKeys }) => {
@@ -192,6 +198,14 @@ const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose, conte
     schedulePendingListVisibleMonthSync();
   }, [schedulePendingListVisibleMonthSync]);
   const handleListScrollTopChange = useCallback(() => {
+    setIsListScrollActive(true);
+    if (listScrollIdleTimeoutRef.current !== null) {
+      window.clearTimeout(listScrollIdleTimeoutRef.current);
+    }
+    listScrollIdleTimeoutRef.current = window.setTimeout(() => {
+      listScrollIdleTimeoutRef.current = null;
+      setIsListScrollActive(false);
+    }, LIST_SCROLL_IDLE_DELAY_MS);
     if (!pendingListVisibleMonthSyncDateRef.current) return;
     schedulePendingListVisibleMonthSync();
   }, [schedulePendingListVisibleMonthSync]);
@@ -204,6 +218,13 @@ const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose, conte
   const printDisplayRange = useMemo(() => getCalendarPrintRange({ printRange, primaryViewMode, currentDate, selectedDate, visibleDays, currentDisplayRange: mainDisplayRange, weekStartDay }), [currentDate, mainDisplayRange, primaryViewMode, printRange, selectedDate, visibleDays, weekStartDay]);
   const rawMainCalendarEvents = useMemo(() => filterEventsByDisplayRange(visibleGoogleCalendarEvents, mainDisplayRange), [mainDisplayRange, visibleGoogleCalendarEvents]);
   const mainCalendarEvents = useTransientEmptyCalendarEvents(rawMainCalendarEvents, mainDisplayRangeKey);
+  const listStableCalendarEventsRef = useRef(mainCalendarEvents);
+  useEffect(() => {
+    if (!isListCalendarView || !isListScrollActive) {
+      listStableCalendarEventsRef.current = mainCalendarEvents;
+    }
+  }, [isListCalendarView, isListScrollActive, mainCalendarEvents]);
+  const listCalendarEvents = isListCalendarView && isListScrollActive ? listStableCalendarEventsRef.current : mainCalendarEvents;
   const printCalendarEvents = useMemo(() => filterEventsByDisplayRange(visibleGoogleCalendarEvents, printDisplayRange), [printDisplayRange, visibleGoogleCalendarEvents]);
   const headerTitleDate = isSplitCalendarView ? selectedDate : primaryViewMode === "month" ? monthTitleDate : isListCalendarView ? listVisibleTitleDate : isPieChartCalendarView ? selectedDate : titleDate;
   const headerTitleLabel = primaryViewMode === "year" ? format(headerTitleDate, "yyyy年", { locale: dateFnsLocale }) : format(headerTitleDate, isPieChartCalendarView || isSplitCalendarView ? "yyyy年M月d日" : monthLabelFormat, { locale: dateFnsLocale });
@@ -238,7 +259,7 @@ const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose, conte
             ) : isPieChartCalendarView ? (
               <div className="ml-4 mr-4 flex min-h-0 flex-1 flex-col overflow-hidden bg-white"><CalendarPieChartView days={visibleDays} virtualRail={virtualRail} selectedDate={selectedDate} events={mainCalendarEvents} appProjects={appProjects} googleAccounts={googleAccountsWithColorOverrides} onSelectDate={handleSidebarSelectDate} onVisibleDateChange={handleVisibleDateChange} /></div>
             ) : isListCalendarView ? (
-              <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0 bg-white"><CalendarListView days={visibleDays} virtualRail={virtualRail} events={mainCalendarEvents} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} onVisibleMonthChange={handleListVisibleMonthChange} onScrollTopChange={handleListScrollTopChange} /></div>
+              <div className="ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border-0 bg-white"><CalendarListView days={visibleDays} virtualRail={virtualRail} events={listCalendarEvents} selectedDate={selectedDate} onSelectDate={handleSidebarSelectDate} onVisibleMonthChange={handleListVisibleMonthChange} onScrollTopChange={handleListScrollTopChange} /></div>
             ) : isMonthCalendarView ? (
               <div className={cn("ml-4 mr-0 flex min-h-0 flex-1 flex-col overflow-hidden border border-b-0 border-r-0", IOS_CALENDAR_MONTH_SURFACE_CLASS)}><CalendarMonthView currentDate={currentDate} selectedDate={selectedDate} weekStartDay={weekStartDay} scrollTargetToken={monthScrollTargetToken} visibleEvents={mainCalendarEvents} monthVisibleEventCount={monthVisibleEventCount} onSelectDate={handleMonthCellSelectDate} onVisibleMonthChange={handleVisibleMonthChange} onRenderedRangeChange={handleMonthRenderedRangeChange} onMoveCalendarEvent={handleMoveCalendarEvent} /></div>
             ) : isTimetableCalendarView ? (
