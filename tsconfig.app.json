@@ -16,6 +16,7 @@
       "@core/*": ["packages/core/src/*"],
       "@platform/*": ["packages/platform/src/*"],
       "@web-renderer/*": ["packages/web-renderer/src/*"],
+      "@web/*": ["apps/web/src/*"],
       "@/*": ["src/*"],
       "@shared/*": ["shared/*"]
     }
