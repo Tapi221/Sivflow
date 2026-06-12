@@ -1,5 +1,5 @@
 import React from "react";
-import { DropdownMenuContent, DropdownMenuItem, DropdownMenuItemIcon, DropdownMenuItemLabel, DropdownMenuSeparator } from "@/chip/ui/dropdown-menu";
+import { DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/chip/ui/dropdown-menu";
 import { floatingPanelPresets } from "@/chip/ui/menu-styles";
 import { cn } from "@/lib/utils";
 import type { MenuAction } from "./menuActions";
@@ -84,7 +84,6 @@ const ExplorerMenuPanel = ({ actions, closeMenu, className, variant = "default",
   return (
     <DropdownMenuContent
       className={cn(contentClassName, className)}
-      surface={isPlainVariant ? "plain" : panelPreset.surface}
       style={
         isPlainVariant
           ? {
@@ -119,17 +118,15 @@ const ExplorerMenuPanel = ({ actions, closeMenu, className, variant = "default",
             }}
           >
             {action.icon ? (
-              <DropdownMenuItemIcon className={cn(iconClassName)}>
-                {action.icon}
-              </DropdownMenuItemIcon>
+              <span className={cn(iconClassName)}>{action.icon}</span>
             ) : null}
-            <DropdownMenuItemLabel
+            <span
               className={cn(
                 isPlainVariant ? PLAIN_MENU_LABEL_CLASS : undefined,
               )}
             >
               {action.label}
-            </DropdownMenuItemLabel>
+            </span>
           </DropdownMenuItem>
         </React.Fragment>
       ))}
