@@ -4,7 +4,7 @@ import { useToast } from "@web-renderer/contexts/ToastContext";
 import type { KeyboardEvent } from "react";
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { MessageSquare, Plus, Sparkles } from "@/ui/icons";
@@ -179,7 +179,9 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent accessibleTitle="Q&Aチャット" accessibleDescription="チャット形式でQ&Aカードを作成します。" overlayClassName="app-modal-backdrop" contentWrapperClassName="app-modal-content-frame" className="app-modal-surface max-w-[560px] gap-0 p-0" closeButtonClassName="right-4 top-4 text-[#85827e] hover:text-[#343434]">
+      <DialogContent className="app-modal-surface max-w-[560px] gap-0 p-0">
+        <DialogTitle className="sr-only">Q&Aチャット</DialogTitle>
+        <DialogDescription className="sr-only">チャット形式でQ&Aカードを作成します。</DialogDescription>
         <div className="border-b border-[#eceae4] px-5 py-4">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[#dddcd5] bg-white text-[#85827e]">
