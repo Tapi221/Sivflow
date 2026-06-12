@@ -1,1 +1,0 @@
-const todoProps = value["foo"];
