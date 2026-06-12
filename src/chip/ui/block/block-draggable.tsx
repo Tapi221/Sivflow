@@ -162,13 +162,24 @@ const calculatePreviewTop = (
 
   return previewElementsTopDistance;
 };
+const resolveListRowOffsetTop = (child: HTMLElement): number => {
+  const list = child.querySelector<HTMLElement>("ol, ul");
+
+  if (!list) return 0;
+
+  const childRect = child.getBoundingClientRect();
+  const listRect = list.getBoundingClientRect();
+  const offsetTop = listRect.top - childRect.top;
+
+  return Number.isFinite(offsetTop) && offsetTop > 0 ? offsetTop : 0;
+};
 const calcDragButtonTop = (editor: PlateEditor, element: TElement): number => {
   const child = editor.api.toDOMNode(element)!;
 
   const currentMarginTopString = window.getComputedStyle(child).marginTop;
   const currentMarginTop = Number(currentMarginTopString.replace("px", ""));
 
-  return currentMarginTop;
+  return currentMarginTop + resolveListRowOffsetTop(child);
 };
 
 const Gutter = ({
