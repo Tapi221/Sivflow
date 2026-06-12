@@ -1,3 +1,9 @@
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import type { ClipboardEvent as ReactClipboardEvent, FormEvent as ReactFormEvent, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
+import { codeTheme } from "@shared/design-tokens/codeTheme";
+import type { RenderProps } from "prism-react-renderer";
+import { Highlight } from "prism-react-renderer";
+import Prism from "prismjs";
 import "prismjs/components/prism-bash";
 import "prismjs/components/prism-c";
 import "prismjs/components/prism-clike";
@@ -14,12 +20,6 @@ import "prismjs/components/prism-python";
 import "prismjs/components/prism-rust";
 import "prismjs/components/prism-sql";
 import "prismjs/components/prism-typescript";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { codeTheme } from "@shared/design-tokens/codeTheme";
-import type { RenderProps } from "prism-react-renderer";
-import { Highlight } from "prism-react-renderer";
-import Prism from "prismjs";
-import type { ClipboardEvent as ReactClipboardEvent, FormEvent as ReactFormEvent, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
 import { cn } from "@/lib/utils";
@@ -56,9 +56,11 @@ const CODE_EDITOR_TAB_TEXT = "  ";
 const clampTextOffset = (offset: number, textLength: number) => {
   return Math.max(0, Math.min(offset, textLength));
 };
+
 const isNodeInside = (parent: HTMLElement, node: Node | null) => {
   return node !== null && (node === parent || parent.contains(node));
 };
+
 const getNodeTextOffset = (root: HTMLElement, node: Node, offset: number) => {
   const range = document.createRange();
   range.selectNodeContents(root);
@@ -70,6 +72,7 @@ const getNodeTextOffset = (root: HTMLElement, node: Node, offset: number) => {
     return 0;
   }
 };
+
 const getEditorSelectionRange = (root: HTMLElement): EditorTextSelection | null => {
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return null;
@@ -92,6 +95,7 @@ const getEditorSelectionRange = (root: HTMLElement): EditorTextSelection | null 
     end: Math.max(anchorOffset, focusOffset),
   };
 };
+
 const getTextPositionAtOffset = (root: HTMLElement, offset: number) => {
   const safeOffset = clampTextOffset(offset, root.textContent?.length ?? 0);
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -118,10 +122,8 @@ const getTextPositionAtOffset = (root: HTMLElement, offset: number) => {
 
   return { node: root, offset: 0 };
 };
-const restoreEditorSelection = (
-  root: HTMLElement,
-  selectionRange: EditorTextSelection,
-) => {
+
+const restoreEditorSelection = (root: HTMLElement, selectionRange: EditorTextSelection) => {
   const selection = root.ownerDocument.getSelection();
   if (!selection) return;
 
@@ -133,12 +135,8 @@ const restoreEditorSelection = (
   selection.removeAllRanges();
   selection.addRange(range);
 };
-const setHighlightedEditorCode = (
-  editor: HTMLElement,
-  code: string,
-  grammar: PrismGrammar,
-  language: string,
-) => {
+
+const setHighlightedEditorCode = (editor: HTMLElement, code: string, grammar: PrismGrammar, language: string) => {
   const nextHtml = Prism.highlight(code, grammar, language);
   if (editor.innerHTML !== nextHtml) {
     editor.innerHTML = nextHtml;
