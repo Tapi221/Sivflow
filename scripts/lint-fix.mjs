@@ -9,6 +9,7 @@ const NODE_SCRIPT_PATHS = {
   fixConstArrowFunctions: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-const-arrow-functions.mjs"),
   fixImportPaths: path.resolve(REPOSITORY_ROOT, "scripts/fix-src-import-paths.mjs"),
   fixImportSpacing: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-import-spacing.mjs"),
+  fixJsxChildSpacing: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-jsx-child-spacing.mjs"),
   fixKnownLintErrors: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-known-lint-errors.mjs"),
   fixNullishFallback: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-nullish-fallback.mjs"),
   fixShortHexColors: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-short-hex-colors.mjs"),
@@ -19,6 +20,7 @@ const NODE_SCRIPT_PATHS = {
   verifyBlankLines: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-repeated-blank-lines.mjs"),
   verifyConstArrowFunctions: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-const-arrow-functions.mjs"),
   verifyImportSpacing: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-import-spacing.mjs"),
+  verifyJsxChildSpacing: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-jsx-child-spacing.mjs"),
   verifyModuleConstantNames: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-module-constant-names.mjs"),
   verifyNoSymbols: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-no-symbols.mjs"),
   verifyNullishFallback: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-nullish-fallback.mjs"),
@@ -56,6 +58,7 @@ const runSourceConventionFixes = () => {
     runNodeScript(NODE_SCRIPT_PATHS.fixImportSpacing),
     runNodeScript(NODE_SCRIPT_PATHS.fixSourceOrder),
     runNodeScript(NODE_SCRIPT_PATHS.fixImportSpacing),
+    runNodeScript(NODE_SCRIPT_PATHS.fixJsxChildSpacing),
     runNodeScript(NODE_SCRIPT_PATHS.fixBlankLines),
   ];
 
@@ -72,6 +75,7 @@ const runSourceConventionVerification = () => {
     runNodeScript(NODE_SCRIPT_PATHS.verifyNullishFallback),
     runNodeScript(NODE_SCRIPT_PATHS.verifyStrictEquality),
     runNodeScript(NODE_SCRIPT_PATHS.verifySourceConventions),
+    runNodeScript(NODE_SCRIPT_PATHS.verifyJsxChildSpacing),
     runNodeScript(NODE_SCRIPT_PATHS.verifyConstArrowFunctions),
     runNodeScript(NODE_SCRIPT_PATHS.verifyPdfZoomConstants),
     runNodeScript(NODE_SCRIPT_PATHS.verifyModuleConstantNames),
