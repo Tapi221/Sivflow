@@ -15,7 +15,7 @@
   },
   "scripts": {
     "dev": "npm run dev:web",
-    "dev:web": "npm run sync:app-icon && vite --config apps/web/vite.config.ts --strictPort",
+    "dev:web": "npm run sync:app-icon && vite --config apps/web/vite.config.ts",
     "dev:desktop": "npm --prefix apps/desktop run dev",
     "dev:tauri": "npm run dev:desktop",
     "dev:mobile": "npm --prefix apps/mobile start",
