@@ -6,8 +6,8 @@ import { useTodoListElement, useTodoListElementState } from "@platejs/list/react
 import type { TListElement } from "platejs";
 import type { PlateElementProps, RenderNodeWrapper } from "platejs/react";
 import { useReadOnly } from "platejs/react";
+import { Checkbox } from "@/chip/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { Checkbox } from "./checkbox";
 
 const TodoMarker = (props: PlateElementProps) => {
   const state = useTodoListElementState({ element: props.element });
