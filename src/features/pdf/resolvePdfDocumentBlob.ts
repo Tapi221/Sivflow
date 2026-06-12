@@ -1,7 +1,7 @@
 import { requestGoogleDriveFileAccessToken } from "@/integration/google-integration/googleDrive.oauth";
 import { downloadPdfFromGoogleDrive } from "@/integration/google-integration/googleDrive.pdfDownload";
+import { auth } from "@/infrastructure/firebase/client";
 import { getDocumentBlob, saveDocumentBlob } from "@/services/documentFileStore";
-import { auth } from "@/services/firebase";
 import type { DocumentItem } from "@/types";
 
 type PdfDocumentBlobFields = Pick<DocumentItem, "id" | "localFileId" | "userId" | "googleDriveFileId" | "googleDriveWebContentLink" | "googleDriveWebViewLink" | "storagePath">;
