@@ -83,7 +83,7 @@ const getPdfPageWindowAroundPage = (pageNumber: number, pageCount: number, overs
 };
 function getPdfPageWindowKeepSet(pageMetrics: PdfPageWindowMetric[], viewportTop: number, viewportHeight: number, pageCount: number, options?: PdfPageWindowOptions): Set<number>;
 function getPdfPageWindowKeepSet(fallbackPageNumber: number, pageCount: number, overscanPageCount?: number): Set<number>;
-function getPdfPageWindowKeepSet(first: PdfPageWindowMetric[] | number, second: number, third?: number, fourth?: number | PdfPageWindowOptions, fifth: PdfPageWindowOptions = {}): Set<number> {
+const getPdfPageWindowKeepSet = (first: PdfPageWindowMetric[] | number, second: number, third?: number, fourth?: number | PdfPageWindowOptions, fifth: PdfPageWindowOptions = {}): Set<number> => {
   if (typeof first === "number") {
     return getPdfPageWindowAroundPage(first, second, third);
   }
@@ -110,7 +110,7 @@ function getPdfPageWindowKeepSet(first: PdfPageWindowMetric[] | number, second: 
 
   for (let page = firstPage; page <= lastPage; page += 1) idsToKeep.add(page);
   return idsToKeep;
-}
+};
 
 export { getPdfPageWindowKeepSet, getSafePdfPageNumber };
 export type { PdfPageWindowMetric, PdfPageWindowOptions };
