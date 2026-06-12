@@ -8,7 +8,7 @@ import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selec
 import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
 import type { Card, CardBlock } from "@/types/domain/card";
 import type { CardSet } from "@/types/domain/cardSet";
 import { Link, Plus } from "@/ui/icons";
@@ -174,17 +174,15 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
         {isOpen ? (
           <div className="border-t border-[#eceae4] px-3 pb-3 pt-2">
             <div className="space-y-2">
-              <>
-                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9a9690]">この回答から作る</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {candidateTerms.length > 0 ? candidateTerms.map((term) => (
-                    <button key={term} type="button" className="inline-flex h-7 max-w-[180px] items-center gap-1 rounded-[8px] border border-[#dddcd5] bg-[#f7f6f2] px-2 text-[11px] font-medium text-[#5f5f5f] transition hover:bg-[#eee] disabled:opacity-60" onClick={() => void handleCreateLinkedQuestion(term)} disabled={creatingTerm !== null} title={`${term} から疑問を作る`}>
-                      {creatingTerm === term ? <LoadingSpinner iconClassName="h-3 w-3" label="疑問リンクを作成中" /> : <Plus className="h-3 w-3" />}
-                      <span className="truncate">{term}</span>
-                    </button>
-                  )) : <span className="text-[11px] text-[#9a9690]">候補語句がありません。</span>}
-                </div>
-              </>
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9a9690]">この回答から作る</p>
+              <div className="flex flex-wrap gap-1.5">
+                {candidateTerms.length > 0 ? candidateTerms.map((term) => (
+                  <button key={term} type="button" className="inline-flex h-7 max-w-[180px] items-center gap-1 rounded-[8px] border border-[#dddcd5] bg-[#f7f6f2] px-2 text-[11px] font-medium text-[#5f5f5f] transition hover:bg-[#eee] disabled:opacity-60" onClick={() => void handleCreateLinkedQuestion(term)} disabled={creatingTerm !== null} title={`${term} から疑問を作る`}>
+                    {creatingTerm === term ? <LoadingSpinner iconClassName="h-3 w-3" label="疑問リンクを作成中" /> : <Plus className="h-3 w-3" />}
+                    <span className="truncate">{term}</span>
+                  </button>
+                )) : <span className="text-[11px] text-[#9a9690]">候補語句がありません。</span>}
+              </div>
               <div className="flex gap-1.5">
                 <input value={customTerm} onChange={(event) => setCustomTerm(event.target.value)} onKeyDown={(event) => {
                   if (event.key === "Enter") handleCreateCustomQuestion(); }} placeholder="語句を入力して疑問にする" className="h-8 min-w-0 flex-1 rounded-[9px] border border-[#dddcd5] bg-white px-2.5 text-[12px] text-[#343434] outline-none transition placeholder:text-[#aaa49d] focus:border-[#c8c6bf]" maxLength={MAX_CUSTOM_TERM_LENGTH}
