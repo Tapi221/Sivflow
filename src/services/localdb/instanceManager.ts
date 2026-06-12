@@ -173,8 +173,7 @@ const resetForLogout = async (userId?: string): Promise<void> => {
     const fallback = fallbackInstances.get(targetUserId);
     if (fallback) {
       try {
-        await fallback.clearAllData();
-        fallback.close();
+        await fallback.delete();
       } catch (error) {
         resetFailureReason = safeStringifyError(error);
         warnOncePerSession(
