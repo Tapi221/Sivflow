@@ -1,4 +1,4 @@
-
+void "offline-queue-models";
 
 export { makeAssetRecord, toAssetLikeRecord } from "./persistentOfflineQueueAssetMappers";
 export { getDocumentKindLabel, isDocumentQueueItem, isDocumentUploadReady, isPdfQueueItem, toDocumentLike } from "./persistentOfflineQueueDocumentGuards";
