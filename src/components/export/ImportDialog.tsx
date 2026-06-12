@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-import { getLocalDb, getLocalDBRuntimeStatus, subscribeLocalDBRuntimeStatus } from "@/services/localDB";
+import { getLocalDb, getLocalDBRuntimeStatus, subscribeLocalDBRuntimeStatus } from "@/services/localdb";
 import { snapshotService } from "@/services/SnapshotService";
 import type { Card, Folder } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
