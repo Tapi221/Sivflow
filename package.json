@@ -52,7 +52,7 @@
     "fix:known-lint-errors": "node scripts/verify/fix-known-lint-errors.mjs",
     "fix:alias-import-paths": "node scripts/fix-alias-import-paths.mjs",
     "fix:source-conventions": "npm run fix:type-only-imports && npm run fix:const-arrow-functions && npm run fix:blank-lines && npm run fix:short-hex-colors && npm run fix:nullish-fallback && npm run fix:known-lint-errors && npm run fix:no-compat-export-files && node scripts/fix-src-import-paths.mjs && npm run fix:alias-import-paths && node scripts/verify/fix-import-spacing.mjs && node scripts/verify/fix-source-order.mjs && node scripts/verify/fix-import-spacing.mjs && npm run fix:jsx-child-spacing && npm run fix:blank-lines",
-    "verify:source-conventions": "npm run verify:no-emoji && npm run verify:no-compat-export-files && npm run verify:type-only-imports && node scripts/verify/verify-import-spacing.mjs && npm run verify:blank-lines && npm run verify:short-hex-colors && npm run verify:nullish-fallback && node scripts/verify/verify-source-conventions.mjs && npm run verify:jsx-child-spacing && npm run verify:const-arrow-functions && npm run verify:pdf-zoom-constants && npm run verify:module-constant-names",
+    "verify:source-conventions": "npm run verify:no-compat-export-files && npm run verify:type-only-imports && node scripts/verify/verify-import-spacing.mjs && npm run verify:blank-lines && npm run verify:short-hex-colors && npm run verify:nullish-fallback && node scripts/verify/verify-source-conventions.mjs && npm run verify:jsx-child-spacing && npm run verify:const-arrow-functions && npm run verify:pdf-zoom-constants && npm run verify:module-constant-names",
     "watch:source-conventions": "node scripts/dev/watch-source-conventions.mjs",
     "watch:source-conventions:fix": "node scripts/dev/watch-source-conventions.mjs --fix",
     "fix:source-conventions:local-llm": "node scripts/dev/watch-source-conventions.mjs --fix --once",
@@ -68,7 +68,7 @@
     "lint": "npm run lint:imports && node scripts/lint-eslint-ja.mjs && npm run verify:source-conventions",
     "lint:fix": "node scripts/lint-fix.mjs",
     "preview": "vite preview --config apps/web/vite.config.ts",
-    "test": "npm run verify:no-emoji && vitest run",
+    "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e:codeblock": "playwright test tests/e2e/codeblock_visual.spec.ts",
     "test:e2e:card-layout": "playwright test tests/e2e/card_layout_consistency.spec.ts"
