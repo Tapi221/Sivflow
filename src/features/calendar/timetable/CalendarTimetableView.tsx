@@ -54,6 +54,12 @@ const StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);
 
 const StratisSettingsIcon = resolveStratisIcon(STRATIS_SETTINGS_ICON_NAMES);
 
+const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);
+
+const StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);
+
+const StratisSettingsIcon = resolveStratisIcon(STRATIS_SETTINGS_ICON_NAMES);
+
 const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
 
 const createTimetableSlotKey = ({ dayIndex, periodId }: TimetableSlot): string => `${dayIndex}:${periodId}`;
