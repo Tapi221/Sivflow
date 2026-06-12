@@ -34,9 +34,11 @@ const DEFAULT_TIMETABLE_ADD_REQUEST_TOKEN = 0;
 const EMPTY_SLOT_LIST: CalendarTimetableSlot[] = [];
 
 const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
+
 const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);
 const StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);
 const StratisSettingsIcon = resolveStratisIcon(STRATIS_SETTINGS_ICON_NAMES);
+
 const createTimetableSlotKey = ({ dayIndex, periodId }: TimetableSlot): string => `${dayIndex}:${periodId}`;
 const buildTimetableWeekDays = (weekDate: Date, weekStartDay: CalendarWeekStartDay, visibleDayCount: CalendarTimetableVisibleDayCount): Date[] => Array.from({ length: visibleDayCount }, (_, index) => addDays(startOfWeek(weekDate, { weekStartsOn: getCalendarWeekStartsOn(weekStartDay) }), index));
 const getTimetableEntryDayIndex = (date: Date): CalendarTimetableWeekdayIndex => ((date.getDay() + 6) % 7) as CalendarTimetableWeekdayIndex;
