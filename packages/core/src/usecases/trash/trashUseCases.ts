@@ -1,11 +1,7 @@
 import type { TrashCardBase, TrashCardSetBase, TrashDocumentBase, TrashEntityBase, TrashFolderBase, TrashItemIds, TrashItems, TrashUseCaseInput } from "./trashTypes";
 
-
-
 const TRASH_RETENTION_DAYS = 30;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
-
 
 const getDeletedAtTime = (value: unknown): number | null => {
   if (value instanceof Date) return value.getTime();
@@ -243,7 +239,5 @@ const emptyTrash = async <TFolder extends TrashFolderBase, TCard extends TrashCa
     documentIds: documents.map((document) => document.id),
   });
 };
-
-
 
 export { TRASH_RETENTION_DAYS, getTrashItems, restoreFolderWithParents, restoreTrashItems, permanentlyDeleteTrashItems, purgeExpiredTrashItems, emptyTrash };

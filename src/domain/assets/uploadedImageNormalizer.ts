@@ -2,15 +2,11 @@ import type { UploadFallbackReason, UploadSource } from "@/types";
 import type { BlobUrl, StorageUrl } from "@/types/core/branded";
 import { generateUploadedImageId } from "./uploadedImageFactory";
 
-
-
 type NormalizeUploadedImageOptions = { onInvalid?: "skip" | "throw";
 };
 type DenormalizeUploadedImageOptions = { case?: "camel" | "snake";
   stripUndefined?: boolean;
 };
-
-
 
 const resolveString = (value: unknown): string | undefined => {
   if (typeof value === "string" && value.trim().length > 0) {
@@ -245,9 +241,5 @@ options: DenormalizeUploadedImageOptions = {},
   return images.map((image) => denormalizeUploadedImage(image, options));
 };
 
-
-
 export { normalizeUploadedImages, denormalizeUploadedImages };
-
-
 export type { NormalizeUploadedImageOptions, DenormalizeUploadedImageOptions };
