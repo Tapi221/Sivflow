@@ -3,6 +3,15 @@ import type { CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTim
 import type { Table } from "dexie";
 import Dexie from "dexie";
 
+type CalendarTimetableDatabase = Dexie & {
+  courses: Table<CalendarTimetableCourse, string>;
+  departments: Table<CalendarTimetableDepartment, string>;
+  institutions: Table<CalendarTimetableInstitution, string>;
+  periods: Table<CalendarTimetablePeriod, string>;
+  settings: Table<CalendarTimetableSettings, string>;
+  syllabusCourses: Table<CalendarTimetableSyllabusCourse, string>;
+};
+
 const TIMETABLE_SETTINGS_ID = "default";
 const DEFAULT_SEMESTER_ID = "default-semester";
 const DEFAULT_VISIBLE_DAY_COUNT: CalendarTimetableVisibleDayCount = 5;
@@ -15,33 +24,24 @@ const DEFAULT_TIMETABLE_PERIODS: readonly CalendarTimetablePeriod[] = [
   { id: "period-6", label: "6", startTime: "18:00", endTime: "19:30", order: 5 },
   { id: "period-7", label: "7", startTime: "19:40", endTime: "21:10", order: 6 },
 ];
-const timetableDb = new CalendarTimetableDatabase();
+const timetableDb = (() => {
+  const database = new Dexie("sivflow-calendar-timetable") as CalendarTimetableDatabase;
+  database.version(1).stores({
+    courses: "id, semesterId, updatedAt",
+    periods: "id, order",
+    settings: "id",
+  });
+  database.version(2).stores({
+    courses: "id, semesterId, syllabusCourseId, institutionId, departmentId, updatedAt",
+    departments: "id, institutionId, name, facultyName, updatedAt",
+    institutions: "id, name, kind, updatedAt",
+    periods: "id, order",
+    settings: "id",
+    syllabusCourses: "id, institutionId, departmentId, title, teacher, semesterLabel, source, updatedAt",
+  });
+  return database;
+})();
 
-class CalendarTimetableDatabase extends Dexie {
-  courses!: Table<CalendarTimetableCourse, string>;
-  departments!: Table<CalendarTimetableDepartment, string>;
-  institutions!: Table<CalendarTimetableInstitution, string>;
-  periods!: Table<CalendarTimetablePeriod, string>;
-  settings!: Table<CalendarTimetableSettings, string>;
-  syllabusCourses!: Table<CalendarTimetableSyllabusCourse, string>;
-
-  constructor() {
-    super("sivflow-calendar-timetable");
-    this.version(1).stores({
-      courses: "id, semesterId, updatedAt",
-      periods: "id, order",
-      settings: "id",
-    });
-    this.version(2).stores({
-      courses: "id, semesterId, syllabusCourseId, institutionId, departmentId, updatedAt",
-      departments: "id, institutionId, name, facultyName, updatedAt",
-      institutions: "id, name, kind, updatedAt",
-      periods: "id, order",
-      settings: "id",
-      syllabusCourses: "id, institutionId, departmentId, title, teacher, semesterLabel, source, updatedAt",
-    });
-  }
-}
 const createTimestamp = (): string => new Date().toISOString();
 const createCourseId = (): string => `course-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 const createDepartmentId = (): string => `department-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
