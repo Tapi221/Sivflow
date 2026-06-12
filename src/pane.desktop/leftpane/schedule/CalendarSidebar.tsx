@@ -38,6 +38,10 @@ type IconProps = {
 const ADD_GOOGLE_CALENDAR_LABEL = "Googleカレンダーを追加";
 const ADD_PROJECT_EMPTY_MESSAGE = "プロジェクト名を入力してください";
 const CALENDAR_CONTEXT_MENU_DIMENSIONS = { width: CALENDAR_LIST_MENU_WIDTH, height: CALENDAR_LIST_MENU_HEIGHT };
+const CALENDAR_SIDEBAR_CONTENT_CLASS_NAME = "pt-2";
+const CALENDAR_SIDEBAR_GOOGLE_LIST_CLASS_NAME = "min-h-0 flex-1 overflow-y-auto px-4 pt-1";
+const CALENDAR_SIDEBAR_HEADING_ROW_CLASS_NAME = "flex min-h-[22px] items-center gap-[3px] px-4";
+const CALENDAR_SIDEBAR_PROJECT_LIST_CLASS_NAME = "max-h-[55%] shrink-0 overflow-y-auto px-4 pb-1";
 const COLOR_INPUT_STYLE: CSSProperties = { position: "fixed", left: -9999, top: -9999, width: 1, height: 1, opacity: 0, pointerEvents: "none" };
 const CONNECTING_GOOGLE_CALENDAR_LABEL = "接続中...";
 const DEFAULT_CALENDAR_COLOR = "#74798b";
@@ -269,11 +273,11 @@ const CalendarSidebarContent = ({ appProjects, projectCalendarLinks, googleCalen
   return (
     <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden pb-0 text-[#2f2f2f]", className)}>
       <nav className="flex min-h-0 w-full flex-1 flex-col overflow-hidden pb-0" aria-label="カレンダー一覧">
-        <div className="app-layered-directory__section-heading-row"><h2 className="app-layered-directory__section-heading">{t.myProjects}</h2><button type="button" className="app-layered-directory__add-button" onClick={handleStartAddingProject} aria-label="プロジェクトを追加" title="プロジェクトを追加"><IconPlus className="h-4 w-4" /></button></div>
+        <div className={CALENDAR_SIDEBAR_HEADING_ROW_CLASS_NAME}><h2 className="app-layered-directory__section-heading">{t.myProjects}</h2><button type="button" className="app-layered-directory__add-button" onClick={handleStartAddingProject} aria-label="プロジェクトを追加" title="プロジェクトを追加"><IconPlus className="h-4 w-4" /></button></div>
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          <div className="max-h-[55%] shrink-0 overflow-y-auto pb-1"><AppProjectsSection projects={appProjects} isAdding={isAddingProject} onAddProject={onAddProject} onToggleProject={onToggleProject} onOpenProjectLinksContextMenu={handleOpenProjectLinksContextMenu} onAddingChange={setIsAddingProject} /></div>
-          <div className="shrink-0 pt-2"><div className="app-layered-directory__section-heading-row"><h2 className="app-layered-directory__section-heading" aria-label={GOOGLE_CALENDAR_SECTION_LABEL}><GoogleCalendarHeadingSvg /></h2><button type="button" className="app-layered-directory__add-button" onClick={handleAddGoogleCalendar} disabled={isAnyCalendarConnecting} aria-label={ADD_GOOGLE_CALENDAR_LABEL} title={ADD_GOOGLE_CALENDAR_LABEL}><IconPlus className="h-4 w-4" /></button></div></div>
-          <div className="min-h-0 flex-1 overflow-y-auto pt-1"><GoogleAccountsSection accounts={googleAccounts} isConnecting={isAnyCalendarConnecting} projectCalendarLinks={projectCalendarLinks} googleCalendarColorOverrides={googleCalendarColorOverrides} onAddCalendar={handleAddGoogleCalendar} onToggleCalendar={onToggleCalendar} onOpenCalendarContextMenu={handleOpenCalendarContextMenu} onReconnectAccount={onReconnectAccount} /></div>
+          <div className={CALENDAR_SIDEBAR_PROJECT_LIST_CLASS_NAME}><AppProjectsSection projects={appProjects} isAdding={isAddingProject} onAddProject={onAddProject} onToggleProject={onToggleProject} onOpenProjectLinksContextMenu={handleOpenProjectLinksContextMenu} onAddingChange={setIsAddingProject} /></div>
+          <div className="shrink-0 pt-2"><div className={CALENDAR_SIDEBAR_HEADING_ROW_CLASS_NAME}><h2 className="app-layered-directory__section-heading" aria-label={GOOGLE_CALENDAR_SECTION_LABEL}><GoogleCalendarHeadingSvg /></h2><button type="button" className="app-layered-directory__add-button" onClick={handleAddGoogleCalendar} disabled={isAnyCalendarConnecting} aria-label={ADD_GOOGLE_CALENDAR_LABEL} title={ADD_GOOGLE_CALENDAR_LABEL}><IconPlus className="h-4 w-4" /></button></div></div>
+          <div className={CALENDAR_SIDEBAR_GOOGLE_LIST_CLASS_NAME}><GoogleAccountsSection accounts={googleAccounts} isConnecting={isAnyCalendarConnecting} projectCalendarLinks={projectCalendarLinks} googleCalendarColorOverrides={googleCalendarColorOverrides} onAddCalendar={handleAddGoogleCalendar} onToggleCalendar={onToggleCalendar} onOpenCalendarContextMenu={handleOpenCalendarContextMenu} onReconnectAccount={onReconnectAccount} /></div>
         </div>
       </nav>
       <input ref={colorInputRef} type="color" aria-label="カレンダー色" style={COLOR_INPUT_STYLE} onChange={handleChangeCalendarColor} />
@@ -282,6 +286,6 @@ const CalendarSidebarContent = ({ appProjects, projectCalendarLinks, googleCalen
     </div>
   );
 };
-const CalendarSidebar = (props: CalendarSidebarProps) => <SidebarLayeredDirectory calendarContent={<CalendarSidebarContent {...props} className="px-0 pt-2" />} />;
+const CalendarSidebar = (props: CalendarSidebarProps) => <SidebarLayeredDirectory calendarContent={<CalendarSidebarContent {...props} className={CALENDAR_SIDEBAR_CONTENT_CLASS_NAME} />} />;
 
 export { CalendarSidebar, CalendarSidebarContent };
