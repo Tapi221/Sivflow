@@ -22,5 +22,5 @@
     }
   },
   "include": ["apps/web/src", "packages/web-renderer/src", "packages/core/src", "packages/platform/src", "src", "shared"],
-  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "tests/**"]
+  "exclude": ["src/app/api/**", "src/**/*.test.ts", "src/**/*.test.tsx", "tests/**"]
 }
