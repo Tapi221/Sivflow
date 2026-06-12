@@ -45,11 +45,28 @@ type PdfToolbarState = {
   scale: number;
   isBookmarked: boolean;
 };
+type PdfPageSize = {
+  width: number;
+  height: number;
+};
+type PdfPageCanvasProps = {
+  pdfDocument: PdfDocumentProxy;
+  pageNumber: number;
+  pageSize: PdfPageSize | null;
+  registerPageElement: (pageNumber: number, element: HTMLDivElement | null) => void;
+  scale: number;
+  scrollRoot: HTMLDivElement | null;
+  onPageSizeChange: (pageNumber: number, pageSize: PdfPageSize) => void;
+};
 
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 640;
+const PDF_FALLBACK_PAGE_SIZE: PdfPageSize = { width: 612, height: 792 };
 const PDF_HISTORY_LIMIT = 80;
+const PDF_INTERSECTION_ROOT_MARGIN = "1400px 0px";
 const PDF_PAGE_WIDTH_PADDING_PX = 48;
+const PDF_RENDER_OUTPUT_SCALE_MAX = 2;
 const PDF_SCROLL_CONTAINER_CLASS_NAME = "pdf-pane__scroll-container";
+const PDF_SCROLL_IDLE_DELAY_MS = 180;
 const PDF_TOOLBAR_BUTTON_CLASS_NAME = "inline-flex h-8 min-w-8 items-center justify-center rounded-md border border-black/10 bg-white/90 px-2 text-[12px] font-medium text-[#4a4a4a] shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40";
 const PDF_TOOLBAR_INPUT_CLASS_NAME = "h-8 w-14 rounded-md border border-black/10 bg-white/90 px-2 text-center text-[12px] font-medium text-[#4a4a4a] shadow-sm outline-none focus:border-black/25";
 const PDF_MARK_KEY_PATTERN = /^[a-z0-9]$/i;
@@ -138,17 +155,134 @@ const loadPdfDocument = async (source: PdfDocumentSource | null, viewerOptions: 
   if (!source) throw new Error("表示できるPDFソースがありません。");
   return waitForPdfLoadingTask(pdfjsLib.getDocument({ ...createPdfDocumentLoadOptions(viewerOptions, source), ...toPdfDocumentLoadSource(source) }));
 };
+const getRenderedPageSize = (pageSize: PdfPageSize | null, scale: number): PdfPageSize => {
+  const safePageSize = pageSize ?? PDF_FALLBACK_PAGE_SIZE;
+  const safeScale = clampPdfViewerScale(scale);
+  return {
+    width: safePageSize.width * safeScale,
+    height: safePageSize.height * safeScale,
+  };
+};
+const getNearestPageNumber = (container: HTMLElement, pageElements: Map<number, HTMLElement>): number | null => {
+  const containerRect = container.getBoundingClientRect();
+  const anchorY = containerRect.top + Math.min(containerRect.height * 0.35, 220);
+  let nearestPageNumber: number | null = null;
+  let nearestDistance = Number.POSITIVE_INFINITY;
+
+  for (const [pageNumber, pageElement] of pageElements) {
+    const rect = pageElement.getBoundingClientRect();
+    const intersects = rect.bottom >= containerRect.top && rect.top <= containerRect.bottom;
+    if (!intersects) continue;
+    const distance = Math.abs(rect.top - anchorY);
+    if (distance >= nearestDistance) continue;
+    nearestDistance = distance;
+    nearestPageNumber = pageNumber;
+  }
+
+  return nearestPageNumber;
+};
+
+const PdfPageCanvas = ({ pdfDocument, pageNumber, pageSize, registerPageElement, scale, scrollRoot, onPageSizeChange }: PdfPageCanvasProps) => {
+  const pageElementRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const renderTaskRef = useRef<PdfRenderTask | null>(null);
+  const [isNearViewport, setIsNearViewport] = useState(false);
+  const [renderErrorMessage, setRenderErrorMessage] = useState<string | null>(null);
+  const renderedPageSize = getRenderedPageSize(pageSize, scale);
+
+  const setPageElement = useCallback(
+    (element: HTMLDivElement | null) => {
+      pageElementRef.current = element;
+      registerPageElement(pageNumber, element);
+    },
+    [pageNumber, registerPageElement],
+  );
+
+  useEffect(() => {
+    const pageElement = pageElementRef.current;
+    if (!pageElement) return;
+    if (!scrollRoot || !("IntersectionObserver" in globalThis)) {
+      setIsNearViewport(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsNearViewport(entry.isIntersecting);
+      },
+      { root: scrollRoot, rootMargin: PDF_INTERSECTION_ROOT_MARGIN },
+    );
+    observer.observe(pageElement);
+    return () => {
+      observer.disconnect();
+    };
+  }, [scrollRoot]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !isNearViewport) return;
+
+    let isCancelled = false;
+
+    const renderPage = async () => {
+      renderTaskRef.current?.cancel();
+      renderTaskRef.current = null;
+      setRenderErrorMessage(null);
+      const page = await pdfDocument.getPage(pageNumber);
+      if (isCancelled) return;
+
+      const baseViewport = page.getViewport({ scale: 1 });
+      onPageSizeChange(pageNumber, { width: baseViewport.width, height: baseViewport.height });
+      const viewport = page.getViewport({ scale: clampPdfViewerScale(scale) });
+      const outputScale = Math.min(Math.max(globalThis.devicePixelRatio || 1, 1), PDF_RENDER_OUTPUT_SCALE_MAX);
+      const canvasContext = canvas.getContext("2d");
+      if (!canvasContext) throw new Error("PDF Canvas を初期化できませんでした。");
+
+      canvas.width = Math.floor(viewport.width * outputScale);
+      canvas.height = Math.floor(viewport.height * outputScale);
+      canvas.style.width = `${viewport.width}px`;
+      canvas.style.height = `${viewport.height}px`;
+      canvasContext.setTransform(outputScale, 0, 0, outputScale, 0, 0);
+      canvasContext.clearRect(0, 0, viewport.width, viewport.height);
+
+      const renderParameters = { canvas, canvasContext, viewport } as Parameters<PdfPageProxy["render"]>[0];
+      const renderTask = page.render(renderParameters);
+      renderTaskRef.current = renderTask;
+      await renderTask.promise;
+      if (renderTaskRef.current === renderTask) renderTaskRef.current = null;
+    };
+
+    void renderPage().catch((error: unknown) => {
+      if (isCancelled || isRenderingCancelled(error)) return;
+      setRenderErrorMessage(getErrorMessage(error, "PDFページの描画に失敗しました。"));
+    });
+
+    return () => {
+      isCancelled = true;
+      renderTaskRef.current?.cancel();
+      renderTaskRef.current = null;
+    };
+  }, [isNearViewport, onPageSizeChange, pageNumber, pdfDocument, scale]);
+
+  return (
+    <div ref={setPageElement} className="pdf-pane__page" data-page-number={pageNumber} style={{ width: `${renderedPageSize.width}px`, minHeight: `${renderedPageSize.height}px` }}>
+      <canvas ref={canvasRef} className="pdf-pane__page-canvas" aria-label={`PDF ${pageNumber} ページ`} />
+      {!isNearViewport ? <div className="pdf-pane__page-placeholder" aria-hidden="true" /> : null}
+      {renderErrorMessage ? <div className="pdf-pane__page-error" role="alert">{renderErrorMessage}</div> : null}
+    </div>
+  );
+};
 
 const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadError, onViewerStateChange }: PdfPaneProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const pdfDocumentRef = useRef<PdfDocumentProxy | null>(null);
-  const renderTaskRef = useRef<PdfRenderTask | null>(null);
+  const pageElementsRef = useRef<Map<number, HTMLElement>>(new Map());
+  const scrollIdleTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | null>(null);
   const sourceReleaseTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | null>(null);
   const viewerStateRef = useRef<PdfViewerState | null>(viewerState);
+  const [scrollRoot, setScrollRoot] = useState<HTMLDivElement | null>(null);
   const [pdfDocument, setPdfDocument] = useState<PdfDocumentProxy | null>(null);
+  const [pageSizes, setPageSizes] = useState<Array<PdfPageSize | null>>([]);
   const [isLoading, setIsLoading] = useState(Boolean(source));
-  const [isRendering, setIsRendering] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [toolbarState, setToolbarState] = useState<PdfToolbarState>(createDefaultToolbarState);
   const [bookmarkPages, setBookmarkPages] = useState<number[]>(() => getViewerStateBookmarkPages(viewerState));
@@ -162,41 +296,72 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     setZoomInputValue(String(Math.round(toolbarState.scale * 100)));
   }, [toolbarState.scale]);
 
-  const setActiveDocument = useCallback((nextDocument: PdfDocumentProxy | null) => {
-    const currentDocument = pdfDocumentRef.current;
-    if (currentDocument && currentDocument !== nextDocument) void currentDocument.destroy();
-    pdfDocumentRef.current = nextDocument;
-    setPdfDocument(nextDocument);
+  const handleContainerRef = useCallback((element: HTMLDivElement | null) => {
+    containerRef.current = element;
+    setScrollRoot(element);
   }, []);
+
+  const setActiveDocument = useCallback((nextDocument: PdfDocumentProxy | null) => {
+    const currentDocument = pdfDocument;
+    if (currentDocument && currentDocument !== nextDocument) void currentDocument.destroy();
+    setPdfDocument(nextDocument);
+  }, [pdfDocument]);
 
   const emitViewerStateChange = useCallback((nextState: PdfViewerState, options?: PdfViewerStateChangeOptions) => {
     void onViewerStateChange?.(nextState, options);
   }, [onViewerStateChange]);
 
-  const buildViewerState = useCallback((updates: Partial<PdfViewerState>): PdfViewerState => {
-    const currentViewerState = viewerStateRef.current ?? {};
+  const buildViewerState = useCallback((updates: Partial<LegacyPdfViewerState>): PdfViewerState => {
+    const currentViewerState = (viewerStateRef.current ?? {}) as LegacyPdfViewerState;
     return {
       ...currentViewerState,
       ...updates,
-    };
+    } as PdfViewerState;
   }, []);
 
-  const persistViewerState = useCallback((updates: Partial<PdfViewerState>, options?: PdfViewerStateChangeOptions) => {
-    emitViewerStateChange(buildViewerState(updates), options);
+  const persistViewerState = useCallback((updates: Partial<LegacyPdfViewerState>, options?: PdfViewerStateChangeOptions) => {
+    const nextState = buildViewerState(updates);
+    viewerStateRef.current = nextState;
+    emitViewerStateChange(nextState, options);
   }, [buildViewerState, emitViewerStateChange]);
 
-  const updatePageState = useCallback((pageNumber: number, options?: PdfViewerStateChangeOptions) => {
+  const registerPageElement = useCallback((pageNumber: number, element: HTMLDivElement | null) => {
+    if (element) {
+      pageElementsRef.current.set(pageNumber, element);
+      return;
+    }
+    pageElementsRef.current.delete(pageNumber);
+  }, []);
+
+  const scrollToPage = useCallback((pageNumber: number) => {
+    const pageElement = pageElementsRef.current.get(pageNumber);
+    pageElement?.scrollIntoView({ block: "start" });
+  }, []);
+
+  const updatePageState = useCallback((pageNumber: number, options?: PdfViewerStateChangeOptions, shouldScroll = true) => {
     const nextPage = clampPdfPageNumber(pageNumber, toolbarState.pageCount);
     const nextHistoryBackPages = appendHistoryPage(getViewerStateHistoryBackPages(viewerStateRef.current), nextPage);
     setToolbarState((currentState) => ({ ...currentState, currentPage: nextPage, isBookmarked: isBookmarkedPage(bookmarkPages, nextPage) }));
-    persistViewerState({ currentPage: nextPage, historyBackPages: nextHistoryBackPages }, options);
-  }, [bookmarkPages, persistViewerState, toolbarState.pageCount]);
+    persistViewerState({ currentPage: nextPage, page: nextPage, history: nextHistoryBackPages, historyBackPages: nextHistoryBackPages }, options);
+    if (shouldScroll) globalThis.requestAnimationFrame(() => scrollToPage(nextPage));
+  }, [bookmarkPages, persistViewerState, scrollToPage, toolbarState.pageCount]);
 
   const updateScaleState = useCallback((scale: number, fitMode: PdfViewerState["fitMode"], options?: PdfViewerStateChangeOptions) => {
     const nextScale = clampPdfViewerScale(scale);
     setToolbarState((currentState) => ({ ...currentState, scale: nextScale }));
     persistViewerState({ scale: nextScale, fitMode }, options);
   }, [persistViewerState]);
+
+  const updatePageSize = useCallback((pageNumber: number, nextPageSize: PdfPageSize) => {
+    setPageSizes((currentPageSizes) => {
+      const index = pageNumber - 1;
+      const currentPageSize = currentPageSizes[index];
+      if (currentPageSize?.width === nextPageSize.width && currentPageSize.height === nextPageSize.height) return currentPageSizes;
+      const nextPageSizes = currentPageSizes.slice();
+      nextPageSizes[index] = nextPageSize;
+      return nextPageSizes;
+    });
+  }, []);
 
   const goToPreviousPage = useCallback(() => {
     updatePageState(toolbarState.currentPage - 1, { persistence: "immediate" });
@@ -215,18 +380,12 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
   }, [toolbarState.scale, updateScaleState]);
 
   const applyPageWidth = useCallback(() => {
-    const currentDocument = pdfDocumentRef.current;
     const container = containerRef.current;
-    if (!currentDocument || !container) return;
-
-    void currentDocument.getPage(toolbarState.currentPage).then((page) => {
-      const viewport = page.getViewport({ scale: 1 });
-      const availableWidth = Math.max(container.clientWidth - PDF_PAGE_WIDTH_PADDING_PX, 1);
-      updateScaleState(availableWidth / viewport.width, "width", { persistence: "immediate" });
-    }).catch((error: unknown) => {
-      setErrorMessage(getErrorMessage(error, "PDFページ幅の取得に失敗しました。"));
-    });
-  }, [toolbarState.currentPage, updateScaleState]);
+    const currentPageSize = pageSizes[toolbarState.currentPage - 1] ?? PDF_FALLBACK_PAGE_SIZE;
+    if (!container) return;
+    const availableWidth = Math.max(container.clientWidth - PDF_PAGE_WIDTH_PADDING_PX, 1);
+    updateScaleState(availableWidth / currentPageSize.width, "width", { persistence: "immediate" });
+  }, [pageSizes, toolbarState.currentPage, updateScaleState]);
 
   const handlePageInputChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const nextPage = Number(event.target.value);
@@ -256,7 +415,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       : [...bookmarkPages, currentPage].sort((left, right) => left - right);
     setBookmarkPages(nextBookmarkPages);
     setToolbarState((currentState) => ({ ...currentState, isBookmarked: isBookmarkedPage(nextBookmarkPages, currentPage) }));
-    persistViewerState({ bookmarkPages: nextBookmarkPages }, { persistence: "immediate" });
+    persistViewerState({ bookmark: isBookmarkedPage(nextBookmarkPages, currentPage), bookmarkPages: nextBookmarkPages }, { persistence: "immediate" });
   }, [bookmarkPages, persistViewerState, toolbarState.currentPage]);
 
   const goBackInHistory = useCallback(() => {
@@ -265,18 +424,20 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     if (previousPage === null) return;
     const nextHistoryBackPages = historyBackPages.slice(0, -1);
     setToolbarState((currentState) => ({ ...currentState, currentPage: previousPage, isBookmarked: isBookmarkedPage(bookmarkPages, previousPage) }));
-    persistViewerState({ currentPage: previousPage, historyBackPages: nextHistoryBackPages }, { persistence: "immediate" });
-  }, [bookmarkPages, persistViewerState]);
+    persistViewerState({ currentPage: previousPage, page: previousPage, history: nextHistoryBackPages, historyBackPages: nextHistoryBackPages }, { persistence: "immediate" });
+    globalThis.requestAnimationFrame(() => scrollToPage(previousPage));
+  }, [bookmarkPages, persistViewerState, scrollToPage]);
 
   useEffect(() => {
     if (!source) {
       setActiveDocument(null);
       setIsLoading(false);
-      setIsRendering(false);
       setErrorMessage(null);
       setToolbarState(createDefaultToolbarState());
       setBookmarkPages([]);
+      setPageSizes([]);
       setZoomInputValue("100");
+      pageElementsRef.current.clear();
       return;
     }
 
@@ -303,9 +464,13 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         const nextScale = getViewerStateScale(activeViewerState);
         const nextBookmarkPages = getViewerStateBookmarkPages(activeViewerState);
         setActiveDocument(loadedDocument);
+        setPageSizes(Array.from({ length: nextPageCount }, () => null));
         setBookmarkPages(nextBookmarkPages);
         setToolbarState({ currentPage: nextPage, pageCount: nextPageCount, scale: nextScale, isBookmarked: isBookmarkedPage(nextBookmarkPages, nextPage) });
         setIsLoading(false);
+        globalThis.requestAnimationFrame(() => {
+          globalThis.requestAnimationFrame(() => scrollToPage(nextPage));
+        });
       })
       .catch((error: unknown) => {
         if (isCancelled) return;
@@ -323,65 +488,37 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         sourceReleaseTimerRef.current = null;
       }, 0);
     };
-  }, [onLoadError, setActiveDocument, source, viewerOptions]);
+  }, [onLoadError, scrollToPage, setActiveDocument, source, viewerOptions]);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!pdfDocument || !canvas || toolbarState.pageCount <= 0) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-    let isCancelled = false;
-    const currentPage = clampPdfPageNumber(toolbarState.currentPage, toolbarState.pageCount);
-    const currentScale = clampPdfViewerScale(toolbarState.scale);
-
-    const renderPage = async () => {
-      renderTaskRef.current?.cancel();
-      renderTaskRef.current = null;
-      setIsRendering(true);
-      setErrorMessage(null);
-      const page = await pdfDocument.getPage(currentPage);
-      if (isCancelled) return;
-
-      const viewport = page.getViewport({ scale: currentScale });
-      const outputScale = Math.max(globalThis.devicePixelRatio || 1, 1);
-      const canvasContext = canvas.getContext("2d");
-      if (!canvasContext) throw new Error("PDF Canvas を初期化できませんでした。");
-
-      canvas.width = Math.floor(viewport.width * outputScale);
-      canvas.height = Math.floor(viewport.height * outputScale);
-      canvas.style.width = `${viewport.width}px`;
-      canvas.style.height = `${viewport.height}px`;
-      canvasContext.setTransform(outputScale, 0, 0, outputScale, 0, 0);
-      canvasContext.clearRect(0, 0, viewport.width, viewport.height);
-
-      const renderParameters = { canvas, canvasContext, viewport } as Parameters<PdfPageProxy["render"]>[0];
-      const renderTask = page.render(renderParameters);
-      renderTaskRef.current = renderTask;
-      await renderTask.promise;
-      if (renderTaskRef.current === renderTask) renderTaskRef.current = null;
+    const handleScroll = () => {
+      const nearestPage = getNearestPageNumber(container, pageElementsRef.current);
+      if (nearestPage === null) return;
+      setToolbarState((currentState) => currentState.currentPage === nearestPage ? currentState : { ...currentState, currentPage: nearestPage, isBookmarked: isBookmarkedPage(bookmarkPages, nearestPage) });
+      if (scrollIdleTimerRef.current !== null) globalThis.clearTimeout(scrollIdleTimerRef.current);
+      scrollIdleTimerRef.current = globalThis.setTimeout(() => {
+        const nextHistoryBackPages = appendHistoryPage(getViewerStateHistoryBackPages(viewerStateRef.current), nearestPage);
+        persistViewerState({ currentPage: nearestPage, page: nearestPage, history: nextHistoryBackPages, historyBackPages: nextHistoryBackPages }, { persistence: "deferred" });
+        scrollIdleTimerRef.current = null;
+      }, PDF_SCROLL_IDLE_DELAY_MS);
     };
 
-    void renderPage()
-      .catch((error: unknown) => {
-        if (isCancelled || isRenderingCancelled(error)) return;
-        setErrorMessage(getErrorMessage(error, "PDFページの描画に失敗しました。"));
-      })
-      .finally(() => {
-        if (!isCancelled) setIsRendering(false);
-      });
-
+    container.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
-      isCancelled = true;
-      renderTaskRef.current?.cancel();
-      renderTaskRef.current = null;
+      container.removeEventListener("scroll", handleScroll);
+      if (scrollIdleTimerRef.current !== null) globalThis.clearTimeout(scrollIdleTimerRef.current);
+      scrollIdleTimerRef.current = null;
     };
-  }, [pdfDocument, toolbarState.currentPage, toolbarState.pageCount, toolbarState.scale]);
+  }, [bookmarkPages, persistViewerState, scrollRoot]);
 
   useEffect(() => {
     return () => {
-      renderTaskRef.current?.cancel();
-      renderTaskRef.current = null;
       setActiveDocument(null);
       if (sourceReleaseTimerRef.current !== null) globalThis.clearTimeout(sourceReleaseTimerRef.current);
+      if (scrollIdleTimerRef.current !== null) globalThis.clearTimeout(scrollIdleTimerRef.current);
     };
   }, [setActiveDocument]);
 
@@ -436,7 +573,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
           ...(viewerStateRef.current?.markPages ?? {}),
           [event.key.toLowerCase()]: toolbarState.currentPage,
         };
-        persistViewerState({ markPages }, { persistence: "immediate" });
+        persistViewerState({ mark: event.key.toLowerCase(), markPages }, { persistence: "immediate" });
       }
     };
 
@@ -499,13 +636,18 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
           戻る
         </button>
       </div>
-      <div ref={containerRef} className={PDF_SCROLL_CONTAINER_CLASS_NAME}>
-        <div className="pdf-pane__single-page">
-          <canvas ref={canvasRef} className="pdf-pane__canvas" />
-        </div>
-        {isLoading || isRendering ? (
+      <div ref={handleContainerRef} className={PDF_SCROLL_CONTAINER_CLASS_NAME}>
+        {pdfDocument ? (
+          <div className="pdf-pane__pages">
+            {Array.from({ length: toolbarState.pageCount }, (_, index) => {
+              const pageNumber = index + 1;
+              return <PdfPageCanvas key={pageNumber} pdfDocument={pdfDocument} pageNumber={pageNumber} pageSize={pageSizes[index] ?? null} registerPageElement={registerPageElement} scale={toolbarState.scale} scrollRoot={scrollRoot} onPageSizeChange={updatePageSize} />;
+            })}
+          </div>
+        ) : null}
+        {isLoading ? (
           <div className="pdf-pane__overlay" role="status" aria-live="polite">
-            <LoadingSpinner size="md" text={isLoading ? "PDFを読み込み中..." : "PDFページを描画中..."} />
+            <LoadingSpinner size="md" text="PDFを読み込み中..." />
           </div>
         ) : null}
         {errorMessage ? (
