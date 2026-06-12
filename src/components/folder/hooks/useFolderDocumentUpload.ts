@@ -4,9 +4,9 @@ import { buildStoragePath, createDocumentId, extractPdfFiles } from "@/component
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { requestGoogleDriveFileAccessToken } from "@/integration/google-integration/googleDrive.oauth";
 import { uploadPdfToGoogleDrive } from "@/integration/google-integration/googleDrive.pdfUpload";
+import { auth } from "@/infrastructure/firebase/client";
 import { saveDocumentWithBlob } from "@/services/documentFileStore";
-import { auth } from "@/services/firebase";
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
 import type { DocumentItem } from "@/types";
 import { getOrCreateDeviceId } from "@/utils/device";
 
