@@ -2,12 +2,12 @@ import React from "react";
 import { useFlashcardDualDerived } from "@/components/card/frame/useFlashcardDualDerived";
 import { layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-import type { Card, UserSettings } from "@/types";
-import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
 import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
 import { DesktopEmbeddedCardEditorSurface } from "@/features/cardsetview/presentation/web/ui/components/DesktopEmbeddedCardEditorSurface";
 import { PreparedViewCardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/PreparedViewCardFaceScene";
+import type { Card, UserSettings } from "@/types";
+import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 interface DesktopCardSurfaceProps {
   card: Card;

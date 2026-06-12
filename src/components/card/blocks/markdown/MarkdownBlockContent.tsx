@@ -1,8 +1,8 @@
 import React from "react";
-import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
-import { clampMarkdownTabSize, normalizeMarkdownEditorValue, normalizeMarkdownInsertionText, resolveMarkdownTabKeyText } from "@/utils/markdownWhitespace";
 import { MarkdownBlockDisplay } from "@/components/card/blocks/markdown/MarkdownBlockDisplay";
 import { MarkdownEditorDialog } from "@/components/card/blocks/markdown/MarkdownEditorDialog";
+import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
+import { clampMarkdownTabSize, normalizeMarkdownEditorValue, normalizeMarkdownInsertionText, resolveMarkdownTabKeyText } from "@/utils/markdownWhitespace";
 
 type MarkdownReplaceBlock = | { type: "markdown"; markdown: string; }
   | { type: "code"; code: { language: string; code: string; }; };

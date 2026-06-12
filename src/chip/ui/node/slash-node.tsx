@@ -7,8 +7,8 @@ import type { TComboboxInputElement } from "platejs";
 import { KEYS } from "platejs";
 import type { PlateEditor, PlateElementProps } from "platejs/react";
 import { PlateElement } from "platejs/react";
-import { insertBlock, insertInlineElement } from "@/components/editor/transforms";
 import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxGroupLabel, InlineComboboxInput, InlineComboboxItem } from "@/chip/ui/inline-combobox";
+import { insertBlock, insertInlineElement } from "@/components/editor/transforms";
 
 type Group = {
   group: string;

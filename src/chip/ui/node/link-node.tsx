@@ -1,10 +1,10 @@
 "use client";
 
 import { getLinkAttributes } from "@platejs/link";
-import type { MouseEvent } from "react";
 import type { TLinkElement } from "platejs";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement } from "platejs/react";
+import type { MouseEvent } from "react";
 import { inlineSuggestionVariants } from "@/lib/suggestion";
 import { cn } from "@/lib/utils";
 

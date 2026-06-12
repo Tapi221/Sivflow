@@ -1,6 +1,6 @@
 import { createContext } from "react";
-import type { ReactNode } from "react";
 import type { User as FirebaseUser } from "firebase/auth";
+import type { ReactNode } from "react";
 
 type AuthSessionContextType = {
   currentUser: FirebaseUser | null;

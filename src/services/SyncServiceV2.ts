@@ -1,11 +1,11 @@
 import { nanoid } from "nanoid";
 import type { ICloudSyncAdapter, IDiffEngine, INetworkMonitor, IQueueManager, ISyncService, SecurityState, SyncChange, SyncConflict, SyncProcessingError, SyncStats, SyncTask, UserSettingsSnapshot } from "@/services/interfaces/ISyncService";
+import type { LocalDBLike } from "@/services/localDB";
 import { SecurityMonitor } from "@/services/logic/SecurityMonitor";
 import { TelemetryService } from "@/services/logic/TelemetryService";
 import type { Card, CardSet, Folder } from "@/types";
 import type { SyncConflict as StoredSyncConflict, SyncQueueItem, SyncResult } from "@/types/domain/sync";
 import type { SyncContextSource } from "@/types/domain/telemetry";
-import type { LocalDBLike } from "@/services/localDB";
 
 type SyncableRecord = Record<string, unknown> & { id?: string; isDeleted?: boolean; };
 

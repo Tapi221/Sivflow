@@ -9,9 +9,9 @@ import type { NodeEntry, Path, TCommentText, TElement, TSuggestionText } from "p
 import { ElementApi, KEYS, NodeApi, PathApi, TextApi } from "platejs";
 import type { PlateEditor } from "platejs/react";
 import { useEditorRef, useEditorVersion, usePluginOption } from "platejs/react";
+import type { TComment } from "@/chip/ui/comment";
 import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
-import type { TComment } from "@/chip/ui/comment";
 
 interface ResolvedSuggestion extends TResolvedSuggestion {
   comments: TComment[];

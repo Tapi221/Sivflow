@@ -1,6 +1,6 @@
-import { isStorageRecord } from "@/domain/shared/storage/storageRecordUtils";
 import { readCardStorageFiniteNumberField, readCardStorageStringField } from "@/domain/card/storage/cardStorageFieldReaders";
 import { sanitizeCardStorageLayout } from "@/domain/card/storage/cardStorageLayoutTransforms";
+import { isStorageRecord } from "@/domain/shared/storage/storageRecordUtils";
 
 const sanitizeCardStorageImageRef = (imageValue: unknown) => {
   if (!isStorageRecord(imageValue)) return imageValue;

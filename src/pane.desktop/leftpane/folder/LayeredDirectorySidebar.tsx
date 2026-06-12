@@ -22,14 +22,14 @@ import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
 import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
 import { useNotes } from "@/hooks/note/useNotes";
 import { cn } from "@/lib/utils";
-import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
-import type { CardSet, DocumentItem, Note, SelectedExplorerItem } from "@/types";
 import { LayeredTreeDropIndicator } from "@/pane.desktop/leftpane/folder/layeredTreeDnd";
 import { LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX, LAYERED_TREE_ROOT_LEVEL } from "@/pane.desktop/leftpane/folder/layeredTreeDnd.constants";
 import type { LayeredTreeDragState } from "@/pane.desktop/leftpane/folder/layeredTreeDnd.types";
 import { getLayeredTreeDropIndicatorLeft, isLayeredTreeAppendDropTarget } from "@/pane.desktop/leftpane/folder/layeredTreeDnd.utils";
 import { useLayeredTreeDragDrop } from "@/pane.desktop/leftpane/folder/useLayeredTreeDragDrop";
+import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
+import type { CardSet, DocumentItem, Note, SelectedExplorerItem } from "@/types";
 
 type FolderCommandSet = ReturnType<typeof useFolderCommands>;
 type CardSetCommandSet = ReturnType<typeof useCardSets>;

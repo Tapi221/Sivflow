@@ -1,11 +1,9 @@
 import type { HandwritingSession, HandwritingSessionMessage, HandwritingSessionStatus, HandwritingStrokeDeltaMessage } from "@platform/handwriting/handwritingSession.types";
-
 import type { HandwritingSessionClient, HandwritingSessionMessageHandler, HandwritingSessionStatusHandler, HandwritingSessionUnsubscribe } from "@platform/handwriting/handwritingSessionClient";
 
 type InMemoryHandwritingSessionHub = {
   clients: Set<InMemoryHandwritingSessionClient>;
 };
-
 type InMemoryHandwritingSessionClientOptions = {
   session: HandwritingSession;
   hub?: InMemoryHandwritingSessionHub;
@@ -87,7 +85,6 @@ class InMemoryHandwritingSessionClient implements HandwritingSessionClient {
     }
   }
 }
-
 const createInMemoryHandwritingSessionClientPair = (session: HandwritingSession): readonly [InMemoryHandwritingSessionClient, InMemoryHandwritingSessionClient] => {
   const hub = createHub();
   return [new InMemoryHandwritingSessionClient({ session, hub }), new InMemoryHandwritingSessionClient({ session, hub })];

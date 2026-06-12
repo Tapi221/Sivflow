@@ -1,8 +1,8 @@
 import dedent from "dedent";
 import type { SlateEditor } from "platejs";
+import { commonGenerateRules } from "@/app/api/ai/command/prompt/common";
 import type { ChatMessage } from "@/app/api/ai/command/types";
 import { addSelection, buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction, getMarkdownWithSelection, isMultiBlocks } from "@/app/api/ai/command/utils";
-import { commonGenerateRules } from "@/app/api/ai/command/prompt/common";
 
 const buildGenerateFreeformPrompt = (messages: ChatMessage[]) => {
   return buildStructuredPrompt({

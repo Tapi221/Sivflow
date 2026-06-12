@@ -7,12 +7,12 @@ import type { Path } from "platejs";
 import { PathApi } from "platejs";
 import type { PlateEditor, PlateElementProps } from "platejs/react";
 import { PlateElement, useEditorSelector, useFocused, useNavigationHighlight, usePath, useSelected } from "platejs/react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/chip/ui/button/button";
 import { Command, CommandGroup, CommandItem, CommandList } from "@/chip/ui/command";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/chip/ui/hover-card";
 import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem } from "@/chip/ui/inline-combobox";
 import { Popover, PopoverAnchor, PopoverContent } from "@/chip/ui/popover";
+import { cn } from "@/lib/utils";
 
 const NUMERIC_FOOTNOTE_QUERY = /^\d+$/;
 

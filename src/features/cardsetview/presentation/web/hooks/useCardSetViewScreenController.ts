@@ -7,6 +7,12 @@ import type { CardLayoutMode, CardSetInteractionMode } from "@/features/cardsetv
 import { CARD_LAYOUT_MODE_LABELS } from "@/features/cardsetview/domain/cardLayoutMode";
 import { CARD_VIEW_ZOOM_GESTURE_STEP_PERCENT, CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT, CARD_VIEW_ZOOM_WHEEL_STEP_PERCENT } from "@/features/cardsetview/domain/cardSetView.constants";
 import { clampCardIndex } from "@/features/cardsetview/domain/cardSetViewState";
+import { useCardSetViewData } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewData";
+import { useCardSetViewPaneWidth } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewPaneWidth";
+import { useCardSetViewState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewState";
+import { useCardSetViewWindowEvents } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewWindowEvents";
+import { useCardSetViewZoom } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewZoom";
+import { useCardSetViewZoomInput } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewZoomInput";
 import { useCardSetViewBreadcrumbs } from "@/features/cardsetview/presentation/web/infra/useCardSetViewBreadcrumbs";
 import { useCardSetViewParams } from "@/features/cardsetview/presentation/web/infra/useCardSetViewParams";
 import { buildWidthControl } from "@/features/cardsetview/presentation/web/ui/cardSetViewViewModels";
@@ -14,12 +20,6 @@ import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import { resolveSplitFallbackLayoutModePreference } from "@/services/cardLayoutFallbackPreferences";
 import { getCardSetViewNavigationPreference, setCardSetViewNavigationPreference } from "@/services/cardSetViewNavigationPreferences";
-import { useCardSetViewData } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewData";
-import { useCardSetViewPaneWidth } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewPaneWidth";
-import { useCardSetViewState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewState";
-import { useCardSetViewWindowEvents } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewWindowEvents";
-import { useCardSetViewZoom } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewZoom";
-import { useCardSetViewZoomInput } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewZoomInput";
 
 type ScrollAnchorFace = "question" | "answer";
 type UseCardSetViewScreenControllerParams = {

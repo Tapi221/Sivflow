@@ -2,8 +2,8 @@ import { useCallback, useMemo } from "react";
 import { CardPane } from "@/components/folder/panes/CardPane";
 import { useDocumentCommands } from "@/features/document/hooks/useDocumentCommands";
 import { PdfDocumentPane } from "@/features/pdf/PdfDocumentPane";
-import type { Card, DocumentItem } from "@/types";
 import type { WorkspaceEntityTab } from "@/pane.desktop/tab.desktopnative/Tab";
+import type { Card, DocumentItem } from "@/types";
 
 type WorkspaceTabPanelProps = {
   activeTab: WorkspaceEntityTab;

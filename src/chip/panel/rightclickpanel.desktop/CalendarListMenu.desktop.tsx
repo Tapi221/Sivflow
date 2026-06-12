@@ -35,7 +35,8 @@ const CalendarListMenu = ({ x, y, actions, menuRef, noDragStyle, panelId = CALEN
           if (action.disabled) return;
 
           action.onSelect();
-        }}>
+        }}
+        >
           {action.label}
         </button>
       ))}

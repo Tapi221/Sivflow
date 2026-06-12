@@ -1,9 +1,3 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { ClipboardEvent as ReactClipboardEvent, FormEvent as ReactFormEvent, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
-import { codeTheme } from "@shared/design-tokens/codeTheme";
-import type { RenderProps } from "prism-react-renderer";
-import { Highlight } from "prism-react-renderer";
-import Prism from "prismjs";
 import "prismjs/components/prism-bash";
 import "prismjs/components/prism-c";
 import "prismjs/components/prism-clike";
@@ -20,13 +14,19 @@ import "prismjs/components/prism-python";
 import "prismjs/components/prism-rust";
 import "prismjs/components/prism-sql";
 import "prismjs/components/prism-typescript";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { codeTheme } from "@shared/design-tokens/codeTheme";
+import type { RenderProps } from "prism-react-renderer";
+import { Highlight } from "prism-react-renderer";
+import Prism from "prismjs";
+import type { ClipboardEvent as ReactClipboardEvent, FormEvent as ReactFormEvent, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
+import { CodeBlockFrame } from "@/components/card/blocks/code/CodeBlockFrame";
+import { getViewerLanguageLabels, normalizeEditorLanguage, normalizeViewerLanguage } from "@/components/card/blocks/code/codeBlockLanguage";
 import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
 import { cn } from "@/lib/utils";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
 import { Check, Copy } from "@/ui/icons";
-import { CodeBlockFrame } from "@/components/card/blocks/code/CodeBlockFrame";
-import { getViewerLanguageLabels, normalizeEditorLanguage, normalizeViewerLanguage } from "@/components/card/blocks/code/codeBlockLanguage";
 
 type CodeBlockContentProps =
   | {

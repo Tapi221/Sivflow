@@ -3,13 +3,13 @@
 import { CaptionPlugin } from "@platejs/caption/react";
 import { AudioPlugin, FilePlugin, ImagePlugin, MediaEmbedPlugin, PlaceholderPlugin, VideoPlugin } from "@platejs/media/react";
 import { KEYS } from "platejs";
+import { MediaPreviewDialog } from "@/chip/ui/dialog/media-preview-dialog";
+import { MediaUploadToast } from "@/chip/ui/media-upload-toast";
 import { AudioElement } from "@/chip/ui/node/media-audio-node";
 import { MediaEmbedElement } from "@/chip/ui/node/media-embed-node";
 import { FileElement } from "@/chip/ui/node/media-file-node";
 import { ImageElement } from "@/chip/ui/node/media-image-node";
 import { PlaceholderElement } from "@/chip/ui/node/media-placeholder-node";
-import { MediaPreviewDialog } from "@/chip/ui/dialog/media-preview-dialog";
-import { MediaUploadToast } from "@/chip/ui/media-upload-toast";
 import { VideoElement } from "@/chip/ui/node/media-video-node";
 
 const MediaKit = [

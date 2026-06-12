@@ -1,8 +1,8 @@
 import React from "react";
 import { memo } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/chip/ui/dialog/dialog";
 import { LinkEditor } from "@/components/card/editor/LinkEditor";
 import MediaUploader from "@/components/card/media/MediaUploader";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/chip/ui/dialog/dialog";
 import type { UploadedImage } from "@/types";
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardFaceAttachmentAudio } from "@/types/domain/card";

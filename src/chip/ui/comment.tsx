@@ -9,14 +9,14 @@ import type { NodeEntry, TCommentText, Value } from "platejs";
 import { KEYS, nanoid, NodeApi } from "platejs";
 import type { CreatePlateEditorOptions } from "platejs/react";
 import { Plate, useEditorPlugin, useEditorRef, usePlateEditor, usePluginOption } from "platejs/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/chip/ui/avatar";
+import { Button } from "@/chip/ui/button/button";
+import { Editor, EditorContainer } from "@/chip/ui/editor";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/ui/menu/dropdown-menu";
 import { BasicMarksKit } from "@/components/editor/plugins/basic-marks-kit";
 import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/chip/ui/avatar";
-import { Button } from "@/chip/ui/button/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/ui/menu/dropdown-menu";
-import { Editor, EditorContainer } from "@/chip/ui/editor";
 
 type TComment = {
   id: string;

@@ -5,11 +5,11 @@ import { AIChatPlugin, AIPlugin, applyAISuggestions, getInsertPreviewStart, stre
 import cloneDeep from "lodash/cloneDeep.js";
 import { ElementApi, getPluginType, KEYS, PathApi } from "platejs";
 import { usePluginOption } from "platejs/react";
-import { useChat } from "@/components/editor/use-chat";
 import { AILoadingBar, AIMenu } from "@/chip/ui/ai-menu";
 import { AIAnchorElement, AILeaf } from "@/chip/ui/node/ai-node";
 import { CursorOverlayKit } from "@/components/editor/plugins/cursor-overlay-kit";
 import { MarkdownKit } from "@/components/editor/plugins/markdown-kit";
+import { useChat } from "@/components/editor/use-chat";
 
 const aiChatPlugin = AIChatPlugin.extend({ options: { chatOptions: { api: "/api/ai/command", body: {} } }, render: { afterContainer: AILoadingBar, afterEditable: AIMenu, node: AIAnchorElement }, shortcuts: { show: { keys: "mod+j" } }, useHooks: ({ editor, getOption }) => {
   useChat();

@@ -1,5 +1,5 @@
-import { useScheduleDays } from "@/features/calendar/grid/useScheduleColumns";
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
+import { useScheduleDays } from "@/features/calendar/grid/useScheduleColumns";
 import type { CalendarBufferDays, CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
 
 const useCalendarVisibleRange = ({ currentDate, selectedViewMode, calendarBuffer, weekStartDay }: { currentDate: Date;
