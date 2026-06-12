@@ -1,6 +1,10 @@
 import { IndexedDBMetadataService } from "./IndexedDBMetadataService";
 import { IndexedDBRebuildOrchestrator } from "./IndexedDBRebuildOrchestrator";
-import { getLocalDb } from "./localDB";
+import { getLocalDb } from "./localdb";
+
+type ResettableLocalDb = {
+  delete: () => Promise<void>;
+};
 
 const rebuildIndexedDb = async (userId: string, reason?: string): Promise<{ degraded: boolean;
   failures: Array<{ type: string; id: string; error: string; }>;
@@ -11,7 +15,7 @@ const rebuildIndexedDb = async (userId: string, reason?: string): Promise<{ degr
   let metaService = new IndexedDBMetadataService(db, userId);
 
   await metaService.incrementRebuildCount(reason ?? "unknown");
-  await db.delete();
+  await (db as ResettableLocalDb).delete();
   await getLocalDb(userId);
 
   let rebuildResult: Awaited<
