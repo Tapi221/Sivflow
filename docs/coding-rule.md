@@ -50,6 +50,8 @@ import、型定義、定数、helper 関数、component 本体、memo / displayN
 
 連続する空行は source file 全体で禁止する。`/// <reference ... />`、import 群、型定義、定数、helper 処理、`export {}` の前後も例外にしない。
 
+JSX の同一 parent 内で、連続する JSX tag child の間に意味のない空行を入れない。視覚的なグルーピングが必要な場合は component 分割、変数化、またはコメントで意図を明示する。
+
 ```ts
 import { value } from "./value";
 import type { Value } from "./value.types";
@@ -64,9 +66,9 @@ const createLocalValueId = (id: string) => `${LOCAL_VALUE_PREFIX}:${id}`;
 const isLocalValueId = (id: string) => id.startsWith(`${LOCAL_VALUE_PREFIX}:`);
 ```
 
-`npm run lint`、`npm run lint:fix`、`npm run fix:source-conventions` は、source 規約の空行と type-only import を自動で正規化する。自動整形 script が import 間だけを直して、同じブロック内またはブロック間の余分な空行を残す状態は禁止する。
+`npm run lint`、`npm run lint:fix`、`npm run fix:source-conventions` は、source 規約の空行、JSX 子要素間の空行、type-only import を自動で正規化する。自動整形 script が import 間だけを直して、同じブロック内またはブロック間の余分な空行を残す状態は禁止する。
 
-`npm run verify:source-conventions` は `verify:blank-lines` を含めて実行し、連続空行を検出する。連続空行の検査は `scripts/verify/verify-repeated-blank-lines.mjs` に置く。
+`npm run verify:source-conventions` は `verify:blank-lines` と `verify:jsx-child-spacing` を含めて実行し、連続空行と JSX 子要素間の意味のない空行を検出する。連続空行の検査は `scripts/verify/verify-repeated-blank-lines.mjs` に置き、JSX 子要素間の空行検査は `scripts/verify/verify-jsx-child-spacing.mjs` に置く。
 
 import 間の空行検査と自動修正は、import 文直前の空白・改行も対象に含める。AST の `getFullStart()` だけを基準にして import 前の空行を取り逃がす実装は禁止する。
 
@@ -227,6 +229,8 @@ box-shadow: 0 0 0 1px #ffff;
 複数要素を返すだけのラッパーは必ず `<>...</>` を使う。`Fragment` の明示使用は `key` が必要な `map` 内だけ許可する。`className` / `style` / `ref` / `onClick` / `role` / `aria-*` / `data-*` / layout が必要な場合だけ `div` などの実 DOM を使う。意味のないラッパー `div` は使わない。
 
 単一要素だけを返すために `<>...</>` で囲むことは禁止する。この場合は子要素を直接返す。`Fragment` / `React.Fragment` の明示使用は、`map` 内で `key` を付ける必要がある場合だけ許可し、それ以外は `<>...</>` にする。`key` 以外の属性が必要な場合は Fragment ではなく、責務のある実 DOM または適切な component を使う。
+
+JSX tag child 同士の間に空白だけの空行を入れない。`npm run fix:jsx-child-spacing` は対象の空行を1改行へ自動修正し、`npm run verify:jsx-child-spacing` は違反を検出する。
 
 ## 絵文字・pictographic symbol
 
