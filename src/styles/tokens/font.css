@@ -6,13 +6,15 @@
    */
   --app-font-family-ui:
     -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
-    "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Helvetica Neue",
-    Arial, sans-serif;
+    "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", system-ui,
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+    "Yu Gothic UI", "Yu Gothic", Meiryo, "Helvetica Neue", Arial, sans-serif;
   --app-font-family-content:
     "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro",
     "Noto Serif JP", "MS PMincho", serif;
   --app-font-family-numeric:
     -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+    "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", system-ui,
     "Helvetica Neue", Arial, sans-serif;
   --app-font-family-code:
     "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
