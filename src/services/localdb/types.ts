@@ -1,6 +1,9 @@
 import type { CardRelation, LocalDBInstance, LocalDBLike as BaseLocalDBLike, LocalDBSyncApi, LocalDBTableMap, ProjectMap, QueryableCollection, QueryableKeyPath, QueryableTable, QueryableWhereClause, QueryableWhereFunction, SyncableEntityTable, TagRecord } from "./localdb.types";
 
 type LocalDBLike = BaseLocalDBLike & {
+  table<T extends object = Record<string, unknown>, TKey = string>(name: string): QueryableTable<T, TKey>;
+  transaction<T>(mode: string, first: unknown, ...rest: unknown[]): Promise<T>;
+  close(): void;
   metadata: QueryableTable<Record<string, unknown>, string>;
   levelHistories: QueryableTable<Record<string, unknown>, string>;
   deviceMeta: QueryableTable<Record<string, unknown>, string>;
