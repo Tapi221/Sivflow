@@ -1,7 +1,7 @@
 import type { CSSProperties, RefObject } from "react";
+import { Panel } from "../panel";
 import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE } from "./rightClickPanel.utils";
-import { RightClickPanelSurface } from "../rightClickPanelCommon";
 
 type ProjectCalendarLinksMenuAction = {
   id: string;
@@ -41,21 +41,13 @@ const ProjectCalendarLinksMenu = ({
   panelId = PROJECT_CALENDAR_LINKS_MENU_PANEL_ID,
 }: ProjectCalendarLinksMenuProps) => {
   return (
-    <RightClickPanelSurface
-      x={x}
-      y={y}
-      width={PROJECT_CALENDAR_LINKS_MENU_WIDTH}
-      panelRef={menuRef}
-      noDragStyle={noDragStyle}
-      ariaLabel="project calendar links context menu"
-      panelId={panelId}
-    >
+    <Panel id={panelId} x={x} y={y} width={PROJECT_CALENDAR_LINKS_MENU_WIDTH} panelRef={menuRef} style={noDragStyle} role="menu" ariaLabel="project calendar links context menu" preventContextMenu>
       {actions.map((action) => (
         <button
           key={action.id}
           type="button"
           disabled={action.disabled}
-          className="right-click-panel-item"
+          className="panel__item"
           role="menuitem"
           onClick={(event) => {
             event.preventDefault();
@@ -69,7 +61,7 @@ const ProjectCalendarLinksMenu = ({
           {action.label}
         </button>
       ))}
-    </RightClickPanelSurface>
+    </Panel>
   );
 };
 
