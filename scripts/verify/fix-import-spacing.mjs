@@ -192,6 +192,15 @@ const getExportDeclarationRemoval = (sourceFile, statement) => ({ end: statement
 
 const getStatementText = (source, sourceFile, statement) => source.slice(statement.getStart(sourceFile), statement.getEnd()).trim();
 
+const getMergeableNamedExportEntries = (source, sourceFile, statement) => {
+  if (statement.moduleSpecifier) return null;
+  if (!statement.exportClause || !ts.isNamedExports(statement.exportClause)) return null;
+  if (statement.exportClause.elements.length === 0) return null;
+  if (statement.exportClause.elements.some((specifier) => specifier.isTypeOnly)) return null;
+
+  return statement.exportClause.elements.map((specifier) => source.slice(specifier.getStart(sourceFile), specifier.getEnd()).trim());
+};
+
 const collectExportConventionReplacements = (source, sourceFile) => {
   const replacements = [];
   const valueExportTexts = [];
@@ -202,7 +211,14 @@ const collectExportConventionReplacements = (source, sourceFile) => {
   for (const statement of sourceFile.statements) {
     if (ts.isExportDeclaration(statement)) {
       const exportText = getStatementText(source, sourceFile, statement);
-      if (statement.isTypeOnly) {
+      const mergeableEntries = getMergeableNamedExportEntries(source, sourceFile, statement);
+      if (mergeableEntries) {
+        if (statement.isTypeOnly) {
+          typeNames.push(...mergeableEntries);
+        } else {
+          valueNames.push(...mergeableEntries);
+        }
+      } else if (statement.isTypeOnly) {
         typeExportTexts.push(exportText);
       } else {
         valueExportTexts.push(exportText);
