@@ -1,20 +1,14 @@
 import crypto from "node:crypto";
 import { getAdminStorage } from "#src/firebaseAdmin.js";
 
-
-
 type CachedGoogleProfileImageResult = {
   contentType: string;
   payload: Buffer;
 };
 
-
-
 const MAX_PROFILE_IMAGE_BYTES = 256 * 1024;
 const PROFILE_IMAGE_CACHE_ROOT = "google-profile-images";
 const DOWNLOAD_TOKEN_METADATA_KEY = "firebaseStorageDownloadTokens";
-
-
 
 const toErrorSummary = (error: unknown): Record<string, unknown> => {
   if (error instanceof Error) return { name: error.name, message: error.message };
@@ -63,7 +57,5 @@ const cacheGoogleProfileImageUrl = async (uid: string, sourceUrl: string | null)
     return null;
   }
 };
-
-
 
 export { cacheGoogleProfileImageUrl };

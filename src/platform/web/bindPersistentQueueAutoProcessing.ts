@@ -2,11 +2,7 @@ type AssetQueueProcessor = {
   processAssetQueue: () => Promise<void>;
 };
 
-
-
 const AUTO_PROCESS_LISTENER_KEY = "__flashcardPersistentQueueAutoProcessListenersBound";
-
-
 
 const getAssetQueueProcessingReasonLabel = (reason: "load" | "online"): string => {
   return reason === "load" ? "読み込み完了" : "オンライン復帰";
@@ -54,7 +50,5 @@ const bindPersistentQueueAutoProcessing = (persistentQueue: AssetQueueProcessor)
     triggerAssetQueueProcessing(persistentQueue, "load");
   }
 };
-
-
 
 export { bindPersistentQueueAutoProcessing };
