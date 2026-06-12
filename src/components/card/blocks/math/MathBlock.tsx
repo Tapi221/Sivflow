@@ -6,6 +6,8 @@ import { Sigma } from "@/ui/icons";
 import { MathBlockPreviewPane } from "./MathBlockPreviewPane";
 import { MathEditorDialog } from "./MathEditorDialog";
 
+
+
 interface MathBlockProps {
   data: MathBlockData;
   onChange: (data: MathBlockData) => void;
@@ -25,7 +27,11 @@ interface MathBlockProps {
   zoom?: number;
 }
 
+
+
 const MAX_LATEX_LENGTH = 10000;
+
+
 
 const areMathBlockPropsEqual = (prev: MathBlockProps, next: MathBlockProps) =>
   prev.data === next.data &&
@@ -36,6 +42,8 @@ const areMathBlockPropsEqual = (prev: MathBlockProps, next: MathBlockProps) =>
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&
   prev.zoom === next.zoom;
+
+
 
 const MathBlockInner: React.FC<MathBlockProps> = ({
   data,
@@ -119,6 +127,8 @@ const MathBlockInner: React.FC<MathBlockProps> = ({
     </BlockWrapper>
   );
 };
+
+
 
 const MathBlock = React.memo(MathBlockInner, areMathBlockPropsEqual);
 MathBlock.displayName = "MathBlock";

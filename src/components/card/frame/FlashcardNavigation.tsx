@@ -4,6 +4,8 @@
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
 
+
+
 interface FlashcardNavigationProps {
   onNext?: () => void;
   onPrev?: () => void;
@@ -12,6 +14,8 @@ interface FlashcardNavigationProps {
   currentIndex?: number;
   totalCards?: number;
 }
+
+
 
 const FlashcardNavigation = ({ onNext, onPrev, hasNext, hasPrev, currentIndex, totalCards }: FlashcardNavigationProps) => {
   const showNav = onNext || onPrev || (currentIndex !== undefined && totalCards !== undefined);
@@ -56,5 +60,7 @@ const FlashcardNavigation = ({ onNext, onPrev, hasNext, hasPrev, currentIndex, t
     </div>
   );
 };
+
+
 
 export { FlashcardNavigation };

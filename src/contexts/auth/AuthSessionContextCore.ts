@@ -2,6 +2,8 @@ import { createContext } from "react";
 import type { User as FirebaseUser } from "firebase/auth";
 import type { ReactNode } from "react";
 
+
+
 type AuthSessionContextType = {
   currentUser: FirebaseUser | null;
   loading: boolean;
@@ -11,13 +13,21 @@ type AuthSessionProviderProps = {
   children: ReactNode;
 };
 
+
+
 const AuthSessionContext = createContext<AuthSessionContextType>({
   currentUser: null,
   loading: true,
   logout: noopLogout,
 });
 
+
+
 const noopLogout = async () => {};
 
+
+
 export { AuthSessionContext };
+
+
 export type { AuthSessionContextType, AuthSessionProviderProps };

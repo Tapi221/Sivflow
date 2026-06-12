@@ -1,10 +1,16 @@
 import React from "react";
 
+
+
 type RowSnapProps = {
   rowPx: number; children: (ctx: { snapPaddingBottomPx: number; snapRef: (node: HTMLElement | null) => void; }) => React.ReactNode; afterGapRows?: number; };
 
+
+
 const EPSILON = 0.5;
 const SNAP_TOLERANCE_PX = 1;
+
+
 
 const RowSnap = ({ rowPx, children, afterGapRows = 0 }: RowSnapProps) => {
   const targetRef = React.useRef<HTMLElement | null>(null);
@@ -61,5 +67,7 @@ const RowSnap = ({ rowPx, children, afterGapRows = 0 }: RowSnapProps) => {
 
   return children({ snapPaddingBottomPx, snapRef: setSnapRef });
 };
+
+
 
 export { RowSnap };
