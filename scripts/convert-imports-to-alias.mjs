@@ -6,12 +6,20 @@ const projectRoot = process.cwd();
 const sourceExtensions = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"];
 const resolvableExtensions = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".json", ".css", ".scss", ".sass", ".less"];
 const importPatterns = [
-  /(from\s+["'])(\.{1,2}\/[^"']+)(["'])/g,
-  /(import\s+["'])(\.{1,2}\/[^"']+)(["'])/g,
-  /(import\s*\(\s*["'])(\.{1,2}\/[^"']+)(["']\s*\))/g,
+  /(from\s+["'])(\.{1,2}\/[^"']+|@\/[^"']+|@web\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+|#src\/[^"']+)(["'])/g,
+  /(import\s+["'])(\.{1,2}\/[^"']+|@\/[^"']+|@web\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+|#src\/[^"']+)(["'])/g,
+  /(import\s*\(\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@web\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+|#src\/[^"']+)(["']\s*\))/g,
+  /(export\s+[^;]*?\s+from\s+["'])(\.{1,2}\/[^"']+|@\/[^"']+|@web\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+|#src\/[^"']+)(["'])/g,
 ];
-
 const aliasRoots = [
+  { dir: path.join(projectRoot, "apps/web/src"), prefix: "@web" },
+  { dir: path.join(projectRoot, "apps/mobile/src"), prefix: "@mobile" },
+  { dir: path.join(projectRoot, "packages/core/src"), prefix: "@core" },
+  { dir: path.join(projectRoot, "packages/platform/src"), prefix: "@platform" },
+  { dir: path.join(projectRoot, "packages/web-renderer/src"), prefix: "@web-renderer" },
+  { dir: path.join(projectRoot, "packages/mobile-renderer/src"), prefix: "@mobile-renderer" },
+  { dir: path.join(projectRoot, "shared"), prefix: "@shared" },
+  { dir: path.join(projectRoot, "functions/src"), prefix: "#src" },
   { dir: path.join(projectRoot, "src"), prefix: "@" },
 ];
 
@@ -37,12 +45,13 @@ const isInsideDir = (filePath, dirPath) => {
   return relativePath === "" || (!relativePath.startsWith("..") && !path.isAbsolute(relativePath));
 };
 
-const hasKnownSourceExtension = (modulePath) => sourceExtensions.some((extension) => modulePath.endsWith(extension));
+const hasKnownExtension = (modulePath) => resolvableExtensions.some((extension) => modulePath.endsWith(extension));
 
-const stripKnownSourceExtension = (modulePath) => {
-  for (const extension of sourceExtensions) {
+const stripKnownExtension = (modulePath) => {
+  for (const extension of resolvableExtensions) {
     if (modulePath.endsWith(extension)) return modulePath.slice(0, -extension.length);
   }
+
   return modulePath;
 };
 
@@ -56,9 +65,7 @@ const fileExists = (filePath) => {
   }
 };
 
-const resolveExistingModulePath = (importerDir, spec) => {
-  const basePath = path.resolve(importerDir, spec);
-
+const resolveExistingModulePath = (basePath) => {
   if (fileExists(basePath)) return basePath;
 
   for (const extension of resolvableExtensions) {
@@ -73,35 +80,31 @@ const resolveExistingModulePath = (importerDir, spec) => {
   return null;
 };
 
-const findAliasRoot = (targetFilePath) => aliasRoots.find(({ dir }) => isInsideDir(targetFilePath, dir));
+const findAliasRootByPrefix = (spec) => aliasRoots.find(({ prefix }) => spec.startsWith(`${prefix}/`));
 
-const toSameDirRelative = (importerDir, targetFilePath, originalSpec) => {
-  const originalHadSourceExtension = hasKnownSourceExtension(originalSpec);
-  const relativeFromImporter = normalizePath(path.relative(importerDir, targetFilePath));
-  const modulePath = originalHadSourceExtension ? relativeFromImporter : stripTrailingIndex(stripKnownSourceExtension(relativeFromImporter));
+const findAliasRootByFilePath = (targetFilePath) => aliasRoots.find(({ dir }) => isInsideDir(targetFilePath, dir));
 
-  return modulePath.startsWith(".") ? modulePath : `./${modulePath}`;
+const resolveSpecifierPath = (importerDir, spec) => {
+  const aliasRoot = findAliasRootByPrefix(spec);
+  if (aliasRoot) return resolveExistingModulePath(path.join(aliasRoot.dir, spec.slice(aliasRoot.prefix.length + 1)));
+  if (spec.startsWith(".")) return resolveExistingModulePath(path.resolve(importerDir, spec));
+
+  return null;
 };
 
 const toAliasSpec = (targetFilePath, aliasRoot, originalSpec) => {
-  const originalHadSourceExtension = hasKnownSourceExtension(originalSpec);
+  const originalHadKnownExtension = hasKnownExtension(originalSpec);
   const relativeToRoot = normalizePath(path.relative(aliasRoot.dir, targetFilePath));
-  const modulePath = originalHadSourceExtension ? relativeToRoot : stripTrailingIndex(stripKnownSourceExtension(relativeToRoot));
+  const modulePath = originalHadKnownExtension ? relativeToRoot : stripTrailingIndex(stripKnownExtension(relativeToRoot));
 
   return `${aliasRoot.prefix}/${modulePath}`;
 };
 
 const convertSpecifier = (filePath, spec) => {
-  if (spec.startsWith("./") && !spec.slice(2).includes("/")) return spec;
-
-  const importerDir = path.dirname(filePath);
-  const targetFilePath = resolveExistingModulePath(importerDir, spec);
+  const targetFilePath = resolveSpecifierPath(path.dirname(filePath), spec);
   if (!targetFilePath) return spec;
 
-  const targetDir = path.dirname(targetFilePath);
-  if (targetDir === importerDir) return toSameDirRelative(importerDir, targetFilePath, spec);
-
-  const aliasRoot = findAliasRoot(targetFilePath);
+  const aliasRoot = findAliasRootByFilePath(targetFilePath);
   if (!aliasRoot) return spec;
 
   return toAliasSpec(targetFilePath, aliasRoot, spec);
