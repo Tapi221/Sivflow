@@ -1,4 +1,4 @@
-import { auth } from "@/services/firebase";
+import { auth } from "@/infrastructure/firebase/client";
 import { GoogleCalendarSyncEngine } from "@/sync/googlecalendar-sync/GoogleCalendarSyncEngine";
 import { GoogleCalendarWatchManager } from "@/sync/googlecalendar-sync/GoogleCalendarWatchManager";
 import type { GCalForceSyncOptions, GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritableEventUpdateInput, GoogleCalendarEvent, GoogleCalendarListItem } from "./gcalSync.types";
