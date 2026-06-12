@@ -1,26 +1,49 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
+
 import { addDays, endOfDay, endOfMonth, format, startOfDay, startOfMonth, subDays } from "date-fns";
+
 import type { ComponentType, SVGProps } from "react";
+
 import * as stratisIcons from "stratis-ui-icons";
+
 import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
+
 import { createCalendarYearEventDisplayResolver } from "@/features/calendar/calendarEventSourcePriority";
+
 import { attachCalendarEventDisplayMetadata, filterCalendarEventsBySourceVisibility } from "@/features/calendar/calendarEventVisibility";
+
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
+
 import { CalendarMonthView } from "@/features/calendar/grid/CalendarView.month";
+
 import { CalendarYearView } from "@/features/calendar/grid/CalendarView.year";
+
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
+
 import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
+
 import type { AppCalendarItem, CalendarViewMode, CalendarViewModeSelection, ScheduleScreenProps } from "@/features/calendar/scheduleScreen.types";
+
 import { CalendarTimetableView } from "@/features/calendar/timetable/CalendarTimetableView";
+
 import { applyCalendarEventMoveOverrides, useCalendarEventMoveController } from "@/features/calendar/useCalendarEventMoveController";
+
 import { useProjectCalendarActions } from "@/features/calendar/useProjectCalendarActions";
+
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
+
 import { createCalendarEventsScopeKey, useTransientEmptyCalendarEvents } from "@/features/calendar/useTransientEmptyCalendarEvents";
+
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+
 import { cn } from "@/lib/utils";
+
 import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
+
 import { MobileCalendarEventComposer } from "./MobileCalendarEventComposer";
+
 import { MobileCalendarSidebar, MobileCalendarSidebarOpenButton } from "./MobileCalendarSidebar";
 
 type CalendarEventDisplayRange = { start: Date; end: Date; };
@@ -64,6 +87,10 @@ const WEEKDAY_EVENT_BUFFER_DAYS = 1;
 const MONTH_EVENT_BUFFER_DAYS = 14;
 
 const EMPTY_APP_PROJECTS: AppCalendarItem[] = [];
+
+const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);
+
+const StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);
 
 const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);
 

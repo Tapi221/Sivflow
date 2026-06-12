@@ -1,17 +1,31 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
+
 import type { CalendarTimetableColorKey, CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTimetablePeriod, CalendarTimetableSlot, CalendarTimetableVisibleDayCount, CalendarTimetableWeekdayIndex } from "@core/domain/calendar/timetable/timetable.types";
+
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
+
 import { ja } from "date-fns/locale";
+
 import type { ComponentType, CSSProperties, SVGProps } from "react";
+
 import * as stratisIcons from "stratis-ui-icons";
+
 import { TAG_COLOR_KEYS } from "@/chip/tag/tag.constants";
+
 import { getTagColorStyle } from "@/chip/tag/tag.style";
+
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
+
 import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
+
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
+
 import { cn } from "@/lib/utils";
+
 import { normalizeVisibleDayCount } from "./calendarTimetable.storage";
+
 import { CalendarTimetableSyllabusCatalogPanel } from "./CalendarTimetableSyllabusCatalogPanel";
+
 import { useCalendarTimetable } from "./useCalendarTimetable";
 
 type TimetableSlot = { dayIndex: CalendarTimetableWeekdayIndex; periodId: string; };
@@ -47,6 +61,12 @@ const DEFAULT_COURSE_COLOR_KEY: CalendarTimetableColorKey = "blue";
 const DEFAULT_TIMETABLE_ADD_REQUEST_TOKEN = 0;
 
 const EMPTY_SLOT_LIST: CalendarTimetableSlot[] = [];
+
+const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);
+
+const StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);
+
+const StratisSettingsIcon = resolveStratisIcon(STRATIS_SETTINGS_ICON_NAMES);
 
 const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);
 
