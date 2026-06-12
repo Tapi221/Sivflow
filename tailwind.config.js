@@ -18,40 +18,29 @@ const config = {
   theme: {
     extend: {
       colors: {
-        border:
-          "rgb(var(--ds-semantic-color-border-default-rgb) / <alpha-value>)",
-        input:
-          "rgb(var(--ds-semantic-color-border-default-rgb) / <alpha-value>)",
-        ring: "rgb(var(--ds-semantic-color-action-primary-rgb) / <alpha-value>)",
-        foreground:
-          "rgb(var(--ds-semantic-color-text-primary-rgb) / <alpha-value>)",
+        border: "hsl(var(--border) / <alpha-value>)",
+        input: "hsl(var(--input) / <alpha-value>)",
+        ring: "hsl(var(--ring) / <alpha-value>)",
+        foreground: "hsl(var(--foreground) / <alpha-value>)",
         popover: {
-          DEFAULT:
-            "rgb(var(--ds-semantic-color-background-app-rgb) / <alpha-value>)",
-          foreground:
-            "rgb(var(--ds-semantic-color-text-primary-rgb) / <alpha-value>)",
+          DEFAULT: "hsl(var(--popover) / <alpha-value>)",
+          foreground: "hsl(var(--popover-foreground) / <alpha-value>)",
         },
         muted: {
-          DEFAULT: "rgb(var(--ds-color-neutral-100-rgb) / <alpha-value>)",
-          foreground:
-            "rgb(var(--ds-semantic-color-text-secondary-rgb) / <alpha-value>)",
+          DEFAULT: "hsl(var(--muted) / <alpha-value>)",
+          foreground: "hsl(var(--muted-foreground) / <alpha-value>)",
         },
         accent: {
-          DEFAULT:
-            "rgb(var(--ds-semantic-color-background-sidebar-active-rgb) / <alpha-value>)",
-          foreground:
-            "rgb(var(--ds-semantic-color-text-strong-rgb) / <alpha-value>)",
+          DEFAULT: "hsl(var(--accent) / <alpha-value>)",
+          foreground: "hsl(var(--accent-foreground) / <alpha-value>)",
         },
         secondary: {
-          DEFAULT:
-            "rgb(var(--ds-semantic-color-action-primary-soft-rgb) / <alpha-value>)",
-          foreground:
-            "rgb(var(--ds-semantic-color-action-primary-rgb) / <alpha-value>)",
+          DEFAULT: "hsl(var(--secondary) / <alpha-value>)",
+          foreground: "hsl(var(--secondary-foreground) / <alpha-value>)",
         },
         destructive: {
-          DEFAULT: "rgb(var(--ds-color-status-danger-rgb) / <alpha-value>)",
-          foreground:
-            "rgb(var(--ds-semantic-color-text-on-primary-rgb) / <alpha-value>)",
+          DEFAULT: "hsl(var(--destructive) / <alpha-value>)",
+          foreground: "hsl(var(--destructive-foreground) / <alpha-value>)",
         },
         primary: {
           DEFAULT: "rgb(var(--ds-color-primary-500-rgb) / <alpha-value>)",
@@ -80,10 +69,8 @@ const config = {
           900: "rgb(var(--ds-color-neutral-900-rgb) / <alpha-value>)",
         },
         background: {
-          DEFAULT:
-            "rgb(var(--ds-semantic-color-background-app-rgb) / <alpha-value>)",
-          light:
-            "rgb(var(--ds-semantic-color-background-app-rgb) / <alpha-value>)",
+          DEFAULT: "hsl(var(--background) / <alpha-value>)",
+          light: "rgb(var(--ds-semantic-color-background-app-rgb) / <alpha-value>)",
           subtle: "rgb(var(--ds-color-neutral-100-rgb) / <alpha-value>)",
         },
         text: {
