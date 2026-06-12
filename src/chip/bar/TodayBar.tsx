@@ -4,8 +4,6 @@ import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "@/ui/icons";
 
-
-
 type Props = {
   onPrevious: () => void;
   onNext: () => void;
@@ -13,14 +11,10 @@ type Props = {
   className?: string;
 };
 
-
-
 const TODAY_NAV_BUTTON_CLASS_NAME =
   "relative z-10 flex h-7 min-h-0 w-7 min-w-0 shrink-0 items-center justify-center rounded-[7px] p-0 appearance-none select-none text-[#85827e] outline-none ring-0 transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eee] hover:text-[#2f343b] active:scale-[0.94] focus:outline-none focus:ring-0 focus-visible:bg-[#eee] focus-visible:text-[#2f343b] focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100";
 const TODAY_BUTTON_CLASS_NAME =
   "relative z-10 flex h-7 min-h-0 min-w-[54px] max-w-[88px] items-center justify-center overflow-hidden rounded-[7px] border-0 bg-transparent px-2.5 text-[12px] font-semibold leading-none tracking-[-0.012em] text-[#85827e] shadow-none outline-none ring-0 transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eee] hover:text-[#2f343b] active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-[#eee] focus-visible:text-[#2f343b] focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100";
-
-
 
 const TodayBar = ({ onPrevious, onNext, onToday, className }: Props) => {
   const t = useT();
@@ -62,7 +56,5 @@ const TodayBar = ({ onPrevious, onNext, onToday, className }: Props) => {
     </div>
   );
 };
-
-
 
 export { TodayBar };
