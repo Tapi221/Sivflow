@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
 
-type CssVars = CSSProperties & Record<`--${string}`, string | number>;
+type CssVars = CSSProperties & Partial<Record<`--${string}`, string | number>>;
 
 export type { CssVars };
