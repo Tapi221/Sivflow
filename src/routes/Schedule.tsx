@@ -29,7 +29,7 @@ const useIsMobileSchedule = () => {
   return isMobile;
 };
 
-const Calendar = () => {
+const ScheduleRoute = () => {
   const isMobile = useIsMobileSchedule();
   const activeSectionKey = useWorkspaceTabsStore((state) => state.tabs.find((tab) => tab.id === state.activeTabId)?.sectionKey ?? null);
   const shouldUseMobileScheduleScreen = isMobile && activeSectionKey !== "library";
@@ -48,4 +48,4 @@ const Calendar = () => {
   );
 };
 
-export default Calendar;
+export { ScheduleRoute };
