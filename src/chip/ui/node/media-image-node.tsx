@@ -7,10 +7,10 @@ import { ResizableProvider, useResizableValue } from "@platejs/resizable";
 import type { TImageElement } from "platejs";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement, withHOC } from "platejs/react";
+import { Caption, CaptionTextarea } from "@/chip/ui/caption";
+import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "@/chip/ui/resize-handle";
+import { MediaToolbar } from "@/chip/ui/toolbar/media-toolbar";
 import { cn } from "@/lib/utils";
-import { Caption, CaptionTextarea } from "./caption";
-import { MediaToolbar } from "./media-toolbar";
-import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "./resize-handle";
 
 const ImageElement = withHOC(ResizableProvider, (props: PlateElementProps<TImageElement>) => {
   const { align = "center", focused, readOnly, selected } = useMediaState();
