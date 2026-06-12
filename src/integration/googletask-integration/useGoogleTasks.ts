@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useReducer } from "react";
 import { refreshConnectedServiceAccessToken, requestConnectedServiceAccessToken } from "@/integration/google-integration/google.oauth";
 import { getServerStoredGoogleConnectedServiceAccessToken, isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
 import type { GoogleConnectedServiceAccountEntry, GoogleConnectedServiceAccountTokenUpdate } from "@/integration/google-integration/googleAccount.types";
-import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
 import { createGoogleTask, deleteGoogleTask, fetchGoogleTasks, moveGoogleTask, patchGoogleTask } from "@/integration/googletask-integration/gtask.api";
 import type { GoogleTaskListAccountState } from "@/integration/googletask-integration/useGoogleTaskLists";
+import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
 
 type GoogleTasksAccountState = {
   tasks: GoogleTaskItem[];

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { TagFilterPanel } from "@/components/explorer/TagFilterPanel";
 import { floatingPanelPresets } from "@/chip/ui/menu-styles";
 import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
+import { TagFilterPanel } from "@/components/explorer/TagFilterPanel";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import { Filter } from "@/ui/icons";

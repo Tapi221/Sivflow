@@ -1,7 +1,7 @@
 import { memo, useCallback } from "react";
+import { useIosCalendarIntegration } from "@mobile/integration/ioscalendar/useIosCalendarIntegration";
 import type { ScheduleYearProps } from "@mobile-renderer/pane/schedule/ScheduleYear";
 import { ScheduleYear } from "@mobile-renderer/pane/schedule/ScheduleYear";
-import { useIosCalendarIntegration } from "@mobile/integration/ioscalendar/useIosCalendarIntegration";
 
 type IosCalendarScheduleYearProps = Omit<ScheduleYearProps, "visibleEvents" | "onRenderedRangeChange">;
 

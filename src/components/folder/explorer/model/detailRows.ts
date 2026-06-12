@@ -1,7 +1,7 @@
-import { toVirtualMfCardDisplayName, toVirtualMfDeckDisplayName } from "@/features/fileDisplay/virtualFileExtensions";
-import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem, SyncEntity } from "@/types";
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
 import { getEntityTime, getFolderId, getParentFolderId, normalizeFolderId } from "@/components/folder/explorer/model/utils";
+import { toVirtualMfCardDisplayName, toVirtualMfDeckDisplayName } from "@/features/fileDisplay/virtualFileExtensions";
+import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem, SyncEntity } from "@/types";
 
 type ExplorerDetailRowKind = "folder" | "cardSet" | "card" | "document";
 type ExplorerDetailLocalSyncState = | "pending" | "synced" | "error" | "conflict";

@@ -8,10 +8,10 @@ import type { EmojiDropdownMenuOptions, UseEmojiPickerType } from "@platejs/emoj
 import { useEmojiDropdownMenuState } from "@platejs/emoji/react";
 import * as Popover from "@radix-ui/react-popover";
 import { AppleIcon, ClockIcon, CompassIcon, FlagIcon, LeafIcon, LightbulbIcon, MusicIcon, SearchIcon, SmileIcon, StarIcon, XIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/chip/ui/button/button";
 import { ToolbarButton } from "@/chip/ui/toolbar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 const emojiCategoryIcons: Record<
   EmojiCategoryList,

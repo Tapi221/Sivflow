@@ -1,9 +1,9 @@
 import { format } from "date-fns";
 import type { CSSProperties } from "react";
+import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 import { HoverMonthEventTooltip } from "@/chip/toolchip/HoverMonthEventTooltip";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 
 type CalendarEventChipMonthProps = {
   event: GoogleCalendarEvent;

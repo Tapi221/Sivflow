@@ -5,11 +5,11 @@
  * - legacy extra rows 吸収
  * - ink document resolve は含まない（副作用のある resolveInkDocument は呼び出し側）
  */
+import type { FlashcardCardLike, FlashcardMediaLike } from "@/components/card/frame/flashcard.types";
 import { extractCardTextFromBlocks } from "@/domain/card/content";
 import { DEFAULT_LAYOUT_ROWS, LEGACY_BASE_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from "@/domain/card/extraRows";
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardBlock } from "@/types/domain/card";
-import type { FlashcardCardLike, FlashcardMediaLike } from "@/components/card/frame/flashcard.types";
 
 // ---------------------------------------------------------------------------
 // Scalar field normalizers

@@ -8,9 +8,9 @@ import type { AnyPluginConfig, TElement, TSuggestionData, TSuggestionText, WithR
 import { KEYS } from "platejs";
 import type { PlateEditor, PlateLeafProps, RenderNodeWrapper } from "platejs/react";
 import { PlateLeaf, useEditorPlugin, usePluginOption } from "platejs/react";
+import { voidRemoveSuggestionOverlayVariants } from "@/chip/ui/node/suggestion-node-static";
 import type { SuggestionConfig } from "@/components/editor/plugins/suggestion-kit";
 import { cn } from "@/lib/utils";
-import { voidRemoveSuggestionOverlayVariants } from "@/chip/ui/node/suggestion-node-static";
 
 const suggestionPlugin = SuggestionPlugin as WithRequiredKey<SuggestionConfig>;
 const suggestionVariants = cva(cn("bg-emerald-100 text-emerald-700 no-underline transition-colors duration-200"), { defaultVariants: { insertActive: false, remove: false, removeActive: false }, variants: { insertActive: { false: "", true: "bg-emerald-200/80" }, remove: { false: "", true: "bg-red-100 text-red-700" }, removeActive: { false: "", true: "bg-red-200/80 no-underline" } } });

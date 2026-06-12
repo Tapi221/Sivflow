@@ -4,9 +4,6 @@ import { createDeleteQueueItem, createUpsertQueueItem } from "@/application/usec
 import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueuePayloadGuards";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
-import type { AssetRecord, Card, CardSet, Document, Folder, Note, SyncConflict, SyncError, SyncHistory, SyncMetadata, SyncQueueItem, SyncSettings, UploadedImage, User, UserSettings, UserStats } from "@/types";
-import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
-import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 import * as crud from "@/services/localdb/crud";
 import { getDatabaseNameForUser as _getDatabaseNameForUser } from "@/services/localdb/generation";
 import { attachHooks } from "@/services/localdb/hooks";
@@ -16,6 +13,9 @@ import { defineNoteSchema } from "@/services/localdb/noteSchema";
 import { defineSchema } from "@/services/localdb/schema";
 import { CURRENT_TAG_STORE } from "@/services/localdb/tagStoreNames";
 import type { LocalDBTableMap, SyncableEntityTable, TagRecord } from "@/services/localdb/types";
+import type { AssetRecord, Card, CardSet, Document, Folder, Note, SyncConflict, SyncError, SyncHistory, SyncMetadata, SyncQueueItem, SyncSettings, UploadedImage, User, UserSettings, UserStats } from "@/types";
+import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
+import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 
 declare global {
   interface GlobalThis {

@@ -3,8 +3,8 @@ import * as Firestore from "firebase/firestore";
 import { getDoc, getDocs, limit, orderBy, query, Timestamp, where } from "firebase/firestore";
 import type { PullableEntityType } from "@/application/usecases/cloudSyncShared";
 import { getUpdatedAtMillis, PULLABLE_ENTITY_TYPES, sanitizeSyncDataFromCloud } from "@/application/usecases/cloudSyncShared";
-import type { SyncChange } from "@/services/interfaces/ISyncService";
 import { getPullableCollectionRef, getUserSettingsRef, requireCloudSyncFirestore } from "@/infrastructure/sync/cloudSyncFirestoreRefs";
+import type { SyncChange } from "@/services/interfaces/ISyncService";
 
 type PullDiffChange = SyncChange & {
   type: PullableEntityType | "userSetting";

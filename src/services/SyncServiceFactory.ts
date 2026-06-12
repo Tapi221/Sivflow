@@ -1,13 +1,13 @@
 import type { ICloudSyncAdapter, ISyncService, SyncChange } from "@/services/interfaces/ISyncService";
+import type { LocalDBLike } from "@/services/localdb";
+import { getLocalDb, getLocalDBTelemetrySnapshot, telemetryOncePerSession } from "@/services/localdb";
 import { CloudSyncAdapter } from "@/services/logic/CloudSyncAdapter";
 import { DiffEngine } from "@/services/logic/DiffEngine";
 import { NetworkMonitor } from "@/services/logic/NetworkMonitor";
 import { QueueManager } from "@/services/logic/QueueManager";
 import { TelemetryService } from "@/services/logic/TelemetryService";
-import type { SyncContextSource } from "@/types/domain/telemetry";
-import type { LocalDBLike } from "@/services/localdb";
-import { getLocalDb, getLocalDBTelemetrySnapshot, telemetryOncePerSession } from "@/services/localdb";
 import { SyncServiceV2 } from "@/services/SyncServiceV2";
+import type { SyncContextSource } from "@/types/domain/telemetry";
 
 type SyncServiceInternals = {
   cloudAdapter: ICloudSyncAdapter;

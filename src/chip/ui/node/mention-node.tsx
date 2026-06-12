@@ -6,10 +6,10 @@ import type { TComboboxInputElement, TMentionElement } from "platejs";
 import { IS_APPLE, KEYS } from "platejs";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement, useFocused, useReadOnly, useSelected } from "platejs/react";
+import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem } from "@/chip/ui/inline-combobox";
 import { useMounted } from "@/hooks/use-mounted";
 import { inlineSuggestionVariants } from "@/lib/suggestion";
 import { cn } from "@/lib/utils";
-import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem } from "@/chip/ui/inline-combobox";
 
 const onSelectItem = getMentionOnSelectItem();
 const MENTIONABLES = [

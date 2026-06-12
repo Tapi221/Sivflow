@@ -5,8 +5,8 @@ import { Caption as CaptionPrimitive, CaptionTextarea as CaptionTextareaPrimitiv
 import { createPrimitiveComponent } from "@udecode/cn";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import { cn } from "@/lib/utils";
 import { Button } from "@/chip/ui/button/button";
+import { cn } from "@/lib/utils";
 
 const captionVariants = cva("max-w-full", {
   defaultVariants: {

@@ -9,10 +9,10 @@ import type { PlateElementProps } from "platejs/react";
 import { createPrimitiveComponent, PlateElement, useEditorRef, useEditorSelector, useElement, useReadOnly, useSelected } from "platejs/react";
 import type { TextareaAutosizeProps } from "react-textarea-autosize";
 import TextareaAutosize from "react-textarea-autosize";
-import { inlineSuggestionVariants } from "@/lib/suggestion";
-import { cn } from "@/lib/utils";
 import { Button } from "@/chip/ui/button/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
+import { inlineSuggestionVariants } from "@/lib/suggestion";
+import { cn } from "@/lib/utils";
 
 const EquationInput = createPrimitiveComponent(TextareaAutosize)({
   propsHook: useEquationInput,

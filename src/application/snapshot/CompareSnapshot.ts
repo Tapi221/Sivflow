@@ -1,6 +1,6 @@
+import { createCreateSnapshotUseCase } from "@/application/snapshot/CreateSnapshot";
 import { localGenerationCounterStore } from "@/infrastructure/browser-storage/LocalGenerationCounterStore";
 import type { AppSnapshot, SnapshotComparison } from "@/types/domain/snapshot";
-import { createCreateSnapshotUseCase } from "@/application/snapshot/CreateSnapshot";
 
 const createSnapshotUseCase = createCreateSnapshotUseCase({
   generationCounterStore: localGenerationCounterStore,

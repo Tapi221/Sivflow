@@ -1,10 +1,10 @@
 import React from "react";
 import { CONTENT_TYPO } from "@shared/design-tokens/typography";
-import { CARD_CONTENT_TOP_PX } from "@/domain/card/cardGeometry.constants";
-import { cn } from "@/lib/utils";
 import type { SharedCardContentProps } from "@/components/card/common/SharedCardContent.types";
 import { SharedCardEditScene } from "@/components/card/common/SharedCardEditScene";
 import { SharedCardViewScene } from "@/components/card/common/SharedCardViewScene";
+import { CARD_CONTENT_TOP_PX } from "@/domain/card/cardGeometry.constants";
+import { cn } from "@/lib/utils";
 
 type SharedCardContentRootProps = Readonly<{
   className?: string;

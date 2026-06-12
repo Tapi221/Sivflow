@@ -2,8 +2,8 @@ import type { QueueItem } from "@/application/usecases/persistentOfflineQueueMod
 import { makeAssetRecord, toAssetLikeRecord } from "@/application/usecases/persistentOfflineQueueModels";
 import { auth } from "@/infrastructure/firebase/client";
 import { getLocalDb } from "@/infrastructure/localdb/client";
-import type { UploadedImage } from "@/types";
 import { cleanupQueuedAssetSyncItems } from "@/infrastructure/offlineQueue/effects/cleanupQueuedAssetSyncItems";
+import type { UploadedImage } from "@/types";
 
 const handleQueuedAssetUploadSuccess = async (item: QueueItem, updatedImage: UploadedImage): Promise<void> => {
   const localDb = await getLocalDb();

@@ -1,10 +1,10 @@
 import type { GenerationCounterStorePort } from "@/application/ports/GenerationCounterStorePort";
+import { toSnapshotAsset } from "@/application/snapshot/snapshotAssetManifest";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { getLocalDb, getLocalDBRuntimeStatus } from "@/infrastructure/persistence/indexeddb";
 import type { AppSnapshot, SnapshotAsset, SnapshotData, SnapshotMetadata } from "@/types/domain/snapshot";
 import { APP_VERSION, CURRENT_SCHEMA_VERSION } from "@/types/domain/snapshot";
-import { toSnapshotAsset } from "@/application/snapshot/snapshotAssetManifest";
 
 interface CreateSnapshotDependencies {
   generationCounterStore: GenerationCounterStorePort;

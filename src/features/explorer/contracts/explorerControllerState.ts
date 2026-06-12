@@ -1,5 +1,5 @@
-import type { SelectedExplorerItem } from "@/types";
 import type { ExplorerBreadcrumbContext } from "@/features/explorer/contracts/explorerBreadcrumbContext";
+import type { SelectedExplorerItem } from "@/types";
 
 type ExplorerControllerState = {
   isHomeOnlyMode: boolean;

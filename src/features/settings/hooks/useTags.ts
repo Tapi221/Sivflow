@@ -3,10 +3,10 @@ import { useLiveQuery } from "dexie-react-hooks";
 import type { TagColorKey } from "@/chip/tag/tagColor";
 import { getTagColorClassName as resolveTagColorClassName, getTagColorKey as normalizeTagColorKey, TAG_COLOR_KEYS } from "@/chip/tag/tagColor";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
+import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { getLocalDb } from "@/services/localDB";
 import { auditAndRepairTags } from "@/services/localdb/audit/tags";
 import type { TagRecord } from "@/services/localdb/types";
-import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 
 type TagCategory = string;
 type Tag = TagRecord;

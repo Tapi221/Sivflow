@@ -1,6 +1,6 @@
 import { deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
-import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import { requireFirestoreDb } from "@/infrastructure/firebase/client";
+import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
 type WatchChannel = {
   channelId: string;

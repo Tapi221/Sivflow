@@ -1,7 +1,7 @@
 import React from "react";
-import { cn } from "@/lib/utils";
 import { detectCssZoomSupport, resolveCardScaleRenderingStrategy } from "@/components/card/frame/cardScaleRenderingStrategy";
 import { observeElementRect } from "@/components/card/frame/elementRectObserver";
+import { cn } from "@/lib/utils";
 
 interface ScaleToFitFrameProps {
   children: React.ReactNode;

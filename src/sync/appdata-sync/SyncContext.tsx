@@ -4,10 +4,10 @@ import type { ISyncService, UserSettingsSnapshot } from "@/services/interfaces/I
 import { getLocalDb } from "@/services/localdb";
 import type { SyncableEntityTable } from "@/services/localdb/types";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
-import type { SyncConflict, SyncEntity, SyncSettings } from "@/types/domain/sync";
-import { DEFAULT_SYNC_SETTINGS } from "@/types/domain/sync";
 import type { SyncContextType, SyncNotice, SyncProviderProps, SyncStatus } from "@/sync/appdata-sync/SyncContextCore";
 import { SyncContext } from "@/sync/appdata-sync/SyncContextCore";
+import type { SyncConflict, SyncEntity, SyncSettings } from "@/types/domain/sync";
+import { DEFAULT_SYNC_SETTINGS } from "@/types/domain/sync";
 
 type ConflictResolvingLocalDb = Awaited<ReturnType<typeof getLocalDb>> & {
   conflicts: {

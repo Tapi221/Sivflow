@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { getTagColorKey } from "@/chip/tag/tagColor";
 import { Button } from "@/chip/ui/button/button";
 import { Dialog, DialogContent, DialogTitle } from "@/chip/ui/dialog/dialog";
+import { TagBadge } from "@/components/tag/TagBadge";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
 import { Tag as TagIcon } from "@/ui/icons";
-import { TagBadge } from "@/components/tag/TagBadge";
 
 interface BulkTagDialogProps {
   open?: boolean;
