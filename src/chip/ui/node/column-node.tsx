@@ -13,7 +13,7 @@ import type { TColumnElement } from "platejs";
 import { PathApi } from "platejs";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement, useEditorRef, useEditorSelector, useElement, useFocusedLast, usePluginOption, useReadOnly, useRemoveNodeButton, useSelected, withHOC } from "platejs/react";
-import { Button } from "@/chip/ui/button";
+import { Button } from "@/chip/ui/button/button";
 import { Popover, PopoverAnchor, PopoverContent } from "@/chip/ui/popover";
 import { Separator } from "@/chip/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/ui/tooltip";
