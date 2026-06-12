@@ -1,7 +1,7 @@
 import "@/styles/index.css";
 import "@/services/localdb";
-import "@/../apps/web/src/runtime/disableNativeTitleTooltips";
-import "@/../apps/web/src/runtime/installProductionConsoleFilter";
+import "./runtime/disableNativeTitleTooltips";
+import "./runtime/installProductionConsoleFilter";
 import "@platform/desktop/installTauriDesktopBridge";
 import "katex/dist/katex.min.css";
 import { StrictMode } from "react";
