@@ -11,11 +11,6 @@
   overflow: hidden;
 }
 
-.panel--floating {
-  position: fixed;
-  z-index: 2147483647;
-}
-
 .panel__title {
   display: flex;
   align-items: center;
