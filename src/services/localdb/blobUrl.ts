@@ -1,4 +1,4 @@
-import { telemetryOncePerSession } from "@/services/localDBRuntimeState";
+import { telemetryOncePerSession } from "@/services/localdbRuntimeState";
 import { findBlobUrlFixesDeep } from "@/utils/blobUrlSanitizer";
 
 type InvalidImageUrlErrorParams = {

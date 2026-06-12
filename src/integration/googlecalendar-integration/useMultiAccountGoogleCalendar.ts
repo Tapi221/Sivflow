@@ -191,7 +191,7 @@ const createGoogleOAuthCooldownError = (entry: GoogleOAuthCooldownEntry): Error 
   return error;
 };
 const requestSilentAccessToken = async () => {
-  const { auth } = await import("@/services/firebase");
+  const { auth } = await import("@/infrastructure/firebase/client");
   return requestCalendarAccessToken(auth, true);
 };
 const readDesktopRefreshToken = async (accountId: string): Promise<string | null> => {
@@ -1022,7 +1022,7 @@ const useMultiAccountGoogleCalendar = () => {
   }, [accounts]);
 
   const connectAccount = useCallback(async (replaceAccountId?: string) => {
-    const { auth } = await import("@/services/firebase");
+    const { auth } = await import("@/infrastructure/firebase/client");
     const tempId = `connecting-${Date.now()}`;
     const replacingAccount = replaceAccountId
       ? accountsRef.current.find((account) => account.id === replaceAccountId)

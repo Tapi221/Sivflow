@@ -10,7 +10,7 @@ vi.mock("dexie-react-hooks", () => ({
   useLiveQuery: (...args: unknown[]) => useLiveQueryMock(...args),
 }));
 
-vi.mock("@/services/localDB", () => ({
+vi.mock("@/services/localdb", () => ({
   getLocalDb: (...args: unknown[]) => getLocalDbMock(...args),
 }));
 

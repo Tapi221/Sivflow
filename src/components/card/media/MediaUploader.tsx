@@ -8,7 +8,7 @@ import type { ResolvedCardImage } from "@/services/cardImageResolver";
 import { resolveCardImageUrl } from "@/services/cardImageResolver";
 import { getOrCreateImageBlobUrl, removeImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
 import { deleteImageBlob, getImageBlob, putImageBlob } from "@/services/imageFileStore";
-import { getLocalDb } from "@/services/localDB";
+import { getLocalDb } from "@/services/localdb";
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
 import type { AssetRecord, UploadedImage } from "@/types";
 import { Check, RotateCcw, Upload, X } from "@/ui/icons";

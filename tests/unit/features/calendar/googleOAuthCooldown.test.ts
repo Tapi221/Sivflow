@@ -4,7 +4,7 @@ vi.mock("@/platform/runtimeKind", () => ({
   isDesktopLikeRuntime: () => false,
 }));
 
-vi.mock("@/services/firebase", () => ({
+vi.mock("@/infrastructure/firebase/client", () => ({
   auth: {
     authStateReady: () => Promise.resolve(),
     currentUser: { uid: "user-1" },
