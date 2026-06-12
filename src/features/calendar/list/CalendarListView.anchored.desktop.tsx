@@ -89,5 +89,4 @@ const CalendarListViewAnchoredComponent = ({ scrollViewportRef: externalRef, onS
 
 const CalendarListViewAnchored = memo(CalendarListViewAnchoredComponent);
 CalendarListViewAnchored.displayName = "CalendarListViewAnchored";
-
 export { CalendarListViewAnchored };
