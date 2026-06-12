@@ -39,7 +39,7 @@ const useSyncSettings = () => {
     setLoading(true);
     try {
       const db = await getLocalDb(currentUser.uid);
-      const savedSettings = await db.syncSettings.get(DEFAULT_SYNC_SETTINGS.id);
+      const savedSettings = await db.getSyncSettings(DEFAULT_SYNC_SETTINGS.id);
       setSettings(normalizeSyncSettings(savedSettings));
     } catch (error) {
       console.error("[useSyncSettings] Failed to load settings:", error);
@@ -61,7 +61,7 @@ const useSyncSettings = () => {
       setSettings(nextSettings);
 
       const db = await getLocalDb(currentUser.uid);
-      await db.syncSettings.put(nextSettings);
+      await db.putSyncSettings(nextSettings);
       SyncServiceFactory.resetInstance(currentUser.uid);
     },
     [currentUser, settings],
