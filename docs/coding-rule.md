@@ -179,63 +179,6 @@ default export は禁止する。export は named export に統一する。
 
 値の export と型の export は分ける。値は `export { ... };`、型は `export type { ... };` を使う。`export { type Foo }` のように named export 内へ `type` 修飾子を書くことは禁止する。
 
-export 群はファイル末尾の1つの連続したブロックにする。直前の component / helper / memo / displayName ブロックとの間には空行1行を入れる。export 文同士の間には空行を入れない。
+local named export は値と型それぞれ1つにまとめる。値の `export { ... };` を複数に分けない。型の `export type { ... };` も複数に分けない。module specifier を持つ re-export は対象外とする。
 
-export 群の順序は、値 export、type export の順にする。
-
-互換 export ファイルは禁止する。移動・リネーム・責務分離後に、旧 import パスを維持するためだけの `export * from "..."` / `export { ... } from "..."` / `export type { ... } from "..."` だけのファイルを作らない。呼び出し元の import パスを正しい module へ修正する。
-
-`index.ts` / `index.tsx` で責務のある公開 API を集約する場合だけ例外とする。非 index ファイルを旧 path 互換の入口として残すことは禁止する。
-
-`npm run verify:no-compat-export-files` は、非 index source file が export-from 宣言だけで構成されている場合に検出する。`npm run verify:source-conventions` はこの検査を含めて実行する。
-
-```ts
-const AppProviders = ({ children }: AppProvidersProps) => (
-  <MantineProvider defaultColorScheme="light">{children}</MantineProvider>
-);
-
-export { AppProviders };
-export type { AppProvidersProps };
-```
-
-## 定数
-
-モジュールスコープの固定値・設定値として定義する `const` は、大文字 + アンダースコアの `UPPER_SNAKE_CASE` にする。対象は定数ブロックに置く値で、関数内の一時変数、`const helper = (...) => ...` のような helper 関数、component / memo / displayName / export 用の識別子は対象外とする。
-
-## 色表記
-
-hex color は、省略可能な場合は省略表記に統一する。`#rrggbb` は `rr`、`gg`、`bb` の各2桁が同じ時だけ `#rgb` にする。`#rrggbbaa` は alpha を含む各2桁が同じ時だけ `#rgba` にする。
-
-```css
-/* NG */
-color: #ffffff;
-background: #eeeeee;
-border-color: #aabbcc;
-box-shadow: 0 0 0 1px #ffffffff;
-
-/* OK */
-color: #fff;
-background: #eee;
-border-color: #abc;
-box-shadow: 0 0 0 1px #ffff;
-```
-
-`#fefefe`、`#eeeeef`、`#12aa33` のように各2桁が同じではない hex color は省略しない。hex color は小文字に統一する。
-
-`npm run fix:short-hex-colors` は省略可能な hex color を自動修正する。`npm run verify:short-hex-colors` は未省略の hex color を検出する。`npm run fix:source-conventions` と `npm run verify:source-conventions` はこの検査を含めて実行する。
-
-## JSX wrapper
-
-複数要素を返すだけのラッパーは必ず `<>...</>` を使う。`Fragment` の明示使用は `key` が必要な `map` 内だけ許可する。`className` / `style` / `ref` / `onClick` / `role` / `aria-*` / `data-*` / layout が必要な場合だけ `div` などの実 DOM を使う。意味のないラッパー `div` は使わない。
-
-単一要素だけを返すために `<>...</>` で囲むことは禁止する。この場合は子要素を直接返す。`Fragment` / `React.Fragment` の明示使用は、`map` 内で `key` を付ける必要がある場合だけ許可し、それ以外は `<>...</>` にする。`key` 以外の属性が必要な場合は Fragment ではなく、責務のある実 DOM または適切な component を使う。
-
-JSX tag child 同士の間に空白だけの空行を入れない。`npm run fix:jsx-child-spacing` は対象の空行を1改行へ自動修正し、`npm run verify:jsx-child-spacing` は違反を検出する。
-
-## 絵文字・pictographic symbol
-
-絵文字・記号絵文字などの pictographic symbol をソースファイルへ直接書くことは禁止する。ただし、`src/components/ui/` 配下の UI コンポーネントは、絵文字選択 UI や callout の既定アイコンなど UI 表現そのものが責務になるため例外として許可する。
-
-## 検証 script
-
-検証スクリプトのエラーメッセージは日本語で直接定義する。英語のメッセージを出力してから翻訳用 runner や wrapper で変換することは禁止する。
+`npm run fix:source-conventions` は分割された local named export を統合する。`npm run verify:source-conventions` は分割された local named export を検出する。
