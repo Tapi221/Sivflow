@@ -13,6 +13,9 @@ type TagRepairSummary = {
     tagIds: string[];
   }>;
 };
+type TransactionalLocalDb = Awaited<ReturnType<typeof getInstance>> & {
+  transaction: <T>(mode: string, ...args: unknown[]) => Promise<T>;
+};
 
 const asStringArray = (value: unknown): string[] => {
   if (!Array.isArray(value)) return [];
@@ -20,13 +23,14 @@ const asStringArray = (value: unknown): string[] => {
 };
 const auditAndRepairTags = async (userId: string): Promise<TagRepairSummary> => {
   const db = await getInstance(userId);
+  const transactionalDb = db as TransactionalLocalDb;
   const tagIdsByNameLower = new Map<string, string[]>();
   const knownTagIds = new Set<string>();
   let removedOrphanTagRefs = 0;
   let dedupedTagRefs = 0;
 
-  await db.transaction("rw", db.tagRecords, db.cards, async () => {
-    await db.tagRecords
+  await transactionalDb.transaction("rw", transactionalDb.tagRecords, transactionalDb.cards, async () => {
+    await transactionalDb.tagRecords
       .where("userId")
       .equals(userId)
       .each((raw: unknown) => {
@@ -57,7 +61,7 @@ const auditAndRepairTags = async (userId: string): Promise<TagRepairSummary> => 
         else tagIdsByNameLower.set(key, [tag.id]);
       });
 
-    await db.cards
+    await transactionalDb.cards
       .where("userId")
       .equals(userId)
       .modify((raw: unknown) => {
