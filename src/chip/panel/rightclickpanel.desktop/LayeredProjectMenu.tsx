@@ -1,6 +1,6 @@
 import { Fragment, memo } from "react";
 import type { CSSProperties, ReactNode, RefObject } from "react";
-import { Panel } from "../panel";
+import { RightClickPanel } from "./rightclickpanel";
 import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE } from "./rightClickPanel.utils";
 
@@ -103,7 +103,7 @@ const LayeredProjectMenuBase = ({ x, y, actions, menuRef, noDragStyle, panelId =
   return (
     <>
       <style>{LAYERED_PROJECT_MENU_STYLE}</style>
-      <Panel id={panelId} x={x} y={y} width={LAYERED_PROJECT_MENU_WIDTH} panelRef={menuRef} style={noDragStyle} className="layered-project-menu-panel" role="menu" ariaLabel="layered project context menu" preventContextMenu>
+      <RightClickPanel id={panelId} x={x} y={y} width={LAYERED_PROJECT_MENU_WIDTH} panelRef={menuRef} style={noDragStyle} className="layered-project-menu-panel" ariaLabel="layered project context menu">
         {LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.map((item, index) => {
           const action = getLayeredProjectMenuAction(actions, item.id);
           const isDisabled = action?.disabled ?? false;
@@ -155,7 +155,7 @@ const LayeredProjectMenuBase = ({ x, y, actions, menuRef, noDragStyle, panelId =
           );
         })}
         {submenuElement}
-      </Panel>
+      </RightClickPanel>
     </>
   );
 };

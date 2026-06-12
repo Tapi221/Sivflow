@@ -1,6 +1,6 @@
 import { memo } from "react";
 import type { CSSProperties, RefObject } from "react";
-import { Panel } from "../panel";
+import { RightClickPanel } from "./rightclickpanel";
 import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE } from "./rightClickPanel.utils";
 
@@ -51,7 +51,7 @@ const CardSetContextMenuBase = ({
   return (
     <>
       <style>{CARD_SET_CONTEXT_MENU_STYLE}</style>
-      <Panel id={panelId} x={x} y={y} width={CARD_SET_CONTEXT_MENU_WIDTH} panelRef={menuRef} style={noDragStyle} role="menu" ariaLabel="card set context menu" preventContextMenu>
+      <RightClickPanel id={panelId} x={x} y={y} width={CARD_SET_CONTEXT_MENU_WIDTH} panelRef={menuRef} style={noDragStyle} ariaLabel="card set context menu">
         {actions.map((action) => (
           <button
             key={action.id}
@@ -71,7 +71,7 @@ const CardSetContextMenuBase = ({
             {action.label}
           </button>
         ))}
-      </Panel>
+      </RightClickPanel>
     </>
   );
 };

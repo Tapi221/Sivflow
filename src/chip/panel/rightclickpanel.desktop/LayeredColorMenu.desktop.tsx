@@ -3,7 +3,7 @@ import { TAG_COLOR_PALETTE } from "@shared/design-tokens/tag.palette";
 import type { CSSProperties, RefObject } from "react";
 import type { TagColorKey } from "@/chip/tag/tagColor";
 import { getTagColorSwatchStyle, TAG_COLOR_KEYS } from "@/chip/tag/tagColor";
-import { Panel } from "../panel";
+import { RightClickPanel } from "./rightclickpanel";
 import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING } from "./rightClickPanel.utils";
 
@@ -111,7 +111,7 @@ const LayeredColorMenuBase = ({
   return (
     <>
       <style>{LAYERED_COLOR_MENU_STYLE}</style>
-      <Panel id={panelId} x={x} y={y} width={LAYERED_COLOR_MENU_WIDTH} panelRef={menuRef} style={noDragStyle} role="menu" ariaLabel="color submenu" preventContextMenu>
+      <RightClickPanel id={panelId} x={x} y={y} width={LAYERED_COLOR_MENU_WIDTH} panelRef={menuRef} style={noDragStyle} ariaLabel="color submenu">
         <div className="layered-color-menu-grid">
           {options.map((option) => {
             const isSelected = normalizeColorValue(option.value) === normalizedCurrentColor;
@@ -127,7 +127,7 @@ const LayeredColorMenuBase = ({
             );
           })}
         </div>
-      </Panel>
+      </RightClickPanel>
     </>
   );
 };
