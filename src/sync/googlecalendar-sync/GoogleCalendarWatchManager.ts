@@ -1,6 +1,6 @@
 import { deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
-import { requireFirestoreDb } from "@/services/firebase";
+import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 
 type WatchChannel = {
   channelId: string;
@@ -69,7 +69,9 @@ const toWatchChannel = (data: GoogleWatchResponse, calendarId: string, userId: s
 // ─────────────────────────────────────────────
 class GoogleCalendarWatchManager {
   private channels = new Map<string, WatchChannel>();
+
   private renewalTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
   private userId: string;
 
   constructor(userId: string) {
