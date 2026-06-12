@@ -1,8 +1,8 @@
 import type { CSSProperties, RefObject } from "react";
 import type { TagColorKey } from "@/chip/tag/tagColor";
 import { getTagColorSwatchStyle } from "@/chip/tag/tagColor";
-import { Panel } from "../panel";
 import { cn } from "@/lib/utils";
+import { RightClickPanel } from "./rightclickpanel";
 import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING } from "./rightClickPanel.utils";
 
@@ -55,7 +55,7 @@ const TagColorRightClickPanel = ({ x, y, availableColors, currentColorKey, tagNa
   return (
     <>
       <style>{TAG_COLOR_GRID_STYLE}</style>
-      <Panel id={panelId} x={x} y={y} width={TAG_COLOR_CONTEXT_MENU_WIDTH} panelRef={menuRef} style={noDragStyle} role="menu" ariaLabel={`${tagName} tag color menu`} preventContextMenu>
+      <RightClickPanel id={panelId} x={x} y={y} width={TAG_COLOR_CONTEXT_MENU_WIDTH} panelRef={menuRef} style={noDragStyle} ariaLabel={`${tagName} tag color menu`}>
         <div className="panel__title">{TAG_COLOR_CONTEXT_MENU_TITLE}</div>
         <div className="tag-color-context-menu-grid">
           {availableColors.map((colorKey) => {
@@ -85,7 +85,7 @@ const TagColorRightClickPanel = ({ x, y, availableColors, currentColorKey, tagNa
             );
           })}
         </div>
-      </Panel>
+      </RightClickPanel>
     </>
   );
 };
