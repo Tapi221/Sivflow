@@ -78,6 +78,8 @@ const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);
 const StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);
 
 const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
+const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);
+const StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);
 
 const buildDaysDisplayRange = (days: Date[], fallbackDate: Date, bufferDays: number): CalendarEventDisplayRange => ({ start: startOfDay(subDays(days[0] ?? fallbackDate, bufferDays)), end: endOfDay(addDays(days.at(-1) ?? fallbackDate, bufferDays)) });
 

@@ -7,6 +7,8 @@ import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING } from "./rightClickPanel.utils";
 import { RightClickPanelSurface } from "./rightClickPanelCommon";
 
+
+
 type LayeredColorMenuOption = { id: TagColorKey;
   label: string;
   value: string;
@@ -21,6 +23,8 @@ type LayeredColorMenuProps = {
   panelId?: RightClickPanelId;
   onSelectColor: (color: string) => void;
 };
+
+
 
 const TAG_COLOR_LABELS: Record<TagColorKey, string> = {
   gray: "グレー",
@@ -93,7 +97,11 @@ const LAYERED_COLOR_MENU_STYLE = `
 }
 `;
 
+
+
 const normalizeColorValue = (color?: string | null): string | null => color?.trim().toLowerCase() ?? null;
+
+
 
 const LayeredColorMenuBase = ({
   x,
@@ -132,8 +140,12 @@ const LayeredColorMenuBase = ({
   );
 };
 
+
+
 const LayeredColorMenu = memo(LayeredColorMenuBase);
 LayeredColorMenu.displayName = "LayeredColorMenu";
 
 export { LayeredColorMenu, LAYERED_COLOR_MENU_PANEL_ID, LAYERED_COLOR_MENU_OPTIONS, LAYERED_COLOR_MENU_WIDTH, LAYERED_COLOR_MENU_HEIGHT, LAYERED_COLOR_MENU_MARGIN };
+
+
 export type { LayeredColorMenuOption };
