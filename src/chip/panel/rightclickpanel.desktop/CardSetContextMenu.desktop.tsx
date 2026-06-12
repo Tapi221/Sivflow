@@ -1,8 +1,8 @@
 import { memo } from "react";
 import type { CSSProperties, RefObject } from "react";
+import { Panel } from "../panel";
 import type { RightClickPanelId } from "./rightClickPanel.utils";
 import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE } from "./rightClickPanel.utils";
-import { RightClickPanelSurface } from "../rightClickPanelCommon";
 
 type CardSetContextMenuActionId = "rename" | "delete";
 type CardSetContextMenuAction = {
@@ -51,13 +51,13 @@ const CardSetContextMenuBase = ({
   return (
     <>
       <style>{CARD_SET_CONTEXT_MENU_STYLE}</style>
-      <RightClickPanelSurface x={x} y={y} width={CARD_SET_CONTEXT_MENU_WIDTH} panelRef={menuRef} noDragStyle={noDragStyle} ariaLabel="card set context menu" panelId={panelId}>
+      <Panel id={panelId} x={x} y={y} width={CARD_SET_CONTEXT_MENU_WIDTH} panelRef={menuRef} style={noDragStyle} role="menu" ariaLabel="card set context menu" preventContextMenu>
         {actions.map((action) => (
           <button
             key={action.id}
             type="button"
             disabled={action.disabled}
-            className={["right-click-panel-item", action.danger ? "card-set-context-menu-item--danger" : null].filter(Boolean).join(" ")}
+            className={["panel__item", action.danger ? "card-set-context-menu-item--danger" : null].filter(Boolean).join(" ")}
             role="menuitem"
             onClick={(event) => {
               event.preventDefault();
@@ -71,7 +71,7 @@ const CardSetContextMenuBase = ({
             {action.label}
           </button>
         ))}
-      </RightClickPanelSurface>
+      </Panel>
     </>
   );
 };
