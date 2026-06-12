@@ -51,6 +51,7 @@ const useGoogleCalendarPushSync = ({ userId, selectedCalendarIds, onNotification
       return;
     }
 
+    const pendingNotificationTimers = pendingNotificationTimersRef.current;
     const colRef = collection(
       firestoreDb,
       "gcal_notifications",
@@ -82,17 +83,17 @@ const useGoogleCalendarPushSync = ({ userId, selectedCalendarIds, onNotification
 
           console.info(`[PushSync] ${calendarId} の変更通知を受信 → 即時同期`);
 
-          const existingTimer = pendingNotificationTimersRef.current.get(calendarId);
+          const existingTimer = pendingNotificationTimers.get(calendarId);
           if (existingTimer) {
             clearTimeout(existingTimer);
           }
 
           const timer = setTimeout(() => {
-            pendingNotificationTimersRef.current.delete(calendarId);
+            pendingNotificationTimers.delete(calendarId);
             onNotificationRef.current(calendarId);
           }, NOTIFICATION_DEBOUNCE_MS);
 
-          pendingNotificationTimersRef.current.set(calendarId, timer);
+          pendingNotificationTimers.set(calendarId, timer);
         });
       },
 
@@ -112,8 +113,8 @@ const useGoogleCalendarPushSync = ({ userId, selectedCalendarIds, onNotification
 
     return () => {
       unsubscribe();
-      pendingNotificationTimersRef.current.forEach((timer) => clearTimeout(timer));
-      pendingNotificationTimersRef.current.clear();
+      pendingNotificationTimers.forEach((timer) => clearTimeout(timer));
+      pendingNotificationTimers.clear();
     };
   }, [userId, calendarKey]);
 };
