@@ -8,7 +8,7 @@ import { CommentToolbarButton } from "@/chip/ui/plate/comment-toolbar-button";
 import { RedoToolbarButton, UndoToolbarButton } from "@/chip/ui/plate/history-toolbar-button";
 import { IndentToolbarButton } from "@/chip/ui/plate/indent-toolbar-button";
 import { LinkToolbarButton } from "@/chip/ui/plate/link-toolbar-button";
-import { BulletedListToolbarButton, NumberedListToolbarButton } from "@/chip/ui/plate/list-toolbar-button";
+import { ListToolbarButton } from "@/chip/ui/plate/list-toolbar-button";
 import { MarkToolbarButton } from "@/chip/ui/plate/mark-toolbar-button";
 import { ToolbarGroup } from "@/chip/ui/plate/toolbar";
 
@@ -42,12 +42,12 @@ const FixedToolbarButtons = () => {
             </MarkToolbarButton>
           </ToolbarGroup>
           <ToolbarGroup>
-            <NumberedListToolbarButton>
+            <ListToolbarButton nodeType={KEYS.ol} tooltip="Numbered list">
               <ListOrderedIcon />
-            </NumberedListToolbarButton>
-            <BulletedListToolbarButton>
+            </ListToolbarButton>
+            <ListToolbarButton nodeType={KEYS.ul} tooltip="Bulleted list">
               <ListIcon />
-            </BulletedListToolbarButton>
+            </ListToolbarButton>
             <IndentToolbarButton reverse>
               <OutdentIcon />
             </IndentToolbarButton>
