@@ -1,9 +1,11 @@
-export type ReferenceLink = { title: string;
+export type ReferenceLink = {
+  title: string;
   description: string;
   href: string;
 };
 
-export type ReferenceSandboxPageProperties = { label: string;
+export type ReferenceSandboxPageProperties = {
+  label: string;
   title: string;
   description: string;
   focusItems: readonly string[];
