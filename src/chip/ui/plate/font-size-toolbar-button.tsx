@@ -26,28 +26,72 @@ const FontSizeToolbarButton = () => {
     if (!block?.type) return DEFAULT_FONT_SIZE;
     return block.type in FONT_SIZE_MAP ? FONT_SIZE_MAP[block.type as keyof typeof FONT_SIZE_MAP] : DEFAULT_FONT_SIZE;
   }, []);
+  const displayValue = isFocused ? inputValue : cursorFontSize;
   const handleInputChange = () => {
     const newSize = toUnitLess(inputValue);
     if (Number.parseInt(newSize, 10) < 1 || Number.parseInt(newSize, 10) > 100) {
-      editor.tf.focus(); return; }
-    if (newSize !== toUnitLess(cursorFontSize)) tf.fontSize.addMark(`${newSize}px`);
+      editor.tf.focus();
+      return;
+    }
+    if (newSize !== toUnitLess(cursorFontSize)) {
+      tf.fontSize.addMark(`${newSize}px`);
+    }
     editor.tf.focus();
   };
   const handleFontSizeChange = (delta: number) => {
-    const newSize = Number(displayValue) + delta; tf.fontSize.addMark(`${newSize}px`); editor.tf.focus(); };
-  const displayValue = isFocused ? inputValue : cursorFontSize;
+    const newSize = Number(displayValue) + delta;
+    tf.fontSize.addMark(`${newSize}px`);
+    editor.tf.focus();
+  };
   return (
     <div className="flex h-7 items-center gap-1 rounded-md bg-muted/60 p-0">
-      <ToolbarButton onClick={() => handleFontSizeChange(-1)}><Minus /></ToolbarButton>
-      <Popover open={isFocused} modal={false}><PopoverTrigger asChild><input className={cn("h-full w-10 shrink-0 bg-transparent px-1 text-center text-sm hover:bg-muted")} value={displayValue} onBlur={() => {
-        setIsFocused(false); handleInputChange(); }} onChange={(e) => setInputValue(e.target.value)} onFocus={() => {
-        setIsFocused(true); setInputValue(toUnitLess(cursorFontSize)); }} onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          e.preventDefault(); handleInputChange(); } }} data-plate-focus="true" type="text"
-      /></PopoverTrigger><PopoverContent className="w-10 px-px py-1" onOpenAutoFocus={(e) => e.preventDefault()}>{FONT_SIZES.map((size) => <button key={size} className={cn("flex h-8 w-full items-center justify-center text-sm hover:bg-accent data-[highlighted=true]:bg-accent")} onClick={() => {
-        tf.fontSize.addMark(`${size}px`); setIsFocused(false); }} data-highlighted={size === displayValue} type="button"
-      >{size}</button>)}</PopoverContent></Popover>
-      <ToolbarButton onClick={() => handleFontSizeChange(1)}><Plus /></ToolbarButton>
+      <ToolbarButton onClick={() => handleFontSizeChange(-1)}>
+        <Minus />
+      </ToolbarButton>
+      <Popover open={isFocused} modal={false}>
+        <PopoverTrigger asChild>
+          <input
+            className={cn("h-full w-10 shrink-0 bg-transparent px-1 text-center text-sm hover:bg-muted")}
+            value={displayValue}
+            onBlur={() => {
+              setIsFocused(false);
+              handleInputChange();
+            }}
+            onChange={(event) => setInputValue(event.target.value)}
+            onFocus={() => {
+              setIsFocused(true);
+              setInputValue(toUnitLess(cursorFontSize));
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                handleInputChange();
+              }
+            }}
+            data-plate-focus="true"
+            type="text"
+          />
+        </PopoverTrigger>
+        <PopoverContent className="w-10 px-px py-1" onOpenAutoFocus={(event) => event.preventDefault()}>
+          {FONT_SIZES.map((size) => (
+            <button
+              key={size}
+              className={cn("flex h-8 w-full items-center justify-center text-sm hover:bg-accent data-[highlighted=true]:bg-accent")}
+              onClick={() => {
+                tf.fontSize.addMark(`${size}px`);
+                setIsFocused(false);
+              }}
+              data-highlighted={size === displayValue}
+              type="button"
+            >
+              {size}
+            </button>
+          ))}
+        </PopoverContent>
+      </Popover>
+      <ToolbarButton onClick={() => handleFontSizeChange(1)}>
+        <Plus />
+      </ToolbarButton>
     </div>
   );
 };
