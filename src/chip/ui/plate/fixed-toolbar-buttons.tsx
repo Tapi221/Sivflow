@@ -3,7 +3,7 @@
 import { ArrowUpToLineIcon, BaselineIcon, BoldIcon, Code2Icon, HighlighterIcon, ItalicIcon, PaintBucketIcon, StrikethroughIcon, UnderlineIcon, WandSparklesIcon } from "lucide-react";
 import { KEYS } from "platejs";
 import { useEditorReadOnly } from "platejs/react";
-import { AiToolbarButton } from "@/chip/ui/plate/ai-toolbar-button";
+import { AIToolbarButton } from "@/chip/ui/plate/ai-toolbar-button";
 import { AlignToolbarButton } from "@/chip/ui/plate/align-toolbar-button";
 import { CommentToolbarButton } from "@/chip/ui/plate/comment-toolbar-button";
 import { EmojiToolbarButton } from "@/chip/ui/plate/emoji-toolbar-button";
@@ -37,9 +37,9 @@ const FixedToolbarButtons = () => {
             <RedoToolbarButton />
           </ToolbarGroup>
           <ToolbarGroup>
-            <AiToolbarButton tooltip="AI commands">
+            <AIToolbarButton tooltip="AI commands">
               <WandSparklesIcon />
-            </AiToolbarButton>
+            </AIToolbarButton>
           </ToolbarGroup>
           <ToolbarGroup>
             <ExportToolbarButton>
