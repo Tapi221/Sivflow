@@ -1,32 +1,32 @@
-import type { PlateElementProps } from "platejs/react";
-import { PlateElement } from "platejs/react";
+import type { SlateElementProps } from "platejs/static";
+import { SlateElement } from "platejs/static";
 import { cn } from "@/lib/utils";
 
-type TableNodeStaticProps = PlateElementProps;
+type TableNodeStaticProps = SlateElementProps;
 
 const TableNodeStatic = ({ className, children, ...props }: TableNodeStaticProps) => (
-  <PlateElement className={cn("my-4 overflow-x-auto", className)} {...props}>
+  <SlateElement className={cn("my-4 overflow-x-auto", className)} {...props}>
     <table className="w-full border-collapse border border-border text-sm">{children}</table>
-  </PlateElement>
+  </SlateElement>
 );
-const TableRowNodeStatic = ({ className, children, ...props }: PlateElementProps) => (
-  <PlateElement as="tr" className={cn("border-border", className)} {...props}>
+const TableRowNodeStatic = ({ className, children, ...props }: SlateElementProps) => (
+  <SlateElement as="tr" className={cn("border-border", className)} {...props}>
     {children}
-  </PlateElement>
+  </SlateElement>
 );
-const TableCellNodeStatic = ({ className, children, ...props }: PlateElementProps) => (
-  <PlateElement as="td" className={cn("border border-border px-3 py-2 align-top", className)} {...props}>
+const TableCellNodeStatic = ({ className, children, ...props }: SlateElementProps) => (
+  <SlateElement as="td" className={cn("border border-border px-3 py-2 align-top", className)} {...props}>
     {children}
-  </PlateElement>
+  </SlateElement>
 );
-const TableCellHeaderStatic = ({ className, children, ...props }: PlateElementProps) => (
-  <PlateElement
+const TableCellHeaderStatic = ({ className, children, ...props }: SlateElementProps) => (
+  <SlateElement
     as="th"
     className={cn("border border-border bg-muted px-3 py-2 text-left align-top font-medium", className)}
     {...props}
   >
     {children}
-  </PlateElement>
+  </SlateElement>
 );
 
 const TableElementStatic = TableNodeStatic;
