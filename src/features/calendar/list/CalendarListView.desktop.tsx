@@ -1,12 +1,12 @@
-import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { differenceInCalendarDays, format, getDaysInMonth, isSameDay, startOfMonth, subDays } from "date-fns";
 import { ja } from "date-fns/locale";
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, MutableRefObject } from "react";
 import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
 import { LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX, LIST_DAY_GAP_PX, LIST_EMPTY_DAY_HEIGHT_PX, LIST_EVENT_ROW_GAP_PX, LIST_EVENT_ROW_HEIGHT_PX } from "@/chip/eventchip/EventChip.list.placement";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
-import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { getScheduleVirtualRailDate } from "@/features/calendar/grid/ScheduleColumn.shared";
+import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { useImmediateVirtualScrollRange } from "@/features/scroll/schedule/hooks/useImmediateVirtualScrollRange";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
@@ -73,22 +73,20 @@ const LOCAL_DAYS = 3650;
 const LIST_MATERIALIZE_OVERSCAN_PX = 8_000;
 const LIST_MAX_RANGE_UPDATE_GUARD_PX = 2_400;
 const DATE_KEY_PART_COUNT = 3;
-const LIST_DAY_RAIL_CLASS_NAME =
-  "pointer-events-none absolute -bottom-2 left-[67px] top-0 w-px -translate-x-1/2 bg-[#eceff3]";
-const LIST_GLOBAL_RAIL_CLASS_NAME =
-  "pointer-events-none absolute bottom-0 left-[127px] top-0 w-px -translate-x-1/2 bg-[#eceff3] md:left-[183px]";
-const DAY_DATE_NUMBER_CLASS_NAME =
-  "flex h-8 w-8 items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-all duration-150";
-const DAY_WEEKDAY_CLASS_NAME =
-  "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
-const SELECTED_DAY_DATE_NUMBER_CLASS_NAME =
-  "border-0 bg-[var(--ds-color-tag-sky-bg)] text-[var(--ds-color-tag-sky-fg)] shadow-none ring-0";
-const EMPTY_DAY_ROW_CLASS_NAME =
-  "grid h-full min-h-[38px] grid-cols-[54px_26px_minmax(0,1fr)] items-stretch";
-const EMPTY_DAY_LINE_CLASS_NAME =
-  "absolute -bottom-1.5 left-1/2 top-0 w-px -translate-x-1/2 bg-[#eceff3]";
-const EMPTY_DAY_DOT_CLASS_NAME =
-  "relative mt-2 h-2 w-2 rounded-full border-2 border-[#dedede] bg-white shadow-[0_1px_4px_rgba(15,23,42,0.08)]";
+const LIST_DAY_RAIL_CLASS_NAME = "pointer-events-none absolute -bottom-2 left-[73px] top-0 w-px -translate-x-1/2 bg-[#e6ddd3]";
+const LIST_GLOBAL_RAIL_CLASS_NAME = "pointer-events-none absolute bottom-0 left-[133px] top-0 w-px -translate-x-1/2 bg-[#e6ddd3] md:left-[189px]";
+const DAY_HEADER_CLASS_NAME = "group mt-0.5 flex h-10 items-center justify-end gap-1.5 rounded-[18px] pr-1 text-right transition hover:bg-white/55 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c8795f]/25";
+const DAY_DATE_NUMBER_CLASS_NAME = "flex h-9 w-9 items-center justify-center rounded-[16px] text-[17px] font-black leading-none tracking-[-0.04em] tabular-nums transition-all duration-150";
+const DAY_WEEKDAY_CLASS_NAME = "text-[11px] font-bold leading-none text-[rgba(60,60,67,0.52)]";
+const SELECTED_DAY_DATE_NUMBER_CLASS_NAME = "border border-[#efb49d] bg-[#f6d2c3] text-[#7a3a25] shadow-[0_8px_18px_rgba(191,107,77,0.16)] ring-0";
+const EMPTY_DAY_ROW_CLASS_NAME = "grid h-full min-h-[42px] grid-cols-[58px_30px_minmax(0,1fr)] items-stretch";
+const EMPTY_DAY_LINE_CLASS_NAME = "absolute -bottom-2 top-0 left-1/2 w-px -translate-x-1/2 bg-[#e6ddd3]";
+const EMPTY_DAY_DOT_CLASS_NAME = "relative mt-2 h-2.5 w-2.5 rounded-full border-2 border-[#d6c9bc] bg-[#fbf7f1] shadow-[0_0_0_4px_#fbf7f1,0_2px_8px_rgba(15,23,42,0.06)]";
+const EMPTY_DAY_CARD_CLASS_NAME = "flex h-[38px] items-center rounded-[18px] border border-dashed border-[#ddcfc1] bg-white/62 px-3.5 text-[12px] font-bold text-[#9a8f84] shadow-[0_8px_18px_rgba(15,23,42,0.04)]";
+const LIST_VIEW_HEADER_CLASS_NAME = "sticky top-0 z-10 mx-auto flex w-full max-w-[940px] items-end justify-between gap-3 bg-[#fbf7f1]/92 px-3 pb-3 pt-4 backdrop-blur md:px-4";
+const LIST_VIEW_TITLE_CLASS_NAME = "text-[26px] font-black leading-none tracking-[-0.05em] text-[#241f1a]";
+const LIST_VIEW_SUBTITLE_CLASS_NAME = "mt-1 text-[12px] font-bold text-[#9a8f84]";
+const LIST_VIEW_COUNT_CLASS_NAME = "rounded-full bg-white/78 px-3 py-1 text-[12px] font-bold text-[#7a6d61] shadow-[0_6px_18px_rgba(15,23,42,0.06)]";
 
 const createRail = (selectedDate: Date): ScheduleVirtualRail => ({
   startDate: subDays(startOfMonth(selectedDate), LOCAL_DAYS),
@@ -345,22 +343,22 @@ const getDayDateNumberClassName = (day: CalendarListDay): string =>
     day.isSelected
       ? SELECTED_DAY_DATE_NUMBER_CLASS_NAME
       : day.isToday
-        ? "text-[#0a84ff]"
-        : "text-[#1c1c1e]",
+        ? "bg-white text-[#c8795f] shadow-[0_8px_18px_rgba(15,23,42,0.06)]"
+        : "text-[#241f1a]",
   );
+const getVisibleEventCount = (items: CalendarListVirtualItem[]): number =>
+  items.reduce((total, item) => total + (item.kind === "event" ? 1 : 0), 0);
 
 const EmptyDayCard = () => (
   <div className={EMPTY_DAY_ROW_CLASS_NAME}>
-    <div className="pt-2.5 text-right text-[12px] font-medium leading-none text-[#b3b3b3]">
+    <div className="pt-2.5 text-right text-[12px] font-semibold leading-none text-[#b8aa9d]">
       —
     </div>
     <div className="relative flex justify-center">
       <span className={EMPTY_DAY_LINE_CLASS_NAME} aria-hidden="true" />
       <span className={EMPTY_DAY_DOT_CLASS_NAME} aria-hidden="true" />
     </div>
-    <div className="flex h-[34px] items-center rounded-[10px] border border-dashed border-[#dedede] bg-white px-3 text-[12px] font-semibold text-[#8e8e93]">
-      {EMPTY_DAY_LABEL}
-    </div>
+    <div className={EMPTY_DAY_CARD_CLASS_NAME}>{EMPTY_DAY_LABEL}</div>
   </div>
 );
 const CalendarListItemRowComponent = ({
@@ -369,14 +367,14 @@ const CalendarListItemRowComponent = ({
   onSelectDate,
 }: CalendarListItemRowProps) => (
   <section
-    className="grid grid-cols-[56px_minmax(0,1fr)] gap-1 md:grid-cols-[108px_minmax(0,1fr)] md:gap-2"
+    className="grid grid-cols-[62px_minmax(0,1fr)] gap-1.5 md:grid-cols-[114px_minmax(0,1fr)] md:gap-2.5"
     style={createItemRowStyle(item.rowHeight)}
     aria-label={getCalendarListItemAriaLabel(item)}
   >
     {showDayHeader ? (
       <button
         type="button"
-        className="group mt-0.5 flex h-8 items-center justify-end gap-1 rounded-[10px] pr-0.5 text-right transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25"
+        className={DAY_HEADER_CLASS_NAME}
         onClick={() => onSelectDate?.(item.day.date)}
       >
         <span className={getDayDateNumberClassName(item.day)}>
@@ -387,7 +385,7 @@ const CalendarListItemRowComponent = ({
         </span>
       </button>
     ) : (
-      <div className="mt-0.5 h-8" aria-hidden="true" />
+      <div className="mt-0.5 h-10" aria-hidden="true" />
     )}
     <div className="relative h-full overflow-visible">
       <span className={LIST_DAY_RAIL_CLASS_NAME} aria-hidden="true" />
@@ -458,6 +456,7 @@ const CalendarListViewComponent = ({
     [metrics.items, range.end, range.start],
   );
   const totalHeight = metrics.totalHeight;
+  const visibleEventCount = useMemo(() => getVisibleEventCount(visibleItems), [visibleItems]);
   const scrollTargetSignature =
     scrollTargetToken === undefined
       ? scrollTargetDateKey
@@ -558,13 +557,22 @@ const CalendarListViewComponent = ({
   return (
     <div
       className={cn(
-        "flex min-h-0 flex-1 flex-col overflow-hidden bg-white",
+        "flex min-h-0 flex-1 flex-col overflow-hidden bg-[#fbf7f1]",
         className,
       )}
     >
+      <div className={LIST_VIEW_HEADER_CLASS_NAME}>
+        <div>
+          <div className={LIST_VIEW_TITLE_CLASS_NAME}>今日の流れ</div>
+          <div className={LIST_VIEW_SUBTITLE_CLASS_NAME}>
+            {format(selectedDate, "M月d日 EEEE", { locale: ja })}
+          </div>
+        </div>
+        <div className={LIST_VIEW_COUNT_CLASS_NAME}>{visibleEventCount}件</div>
+      </div>
       <div
         ref={scrollRef}
-        className="scrollbar-hidden min-h-0 flex-1 overflow-y-auto px-2 pb-6 pt-2 md:px-4"
+        className="scrollbar-hidden min-h-0 flex-1 overflow-y-auto px-2 pb-8 pt-1 md:px-4"
       >
         <div className="mx-auto w-full max-w-[940px]">
           <div className="relative w-full" style={{ height: totalHeight }}>
