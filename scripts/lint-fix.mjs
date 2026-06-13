@@ -1,20 +1,22 @@
 import { spawnSync } from "node:child_process";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPOSITORY_ROOT = path.resolve(SCRIPT_DIR, "..");
+const FIXER_SCRIPT_PATHS = [
+  path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-type-only-imports.mjs"),
+  path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-const-arrow-functions.mjs"),
+  path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-short-hex-colors.mjs"),
+  path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-nullish-fallback.mjs"),
+  path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-strict-equality.mjs"),
+  path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-known-lint-errors.mjs"),
+  path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-source-order.mjs"),
+  path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-import-spacing.mjs"),
+  path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-jsx-child-spacing.mjs"),
+  path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-repeated-blank-lines.mjs"),
+];
 const NODE_SCRIPT_PATHS = {
-  fixBlankLines: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-repeated-blank-lines.mjs"),
-  fixConstArrowFunctions: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-const-arrow-functions.mjs"),
-  fixImportSpacing: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-import-spacing.mjs"),
-  fixJsxChildSpacing: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-jsx-child-spacing.mjs"),
-  fixKnownLintErrors: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-known-lint-errors.mjs"),
-  fixNullishFallback: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-nullish-fallback.mjs"),
-  fixShortHexColors: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-short-hex-colors.mjs"),
-  fixSourceOrder: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-source-order.mjs"),
-  fixStrictEquality: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-strict-equality.mjs"),
-  fixTypeOnlyImports: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-type-only-imports.mjs"),
   lintEslintJa: path.resolve(REPOSITORY_ROOT, "scripts/lint-eslint-ja.mjs"),
   verifyBlankLines: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-repeated-blank-lines.mjs"),
   verifyConstArrowFunctions: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-const-arrow-functions.mjs"),
@@ -30,6 +32,8 @@ const NODE_SCRIPT_PATHS = {
   verifyTypeOnlyImports: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-type-only-imports.mjs"),
 };
 
+process.chdir(REPOSITORY_ROOT);
+
 const runNodeScript = (scriptPath, args = []) => {
   const result = spawnSync(process.execPath, [scriptPath, ...args], {
     cwd: REPOSITORY_ROOT,
@@ -44,19 +48,29 @@ const runNodeScript = (scriptPath, args = []) => {
   return result.status ?? 0;
 };
 
-const runSourceConventionFixes = () => {
-  const statuses = [
-    runNodeScript(NODE_SCRIPT_PATHS.fixTypeOnlyImports),
-    runNodeScript(NODE_SCRIPT_PATHS.fixConstArrowFunctions),
-    runNodeScript(NODE_SCRIPT_PATHS.fixShortHexColors),
-    runNodeScript(NODE_SCRIPT_PATHS.fixNullishFallback),
-    runNodeScript(NODE_SCRIPT_PATHS.fixStrictEquality),
-    runNodeScript(NODE_SCRIPT_PATHS.fixKnownLintErrors),
-    runNodeScript(NODE_SCRIPT_PATHS.fixSourceOrder),
-    runNodeScript(NODE_SCRIPT_PATHS.fixImportSpacing),
-    runNodeScript(NODE_SCRIPT_PATHS.fixJsxChildSpacing),
-    runNodeScript(NODE_SCRIPT_PATHS.fixBlankLines),
-  ];
+const runImportedScript = async (scriptPath) => {
+  const previousExitCode = process.exitCode;
+  process.exitCode = 0;
+
+  try {
+    await import(pathToFileURL(scriptPath).href);
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = previousExitCode;
+    return 1;
+  }
+
+  const status = process.exitCode ?? 0;
+  process.exitCode = previousExitCode;
+  return status;
+};
+
+const runSourceConventionFixes = async () => {
+  const statuses = [];
+
+  for (const fixerScriptPath of FIXER_SCRIPT_PATHS) {
+    statuses.push(await runImportedScript(fixerScriptPath));
+  }
 
   return statuses.find((status) => status !== 0) ?? 0;
 };
@@ -81,7 +95,7 @@ const runSourceConventionVerification = () => {
 };
 
 const lintStatus = runNodeScript(NODE_SCRIPT_PATHS.lintEslintJa, ["--fix"]);
-const fixStatus = runSourceConventionFixes();
+const fixStatus = await runSourceConventionFixes();
 const verifyStatus = runSourceConventionVerification();
 
 process.exitCode = [lintStatus, fixStatus, verifyStatus].find((status) => status !== 0) ?? 0;
