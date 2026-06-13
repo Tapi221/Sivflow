@@ -27,6 +27,10 @@ type FirebaseClientState = {
   functionsClient: Functions | null;
   firestoreDb: Firestore | null;
 };
+type FirebaseEnvStatus = {
+  isAvailable: boolean;
+  missingEnvVars: string[];
+};
 
 
 
@@ -74,7 +78,17 @@ const getMissingFirebaseEnvVars = (): string[] => {
     return typeof value !== "string" || value.trim().length === 0;
   });
 };
+<<<<<<< HEAD
 
+=======
+const createFirebaseEnvStatus = (): FirebaseEnvStatus => {
+  const missingEnvVars = getMissingFirebaseEnvVars();
+  return {
+    isAvailable: missingEnvVars.length === 0,
+    missingEnvVars,
+  };
+};
+>>>>>>> 1e73a920936e96d44257c48e4ca27949ca7611b3
 const createUnavailableState = (): FirebaseClientState => ({
   app: null,
   auth: null,
@@ -82,12 +96,17 @@ const createUnavailableState = (): FirebaseClientState => ({
   functionsClient: null,
   firestoreDb: null,
 });
+<<<<<<< HEAD
 
 const initializeFirebaseClient = (isAvailable: boolean, missingEnvVars: string[]): FirebaseClientState => {
   if (!isAvailable) {
+=======
+const initializeFirebaseClient = (firebaseEnvStatus: FirebaseEnvStatus): FirebaseClientState => {
+  if (!firebaseEnvStatus.isAvailable) {
+>>>>>>> 1e73a920936e96d44257c48e4ca27949ca7611b3
     if (import.meta.env.DEV || import.meta.env.MODE === "test") {
       console.warn(
-        `[Firebase] Firebase 環境変数が不足しているため、クラウド機能なしのローカル優先モードで起動します。不足: ${missingEnvVars.join(", ")}`,
+        `[Firebase] Firebase 環境変数が不足しているため、クラウド機能なしのローカル優先モードで起動します。不足: ${firebaseEnvStatus.missingEnvVars.join(", ")}`,
       );
     }
     return createUnavailableState();
@@ -134,6 +153,7 @@ const initializeFirebaseClient = (isAvailable: boolean, missingEnvVars: string[]
   };
 };
 
+<<<<<<< HEAD
 
 
 const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
@@ -141,6 +161,18 @@ const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
 const firebaseClientState = initializeFirebaseClient(isFirebaseClientAvailable, missingFirebaseEnvVars);
 
 
+=======
+const firebaseEnvStatus = createFirebaseEnvStatus();
+const missingFirebaseEnvVars = firebaseEnvStatus.missingEnvVars;
+const isFirebaseClientAvailable = firebaseEnvStatus.isAvailable;
+const firebaseClientState = initializeFirebaseClient(firebaseEnvStatus);
+const firebaseApp = firebaseClientState.app;
+const auth = firebaseClientState.auth as Auth;
+const storage = firebaseClientState.storage as FirebaseStorage;
+const functionsClient = firebaseClientState.functionsClient as Functions;
+const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
+const db: Firestore | null = firebaseClientState.firestoreDb;
+>>>>>>> 1e73a920936e96d44257c48e4ca27949ca7611b3
 
 const requireFirebaseClient = (): FirebaseClientState => {
   if (isFirebaseClientAvailable && firebaseClientState.app) {
