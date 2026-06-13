@@ -44,17 +44,14 @@ const getNormalizedPdfWheelDeltaY = (event: WheelEvent, container: HTMLElement):
 };
 const getPdfZoomViewerForTarget = (target: EventTarget | null): PatchedPdfViewerPrototype | null => {
   if (!(target instanceof Node)) return null;
-
   for (const pdfViewer of pdfZoomViewers) {
     const container = pdfViewer.container;
     if (!container?.isConnected) {
       pdfZoomViewers.delete(pdfViewer);
       continue;
     }
-
     if (container.contains(target)) return pdfViewer;
   }
-
   return null;
 };
 const rewritePdfWheelZoomEventDelta = (event: WheelEvent, deltaY: number): boolean => {
@@ -63,12 +60,10 @@ const rewritePdfWheelZoomEventDelta = (event: WheelEvent, deltaY: number): boole
       configurable: true,
       value: deltaY,
     });
-
     Object.defineProperty(event, "deltaMode", {
       configurable: true,
       value: PDF_WHEEL_DELTA_MODE_PIXEL,
     });
-
     return true;
   } catch {
     return false;
@@ -79,15 +74,12 @@ const handlePdfWheelZoomCapture = (event: WheelEvent): void => {
   const pdfViewer = getPdfZoomViewerForTarget(event.target);
   const container = pdfViewer?.container;
   if (!pdfViewer || !container) return;
-
   const currentScale = getPdfZoomScale(pdfViewer);
   const nextScale = computeNextScaleFromWheel({ currentScale, deltaY: getNormalizedPdfWheelDeltaY(event, container), zoomStep: PDF_ZOOM_STEP, minScale: PDF_ZOOM_MIN_SCALE, maxScale: PDF_ZOOM_MAX_SCALE });
   if (nextScale === null || Math.abs(nextScale - currentScale) < PDF_ZOOM_SCALE_EPSILON) return;
-
   const deltaY = resolveTrackpadDeltaYForScaleRatio({ scaleRatio: nextScale / currentScale, sensitivity: PDF_TRACKPAD_ZOOM_SENSITIVITY });
   if (deltaY === null) return;
   if (!rewritePdfWheelZoomEventDelta(event, deltaY)) return;
-
   markPdfViewerScaleScrollSuppressed(pdfViewer);
 };
 const isPdfViewerZooming = (pdfViewer: PatchedPdfViewerPrototype): boolean => {
@@ -102,19 +94,16 @@ const shouldSuppressPdfViewerScaleScroll = (pdfViewer: PatchedPdfViewerPrototype
 };
 const getPdfViewerScaleDescriptor = (prototype: object, propertyName: (typeof PDF_VIEWER_SCALE_PROPERTY_NAMES)[number]): PdfViewerScaleDescriptor | null => {
   let currentPrototype: object | null = prototype;
-
   while (currentPrototype) {
     const descriptor = Object.getOwnPropertyDescriptor(currentPrototype, propertyName) as PdfViewerScaleDescriptor | undefined;
     if (descriptor) return descriptor;
     currentPrototype = Object.getPrototypeOf(currentPrototype);
   }
-
   return null;
 };
 const patchPdfViewerScaleSetter = (prototype: PatchedPdfViewerPrototype, propertyName: (typeof PDF_VIEWER_SCALE_PROPERTY_NAMES)[number]): void => {
   const descriptor = getPdfViewerScaleDescriptor(prototype, propertyName);
   if (!descriptor?.set) return;
-
   Object.defineProperty(prototype, propertyName, {
     configurable: descriptor.configurable,
     enumerable: descriptor.enumerable,
@@ -134,8 +123,7 @@ const patchPdfViewerScaleSetter = (prototype: PatchedPdfViewerPrototype, propert
 const patchPdfViewerSetDocument = (prototype: PatchedPdfViewerPrototype): void => {
   const originalSetDocument = prototype.setDocument;
   if (typeof originalSetDocument !== "function") return;
-
-  prototype.setDocument = (this: PatchedPdfViewerPrototype, ...args: unknown[]): unknown => {
+  prototype.setDocument = function patchSivflowPdfViewerSetDocument(this: PatchedPdfViewerPrototype, ...args: unknown[]): unknown {
     if (this.container) pdfZoomViewers.add(this);
     return originalSetDocument.apply(this, args);
   };
@@ -147,16 +135,13 @@ const addPdfZoomCaptureListeners = (): void => {
 const applyPdfViewerZoomPatch = (): void => {
   const viewerConstructor = PDFViewer as PatchedPdfViewerConstructor;
   if (viewerConstructor.__sivflowZoomPatchApplied) return;
-
   const prototype = viewerConstructor.prototype as PatchedPdfViewerPrototype;
   const originalScrollPageIntoView = prototype.scrollPageIntoView;
   if (typeof originalScrollPageIntoView !== "function") return;
-
-  prototype.scrollPageIntoView = (this: PatchedPdfViewerPrototype, ...args: unknown[]): unknown => {
+  prototype.scrollPageIntoView = function patchSivflowPdfViewerScrollPageIntoView(this: PatchedPdfViewerPrototype, ...args: unknown[]): unknown {
     if (shouldSuppressPdfViewerScaleScroll(this)) return undefined;
     return originalScrollPageIntoView.apply(this, args);
   };
-
   for (const propertyName of PDF_VIEWER_SCALE_PROPERTY_NAMES) patchPdfViewerScaleSetter(prototype, propertyName);
   patchPdfViewerSetDocument(prototype);
   addPdfZoomCaptureListeners();
