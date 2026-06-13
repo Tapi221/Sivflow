@@ -1,4 +1,4 @@
-import { createRouteHandler } from "uploadthing/next";
+import { createRouteHandler } from "uploadthing/server";
 import { ourFileRouter } from "@/lib/uploadthing";
 
 const { GET, POST } = createRouteHandler({
