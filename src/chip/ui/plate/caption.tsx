@@ -1,12 +1,20 @@
 "use client";
 
 import * as React from "react";
+
 import { Caption as CaptionPrimitive, CaptionTextarea as CaptionTextareaPrimitive, useCaptionButton, useCaptionButtonState } from "@platejs/caption/react";
+
 import { createPrimitiveComponent } from "@udecode/cn";
+
 import type { VariantProps } from "class-variance-authority";
+
 import { cva } from "class-variance-authority";
+
 import { Button } from "@/chip/ui/button/button";
+
 import { cn } from "@/lib/utils";
+
+
 
 const captionVariants = cva("max-w-full", {
   defaultVariants: {
@@ -20,14 +28,18 @@ const captionVariants = cva("max-w-full", {
     },
   },
 });
+
 const CaptionButton = createPrimitiveComponent(Button)({
   propsHook: useCaptionButton,
   stateHook: useCaptionButtonState,
 });
 
+
+
 const Caption = ({ align, className, ...props }: React.ComponentProps<typeof CaptionPrimitive> & VariantProps<typeof captionVariants>) => {
   return <CaptionPrimitive {...props} className={cn(captionVariants({ align }), className)} />;
 };
+
 const CaptionTextarea = (props: React.ComponentProps<typeof CaptionTextareaPrimitive>) => {
   return (
     <CaptionTextareaPrimitive
@@ -41,5 +53,7 @@ const CaptionTextarea = (props: React.ComponentProps<typeof CaptionTextareaPrimi
     />
   );
 };
+
+
 
 export { Caption, CaptionTextarea, CaptionButton };

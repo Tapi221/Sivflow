@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { SurfaceButton } from "@/chip/ui/button/surface-button";
 import { cn } from "@/lib/utils";
 
+
+
 type SegmentedOption<T extends string> = {
   label: ReactNode;
   value: T;
@@ -16,6 +18,8 @@ interface SegmentedControlGroupProps<T extends string> {
   className?: string;
   buttonClassName?: string;
 }
+
+
 
 const SegmentedControlGroup = <T extends string,>({ value, options, onChange, size = "xs", className, buttonClassName }: SegmentedControlGroupProps<T>) => {
   return (<div className={cn("ds-segmented-control", className)}> {options.map((option) => {
@@ -41,5 +45,9 @@ const SegmentedControlGroup = <T extends string,>({ value, options, onChange, si
   );
 };
 
+
+
 export { SegmentedControlGroup };
+
+
 export type { SegmentedOption };

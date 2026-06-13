@@ -9,14 +9,16 @@ import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
 import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
-import type { CalendarEventDragPointerSnapshot } from "@/features/calendar/grid/calendarEventDrag.shared";
-import { areSameCalendarEventTimes, CALENDAR_EVENT_DRAGGING_STYLE, createCalendarEventDragPointerSnapshot, createCalendarEventDragPreview, createCalendarEventKey, getCalendarEventDateOrNull, isCalendarEventDraggable, isSameCalendarEventMove, useCalendarEventDragAutoScroll, useCalendarEventDragBodyStyle } from "@/features/calendar/grid/calendarEventDrag.shared";
-import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
-import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";
-import { getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle, WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX } from "@/features/calendar/grid/weekdayTimeGridGeometry";
+import type { CalendarEventDragPointerSnapshot } from "./calendarEventDrag.shared";
+import { areSameCalendarEventTimes, CALENDAR_EVENT_DRAGGING_STYLE, createCalendarEventDragPointerSnapshot, createCalendarEventDragPreview, createCalendarEventKey, getCalendarEventDateOrNull, isCalendarEventDraggable, isSameCalendarEventMove, useCalendarEventDragAutoScroll, useCalendarEventDragBodyStyle } from "./calendarEventDrag.shared";
+import * as COLOR from "./grid.color.constants.desktop";
+import * as GRID from "./grid.layout.constants.desktop";
+import { getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle, WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX } from "./weekdayTimeGridGeometry";
 import type { CalendarAllDayEventOrderMap, CalendarGridStyle, CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
+
+
 
 type CalendarWeekDayGridRef = {
   scrollToHour: (hour: number) => void; };
@@ -30,6 +32,8 @@ type WeekdayEventDragPreview = {
   previewStartsAt: Date; previewEndsAt: Date; previewIsAllDay: boolean; previewAllDayIndex: number | null; previewColumnDayKey: string | null; };
 type WeekdayAllDayRenderItem = {
   event: GoogleCalendarEvent; eventKey: string; isDragPreview: boolean; };
+
+
 
 const WEEKDAY_HOURS = Array.from({ length: GRID.WEEKDAY_HOURS }, (_, hour) => hour);
 const CURRENT_TIME_TICK_MS = GRID.WEEKDAY_CURRENT_TIME_UPDATE_INTERVAL_MS;
@@ -48,6 +52,8 @@ const WEEKDAY_BOTTOM_PREVIEW_SPACER_CLASS_NAME = "relative overflow-hidden";
 const WEEKDAY_TIMED_EVENT_DRAG_SNAP_MINUTES = 15;
 const WEEKDAY_TIMED_EVENT_DRAG_FALLBACK_MINUTES = 30;
 const MINUTE_MS = 60 * 1000;
+
+
 
 const getAllDayColumnStyle = (): CSSProperties => ({ padding: eventChipDesign.weekdayGrid.allDayColumnInsetPx, ...WEEKDAY_COLUMN_BORDER_STYLE });
 const getAllDayStackStyle = (): CSSProperties => ({ gap: eventChipDesign.weekdayGrid.allDayEventGapPx });
@@ -207,6 +213,8 @@ const useCurrentTime = () => {
   return now;
 };
 
+
+
 const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scrollContainerRef, visibleDays, visibleEvents, calendarGridStyle, allDayEventOrder, onScroll, selectedDate, onSelectDate, onMoveCalendarEvent, onReorderAllDayEvents }: CalendarWeekDayGridProps) => {
   const now = useCurrentTime();
   const allDayColumnRefs = useRef(new Map<string, HTMLDivElement>());
@@ -283,8 +291,12 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
   );
 };
 
+
+
 const CalendarWeekDayGrid = memo(CalendarWeekDayGridComponent);
 CalendarWeekDayGrid.displayName = "CalendarWeekDayGrid";
 
 export { CalendarWeekDayGrid };
+
+
 export type { CalendarWeekDayGridRef };

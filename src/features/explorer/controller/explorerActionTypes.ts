@@ -1,3 +1,5 @@
-import type { ExplorerAction } from "@/features/explorer/controller/explorerAction.types";
+import type { ExplorerAction } from "./explorerAction.types";
+
+
 
 export type { ExplorerAction };

@@ -1,7 +1,9 @@
-import { AddDocumentIcon, BulkImportIcon, CreateCardIcon, CreateCardSetIcon, CreateFolderIcon, FolderContextCardSetIcon, FolderContextFolderIcon, FolderContextRenameIcon, FolderContextTrashIcon } from "@/components/folder/components/menus/explorerMenuActionIcons";
-import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
-import type { MenuAction } from "@/components/folder/components/menus/menuActions";
+import { AddDocumentIcon, BulkImportIcon, CreateCardIcon, CreateCardSetIcon, CreateFolderIcon, FolderContextCardSetIcon, FolderContextFolderIcon, FolderContextRenameIcon, FolderContextTrashIcon } from "./explorerMenuActionIcons";
+import { beginInlineRename } from "./explorerMenuStateHelpers";
+import type { MenuAction } from "./menuActions";
 import { Pencil, Tag, Trash2 } from "@/ui/icons";
+
+
 
 interface BuildFolderMenuActionsParams {
   onCreateSubfolder?: () => void;
@@ -40,6 +42,8 @@ interface BuildExplorerCreateMenuActionsParams {
   onAddDocument?: () => void | Promise<void>;
   onBulkImport?: () => void | Promise<void>;
 }
+
+
 
 const buildRenameDeleteMenuActions = ({ renameLabel = "名前を変更", deleteLabel = "削除", onRename, onDelete }: BuildRenameDeleteMenuActionsParams): MenuAction[] => {
   const actions: MenuAction[] = [];
@@ -186,5 +190,7 @@ const buildExplorerCreateMenuActions = ({ canCreateCardSet = false, canCreateCar
 
   return actions;
 };
+
+
 
 export { buildRenameDeleteMenuActions, buildEntityRenameDeleteMenuActions, buildFolderMenuActions, buildExplorerCreateMenuActions };

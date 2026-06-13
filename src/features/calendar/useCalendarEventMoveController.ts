@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import type { CalendarEventMoveHandler } from "@/features/calendar/scheduleScreen.types";
+import type { CalendarEventMoveHandler } from "./scheduleScreen.types";
 import type { GCalWritableEventUpdateInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+
+
 
 type CalendarEventMoveOverride = {
   startsAt: Date; endsAt: Date; isAllDay: boolean; };
@@ -13,9 +15,13 @@ type UseCalendarEventMoveControllerReturn = {
 type CalendarEventMoveSnapshot = {
   startsAt: Date; endsAt: Date; isAllDay: boolean; };
 
+
+
 const EVENT_MOVE_ROLLBACK_MS = 1200;
 const EVENT_MOVE_SAVE_DELAY_MS = 120;
 const EVENT_MOVE_TOAST_ID_PREFIX = "calendar-event-move";
+
+
 
 const cloneDate = (value: Date): Date => new Date(value);
 const cloneMoveOverride = ({ startsAt, endsAt, isAllDay }: CalendarEventMoveOverride): CalendarEventMoveOverride => ({
@@ -192,5 +198,9 @@ const useCalendarEventMoveController = ({ updateGoogleCalendarEvent }: UseCalend
   };
 };
 
+
+
 export { applyCalendarEventMoveOverrides, useCalendarEventMoveController };
+
+
 export type { CalendarEventMoveOverride, UseCalendarEventMoveControllerOptions, UseCalendarEventMoveControllerReturn };

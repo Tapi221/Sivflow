@@ -5,6 +5,8 @@ import type { RenderStaticNodeWrapper, TListElement } from "platejs";
 import type { SlateRenderElementProps } from "platejs/static";
 import { cn } from "@/lib/utils";
 
+
+
 const TodoMarkerStatic = (props: SlateRenderElementProps) => {
   const checked = props.element.checked as boolean;
 
@@ -38,6 +40,8 @@ const TodoLiStatic = (props: SlateRenderElementProps) => {
   );
 };
 
+
+
 const config: Record<
   string,
   {
@@ -50,6 +54,8 @@ const config: Record<
     Marker: TodoMarkerStatic,
   },
 };
+
+
 
 const List = (props: SlateRenderElementProps) => {
   const { indent, listStart, listStyleType } = props.element as TListElement & {
@@ -76,5 +82,7 @@ const BlockListStatic: RenderStaticNodeWrapper = (props) => {
 
   return (nextProps) => <List {...nextProps} />;
 };
+
+
 
 export { BlockListStatic };

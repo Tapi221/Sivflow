@@ -6,12 +6,16 @@ import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
 import { Filter } from "@/ui/icons";
 
+
+
 interface TagFilterPopoverProps {
   allTags: string[];
   className?: string;
   iconClassName?: string;
   ariaLabel?: string;
 }
+
+
 
 const TagFilterPopover = ({ allTags, className, iconClassName, ariaLabel = "タグフィルターを開く" }: TagFilterPopoverProps) => {
   const { tagFilter, uncertaintyFilter, bookmarkedFilter, draftFilter, contentTypeFilter } = useExplorerStore();
@@ -50,5 +54,7 @@ const TagFilterPopover = ({ allTags, className, iconClassName, ariaLabel = "タ�
     </Popover>
   );
 };
+
+
 
 export { TagFilterPopover };

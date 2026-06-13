@@ -1,8 +1,12 @@
 import { createGoogleApiError } from "@/integration/google-integration/googleApiRetry";
-import { parseGoogleRecurrenceRule, serializeGoogleRecurrenceRule } from "@/integration/googlecalendar-integration/gcalRecurrence";
-import type { GCalRawIncrementalEvent, GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritableEventUpdateInput, GoogleCalendarApiCalendarResponse, GoogleCalendarApiEventsResponse, GoogleCalendarApiListResponse, GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
+import { parseGoogleRecurrenceRule, serializeGoogleRecurrenceRule } from "./gcalRecurrence";
+import type { GCalRawIncrementalEvent, GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritableEventUpdateInput, GoogleCalendarApiCalendarResponse, GoogleCalendarApiEventsResponse, GoogleCalendarApiListResponse, GoogleCalendarEvent, GoogleCalendarListItem } from "./gcalSync.types";
+
+
 
 const GOOGLE_CALENDAR_API_BASE = "https://www.googleapis.com/calendar/v3";
+
+
 
 const getJsonOnce = async <T>(accessToken: string, url: string, errorPrefix = "Google API failed"): Promise<T> => {
   const res = await fetch(url, {
@@ -305,5 +309,7 @@ const updateGoogleCalendarEvent = async ({ accessToken, accountId, accentColor, 
 const deleteGoogleCalendarEvent = async ({ accessToken, event }: { accessToken: string; event: GCalWritableEventDeleteInput; }): Promise<void> => {
   await deleteJson(accessToken, `${GOOGLE_CALENDAR_API_BASE}/calendars/${encodeURIComponent(event.calendarId)}/events/${encodeURIComponent(event.eventId)}`, "Google Calendar event deletion failed");
 };
+
+
 
 export { fetchCalendarList, createGoogleCalendar, fetchEventsForCalendar, createGoogleCalendarEvent, updateGoogleCalendarEvent, deleteGoogleCalendarEvent };

@@ -1,5 +1,7 @@
 import { useCallback } from "react";
 
+
+
 const useSyncHorizontalScroll = (sourceRef: React.RefObject<HTMLDivElement | null>, targetRef: React.RefObject<HTMLDivElement | null>) => {
   const sync = useCallback((scrollLeft: number) => {
     if (targetRef.current) {
@@ -17,5 +19,7 @@ const useSyncHorizontalScroll = (sourceRef: React.RefObject<HTMLDivElement | nul
     syncFromSource,
   };
 };
+
+
 
 export { useSyncHorizontalScroll };

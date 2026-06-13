@@ -3,10 +3,14 @@ import type { MouseEvent as ReactMouseEvent } from "react";
 import type { Notification } from "@/types/notification";
 import { AlertCircle, ChevronDown } from "@/ui/icons";
 
+
+
 interface ErrorDialogProps {
   notification: Notification;
   onDismiss?: () => void;
 }
+
+
 
 /**
  * ERROR レベルの通知
@@ -90,5 +94,7 @@ const ErrorDialog = ({ notification, onDismiss }: ErrorDialogProps) => {
     </div>
   );
 };
+
+
 
 export { ErrorDialog };

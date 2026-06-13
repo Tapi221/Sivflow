@@ -1,9 +1,13 @@
 import { useMemo } from "react";
 import { compareCalendarEvents } from "@/features/calendar/calendarEventRange";
-import { toDateKey } from "@/features/calendar/grid/calendarKey";
+import { toDateKey } from "./calendarKey";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
+
+
 type CalendarEventMap = Map<string, GoogleCalendarEvent[]>;
+
+
 
 const useCalendarEventMap = (visibleEvents: GoogleCalendarEvent[]): CalendarEventMap => {
   return useMemo(() => {
@@ -28,5 +32,9 @@ const useCalendarEventMap = (visibleEvents: GoogleCalendarEvent[]): CalendarEven
   }, [visibleEvents]);
 };
 
+
+
 export { useCalendarEventMap };
+
+
 export type { CalendarEventMap };

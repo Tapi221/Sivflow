@@ -2,14 +2,18 @@ import { useMemo } from "react";
 import type { GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import { useGoogleCalendarLayer } from "@/features/calendar/useGoogleCalendarLayer";
 import { useProjectCalendarActions } from "@/features/calendar/useProjectCalendarActions";
-import { CalendarSidebarContent } from "@/pane.desktop/leftpane/schedule/CalendarSidebar";
+import { CalendarSidebarContent } from "./CalendarSidebar";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+
+
 
 type CalendarSidebarControllerProps = {
   onOpenSettings?: () => void;
   onToggleLeftPanel?: () => void;
 };
+
+
 
 const createGoogleAccountDisplays = (google: ReturnType<typeof useGoogleCalendarLayer>): GoogleAccountDisplay[] => google.googleAccounts.map((account) => {
   const taskListState = google.taskListsByAccount[account.id];
@@ -33,6 +37,8 @@ const createGoogleAccountDisplays = (google: ReturnType<typeof useGoogleCalendar
   };
 });
 
+
+
 const CalendarSidebarController = ({ onOpenSettings, onToggleLeftPanel }: CalendarSidebarControllerProps) => {
   const google = useGoogleCalendarLayer();
   const activeSectionKey = useWorkspaceTabsStore((state) => state.tabs.find((tab) => tab.id === state.activeTabId)?.sectionKey ?? null);
@@ -45,5 +51,7 @@ const CalendarSidebarController = ({ onOpenSettings, onToggleLeftPanel }: Calend
 
   return <SidebarLayeredDirectory onOpenSettings={onOpenSettings} onToggleLeftPanel={onToggleLeftPanel} calendarContent={calendarContent} />;
 };
+
+
 
 export { CalendarSidebarController };
