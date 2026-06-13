@@ -34,6 +34,7 @@ const createInlineItems = (items: Omit<Item, "onSelect">[]): Item[] => items.map
     insertInlineElement(editor, value);
   },
 }));
+
 const groups: Group[] = [
   {
     group: "Basic blocks",

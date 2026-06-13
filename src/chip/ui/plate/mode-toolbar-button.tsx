@@ -20,6 +20,13 @@ const modeItems: Record<ModeValue, ModeItem> = {
   suggestion: { icon: <PencilLineIcon />, label: "Suggestion" },
   viewing: { icon: <EyeIcon />, label: "Viewing" },
 };
+
+const getModeValue = (readOnly: boolean, isSuggesting: boolean): ModeValue => {
+  if (readOnly) return "viewing";
+  if (isSuggesting) return "suggestion";
+  return "editing";
+};
+
 const Indicator = () => {
   return (
     <span className="pointer-events-none absolute right-2 flex size-3.5 items-center justify-center">
@@ -28,11 +35,6 @@ const Indicator = () => {
       </DropdownMenuItemIndicator>
     </span>
   );
-};
-const getModeValue = (readOnly: boolean, isSuggesting: boolean): ModeValue => {
-  if (readOnly) return "viewing";
-  if (isSuggesting) return "suggestion";
-  return "editing";
 };
 const ModeToolbarButton = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
