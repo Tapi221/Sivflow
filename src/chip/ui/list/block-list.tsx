@@ -13,21 +13,30 @@ type ListItemProps = PlateElementProps & {
 };
 type ListConfig = Record<string, { Li: React.FC<ListItemProps>; Marker: React.FC<PlateElementProps> }>;
 
-const TODO_CHECKBOX_CLASSNAME = "-left-6 absolute top-1 size-4 border-input bg-background shadow-none data-[state=checked]:border-foreground data-[state=checked]:bg-foreground data-[state=checked]:text-background";
-
 const TodoMarker = (props: PlateElementProps) => {
   const state = useTodoListElementState({ element: props.element });
-  const todoProps = Object.values(useTodoListElement(state))[0];
+  const { checkboxProps } = useTodoListElement(state);
   const readOnly = useReadOnly();
   return (
     <div contentEditable={false}>
-      <Checkbox className={cn(TODO_CHECKBOX_CLASSNAME, readOnly && "pointer-events-none")} {...todoProps} />
+      <Checkbox
+        className={cn(
+          "absolute top-1 -left-6",
+          readOnly && "pointer-events-none",
+        )}
+        {...checkboxProps}
+      />
     </div>
   );
 };
 const TodoLi = (props: ListItemProps) => {
   return (
-    <li className={cn("list-none", props.element.checked === true && "text-muted-foreground line-through")}>
+    <li
+      className={cn(
+        "list-none",
+        (props.element.checked as boolean) && "text-muted-foreground line-through",
+      )}
+    >
       {props.children}
       {props.lineBreakBadge}
     </li>
@@ -44,7 +53,11 @@ const List = (props: ListItemProps) => {
   const { Li, Marker } = LIST_CONFIG[listStyleType] ?? {};
   const ListTag = isOrderedList(props.element) ? "ol" : "ul";
   return (
-    <ListTag className="relative m-0 p-0" style={{ listStyleType }} start={listStart}>
+    <ListTag
+      className="relative m-0 p-0"
+      start={listStart}
+      style={{ listStyleType }}
+    >
       {Marker ? <Marker {...props} /> : null}
       {Li ? (
         <Li {...props} />
@@ -58,11 +71,8 @@ const List = (props: ListItemProps) => {
   );
 };
 const BlockList: RenderNodeWrapper = (props) => {
-  const listStyleType = props.element.listStyleType;
-  if (listStyleType === undefined || listStyleType === null) return;
-  const hasListConfig = LIST_CONFIG[listStyleType] !== undefined;
-  const shouldRenderList = isOrderedList(props.element) || hasListConfig;
-  if (shouldRenderList !== true) return;
+  if (!props.element.listStyleType) return;
+  if (!isOrderedList(props.element)) return;
   return (nextProps) => <List {...nextProps} />;
 };
 
