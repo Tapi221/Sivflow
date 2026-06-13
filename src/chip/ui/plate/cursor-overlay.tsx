@@ -1,22 +1,11 @@
 "use client";
-
-import * as React from "react";
-
 import { AIChatPlugin } from "@platejs/ai/react";
-
 import type { CursorData, CursorOverlayState } from "@platejs/selection/react";
-
 import { useCursorOverlay } from "@platejs/selection/react";
-
 import { getTableGridAbove } from "@platejs/table";
-
 import { RangeApi } from "platejs";
-
 import { useEditorRef, usePluginOption } from "platejs/react";
-
 import { cn } from "@/lib/utils";
-
-
 
 const Cursor = ({
   id,
@@ -46,8 +35,8 @@ const Cursor = ({
           key={index}
           className={cn(
             "pointer-events-none absolute z-10",
-            id === "selection" && "bg-brand/25",
-            id === "selection" && isCursor && "bg-primary",
+            id === "selection" && "bg-muted-foreground/25",
+            id === "selection" && isCursor && "bg-foreground",
           )}
           style={{
             ...selectionStyle,
@@ -59,7 +48,7 @@ const Cursor = ({
         <div
           className={cn(
             "pointer-events-none absolute z-10 w-0.5",
-            id === "drag" && "w-px bg-brand",
+            id === "drag" && "w-px bg-foreground",
           )}
           style={{ ...caretPosition, ...style }}
         />
@@ -67,14 +56,11 @@ const Cursor = ({
     </>
   );
 };
-
 const CursorOverlay = () => {
   const { cursors } = useCursorOverlay();
   return cursors.map((cursor) => (
     <Cursor key={cursor.id} {...cursor} />
   ));
 };
-
-
 
 export { CursorOverlay };
