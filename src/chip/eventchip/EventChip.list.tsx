@@ -1,11 +1,11 @@
 import { format } from "date-fns";
 import { memo, useMemo } from "react";
 import type { CSSProperties } from "react";
+import { LIST_ALL_DAY_EVENT_CHIP_HEIGHT_PX, LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX, LIST_EVENT_CHIP_HEIGHT_PX, LIST_EVENT_ROW_HEIGHT_PX } from "@/chip/eventchip/EventChip.list.placement";
+import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
-import { LIST_ALL_DAY_EVENT_CHIP_HEIGHT_PX, LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX, LIST_EVENT_CHIP_HEIGHT_PX, LIST_EVENT_ROW_HEIGHT_PX } from "@/chip/eventchip/EventChip.list.placement";
-import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 
 type CalendarEventChipListProps = {
   event: GoogleCalendarEvent;
