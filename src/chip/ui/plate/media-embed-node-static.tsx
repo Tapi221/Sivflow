@@ -1,22 +1,17 @@
 import type { TMediaEmbedElement } from "platejs";
-import type { PlateElementProps } from "platejs/react";
-import { PlateElement } from "platejs/react";
+import type { SlateElementProps } from "platejs/static";
+import { SlateElement } from "platejs/static";
 import { cn } from "@/lib/utils";
 
-type MediaEmbedNodeStaticProps = PlateElementProps<TMediaEmbedElement>;
+type MediaEmbedNodeStaticProps = SlateElementProps<TMediaEmbedElement>;
 
-const MediaEmbedNodeStatic = ({ className, element, children, ...props }: MediaEmbedNodeStaticProps) => (
-  <PlateElement className={cn("my-4", className)} element={element} {...props}>
-    <div className="rounded-md border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">{element.url}</div>
-    {(element as any).caption?.[0]?.children?.[0]?.text ? (
-      <figcaption className="mt-2 text-center text-sm text-muted-foreground">
-        {(element as any).caption[0].children[0].text}
-      </figcaption>
-    ) : null}
-    {children}
-  </PlateElement>
-);
-
+const MediaEmbedNodeStatic = ({ children, className, element, ...props }: MediaEmbedNodeStaticProps) => {
+  return (
+    <SlateElement className={cn("my-4", className)} element={element} {...props}>
+      {children}
+    </SlateElement>
+  );
+};
 const MediaEmbedElementStatic = MediaEmbedNodeStatic;
 
 export { MediaEmbedElementStatic, MediaEmbedNodeStatic };
