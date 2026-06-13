@@ -1,6 +1,6 @@
 import { PDFViewer } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
-import { PDF_TRACKPAD_ZOOM_SENSITIVITY, PDF_ZOOM_MAX_SCALE, PDF_ZOOM_MIN_SCALE, PDF_ZOOM_SCALE_EPSILON, PDF_ZOOM_STEP } from "./pdfZoom.constants";
-import { computeNextScaleFromWheel, resolveTrackpadDeltaYForScaleRatio } from "./pdfZoom.utils";
+import { PDF_TRACKPAD_ZOOM_SENSITIVITY, PDF_ZOOM_MAX_SCALE, PDF_ZOOM_MIN_SCALE, PDF_ZOOM_SCALE_EPSILON, PDF_ZOOM_STEP } from "@/features/pdf/pdfZoom.constants";
+import { computeNextScaleFromWheel, resolveTrackpadDeltaYForScaleRatio } from "@/features/pdf/pdfZoom.utils";
 
 type PdfViewerMethod = (...args: unknown[]) => unknown;
 type PatchedPdfViewerConstructor = typeof PDFViewer & {
@@ -70,11 +70,15 @@ const rewritePdfWheelZoomEventDelta = (event: WheelEvent, deltaY: number): boole
     return false;
   }
 };
+const preventPdfWheelZoomBrowserDefault = (event: WheelEvent): void => {
+  if (event.cancelable) event.preventDefault();
+};
 const handlePdfWheelZoomCapture = (event: WheelEvent): void => {
   if (!event.ctrlKey && !event.metaKey) return;
   const pdfViewer = getPdfZoomViewerForTarget(event.target);
   const container = pdfViewer?.container;
   if (!pdfViewer || !container) return;
+  preventPdfWheelZoomBrowserDefault(event);
   const currentScale = getPdfZoomScale(pdfViewer);
   const nextScale = computeNextScaleFromWheel({ currentScale, deltaY: getNormalizedPdfWheelDeltaY(event, container), zoomStep: PDF_ZOOM_STEP, minScale: PDF_ZOOM_MIN_SCALE, maxScale: PDF_ZOOM_MAX_SCALE });
   if (nextScale === null || Math.abs(nextScale - currentScale) < PDF_ZOOM_SCALE_EPSILON) return;
