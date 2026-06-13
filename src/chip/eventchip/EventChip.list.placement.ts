@@ -25,6 +25,8 @@ type BuildListPlacementDaysParams = {
   selectedDate: Date;
 };
 
+type ListPlacementExport = typeof LIST_ALL_DAY_EVENT_CHIP_HEIGHT_PX;
+
 const LIST_DAY_SECTION_MIN_HEIGHT_PX = 430;
 const LIST_DAY_GAP_PX = 8;
 const LIST_EMPTY_DAY_HEIGHT_PX = 38;
@@ -129,4 +131,4 @@ const getListVirtualRange = (metrics: CalendarListVirtualMetrics, scrollTop: num
 };
 
 export { LIST_ALL_DAY_EVENT_CHIP_HEIGHT_PX, LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX, LIST_DAY_SECTION_MIN_HEIGHT_PX, LIST_EVENT_CHIP_HEIGHT_PX, LIST_EVENT_ROW_GAP_PX, LIST_EVENT_ROW_HEIGHT_PX, buildListPlacementDays, buildListVirtualMetrics, getListVirtualRange };
-export type { CalendarListPlacementDay, CalendarListVirtualMetrics, CalendarListVirtualRange };
+export type { CalendarListPlacementDay, CalendarListVirtualMetrics, CalendarListVirtualRange, ListPlacementExport };
