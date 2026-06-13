@@ -1,6 +1,6 @@
 import type { QueueItem } from "@/application/usecases/persistentOfflineQueueModels";
 import { isBackingStoreOpenError } from "@/infrastructure/localdb/errors";
-import { warnOncePerSession } from "@/services/localdbRuntimeState";
+import { warnOncePerSession } from "@/services/localDBRuntimeState";
 
 class IndexedDbPersistentOfflineQueueStore {
   private readonly dbName: string;

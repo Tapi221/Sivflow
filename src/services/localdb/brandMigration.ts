@@ -1,5 +1,5 @@
 import { Dexie } from "dexie";
-import { warnOncePerSession } from "@/services/localdbRuntimeState";
+import { warnOncePerSession } from "@/services/localDBRuntimeState";
 import { LOCALDB_BRAND_MIGRATION_KEY_PREFIX, LOCALDB_GENERATION_MAX, LOCALDB_LEGACY_NAME_PREFIX, LOCALDB_NAME_PREFIX, LOCALDB_SCHEMA_VERSION_FOR_NAME } from "./localdb.constants";
 import { defineNoteSchema } from "./noteSchema";
 import { defineSchema } from "./schema";
