@@ -1,5 +1,5 @@
 import { InMemoryLocalDB } from "@/services/InMemoryLocalDB";
-import { clearLocalDBResetFailureReason, markLocalDBGenerationBumped, saveLocalDBResetFailureReason, updateLocalDBRuntimeStatus, warnOncePerSession } from "@/services/localdbRuntimeState";
+import { clearLocalDBResetFailureReason, markLocalDBGenerationBumped, saveLocalDBResetFailureReason, updateLocalDBRuntimeStatus, warnOncePerSession } from "@/services/localDBRuntimeState";
 import { migrateLegacyLocalDbBrandIfNeeded } from "./brandMigration";
 import { deleteUserPersistentDatabases, getDatabaseNameForUser } from "./generation";
 import { LocalDB } from "./LocalDB";
