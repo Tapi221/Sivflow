@@ -14,7 +14,7 @@ const ListToolbarButton = ({ nodeType, onClick, ...props }: ListToolbarButtonPro
       {...props}
       onClick={(event) => {
         onClick?.(event);
-        toggleList(editor, { type: nodeType });
+        toggleList(editor, { listStyleType: nodeType });
       }}
     />
   );
