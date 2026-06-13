@@ -2,19 +2,19 @@ import { CheckCircleIcon, Loader2Icon, XCircleIcon } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-type MediaUploadToastProps = {
+type MediaUploadToastProps = React.ComponentPropsWithoutRef<"div"> & {
   id?: string | number;
-  name: string;
+  name?: string;
   progress?: number;
   status?: "error" | "loading" | "success";
 };
 
 const getProgress = (progress: MediaUploadToastProps["progress"]) => Math.max(0, Math.min(100, progress ?? 0));
 
-const MediaUploadToast = ({ id, name, progress, status = "loading" }: MediaUploadToastProps) => {
+const MediaUploadToast = ({ id, name, progress, status = "loading", ...props }: MediaUploadToastProps) => {
   const resolvedProgress = getProgress(progress);
   return (
-    <div className="flex min-w-72 items-center gap-3 rounded-md border bg-background p-3 shadow-md">
+    <div {...props} className={cn("flex min-w-72 items-center gap-3 rounded-md border bg-background p-3 shadow-md", props.className)}>
       <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
         {status === "loading" ? <Loader2Icon className="size-4 animate-spin" /> : null}
         {status === "success" ? <CheckCircleIcon className="size-4" /> : null}
