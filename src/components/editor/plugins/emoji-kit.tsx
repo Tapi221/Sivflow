@@ -2,8 +2,13 @@
 
 import emojiMartData from "@emoji-mart/data";
 import { EmojiInputPlugin, EmojiPlugin } from "@platejs/emoji/react";
-import { EmojiInputElement } from "@/chip/ui/node/emoji-node";
+import { EmojiInputElement } from "@/chip/ui/plate/emoji-node";
 
-const EmojiKit = [EmojiPlugin.configure({ options: { data: emojiMartData as any } }), EmojiInputPlugin.withComponent(EmojiInputElement)];
+const EmojiKit = [
+  EmojiPlugin.configure({
+    options: { data: emojiMartData as any },
+  }),
+  EmojiInputPlugin.withComponent(EmojiInputElement),
+];
 
 export { EmojiKit };
