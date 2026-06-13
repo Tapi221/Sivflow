@@ -1,17 +1,13 @@
-export interface PlatformAppApi {
-  getVersion(): Promise<string>;
+export interface PlatformAppApi { getVersion(): Promise<string>;
 }
 
-export interface PlatformShellApi {
-  openExternal(url: string): Promise<void>;
+export interface PlatformShellApi { openExternal(url: string): Promise<void>;
 }
 
-export interface DesktopImportFileOpenPayload {
-  paths: string[];
+export interface DesktopImportFileOpenPayload { paths: string[];
 }
 
-export interface DesktopImportFileReadResult {
-  path: string;
+export interface DesktopImportFileReadResult { path: string;
   name: string;
   size: number;
   data: ArrayBuffer | Uint8Array | number[];
@@ -19,14 +15,12 @@ export interface DesktopImportFileReadResult {
 
 export type DesktopImportFileOpenHandler = (payload: DesktopImportFileOpenPayload) => void;
 
-export interface DesktopFileApi {
-  readImportFile(filePath: string): Promise<DesktopImportFileReadResult>;
+export interface DesktopFileApi { readImportFile(filePath: string): Promise<DesktopImportFileReadResult>;
   selectImportFiles(): Promise<string[]>;
   onImportFileOpen(handler: DesktopImportFileOpenHandler): () => void;
 }
 
-export interface DesktopOauthCallbackPayload {
-  url: string;
+export interface DesktopOauthCallbackPayload { url: string;
   code?: string;
   state?: string;
   error?: string;
@@ -35,8 +29,7 @@ export interface DesktopOauthCallbackPayload {
 
 export type DesktopOauthCallbackHandler = (payload: DesktopOauthCallbackPayload) => void;
 
-export interface PlatformOauthApi {
-  start(authorizeUrl: string): Promise<void>;
+export interface PlatformOauthApi { start(authorizeUrl: string): Promise<void>;
   cancel(): Promise<void>;
   takePendingCallback(): Promise<DesktopOauthCallbackPayload | null>;
   exchangeIdToken(idToken: string): Promise<unknown>;
@@ -46,24 +39,21 @@ export interface PlatformOauthApi {
   onCallback(handler: DesktopOauthCallbackHandler): () => void;
 }
 
-export interface DesktopWindowApi {
-  minimize(): Promise<void>;
+export interface DesktopWindowApi { minimize(): Promise<void>;
   maximizeToggle(): Promise<void>;
   close(): Promise<void>;
   isMaximized(): Promise<boolean>;
   onMaximizedStateChange(handler: (isMaximized: boolean) => void): () => void;
 }
 
-export interface PlatformApi {
-  app: PlatformAppApi;
+export interface PlatformApi { app: PlatformAppApi;
   shell: PlatformShellApi;
   oauth: PlatformOauthApi;
 }
 
 export type DesktopOauthApi = PlatformOauthApi;
 
-export interface DesktopBridgeApi extends PlatformApi {
-  files: DesktopFileApi;
+export interface DesktopBridgeApi extends PlatformApi { files: DesktopFileApi;
   oauth: DesktopOauthApi;
   window: DesktopWindowApi;
 }
