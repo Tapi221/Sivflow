@@ -1,4 +1,5 @@
 import platform from "@/platform";
+
 import type { Notification, NotificationOptions } from "@/types/notification";
 
 type NotificationListener = (notification: Notification) => void;
@@ -111,6 +112,7 @@ const NotificationService = class {
     return Array.from(this.notifications.values());
   };
 };
+
 const notificationService = new NotificationService();
 
 export { notificationService };

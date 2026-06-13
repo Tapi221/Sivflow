@@ -123,7 +123,7 @@ const patchPdfViewerScaleSetter = (prototype: PatchedPdfViewerPrototype, propert
 const patchPdfViewerSetDocument = (prototype: PatchedPdfViewerPrototype): void => {
   const originalSetDocument = prototype.setDocument;
   if (typeof originalSetDocument !== "function") return;
-  prototype.setDocument = function patchedPdfViewerSetDocument(this: PatchedPdfViewerPrototype, ...args: unknown[]): unknown {
+  prototype.setDocument = (this: PatchedPdfViewerPrototype, ...args: unknown[]): unknown => {
     if (this.container) pdfZoomViewers.add(this);
     return originalSetDocument.apply(this, args);
   };
@@ -138,7 +138,7 @@ const applyPdfViewerZoomPatch = (): void => {
   const prototype = viewerConstructor.prototype as PatchedPdfViewerPrototype;
   const originalScrollPageIntoView = prototype.scrollPageIntoView;
   if (typeof originalScrollPageIntoView !== "function") return;
-  prototype.scrollPageIntoView = function patchedPdfViewerScrollPageIntoView(this: PatchedPdfViewerPrototype, ...args: unknown[]): unknown {
+  prototype.scrollPageIntoView = (this: PatchedPdfViewerPrototype, ...args: unknown[]): unknown => {
     if (shouldSuppressPdfViewerScaleScroll(this)) return undefined;
     return originalScrollPageIntoView.apply(this, args);
   };
