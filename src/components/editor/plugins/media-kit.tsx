@@ -3,9 +3,9 @@
 import { CaptionPlugin } from "@platejs/caption/react";
 import { AudioPlugin, FilePlugin, ImagePlugin, MediaEmbedPlugin, PlaceholderPlugin, VideoPlugin } from "@platejs/media/react";
 import { KEYS } from "platejs";
-import { MediaUploadToast } from "@/chip/ui/media-upload-toast";
-import { MediaEmbedElement } from "@/chip/ui/node/media-embed-node";
-import { VideoElement } from "@/chip/ui/node/media-video-node";
+import { MediaUploadToast } from "@/chip/ui/plate/media-upload-toast";
+import { MediaEmbedElement } from "@/chip/ui/plate/media-embed-node";
+import { VideoElement } from "@/chip/ui/plate/media-video-node";
 import { AudioElement } from "@/chip/ui/plate/media-audio-node";
 import { FileElement } from "@/chip/ui/plate/media-file-node";
 import { ImageElement } from "@/chip/ui/plate/media-image-node";

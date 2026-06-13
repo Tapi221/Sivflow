@@ -1,63 +1,48 @@
-"use client";
-
-import * as React from "react";
-import { PlaceholderPlugin, UploadErrorCode } from "@platejs/media/react";
-import { usePluginOption } from "platejs/react";
+import { CheckCircleIcon, Loader2Icon, XCircleIcon } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
-const useUploadErrorToast = () => {
-  const uploadError = usePluginOption(PlaceholderPlugin, "error");
-  React.useEffect(() => {
-    if (!uploadError) return;
-    const { code, data } = uploadError;
-    switch (code) {
-      case UploadErrorCode.INVALID_FILE_SIZE: {
-        toast.error(
-          `The size of files ${data.files
-            .map((file) => file.name)
-            .join(", ")} is invalid`,
-        );
-        break;
-      }
-      case UploadErrorCode.INVALID_FILE_TYPE: {
-        toast.error(
-          `The type of files ${data.files
-            .map((file) => file.name)
-            .join(", ")} is invalid`,
-        );
-        break;
-      }
-      case UploadErrorCode.TOO_LARGE: {
-        toast.error(
-          `The size of files ${data.files
-            .map((file) => file.name)
-            .join(", ")} is too large than ${data.maxFileSize}`,
-        );
-        break;
-      }
-      case UploadErrorCode.TOO_LESS_FILES: {
-        toast.error(
-          `The mini um number of files is ${data.minFileCount} for ${data.fileType}`,
-        );
-        break;
-      }
-      case UploadErrorCode.TOO_MANY_FILES: {
-        toast.error(
-          `The maximum number of files is ${data.maxFileCount} ${
-            data.fileType ? `for ${data.fileType}` : ""
-          }`,
-        );
-        break;
-      }
-      default: {
-        break;
-      }
-    }
-  }, [uploadError]);
+type MediaUploadToastProps = {
+  id?: string | number;
+  name: string;
+  progress?: number;
+  status?: "error" | "loading" | "success";
 };
-const MediaUploadToast = () => {
-  useUploadErrorToast();
-  return null;
+
+const getProgress = (progress: MediaUploadToastProps["progress"]) => Math.max(0, Math.min(100, progress ?? 0));
+
+const MediaUploadToast = ({ id, name, progress, status = "loading" }: MediaUploadToastProps) => {
+  const resolvedProgress = getProgress(progress);
+  return (
+    <div className="flex min-w-72 items-center gap-3 rounded-md border bg-background p-3 shadow-md">
+      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
+        {status === "loading" ? <Loader2Icon className="size-4 animate-spin" /> : null}
+        {status === "success" ? <CheckCircleIcon className="size-4" /> : null}
+        {status === "error" ? <XCircleIcon className="size-4" /> : null}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm font-medium">{name}</div>
+        <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
+          <div
+            className={cn("h-full rounded-full bg-primary transition-all", status === "error" && "bg-destructive")}
+            style={{ width: `${resolvedProgress}%` }}
+          />
+        </div>
+      </div>
+      <button
+        className="text-sm text-muted-foreground hover:text-foreground"
+        type="button"
+        onClick={() => {
+          if (id !== null && id !== undefined) {
+            toast.dismiss(id);
+          }
+        }}
+      >
+        Close
+      </button>
+    </div>
+  );
 };
 
 export { MediaUploadToast };
+export type { MediaUploadToastProps };
