@@ -16,27 +16,29 @@ type CommentConfig = ExtendConfig<
   }
 >;
 
-const commentPlugin = toTPlatePlugin<CommentConfig>(BaseCommentPlugin, { handlers: { onClick: ({ api, event, setOption, type }) => {
-  const activeTarget = getDiscussionClickTarget({ selector: `.slate-${type}`, target: event.target });
-
-  if (!activeTarget) {
-    setOption("activeId", null);
-    return;
-  }
-
-  const commentEntry = api.comment?.node();
-
-  setOption(
-    "activeId",
-    commentEntry ? (api.comment?.nodeId(commentEntry[0]) ?? null) : null,
-  );
-},
-},
-options: {
-  activeId: null,
-  commentingBlock: null,
-  hoverId: null,
-},
+const commentPlugin = toTPlatePlugin<CommentConfig>(BaseCommentPlugin, {
+  handlers: {
+    onClick: ({ api, event, setOption, type }) => {
+      const activeTarget = getDiscussionClickTarget({
+        selector: `.slate-${type}`,
+        target: event.target,
+      });
+      if (!activeTarget) {
+        setOption("activeId", null);
+        return;
+      }
+      const commentEntry = api.comment?.node();
+      setOption(
+        "activeId",
+        commentEntry ? (api.comment?.nodeId(commentEntry[0]) ?? null) : null,
+      );
+    },
+  },
+  options: {
+    activeId: null,
+    commentingBlock: null,
+    hoverId: null,
+  },
 })
   .extendTransforms(
     ({
@@ -50,9 +52,7 @@ options: {
         if (editor.api.isCollapsed()) {
           editor.tf.select(editor.api.block()![1]);
         }
-
         setDraft();
-
         editor.tf.collapse();
         setOption("activeId", getDraftCommentKey());
         setOption("commentingBlock", editor.selection!.focus.path.slice(0, 1));
@@ -67,4 +67,5 @@ options: {
   });
 const CommentKit = [commentPlugin];
 
-export { commentPlugin, CommentKit };
+export { CommentKit, commentPlugin };
+export type { CommentConfig };
