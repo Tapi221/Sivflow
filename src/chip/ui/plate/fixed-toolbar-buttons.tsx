@@ -12,7 +12,7 @@ import { FontColorToolbarButton } from "@/chip/ui/plate/font-color-toolbar-butto
 import { FontSizeToolbarButton } from "@/chip/ui/plate/font-size-toolbar-button";
 import { RedoToolbarButton, UndoToolbarButton } from "@/chip/ui/plate/history-toolbar-button";
 import { ImportToolbarButton } from "@/chip/ui/plate/import-toolbar-button";
-import { IndentToolbarButton } from "@/chip/ui/plate/indent-toolbar-button";
+import { IndentToolbarButton, OutdentToolbarButton } from "@/chip/ui/plate/indent-toolbar-button";
 import { InsertToolbarButton } from "@/chip/ui/plate/insert-toolbar-button";
 import { LineHeightToolbarButton } from "@/chip/ui/plate/line-height-toolbar-button";
 import { LinkToolbarButton } from "@/chip/ui/plate/link-toolbar-button";
@@ -53,19 +53,19 @@ const FixedToolbarButtons = () => {
             <FontSizeToolbarButton />
           </ToolbarGroup>
           <ToolbarGroup>
-            <MarkToolbarButton nodeType={KEYS.bold} tooltip="Bold">
+            <MarkToolbarButton nodeType={KEYS.bold} tooltip="Bold (⌘+B)">
               <BoldIcon />
             </MarkToolbarButton>
-            <MarkToolbarButton nodeType={KEYS.italic} tooltip="Italic">
+            <MarkToolbarButton nodeType={KEYS.italic} tooltip="Italic (⌘+I)">
               <ItalicIcon />
             </MarkToolbarButton>
-            <MarkToolbarButton nodeType={KEYS.underline} tooltip="Underline">
+            <MarkToolbarButton nodeType={KEYS.underline} tooltip="Underline (⌘+U)">
               <UnderlineIcon />
             </MarkToolbarButton>
-            <MarkToolbarButton nodeType={KEYS.strikethrough} tooltip="Strikethrough">
+            <MarkToolbarButton nodeType={KEYS.strikethrough} tooltip="Strikethrough (⌘+⇧+M)">
               <StrikethroughIcon />
             </MarkToolbarButton>
-            <MarkToolbarButton nodeType={KEYS.code} tooltip="Code">
+            <MarkToolbarButton nodeType={KEYS.code} tooltip="Code (⌘+E)">
               <Code2Icon />
             </MarkToolbarButton>
             <FontColorToolbarButton nodeType={KEYS.color} tooltip="Text color">
@@ -95,8 +95,7 @@ const FixedToolbarButtons = () => {
           </ToolbarGroup>
           <ToolbarGroup>
             <LineHeightToolbarButton />
-            <IndentToolbarButton reverse>
-            </IndentToolbarButton>
+            <OutdentToolbarButton />
             <IndentToolbarButton />
           </ToolbarGroup>
           <ToolbarGroup>
