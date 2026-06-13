@@ -1,5 +1,4 @@
 "use client";
-
 import * as React from "react";
 import { acceptSuggestion, rejectSuggestion } from "@platejs/suggestion";
 import { SuggestionPlugin } from "@platejs/suggestion/react";
@@ -96,7 +95,7 @@ const BlockSuggestionCard = ({
                 {suggestionText2Array(suggestion.newText!).map((text, index) => (
                   <div
                     key={index}
-                    className="flex items-start gap-2 text-brand/80"
+                    className="flex items-start gap-2 text-emerald-700"
                   >
                     <span className="text-sm">with:</span>
                     <span className="text-sm">{text ?? "line breaks"}</span>
