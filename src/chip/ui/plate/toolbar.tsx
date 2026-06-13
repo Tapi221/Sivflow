@@ -65,22 +65,8 @@ const dropdownArrowVariants = cva(
     },
   },
 );
-const Toolbar = ({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Root>) => {
-  return <ToolbarPrimitive.Root className={cn("relative flex select-none items-center", className)} {...props} />;
-};
-const ToolbarToggleGroup = ({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.ToolbarToggleGroup>) => {
-  return <ToolbarPrimitive.ToolbarToggleGroup className={cn("flex items-center", className)} {...props} />;
-};
-const ToolbarLink = ({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Link>) => {
-  return <ToolbarPrimitive.Link className={cn("font-medium underline underline-offset-4", className)} {...props} />;
-};
-const ToolbarSeparator = ({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Separator>) => {
-  return <ToolbarPrimitive.Separator className={cn("mx-2 my-1 w-px shrink-0 bg-border", className)} {...props} />;
-};
-const ToolbarToggleItem = ({ className, size = "sm", variant, ...props }: React.ComponentProps<typeof ToolbarPrimitive.ToggleItem> & VariantProps<typeof toolbarButtonVariants>) => {
-  return <ToolbarPrimitive.ToggleItem className={cn(toolbarButtonVariants({ size, variant }), className)} {...props} />;
-};
-const withTooltip = <T extends React.ElementType>(Component: T) => {
+
+const withTooltip = <T extends React.ElementType,>(Component: T) => {
   const ExtendComponent = ({
     tooltip,
     tooltipContentProps,
@@ -106,6 +92,22 @@ const withTooltip = <T extends React.ElementType>(Component: T) => {
     return component;
   };
   return ExtendComponent;
+};
+
+const Toolbar = ({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Root>) => {
+  return <ToolbarPrimitive.Root className={cn("relative flex select-none items-center", className)} {...props} />;
+};
+const ToolbarToggleGroup = ({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.ToolbarToggleGroup>) => {
+  return <ToolbarPrimitive.ToolbarToggleGroup className={cn("flex items-center", className)} {...props} />;
+};
+const ToolbarLink = ({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Link>) => {
+  return <ToolbarPrimitive.Link className={cn("font-medium underline underline-offset-4", className)} {...props} />;
+};
+const ToolbarSeparator = ({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Separator>) => {
+  return <ToolbarPrimitive.Separator className={cn("mx-2 my-1 w-px shrink-0 bg-border", className)} {...props} />;
+};
+const ToolbarToggleItem = ({ className, size = "sm", variant, ...props }: React.ComponentProps<typeof ToolbarPrimitive.ToggleItem> & VariantProps<typeof toolbarButtonVariants>) => {
+  return <ToolbarPrimitive.ToggleItem className={cn(toolbarButtonVariants({ size, variant }), className)} {...props} />;
 };
 const TooltipContent = ({ children, className, sideOffset = 4, ...props }: React.ComponentProps<typeof TooltipPrimitive.Content>) => {
   return (
@@ -149,9 +151,7 @@ const ToolbarButton = withTooltip(({
             <div className="flex flex-1 items-center gap-2 whitespace-nowrap">
               {children}
             </div>
-            <div>
-              <ChevronDown className="size-3.5 text-muted-foreground" data-icon />
-            </div>
+            <ChevronDown className="size-3.5 text-muted-foreground" data-icon />
           </>
         ) : (
           children
