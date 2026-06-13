@@ -14,6 +14,8 @@ import { Caption, CaptionTextarea } from "@/chip/ui/plate/caption";
 import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "@/chip/ui/plate/resize-handle";
 import { cn } from "@/lib/utils";
 
+const TWEET_PROVIDER = "twitter";
+
 const VideoElement = withHOC(ResizableProvider, (props: PlateElementProps<TVideoElement & TResizableProps>) => {
   const {
     align = "center",
@@ -31,7 +33,7 @@ const VideoElement = withHOC(ResizableProvider, (props: PlateElementProps<TVideo
   const shouldRenderEmbedPlayer =
     isEditorMounted && !isUpload && !isYoutube && isVideo;
   const shouldRenderFileVideo = isEditorMounted && (isUpload || !isVideo);
-  const isTweet = true;
+  const isTweet = embed?.provider === TWEET_PROVIDER;
   const { isDragging, handleRef } = useDraggable({
     element: props.element,
   });

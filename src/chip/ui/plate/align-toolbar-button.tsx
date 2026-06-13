@@ -19,7 +19,7 @@ const items = [
 const AlignToolbarButton = (props: DropdownMenuProps) => {
   const { editor, tf } = useEditorPlugin(TextAlignPlugin);
   const value = useSelectionFragmentProp({
-    defaultValue: "start",
+    defaultValue: "left",
     getProp: (node) => node.align,
   }) ?? "left";
   const [open, setOpen] = React.useState(false);

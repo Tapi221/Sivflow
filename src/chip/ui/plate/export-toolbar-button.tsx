@@ -8,7 +8,7 @@ import { createSlateEditor } from "platejs";
 import { useEditorRef } from "platejs/react";
 import { serializeHtml } from "platejs/static";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-import { EditorStatic } from "@/chip/ui/editor-static";
+import { EditorStatic } from "@/chip/ui/plate/editor-static";
 import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 import { BaseEditorKit } from "@/components/editor/editor-base-kit";
 

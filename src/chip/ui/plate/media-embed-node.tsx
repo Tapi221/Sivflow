@@ -42,6 +42,7 @@ const MediaEmbedElement = withHOC(ResizableProvider, (props: PlateElementProps<T
               align,
               maxWidth: isTweet ? 550 : "100%",
               minWidth: isTweet ? 300 : 100,
+              readOnly,
             }}
           >
             <ResizeHandle
@@ -111,7 +112,7 @@ const MediaEmbedElement = withHOC(ResizableProvider, (props: PlateElementProps<T
             />
           </Resizable>
           <Caption style={{ width }} align={align}>
-            <CaptionTextarea placeholder="Write a caption..." />
+            <CaptionTextarea readOnly={readOnly} placeholder="Write a caption..." />
           </Caption>
         </figure>
         {props.children}
