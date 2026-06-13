@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
-import { ChevronRightIcon, FileCodeIcon, Heading1Icon, Heading2Icon, Heading3Icon, ListIcon, ListOrderedIcon, PilcrowIcon, QuoteIcon, SquareIcon } from "lucide-react";
+import { FileCodeIcon, Heading1Icon, Heading2Icon, Heading3Icon, ListIcon, ListOrderedIcon, PilcrowIcon, QuoteIcon, SquareIcon } from "lucide-react";
 import type { TElement } from "platejs";
 import { KEYS } from "platejs";
 import { useEditorRef, useSelectionFragmentProp } from "platejs/react";
@@ -15,14 +15,12 @@ const turnIntoItems = [
   { icon: <Heading1Icon />, label: "Heading 1", value: "h1" },
   { icon: <Heading2Icon />, label: "Heading 2", value: "h2" },
   { icon: <Heading3Icon />, label: "Heading 3", value: "h3" },
-  { icon: <ListIcon />, label: "Bulleted list", value: KEYS.ulClassic },
-  { icon: <ListOrderedIcon />, label: "Numbered list", value: KEYS.olClassic },
-  { icon: <SquareIcon />, label: "To-do list", value: KEYS.taskList },
-  { icon: <ChevronRightIcon />, label: "Toggle list", value: KEYS.toggle },
+  { icon: <ListIcon />, label: "Bulleted list", value: KEYS.ul },
+  { icon: <ListOrderedIcon />, label: "Numbered list", value: KEYS.ol },
+  { icon: <SquareIcon />, label: "To-do list", value: KEYS.listTodo },
   { icon: <FileCodeIcon />, label: "Code", value: KEYS.codeBlock },
   { icon: <QuoteIcon />, label: "Quote", value: KEYS.blockquote },
 ];
-
 const TurnIntoToolbarButton = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
@@ -44,14 +42,7 @@ const TurnIntoToolbarButton = (props: DropdownMenuProps) => {
       <DropdownMenuContent className="min-w-0" align="start">
         <ToolbarMenuGroup label="Turn into">
           {turnIntoItems.map(({ icon, label, value: itemValue }) => (
-            <DropdownMenuItem
-              key={itemValue}
-              className="min-w-[180px]"
-              onSelect={() => {
-                setBlockType(editor, itemValue);
-                editor.tf.focus();
-              }}
-            >
+            <DropdownMenuItem key={itemValue} className="min-w-[180px]" onSelect={() => setBlockType(editor, itemValue)}>
               {icon}
               {label}
             </DropdownMenuItem>
