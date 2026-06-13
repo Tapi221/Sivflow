@@ -13,13 +13,11 @@ const CodeBlockNodeStatic = ({ className, children, ...props }: CodeBlockNodeSta
     <code>{children}</code>
   </PlateElement>
 );
-
 const CodeLineNodeStatic = ({ className, children, ...props }: PlateElementProps) => (
   <PlateElement as="div" className={cn("min-h-5", className)} {...props}>
     {children}
   </PlateElement>
 );
-
 const CodeSyntaxLeafStatic = ({ className, children, ...props }: PlateElementProps) => (
   <span className={cn(className)} {...props.attributes}>
     {children}

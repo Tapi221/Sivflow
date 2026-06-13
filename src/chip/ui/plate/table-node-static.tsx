@@ -9,19 +9,16 @@ const TableNodeStatic = ({ className, children, ...props }: TableNodeStaticProps
     <table className="w-full border-collapse border border-border text-sm">{children}</table>
   </PlateElement>
 );
-
 const TableRowNodeStatic = ({ className, children, ...props }: PlateElementProps) => (
   <PlateElement as="tr" className={cn("border-border", className)} {...props}>
     {children}
   </PlateElement>
 );
-
 const TableCellNodeStatic = ({ className, children, ...props }: PlateElementProps) => (
   <PlateElement as="td" className={cn("border border-border px-3 py-2 align-top", className)} {...props}>
     {children}
   </PlateElement>
 );
-
 const TableCellHeaderStatic = ({ className, children, ...props }: PlateElementProps) => (
   <PlateElement
     as="th"
@@ -37,14 +34,5 @@ const TableRowElementStatic = TableRowNodeStatic;
 const TableCellElementStatic = TableCellNodeStatic;
 const TableCellHeaderElementStatic = TableCellHeaderStatic;
 
-export {
-  TableCellElementStatic,
-  TableCellHeaderElementStatic,
-  TableCellHeaderStatic,
-  TableCellNodeStatic,
-  TableElementStatic,
-  TableNodeStatic,
-  TableRowElementStatic,
-  TableRowNodeStatic,
-};
+export { TableCellElementStatic, TableCellHeaderElementStatic, TableCellHeaderStatic, TableCellNodeStatic, TableElementStatic, TableNodeStatic, TableRowElementStatic, TableRowNodeStatic };
 export type { TableNodeStaticProps };
