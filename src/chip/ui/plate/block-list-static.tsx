@@ -25,7 +25,6 @@ const TodoMarkerStatic = (props: SlateRenderElementProps) => {
     </div>
   );
 };
-
 const TodoLiStatic = (props: SlateRenderElementProps) => {
   return (
     <li
@@ -71,7 +70,6 @@ const List = (props: SlateRenderElementProps) => {
     </ListTag>
   );
 };
-
 const BlockListStatic: RenderStaticNodeWrapper = (props) => {
   if (!props.element.listStyleType) return;
   if (!isOrderedList(props.element)) return;
