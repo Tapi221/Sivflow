@@ -53,7 +53,6 @@ const MediaPreviewDialog = () => {
       {...maskLayerProps}
     >
       <div className="absolute inset-0 size-full bg-black opacity-30" />
-      <div className="absolute inset-0 size-full bg-black opacity-30" />
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="relative flex max-h-screen w-full items-center">
           <PreviewImage
