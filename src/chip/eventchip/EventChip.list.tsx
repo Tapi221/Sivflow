@@ -1,19 +1,15 @@
-import { memo, useMemo } from "react";
 import { format } from "date-fns";
+import { memo, useMemo } from "react";
 import type { CSSProperties } from "react";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
-import { LIST_ALL_DAY_EVENT_CHIP_HEIGHT_PX, LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX, LIST_EVENT_CHIP_HEIGHT_PX, LIST_EVENT_ROW_HEIGHT_PX } from "./EventChip.list.placement";
-import { eventChipDesign } from "./eventChipDesign.generated";
-
-
+import { LIST_ALL_DAY_EVENT_CHIP_HEIGHT_PX, LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX, LIST_EVENT_CHIP_HEIGHT_PX, LIST_EVENT_ROW_HEIGHT_PX } from "@/chip/eventchip/EventChip.list.placement";
+import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 
 type CalendarEventChipListProps = {
   event: GoogleCalendarEvent;
 };
-
-
 
 const ALL_DAY_LABEL = "終日";
 const LIST_EVENT_ROW_CLASS_NAME = "grid grid-cols-[54px_26px_minmax(0,1fr)] items-stretch";
@@ -27,31 +23,24 @@ const LIST_EVENT_TITLE_CLASS_NAME = "line-clamp-2 overflow-hidden whitespace-nor
 const LIST_ALL_DAY_EVENT_TITLE_CLASS_NAME = "mt-0 line-clamp-1 whitespace-nowrap leading-none";
 const MINUTE_IN_MS = 60_000;
 
-
-
-const getEventTitle = (event: GoogleCalendarEvent): string => event.title.trim() ?? "Untitled";
+const getEventTitle = (event: GoogleCalendarEvent): string => event.title.trim() === "" ? "Untitled" : event.title.trim();
 const getEventStartTimeLabel = (event: GoogleCalendarEvent): string => {
   if (event.isAllDay) return ALL_DAY_LABEL;
-
   return format(new Date(event.startsAt), "H:mm");
 };
 const getEventDurationLabel = (startsAt: Date, endsAt: Date): string => {
   const totalMinutes = Math.max(0, Math.round((endsAt.getTime() - startsAt.getTime()) / MINUTE_IN_MS));
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
-
   if (hours === 0) return `${minutes}分`;
   if (minutes === 0) return `${hours}時間`;
-
   return `${hours}時間${minutes}分`;
 };
 const getEventTimeRangeLabel = (event: GoogleCalendarEvent): string | null => {
   if (event.isAllDay) return null;
-
   const startsAt = new Date(event.startsAt);
   const endsAt = new Date(event.endsAt ?? event.startsAt);
   const durationLabel = getEventDurationLabel(startsAt, endsAt);
-
   return `${format(startsAt, "H:mm")} - ${format(endsAt, "H:mm")}（${durationLabel}）`;
 };
 const createEventRowStyle = (isAllDay: boolean): CSSProperties => ({
@@ -72,8 +61,6 @@ const createEventTitleStyle = (): CSSProperties => ({
   marginTop: eventChipDesign.list.titleGapPx,
 });
 
-
-
 const CalendarEventChipListComponent = ({ event }: CalendarEventChipListProps) => {
   const tokens = useMemo(() => generateColorTokens(event.accentColor), [event.accentColor]);
   const title = getEventTitle(event);
@@ -81,7 +68,6 @@ const CalendarEventChipListComponent = ({ event }: CalendarEventChipListProps) =
   const timeRangeLabel = getEventTimeRangeLabel(event);
   const rowStyle = useMemo(() => createEventRowStyle(event.isAllDay), [event.isAllDay]);
   const chipStyle = useMemo(() => createEventChipStyle(tokens, event.isAllDay), [event.isAllDay, tokens]);
-
   return (
     <div className={LIST_EVENT_ROW_CLASS_NAME} style={rowStyle}>
       <div className={LIST_EVENT_START_TIME_CLASS_NAME}>{startLabel}</div>
@@ -97,9 +83,6 @@ const CalendarEventChipListComponent = ({ event }: CalendarEventChipListProps) =
   );
 };
 
-
-
 const CalendarEventChipList = memo(CalendarEventChipListComponent);
 CalendarEventChipList.displayName = "CalendarEventChipList";
-
 export { CalendarEventChipList };
