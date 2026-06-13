@@ -59,5 +59,4 @@ const ScrollBar = React.forwardRef<HTMLInputElement, ScrollBarProps>(
 ScrollBar.displayName = "ScrollBar";
 
 export { ScrollBar };
-
 export type { ScrollBarProps };

@@ -11,5 +11,4 @@ export { getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout } from 
 export { LocalDB } from "./LocalDB";
 export { LOCALDB_RECOVERY_GUIDE_URL } from "./localdb.constants";
 export { clearLocalDBResetFailureReason, getLocalDBRuntimeStatus, getLocalDBTelemetrySnapshot, subscribeLocalDBRuntimeStatus, telemetryOncePerSession } from "@/services/localDBRuntimeState";
-
 export type { CardRelation, LocalDBInstance, LocalDBLike, ProjectMap } from "./types";

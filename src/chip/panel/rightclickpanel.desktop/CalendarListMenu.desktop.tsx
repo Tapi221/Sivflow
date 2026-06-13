@@ -45,5 +45,4 @@ const CalendarListMenu = ({ x, y, actions, menuRef, noDragStyle, panelId = CALEN
 };
 
 export { CALENDAR_LIST_MENU_PANEL_ID, CALENDAR_LIST_MENU_WIDTH, CALENDAR_LIST_MENU_HEIGHT, CALENDAR_LIST_MENU_MARGIN, CalendarListMenu };
-
 export type { CalendarListMenuAction };

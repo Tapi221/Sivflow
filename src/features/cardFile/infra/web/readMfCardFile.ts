@@ -67,5 +67,4 @@ const readMfCardFile = async (file: File): Promise<LoadMfCardFileResult> => {
 };
 
 export { buildMfCardImportCardSetName, readMfCardFile };
-
 export type { LoadMfCardFileResult };

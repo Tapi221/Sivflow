@@ -16,5 +16,4 @@ getLastBackupAt: (): string | null => {
 };
 
 export { autoBackupService };
-
 export type { AutoBackup };

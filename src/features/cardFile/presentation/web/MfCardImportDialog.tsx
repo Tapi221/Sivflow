@@ -374,5 +374,4 @@ const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
 };
 
 export { MfCardImportDialog };
-
 export type { MfCardImportCompletedPayload };

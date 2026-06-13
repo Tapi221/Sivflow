@@ -20,5 +20,4 @@ const MediaVideoNodeStatic = ({ children, className, element, ...props }: MediaV
 const VideoElementStatic = MediaVideoNodeStatic;
 
 export { MediaVideoNodeStatic, VideoElementStatic };
-
 export type { MediaVideoNodeStaticProps };

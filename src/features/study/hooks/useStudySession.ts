@@ -217,5 +217,4 @@ const useStudySession = ({ studyCards, cardSets = [], updateCard, currentUser, s
 };
 
 export { useStudySession };
-
 export type { StudySessionRating, StudySessionResult };

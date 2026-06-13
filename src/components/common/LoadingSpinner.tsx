@@ -34,5 +34,4 @@ const LoadingSpinner = ({ className, iconClassName, label, size, text }: Loading
 };
 
 export { LoadingSpinner };
-
 export type { LoadingSpinnerProps };

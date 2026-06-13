@@ -194,5 +194,4 @@ const useGoogleCalendarLayer = () => {
 };
 
 export { useGoogleCalendarLayer };
-
 export type { GoogleAccountEntry };

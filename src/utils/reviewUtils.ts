@@ -72,5 +72,4 @@ const getStabilityPhase = (stabilityInternal: number, intervalDays: number = 1):
 
 export { normalizeMemoryStability, type SubjectiveScore };
 export { getStabilityPhase };
-
 export type { StabilityPhase };

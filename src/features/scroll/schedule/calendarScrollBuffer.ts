@@ -78,5 +78,4 @@ const createCalendarScrollBuffer = (surface: CalendarScrollBufferSurface, viewMo
 };
 
 export { createCalendarScrollBuffer };
-
 export type { CalendarScrollBuffer };

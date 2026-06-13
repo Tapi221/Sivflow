@@ -250,5 +250,4 @@ const useCardsRead = (folderId?: string, cardSetId?: string, options?: UseCardsR
 };
 
 export { useCardsRead };
-
 export type { UseCardsReadOptions };

@@ -1,35 +1,20 @@
 "use client";
 
 import { insertCallout } from "@platejs/callout";
-
 import { insertCodeBlock, toggleCodeBlock } from "@platejs/code-block";
-
 import { insertCodeDrawing } from "@platejs/code-drawing";
-
 import { insertDate } from "@platejs/date";
-
 import { insertExcalidraw } from "@platejs/excalidraw";
-
 import { insertFootnote } from "@platejs/footnote";
-
 import { insertColumnGroup, toggleColumnGroup } from "@platejs/layout";
-
 import { triggerFloatingLink } from "@platejs/link/react";
-
 import { insertEquation, insertInlineEquation } from "@platejs/math";
-
 import { insertAudioPlaceholder, insertFilePlaceholder, insertMedia, insertVideoPlaceholder } from "@platejs/media";
-
 import { SuggestionPlugin } from "@platejs/suggestion/react";
-
 import { TablePlugin } from "@platejs/table/react";
-
 import { insertToc } from "@platejs/toc";
-
 import type { NodeEntry, Path, TElement } from "platejs";
-
 import { KEYS, PathApi } from "platejs";
-
 import type { PlateEditor } from "platejs/react";
 
 type InsertBlockOptions = {
@@ -37,9 +22,7 @@ type InsertBlockOptions = {
 };
 
 const ACTION_THREE_COLUMNS = "action_three_columns";
-
 const ACTION_FOOTNOTE = "action_footnote";
-
 const insertInlineMap: Record<string, (editor: PlateEditor, type: string) => void> = {
   [KEYS.date]: (editor) => insertDate(editor, { select: true }),
   [ACTION_FOOTNOTE]: (editor) => insertFootnote(editor, { select: true }),
@@ -56,7 +39,6 @@ const insertList = (editor: PlateEditor, type: string) => {
     { select: true },
   );
 };
-
 const setList = (editor: PlateEditor, type: string, entry: NodeEntry<TElement>) => {
   editor.tf.setNodes(
     editor.api.create.block({
@@ -95,7 +77,6 @@ const insertBlockMap: Record<string, (editor: PlateEditor, type: string) => void
   [KEYS.toc]: (editor) => insertToc(editor, { select: true }),
   [KEYS.video]: (editor) => insertVideoPlaceholder(editor, { select: true }),
 };
-
 const setBlockMap: Record<string, (editor: PlateEditor, type: string, entry: NodeEntry<TElement>) => void> = {
   [KEYS.listTodo]: setList,
   [KEYS.ol]: setList,
@@ -108,7 +89,6 @@ const createBlockquote = (editor: PlateEditor) => ({
   children: [editor.api.create.block({ type: KEYS.p })],
   type: KEYS.blockquote,
 });
-
 const selectBlockquoteStart = (editor: PlateEditor, path: Path) => {
   const start = editor.api.start(path.concat([0]));
 
@@ -116,13 +96,11 @@ const selectBlockquoteStart = (editor: PlateEditor, path: Path) => {
     editor.tf.select(start);
   }
 };
-
 const insertInlineElement = (editor: PlateEditor, type: string) => {
   if (insertInlineMap[type]) {
     insertInlineMap[type](editor, type);
   }
 };
-
 const setBlockType = (editor: PlateEditor, type: string, { at }: { at?: Path } = {}) => {
   editor.tf.withoutNormalizing(() => {
     if (type === KEYS.blockquote) {
@@ -171,7 +149,6 @@ const setBlockType = (editor: PlateEditor, type: string, { at }: { at?: Path } =
     });
   });
 };
-
 const getBlockType = (block: TElement) => {
   if (block[KEYS.listType]) {
     if (block[KEYS.listType] === KEYS.ol) {
@@ -185,7 +162,6 @@ const getBlockType = (block: TElement) => {
 
   return block.type;
 };
-
 const insertBlock = (editor: PlateEditor, type: string, options: InsertBlockOptions = {}) => {
   const { upsert = false } = options;
 

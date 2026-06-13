@@ -28,5 +28,4 @@ const TRANSLATIONS: Record<Locale, Translations> = {
 };
 
 export { RAW_TRANSLATIONS, TRANSLATIONS };
-
 export type { RawTranslations, Translations };

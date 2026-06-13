@@ -18,5 +18,4 @@ const CommentNode = ({ active, className, children, ...props }: CommentNodeProps
 const CommentLeaf = CommentNode;
 
 export { CommentLeaf, CommentNode };
-
 export type { CommentNodeProps };

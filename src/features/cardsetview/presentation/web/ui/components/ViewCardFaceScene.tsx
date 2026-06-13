@@ -220,5 +220,4 @@ const ViewCardFaceScene = ({ card, side, displayMode, fixedScale, fixedHeightPx 
 };
 
 export { ViewCardFaceScene };
-
 export type { ViewCardFaceSceneProps };

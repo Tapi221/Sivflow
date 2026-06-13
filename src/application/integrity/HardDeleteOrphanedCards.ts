@@ -213,5 +213,4 @@ const createHardDeleteOrphanedCardsUseCase = () => {
 };
 
 export { createHardDeleteOrphanedCardsUseCase };
-
 export type { HardDeleteOrphanedCardsResult };

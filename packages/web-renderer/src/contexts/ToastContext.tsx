@@ -90,5 +90,4 @@ const ToastProvider = ({ children }: { children: ReactNode; }) => {
 };
 
 export { ToastProvider, useToast };
-
 export type { Toast };

@@ -1,9 +1,7 @@
 "use client";
 
 import { createPlatePlugin } from "platejs/react";
-
 import { BlockDiscussion } from "@/chip/ui/plate/block-discussion";
-
 import type { TComment } from "@/chip/ui/plate/comment";
 
 type TDiscussion = {
@@ -14,7 +12,6 @@ type TDiscussion = {
   userId: string;
   documentContent?: string;
 };
-
 type TDiscussionUser = {
   id: string;
   avatarUrl: string;
@@ -23,7 +20,6 @@ type TDiscussionUser = {
 };
 
 const BLOCK_SUGGESTION_SELECTOR = '[data-block-suggestion="true"]';
-
 const discussionsData: TDiscussion[] = [
   {
     id: "discussion1",
@@ -112,7 +108,6 @@ const discussionsData: TDiscussion[] = [
     userId: "bob",
   },
 ];
-
 const usersData: Record<string, TDiscussionUser> = {
   alice: {
     id: "alice",
@@ -130,7 +125,6 @@ const usersData: Record<string, TDiscussionUser> = {
     name: "Charlie",
   },
 };
-
 const discussionPlugin = createPlatePlugin({
   key: "discussion",
   options: {
@@ -146,7 +140,6 @@ const discussionPlugin = createPlatePlugin({
     currentUser: () => getOption("users")[getOption("currentUserId")],
     user: (id: string) => getOption("users")[id],
   }));
-
 const DiscussionKit = [discussionPlugin];
 
 const getTargetElement = (target: EventTarget | null) => {
@@ -155,7 +148,6 @@ const getTargetElement = (target: EventTarget | null) => {
 
   return null;
 };
-
 const getDiscussionClickTarget = ({
   selector,
   target,
@@ -169,7 +161,6 @@ const getDiscussionClickTarget = ({
 
   return element.closest(selector) as HTMLElement | null;
 };
-
 const getDiscussionBlockClickTarget = ({
   selector = BLOCK_SUGGESTION_SELECTOR,
   target,
@@ -183,5 +174,4 @@ const getDiscussionBlockClickTarget = ({
   });
 
 export { DiscussionKit, discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarget };
-
 export type { TDiscussion };

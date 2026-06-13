@@ -87,5 +87,4 @@ const truncateUsername = (name: string, maxLength: number = 20) => {
 };
 
 export { countUnicodeCharacters, validateUsername, truncateUsername };
-
 export type { ValidationResult };

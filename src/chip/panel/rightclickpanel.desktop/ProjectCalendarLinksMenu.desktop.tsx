@@ -66,5 +66,4 @@ const ProjectCalendarLinksMenu = ({
 };
 
 export { ProjectCalendarLinksMenu, PROJECT_CALENDAR_LINKS_MENU_PANEL_ID, PROJECT_CALENDAR_LINKS_MENU_WIDTH, getProjectCalendarLinksMenuHeight };
-
 export type { ProjectCalendarLinksMenuAction };

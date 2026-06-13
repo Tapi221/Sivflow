@@ -474,5 +474,4 @@ const DesktopEmbeddedCardEditorSurface = ({ selectedCardId, folderId, cardSetId,
 };
 
 export { DesktopEmbeddedCardEditorSurface };
-
 export type { DesktopEmbeddedCardEditorSurfaceProps };

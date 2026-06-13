@@ -223,5 +223,4 @@ const useFlashcardCornerControls = ({ card, hasUncertainty, isBookmarked, active
 };
 
 export { useFlashcardCornerControls };
-
 export type { FlashcardCornerControlsResult };

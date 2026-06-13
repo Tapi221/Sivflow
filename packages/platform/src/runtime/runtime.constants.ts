@@ -22,5 +22,4 @@ const RUNTIME_CHUNK_ERROR_PATTERNS = [
 ] as const;
 
 export { RUNTIME_CHUNK_ERROR_PATTERNS, RUNTIME_KINDS, RUNTIME_RELOAD_KEYS };
-
 export type { RuntimeKind };

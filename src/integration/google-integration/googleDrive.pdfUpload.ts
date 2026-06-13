@@ -79,5 +79,4 @@ const uploadPdfToGoogleDrive = async ({ accessToken, fileName, pdf }: GoogleDriv
 };
 
 export { uploadPdfToGoogleDrive };
-
 export type { GoogleDrivePdfUploadInput, GoogleDrivePdfUploadResult };

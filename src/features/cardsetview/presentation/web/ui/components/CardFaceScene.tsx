@@ -110,5 +110,4 @@ const CardFaceScene = ({ displayMode, fixedScale, contentZoom, contentProps, act
 };
 
 export { CardFaceScene };
-
 export type { CardFaceSceneProps };

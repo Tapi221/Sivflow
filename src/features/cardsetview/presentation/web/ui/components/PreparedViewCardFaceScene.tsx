@@ -219,5 +219,4 @@ const PreparedViewCardFaceScene = ({ card, sharedDerived, sideDerived, displayMo
 };
 
 export { PreparedViewCardFaceScene };
-
 export type { PreparedViewCardFaceSceneProps };

@@ -151,5 +151,4 @@ const selectCombinedSelectedCalendarIds = (accounts: Array<{ selectedCalendarIds
 };
 
 export { reduceGoogleCalendarEvents, selectVisibleGoogleCalendarEvents, selectCombinedSelectedCalendarIds };
-
 export type { GoogleCalendarEventsState, GoogleCalendarEventsAction };

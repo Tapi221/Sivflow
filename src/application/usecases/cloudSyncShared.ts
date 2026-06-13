@@ -18,5 +18,4 @@ const sanitizeSyncDataFromCloud = Sanitizers.sanitizeSyncDataFromCloud;
 const getUpdatedAtMillis = Timestamps.getUpdatedAtMillis;
 
 export { COLLECTION_BY_TYPE, CURRENT_TAG_COLLECTION, PULLABLE_ENTITY_TYPES, deepStripUndefined, getChangeId, getChangeParts, getUpdatedAtMillis, isCloudEntityType, sanitizeSyncDataForCloud, sanitizeSyncDataFromCloud };
-
 export type { CloudEntityType, PullableEntityType };

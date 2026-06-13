@@ -536,5 +536,4 @@ const useGoogleTasks = (accounts: GoogleConnectedServiceAccountEntry[], taskList
 };
 
 export { useGoogleTasks };
-
 export type { GoogleTasksAccountState, GoogleTaskCreateInput, GoogleTaskPatchInput };

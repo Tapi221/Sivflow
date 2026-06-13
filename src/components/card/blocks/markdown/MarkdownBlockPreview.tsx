@@ -57,5 +57,4 @@ const MarkdownBlockView: React.FC<MarkdownBlockViewProps> = ({ md, ...rest }) =>
 };
 
 export { MarkdownBlockView };
-
 export type { MarkdownBlockPreviewProps };

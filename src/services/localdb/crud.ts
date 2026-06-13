@@ -542,5 +542,4 @@ const upsert: Upsert = async (db: DbLike, tableName: string, data: unknown, skip
 };
 
 export { addItem, updateItem, deleteItem, softDelete, bulkUpsert, upsert };
-
 export type { EnqueueSync, TableLike, DbLike };

@@ -223,5 +223,4 @@ const HoverSuggestionTooltip = ({ children, items, side = "right", offset = 10, 
 };
 
 export { HoverSuggestionTooltip };
-
 export type { HoverSuggestionItem };

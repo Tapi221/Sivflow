@@ -62,5 +62,4 @@ const squaredDistance = (a: Pick<InkPoint, "x" | "y">, b: Pick<InkPoint, "x" | "
 };
 
 export { clientPointToPaperPoint, paperPointToCanvasPoint, squaredDistance };
-
 export type { RectLike };

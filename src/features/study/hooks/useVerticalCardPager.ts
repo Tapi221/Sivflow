@@ -306,5 +306,4 @@ const useVerticalCardPager = ({ count, activeIndex, onActiveIndexChange, scrollC
 };
 
 export { useVerticalCardPager };
-
 export type { UseVerticalCardPagerOptions, UseVerticalCardPagerReturn };

@@ -20,5 +20,4 @@ const translate = (locale: Locale, key: TranslationKey, params?: TranslationPara
 };
 
 export { translate };
-
 export type { TranslationKey, TranslationParams };

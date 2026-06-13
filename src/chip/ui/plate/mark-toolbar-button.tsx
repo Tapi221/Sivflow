@@ -13,5 +13,4 @@ const MarkToolbarButton = ({ nodeType, ...props }: MarkToolbarButtonProps) => {
 };
 
 export { MarkToolbarButton };
-
 export type { MarkToolbarButtonProps };

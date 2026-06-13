@@ -22,5 +22,4 @@ const normalizeCardDisplayMode = (value: unknown) => {
 };
 
 export { DEFAULT_CARD_DISPLAY_MODE, normalizeCardDisplayMode };
-
 export type { CardDisplayMode, CardSet };

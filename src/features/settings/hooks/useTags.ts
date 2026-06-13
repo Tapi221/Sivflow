@@ -964,5 +964,4 @@ const useTags = () => {
 };
 
 export { DEFAULT_TAG_COLOR_KEYS, resolveCardTagNames, useTags };
-
 export type { TagCategory, Tag };

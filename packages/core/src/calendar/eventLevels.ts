@@ -83,5 +83,4 @@ const getCalendarEventLevels = (rowSegments: readonly CalendarEventSegment[], li
 };
 
 export { getCalendarEventSegment, calendarEventSegmentsOverlap, getCalendarEventLevels };
-
 export type { CalendarEventSegment, CalendarEventLevelsResult };

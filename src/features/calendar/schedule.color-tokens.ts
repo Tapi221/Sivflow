@@ -94,5 +94,4 @@ const generateColorTokens = (hex: string): CalendarColorTokens => {
 };
 
 export { generateColorTokens };
-
 export type { CalendarColorTokens };

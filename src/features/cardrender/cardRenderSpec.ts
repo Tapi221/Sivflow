@@ -54,5 +54,4 @@ const resolveCardDisablesFrameScale = (spec: CardRenderSpec) => {
 };
 
 export { clampCardRenderZoomScale, resolveCardSurfaceMode, buildCardRenderSpec, resolveCardSurfaceScale, resolveCardContentZoom, resolveCardUsesSurfaceScale, resolveCardUsesStretchWidth, resolveCardDisablesFrameScale };
-
 export type { CardSurfaceMode, CardInteractionMode, CardChromeScaleMode, CardRenderSpec };

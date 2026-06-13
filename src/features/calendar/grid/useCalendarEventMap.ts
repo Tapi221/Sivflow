@@ -29,5 +29,4 @@ const useCalendarEventMap = (visibleEvents: GoogleCalendarEvent[]): CalendarEven
 };
 
 export { useCalendarEventMap };
-
 export type { CalendarEventMap };

@@ -11,5 +11,4 @@ const DEFAULT_FEATURE_FLAGS: FeatureFlags = { newEditor: false, enableMarkdownIm
 const LEGACY_FEATURE_FLAG_MAP: Record<LegacyFlagName, keyof FeatureFlags> = { postReviewPractice: "postReviewPractice", ENABLE_ADVANCED_TELEMETRY: "enableAdvancedTelemetry" };
 
 export { DEFAULT_FEATURE_FLAGS, LEGACY_FEATURE_FLAG_MAP };
-
 export type { FeatureFlags, LegacyFlagName };

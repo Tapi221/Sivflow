@@ -6,5 +6,4 @@ const floatingSurfaceVariants = cva("", { variants: { surface: { default: "", me
 type FloatingSurfaceVariantProps = VariantProps<typeof floatingSurfaceVariants>;
 
 export { floatingSurfaceVariants };
-
 export type { FloatingSurfaceVariantProps };

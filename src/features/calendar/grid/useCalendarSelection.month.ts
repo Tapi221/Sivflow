@@ -13,5 +13,4 @@ const useCalendarSelection = (selectedDate: Date, today: Date): CalendarSelectio
 };
 
 export { useCalendarSelection };
-
 export type { CalendarSelection };

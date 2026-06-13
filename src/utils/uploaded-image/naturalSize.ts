@@ -50,5 +50,4 @@ const loadImageNaturalSize = async (src: string): Promise<ImageNaturalSize | nul
 };
 
 export { loadImageNaturalSize };
-
 export type { ImageNaturalSize };

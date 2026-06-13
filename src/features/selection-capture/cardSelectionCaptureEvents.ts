@@ -47,5 +47,4 @@ const dispatchCardSelectionCaptureEvent = (payload: CardSelectionCaptureEventPay
 };
 
 export { CARD_SELECTION_CAPTURE_EVENT, dispatchCardSelectionCaptureEvent };
-
 export type { CardSelectionCaptureSide, CardSelectionCaptureTaskResult, CardSelectionCaptureEventPayload, CardSelectionCaptureEventDetail, DispatchedCardSelectionCaptureEvent };

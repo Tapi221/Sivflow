@@ -54,5 +54,4 @@ const receiveDesktopHandwritingMessage = ({ document, session, message, now }: R
 };
 
 export { receiveDesktopHandwritingMessage };
-
 export type { DesktopHandwritingReceiverSession, ReceiveDesktopHandwritingMessageInput, DesktopHandwritingReceiverReason, ReceiveDesktopHandwritingMessageResult };

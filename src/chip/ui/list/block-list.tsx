@@ -1,19 +1,12 @@
 "use client";
 
 import React from "react";
-
 import { isOrderedList } from "@platejs/list";
-
 import { useTodoListElement, useTodoListElementState } from "@platejs/list/react";
-
 import type { TListElement } from "platejs";
-
 import type { PlateElementProps, RenderNodeWrapper } from "platejs/react";
-
 import { useReadOnly } from "platejs/react";
-
 import { Checkbox } from "@/chip/ui/checkbox";
-
 import { cn } from "@/lib/utils";
 
 const TodoMarker = (props: PlateElementProps) => {
@@ -33,7 +26,6 @@ const TodoMarker = (props: PlateElementProps) => {
     </div>
   );
 };
-
 const TodoLi = (props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }) => {
   return (
     <li
@@ -85,7 +77,6 @@ const List = (props: PlateElementProps & { lineBreakBadge?: React.ReactNode; }) 
     </List>
   );
 };
-
 const BlockList: RenderNodeWrapper = (props) => {
   if (!props.element.listStyleType) return;
   if (!isOrderedList(props.element)) return;

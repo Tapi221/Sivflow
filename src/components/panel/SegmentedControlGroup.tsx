@@ -42,5 +42,4 @@ const SegmentedControlGroup = <T extends string,>({ value, options, onChange, si
 };
 
 export { SegmentedControlGroup };
-
 export type { SegmentedOption };

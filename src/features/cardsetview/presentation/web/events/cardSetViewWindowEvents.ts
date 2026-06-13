@@ -40,5 +40,4 @@ const subscribeCardSetViewWindowEvent = <TEventName extends CardSetViewWindowEve
 };
 
 export { dispatchCardSetViewWindowEvent, subscribeCardSetViewWindowEvent };
-
 export type { CardSetViewEditingDraftPatch, CardSetViewWindowEventMap };

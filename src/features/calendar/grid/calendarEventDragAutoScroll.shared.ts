@@ -124,5 +124,4 @@ const useCalendarEventDragRepeatAction = <TDirection extends string>({ repeatInt
 };
 
 export { createCalendarEventDragPointerSnapshot, useCalendarEventDragRepeatAction };
-
 export type { CalendarEventDragPointerSnapshot };

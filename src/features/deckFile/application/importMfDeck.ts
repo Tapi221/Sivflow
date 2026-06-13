@@ -236,5 +236,4 @@ const importMfDeckArchive = async ({ archive, folderId, createCardSet, updateCar
 };
 
 export { importMfDeckArchive };
-
 export type { CreateMfDeckCardSet, UpdateMfDeckCardSet, CreateMfDeckCard, EnsureMfDeckTagByName, MfDeckImportDestination, ImportMfDeckArchiveParams, ImportMfDeckArchiveResult };

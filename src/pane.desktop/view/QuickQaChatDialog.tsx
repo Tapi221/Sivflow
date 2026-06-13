@@ -242,5 +242,4 @@ const QuickQaChatDialog = memo(QuickQaChatDialogComponent);
 QuickQaChatDialog.displayName = "QuickQaChatDialog";
 
 export { QuickQaChatDialog };
-
 export type { QuickQaChatDialogProps };

@@ -44,5 +44,4 @@ const getPreloadCacheStats = () => {
 };
 
 export { getCachedRemoteUrl, setCachedRemoteUrl, isUrlDecoded, markUrlDecoded, getPreloadCacheStats };
-
 export type { PreloadCacheStats };

@@ -85,5 +85,4 @@ const useTrashItems = (userId: string | null | undefined) => {
 };
 
 export { useTrashItems };
-
 export type { TrashLoadState, TrashItemsState, TrashItemIdInput };

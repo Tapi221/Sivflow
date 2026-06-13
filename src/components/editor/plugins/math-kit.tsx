@@ -1,9 +1,7 @@
 "use client";
 
 import { MathRules } from "@platejs/math";
-
 import { EquationPlugin, InlineEquationPlugin } from "@platejs/math/react";
-
 import { EquationElement, InlineEquationElement } from "@/chip/ui/plate/equation-node";
 
 const MathKit = [

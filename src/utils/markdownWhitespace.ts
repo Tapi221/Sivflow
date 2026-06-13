@@ -498,5 +498,4 @@ const normalizeMarkdownEditorValue = (input: string, tabSize: unknown): string =
 };
 
 export { clampMarkdownTabSize, normalizeMarkdownLineEndings, normalizeMarkdownNbsp, stripTrailingMarkdownNewlines, isEligibleMarkdownWhitespaceOffset, resolveMarkdownTabKeyText, expandTabsInEligibleMarkdownLines, normalizeMarkdownInsertionText, normalizeMarkdownEditorValue };
-
 export type { MarkdownTabSize };

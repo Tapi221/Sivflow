@@ -129,5 +129,4 @@ const CodeLineElementStatic = CodeLineNodeStatic;
 const CodeSyntaxLeaf = CodeSyntaxLeafStatic;
 
 export { CodeBlockElementDocx, CodeBlockElementStatic, CodeBlockNodeStatic, CodeLineElementDocx, CodeLineElementStatic, CodeLineNodeStatic, CodeSyntaxLeaf, CodeSyntaxLeafDocx, CodeSyntaxLeafStatic };
-
 export type { CodeBlockNodeStaticProps };

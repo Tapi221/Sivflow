@@ -258,5 +258,4 @@ const CardWorkspaceShell = ({ children, containerClassName, shellClassName, cont
 };
 
 export { CardWorkspaceShell };
-
 export type { CardWorkspaceSurfaceVariant, CardWorkspaceWidthControlProps, CardWorkspaceShellProps };

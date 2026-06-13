@@ -190,5 +190,4 @@ const useRootFolderProjects = (): UseRootFolderProjectsResult => {
 };
 
 export { normalizeRootFolderProjectLabel, readLegacyStoredAppProjects, clearLegacyStoredAppProjects, useRootFolderProjects };
-
 export type { CreateRootFolderProjectInput, UseRootFolderProjectsResult, LegacyStoredAppProject };

@@ -89,5 +89,4 @@ const buildSharedCardSurfaceMetrics = ({ displayMode, cardLayoutMode, zoomScale 
 }) => buildCardSurfaceMetrics({ displayMode, cardLayoutMode, zoomScale });
 
 export { buildCardSurfaceMetrics, buildSharedCardSurfaceMetrics };
-
 export type { SharedCardSurfaceMetrics, BuildCardSurfaceMetricsArgs };

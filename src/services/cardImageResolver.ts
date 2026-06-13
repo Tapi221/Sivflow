@@ -201,5 +201,4 @@ const resolveCardImageUrl = async (image: ResolvableImageRef, userId?: string | 
 };
 
 export { resolveCardImageUrl };
-
 export type { ResolvedCardImage };

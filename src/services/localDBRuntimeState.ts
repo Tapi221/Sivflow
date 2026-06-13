@@ -121,5 +121,4 @@ const getLocalDBTelemetrySnapshot = (): LocalDBTelemetrySnapshot => {
 };
 
 export { getLocalDBRuntimeStatus, subscribeLocalDBRuntimeStatus, updateLocalDBRuntimeStatus, warnOncePerSession, telemetryOncePerSession, markLocalDBGenerationBumped, saveLocalDBResetFailureReason, clearLocalDBResetFailureReason, getStoredLocalDBResetFailureReason, getLocalDBTelemetrySnapshot };
-
 export type { LocalDBMode, LocalDBFallbackReasonCode, LocalDBRuntimeStatus, LocalDBTelemetrySnapshot };

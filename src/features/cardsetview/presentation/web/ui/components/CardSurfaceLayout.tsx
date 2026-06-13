@@ -24,5 +24,4 @@ const CardSurfaceLayout = ({ cardLayoutMode, questionNode, answerNode, flipNode,
 };
 
 export { CardSurfaceLayout };
-
 export type { CardSurfaceFace };

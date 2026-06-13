@@ -244,5 +244,4 @@ options: DenormalizeUploadedImageOptions = {},
 };
 
 export { normalizeUploadedImages, denormalizeUploadedImages };
-
 export type { NormalizeUploadedImageOptions, DenormalizeUploadedImageOptions };

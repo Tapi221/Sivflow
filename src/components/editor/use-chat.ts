@@ -1,41 +1,24 @@
 "use client";
 
 import * as React from "react";
-
 import type { UseChatHelpers } from "@ai-sdk/react";
-
 import { useChat as useBaseChat } from "@ai-sdk/react";
-
 import { faker } from "@faker-js/faker";
-
 import { withAIBatch } from "@platejs/ai";
-
 import { AIChatPlugin, aiCommentToRange, applyTableCellSuggestion } from "@platejs/ai/react";
-
 import { getCommentKey, getTransientCommentKey } from "@platejs/comment";
-
 import { deserializeMd } from "@platejs/markdown";
-
 import { BlockSelectionPlugin } from "@platejs/selection/react";
-
 import type { UIMessage } from "ai";
-
 import { DefaultChatTransport } from "ai";
-
 import type { TNode } from "platejs";
-
 import { KEYS, nanoid, NodeApi, TextApi } from "platejs";
-
 import type { PlateEditor } from "platejs/react";
-
 import { useEditorRef, usePluginOption } from "platejs/react";
-
 import { aiChatPlugin } from "@/components/editor/plugins/ai-kit";
-
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 
 type ToolName = "comment" | "edit" | "generate";
-
 type TComment = {
   comment: { blockId: string;
     comment: string;
@@ -43,26 +26,21 @@ type TComment = {
   } | null;
   status: "finished" | "streaming";
 };
-
 type TTableCellUpdate = {
   cellUpdate: { content: string;
     id: string;
   } | null;
   status: "finished" | "streaming";
 };
-
 type MessageDataPart = {
   toolName: ToolName;
   comment?: TComment;
   table?: TTableCellUpdate;
 };
-
 type ChatMessage = UIMessage<object, MessageDataPart>;
-
 type Chat = UseChatHelpers<ChatMessage>;
 
 const delay = faker.number.int({ max: 20, min: 5 });
-
 const markdownChunks = [
   [
     { delay, texts: "Make text " },
@@ -232,7 +210,6 @@ const markdownChunks = [
     { delay, texts: " |" },
   ],
 ];
-
 const mdxChunks = [
   [
     {
@@ -1223,7 +1200,6 @@ const createCommentChunks = (editor: PlateEditor) => {
 
   return result_chunks;
 };
-
 const createTableCellChunks = (editor: PlateEditor) => {
   // Get selected table cells from the TablePlugin
   const selectedCells =
@@ -1279,7 +1255,6 @@ const createTableCellChunks = (editor: PlateEditor) => {
 
   return result_chunks;
 };
-
 // Used for testing. Remove it after implementing useChat api.
 const fakeStreamText = ({
   chunkCount = 10,
@@ -1443,7 +1418,6 @@ const fakeStreamText = ({
     },
   });
 };
-
 const createChatTransport = ({
   api,
   abortControllerRef,
@@ -1550,7 +1524,6 @@ const createChatTransport = ({
     }) as typeof fetch,
   });
 };
-
 const useChat = () => {
   const editor = useEditorRef();
   const options = usePluginOption(aiChatPlugin, "chatOptions");
@@ -1683,5 +1656,4 @@ const useChat = () => {
 };
 
 export { useChat };
-
 export type { ToolName, TComment, TTableCellUpdate, MessageDataPart, Chat, ChatMessage };

@@ -16,5 +16,4 @@ const LinkToolbarButton = ({ children, ...props }: LinkToolbarButtonProps) => {
 };
 
 export { LinkToolbarButton };
-
 export type { LinkToolbarButtonProps };

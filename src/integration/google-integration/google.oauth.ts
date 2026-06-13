@@ -371,5 +371,4 @@ const refreshCalendarAccessToken = async ({ refreshToken }: { refreshToken: stri
 };
 
 export { GOOGLE_CONNECTED_SERVICE_SCOPES, consumeGoogleCalendarServerCodeVerifier, consumeGoogleCalendarServerCodeVerifier as consumeGoogleConnectedServiceServerCodeVerifier, requestGoogleSignInServerCode, requestGoogleCalendarServerCode, requestCalendarAccessToken, requestCalendarAccessToken as requestConnectedServiceAccessToken, refreshCalendarAccessToken, refreshCalendarAccessToken as refreshConnectedServiceAccessToken };
-
 export type { GoogleCalendarAccess, GoogleConnectedServiceAccess };

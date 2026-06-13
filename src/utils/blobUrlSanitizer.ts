@@ -57,5 +57,4 @@ const findBlobUrlFixesDeep = (input: unknown) => {
 };
 
 export { isBlobUrl, sanitizeBlobUrlsDeep, findBlobUrlFixesDeep };
-
 export type { BlobUrlFix, SanitizeResult };

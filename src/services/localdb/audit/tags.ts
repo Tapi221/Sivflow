@@ -117,5 +117,4 @@ const auditAndRepairTags = async (userId: string): Promise<TagRepairSummary> => 
 };
 
 export { auditAndRepairTags };
-
 export type { TagRepairSummary };

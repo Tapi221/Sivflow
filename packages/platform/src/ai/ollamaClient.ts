@@ -129,5 +129,4 @@ const testOllamaConnection = async (): Promise<TestOllamaConnectionResult> => {
 };
 
 export { generateOllamaAnswer, testOllamaConnection };
-
 export type { GenerateOllamaAnswerInput, GenerateOllamaAnswerResult, TestOllamaConnectionResult };

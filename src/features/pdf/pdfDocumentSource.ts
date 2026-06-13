@@ -121,5 +121,4 @@ const releasePdfDocumentSourceSoon = (source: PdfDocumentSource | null | undefin
 };
 
 export { createPdfDocumentDataSource, createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource, releasePdfDocumentSource, releasePdfDocumentSourceSoon, retainPdfDocumentSource, toPdfDocumentLoadSource };
-
 export type { PdfDocumentSource };

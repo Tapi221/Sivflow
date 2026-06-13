@@ -58,5 +58,4 @@ const buildWidthControl = ({ isDesktop, isGlobalEditing, activePaneWidthPx, acti
 };
 
 export { resolveDisplayModeLabels, buildWidthControl };
-
 export type { WidthControlViewModel };

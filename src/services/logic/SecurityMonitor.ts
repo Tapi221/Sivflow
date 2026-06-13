@@ -200,5 +200,4 @@ class SecurityMonitor {
 }
 
 export { SecurityMonitor };
-
 export type { SecurityState };

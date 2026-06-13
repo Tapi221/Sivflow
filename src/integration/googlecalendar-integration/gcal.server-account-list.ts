@@ -71,5 +71,4 @@ const hydrateServerStoredGoogleCalendarAccounts = async (): Promise<number> => {
 };
 
 export { listServerStoredGoogleCalendarAccounts, hydrateServerStoredGoogleCalendarAccounts };
-
 export type { ServerStoredGoogleCalendarAccount };
