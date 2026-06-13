@@ -1,35 +1,16 @@
-import "prismjs/components/prism-clike";
-import "prismjs/components/prism-markup";
-import "prismjs/components/prism-css";
-import "prismjs/components/prism-javascript";
-import "prismjs/components/prism-jsx";
-import "prismjs/components/prism-typescript";
-import "prismjs/components/prism-tsx";
-import "prismjs/components/prism-bash";
-import "prismjs/components/prism-c";
-import "prismjs/components/prism-cpp";
-import "prismjs/components/prism-csharp";
-import "prismjs/components/prism-go";
-import "prismjs/components/prism-java";
-import "prismjs/components/prism-json";
-import "prismjs/components/prism-markdown";
-import "prismjs/components/prism-python";
-import "prismjs/components/prism-rust";
-import "prismjs/components/prism-sql";
-import "prismjs/components/prism-yaml";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { codeTheme } from "@shared/design-tokens/codeTheme";
-import type { RenderProps } from "prism-react-renderer";
 import { Highlight } from "prism-react-renderer";
-import Prism from "prismjs";
-import type { ClipboardEvent as ReactClipboardEvent, FormEvent as ReactFormEvent, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
+import { Prism } from "@/components/card/blocks/code/prismSetup";
+import { CodeBlockFrame } from "@/components/card/blocks/code/CodeBlockFrame";
+import { getViewerLanguageLabels, normalizeEditorLanguage, normalizeViewerLanguage } from "@/components/card/blocks/code/codeBlockLanguage";
 import { cn } from "@/lib/utils";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
 import { Check, Copy } from "@/ui/icons";
-import { CodeBlockFrame } from "./CodeBlockFrame";
-import { getViewerLanguageLabels, normalizeEditorLanguage, normalizeViewerLanguage } from "./codeBlockLanguage";
+import { codeTheme } from "@shared/design-tokens/codeTheme";
+import type { RenderProps } from "prism-react-renderer";
+import type { ClipboardEvent as ReactClipboardEvent, FormEvent as ReactFormEvent, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 
 type CodeBlockContentProps =
   | {
