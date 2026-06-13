@@ -1,22 +1,17 @@
-import * as React from "react";
+import type * as React from "react";
 import { isOrderedList } from "@platejs/list";
 import { CheckIcon } from "lucide-react";
 import type { RenderStaticNodeWrapper, TListElement } from "platejs";
 import type { SlateRenderElementProps } from "platejs/static";
 import { cn } from "@/lib/utils";
 
-
-
+const TODO_CHECKBOX_CLASSNAME = "peer -left-6 pointer-events-none absolute top-1 size-4 shrink-0 rounded-sm border border-input bg-background text-background shadow-none ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[state=checked]:border-foreground data-[state=checked]:bg-foreground data-[state=checked]:text-background";
 const TodoMarkerStatic = (props: SlateRenderElementProps) => {
   const checked = props.element.checked as boolean;
-
   return (
     <div contentEditable={false}>
       <button
-        className={cn(
-          "peer -left-6 pointer-events-none absolute top-1 size-4 shrink-0 rounded-sm border border-primary bg-background ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
-          props.className,
-        )}
+        className={cn(TODO_CHECKBOX_CLASSNAME, props.className)}
         data-state={checked ? "checked" : "unchecked"}
         type="button"
       >
@@ -39,9 +34,6 @@ const TodoLiStatic = (props: SlateRenderElementProps) => {
     </li>
   );
 };
-
-
-
 const config: Record<
   string,
   {
@@ -54,9 +46,6 @@ const config: Record<
     Marker: TodoMarkerStatic,
   },
 };
-
-
-
 const List = (props: SlateRenderElementProps) => {
   const { indent, listStart, listStyleType } = props.element as TListElement & {
     indent?: number;
@@ -64,7 +53,6 @@ const List = (props: SlateRenderElementProps) => {
   const { Li, Marker } = config[listStyleType] ?? {};
   const ListTag = isOrderedList(props.element) ? "ol" : "ul";
   const marginLeft = indent ? `${indent * 24}px` : undefined;
-
   return (
     <ListTag
       className="relative m-0 p-0"
@@ -79,10 +67,7 @@ const List = (props: SlateRenderElementProps) => {
 const BlockListStatic: RenderStaticNodeWrapper = (props) => {
   if (!props.element.listStyleType) return;
   if (!isOrderedList(props.element)) return;
-
   return (nextProps) => <List {...nextProps} />;
 };
-
-
 
 export { BlockListStatic };
