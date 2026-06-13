@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { MouseEvent, PointerEvent } from "react";
-import type { SelectionCaptureArea, SelectionCapturePoint, SelectionCaptureRect, SelectionCaptureShape } from "./selectionCapture.types";
+import type { SelectionCaptureArea, SelectionCapturePoint, SelectionCaptureRect, SelectionCaptureShape } from "@/features/selection-capture/selectionCapture.types";
 
 type SelectionCaptureTargetRef = {
   readonly current: HTMLElement | null;

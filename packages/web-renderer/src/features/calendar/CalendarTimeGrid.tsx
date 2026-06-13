@@ -1,7 +1,7 @@
 import { memo, useMemo } from "react";
 import type { CalendarEvent, CalendarTimeGridLayoutMode } from "@core/calendar";
 import { layoutCalendarTimeGridEvents } from "@core/calendar";
-import { CalendarEventChip } from "./CalendarEventChip";
+import { CalendarEventChip } from "@web-renderer/features/calendar/CalendarEventChip";
 
 type CalendarTimeGridProperties = {
   events: readonly CalendarEvent[];

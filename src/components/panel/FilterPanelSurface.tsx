@@ -1,8 +1,8 @@
 import type { FloatingSurfaceVariantProps } from "@/chip/ui/floating-surface";
 import { cn } from "@/lib/utils";
-import type { FilterPanelShellProps } from "./FilterPanelShell";
-import { FilterPanelShell } from "./FilterPanelShell";
-import { PanelSurface } from "./PanelSurface";
+import type { FilterPanelShellProps } from "@/components/panel/FilterPanelShell";
+import { FilterPanelShell } from "@/components/panel/FilterPanelShell";
+import { PanelSurface } from "@/components/panel/PanelSurface";
 
 type FilterPanelSurfaceProps = FilterPanelShellProps &
   FloatingSurfaceVariantProps & {

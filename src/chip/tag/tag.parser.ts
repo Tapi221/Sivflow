@@ -1,5 +1,5 @@
-import { DEFAULT_TAG_COLOR_KEY, TAG_COLOR_KEYS } from "./tag.constants";
-import type { TagColorKey } from "./tag.types";
+import { DEFAULT_TAG_COLOR_KEY, TAG_COLOR_KEYS } from "@/chip/tag/tag.constants";
+import type { TagColorKey } from "@/chip/tag/tag.types";
 
 const TAG_COLOR_KEY_SET = new Set<string>(TAG_COLOR_KEYS);
 

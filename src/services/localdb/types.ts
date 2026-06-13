@@ -1,6 +1,6 @@
 import type { Card, Folder } from "@/types";
 import type { SyncConflict, SyncQueueItem, SyncSettings } from "@/types/domain/sync";
-import type { CardRelation, LocalDBInstance, LocalDBLike as BaseLocalDBLike, LocalDBSyncApi, LocalDBTableMap, ProjectMap, QueryableCollection, QueryableKeyPath, QueryableTable, QueryableWhereClause, QueryableWhereFunction, SyncableEntityTable, TagRecord } from "./localdb.types";
+import type { CardRelation, LocalDBInstance, LocalDBLike as BaseLocalDBLike, LocalDBSyncApi, LocalDBTableMap, ProjectMap, QueryableCollection, QueryableKeyPath, QueryableTable, QueryableWhereClause, QueryableWhereFunction, SyncableEntityTable, TagRecord } from "@/services/localdb/localdb.types";
 
 type LocalDBLike = BaseLocalDBLike & {
   table<T extends object = Record<string, unknown>, TKey = string>(name: string): QueryableTable<T, TKey>;

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useWorkspaceTabsStore } from "./useTabsStore";
+import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 
 type UseWorkspaceTabsRouteSyncOptions = {
   enabled?: boolean;

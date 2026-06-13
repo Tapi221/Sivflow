@@ -1,7 +1,7 @@
 import type { Translations } from "@shared/i18n/translations";
 import { format } from "date-fns";
 import { normalizeDate } from "@/shared/codec/date";
-import type { CalendarStudyLogLike, CalendarTimestampLike, CalendarWeekStartDay } from "./calendar.types";
+import type { CalendarStudyLogLike, CalendarTimestampLike, CalendarWeekStartDay } from "@/features/calendar/calendar.types";
 
 type CalendarArrowKey = "ArrowLeft" | "ArrowRight" | "ArrowUp" | "ArrowDown";
 type CalendarWeekDayLabel = "SUN" | "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT";

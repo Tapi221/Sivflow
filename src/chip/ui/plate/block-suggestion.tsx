@@ -11,7 +11,7 @@ import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 import type { ResolvedSuggestion } from "@/lib/block-discussion-index";
 import { BLOCK_SUGGESTION_TOKEN } from "@/lib/block-discussion-index";
-import { Comment, CommentCreateForm, formatCommentDate } from "./comment";
+import { Comment, CommentCreateForm, formatCommentDate } from "@/chip/ui/plate/comment";
 
 const isResolvedSuggestion = (suggestion: ResolvedSuggestion | TDiscussion): suggestion is ResolvedSuggestion => "suggestionId" in suggestion;
 

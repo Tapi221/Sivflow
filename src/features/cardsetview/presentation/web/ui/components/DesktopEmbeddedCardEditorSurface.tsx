@@ -11,9 +11,9 @@ import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMod
 import type { Card, UserSettings } from "@/types";
 import type { CardBlock } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { CardFaceScene } from "./CardFaceScene";
-import { CardSurfaceLayout } from "./CardSurfaceLayout";
-import { buildCardSurfaceMetrics } from "./cardSurfacePresentation";
+import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
+import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
+import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
 
 type Side = "question" | "answer";
 type EditorSettings = Partial<UserSettings> | null | undefined;

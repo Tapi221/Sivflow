@@ -1,8 +1,8 @@
 import type { InkDocument } from "@core/domain/card/ink/inkDocument";
 import { Timestamp } from "firebase/firestore";
 import type { CodeBlockData } from "@/types/core/code-block";
-import type { UploadedImage, UploadedPdf } from "./assets";
-import type { BaseEntity, CardState, MathBlockData, ReferenceBlockData, ReviewLog, SubjectiveScoreValue } from "./base";
+import type { UploadedImage, UploadedPdf } from "@/types/domain/assets";
+import type { BaseEntity, CardState, MathBlockData, ReferenceBlockData, ReviewLog, SubjectiveScoreValue } from "@/types/domain/base";
 
 type CardBlock = {
   id: string;

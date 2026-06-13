@@ -1,7 +1,7 @@
 import { addDays, startOfDay } from "date-fns";
 import { compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { eventChipDesign } from "./eventChipDesign.generated";
+import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 
 type CalendarMonthDayEvents = {
   visibleEvents: GoogleCalendarEvent[];

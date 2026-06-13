@@ -1,6 +1,6 @@
-import "./SettingsWorkspaceDialog.css";
+import "@/features/settings/SettingsWorkspaceDialog.css";
 import { DialogDesktopPanel } from "@/chip/panel/dialog.desktop/dialog";
-import { SettingsWorkspaceScreen } from "./SettingsWorkspaceScreen";
+import { SettingsWorkspaceScreen } from "@/features/settings/SettingsWorkspaceScreen";
 
 type SettingsWorkspaceDialogProps = {
   open: boolean;

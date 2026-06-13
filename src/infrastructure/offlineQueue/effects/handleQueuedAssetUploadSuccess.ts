@@ -3,7 +3,7 @@ import { makeAssetRecord, toAssetLikeRecord } from "@/application/usecases/persi
 import { auth } from "@/infrastructure/firebase/client";
 import { getLocalDb } from "@/infrastructure/localdb/client";
 import type { UploadedImage } from "@/types";
-import { cleanupQueuedAssetSyncItems } from "./cleanupQueuedAssetSyncItems";
+import { cleanupQueuedAssetSyncItems } from "@/infrastructure/offlineQueue/effects/cleanupQueuedAssetSyncItems";
 
 const handleQueuedAssetUploadSuccess = async (item: QueueItem, updatedImage: UploadedImage): Promise<void> => {
   const localDb = await getLocalDb();

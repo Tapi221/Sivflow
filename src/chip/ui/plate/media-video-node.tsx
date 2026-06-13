@@ -11,8 +11,8 @@ import { PlateElement, useEditorMounted, withHOC } from "platejs/react";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import ReactPlayer from "react-player";
 import { cn } from "@/lib/utils";
-import { Caption, CaptionTextarea } from "./caption";
-import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "./resize-handle";
+import { Caption, CaptionTextarea } from "@/chip/ui/plate/caption";
+import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "@/chip/ui/plate/resize-handle";
 
 const TWEET_PROVIDER = "twitter";
 

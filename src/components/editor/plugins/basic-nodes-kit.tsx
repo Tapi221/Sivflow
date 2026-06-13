@@ -1,7 +1,7 @@
 "use client";
 
-import { BasicBlocksKit } from "./basic-blocks-kit";
-import { BasicMarksKit } from "./basic-marks-kit";
+import { BasicBlocksKit } from "@/components/editor/plugins/basic-blocks-kit";
+import { BasicMarksKit } from "@/components/editor/plugins/basic-marks-kit";
 
 const BasicNodesKit = [...BasicBlocksKit, ...BasicMarksKit];
 

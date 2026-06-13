@@ -1,5 +1,5 @@
 import { Dexie } from "dexie";
-import type { GoogleCalendarEvent } from "./gcalSync.types";
+import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 type GoogleCalendarEventCacheRow = {
   id: string;

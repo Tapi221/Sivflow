@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import { MetaPanelShell } from "./MetaPanelShell";
+import { MetaPanelShell } from "@/components/card/panels/MetaPanelShell";
 
 type EmptyMetaPanelProps = {
   children?: ReactNode;

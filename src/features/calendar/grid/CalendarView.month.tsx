@@ -7,7 +7,7 @@ import type { CalendarEventMoveHandler } from "@/features/calendar/scheduleScree
 import { useCalendarWeekStartSetting } from "@/features/calendar/useCalendarWeekStartSetting";
 import { useMonthInfiniteScroll } from "@/features/scroll/schedule/useInfiniteScroll.month.desktop";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { GridCalendarMonthDesktop } from "./Grid.calendar.month.desktop";
+import { GridCalendarMonthDesktop } from "@/features/calendar/grid/Grid.calendar.month.desktop";
 
 type CalendarMonthViewProps = {
   currentDate: Date;

@@ -3,12 +3,12 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { cn } from "@/lib/utils";
 import type { DocumentItem, PdfViewerState } from "@/types";
-import type { PdfDocumentSource } from "./pdfDocumentSource";
-import { createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource, releasePdfDocumentSource } from "./pdfDocumentSource";
-import { PdfPane } from "./PdfPane";
-import { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerformanceMeasure } from "./pdfPerformance";
-import { findLocalPdfBlob, resolvePdfDocumentBlob } from "./resolvePdfDocumentBlob";
-import { resolvePdfDocumentSourceUrl } from "./resolvePdfDocumentSourceUrl";
+import type { PdfDocumentSource } from "@/features/pdf/pdfDocumentSource";
+import { createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource, releasePdfDocumentSource } from "@/features/pdf/pdfDocumentSource";
+import { PdfPane } from "@/features/pdf/PdfPane";
+import { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerformanceMeasure } from "@/features/pdf/pdfPerformance";
+import { findLocalPdfBlob, resolvePdfDocumentBlob } from "@/features/pdf/resolvePdfDocumentBlob";
+import { resolvePdfDocumentSourceUrl } from "@/features/pdf/resolvePdfDocumentSourceUrl";
 
 type PdfViewerStateChangePersistence = "immediate" | "deferred" | "none";
 type PdfViewerStateChangeOptions = {

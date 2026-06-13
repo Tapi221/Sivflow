@@ -1,8 +1,8 @@
 import { refreshCalendarAccessToken } from "@/integration/google-integration/google.oauth";
-import { fetchCalendarList } from "./gcal.api";
-import type { StoredGoogleAccount } from "./gcal.multi-storage";
-import { readStoredAccounts, updateStoredAccountCalendarIds, updateStoredAccountToken } from "./gcal.multi-storage";
-import type { GoogleCalendarListItem } from "./gcalSync.types";
+import { fetchCalendarList } from "@/integration/googlecalendar-integration/gcal.api";
+import type { StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
+import { readStoredAccounts, updateStoredAccountCalendarIds, updateStoredAccountToken } from "@/integration/googlecalendar-integration/gcal.multi-storage";
+import type { GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 const silentReconnect = async (accountId: string): Promise<{ accessToken: string;
   calendars: GoogleCalendarListItem[];

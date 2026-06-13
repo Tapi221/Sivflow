@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Toolbar } from "./toolbar";
+import { Toolbar } from "@/chip/ui/plate/toolbar";
 
 const FixedToolbar = (props: React.ComponentProps<typeof Toolbar>) => {
   return (

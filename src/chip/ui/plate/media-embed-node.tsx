@@ -10,9 +10,9 @@ import { PlateElement, withHOC } from "platejs/react";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import { Tweet } from "react-tweet";
 import { cn } from "@/lib/utils";
-import { Caption, CaptionTextarea } from "./caption";
-import { MediaToolbar } from "./media-toolbar";
-import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "./resize-handle";
+import { Caption, CaptionTextarea } from "@/chip/ui/plate/caption";
+import { MediaToolbar } from "@/chip/ui/plate/media-toolbar";
+import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "@/chip/ui/plate/resize-handle";
 
 const MediaEmbedElement = withHOC(ResizableProvider, (props: PlateElementProps<TMediaEmbedElement>) => {
   const {

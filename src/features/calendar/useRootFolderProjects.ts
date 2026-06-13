@@ -5,7 +5,7 @@ import { getFolderId, UNTITLED_PROJECT_NAME } from "@/components/folder/explorer
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
 import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
-import type { AppCalendarItem } from "./scheduleScreen.types";
+import type { AppCalendarItem } from "@/features/calendar/scheduleScreen.types";
 
 type CreateRootFolderProjectInput = {
   label: string;

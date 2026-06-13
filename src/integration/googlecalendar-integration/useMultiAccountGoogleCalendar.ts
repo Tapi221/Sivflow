@@ -5,11 +5,11 @@ import { disconnectServerStoredGoogleCalendarAccount, exchangeGoogleCalendarCode
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 import { GoogleCalendarSyncEngine } from "@/sync/googlecalendar-sync/GoogleCalendarSyncEngine";
-import { fetchCalendarList } from "./gcal.api";
-import type { StoredGoogleAccount } from "./gcal.multi-storage";
-import { buildTokenExpiry, isStoredTokenValid, readStoredAccounts, removeStoredAccount, updateStoredAccountCalendarIds, updateStoredAccountToken, upsertStoredAccount } from "./gcal.multi-storage";
-import type { GCalConnectionStatus, GCalForceSyncOptions, GCalSilentReconnectResult, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem } from "./gcalSync.types";
-import { GoogleCalendarEngineManager } from "./GoogleCalendarEngineManager";
+import { fetchCalendarList } from "@/integration/googlecalendar-integration/gcal.api";
+import type { StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
+import { buildTokenExpiry, isStoredTokenValid, readStoredAccounts, removeStoredAccount, updateStoredAccountCalendarIds, updateStoredAccountToken, upsertStoredAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
+import type { GCalConnectionStatus, GCalForceSyncOptions, GCalSilentReconnectResult, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
+import { GoogleCalendarEngineManager } from "@/integration/googlecalendar-integration/GoogleCalendarEngineManager";
 
 type GoogleAccountEntry = {
   id: string;

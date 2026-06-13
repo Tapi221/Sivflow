@@ -5,7 +5,7 @@ import { CardSetLibraryDashboard } from "@/features/library-cardset/components/C
 import { PdfLibraryDashboard } from "@/features/library-pdf/components/PdfLibraryDashboard";
 import { cn } from "@/lib/utils";
 import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
-import { SectionListBlankPane } from "./SectionListBlankPane";
+import { SectionListBlankPane } from "@/components/folder/components/SectionListBlankPane";
 
 interface SectionListColumnPaneProps {
   className?: string;
