@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ComponentType, SVGProps } from "react";
 import * as stratisIcons from "stratis-ui-icons";
-import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
+import { sanitizeReferences } from "./cardEditorUtils";
 import { CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS } from "@/components/card/frame/cardAction.constants";
 import { cn } from "@/lib/utils";
 import type { UploadedImage } from "@/types/domain/assets";
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardFaceAttachmentAudio, CardFaceAttachments } from "@/types/domain/card";
+
+
 
 type Side = "question" | "answer";
 type UseCardMediaDialogsParams = {
@@ -19,16 +21,24 @@ type StratisComponentIconProps = {
   className?: string;
 };
 
+
+
 const STRATIS_ICON_COMPONENTS = stratisIcons as unknown as Record<string, StratisIconComponent | undefined>;
 const STRATIS_AUDIO_ICON_NAMES = ["StratisAudioSettings01Icon"] as const;
 const STRATIS_IMAGE_ICON_NAMES = ["StratisImage01Icon", "StratisImageIcon"] as const;
 const STRATIS_LINK_ICON_NAMES = ["StratisLinkAngledIcon"] as const;
 
+
+
 const resolveStratisIcon = (names: readonly string[]): StratisIconComponent | null => names.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
+
+
 
 const StratisAudioIcon = resolveStratisIcon(STRATIS_AUDIO_ICON_NAMES);
 const StratisImageIcon = resolveStratisIcon(STRATIS_IMAGE_ICON_NAMES);
 const StratisLinkIcon = resolveStratisIcon(STRATIS_LINK_ICON_NAMES);
+
+
 
 const normalizeAttachments = (attachments: CardFaceAttachments | null | undefined): CardFaceAttachments => ({
   images: attachments?.images ?? [],
@@ -36,7 +46,11 @@ const normalizeAttachments = (attachments: CardFaceAttachments | null | undefine
   references: attachments?.references ?? [],
 });
 
+
+
 const StratisComponentIcon = ({ icon: Icon, className }: StratisComponentIconProps) => <Icon aria-hidden="true" focusable="false" className={className} />;
+
+
 
 const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: UseCardMediaDialogsParams) => {
   const [imageDialogSide, setImageDialogSide] = useState<Side | null>(null);
@@ -144,5 +158,7 @@ const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: UseCard
     [audioDialogSide, getDialogAudios, getDialogImages, getReferenceItems, imageDialogSide, linkDialogSide, renderMediaDialogButtons, setDialogAudios, setDialogImages, setReferenceItems],
   );
 };
+
+
 
 export { useCardMediaDialogs };

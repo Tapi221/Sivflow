@@ -3,6 +3,8 @@
  */
 import { useCallback, useState } from "react";
 
+
+
 interface FlashcardMediaState {
   isImageModalOpen: boolean;
   isImagePopupOpen: boolean;
@@ -16,6 +18,8 @@ interface FlashcardMediaState {
   /** いずれかのモーダルが開いており flip をブロックすべき状態か */
   isModalBlockingFlip: boolean;
 }
+
+
 
 const useFlashcardMediaState = () => {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
@@ -46,5 +50,9 @@ const useFlashcardMediaState = () => {
   };
 };
 
+
+
 export { useFlashcardMediaState };
+
+
 export type { FlashcardMediaState };

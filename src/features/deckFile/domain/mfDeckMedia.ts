@@ -1,5 +1,7 @@
-import type { MfDeckMediaEntryV1, MfDeckMediaKindV1 } from "@/features/deckFile/domain/mfDeck.types";
-import { MF_DECK_MEDIA_DIRECTORY, MF_DECK_MEDIA_URI_PREFIX } from "@/features/deckFile/domain/mfDeck.types";
+import type { MfDeckMediaEntryV1, MfDeckMediaKindV1 } from "./mfDeck.types";
+import { MF_DECK_MEDIA_DIRECTORY, MF_DECK_MEDIA_URI_PREFIX } from "./mfDeck.types";
+
+
 
 const EXTENSION_BY_MIME_TYPE: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -18,6 +20,8 @@ const EXTENSION_BY_MIME_TYPE: Record<string, string> = {
 const INVALID_FILENAME_CHARACTERS = new Set(["\\", "/", ":", "*", "?", "\"", "<", ">", "|"]);
 const MF_DECK_MAX_MEDIA_ENTRY_BYTES = 32 * 1024 * 1024;
 const MF_DECK_MAX_MEDIA_TOTAL_BYTES = 96 * 1024 * 1024;
+
+
 
 const replaceControlCharacters = (value: string): string => {
   return Array.from(value, (char) => {
@@ -127,5 +131,7 @@ const buildMfDeckMediaPath = (input: { index: number;
   return `${MF_DECK_MEDIA_DIRECTORY}${directory}/${paddedIndex}-${name}.${cleanExtension}`;
 };
 const buildMfDeckMediaManifest = (mediaEntries: MfDeckMediaEntryV1[]) => ({ format: "sivflow.deck.media" as const, version: 1 as const, media: mediaEntries });
+
+
 
 export { MF_DECK_MAX_MEDIA_ENTRY_BYTES, MF_DECK_MAX_MEDIA_TOTAL_BYTES, isMfDeckMediaPath, toMfDeckMediaUri, isMfDeckMediaUri, pathFromMfDeckMediaUri, inferMfDeckMediaKind, inferMfDeckMediaExtension, sanitizeMfDeckMediaName, buildMfDeckMediaPath, buildMfDeckMediaManifest };

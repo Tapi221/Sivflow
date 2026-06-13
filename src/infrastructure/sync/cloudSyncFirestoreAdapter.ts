@@ -1,5 +1,7 @@
 void "cloud-sync-firestore-adapter";
 
-export { pullCloudSyncDiff } from "@/infrastructure/sync/cloudSyncPullDiff";
-export { pullCloudSyncFull } from "@/infrastructure/sync/cloudSyncPullFull";
-export { pushCloudSyncBatch } from "@/infrastructure/sync/cloudSyncPushBatch";
+
+
+export { pullCloudSyncDiff } from "./cloudSyncPullDiff";
+export { pullCloudSyncFull } from "./cloudSyncPullFull";
+export { pushCloudSyncBatch } from "./cloudSyncPushBatch";

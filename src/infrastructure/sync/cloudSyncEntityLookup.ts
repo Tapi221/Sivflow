@@ -2,8 +2,10 @@ import type { DocumentData, Firestore } from "firebase/firestore";
 import { getDoc, getDocs } from "firebase/firestore";
 import type { CloudEntityType, PullableEntityType } from "@/application/usecases/cloudSyncShared";
 import { COLLECTION_BY_TYPE, sanitizeSyncDataFromCloud } from "@/application/usecases/cloudSyncShared";
-import { getUserSettingsRef, queryEntityById } from "@/infrastructure/sync/cloudSyncFirestoreRefs";
+import { getUserSettingsRef, queryEntityById } from "./cloudSyncFirestoreRefs";
 import type { SyncChange } from "@/services/interfaces/ISyncService";
+
+
 
 type LookupContext = {
   firestore: Firestore;
@@ -15,6 +17,8 @@ type CloudSyncLookupDescriptor = {
   resolveData: (context: LookupContext) => Promise<DocumentData | null>;
   resolveSyncId: (context: LookupContext) => string;
 };
+
+
 
 const lookupPullableEntityData = async (
   firestore: Firestore,
@@ -44,6 +48,8 @@ const createPullableLookupDescriptor = (
   resolveSyncId: ({ id }) => id,
 });
 
+
+
 const PULL_FULL_LOOKUP_ORDER: readonly CloudSyncLookupDescriptor[] = [
   createPullableLookupDescriptor("card"),
   createPullableLookupDescriptor("cardSet"),
@@ -58,6 +64,8 @@ const PULL_FULL_LOOKUP_ORDER: readonly CloudSyncLookupDescriptor[] = [
     resolveSyncId: ({ userId }) => userId,
   },
 ];
+
+
 
 const lookupCloudSyncEntityById = async (firestore: Firestore, userId: string, id: string): Promise<SyncChange | null> => {
   for (const descriptor of PULL_FULL_LOOKUP_ORDER) {
@@ -76,5 +84,7 @@ const lookupCloudSyncEntityById = async (firestore: Firestore, userId: string, i
 
   return null;
 };
+
+
 
 export { lookupCloudSyncEntityById };

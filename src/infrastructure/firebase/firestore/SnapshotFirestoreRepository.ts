@@ -3,7 +3,11 @@ import type { SnapshotRepositoryPort } from "@/application/ports/SnapshotReposit
 import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 import type { AppSnapshot } from "@/types/domain/snapshot";
 
+
+
 const MAX_STORED_SNAPSHOTS = 7;
+
+
 
 const save: SnapshotRepositoryPort["save"] = async (snapshot) => {
   const userId = snapshot.metadata.userId;
@@ -54,6 +58,10 @@ const list: SnapshotRepositoryPort["list"] = async (userId) => {
   });
 };
 
+
+
 const snapshotFirestoreRepository: SnapshotRepositoryPort = { save, list };
+
+
 
 export { snapshotFirestoreRepository };

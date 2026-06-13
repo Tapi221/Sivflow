@@ -4,7 +4,7 @@ import { hasRuledLine } from "@/components/card/blocks/core/blockDisplayPolicy";
 import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
 import { sortBlocksByOrderIndex } from "@/components/card/blocks/core/blockOrdering";
 import { BlockToolbar } from "@/components/card/blocks/core/BlockToolbar";
-import { createEditorBlock, isEditorInsertableBlockType } from "@/components/card/blocks/editor/blockEditorInsertPolicy";
+import { createEditorBlock, isEditorInsertableBlockType } from "./blockEditorInsertPolicy";
 import type { CardBlockLayoutReplaceBlock, EditorProps } from "@/components/card/blocks/shared/CardBlockLayoutRenderer";
 import { CardBlocksScene } from "@/components/card/blocks/shared/CardBlocksScene";
 import { getNormalizedGridOffsetRows, getNormalizedRowOffset, isGridOffsetType, isRowPositionableType } from "@/components/card/frame/rowOffset";
@@ -12,6 +12,8 @@ import { CARD_ROW_PX } from "@/domain/card/cardGeometry.constants";
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
+
+
 
 type CssVars = React.CSSProperties & Record<`--${string}`, string>;
 interface BlockEditorProps {
@@ -39,13 +41,19 @@ interface BlockEditorHandle {
   addBlock: (type: CardBlock["type"]) => void;
 }
 
+
+
 const ROW_STEP_PX = CARD_ROW_PX;
 const EMPTY_HIDDEN_BLOCK_TYPES: CardBlock["type"][] = [];
+
+
 
 const uid = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : Math.random().toString(36).slice(2);
+
+
 
 const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>(({ blocks = [], onChange, prefix, label, accentColor, duplicateToOpposite = false, onCrossDuplicate, autoFocus = false, customPlaceholders, hideToolbar = false, onDelete, minDeletableIndex = 0, hiddenBlockTypes = EMPTY_HIDDEN_BLOCK_TYPES, settings = undefined, toolbarMount = null, toolbarDesktopLayout = "horizontal", enableBlockSelectionState = true, displayMode = "fixed", zoom = 1 }, ref) => {
   const [selectedContainerBlockId, setSelectedContainerBlockId] = useState<string | null>(null);
@@ -613,7 +621,11 @@ const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>(({ blo
 },
 );
 
+
+
 BlockEditor.displayName = "BlockEditor";
 
 export { BlockEditor };
+
+
 export type { BlockEditorHandle };

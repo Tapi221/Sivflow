@@ -1,9 +1,11 @@
-import { useCardSetViewCardLayoutMode } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewCardLayoutMode";
-import { useCardSetViewDisplayMode } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewDisplayMode";
-import { useCardSetViewEditingBridge } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewEditingBridge";
-import { useCardSetViewSelectionState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewSelectionState";
+import { useCardSetViewCardLayoutMode } from "./useCardSetViewCardLayoutMode";
+import { useCardSetViewDisplayMode } from "./useCardSetViewDisplayMode";
+import { useCardSetViewEditingBridge } from "./useCardSetViewEditingBridge";
+import { useCardSetViewSelectionState } from "./useCardSetViewSelectionState";
 import type { Card } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
+
+
 
 interface UseCardSetViewViewStateOptions {
   initialIndex: number;
@@ -14,6 +16,8 @@ interface UseCardSetViewViewStateOptions {
   selectedCardSet: CardSet | null;
   deviceScope: string;
 }
+
+
 
 const useCardSetViewViewState = ({ initialIndex, targetCardId, cardSetId, sortedCards, cardIndexById, selectedCardSet, deviceScope }: UseCardSetViewViewStateOptions) => {
   const selectionState = useCardSetViewSelectionState({ initialIndex, targetCardId, deviceScope, cardSetId, sortedCards, cardIndexById });
@@ -40,5 +44,7 @@ const useCardSetViewViewState = ({ initialIndex, targetCardId, cardSetId, sorted
     ...cardLayoutModeState,
   };
 };
+
+
 
 export { useCardSetViewViewState };

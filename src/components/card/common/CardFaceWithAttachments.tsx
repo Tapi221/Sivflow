@@ -1,7 +1,9 @@
 import React from "react";
-import { SharedCardAttachments } from "@/components/card/common/SharedCardAttachments";
+import { SharedCardAttachments } from "./SharedCardAttachments";
 import { cn } from "@/lib/utils";
 import type { CardFaceAttachments } from "@/types/domain/card";
+
+
 
 type CardFaceWithAttachmentsProps = Readonly<{
   faceNode: React.ReactNode;
@@ -9,8 +11,12 @@ type CardFaceWithAttachmentsProps = Readonly<{
   className?: string;
 }>;
 
+
+
 const CardFaceWithAttachments = ({ faceNode, attachments, className }: CardFaceWithAttachmentsProps) => {
   return (<div className={cn("w-full min-w-0", className)}> {faceNode} <SharedCardAttachments attachments={attachments} /> </div>);
 };
+
+
 
 export { CardFaceWithAttachments };

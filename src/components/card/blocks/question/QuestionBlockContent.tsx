@@ -1,8 +1,10 @@
 import React, { useMemo, useState } from "react";
 import AutoResizeTextarea from "@/chip/ui/AutoResizeTextarea";
-import { QuestionBlockLayout } from "@/components/card/blocks/question/QuestionBlockLayout";
-import { QUESTION_BLOCK_ANSWER_TEXT_CLASS, QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX, QUESTION_BLOCK_TITLE_TEXT_CLASS } from "@/components/card/blocks/question/questionBlockTextStyles";
+import { QuestionBlockLayout } from "./QuestionBlockLayout";
+import { QUESTION_BLOCK_ANSWER_TEXT_CLASS, QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX, QUESTION_BLOCK_TITLE_TEXT_CLASS } from "./questionBlockTextStyles";
 import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
+
+
 
 type QuestionBlockContentProps =
   | {
@@ -50,6 +52,8 @@ type QuestionBlockViewContentProps = {
   zoom?: number;
 };
 
+
+
 const buildQuestionFieldStyle = (zoom?: number) =>
   buildTypographyStyle({
     fontSizePx: 12,
@@ -67,6 +71,8 @@ const buildViewResetKey = ({
   questionAnswer?: string;
   answerDisplayMode: "always" | "tap_to_reveal";
 }) => [answerDisplayMode, questionTitle ?? "", questionAnswer ?? ""].join("::");
+
+
 
 const QuestionField = (props: QuestionFieldProps) => {
   const style = buildQuestionFieldStyle(props.zoom);
@@ -232,5 +238,7 @@ const QuestionBlockContent = (props: QuestionBlockContentProps) => {
     />
   );
 };
+
+
 
 export { QuestionBlockContent };

@@ -1,28 +1,46 @@
 "use client";
 
 import * as React from "react";
+
 import { resizeLengthClampStatic } from "@platejs/resizable";
+
 import { useBlockSelected } from "@platejs/selection/react";
+
 import { getTableColumnCount, setCellBackground, setTableColSize, setTableRowSize } from "@platejs/table";
+
 import { TablePlugin, roundCellSizeToStep, useOverrideColSize, useOverrideRowSize, useTableColSizes, useTableMergeState } from "@platejs/table/react";
+
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, CombineIcon, EraserIcon, Grid2X2Icon, PaintBucketIcon, SquareSplitHorizontalIcon, Trash2Icon, XIcon } from "lucide-react";
+
 import type { TTableCellElement, TTableElement, TTableRowElement } from "platejs";
+
 import type { PlateElementProps } from "platejs/react";
+
 import { PlateElement, useEditorPlugin, useEditorRef, useFocusedLast, useReadOnly, useSelected } from "platejs/react";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
+
 import { Popover, PopoverAnchor, PopoverContent } from "@/chip/ui/popover";
-import { blockSelectionVariants } from "@/chip/ui/plate/block-selection";
-import { ColorDropdownMenuItems, DEFAULT_COLORS } from "@/chip/ui/plate/font-color-toolbar-button";
-import { Toolbar, ToolbarButton, ToolbarGroup, ToolbarMenuGroup } from "@/chip/ui/plate/toolbar";
+
+import { blockSelectionVariants } from "./block-selection";
+
+import { ColorDropdownMenuItems, DEFAULT_COLORS } from "./font-color-toolbar-button";
+
+import { Toolbar, ToolbarButton, ToolbarGroup, ToolbarMenuGroup } from "./toolbar";
+
 import { cn } from "@/lib/utils";
 
+
+
 type TableResizeDirection = "bottom" | "right";
+
 type TableResizeStartOptions = {
   colIndex: number;
   direction: TableResizeDirection;
   handleKey: string;
   rowIndex: number;
 };
+
 type TableResizeDragState = {
   colIndex: number;
   direction: TableResizeDirection;
@@ -30,11 +48,13 @@ type TableResizeDragState = {
   initialSize: number;
   rowIndex: number;
 };
+
 type TableResizeContextValue = {
   clearResizePreview: (handleKey: string) => void;
   setResizePreview: (event: React.PointerEvent<HTMLDivElement>, options: TableResizeStartOptions) => void;
   startResize: (event: React.PointerEvent<HTMLDivElement>, options: TableResizeStartOptions) => void;
 };
+
 type TableResizeControllerOptions = {
   dragIndicatorRef: React.RefObject<HTMLDivElement | null>;
   effectiveColSizes: number[];
@@ -43,9 +63,11 @@ type TableResizeControllerOptions = {
   tableRef: React.RefObject<HTMLTableElement | null>;
   wrapperRef: React.RefObject<HTMLDivElement | null>;
 };
+
 type TableCellElementProps = PlateElementProps<TTableCellElement> & {
   isHeader?: boolean;
 };
+
 type TableActionButtonProps = {
   children: React.ReactNode;
   disabled?: boolean;
@@ -53,19 +75,27 @@ type TableActionButtonProps = {
   tooltip: string;
 };
 
+
+
 const TABLE_DEFAULT_COLUMN_WIDTH = 120;
+
 const TABLE_MIN_ROW_HEIGHT = 34;
+
 const TableResizeContext = React.createContext<TableResizeContextValue | null>(null);
+
+
 
 const getElementPath = (props: PlateElementProps): number[] => {
   const path = (props as { path?: number[] }).path;
   return Array.isArray(path) ? path : [];
 };
+
 const getCellIndicesFromPath = (path: number[]) => {
   const colIndex = path.length > 0 ? path[path.length - 1] : 0;
   const rowIndex = path.length > 1 ? path[path.length - 2] : 0;
   return { colIndex, rowIndex };
 };
+
 const useTableResizeContext = () => {
   const context = React.useContext(TableResizeContext);
   if (!context) {
@@ -73,6 +103,7 @@ const useTableResizeContext = () => {
   }
   return context;
 };
+
 const useTableResizeController = ({ dragIndicatorRef, effectiveColSizes, hoverIndicatorRef, tablePath, tableRef, wrapperRef }: TableResizeControllerOptions): TableResizeContextValue => {
   const { editor, getOptions } = useEditorPlugin(TablePlugin);
   const { minColumnWidth = 0 } = getOptions();
@@ -204,6 +235,9 @@ const useTableResizeController = ({ dragIndicatorRef, effectiveColSizes, hoverIn
   }, [hideIndicator, hoverIndicatorRef]);
   return React.useMemo(() => ({ clearResizePreview, setResizePreview, startResize }), [clearResizePreview, setResizePreview, startResize]);
 };
+
+
+
 const TableActionButton = ({ children, disabled, onAction, tooltip }: TableActionButtonProps) => {
   const editor = useEditorRef();
   return (
@@ -220,6 +254,7 @@ const TableActionButton = ({ children, disabled, onAction, tooltip }: TableActio
     </ToolbarButton>
   );
 };
+
 const TableCellBackgroundButton = ({ color, path }: { color?: string; path: number[] }) => {
   const editor = useEditorRef();
   const updateColor = React.useCallback((nextColor: string) => {
@@ -253,6 +288,7 @@ const TableCellBackgroundButton = ({ color, path }: { color?: string; path: numb
     </DropdownMenu>
   );
 };
+
 const TableCellToolbar = ({ color, path }: { color?: string; path: number[] }) => {
   const { tf } = useEditorPlugin(TablePlugin);
   const mergeState = useTableMergeState();
@@ -299,6 +335,7 @@ const TableCellToolbar = ({ color, path }: { color?: string; path: number[] }) =
     </PopoverContent>
   );
 };
+
 const TableResizeHandle = ({ colIndex, direction, rowIndex }: { colIndex: number; direction: TableResizeDirection; rowIndex: number }) => {
   const { clearResizePreview, setResizePreview, startResize } = useTableResizeContext();
   const handleKey = `${direction}:${rowIndex}:${colIndex}`;
@@ -316,6 +353,7 @@ const TableResizeHandle = ({ colIndex, direction, rowIndex }: { colIndex: number
     />
   );
 };
+
 const TableElement = ({ children, ...props }: PlateElementProps<TTableElement>) => {
   const { element } = props;
   const { getOptions, tf } = useEditorPlugin(TablePlugin);
@@ -375,6 +413,7 @@ const TableElement = ({ children, ...props }: PlateElementProps<TTableElement>) 
     </PlateElement>
   );
 };
+
 const TableRowElement = (props: PlateElementProps<TTableRowElement>) => {
   return (
     <PlateElement {...props} as="tr" className="h-full">
@@ -382,6 +421,7 @@ const TableRowElement = (props: PlateElementProps<TTableRowElement>) => {
     </PlateElement>
   );
 };
+
 const TableCellElement = ({ isHeader, ...props }: TableCellElementProps) => {
   const editor = useEditorRef();
   const readOnly = useReadOnly();
@@ -445,9 +485,15 @@ const TableCellElement = ({ isHeader, ...props }: TableCellElementProps) => {
     </PlateElement>
   );
 };
+
 const TableCellHeaderElement = (props: PlateElementProps<TTableCellElement>) => {
   return <TableCellElement {...props} isHeader />;
 };
 
+
+
 export { TableElement, TableRowElement, TableCellElement, TableCellHeaderElement };
+
+
+
 export type { TableCellElementProps };

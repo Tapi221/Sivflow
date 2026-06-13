@@ -1,9 +1,13 @@
 import { useEffect } from "react";
-import { isPrimaryShortcut, isTypingTarget } from "@/features/hotkey/hotkeyGuards";
+import { isPrimaryShortcut, isTypingTarget } from "./hotkeyGuards";
+
+
 
 type UseTreeViewSidebarHotkeyParams = {
   onToggle: () => void;
 };
+
+
 
 const useTreeViewSidebarHotkey = ({ onToggle }: UseTreeViewSidebarHotkeyParams) => {
   useEffect(() => {
@@ -23,5 +27,7 @@ const useTreeViewSidebarHotkey = ({ onToggle }: UseTreeViewSidebarHotkeyParams) 
     };
   }, [onToggle]);
 };
+
+
 
 export { useTreeViewSidebarHotkey };
