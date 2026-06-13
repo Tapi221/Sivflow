@@ -1,6 +1,6 @@
 import { useEditorRef } from "platejs/react";
-import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
+import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
 type IndentToolbarButtonProps = ToolbarButtonProps & {
   reverse?: boolean;

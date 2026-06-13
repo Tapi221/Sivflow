@@ -1,8 +1,8 @@
 import { BoldIcon, ItalicIcon, LinkIcon, MessageSquareIcon } from "lucide-react";
-import { ToolbarGroup } from "@/chip/ui/plate/toolbar";
 import { CommentToolbarButton } from "@/chip/ui/plate/comment-toolbar-button";
 import { LinkToolbarButton } from "@/chip/ui/plate/link-toolbar-button";
 import { MarkToolbarButton } from "@/chip/ui/plate/mark-toolbar-button";
+import { ToolbarGroup } from "@/chip/ui/plate/toolbar";
 
 type FloatingToolbarButtonsProps = {
   withComment?: boolean;
