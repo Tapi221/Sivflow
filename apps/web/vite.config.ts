@@ -430,6 +430,10 @@ export default defineConfig(({ command }) => ({
       "react-dom",
     ],
     alias: [
+      ...command === "build" ? [
+        { find: /^node:path$/, replacement: resolveFromRoot("packages/platform/src/browser/nodePathBrowserShim.cjs") },
+        { find: /^path$/, replacement: resolveFromRoot("packages/platform/src/browser/nodePathBrowserShim.cjs") },
+      ] : [],
       { find: /^@\/services\/localDB$/, replacement: resolveFromRoot("src/services/localdb/index.ts") },
       { find: /^@\/services\/firebase$/, replacement: resolveFromRoot("src/infrastructure/firebase/client.ts") },
       { find: /^@\/features\/tab\/Tab$/, replacement: resolveFromRoot("src/pane.desktop/tab.desktopnative/Tab.ts") },
