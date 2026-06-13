@@ -1,56 +1,51 @@
 "use client";
-
 import * as React from "react";
-
 import { getDraftCommentKey } from "@platejs/comment";
-
 import { CommentPlugin } from "@platejs/comment/react";
-
 import { getTransientSuggestionKey } from "@platejs/suggestion";
-
 import { SuggestionPlugin } from "@platejs/suggestion/react";
-
 import { MessageSquareTextIcon, MessagesSquareIcon, PencilLineIcon } from "lucide-react";
-
 import type { AnyPluginConfig, NodeEntry } from "platejs";
-
 import { PathApi } from "platejs";
-
 import type { PlateElementProps, RenderNodeWrapper } from "platejs/react";
-
 import { useEditorRef, usePluginOption } from "platejs/react";
-
 import { Button } from "@/chip/ui/button/button";
-
+import { BlockSuggestionCard, isResolvedSuggestion } from "@/chip/ui/plate/block-suggestion";
+import { Comment, CommentCreateForm } from "@/chip/ui/plate/comment";
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
-
 import { commentPlugin } from "@/components/editor/plugins/comment-kit";
-
 import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
-
 import { suggestionPlugin } from "@/components/editor/plugins/suggestion-kit";
-
 import { useBlockDiscussionItems } from "@/lib/block-discussion-index";
 
-import { BlockSuggestionCard, isResolvedSuggestion } from "./block-suggestion";
+type BlockCommentProps = {
+  discussion: TDiscussion;
+  isLast: boolean;
+};
 
-import { Comment, CommentCreateForm } from "./comment";
-
-
-
-const BlockComment = ({ discussion, isLast }: { discussion: TDiscussion; isLast: boolean; }) => {
+const BlockComment = ({ discussion, isLast }: BlockCommentProps) => {
   const [editingId, setEditingId] = React.useState<string | null>(null);
   return (
     <>
       <div className="p-4">
-        {discussion.comments.map((comment, index) => <Comment key={comment.id ?? index} comment={comment} discussionLength={discussion.comments.length} documentContent={discussion?.documentContent} editingId={editingId} index={index} setEditingId={setEditingId} showDocumentContent />)}
+        {discussion.comments.map((comment, index) => (
+          <Comment
+            key={comment.id ?? index}
+            comment={comment}
+            discussionLength={discussion.comments.length}
+            documentContent={discussion?.documentContent}
+            editingId={editingId}
+            index={index}
+            setEditingId={setEditingId}
+            showDocumentContent
+          />
+        ))}
         <CommentCreateForm discussionId={discussion.id} />
       </div>
       {!isLast && <div className="h-px w-full bg-muted" />}
     </>
   );
 };
-
 const BlockCommentContent = ({ children, element }: PlateElementProps) => {
   const editor = useEditorRef();
   const commentsApi = editor.getApi(CommentPlugin).comment;
@@ -64,47 +59,51 @@ const BlockCommentContent = ({ children, element }: PlateElementProps) => {
   const discussionsCount = resolvedDiscussions.length;
   const totalCount = suggestionsCount + discussionsCount;
   const activeSuggestionId = usePluginOption(suggestionPlugin, "activeId");
-  const activeSuggestion = activeSuggestionId && resolvedSuggestions.find((s) => s.suggestionId === activeSuggestionId);
+  const activeSuggestion = activeSuggestionId && resolvedSuggestions.find((suggestion) => suggestion.suggestionId === activeSuggestionId);
   const commentingBlock = usePluginOption(commentPlugin, "commentingBlock");
   const activeCommentId = usePluginOption(commentPlugin, "activeId");
   const isCommenting = activeCommentId === getDraftCommentKey();
-  const activeDiscussion = activeCommentId && resolvedDiscussions.find((d) => d.id === activeCommentId);
+  const activeDiscussion = activeCommentId && resolvedDiscussions.find((discussion) => discussion.id === activeCommentId);
   const noneActive = !activeSuggestion && !activeDiscussion;
   const sortedMergedData = [...resolvedDiscussions, ...resolvedSuggestions].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-  const selected = resolvedDiscussions.some((d) => d.id === activeCommentId) || resolvedSuggestions.some((s) => s.suggestionId === activeSuggestionId);
+  const selected = resolvedDiscussions.some((discussion) => discussion.id === activeCommentId) || resolvedSuggestions.some((suggestion) => suggestion.suggestionId === activeSuggestionId);
   const [_open, setOpen] = React.useState(selected);
   const commentingCurrent = !!commentingBlock && PathApi.equals(blockPath, commentingBlock);
   const open = _open || selected || (isCommenting && !!draftCommentNode && commentingCurrent);
   const anchorElement = React.useMemo(() => {
     let activeNode: NodeEntry | undefined;
-    if (activeSuggestion) activeNode = suggestionNodes.find(([node]) => editor.getApi(SuggestionPlugin).suggestion.nodeId(node) === activeSuggestion.suggestionId);
-    if (activeCommentId) activeNode = activeCommentId === getDraftCommentKey() ? draftCommentNode : commentNodes.find(([node]) => editor.getApi(commentPlugin).comment.nodeId(node) === activeCommentId);
+    if (activeSuggestion) {
+      activeNode = suggestionNodes.find(([node]) => editor.getApi(SuggestionPlugin).suggestion.nodeId(node) === activeSuggestion.suggestionId);
+    }
+    if (activeCommentId) {
+      activeNode = activeCommentId === getDraftCommentKey() ? draftCommentNode : commentNodes.find(([node]) => editor.getApi(commentPlugin).comment.nodeId(node) === activeCommentId);
+    }
     if (!activeNode) return null;
     return editor.api.toDOMNode(activeNode[0])!;
-  }, [activeSuggestion, activeCommentId, commentNodes, draftCommentNode, editor.api, suggestionNodes]);
+  }, [activeSuggestion, activeCommentId, commentNodes, draftCommentNode, editor, suggestionNodes]);
   if (!isTopLevelBlock) return children;
   if (suggestionsCount + resolvedDiscussions.length === 0 && !draftCommentNode) return <div className="w-full">{children}</div>;
   return (
     <div className="flex w-full justify-between">
       <Popover
         open={open}
-        onOpenChange={(_open_) => {
-          if (!_open_ && isCommenting && draftCommentNode) {
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen && isCommenting && draftCommentNode) {
             editor.tf.unsetNodes(getDraftCommentKey(), {
               at: [],
               mode: "lowest",
-              match: (n) => n[getDraftCommentKey()],
+              match: (node) => node[getDraftCommentKey()],
             });
           }
-          setOpen(_open_);
+          setOpen(nextOpen);
         }}
       >
         <div className="w-full">{children}</div>
-        {anchorElement && <PopoverAnchor asChild className="w-full" virtualRef={{ current: anchorElement }} />}
+        {anchorElement ? <PopoverAnchor asChild className="w-full" virtualRef={{ current: anchorElement }} /> : null}
         <PopoverContent
           className="max-h-[min(50dvh,calc(-24px+var(--radix-popper-available-height)))] w-[380px] min-w-[130px] max-w-[calc(100vw-24px)] overflow-y-auto p-0 data-[state=closed]:opacity-0"
-          onCloseAutoFocus={(e) => e.preventDefault()}
-          onOpenAutoFocus={(e) => e.preventDefault()}
+          onCloseAutoFocus={(event) => event.preventDefault()}
+          onOpenAutoFocus={(event) => event.preventDefault()}
           align="center"
           side="bottom"
         >
@@ -170,9 +169,6 @@ const BlockCommentContent = ({ children, element }: PlateElementProps) => {
     </div>
   );
 };
-
 const BlockDiscussion: RenderNodeWrapper<AnyPluginConfig> = (_props) => (props) => <BlockCommentContent {...props} />;
-
-
 
 export { BlockDiscussion };
