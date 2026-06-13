@@ -13,7 +13,6 @@ import { BlockMenuKit } from "@/components/editor/plugins/block-menu-kit";
 import { BlockPlaceholderKit } from "@/components/editor/plugins/block-placeholder-kit";
 import { CalloutKit } from "@/components/editor/plugins/callout-kit";
 import { CodeBlockKit } from "@/components/editor/plugins/code-block-kit";
-import { CodeDrawingKit } from "@/components/editor/plugins/code-drawing-kit";
 import { ColumnKit } from "@/components/editor/plugins/column-kit";
 import { CommentKit } from "@/components/editor/plugins/comment-kit";
 import { CopilotKit } from "@/components/editor/plugins/copilot-kit";
@@ -27,7 +26,6 @@ import { ExitBreakKit } from "@/components/editor/plugins/exit-break-kit";
 import { FixedToolbarKit } from "@/components/editor/plugins/fixed-toolbar-kit";
 import { FloatingToolbarKit } from "@/components/editor/plugins/floating-toolbar-kit";
 import { FontKit } from "@/components/editor/plugins/font-kit";
-import { FootnoteKit } from "@/components/editor/plugins/footnote-kit";
 import { LineHeightKit } from "@/components/editor/plugins/line-height-kit";
 import { LinkKit } from "@/components/editor/plugins/link-kit";
 import { ListKit } from "@/components/editor/plugins/list-kit";
@@ -48,7 +46,6 @@ const EditorKit = [
   // Elements
   ...BasicBlocksKit,
   ...CodeBlockKit,
-  ...CodeDrawingKit,
   ...TableKit,
   ...ToggleKit,
   ...TocKit,
@@ -87,7 +84,6 @@ const EditorKit = [
   // Parsers
   ...DocxKit,
   ...MarkdownKit,
-  ...FootnoteKit,
 
   // UI
   ...BlockPlaceholderKit,
