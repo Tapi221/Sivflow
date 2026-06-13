@@ -3,7 +3,7 @@ import { migrateLegacyLocalDbBrandIfNeeded } from "@/services/localdb/brandMigra
 import { deleteUserPersistentDatabases, getDatabaseNameForUser } from "@/services/localdb/generation";
 import { LocalDB } from "@/services/localdb/LocalDB";
 import type { LocalDBSyncStore } from "@/services/localdb/types";
-import { clearLocalDBResetFailureReason, markLocalDBGenerationBumped, saveLocalDBResetFailureReason, updateLocalDBRuntimeStatus, warnOncePerSession } from "@/services/localdbRuntimeState";
+import { clearLocalDBResetFailureReason, markLocalDBGenerationBumped, saveLocalDBResetFailureReason, updateLocalDBRuntimeStatus, warnOncePerSession } from "@/services/localDBRuntimeState";
 
 type LocalDbGlobal = typeof globalThis & {
   __ALLOW_LOCAL_DB_CONSTRUCTION?: boolean;
