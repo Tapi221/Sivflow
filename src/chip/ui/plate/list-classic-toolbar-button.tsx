@@ -1,17 +1,26 @@
 "use client";
 
 import { IndentIcon, ListIcon, ListOrderedIcon, OutdentIcon } from "lucide-react";
+
 import { KEYS } from "platejs";
+
 import { useEditorRef } from "platejs/react";
-import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
-import { ToolbarButton } from "@/chip/ui/plate/toolbar";
+
+import type { ToolbarButtonProps } from "./toolbar";
+
+import { ToolbarButton } from "./toolbar";
+
+
 
 type ListToolbarButtonProps = ToolbarButtonProps & {
   nodeType: string;
 };
+
 type IndentToolbarButtonProps = ToolbarButtonProps & {
   reverse?: boolean;
 };
+
+
 
 const ListToolbarButton = ({ nodeType, ...props }: ListToolbarButtonProps) => {
   const editor = useEditorRef();
@@ -30,6 +39,7 @@ const ListToolbarButton = ({ nodeType, ...props }: ListToolbarButtonProps) => {
     </ToolbarButton>
   );
 };
+
 const IndentToolbarButton = ({ reverse = false, ...props }: IndentToolbarButtonProps) => {
   const editor = useEditorRef();
   return (
@@ -50,9 +60,15 @@ const IndentToolbarButton = ({ reverse = false, ...props }: IndentToolbarButtonP
     </ToolbarButton>
   );
 };
+
 const TodoListToolbarButton = (props: ToolbarButtonProps) => {
   return <ListToolbarButton {...props} nodeType={KEYS.taskList} />;
 };
 
+
+
 export { IndentToolbarButton, ListToolbarButton, TodoListToolbarButton };
+
+
+
 export type { IndentToolbarButtonProps, ListToolbarButtonProps };

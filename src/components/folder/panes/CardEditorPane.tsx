@@ -28,6 +28,8 @@ import { CardEditorPaneReadonlySurface } from "./CardEditorPaneReadonlySurface";
 import { useCardEditorPaneController } from "./useCardEditorPaneController";
 import { CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX, CARD_PANE_WIDTH_STEP_PX, useCardEditorPaneWidth } from "./useCardEditorPaneWidth";
 
+
+
 type CardEditorPaneSettings = {
   accentColor?: string;
   duplicateToOpposite?: boolean;
@@ -95,7 +97,11 @@ type EditorSidePaneProps = {
   overlayTopRight?: React.ReactNode;
 };
 
+
+
 const EMPTY_BLOCKS: CardBlock[] = [];
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -176,6 +182,8 @@ const areEditorSidePanePropsEqual = (
   prev.actionsTopLeft === next.actionsTopLeft &&
   prev.actionsTopRight === next.actionsTopRight &&
   prev.overlayTopRight === next.overlayTopRight;
+
+
 
 const EditorSidePaneInner = ({
   side,
@@ -1028,6 +1036,8 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
     </BlockEditModeContext.Provider>
   );
 };
+
+
 
 const EditorSidePane = memo(EditorSidePaneInner, areEditorSidePanePropsEqual);
 EditorSidePane.displayName = "EditorSidePane";

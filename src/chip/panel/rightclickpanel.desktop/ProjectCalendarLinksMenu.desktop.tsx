@@ -3,6 +3,8 @@ import { RightClickPanel } from "@/chip/panel/rightclickpanel";
 import type { RightClickPanelId } from "@/chip/panel/rightClickPanel.utils";
 import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE } from "@/chip/panel/rightClickPanel.utils";
 
+
+
 type ProjectCalendarLinksMenuAction = {
   id: string;
   label: string;
@@ -18,6 +20,8 @@ type ProjectCalendarLinksMenuProps = {
   panelId?: RightClickPanelId;
 };
 
+
+
 const PROJECT_CALENDAR_LINKS_MENU_PANEL_ID = "project-calendar-links-context-menu";
 const PROJECT_CALENDAR_LINKS_MENU_LABELS = [
   "Googleカレンダーとして追加",
@@ -30,7 +34,11 @@ const PROJECT_CALENDAR_LINKS_MENU_LABELS = [
 ];
 const PROJECT_CALENDAR_LINKS_MENU_WIDTH = resolveRightClickPanelTextWidth(PROJECT_CALENDAR_LINKS_MENU_LABELS);
 
+
+
 const getProjectCalendarLinksMenuHeight = (actionCount: number): number => Math.max(RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, actionCount * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE);
+
+
 
 const ProjectCalendarLinksMenu = ({
   x,
@@ -65,5 +73,9 @@ const ProjectCalendarLinksMenu = ({
   );
 };
 
+
+
 export { ProjectCalendarLinksMenu, PROJECT_CALENDAR_LINKS_MENU_PANEL_ID, PROJECT_CALENDAR_LINKS_MENU_WIDTH, getProjectCalendarLinksMenuHeight };
+
+
 export type { ProjectCalendarLinksMenuAction };

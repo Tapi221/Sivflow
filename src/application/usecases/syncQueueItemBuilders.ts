@@ -3,6 +3,8 @@ import type { SyncDirection, SyncOperationType, SyncPriority, SyncQueueItem } fr
 import type { DeleteEntity, UpsertEntity, UpsertQueueItem } from "./syncQueuePayloadGuards";
 import { assertDeletePayload, assertUpsertPayload } from "./syncQueuePayloadGuards";
 
+
+
 const normalizeForStableHash = (value: unknown): unknown => {
   if (value instanceof Date) {
     return { $date: value.toISOString() };
@@ -184,5 +186,7 @@ const createQueueItemFromSyncTask = (task: SyncTask): SyncQueueItem => {
     nextRetryAt: createdAt,
   } as SyncQueueItem;
 };
+
+
 
 export { createUpsertQueueItem, createDeleteQueueItem, createQueueItemFromSyncTask };

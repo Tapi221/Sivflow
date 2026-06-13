@@ -1,24 +1,37 @@
 "use client";
 
 import * as React from "react";
+
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
+
 import { ChevronRightIcon, FileCodeIcon, Heading1Icon, Heading2Icon, Heading3Icon, ListIcon, ListOrderedIcon, PilcrowIcon, PlusIcon, QuoteIcon, SquareIcon, TableIcon } from "lucide-react";
+
 import { KEYS } from "platejs";
+
 import type { PlateEditor } from "platejs/react";
+
 import { useEditorRef } from "platejs/react";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-import { ToolbarButton, ToolbarMenuGroup } from "@/chip/ui/plate/toolbar";
+
+import { ToolbarButton, ToolbarMenuGroup } from "./toolbar";
+
 import { insertBlock } from "@/components/editor/transforms";
+
+
 
 type InsertToolbarItem = {
   icon: React.ReactNode;
   label: string;
   value: string;
 };
+
 type InsertToolbarGroup = {
   group: string;
   items: InsertToolbarItem[];
 };
+
+
 
 const groups: InsertToolbarGroup[] = [
   {
@@ -44,9 +57,13 @@ const groups: InsertToolbarGroup[] = [
   },
 ];
 
+
+
 const insertClassicBlock = (editor: PlateEditor, type: string) => {
   insertBlock(editor, type);
 };
+
+
 
 const InsertToolbarButton = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
@@ -81,5 +98,10 @@ const InsertToolbarButton = (props: DropdownMenuProps) => {
   );
 };
 
+
+
 export { InsertToolbarButton };
+
+
+
 export type { InsertToolbarGroup, InsertToolbarItem };

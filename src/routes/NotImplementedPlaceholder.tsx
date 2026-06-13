@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/chip/ui/button/button";
 import { ArrowLeft, Construction } from "@/ui/icons";
 
+
+
 const NotImplementedPlaceholder = () => {
   const navigate = useNavigate();
 
@@ -29,5 +31,7 @@ const NotImplementedPlaceholder = () => {
     </div>
   );
 };
+
+
 
 export default NotImplementedPlaceholder;

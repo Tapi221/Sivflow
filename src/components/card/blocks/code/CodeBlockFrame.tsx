@@ -2,6 +2,8 @@ import React from "react";
 import { RowSnappedRoot } from "@/components/card/frame/RowSnappedRoot";
 import { CARD_ROW_PX } from "@/domain/card/cardGeometry.constants";
 
+
+
 type CodeBlockFrameProps = {
   variant?: "viewer" | "editor";
   languageLabel?: string;
@@ -11,6 +13,8 @@ type CodeBlockFrameProps = {
   headerRight?: React.ReactNode;
   children: React.ReactNode;
 };
+
+
 
 const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({ variant = "viewer", languageLabel, languageTitle, headerLeft, headerRight, children }) => {
   const showLangLabel = !!languageLabel && !headerLeft;
@@ -71,5 +75,7 @@ const CodeBlockFrame: React.FC<CodeBlockFrameProps> = ({ variant = "viewer", lan
     </div>
   );
 };
+
+
 
 export { CodeBlockFrame };

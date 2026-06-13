@@ -1,13 +1,24 @@
 import type { FirebaseApp } from "firebase/app";
+
 import { initializeApp } from "firebase/app";
+
 import type { Auth } from "firebase/auth";
+
 import { getAuth } from "firebase/auth";
+
 import type { Firestore } from "firebase/firestore";
+
 import { collection, getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "firebase/firestore";
+
 import type { Functions } from "firebase/functions";
+
 import { getFunctions } from "firebase/functions";
+
 import type { FirebaseStorage } from "firebase/storage";
+
 import { getStorage } from "firebase/storage";
+
+
 
 type FirebaseClientState = {
   app: FirebaseApp | null;
@@ -17,6 +28,8 @@ type FirebaseClientState = {
   firestoreDb: Firestore | null;
 };
 
+
+
 const REQUIRED_FIREBASE_ENV_KEYS = [
   "VITE_FIREBASE_API_KEY",
   "VITE_FIREBASE_AUTH_DOMAIN",
@@ -25,6 +38,7 @@ const REQUIRED_FIREBASE_ENV_KEYS = [
   "VITE_FIREBASE_MESSAGING_SENDER_ID",
   "VITE_FIREBASE_APP_ID",
 ] as const;
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -34,15 +48,33 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+const isFirebaseClientAvailable = missingFirebaseEnvVars.length === 0;
+
+const firebaseApp = firebaseClientState.app;
+
+const auth = firebaseClientState.auth as Auth;
+
+const storage = firebaseClientState.storage as FirebaseStorage;
+
+const functionsClient = firebaseClientState.functionsClient as Functions;
+
+const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
+
+const db: Firestore | null = firebaseClientState.firestoreDb;
+
+
+
 const getFirebaseEnvValue = (key: (typeof REQUIRED_FIREBASE_ENV_KEYS)[number]) => {
   return import.meta.env[key];
 };
+
 const getMissingFirebaseEnvVars = (): string[] => {
   return REQUIRED_FIREBASE_ENV_KEYS.filter((key) => {
     const value = getFirebaseEnvValue(key);
     return typeof value !== "string" || value.trim().length === 0;
   });
 };
+
 const createUnavailableState = (): FirebaseClientState => ({
   app: null,
   auth: null,
@@ -50,6 +82,7 @@ const createUnavailableState = (): FirebaseClientState => ({
   functionsClient: null,
   firestoreDb: null,
 });
+
 const initializeFirebaseClient = (isAvailable: boolean, missingEnvVars: string[]): FirebaseClientState => {
   if (!isAvailable) {
     if (import.meta.env.DEV || import.meta.env.MODE === "test") {
@@ -101,15 +134,13 @@ const initializeFirebaseClient = (isAvailable: boolean, missingEnvVars: string[]
   };
 };
 
+
+
 const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
-const isFirebaseClientAvailable = missingFirebaseEnvVars.length === 0;
+
 const firebaseClientState = initializeFirebaseClient(isFirebaseClientAvailable, missingFirebaseEnvVars);
-const firebaseApp = firebaseClientState.app;
-const auth = firebaseClientState.auth as Auth;
-const storage = firebaseClientState.storage as FirebaseStorage;
-const functionsClient = firebaseClientState.functionsClient as Functions;
-const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
-const db: Firestore | null = firebaseClientState.firestoreDb;
+
+
 
 const requireFirebaseClient = (): FirebaseClientState => {
   if (isFirebaseClientAvailable && firebaseClientState.app) {
@@ -120,6 +151,7 @@ const requireFirebaseClient = (): FirebaseClientState => {
     `[Firebase] Firebase クライアントを利用できません。不足している環境変数: ${missingFirebaseEnvVars.join(", ")}`,
   );
 };
+
 const requireFirestoreDb = (): Firestore => {
   if (firestoreDb) {
     return firestoreDb;
@@ -135,6 +167,7 @@ const requireFirestoreDb = (): Firestore => {
     "[Firebase] Firestore の初期化に失敗しました。Firestore 依存の処理を続行できません。",
   );
 };
+
 const debugFirebase = (): void => {
   console.log("=== Firebase デバッグ情報 ===");
 
@@ -161,8 +194,11 @@ const debugFirebase = (): void => {
 
   console.log("=============================");
 };
+
 if (import.meta.env.DEV) {
   debugFirebase();
 }
+
+
 
 export { missingFirebaseEnvVars, isFirebaseClientAvailable, firebaseApp, auth, storage, functionsClient, firestoreDb, db, requireFirebaseClient, requireFirestoreDb };

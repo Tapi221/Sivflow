@@ -2,6 +2,8 @@ import * as React from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+
+
 type UploadedFile<T = unknown> = {
   appUrl?: string;
   key: string;
@@ -30,9 +32,13 @@ type UseUploadFileProps = Omit<LocalUploadFilesOptions, "files"> & {
   onUploadError?: (error: unknown) => void;
 };
 
+
+
 const UNKNOWN_ERROR_MESSAGE = "Something went wrong, please try again later.";
 const LOCAL_UPLOAD_PROGRESS_STEPS = [20, 40, 60, 80, 100];
 const LOCAL_UPLOAD_PROGRESS_INTERVAL_MS = 50;
+
+
 
 const wait = (milliseconds: number) => new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
 const createLocalUploadKey = (file: File) => {
@@ -118,5 +124,9 @@ const showErrorToast = (err: unknown) => {
   return toast.error(errorMessage);
 };
 
+
+
 export { uploadFiles, useUploadThing, useUploadFile, getErrorMessage, showErrorToast };
+
+
 export type { UploadedFile };
