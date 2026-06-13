@@ -1,7 +1,7 @@
 import { createCheckDataIntegrityUseCase } from "@/application/integrity/CheckDataIntegrity";
 import { createHardDeleteOrphanedCardsUseCase } from "@/application/integrity/HardDeleteOrphanedCards";
 import { createQuarantineOrphanedCardsUseCase } from "@/application/integrity/QuarantineOrphanedCards";
-import type { IntegrityReport } from "@/services/dataIntegrity.types";
+import type { IntegrityReport } from "./dataIntegrity.types";
 
 const checkDataIntegrityUseCase = createCheckDataIntegrityUseCase();
 const quarantineOrphanedCardsUseCase = createQuarantineOrphanedCardsUseCase();

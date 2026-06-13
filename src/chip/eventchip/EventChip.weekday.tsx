@@ -1,10 +1,10 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { format } from "date-fns";
 import type { CSSProperties } from "react";
-import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 import { HoverEventTooltip } from "@/chip/toolchip/HoverEventTooltip";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+import { eventChipDesign } from "./eventChipDesign.generated";
 
 type CalendarEventChipWeekdayProps = {
   event: GoogleCalendarEvent;

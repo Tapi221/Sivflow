@@ -97,4 +97,5 @@ const getRuledStyle = (params: RuledParams) => {
 };
 
 export { getPageRuledBg, getRuledStyle };
+
 export type { RuledParams, RuledStyleKind };

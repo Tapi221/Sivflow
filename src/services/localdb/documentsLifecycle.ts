@@ -1,6 +1,6 @@
 import { removeDocumentBlobUrl } from "@/services/documentBlobUrlSessionCache";
 import { deleteDocumentBlob } from "@/services/documentFileStore";
-import { safeRevokeBlobUrl } from "@/services/localdb/blobUrl";
+import { safeRevokeBlobUrl } from "./blobUrl";
 
 type DocumentRecord = {
   id?: string;
@@ -166,4 +166,5 @@ const cleanupBeforeDocumentSoftDelete = async (db: DocDbCtx, id: string) => {
 };
 
 export { cleanupBeforeDocumentUpdate, cleanupBeforeDocumentDelete, cleanupBeforeDocumentSoftDelete };
+
 export type { DocDbCtx };

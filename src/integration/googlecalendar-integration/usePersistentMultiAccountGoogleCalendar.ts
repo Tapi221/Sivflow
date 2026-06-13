@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { useMultiAccountGoogleCalendar } from "@/integration/googlecalendar-integration/useMultiAccountGoogleCalendar";
+import type { GoogleCalendarEvent } from "./gcalSync.types";
+import { useMultiAccountGoogleCalendar } from "./useMultiAccountGoogleCalendar";
 
 type CachedGoogleCalendarEvent = Omit<GoogleCalendarEvent, "startsAt" | "endsAt"> & {
   startsAt: string;

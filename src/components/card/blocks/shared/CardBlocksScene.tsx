@@ -1,9 +1,9 @@
 import React from "react";
 import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
 import { BlockList } from "@/components/card/blocks/core/BlockList";
-import type { EditorProps, ViewerProps } from "@/components/card/blocks/shared/CardBlockLayoutRenderer";
-import { CardBlockLayoutRenderer } from "@/components/card/blocks/shared/CardBlockLayoutRenderer";
 import type { CardBlock } from "@/types/domain/card";
+import type { EditorProps, ViewerProps } from "./CardBlockLayoutRenderer";
+import { CardBlockLayoutRenderer } from "./CardBlockLayoutRenderer";
 
 type RowContainerProps = Readonly<Record<string, unknown>>;
 type GetRowRef = (
@@ -66,4 +66,5 @@ const CardBlocksScene = React.memo(CardBlocksSceneInner);
 CardBlocksScene.displayName = "CardBlocksScene";
 
 export { CardBlocksScene };
+
 export type { CardBlocksSceneProps, CardBlocksSceneResolvedProps };

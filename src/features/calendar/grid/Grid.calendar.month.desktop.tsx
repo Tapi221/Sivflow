@@ -9,13 +9,13 @@ import { CalendarDayNumberCircle } from "@/chip/icons/CalendarDayNumberCircle";
 import { WEEKDAY_LABELS } from "@/features/calendar/calendar.text";
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
 import { rotateCalendarWeekdayLabels } from "@/features/calendar/calendarWeekStart";
-import type { CalendarEventDragPointerSnapshot } from "@/features/calendar/grid/calendarEventDrag.shared";
-import { areSameCalendarEventTimes, CALENDAR_EVENT_DRAGGING_STYLE, createCalendarEventDragPointerSnapshot, createCalendarEventDragPreview, createCalendarEventKey, getCalendarEventDateOrNull, isCalendarEventDraggable, isSameCalendarEventMove, useCalendarEventDragAutoScroll, useCalendarEventDragBodyStyle } from "@/features/calendar/grid/calendarEventDrag.shared";
-import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
-import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";
 import type { CalendarEventMoveHandler } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
+import type { CalendarEventDragPointerSnapshot } from "./calendarEventDrag.shared";
+import { areSameCalendarEventTimes, CALENDAR_EVENT_DRAGGING_STYLE, createCalendarEventDragPointerSnapshot, createCalendarEventDragPreview, createCalendarEventKey, getCalendarEventDateOrNull, isCalendarEventDraggable, isSameCalendarEventMove, useCalendarEventDragAutoScroll, useCalendarEventDragBodyStyle } from "./calendarEventDrag.shared";
+import * as COLOR from "./grid.color.constants.desktop";
+import * as GD from "./grid.layout.constants.desktop";
 
 type CalendarMonthGridDay = {
   date: Date; key: string; dayOfMonth: number; isCurrentMonth: boolean; };

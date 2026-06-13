@@ -1,9 +1,9 @@
 import type { JsonFileExportPort } from "@/application/ports/JsonFileExportPort";
-import { createCreateSnapshotUseCase } from "@/application/snapshot/CreateSnapshot";
 import { buildCardSetById, filterCardsByFolderId } from "@/domain/card/selectors/cardFolder";
 import { localGenerationCounterStore } from "@/infrastructure/browser-storage/LocalGenerationCounterStore";
 import type { Card } from "@/types";
 import type { AppSnapshot } from "@/types/domain/snapshot";
+import { createCreateSnapshotUseCase } from "./CreateSnapshot";
 
 interface ExportFolderSnapshotDependencies {
   fileExporter: JsonFileExportPort;
@@ -118,4 +118,5 @@ const createExportFolderSnapshotUseCase = ({ fileExporter }: ExportFolderSnapsho
 };
 
 export { createExportFolderSnapshotUseCase };
+
 export type { ExportFolderSnapshotDependencies };

@@ -21,4 +21,5 @@ const CardOverlayTopRight = ({ children }: CardOverlayTopRightProps) => {
 };
 
 export { CardOverlayTopRight };
+
 export type { CardOverlayTopRightProps };

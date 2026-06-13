@@ -1,17 +1,28 @@
 "use client";
 
 import * as React from "react";
+
 import { acceptSuggestion, rejectSuggestion } from "@platejs/suggestion";
+
 import { SuggestionPlugin } from "@platejs/suggestion/react";
+
 import { CheckIcon, XIcon } from "lucide-react";
+
 import { useEditorPlugin, usePluginOption } from "platejs/react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/chip/ui/avatar";
+
 import { Button } from "@/chip/ui/button/button";
-import { Comment, CommentCreateForm, formatCommentDate } from "@/chip/ui/plate/comment";
+
 import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
+
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
+
 import type { ResolvedSuggestion } from "@/lib/block-discussion-index";
+
 import { BLOCK_SUGGESTION_TOKEN } from "@/lib/block-discussion-index";
+
+import { Comment, CommentCreateForm, formatCommentDate } from "./comment";
 
 const isResolvedSuggestion = (suggestion: ResolvedSuggestion | TDiscussion): suggestion is ResolvedSuggestion => "suggestionId" in suggestion;
 

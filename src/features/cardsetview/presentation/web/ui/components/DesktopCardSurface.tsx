@@ -2,12 +2,12 @@ import React from "react";
 import { useFlashcardDualDerived } from "@/components/card/frame/useFlashcardDualDerived";
 import { layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
-import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
-import { DesktopEmbeddedCardEditorSurface } from "@/features/cardsetview/presentation/web/ui/components/DesktopEmbeddedCardEditorSurface";
-import { PreparedViewCardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/PreparedViewCardFaceScene";
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
+import { CardSurfaceLayout } from "./CardSurfaceLayout";
+import { buildCardSurfaceMetrics } from "./cardSurfacePresentation";
+import { DesktopEmbeddedCardEditorSurface } from "./DesktopEmbeddedCardEditorSurface";
+import { PreparedViewCardFaceScene } from "./PreparedViewCardFaceScene";
 
 interface DesktopCardSurfaceProps {
   card: Card;
@@ -243,4 +243,5 @@ const DesktopCardSurface = React.memo(
 DesktopCardSurface.displayName = "DesktopCardSurface";
 
 export { DesktopCardSurface };
+
 export type { DesktopCardSurfaceProps };

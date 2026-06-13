@@ -9,8 +9,8 @@ import { useWorkspaceTabDnd } from "@/features/dnd/tab/useWorkspaceTabDnd";
 import { WorkspaceTabDndItem, WorkspaceTabDndList } from "@/features/dnd/tab/WorkspaceTabDnd";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import type { WorkspaceSidebarSection, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 import { FileText, Layers, X } from "@/ui/icons";
+import type { WorkspaceSidebarSection, WorkspaceTab } from "./Tab";
 
 type TabsBarVariant = "workspace" | "titlebar";
 type TabsBarProps = {

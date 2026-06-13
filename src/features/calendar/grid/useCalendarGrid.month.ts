@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { toDateKey } from "@/features/calendar/grid/calendarKey";
+import { toDateKey } from "./calendarKey";
 
 type CalendarMonthGridDay = {
   date: Date;
@@ -61,4 +61,5 @@ const useCalendarGrid = ({ monthWeeks, selectedKey, todayKey }: Params): Calenda
 };
 
 export { useCalendarGrid };
+
 export type { CalendarDayModel, CalendarWeekModel, CalendarGridModel };

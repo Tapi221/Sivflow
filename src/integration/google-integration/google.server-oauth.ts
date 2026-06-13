@@ -1,8 +1,8 @@
 import { httpsCallable } from "firebase/functions";
 import { auth, functionsClient } from "@/infrastructure/firebase/client";
-import type { GoogleCalendarAccess } from "@/integration/google-integration/google.oauth";
-import { consumeGoogleCalendarServerCodeVerifier } from "@/integration/google-integration/google.oauth";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
+import type { GoogleCalendarAccess } from "./google.oauth";
+import { consumeGoogleCalendarServerCodeVerifier } from "./google.oauth";
 
 type GoogleOAuthReconnectDiagnosis = {
   cause: string; reconnectRequired: boolean; action: string; };
@@ -191,4 +191,5 @@ const disconnectServerStoredGoogleCalendarAccount = async (input: DisconnectGoog
 };
 
 export { readGoogleOAuthCallableErrorDetails, getGoogleOAuthCallableErrorReason, diagnoseGoogleOAuthReconnectCause, isGoogleOAuthDeterministicErrorReason, toUserTransparentAutoRecoveryError, isServerStoredGoogleOAuthEnabled, exchangeGoogleCalendarCode, exchangeGoogleConnectedServiceCode, getServerStoredGoogleCalendarAccessToken, getServerStoredGoogleConnectedServiceAccessToken, disconnectServerStoredGoogleCalendarAccount };
+
 export type { GoogleOAuthCallableErrorReason };

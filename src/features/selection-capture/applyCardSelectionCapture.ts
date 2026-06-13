@@ -1,5 +1,5 @@
-import { createSelectionCaptureImageAsset } from "@/features/selection-capture/createSelectionCaptureImageAsset";
 import type { CardBlock } from "@/types";
+import { createSelectionCaptureImageAsset } from "./createSelectionCaptureImageAsset";
 
 type ApplyCardSelectionCaptureSide = "question" | "answer";
 type CapturedCardImage = Awaited<ReturnType<typeof createSelectionCaptureImageAsset>>;
@@ -63,4 +63,5 @@ const appendSelectionCaptureBlocks = ({ blocks, side, image, ocrText }: { blocks
 };
 
 export { normalizeSelectionCaptureOcrText, appendSelectionCaptureBlocks };
+
 export type { ApplyCardSelectionCaptureSide, CapturedCardImage };

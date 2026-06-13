@@ -4,7 +4,7 @@ import type { UIMessage } from "ai";
 import dedent from "dedent";
 import type { SlateEditor } from "platejs";
 import { KEYS, RangeApi } from "platejs";
-import type { ChatMessage } from "@/app/api/ai/command/types";
+import type { ChatMessage } from "./types";
 
 type StructuredPromptSections = {
   context?: string;
@@ -176,4 +176,5 @@ const isSingleCellSelection = (editor: SlateEditor): boolean => {
 };
 
 export { tag, inlineTag, sections, list, buildStructuredPrompt, getTextFromMessage, formatTextFromMessages, getLastUserInstruction, addSelection, isMultiBlocks, getMarkdownWithSelection, isSelectionInTable, isSingleCellSelection };
+
 export type { StructuredPromptSections };

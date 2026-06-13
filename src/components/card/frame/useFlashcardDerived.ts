@@ -1,9 +1,9 @@
 import React from "react";
-import type { FlashcardCardLike, FlashcardDerived, FlashcardMediaLike } from "@/components/card/frame/flashcard.types";
-import { resolveSideBlocks } from "@/components/card/frame/flashcardBlocks";
-import { resolveAnswerAttachmentAudios, resolveAnswerAttachmentImages, resolveAnswerAttachmentReferences, resolveAnswerAudios, resolveAnswerCode, resolveAnswerText, resolveAudioUrls, resolveCardId, resolveHasUncertainty, resolveImageUrls, resolveIsBookmarked, resolveLayoutRows, resolveQuestionAttachmentAudios, resolveQuestionAttachmentImages, resolveQuestionAttachmentReferences, resolveQuestionAudios, resolveQuestionCode, resolveQuestionText } from "@/components/card/frame/flashcardDerived";
 import { resolveInkDocument } from "@/components/ink/inkStorage";
 import type { CardBlock } from "@/types/domain/card";
+import type { FlashcardCardLike, FlashcardDerived, FlashcardMediaLike } from "./flashcard.types";
+import { resolveSideBlocks } from "./flashcardBlocks";
+import { resolveAnswerAttachmentAudios, resolveAnswerAttachmentImages, resolveAnswerAttachmentReferences, resolveAnswerAudios, resolveAnswerCode, resolveAnswerText, resolveAudioUrls, resolveCardId, resolveHasUncertainty, resolveImageUrls, resolveIsBookmarked, resolveLayoutRows, resolveQuestionAttachmentAudios, resolveQuestionAttachmentImages, resolveQuestionAttachmentReferences, resolveQuestionAudios, resolveQuestionCode, resolveQuestionText } from "./flashcardDerived";
 
 const EMPTY_MEDIA_ITEMS: FlashcardMediaLike[] = [];
 const EMPTY_IMAGE_URLS: string[] = [];

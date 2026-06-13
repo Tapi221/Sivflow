@@ -1,7 +1,7 @@
 import { addDays, startOfDay } from "date-fns";
-import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 import { compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+import { eventChipDesign } from "./eventChipDesign.generated";
 
 type CalendarMonthDayEvents = {
   visibleEvents: GoogleCalendarEvent[];
@@ -259,4 +259,5 @@ const computeMonthEventsByDay = ({ visibleEvents, eventIndex, monthWeeks, monthR
 };
 
 export { EMPTY_MONTH_DAY_EVENTS, createMonthEventIndex, getVisibleMonthEventChipCount, computeMonthEventsByDay };
+
 export type { CalendarMonthDayEvents, CalendarMonthPlacementDay, CalendarMonthPlacementWeek, CalendarMonthEventIndex };

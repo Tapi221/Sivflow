@@ -1,4 +1,4 @@
-import type { CalendarProvider, ProjectCalendarLink, ProjectCalendarSyncDirection } from "@/features/calendar/scheduleScreen.types";
+import type { CalendarProvider, ProjectCalendarLink, ProjectCalendarSyncDirection } from "./scheduleScreen.types";
 
 type CreateProjectCalendarLinkInput = {
   projectId: string;
@@ -122,4 +122,5 @@ const persistProjectCalendarLinks = (links: ProjectCalendarLink[]) => {
 };
 
 export { PROJECT_CALENDAR_LINKS_STORAGE_KEY, buildProjectCalendarLinkId, createProjectCalendarLink, readStoredProjectCalendarLinks, persistProjectCalendarLinks };
+
 export type { CreateProjectCalendarLinkInput };

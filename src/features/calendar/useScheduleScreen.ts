@@ -1,18 +1,18 @@
 import { useCallback, useMemo, useState } from "react";
 import type { RefObject, UIEvent } from "react";
-import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
-import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { useCalendarLayout } from "@/features/calendar/layout/useCalendarLayout.desktop";
-import type { CalendarGridStyle, CalendarViewMode, CalendarViewModeSelection, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
-import { useCalendarNavigation } from "@/features/calendar/useCalendarNavigation";
-import { useCalendarVisibleRange } from "@/features/calendar/useCalendarVisibleRange";
-import { useCalendarWeekStartSetting } from "@/features/calendar/useCalendarWeekStartSetting";
-import { useGoogleCalendarLayer } from "@/features/calendar/useGoogleCalendarLayer";
 import { useCalendarScrollController } from "@/features/scroll/schedule/hooks/useCalendarScrollController";
 import { createInitialMonthVisibleWeekRange } from "@/features/scroll/schedule/useInfiniteScroll.month.desktop";
 import type { GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritableEventUpdateInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { useCalendarEventSync } from "@/sync/googlecalendar-sync/useCalendarEventSync";
+import type { CalendarWeekStartDay } from "./calendar.types";
+import type { CalendarDateRange } from "./calendarRange.types";
+import type { CalendarGridStyle, CalendarViewMode, CalendarViewModeSelection, GoogleAccountDisplay } from "./scheduleScreen.types";
+import { useCalendarNavigation } from "./useCalendarNavigation";
+import { useCalendarVisibleRange } from "./useCalendarVisibleRange";
+import { useCalendarWeekStartSetting } from "./useCalendarWeekStartSetting";
+import { useGoogleCalendarLayer } from "./useGoogleCalendarLayer";
 
 type UseScheduleScreenOptions = {
   allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay; };
@@ -249,4 +249,5 @@ const useScheduleScreen = ({ allowMultiSelectViewMode = true, weekStartDay }: Us
 };
 
 export { useScheduleScreen };
+
 export type { UseScheduleScreenReturn };

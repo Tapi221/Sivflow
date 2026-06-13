@@ -53,7 +53,7 @@ const resetStartupTasks = async (): Promise<void> => {
 };
 const runStartupTasks = async ({ userId, isDisposed = isDisposedDefault }: RunStartupTasksParams): Promise<void> => {
   try {
-    const { migrateLegacyImagesToAssets } = await import("@/application/startup/MigrateLegacyImagesToAssets");
+    const { migrateLegacyImagesToAssets } = await import("./MigrateLegacyImagesToAssets");
 
     const migrationSummary = await migrateLegacyImagesToAssets({ userId });
 
@@ -102,4 +102,5 @@ const runStartupTasks = async ({ userId, isDisposed = isDisposedDefault }: RunSt
 };
 
 export { resetStartupTasks, runStartupTasks };
+
 export type { RunStartupTasksParams };

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { toDateKey } from "@/features/calendar/grid/calendarKey";
+import { toDateKey } from "./calendarKey";
 
 type CalendarSelection = {
   selectedKey: string;
@@ -13,4 +13,5 @@ const useCalendarSelection = (selectedDate: Date, today: Date): CalendarSelectio
 };
 
 export { useCalendarSelection };
+
 export type { CalendarSelection };

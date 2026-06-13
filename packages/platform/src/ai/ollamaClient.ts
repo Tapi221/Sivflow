@@ -1,4 +1,4 @@
-import { getLocalAiSettings } from "@platform/ai/localAiSettings";
+import { getLocalAiSettings } from "./localAiSettings";
 
 type GenerateOllamaAnswerInput = {
   question: string;
@@ -129,4 +129,5 @@ const testOllamaConnection = async (): Promise<TestOllamaConnectionResult> => {
 };
 
 export { generateOllamaAnswer, testOllamaConnection };
+
 export type { GenerateOllamaAnswerInput, GenerateOllamaAnswerResult, TestOllamaConnectionResult };

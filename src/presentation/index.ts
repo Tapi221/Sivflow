@@ -1,3 +1,3 @@
 
 
-export { designTokens, reactThemeContract } from "@/presentation/design-tokens";
+export { designTokens, reactThemeContract } from "./design-tokens";

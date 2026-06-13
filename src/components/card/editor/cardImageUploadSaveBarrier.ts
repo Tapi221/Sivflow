@@ -1,8 +1,8 @@
-import type { EditorDraft } from "@/components/card/editor/cardEditorUtils";
 import { getLocalDb } from "@/services/localdb";
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
 import type { UploadedImage } from "@/types/domain/assets";
 import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
+import type { EditorDraft } from "./cardEditorUtils";
 
 type LocalImageRecordLike = {
   remoteStatus?: "none" | "uploading" | "ready" | "failed" | null;

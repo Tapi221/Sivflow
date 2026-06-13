@@ -2,7 +2,6 @@ import { normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
 import { normalizeUploadedImages } from "@/domain/assets/uploadedImageNormalizer";
 import { isGridOffsetType } from "@/domain/card/blockOffset";
 import { LEGACY_BASE_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from "@/domain/card/extraRows";
-import { normalizeReviewLogs } from "@/domain/card/normalizers/reviewLogs";
 import { normalizeMemoryStability } from "@/domain/card/review/stability";
 import { normalizeDate } from "@/shared/codec/date";
 import { toArrayOr, toBoolOr, toFiniteNumber, toStringOr } from "@/shared/codec/primitives";
@@ -12,6 +11,7 @@ import { asRecord, pick } from "@/shared/lib/records";
 import type { UploadedPdf } from "@/types/domain/assets";
 import type { SubjectiveScoreValue } from "@/types/domain/base";
 import type { Card, CardBlock } from "@/types/domain/card";
+import { normalizeReviewLogs } from "./reviewLogs";
 
 type GridBlockType = Parameters<typeof isGridOffsetType>[0];
 

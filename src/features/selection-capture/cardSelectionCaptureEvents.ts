@@ -1,4 +1,4 @@
-import type { SelectionCaptureArea, SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
+import type { SelectionCaptureArea, SelectionCaptureRect } from "./selectionCapture.types";
 
 type CardSelectionCaptureSide = "question" | "answer";
 type CardSelectionCaptureTaskResult = string | void;
@@ -47,4 +47,5 @@ const dispatchCardSelectionCaptureEvent = (payload: CardSelectionCaptureEventPay
 };
 
 export { CARD_SELECTION_CAPTURE_EVENT, dispatchCardSelectionCaptureEvent };
+
 export type { CardSelectionCaptureSide, CardSelectionCaptureTaskResult, CardSelectionCaptureEventPayload, CardSelectionCaptureEventDetail, DispatchedCardSelectionCaptureEvent };

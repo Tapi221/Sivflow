@@ -2,8 +2,8 @@ import { getLinkAttributes } from "@platejs/link";
 import type { TLinkElement } from "platejs";
 import type { SlateElementProps } from "platejs/static";
 import { SlateElement } from "platejs/static";
-import { inlineSuggestionVariants } from "@/chip/ui/plate/suggestion";
 import { cn } from "@/lib/utils";
+import { inlineSuggestionVariants } from "./suggestion";
 
 const LINK_ELEMENT_CLASS_NAME = "font-medium text-inherit underline decoration-current underline-offset-4";
 

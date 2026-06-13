@@ -11,8 +11,8 @@ import { getTagColorStyle } from "@/chip/tag/tag.style";
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
 import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
-import { useCalendarTimetable } from "@/features/calendar/timetable/useCalendarTimetable";
 import { cn } from "@/lib/utils";
+import { useCalendarTimetable } from "./useCalendarTimetable";
 
 type TimetableSlot = {
   dayIndex: CalendarTimetableWeekdayIndex;

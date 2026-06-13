@@ -93,4 +93,5 @@ const resolveRouteTabBySection = (sectionKey: WorkspaceRouteSection): WorkspaceR
 };
 
 export { WORKSPACE_DEFAULT_EXPLORER_TAB_ID, WORKSPACE_ROUTE_TABS, createDefaultExplorerRouteState, resolveRouteTabBySection };
+
 export type { WorkspaceSidebarSection, WorkspaceRouteSection, WorkspaceRouteTabId, WorkspaceTabKind, WorkspaceRouteTab, WorkspaceExplorerTab, WorkspaceDocumentTab, WorkspaceCardTab, WorkspaceNoteTab, WorkspaceTab, WorkspaceEntityTab };

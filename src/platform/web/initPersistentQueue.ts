@@ -1,5 +1,5 @@
-import { bindPersistentQueueAutoProcessing } from "@/platform/web/bindPersistentQueueAutoProcessing";
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
+import { bindPersistentQueueAutoProcessing } from "./bindPersistentQueueAutoProcessing";
 
 const initPersistentQueue = (): void => {
   bindPersistentQueueAutoProcessing(persistentQueue);

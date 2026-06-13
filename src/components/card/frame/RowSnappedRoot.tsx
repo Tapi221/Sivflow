@@ -1,6 +1,6 @@
 import React from "react";
-import { RowSnap } from "@/components/card/frame/RowSnap";
 import type { CssVars } from "@/types/style";
+import { RowSnap } from "./RowSnap";
 
 type RowSnappedRootProps = {
   rowPx: number;

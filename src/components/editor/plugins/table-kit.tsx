@@ -1,6 +1,7 @@
 "use client";
 
 import { TableCellHeaderPlugin, TableCellPlugin, TablePlugin, TableRowPlugin } from "@platejs/table/react";
+
 import { TableCellElement, TableCellHeaderElement, TableElement, TableRowElement } from "@/chip/ui/plate/table-node";
 
 const TableKit = [

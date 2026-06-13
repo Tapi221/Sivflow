@@ -80,4 +80,5 @@ const CardSetContextMenu = memo(CardSetContextMenuBase);
 CardSetContextMenu.displayName = "CardSetContextMenu";
 
 export { CardSetContextMenu, CARD_SET_CONTEXT_MENU_PANEL_ID, CARD_SET_CONTEXT_MENU_WIDTH, CARD_SET_CONTEXT_MENU_HEIGHT, CARD_SET_CONTEXT_MENU_MARGIN };
+
 export type { CardSetContextMenuActionId, CardSetContextMenuAction };

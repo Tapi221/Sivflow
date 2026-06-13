@@ -1,11 +1,11 @@
 import { DESKTOP_GOOGLE_OAUTH_REDIRECT_URI } from "@platform/auth/google/desktopOAuth.constants";
 import type { Auth } from "firebase/auth";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import type { GoogleOAuthCallbackPayload } from "@/integration/google-integration/google.oauth-callback";
-import { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, isGoogleOAuthCallbackPayload } from "@/integration/google-integration/google.oauth-callback";
 import { readEmail } from "@/integration/googlecalendar-integration/gcal.storage";
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
+import type { GoogleOAuthCallbackPayload } from "./google.oauth-callback";
+import { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, isGoogleOAuthCallbackPayload } from "./google.oauth-callback";
 
 type GoogleCalendarAccess = {
   accessToken: string;
@@ -371,4 +371,5 @@ const refreshCalendarAccessToken = async ({ refreshToken }: { refreshToken: stri
 };
 
 export { GOOGLE_CONNECTED_SERVICE_SCOPES, consumeGoogleCalendarServerCodeVerifier, consumeGoogleCalendarServerCodeVerifier as consumeGoogleConnectedServiceServerCodeVerifier, requestGoogleSignInServerCode, requestGoogleCalendarServerCode, requestCalendarAccessToken, requestCalendarAccessToken as requestConnectedServiceAccessToken, refreshCalendarAccessToken, refreshCalendarAccessToken as refreshConnectedServiceAccessToken };
+
 export type { GoogleCalendarAccess, GoogleConnectedServiceAccess };

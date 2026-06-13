@@ -6,8 +6,8 @@ import { DiffEngine } from "@/services/logic/DiffEngine";
 import { NetworkMonitor } from "@/services/logic/NetworkMonitor";
 import { QueueManager } from "@/services/logic/QueueManager";
 import { TelemetryService } from "@/services/logic/TelemetryService";
-import { SyncServiceV2 } from "@/services/SyncServiceV2";
 import type { SyncContextSource } from "@/types/domain/telemetry";
+import { SyncServiceV2 } from "./SyncServiceV2";
 
 type SyncServiceInternals = {
   cloudAdapter: ICloudSyncAdapter;

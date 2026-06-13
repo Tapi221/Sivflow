@@ -1,6 +1,6 @@
 import type { JsonFileExportPort } from "@/application/ports/JsonFileExportPort";
-import { createCreateSnapshotUseCase } from "@/application/snapshot/CreateSnapshot";
 import { localGenerationCounterStore } from "@/infrastructure/browser-storage/LocalGenerationCounterStore";
+import { createCreateSnapshotUseCase } from "./CreateSnapshot";
 
 interface ExportSnapshotDependencies {
   fileExporter: JsonFileExportPort;
@@ -30,4 +30,5 @@ const createExportSnapshotUseCase = ({ fileExporter }: ExportSnapshotDependencie
 };
 
 export { createExportSnapshotUseCase };
+
 export type { ExportSnapshotDependencies };

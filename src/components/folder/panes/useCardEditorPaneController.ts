@@ -4,7 +4,6 @@ import { useCardEditorSession } from "@/components/card/editor/useCardEditorSess
 import { useCardEditorTags } from "@/components/card/editor/useCardEditorTags";
 import { useLayoutRowsController } from "@/components/card/editor/useLayoutRowsController";
 import { useCards } from "@/components/card/hooks/useCards";
-import { applyEditingDraftPatch, buildCardsById, createMetaPanelActions, resolveSelectedCardSnapshot } from "@/components/folder/panes/cardEditorPaneControllerCore";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useToast } from "@/contexts/ToastContext";
 import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
@@ -17,6 +16,7 @@ import { CARD_SELECTION_CAPTURE_EVENT } from "@/features/selection-capture/cardS
 import { createSelectionCaptureImageAsset } from "@/features/selection-capture/createSelectionCaptureImageAsset";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { Card, CardPatch, UserSettings } from "@/types";
+import { applyEditingDraftPatch, buildCardsById, createMetaPanelActions, resolveSelectedCardSnapshot } from "./cardEditorPaneControllerCore";
 
 type UseCardsResult = {
   cards: Card[];

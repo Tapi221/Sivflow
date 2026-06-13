@@ -3,8 +3,8 @@ import { RadicalIcon } from "lucide-react";
 import type { TEquationElement } from "platejs";
 import type { SlateElementProps } from "platejs/static";
 import { SlateElement } from "platejs/static";
-import { inlineSuggestionVariants } from "@/chip/ui/plate/suggestion";
 import { cn } from "@/lib/utils";
+import { inlineSuggestionVariants } from "./suggestion";
 
 const EQUATION_RENDER_OPTIONS = {
   displayMode: true,

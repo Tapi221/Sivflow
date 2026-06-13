@@ -1,5 +1,5 @@
-import * as C from "@/features/calendar/calendar.constants.desktop";
-import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/calendar/scheduleScreen.types";
+import * as C from "./calendar.constants.desktop";
+import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScreen.types";
 
 type StoredScheduleNavigationState = {
   currentDate?: unknown;
@@ -136,4 +136,5 @@ const persistScheduleMonthVisibleEventCount = (monthVisibleEventCount: number) =
 };
 
 export { SCHEDULE_NAVIGATION_STORAGE_KEY, normalizeScheduleMonthVisibleEventCount, readStoredScheduleNavigationState, readStoredScheduleCalendarScrollTop, readStoredScheduleMonthVisibleEventCount, persistScheduleNavigationState, persistScheduleCalendarScrollTop, persistScheduleMonthVisibleEventCount };
+
 export type { ScheduleNavigationState };

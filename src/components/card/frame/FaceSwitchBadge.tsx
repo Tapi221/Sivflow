@@ -65,4 +65,5 @@ const FaceSwitchBadge = ({
 };
 
 export { FaceSwitchBadge };
+
 export type { FaceSwitchBadgeProps };

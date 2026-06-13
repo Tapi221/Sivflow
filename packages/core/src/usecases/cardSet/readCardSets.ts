@@ -80,4 +80,5 @@ const listCardSetsForFolder = async <TCardSet extends CardSetQueryEntity>({ user
 };
 
 export { listCardSetsForFolder };
+
 export type { CardSetQueryEntity, CardSetQueryRepository };

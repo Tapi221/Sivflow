@@ -13,4 +13,5 @@ const ParagraphNode = ({ className, children, ...props }: ParagraphNodeProps) =>
 const ParagraphElement = ParagraphNode;
 
 export { ParagraphElement, ParagraphNode };
+
 export type { ParagraphNodeProps };

@@ -12,10 +12,6 @@ import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { MetaPanelToggleIcon } from "@/components/card/shell/MetaPanelToggleIcon";
 import { useCardSyncStatusReporter } from "@/components/card/shell/useCardSyncStatusReporter";
-import { CardEditorPaneMediaDialogs } from "@/components/folder/panes/CardEditorPaneMediaDialogs";
-import { CardEditorPaneReadonlySurface } from "@/components/folder/panes/CardEditorPaneReadonlySurface";
-import { useCardEditorPaneController } from "@/components/folder/panes/useCardEditorPaneController";
-import { CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX, CARD_PANE_WIDTH_STEP_PX, useCardEditorPaneWidth } from "@/components/folder/panes/useCardEditorPaneWidth";
 import { CANONICAL_CARD_WIDTH, CARD_ROW_PX, layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
@@ -27,6 +23,10 @@ import type { Card, CardBlock, CardFaceAttachments } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { X } from "@/ui/icons";
 import { toMillisOrNull } from "@/utils/toMillis";
+import { CardEditorPaneMediaDialogs } from "./CardEditorPaneMediaDialogs";
+import { CardEditorPaneReadonlySurface } from "./CardEditorPaneReadonlySurface";
+import { useCardEditorPaneController } from "./useCardEditorPaneController";
+import { CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX, CARD_PANE_WIDTH_STEP_PX, useCardEditorPaneWidth } from "./useCardEditorPaneWidth";
 
 type CardEditorPaneSettings = {
   accentColor?: string;

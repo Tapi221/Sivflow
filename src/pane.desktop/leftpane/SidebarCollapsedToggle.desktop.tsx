@@ -1,4 +1,4 @@
-import "@/pane.desktop/leftpane/sidebar.desktop.css";
+import "./sidebar.desktop.css";
 import { memo } from "react";
 import { useT } from "@shared/i18n/useT";
 import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";

@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
+
 import { Toolbar } from "@/chip/ui/plate/toolbar";
+
 import { cn } from "@/lib/utils";
 
 const FixedToolbar = (props: React.ComponentProps<typeof Toolbar>) => {

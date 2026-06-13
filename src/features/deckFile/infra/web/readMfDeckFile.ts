@@ -1,6 +1,6 @@
 import type { MfDeckArchiveV1, MfDeckIssue } from "@/features/deckFile/domain/mfDeck.types";
 import { MF_DECK_FILE_EXTENSION, MfDeckValidationError } from "@/features/deckFile/domain/mfDeck.types";
-import { decodeMfDeckArchive, MF_DECK_MAX_FILE_BYTES } from "@/features/deckFile/infra/web/mfDeckZipCodec";
+import { decodeMfDeckArchive, MF_DECK_MAX_FILE_BYTES } from "./mfDeckZipCodec";
 
 type LoadMfDeckFileResult = {
   file: File;
@@ -79,4 +79,5 @@ const readMfDeckFile = async (file: File): Promise<LoadMfDeckFileResult> => {
 };
 
 export { buildMfDeckSuggestedCardSetName, readMfDeckFile };
+
 export type { LoadMfDeckFileResult };

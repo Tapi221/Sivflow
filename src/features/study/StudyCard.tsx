@@ -426,4 +426,5 @@ const StudyCardInner = ({
 };
 
 export default StudyCard;
+
 export type { StudyCardProps };

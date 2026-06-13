@@ -63,4 +63,5 @@ const setLocalAiSettings = (settings: LocalAiSettings): LocalAiSettings => {
 };
 
 export { getDefaultLocalAiSettings, getLocalAiSettings, setLocalAiSettings };
+
 export type { LocalAiProvider, LocalAiSettings };

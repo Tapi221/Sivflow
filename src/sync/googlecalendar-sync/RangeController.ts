@@ -1,4 +1,4 @@
-import type { GoogleCalendarSyncEngine } from "@/sync/googlecalendar-sync/GoogleCalendarSyncEngine";
+import type { GoogleCalendarSyncEngine } from "./GoogleCalendarSyncEngine";
 
 type Range = {
   start: Date;

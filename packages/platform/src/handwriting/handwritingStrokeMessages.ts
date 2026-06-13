@@ -1,6 +1,6 @@
 import type { InkDocument, InkSide, InkStroke } from "@core/domain/card/ink/inkDocument";
 import { INK_DOCUMENT_VERSION, normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
-import type { HandwritingStrokeDeltaMessage } from "@platform/handwriting/handwritingSession.types";
+import type { HandwritingStrokeDeltaMessage } from "./handwritingSession.types";
 
 type CreateHandwritingStrokeDeltaInput = {
   sessionId: string;
@@ -78,4 +78,5 @@ const applyHandwritingStrokeDelta = ({ document, message, expectedSessionId, exp
 };
 
 export { createHandwritingStrokeDeltaMessage, applyHandwritingStrokeDelta };
+
 export type { CreateHandwritingStrokeDeltaInput, ApplyHandwritingStrokeDeltaInput, ApplyHandwritingStrokeDeltaResult };

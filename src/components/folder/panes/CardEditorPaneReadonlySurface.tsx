@@ -119,4 +119,5 @@ const CardEditorPaneReadonlySurface = ({ card, isFlipped, onFlip, onToggleUncert
 };
 
 export { CardEditorPaneReadonlySurface };
+
 export type { CardEditorPaneReadonlySurfaceProps };

@@ -16,4 +16,5 @@ const MediaEmbedNodeStatic = ({ children, className, element, ...props }: MediaE
 const MediaEmbedElementStatic = MediaEmbedNodeStatic;
 
 export { MediaEmbedElementStatic, MediaEmbedNodeStatic };
+
 export type { MediaEmbedNodeStaticProps };

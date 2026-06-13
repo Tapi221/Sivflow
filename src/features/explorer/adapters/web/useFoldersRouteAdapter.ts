@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
-import { getLastSelectedFolderId, setLastSelectedFolderId } from "@/features/explorer/adapters/web/explorerStorage";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import { mapSearchParamsToExplorerRouteState } from "@/features/explorer/mappers/mapSearchParamsToExplorerRouteState";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
+import { getLastSelectedFolderId, setLastSelectedFolderId } from "./explorerStorage";
 
 type FoldersRouteAdapter = {
   routeKey: string;
@@ -97,5 +97,6 @@ const useFoldersRouteAdapter = (): FoldersRouteAdapter => {
 };
 
 export { useFoldersRouteAdapter };
+
 export type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 export type { FoldersRouteAdapter };

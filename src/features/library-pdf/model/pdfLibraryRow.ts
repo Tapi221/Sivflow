@@ -162,4 +162,5 @@ const buildPdfDashboardRows = ({ documents, folders, tagById }: BuildPdfDashboar
 };
 
 export { buildPdfDashboardRows };
+
 export type { PdfDashboardRow };

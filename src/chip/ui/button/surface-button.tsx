@@ -47,4 +47,5 @@ const SurfaceButton = React.forwardRef<HTMLButtonElement, SurfaceButtonProps>(({
 SurfaceButton.displayName = "SurfaceButton";
 
 export { SurfaceButton };
+
 export type { SurfaceButtonProps };

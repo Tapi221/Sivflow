@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ComponentType, SVGProps } from "react";
 import * as stratisIcons from "stratis-ui-icons";
-import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
 import { CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS } from "@/components/card/frame/cardAction.constants";
 import { cn } from "@/lib/utils";
 import type { UploadedImage } from "@/types/domain/assets";
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardFaceAttachmentAudio, CardFaceAttachments } from "@/types/domain/card";
+import { sanitizeReferences } from "./cardEditorUtils";
 
 type Side = "question" | "answer";
 type UseCardMediaDialogsParams = {

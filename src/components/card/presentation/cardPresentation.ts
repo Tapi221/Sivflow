@@ -42,4 +42,5 @@ const buildCardChromeClassName = (state: CardPresentationState, options?: { hove
   );
 
 export { resolveCardPresentationState, buildCardShellClassName, buildCardChromeClassName };
+
 export type { CardPresentationContext, CardPresentationState, CardPresentationContextInput };

@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useReducer } from "react";
 import type { ExplorerBreadcrumbContext } from "@/features/explorer/contracts/explorerBreadcrumbContext";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
-import { explorerReducer } from "@/features/explorer/controller/explorerReducer";
-import { createInitialExplorerState } from "@/features/explorer/controller/explorerState";
 import type { SelectedExplorerItem } from "@/types";
+import { explorerReducer } from "./explorerReducer";
+import { createInitialExplorerState } from "./explorerState";
 
 type UseExplorerControllerParams = {
   initialRouteState: ExplorerRouteState;

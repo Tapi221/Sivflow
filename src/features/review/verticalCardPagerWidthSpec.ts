@@ -44,4 +44,5 @@ const buildVerticalCardPagerItemStyle = (widthSpec: VerticalCardPagerItemWidthSp
 };
 
 export { resolveVerticalCardPagerItemWidthSpec, buildVerticalCardPagerItemStyle };
+
 export type { VerticalCardPagerItemWidthSpec };

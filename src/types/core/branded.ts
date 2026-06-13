@@ -90,4 +90,5 @@ const revokeBlobUrl = (url: BlobUrl): void => {
 };
 
 export { isBlobUrl, isStorageUrl, isBase64DataUrl, createBlobUrl, createStorageUrl, createBase64DataUrl, revokeBlobUrl };
+
 export type { BlobUrl, StorageUrl, Base64DataUrl };

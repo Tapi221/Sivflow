@@ -2,9 +2,9 @@ import { useMemo } from "react";
 import type { GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import { useGoogleCalendarLayer } from "@/features/calendar/useGoogleCalendarLayer";
 import { useProjectCalendarActions } from "@/features/calendar/useProjectCalendarActions";
-import { CalendarSidebarContent } from "@/pane.desktop/leftpane/schedule/CalendarSidebar";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
+import { CalendarSidebarContent } from "./CalendarSidebar";
 
 type CalendarSidebarControllerProps = {
   onOpenSettings?: () => void;
