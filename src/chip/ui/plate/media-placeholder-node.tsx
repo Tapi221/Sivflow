@@ -1,26 +1,14 @@
 "use client";
-
 import * as React from "react";
-
 import { PlaceholderPlugin, PlaceholderProvider, updateUploadHistory } from "@platejs/media/react";
-
 import { AudioLines, FileUp, Film, ImageIcon, Loader2Icon } from "lucide-react";
-
 import type { TPlaceholderElement } from "platejs";
-
 import { KEYS } from "platejs";
-
 import type { PlateElementProps } from "platejs/react";
-
 import { PlateElement, useEditorPlugin, withHOC } from "platejs/react";
-
 import { useFilePicker } from "use-file-picker";
-
 import { useUploadFile } from "@/hooks/use-upload-file";
-
 import { cn } from "@/lib/utils";
-
-
 
 type ImageProgressProps = {
   file: File;
@@ -28,8 +16,6 @@ type ImageProgressProps = {
   imageRef?: React.RefObject<HTMLImageElement | null>;
   progress?: number;
 };
-
-
 
 const formatBytes = (
   bytes: number,
@@ -45,13 +31,10 @@ const formatBytes = (
   const index = Math.floor(Math.log(bytes) / Math.log(1024));
   return `${(bytes / 1024 ** index).toFixed(decimals)} ${
     sizeType === "accurate"
-      ? (accurateSizes[index] ?? "Bytest")
+      ? (accurateSizes[index] ?? "Bytes")
       : (sizes[index] ?? "Bytes")
   }`;
 };
-
-
-
 const CONTENT: Record<
   string,
   {
@@ -113,7 +96,6 @@ const ImageProgress = ({ className, file, imageRef, progress = 0 }: ImageProgres
     </div>
   );
 };
-
 const PlaceholderElement = withHOC(PlaceholderProvider, (props: PlateElementProps<TPlaceholderElement>) => {
   const { editor, element } = props;
   const { api } = useEditorPlugin(PlaceholderPlugin);
@@ -173,7 +155,7 @@ const PlaceholderElement = withHOC(PlaceholderProvider, (props: PlateElementProp
     <PlateElement className="my-1" {...props}>
       {(!loading || !isImage) && (
         <div
-          className={cn("flex cursor-pointer select-none items-center rounded-sm bg-muted p-3 pr-9 hover:bg-primary/10")}
+          className={cn("flex cursor-pointer select-none items-center rounded-sm bg-muted p-3 pr-9 hover:bg-muted/80")}
           onClick={() => !loading && openFilePicker()}
           contentEditable={false}
         >
@@ -206,7 +188,5 @@ const PlaceholderElement = withHOC(PlaceholderProvider, (props: PlateElementProp
     </PlateElement>
   );
 });
-
-
 
 export { PlaceholderElement, ImageProgress };
