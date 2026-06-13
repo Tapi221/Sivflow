@@ -29,6 +29,7 @@ const toolbarButtonVariants = cva(
 
 type ToolbarButtonProps = {
   pressed?: boolean;
+  tooltip?: React.ReactNode;
 } & React.ComponentPropsWithoutRef<typeof ToolbarPrimitive.Button> & VariantProps<typeof toolbarButtonVariants>;
 
 const Toolbar = ({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Root>) => {
@@ -43,7 +44,7 @@ const ToolbarLink = ({ className, ...props }: React.ComponentProps<typeof Toolba
 const ToolbarSeparator = ({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Separator>) => {
   return <ToolbarPrimitive.Separator className={cn("mx-2 my-1 w-px shrink-0 bg-border", className)} {...props} />;
 };
-const ToolbarButton = ({ className, size = "sm", variant, ...props }: ToolbarButtonProps) => {
+const ToolbarButton = ({ className, size = "sm", tooltip: _tooltip, variant, ...props }: ToolbarButtonProps) => {
   return <ToolbarPrimitive.Button className={cn(toolbarButtonVariants({ size, variant }), className)} {...props} />;
 };
 const ToolbarToggleItem = ({ className, size = "sm", variant, ...props }: React.ComponentProps<typeof ToolbarPrimitive.ToggleItem> & VariantProps<typeof toolbarButtonVariants>) => {
