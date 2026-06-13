@@ -3,7 +3,7 @@
 import * as React from "react";
 import { BoldIcon } from "lucide-react";
 import { KEYS } from "platejs";
-import { MarkToolbarButton } from "@/chip/ui/button/mark-toolbar-button";
+import { MarkToolbarButton } from "@/chip/ui/plate/mark-toolbar-button";
 import { ToolbarGroup } from "@/chip/ui/plate/toolbar";
 
 const FixedToolbarButtons = () => {

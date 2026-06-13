@@ -1,8 +1,8 @@
 "use client";
 
 import { createPlatePlugin } from "platejs/react";
-import { FloatingToolbarButtons } from "@/chip/ui/button/floating-toolbar-buttons";
-import { FloatingToolbar } from "@/chip/ui/toolbar/floating-toolbar";
+import { FloatingToolbarButtons } from "@/chip/ui/plate/floating-toolbar-buttons";
+import { FloatingToolbar } from "@/chip/ui/plate/floating-toolbar";
 
 const FloatingToolbarKit = [
   createPlatePlugin({
