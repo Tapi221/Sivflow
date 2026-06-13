@@ -77,19 +77,19 @@ const BlockSuggestionCard = ({
           <div className="flex flex-col gap-2">
             {suggestion.type === "remove"
               ? getRemoveSummaryItems(suggestion.text!).map((text, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <span className="text-muted-foreground text-sm">Delete:</span>
-                    <span className="text-sm">{text}</span>
-                  </div>
-                ))
+                <div key={index} className="flex items-center gap-2">
+                  <span className="text-muted-foreground text-sm">Delete:</span>
+                  <span className="text-sm">{text}</span>
+                </div>
+              ))
               : null}
             {suggestion.type === "insert"
               ? suggestionText2Array(suggestion.newText!).map((text, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <span className="text-muted-foreground text-sm">Add:</span>
-                    <span className="text-sm">{text ?? "line breaks"}</span>
-                  </div>
-                ))
+                <div key={index} className="flex items-center gap-2">
+                  <span className="text-muted-foreground text-sm">Add:</span>
+                  <span className="text-sm">{text ?? "line breaks"}</span>
+                </div>
+              ))
               : null}
             {suggestion.type === "replace" ? (
               <div className="flex flex-col gap-2">

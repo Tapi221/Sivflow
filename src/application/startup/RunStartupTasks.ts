@@ -4,15 +4,21 @@ import { localStorageBackupStore } from "@/infrastructure/browser-storage/LocalS
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
+
+
 interface RunStartupTasksParams {
   userId: string;
   isDisposed?: () => boolean;
 }
 
+
+
 const performAutoBackupUseCase = createPerformAutoBackupUseCase({
   backupStore: localStorageBackupStore,
 });
 const checkDataIntegrityUseCase = createCheckDataIntegrityUseCase();
+
+
 
 const isDisposedDefault = (): boolean => false;
 const logIntegrityReport = (report: Awaited<ReturnType<typeof checkDataIntegrityUseCase.execute>>) => {
@@ -53,7 +59,7 @@ const resetStartupTasks = async (): Promise<void> => {
 };
 const runStartupTasks = async ({ userId, isDisposed = isDisposedDefault }: RunStartupTasksParams): Promise<void> => {
   try {
-    const { migrateLegacyImagesToAssets } = await import("@/application/startup/MigrateLegacyImagesToAssets");
+    const { migrateLegacyImagesToAssets } = await import("./MigrateLegacyImagesToAssets");
 
     const migrationSummary = await migrateLegacyImagesToAssets({ userId });
 
@@ -101,5 +107,9 @@ const runStartupTasks = async ({ userId, isDisposed = isDisposedDefault }: RunSt
   }
 };
 
+
+
 export { resetStartupTasks, runStartupTasks };
+
+
 export type { RunStartupTasksParams };
