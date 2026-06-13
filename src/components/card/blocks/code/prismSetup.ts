@@ -1,24 +1,28 @@
-import "prismjs/components/prism-clike";
-import "prismjs/components/prism-markup";
-import "prismjs/components/prism-css";
-import "prismjs/components/prism-javascript";
-import "prismjs/components/prism-jsx";
-import "prismjs/components/prism-typescript";
-import "prismjs/components/prism-tsx";
-import "prismjs/components/prism-bash";
-import "prismjs/components/prism-c";
-import "prismjs/components/prism-cpp";
-import "prismjs/components/prism-csharp";
-import "prismjs/components/prism-go";
-import "prismjs/components/prism-java";
-import "prismjs/components/prism-json";
-import "prismjs/components/prism-markdown";
-import "prismjs/components/prism-python";
-import "prismjs/components/prism-rust";
-import "prismjs/components/prism-sql";
-import "prismjs/components/prism-yaml";
 import Prism from "prismjs";
 
+type PrismGlobal = typeof globalThis & {
+  Prism?: typeof Prism;
+};
 
+(globalThis as PrismGlobal).Prism = Prism;
+await import("prismjs/components/prism-clike");
+await import("prismjs/components/prism-markup");
+await import("prismjs/components/prism-css");
+await import("prismjs/components/prism-javascript");
+await import("prismjs/components/prism-jsx");
+await import("prismjs/components/prism-typescript");
+await import("prismjs/components/prism-tsx");
+await import("prismjs/components/prism-bash");
+await import("prismjs/components/prism-c");
+await import("prismjs/components/prism-cpp");
+await import("prismjs/components/prism-csharp");
+await import("prismjs/components/prism-go");
+await import("prismjs/components/prism-java");
+await import("prismjs/components/prism-json");
+await import("prismjs/components/prism-markdown");
+await import("prismjs/components/prism-python");
+await import("prismjs/components/prism-rust");
+await import("prismjs/components/prism-sql");
+await import("prismjs/components/prism-yaml");
 
 export { Prism };
