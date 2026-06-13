@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { ListStyleType, someList, toggleList } from "@platejs/list";
 import { useIndentTodoToolBarButton, useIndentTodoToolBarButtonState } from "@platejs/list/react";
