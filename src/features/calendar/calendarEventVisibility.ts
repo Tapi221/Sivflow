@@ -1,7 +1,5 @@
-import type { AppCalendarItem, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink } from "./scheduleScreen.types";
+import type { AppCalendarItem, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-
-
 
 type CalendarEventSourceIndex = {
   projectById: Map<string, AppCalendarItem>;
@@ -18,11 +16,7 @@ type CalendarEventDisplayMetadataInput = CalendarEventVisibilityInput & {
   googleCalendarColorOverrides: GoogleCalendarColorOverrideMap;
 };
 
-
-
 const GOOGLE_CALENDAR_KEY_SEPARATOR = "\u001f";
-
-
 
 const createGoogleCalendarColorOverrideKey = (accountId: string, calendarId: string): string => `${accountId}:${calendarId}`;
 const createGoogleCalendarKey = (accountId: string, calendarId: string): string => `${accountId}${GOOGLE_CALENDAR_KEY_SEPARATOR}${calendarId}`;
@@ -100,7 +94,5 @@ const filterCalendarEventsBySourceVisibility = (events: GoogleCalendarEvent[], i
     return project?.checked !== false;
   });
 };
-
-
 
 export { attachCalendarEventDisplayMetadata, filterCalendarEventsBySourceVisibility };

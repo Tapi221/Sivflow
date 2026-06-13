@@ -1,17 +1,13 @@
 import { useCallback, useMemo, useReducer } from "react";
 import type { ExplorerBreadcrumbContext } from "@/features/explorer/contracts/explorerBreadcrumbContext";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
-import { explorerReducer } from "./explorerReducer";
-import { createInitialExplorerState } from "./explorerState";
+import { explorerReducer } from "@/features/explorer/controller/explorerReducer";
+import { createInitialExplorerState } from "@/features/explorer/controller/explorerState";
 import type { SelectedExplorerItem } from "@/types";
-
-
 
 type UseExplorerControllerParams = {
   initialRouteState: ExplorerRouteState;
 };
-
-
 
 const useExplorerController = ({ initialRouteState }: UseExplorerControllerParams) => {
   const [state, dispatch] = useReducer(explorerReducer, initialRouteState, createInitialExplorerState);
@@ -67,7 +63,5 @@ const useExplorerController = ({ initialRouteState }: UseExplorerControllerParam
     [state, actions],
   );
 };
-
-
 
 export { useExplorerController };

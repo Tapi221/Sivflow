@@ -18,8 +18,6 @@ import type { FirebaseStorage } from "firebase/storage";
 
 import { getStorage } from "firebase/storage";
 
-
-
 type FirebaseClientState = {
   app: FirebaseApp | null;
   auth: Auth | null;
@@ -27,8 +25,6 @@ type FirebaseClientState = {
   functionsClient: Functions | null;
   firestoreDb: Firestore | null;
 };
-
-
 
 const REQUIRED_FIREBASE_ENV_KEYS = [
   "VITE_FIREBASE_API_KEY",
@@ -47,22 +43,6 @@ const firebaseConfig = {
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
-
-const isFirebaseClientAvailable = missingFirebaseEnvVars.length === 0;
-
-const firebaseApp = firebaseClientState.app;
-
-const auth = firebaseClientState.auth as Auth;
-
-const storage = firebaseClientState.storage as FirebaseStorage;
-
-const functionsClient = firebaseClientState.functionsClient as Functions;
-
-const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
-
-const db: Firestore | null = firebaseClientState.firestoreDb;
-
-
 
 const getFirebaseEnvValue = (key: (typeof REQUIRED_FIREBASE_ENV_KEYS)[number]) => {
   return import.meta.env[key];
@@ -134,13 +114,23 @@ const initializeFirebaseClient = (isAvailable: boolean, missingEnvVars: string[]
   };
 };
 
-
-
 const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
+
+const isFirebaseClientAvailable = missingFirebaseEnvVars.length === 0;
 
 const firebaseClientState = initializeFirebaseClient(isFirebaseClientAvailable, missingFirebaseEnvVars);
 
+const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
 
+const db: Firestore | null = firebaseClientState.firestoreDb;
+
+const functionsClient = firebaseClientState.functionsClient as Functions;
+
+const storage = firebaseClientState.storage as FirebaseStorage;
+
+const auth = firebaseClientState.auth as Auth;
+
+const firebaseApp = firebaseClientState.app;
 
 const requireFirebaseClient = (): FirebaseClientState => {
   if (isFirebaseClientAvailable && firebaseClientState.app) {
@@ -199,6 +189,4 @@ if (import.meta.env.DEV) {
   debugFirebase();
 }
 
-
-
-export { missingFirebaseEnvVars, isFirebaseClientAvailable, firebaseApp, auth, storage, functionsClient, firestoreDb, db, requireFirebaseClient, requireFirestoreDb };
+export { missingFirebaseEnvVars, isFirebaseClientAvailable, firebaseApp, auth, storage, functionsClient, firestoreDb, db, requireFirebaseClient

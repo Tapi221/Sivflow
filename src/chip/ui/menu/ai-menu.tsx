@@ -1,26 +1,17 @@
 "use client";
 
 import * as React from "react";
-
 import { AIChatPlugin } from "@platejs/ai/react";
-
 import { Loader2Icon, PauseIcon, SendIcon, XIcon } from "lucide-react";
-
 import { useEditorPlugin, usePluginOption } from "platejs/react";
-
 import { Button } from "@/chip/ui/button/button";
-
 import { cn } from "@/lib/utils";
-
-
 
 type AIMenuItemsProps = {
   input: string;
   setInput: (value: string) => void;
   setValue: (value: string) => void;
 };
-
-
 
 const AIMenuItems = ({ input, setInput, setValue }: AIMenuItemsProps) => {
   const { api } = useEditorPlugin(AIChatPlugin);
@@ -44,7 +35,6 @@ const AIMenuItems = ({ input, setInput, setValue }: AIMenuItemsProps) => {
     </div>
   );
 };
-
 const AIMenu = () => {
   const { api } = useEditorPlugin(AIChatPlugin);
   const open = usePluginOption(AIChatPlugin, "open");
@@ -86,7 +76,6 @@ const AIMenu = () => {
     </div>
   );
 };
-
 const AILoadingBar = () => {
   const { api } = useEditorPlugin(AIChatPlugin);
   const chat = usePluginOption(AIChatPlugin, "chat");
@@ -110,10 +99,5 @@ const AILoadingBar = () => {
   );
 };
 
-
-
 export { AILoadingBar, AIMenu, AIMenuItems };
-
-
-
 export type { AIMenuItemsProps };

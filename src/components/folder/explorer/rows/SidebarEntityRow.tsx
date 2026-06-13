@@ -1,13 +1,11 @@
 import React from "react";
 import type { ExplorerMenuPanelVariant } from "@/components/folder/components/menus/ExplorerMenuPanel";
 import type { MenuAction } from "@/components/folder/components/menus/menuActions";
-import { ExplorerRow } from "./ExplorerRow";
-import { ExplorerRowContent } from "./ExplorerRowContent";
-import { EXPLORER_ENTITY_ROW_DENSITY_COMPACT_CLASS, EXPLORER_ENTITY_ROW_INTERACTIVE_CLASS, EXPLORER_ENTITY_ROW_SHELL_BASE_CLASS } from "./shared";
-import { SidebarTreeRow } from "./SidebarTreeRow";
+import { ExplorerRow } from "@/components/folder/explorer/rows/ExplorerRow";
+import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
+import { EXPLORER_ENTITY_ROW_DENSITY_COMPACT_CLASS, EXPLORER_ENTITY_ROW_INTERACTIVE_CLASS, EXPLORER_ENTITY_ROW_SHELL_BASE_CLASS } from "@/components/folder/explorer/rows/shared";
+import { SidebarTreeRow } from "@/components/folder/explorer/rows/SidebarTreeRow";
 import { cn } from "@/lib/utils";
-
-
 
 interface SidebarEntityRowProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
@@ -43,8 +41,6 @@ interface SidebarEntityRowProps extends Omit<
   density?: "compact";
   selected?: boolean;
 }
-
-
 
 const SidebarEntityRowBase = ({
   menuOpen = false,
@@ -144,8 +140,6 @@ const SidebarEntityRowBase = ({
     </SidebarTreeRow>
   );
 };
-
-
 
 const SidebarEntityRow = React.memo(SidebarEntityRowBase);
 SidebarEntityRow.displayName = "SidebarEntityRow";

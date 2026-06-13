@@ -1,11 +1,9 @@
 import React from "react";
-import type { FlashcardCardLike, FlashcardDerived, FlashcardMediaLike } from "./flashcard.types";
-import { resolveSideBlocks } from "./flashcardBlocks";
-import { resolveAnswerAttachmentAudios, resolveAnswerAttachmentImages, resolveAnswerAttachmentReferences, resolveAnswerAudios, resolveAnswerCode, resolveAnswerText, resolveAudioUrls, resolveCardId, resolveHasUncertainty, resolveImageUrls, resolveIsBookmarked, resolveLayoutRows, resolveQuestionAttachmentAudios, resolveQuestionAttachmentImages, resolveQuestionAttachmentReferences, resolveQuestionAudios, resolveQuestionCode, resolveQuestionText } from "./flashcardDerived";
+import type { FlashcardCardLike, FlashcardDerived, FlashcardMediaLike } from "@/components/card/frame/flashcard.types";
+import { resolveSideBlocks } from "@/components/card/frame/flashcardBlocks";
+import { resolveAnswerAttachmentAudios, resolveAnswerAttachmentImages, resolveAnswerAttachmentReferences, resolveAnswerAudios, resolveAnswerCode, resolveAnswerText, resolveAudioUrls, resolveCardId, resolveHasUncertainty, resolveImageUrls, resolveIsBookmarked, resolveLayoutRows, resolveQuestionAttachmentAudios, resolveQuestionAttachmentImages, resolveQuestionAttachmentReferences, resolveQuestionAudios, resolveQuestionCode, resolveQuestionText } from "@/components/card/frame/flashcardDerived";
 import { resolveInkDocument } from "@/components/ink/inkStorage";
 import type { CardBlock } from "@/types/domain/card";
-
-
 
 const EMPTY_MEDIA_ITEMS: FlashcardMediaLike[] = [];
 const EMPTY_IMAGE_URLS: string[] = [];
@@ -13,8 +11,6 @@ const EMPTY_AUDIO_URLS: string[] = [];
 const EMPTY_REFERENCES: ReturnType<typeof resolveQuestionAttachmentReferences> =
   [];
 const EMPTY_BLOCKS: ReturnType<typeof resolveSideBlocks> = [];
-
-
 
 const useFlashcardDerived = (cardData: FlashcardCardLike | null | undefined, effectiveIsFlipped: boolean): FlashcardDerived => {
   const cardId = cardData ? resolveCardId(cardData) : null;
@@ -136,7 +132,5 @@ const useFlashcardDerived = (cardData: FlashcardCardLike | null | undefined, eff
     activeInkDocument,
   };
 };
-
-
 
 export { useFlashcardDerived };

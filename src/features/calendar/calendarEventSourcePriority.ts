@@ -1,8 +1,6 @@
 import type { CalendarYearEventDisplay, CalendarYearEventDisplayResolver } from "@/features/calendar/grid/CalendarView.year";
-import type { AppCalendarItem, GoogleAccountDisplay, ProjectCalendarLink } from "./scheduleScreen.types";
+import type { AppCalendarItem, GoogleAccountDisplay, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-
-
 
 type CalendarEventSourcePriorityInput = {
   appProjects: AppCalendarItem[];
@@ -10,15 +8,11 @@ type CalendarEventSourcePriorityInput = {
   googleAccounts: GoogleAccountDisplay[];
 };
 
-
-
 const PROJECT_EVENT_PRIORITY_GROUP = 0;
 const GOOGLE_CALENDAR_EVENT_PRIORITY_GROUP = 1;
 const FALLBACK_EVENT_PRIORITY_GROUP = 2;
 const FALLBACK_EVENT_PRIORITY_INDEX = Number.MAX_SAFE_INTEGER;
 const GOOGLE_CALENDAR_KEY_SEPARATOR = "\u001f";
-
-
 
 const createGoogleCalendarSourceKey = (accountId: string, calendarId: string): string => `${accountId}${GOOGLE_CALENDAR_KEY_SEPARATOR}${calendarId}`;
 const setUnambiguousValue = <T>(map: Map<string, T | null>, key: string, value: T): void => {
@@ -94,7 +88,5 @@ const createCalendarYearEventDisplayResolver = ({ appProjects, projectCalendarLi
     };
   };
 };
-
-
 
 export { createCalendarYearEventDisplayResolver };

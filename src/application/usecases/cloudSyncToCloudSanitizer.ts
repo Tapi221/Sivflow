@@ -1,7 +1,5 @@
-import { stripCloudSyncLocalOnlyFields } from "./cloudSyncLocalFieldStripping";
-import { deepStripUndefined } from "./cloudSyncValueCleaning";
-
-
+import { stripCloudSyncLocalOnlyFields } from "@/application/usecases/cloudSyncLocalFieldStripping";
+import { deepStripUndefined } from "@/application/usecases/cloudSyncValueCleaning";
 
 const sanitizeSyncDataForCloud = (type: string, data: unknown): unknown => {
   if (!data) return data;
@@ -13,7 +11,5 @@ const sanitizeSyncDataForCloud = (type: string, data: unknown): unknown => {
     ...(cleaned as Record<string, unknown>),
   });
 };
-
-
 
 export { sanitizeSyncDataForCloud };

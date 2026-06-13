@@ -1,9 +1,7 @@
 import { useIndentButton, useOutdentButton } from "@platejs/indent/react";
 import { IndentDecreaseIcon, IndentIncreaseIcon } from "lucide-react";
-import type { ToolbarButtonProps } from "./toolbar";
-import { ToolbarButton } from "./toolbar";
-
-
+import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
+import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
 const IndentToolbarButton = (props: ToolbarButtonProps) => {
   const { props: buttonProps } = useIndentButton();
@@ -21,7 +19,5 @@ const OutdentToolbarButton = (props: ToolbarButtonProps) => {
     </ToolbarButton>
   );
 };
-
-
 
 export { IndentToolbarButton, OutdentToolbarButton };

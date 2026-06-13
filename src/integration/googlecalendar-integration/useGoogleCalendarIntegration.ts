@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { auth } from "@/infrastructure/firebase/client";
 import { refreshCalendarAccessToken, requestCalendarAccessToken } from "@/integration/google-integration/google.oauth";
-import { fetchCalendarList } from "./gcal.api";
-import { readCalendarIds, readEmail, readRefreshToken, readToken, readWasConnected, writeCalendarIds, writeEmail, writeRefreshToken, writeToken, writeWasConnected } from "./gcal.storage";
-import type { GCalForceSyncOptions, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem, UseGoogleCalendarIntegrationOptions } from "./gcalSync.types";
+import { fetchCalendarList } from "@/integration/googlecalendar-integration/gcal.api";
+import { readCalendarIds, readEmail, readRefreshToken, readToken, readWasConnected, writeCalendarIds, writeEmail, writeRefreshToken, writeToken, writeWasConnected } from "@/integration/googlecalendar-integration/gcal.storage";
+import type { GCalForceSyncOptions, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem, UseGoogleCalendarIntegrationOptions } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { GoogleCalendarSyncEngine } from "@/sync/googlecalendar-sync/GoogleCalendarSyncEngine";
-
-
 
 type EventsAction =
   | {
@@ -27,8 +25,6 @@ type EventsAction =
   | {
     type: "clear";
   };
-
-
 
 const reduceEvents = (
   state: GoogleCalendarEvent[],
@@ -378,7 +374,5 @@ const useGoogleCalendarIntegration = ({ authInstance = auth }: UseGoogleCalendar
     toggleCalendar,
   };
 };
-
-
 
 export { useGoogleCalendarIntegration };

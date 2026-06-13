@@ -11,8 +11,6 @@ import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/cal
 import { cn } from "@/lib/utils";
 import { Check, ChevronDown, Download, Minus, Plus } from "@/ui/icons";
 
-
-
 type ScheduleScreenHeaderViewOption = {
   value: CalendarViewMode;
   label: string;
@@ -53,8 +51,6 @@ type ToolbarActionButtonProps = {
   onClick: () => void;
 };
 
-
-
 const SCHEDULE_SCREEN_HEADER_CLASS_NAME = "mb-1 flex shrink-0 items-center justify-between gap-3 px-4 pt-2";
 const SCHEDULE_SCREEN_HEADER_TITLE_CLASS_NAME = "min-w-32 max-w-52 shrink-0 truncate text-base font-semibold leading-tight tracking-tight text-[#1c1c1e]";
 const SCHEDULE_SCREEN_HEADER_ACTIONS_CLASS_NAME = "ml-auto flex min-w-0 shrink-0 items-center gap-1.5";
@@ -78,12 +74,8 @@ const MONTH_EVENT_COUNT_BUTTON_CLASS_NAME = "relative z-10 flex h-5 min-h-0 w-5 
 const MONTH_EVENT_COUNT_VALUE_CLASS_NAME = "relative z-10 flex h-5 min-w-5 items-center justify-center px-1 text-center text-xs font-semibold leading-none tracking-tight text-[#2f343b] tabular-nums";
 const DEFAULT_CALENDAR_PRINT_RANGE: CalendarPrintRangeState = { mode: "current", customStartDate: "", customEndDate: "" };
 
-
-
 const clampMonthVisibleEventCount = (value: number): number => Math.min(C.MONTH_VISIBLE_EVENT_COUNT_MAX, Math.max(C.MONTH_VISIBLE_EVENT_COUNT_MIN, Math.round(value)));
 const getCalendarPrintRangeOptionButtonClassName = (isActive: boolean): string => cn(CALENDAR_PRINT_RANGE_OPTION_BUTTON_BASE_CLASS_NAME, isActive ? CALENDAR_PRINT_RANGE_OPTION_ACTIVE_CLASS_NAME : CALENDAR_PRINT_RANGE_OPTION_INACTIVE_CLASS_NAME);
-
-
 
 const ToolbarActionButton = ({ children, label, title = label, isActive = false, disabled = false, buttonRef, ariaHasPopup, ariaExpanded, onClick }: ToolbarActionButtonProps) => (
   <button
@@ -261,7 +253,5 @@ const ScheduleScreenHeaderDesktop = ({
     </div>
   );
 };
-
-
 
 export { ScheduleScreenHeaderDesktop };

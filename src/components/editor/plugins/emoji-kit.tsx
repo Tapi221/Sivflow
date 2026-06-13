@@ -1,12 +1,8 @@
 "use client";
 
 import emojiMartData from "@emoji-mart/data";
-
 import { EmojiInputPlugin, EmojiPlugin } from "@platejs/emoji/react";
-
 import { EmojiInputElement } from "@/chip/ui/plate/emoji-node";
-
-
 
 const EmojiKit = [
   EmojiPlugin.configure({
@@ -14,7 +10,5 @@ const EmojiKit = [
   }),
   EmojiInputPlugin.withComponent(EmojiInputElement),
 ];
-
-
 
 export { EmojiKit };
