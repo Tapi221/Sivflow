@@ -2,6 +2,7 @@ import { PDFViewer } from "pdfjs-dist/legacy/web/pdf_viewer.mjs";
 import { PDF_TRACKPAD_ZOOM_SENSITIVITY, PDF_ZOOM_MAX_SCALE, PDF_ZOOM_MIN_SCALE, PDF_ZOOM_SCALE_EPSILON, PDF_ZOOM_STEP } from "@/features/pdf/pdfZoom.constants";
 import { computeNextScaleFromWheel, resolveTrackpadDeltaYForScaleRatio } from "@/features/pdf/pdfZoom.utils";
 
+type PdfViewerMethod = (...args: unknown[]) => unknown;
 type PatchedPdfViewerConstructor = typeof PDFViewer & {
   __sivflowZoomPatchApplied?: boolean;
 };
@@ -10,8 +11,8 @@ type PatchedPdfViewerPrototype = InstanceType<typeof PDFViewer> & {
   __sivflowSuppressScaleScrollUntil?: number;
   container?: HTMLElement;
   currentScale?: number;
-  scrollPageIntoView?: (...args: unknown[]) => unknown;
-  setDocument?: (...args: unknown[]) => unknown;
+  scrollPageIntoView?: PdfViewerMethod;
+  setDocument?: PdfViewerMethod;
 };
 type PdfViewerScaleDescriptor = PropertyDescriptor & {
   get?: (this: PatchedPdfViewerPrototype) => unknown;
@@ -92,6 +93,22 @@ const isPdfViewerScaleScrollSuppressed = (pdfViewer: PatchedPdfViewerPrototype):
 const shouldSuppressPdfViewerScaleScroll = (pdfViewer: PatchedPdfViewerPrototype): boolean => {
   return Boolean(pdfViewer.__sivflowIsSettingScale || isPdfViewerZooming(pdfViewer) || isPdfViewerScaleScrollSuppressed(pdfViewer));
 };
+const createPdfViewerSetDocumentProxy = (originalSetDocument: PdfViewerMethod): PdfViewerMethod => {
+  return new Proxy(originalSetDocument, {
+    apply(target, thisArg: PatchedPdfViewerPrototype, argArray: unknown[]) {
+      if (thisArg.container) pdfZoomViewers.add(thisArg);
+      return Reflect.apply(target, thisArg, argArray);
+    },
+  });
+};
+const createPdfViewerScrollPageIntoViewProxy = (originalScrollPageIntoView: PdfViewerMethod): PdfViewerMethod => {
+  return new Proxy(originalScrollPageIntoView, {
+    apply(target, thisArg: PatchedPdfViewerPrototype, argArray: unknown[]) {
+      if (shouldSuppressPdfViewerScaleScroll(thisArg)) return undefined;
+      return Reflect.apply(target, thisArg, argArray);
+    },
+  });
+};
 const getPdfViewerScaleDescriptor = (prototype: object, propertyName: (typeof PDF_VIEWER_SCALE_PROPERTY_NAMES)[number]): PdfViewerScaleDescriptor | null => {
   let currentPrototype: object | null = prototype;
   while (currentPrototype) {
@@ -123,10 +140,7 @@ const patchPdfViewerScaleSetter = (prototype: PatchedPdfViewerPrototype, propert
 const patchPdfViewerSetDocument = (prototype: PatchedPdfViewerPrototype): void => {
   const originalSetDocument = prototype.setDocument;
   if (typeof originalSetDocument !== "function") return;
-  prototype.setDocument = (this: PatchedPdfViewerPrototype, ...args: unknown[]): unknown => {
-    if (this.container) pdfZoomViewers.add(this);
-    return originalSetDocument.apply(this, args);
-  };
+  prototype.setDocument = createPdfViewerSetDocumentProxy(originalSetDocument);
 };
 const addPdfZoomCaptureListeners = (): void => {
   if (typeof window === "undefined") return;
@@ -138,10 +152,7 @@ const applyPdfViewerZoomPatch = (): void => {
   const prototype = viewerConstructor.prototype as PatchedPdfViewerPrototype;
   const originalScrollPageIntoView = prototype.scrollPageIntoView;
   if (typeof originalScrollPageIntoView !== "function") return;
-  prototype.scrollPageIntoView = (this: PatchedPdfViewerPrototype, ...args: unknown[]): unknown => {
-    if (shouldSuppressPdfViewerScaleScroll(this)) return undefined;
-    return originalScrollPageIntoView.apply(this, args);
-  };
+  prototype.scrollPageIntoView = createPdfViewerScrollPageIntoViewProxy(originalScrollPageIntoView);
   for (const propertyName of PDF_VIEWER_SCALE_PROPERTY_NAMES) patchPdfViewerScaleSetter(prototype, propertyName);
   patchPdfViewerSetDocument(prototype);
   addPdfZoomCaptureListeners();
