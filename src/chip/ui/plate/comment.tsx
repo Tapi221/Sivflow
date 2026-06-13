@@ -486,7 +486,7 @@ const CommentCreateForm = ({ autoFocus = false, className, discussionId: discuss
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  onAddComment();
+                  void onAddComment();
                 }
               }}
               placeholder="Reply..."
@@ -500,7 +500,7 @@ const CommentCreateForm = ({ autoFocus = false, className, discussionId: discuss
               disabled={commentContent.trim().length === 0}
               onClick={(e) => {
                 e.stopPropagation();
-                onAddComment();
+                void onAddComment();
               }}
             >
               <div className="flex size-6 items-center justify-center rounded-full">
