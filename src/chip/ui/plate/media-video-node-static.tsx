@@ -1,20 +1,20 @@
 import type { TMediaElement } from "platejs";
-import type { PlateElementProps } from "platejs/react";
-import { PlateElement } from "platejs/react";
+import type { SlateElementProps } from "platejs/static";
+import { SlateElement } from "platejs/static";
 import { cn } from "@/lib/utils";
 
-type MediaVideoNodeStaticProps = PlateElementProps<TMediaElement>;
+type MediaVideoNodeStaticProps = SlateElementProps<TMediaElement>;
 
-const MediaVideoNodeStatic = ({ className, element, children, ...props }: MediaVideoNodeStaticProps) => (
-  <PlateElement className={cn("my-4", className)} element={element} {...props}>
+const MediaVideoNodeStatic = ({ children, className, element, ...props }: MediaVideoNodeStaticProps) => (
+  <SlateElement className={cn("my-4", className)} element={element} {...props}>
     <video className="mx-auto max-h-[420px] max-w-full rounded-md" controls src={element.url} />
     {(element as any).caption?.[0]?.children?.[0]?.text ? (
-      <figcaption className="mt-2 text-center text-sm text-muted-foreground">
+      <figcaption className="mt-2 text-center text-muted-foreground text-sm">
         {(element as any).caption[0].children[0].text}
       </figcaption>
     ) : null}
     {children}
-  </PlateElement>
+  </SlateElement>
 );
 
 const VideoElementStatic = MediaVideoNodeStatic;
