@@ -16,7 +16,6 @@ import { CodeBlockKit } from "@/components/editor/plugins/code-block-kit";
 import { CodeDrawingKit } from "@/components/editor/plugins/code-drawing-kit";
 import { ColumnKit } from "@/components/editor/plugins/column-kit";
 import { CommentKit } from "@/components/editor/plugins/comment-kit";
-import { CopilotKit } from "@/components/editor/plugins/copilot-kit";
 import { CursorOverlayKit } from "@/components/editor/plugins/cursor-overlay-kit";
 import { DateKit } from "@/components/editor/plugins/date-kit";
 import { DiscussionKit } from "@/components/editor/plugins/discussion-kit";
@@ -42,8 +41,8 @@ import { TocKit } from "@/components/editor/plugins/toc-kit";
 import { ToggleKit } from "@/components/editor/plugins/toggle-kit";
 
 const EditorKit = [
-  ...CopilotKit,
   ...AIKit,
+  ...BlockMenuKit,
 
   // Elements
   ...BasicBlocksKit,
@@ -78,7 +77,6 @@ const EditorKit = [
   ...SlashKit,
   ...AutoformatKit,
   ...CursorOverlayKit,
-  ...BlockMenuKit,
   ...DndKit,
   ...EmojiKit,
   ...ExitBreakKit,
