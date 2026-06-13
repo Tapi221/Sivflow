@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import * as ToolbarPrimitive from "@radix-ui/react-toolbar";
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import { ChevronDown } from "lucide-react";
@@ -145,11 +144,9 @@ const ToolbarButton = ({
   ...props
 }: ToolbarButtonProps) => {
   const [mounted, setMounted] = React.useState(false);
-
   React.useEffect(() => {
     setMounted(true);
   }, []);
-
   const button = typeof pressed === "boolean" ? (
     <ToolbarPrimitive.ToggleGroup disabled={props.disabled} type="single" value="single">
       <ToolbarPrimitive.ToggleItem
@@ -159,7 +156,7 @@ const ToolbarButton = ({
       >
         {isDropdown ? (
           <>
-            <div className="flex flex-1 items-center gap-2 whitespace-nowrap">{children}</div>
+            {children}
             <ChevronDown className="size-3.5 text-muted-foreground" data-icon />
           </>
         ) : (
@@ -172,7 +169,6 @@ const ToolbarButton = ({
       {children}
     </ToolbarPrimitive.Button>
   );
-
   if (tooltip && mounted) {
     return (
       <Tooltip {...tooltipProps}>
@@ -183,7 +179,6 @@ const ToolbarButton = ({
       </Tooltip>
     );
   }
-
   return button;
 };
 const ToolbarSplitButton = ({ className, ...props }: React.ComponentPropsWithoutRef<typeof ToolbarButton>) => {
