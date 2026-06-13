@@ -113,4 +113,4 @@ const SuggestionKit = [suggestionPlugin, trailingBlockPlugin];
 
 export { SuggestionKit, suggestionPlugin };
 
-export type { SuggestionC
+export type { SuggestionConfig };
