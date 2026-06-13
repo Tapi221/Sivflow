@@ -1,3 +1,5 @@
-import type { AssetUploadRequest, QueueItem } from "@/application/usecases/persistentOfflineQueue.types";
+import type { AssetUploadRequest, QueueItem } from "./persistentOfflineQueue.types";
+
+
 
 export type { AssetUploadRequest, QueueItem };
