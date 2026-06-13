@@ -12,6 +12,7 @@ const MediaEmbedNodeStatic = ({ children, className, element, ...props }: MediaE
     </SlateElement>
   );
 };
+
 const MediaEmbedElementStatic = MediaEmbedNodeStatic;
 
 export { MediaEmbedElementStatic, MediaEmbedNodeStatic };

@@ -61,32 +61,32 @@ const MAX_COLOR_QUEUE = 30;
 const HEX_COLOR_RE = /^#[\da-f]{6}$/i;
 const DEFAULT_CUSTOM_COLORS: TColor[] = [
   { isBrightColor: false, name: "dark orange 3", value: "#783f04" },
-  { isBrightColor: false, name: "dark grey 3", value: "#666666" },
-  { isBrightColor: false, name: "dark grey 2", value: "#999999" },
+  { isBrightColor: false, name: "dark grey 3", value: "#666" },
+  { isBrightColor: false, name: "dark grey 2", value: "#999" },
   { isBrightColor: false, name: "light cornflower blue 1", value: "#6c9eeb" },
   { isBrightColor: false, name: "dark magenta 3", value: "#4c1130" },
 ];
 const DEFAULT_COLORS: TColor[] = [
-  { isBrightColor: false, name: "black", value: "#000000" },
+  { isBrightColor: false, name: "black", value: "#000" },
   { isBrightColor: false, name: "dark grey 4", value: "#434343" },
-  { isBrightColor: false, name: "dark grey 3", value: "#666666" },
-  { isBrightColor: false, name: "dark grey 2", value: "#999999" },
+  { isBrightColor: false, name: "dark grey 3", value: "#666" },
+  { isBrightColor: false, name: "dark grey 2", value: "#999" },
   { isBrightColor: false, name: "dark grey 1", value: "#b7b7b7" },
-  { isBrightColor: false, name: "grey", value: "#cccccc" },
+  { isBrightColor: false, name: "grey", value: "#ccc" },
   { isBrightColor: false, name: "light grey 1", value: "#d9d9d9" },
   { isBrightColor: true, name: "light grey 2", value: "#efefef" },
   { isBrightColor: true, name: "light grey 3", value: "#f3f3f3" },
-  { isBrightColor: true, name: "white", value: "#ffffff" },
+  { isBrightColor: true, name: "white", value: "#fff" },
   { isBrightColor: false, name: "red berry", value: "#980100" },
   { isBrightColor: false, name: "red", value: "#fe0000" },
   { isBrightColor: false, name: "orange", value: "#fe9900" },
   { isBrightColor: true, name: "yellow", value: "#feff00" },
-  { isBrightColor: false, name: "green", value: "#00ff00" },
-  { isBrightColor: false, name: "cyan", value: "#00ffff" },
+  { isBrightColor: false, name: "green", value: "#0f0" },
+  { isBrightColor: false, name: "cyan", value: "#0ff" },
   { isBrightColor: false, name: "cornflower blue", value: "#4b85e8" },
   { isBrightColor: false, name: "blue", value: "#1300ff" },
-  { isBrightColor: false, name: "purple", value: "#9900ff" },
-  { isBrightColor: false, name: "magenta", value: "#ff00ff" },
+  { isBrightColor: false, name: "purple", value: "#90f" },
+  { isBrightColor: false, name: "magenta", value: "#f0f" },
 ];
 
 const normalizeColor = (color: string): string => color.toLowerCase();
@@ -107,7 +107,7 @@ const getEditorColorMarks = (editor: PlateEditor, nodeType: string): string[] =>
   return Array.from(usedColors);
 };
 
-const ColorInput = ({ children, className, value = "#000000", ...props }: React.ComponentProps<"input"> & { className?: string }) => {
+const ColorInput = ({ children, className, value = "#000", ...props }: React.ComponentProps<"input"> & { className?: string }) => {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   return (
     <div className={cn("flex flex-col items-center", className)}>
@@ -162,7 +162,7 @@ const ColorDropdownMenuItems = ({ className, color, colors, updateColor, ...prop
   );
 };
 const ColorCustom = ({ className, color, colors, colorsQueue, customColors, recordColorUsage, updateColor, updateCustomColor, updatedColor, ...props }: ColorCustomProps) => {
-  const [value, setValue] = React.useState<string>(color ?? "#000000");
+  const [value, setValue] = React.useState<string>(color ?? "#000");
   const fullCustomColors = React.useMemo(
     () => colorsQueue
       .filter((queuedColor) => normalizeColor(queuedColor) !== normalizeColor(updatedColor ?? ""))
