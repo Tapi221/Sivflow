@@ -1,7 +1,7 @@
 import { addDays, getDaysInMonth, isSameDay, startOfMonth } from "date-fns";
+import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 
 type CalendarListPlacementDay = {
   date: Date;
