@@ -8,9 +8,9 @@ import { MediaUploadToast } from "@/chip/ui/media-upload-toast";
 import { AudioElement } from "@/chip/ui/node/media-audio-node";
 import { MediaEmbedElement } from "@/chip/ui/node/media-embed-node";
 import { FileElement } from "@/chip/ui/node/media-file-node";
-import { ImageElement } from "@/chip/ui/node/media-image-node";
 import { PlaceholderElement } from "@/chip/ui/node/media-placeholder-node";
 import { VideoElement } from "@/chip/ui/node/media-video-node";
+import { ImageElement } from "@/chip/ui/plate/media-image-node";
 
 const MediaKit = [
   ImagePlugin.configure({
