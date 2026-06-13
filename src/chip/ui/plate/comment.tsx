@@ -1,40 +1,21 @@
 "use client";
-
 import * as React from "react";
-
 import { getCommentKey, getDraftCommentKey } from "@platejs/comment";
-
 import { CommentPlugin, useCommentId } from "@platejs/comment/react";
-
 import { differenceInDays, differenceInHours, differenceInMinutes, format } from "date-fns";
-
 import { ArrowUpIcon, CheckIcon, MoreHorizontalIcon, PencilIcon, TrashIcon, XIcon } from "lucide-react";
-
 import type { NodeEntry, TCommentText, Value } from "platejs";
-
 import { KEYS, nanoid, NodeApi } from "platejs";
-
 import type { CreatePlateEditorOptions } from "platejs/react";
-
 import { Plate, useEditorPlugin, useEditorRef, usePlateEditor, usePluginOption } from "platejs/react";
-
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/chip/ui/avatar";
-
 import { Button } from "@/chip/ui/button/button";
-
+import { Editor, EditorContainer } from "@/chip/ui/plate/editor";
 import { BasicMarksKit } from "@/components/editor/plugins/basic-marks-kit";
-
 import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
-
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
-
 import { cn } from "@/lib/utils";
-
-import { Editor, EditorContainer } from "./editor";
-
-
 
 type TComment = {
   id: string;
@@ -45,11 +26,9 @@ type TComment = {
   userId: string;
 };
 
-
-
 const useCommentEditor = (
   options: Omit<CreatePlateEditorOptions, "plugins"> = {},
-  deps: any[] = [],
+  deps: React.DependencyList = [],
 ) => {
   const commentEditor = usePlateEditor(
     {
@@ -62,7 +41,6 @@ const useCommentEditor = (
   );
   return commentEditor;
 };
-
 const formatCommentDate = (date: Date) => {
   const now = new Date();
   const diffMinutes = differenceInMinutes(now, date);
@@ -79,8 +57,6 @@ const formatCommentDate = (date: Date) => {
   }
   return format(date, "MM/dd/yyyy");
 };
-
-
 
 const CommentMoreDropdown = (props: {
   comment: TComment;
@@ -111,7 +87,7 @@ const CommentMoreDropdown = (props: {
           return discussion;
         }
         const commentIndex = discussion.comments.findIndex(
-          (c) => c.id === comment.id,
+          (currentComment) => currentComment.id === comment.id,
         );
         if (commentIndex === -1) {
           return discussion;
@@ -140,19 +116,19 @@ const CommentMoreDropdown = (props: {
       onOpenChange={setDropdownOpen}
       modal={false}
     >
-      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+      <DropdownMenuTrigger asChild onClick={(event) => event.stopPropagation()}>
         <Button variant="ghost" className={cn("h-6 p-1 text-muted-foreground")}>
           <MoreHorizontalIcon className="size-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         className="w-48"
-        onCloseAutoFocus={(e) => {
+        onCloseAutoFocus={(event) => {
           if (selectedEditCommentRef.current) {
             onCloseAutoFocus?.();
             selectedEditCommentRef.current = false;
           }
-          return e.preventDefault();
+          return event.preventDefault();
         }}
       >
         <DropdownMenuGroup>
@@ -169,7 +145,6 @@ const CommentMoreDropdown = (props: {
     </DropdownMenu>
   );
 };
-
 const Comment = (props: {
   comment: TComment;
   discussionLength: number;
@@ -220,16 +195,16 @@ const Comment = (props: {
       .getOption(discussionPlugin, "discussions")
       .map((discussion) => {
         if (discussion.id === input.discussionId) {
-          const updatedComments = discussion.comments.map((comment) => {
-            if (comment.id === input.id) {
+          const updatedComments = discussion.comments.map((currentComment) => {
+            if (currentComment.id === input.id) {
               return {
-                ...comment,
+                ...currentComment,
                 contentRich: input.contentRich,
                 isEdited: true,
                 updatedAt: new Date(),
               };
             }
-            return comment;
+            return currentComment;
           });
           return { ...discussion, comments: updatedComments };
         }
@@ -324,11 +299,11 @@ const Comment = (props: {
         )}
       </div>
       {isFirst && showDocumentContent && (
-        <div className="relative mt-1 flex pl-[32px] text-sm text-subtle-foreground">
+        <div className="relative mt-1 flex pl-[32px] text-muted-foreground text-sm">
           {discussionLength > 1 && (
             <div className="absolute top-[5px] left-3 h-full w-0.5 shrink-0 bg-muted" />
           )}
-          <div className="my-px w-0.5 shrink-0 bg-highlight" />
+          <div className="my-px w-0.5 shrink-0 bg-muted-foreground/35" />
           {documentContent && <div className="ml-2">{documentContent}</div>}
         </div>
       )}
@@ -349,24 +324,24 @@ const Comment = (props: {
                   size="icon"
                   variant="ghost"
                   className="size-[28px]"
-                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                    e.stopPropagation();
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                    event.stopPropagation();
                     void onCancel();
                   }}
                 >
-                  <div className="flex size-5 shrink-0 items-center justify-center rounded-[50%] bg-primary/40">
-                    <XIcon className="size-3 stroke-[3px] text-background" />
+                  <div className="flex size-5 shrink-0 items-center justify-center rounded-[50%] bg-muted">
+                    <XIcon className="size-3 stroke-[3px] text-muted-foreground" />
                   </div>
                 </Button>
                 <Button
                   size="icon"
                   variant="ghost"
-                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                    e.stopPropagation();
+                  onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                    event.stopPropagation();
                     void onSave();
                   }}
                 >
-                  <div className="flex size-5 shrink-0 items-center justify-center rounded-[50%] bg-brand">
+                  <div className="flex size-5 shrink-0 items-center justify-center rounded-[50%] bg-foreground">
                     <CheckIcon className="size-3 stroke-[3px] text-background" />
                   </div>
                 </Button>
@@ -378,7 +353,6 @@ const Comment = (props: {
     </div>
   );
 };
-
 const CommentCreateForm = ({ autoFocus = false, className, discussionId: discussionIdProp, focusOnMount = false }: {
   autoFocus?: boolean;
   className?: string;
@@ -408,7 +382,7 @@ const CommentCreateForm = ({ autoFocus = false, className, discussionId: discuss
     if (!commentValue) return;
     commentEditor.tf.reset();
     if (discussionId) {
-      const discussion = discussions.find((d) => d.id === discussionId);
+      const discussion = discussions.find((currentDiscussion) => currentDiscussion.id === discussionId);
       if (!discussion) {
         const newDiscussion: TDiscussion = {
           id: discussionId,
@@ -445,7 +419,7 @@ const CommentCreateForm = ({ autoFocus = false, className, discussionId: discuss
         comments: [...discussion.comments, comment],
       };
       const updatedDiscussions = discussions
-        .filter((d) => d.id !== discussionId)
+        .filter((currentDiscussion) => currentDiscussion.id !== discussionId)
         .concat(updatedDiscussion);
       editor.setOption(discussionPlugin, "discussions", updatedDiscussions);
       return;
@@ -455,17 +429,17 @@ const CommentCreateForm = ({ autoFocus = false, className, discussionId: discuss
       .comment.nodes({ at: [], isDraft: true });
     if (commentsNodeEntry.length === 0) return;
     const documentContent = commentsNodeEntry
-      .map(([node, _path]: NodeEntry<TCommentText>) => node.text)
+      .map(([node]: NodeEntry<TCommentText>) => node.text)
       .join("");
-    const _discussionId = nanoid();
+    const createdDiscussionId = nanoid();
     const newDiscussion: TDiscussion = {
-      id: _discussionId,
+      id: createdDiscussionId,
       comments: [
         {
           id: nanoid(),
           contentRich: commentValue,
           createdAt: new Date(),
-          discussionId: _discussionId,
+          discussionId: createdDiscussionId,
           isEdited: false,
           userId: editor.getOption(discussionPlugin, "currentUserId"),
         },
@@ -509,9 +483,9 @@ const CommentCreateForm = ({ autoFocus = false, className, discussionId: discuss
             <Editor
               variant="comment"
               className="min-h-[25px] grow pt-0.5 pr-8"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
                   void onAddComment();
                 }
               }}
@@ -524,8 +498,8 @@ const CommentCreateForm = ({ autoFocus = false, className, discussionId: discuss
               variant="ghost"
               className="absolute right-0.5 bottom-0.5 ml-auto size-6 shrink-0"
               disabled={commentContent.trim().length === 0}
-              onClick={(e) => {
-                e.stopPropagation();
+              onClick={(event) => {
+                event.stopPropagation();
                 void onAddComment();
               }}
             >
@@ -540,10 +514,5 @@ const CommentCreateForm = ({ autoFocus = false, className, discussionId: discuss
   );
 };
 
-
-
 export { Comment, CommentCreateForm, formatCommentDate };
-
-
-
 export type { TComment };
