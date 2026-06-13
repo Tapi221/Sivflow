@@ -4,16 +4,16 @@ import * as React from "react";
 import { resizeLengthClampStatic } from "@platejs/resizable";
 import { useBlockSelected } from "@platejs/selection/react";
 import { getTableColumnCount, setCellBackground, setTableColSize, setTableRowSize } from "@platejs/table";
-import { TablePlugin, roundCellSizeToStep, useOverrideColSize, useOverrideRowSize, useTableColSizes, useTableMergeState } from "@platejs/table/react";
+import { roundCellSizeToStep, TablePlugin, useOverrideColSize, useOverrideRowSize, useTableColSizes, useTableMergeState } from "@platejs/table/react";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, CombineIcon, EraserIcon, Grid2X2Icon, PaintBucketIcon, SquareSplitHorizontalIcon, Trash2Icon, XIcon } from "lucide-react";
 import type { TTableCellElement, TTableElement, TTableRowElement } from "platejs";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement, useEditorPlugin, useEditorRef, useFocusedLast, useReadOnly, useSelected } from "platejs/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-import { Popover, PopoverAnchor, PopoverContent } from "@/chip/ui/popover";
 import { blockSelectionVariants } from "@/chip/ui/plate/block-selection";
 import { ColorDropdownMenuItems, DEFAULT_COLORS } from "@/chip/ui/plate/font-color-toolbar-button";
 import { Toolbar, ToolbarButton, ToolbarGroup, ToolbarMenuGroup } from "@/chip/ui/plate/toolbar";
+import { Popover, PopoverAnchor, PopoverContent } from "@/chip/ui/popover";
 import { cn } from "@/lib/utils";
 
 type TableResizeDirection = "bottom" | "right";
