@@ -1,10 +1,11 @@
-import { createRouteHandler } from "uploadthing/next";
-import { ourFileRouter } from "@/lib/uploadthing";
-
-
-
-const { GET, POST } = createRouteHandler({ router: ourFileRouter });
-
-
+const createLocalUploadResponse = () => Response.json(
+  {
+    error: "UploadThing server upload is disabled. Client uploads use local object URLs.",
+    ok: false,
+  },
+  { status: 501 },
+);
+const GET = createLocalUploadResponse;
+const POST = createLocalUploadResponse;
 
 export { GET, POST };
