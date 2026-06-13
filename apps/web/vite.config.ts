@@ -8,8 +8,10 @@ import { defineConfig } from "vite";
 import type { Plugin } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
+type ApiRouteHandler = (request: Request) => Promise<Response> | Response;
 type ApiRouteModule = {
-  POST?: (request: Request) => Promise<Response> | Response;
+  GET?: ApiRouteHandler;
+  POST?: ApiRouteHandler;
 };
 
 const optimizedDependencyIncludes = [
@@ -39,6 +41,7 @@ const optimizedDependencyIncludes = [
 const apiRouteModulePaths = {
   "/api/ai/command": "src/app/api/ai/command/route.ts",
   "/api/ai/copilot": "src/app/api/ai/copilot/route.ts",
+  "/api/uploadthing": "src/app/api/uploadthing/route.ts",
 };
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const distOutputPath = "dist";
@@ -262,7 +265,7 @@ export const eventChipDesign: EventChipDesign = {
 };
 const createApiRoutesPlugin = (): Plugin => {
   return {
-    name: "serve-plate-ai-api-routes",
+    name: "serve-app-api-routes",
     apply: "serve",
     configureServer(server) {
       server.middlewares.use(async (request, response, next) => {
@@ -272,23 +275,21 @@ const createApiRoutesPlugin = (): Plugin => {
           next();
           return;
         }
-        if (request.method !== "POST") {
-          writeJsonResponse(response, 405, { ok: false, error: "Method not allowed" });
-          return;
-        }
         try {
-          const body = await readRequestBody(request);
           const routeModule = await server.ssrLoadModule(`/@fs/${resolveFromRoot(modulePath)}`) as ApiRouteModule;
-          if (!routeModule.POST) {
-            writeJsonResponse(response, 500, { ok: false, error: "Route handler is missing" });
+          const routeMethod = request.method as keyof ApiRouteModule;
+          const routeHandler = routeModule[routeMethod];
+          if (!routeHandler) {
+            writeJsonResponse(response, 405, { ok: false, error: "Method not allowed" });
             return;
           }
+          const body = request.method === "GET" || request.method === "HEAD" ? undefined : await readRequestBody(request);
           const webRequest = new Request(`http://localhost${request.url ?? requestPath}`, {
             body,
             headers: createRequestHeaders(request),
             method: request.method,
           });
-          const webResponse = await routeModule.POST(webRequest);
+          const webResponse = await routeHandler(webRequest);
           await writeWebResponse(response, webResponse);
         } catch (error) {
           writeJsonResponse(response, 500, { ok: false, error: error instanceof Error ? error.message : "Invalid request" });
