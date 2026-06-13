@@ -1,62 +1,41 @@
 "use client";
-
 import * as React from "react";
-
 import { useEquationElement, useEquationInput } from "@platejs/math/react";
-
 import { BlockSelectionPlugin } from "@platejs/selection/react";
-
 import { CornerDownLeftIcon, RadicalIcon } from "lucide-react";
-
 import type { TEquationElement } from "platejs";
-
 import type { PlateElementProps } from "platejs/react";
-
 import { createPrimitiveComponent, PlateElement, useEditorRef, useEditorSelector, useElement, useReadOnly, useSelected } from "platejs/react";
-
 import type { TextareaAutosizeProps } from "react-textarea-autosize";
-
 import TextareaAutosize from "react-textarea-autosize";
-
 import { Button } from "@/chip/ui/button/button";
-
 import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
-
+import { inlineSuggestionVariants } from "@/chip/ui/plate/suggestion";
 import { cn } from "@/lib/utils";
-
-import { inlineSuggestionVariants } from "./suggestion";
-
-
 
 type EquationPopoverContentProps = {
   isInline: boolean;
   open: boolean;
   setOpen: (open: boolean) => void;
 } & TextareaAutosizeProps;
-
 type EquationElementWithBadgeProps = PlateElementProps<TEquationElement> & {
   lineBreakBadge?: React.ReactNode;
 };
 
-
-
 const EQUATION_RENDER_OPTIONS = {
   displayMode: true,
-  errorColor: "#c00",
+  errorColor: "#cc0000",
   fleqn: false,
   leqno: false,
-  macros: { "\f": "#1f(#2)" },
+  macros: { "\\f": "#1f(#2)" },
   output: "htmlAndMathml" as const,
   strict: "warn" as const,
   throwOnError: false,
   trust: false,
 };
-
 const EquationInput = createPrimitiveComponent(TextareaAutosize)({
   propsHook: useEquationInput,
 });
-
-
 
 const EquationPopoverContent = ({ className, isInline, open, setOpen, ...props }: EquationPopoverContentProps) => {
   const editor = useEditorRef();
@@ -98,7 +77,6 @@ const EquationPopoverContent = ({ className, isInline, open, setOpen, ...props }
     </PopoverContent>
   );
 };
-
 const EquationElement = (props: PlateElementProps<TEquationElement>) => {
   const selected = useSelected();
   const [open, setOpen] = React.useState(selected);
@@ -115,7 +93,7 @@ const EquationElement = (props: PlateElementProps<TEquationElement>) => {
         <PopoverTrigger asChild>
           <div
             className={cn(
-              "group flex cursor-pointer select-none items-center justify-center rounded-sm hover:bg-primary/10 data-[selected=true]:bg-primary/10",
+              "group flex cursor-pointer select-none items-center justify-center rounded-sm hover:bg-muted/60 data-[selected=true]:bg-muted/60",
               props.element.texExpression.length === 0 ? "bg-muted p-3 pr-9" : "px-2 py-1",
             )}
             contentEditable={false}
@@ -148,7 +126,6 @@ const EquationElement = (props: PlateElementProps<TEquationElement>) => {
     </PlateElement>
   );
 };
-
 const InlineEquationElement = (props: PlateElementProps<TEquationElement>) => {
   const { element } = props;
   const katexRef = React.useRef<HTMLDivElement | null>(null);
@@ -177,7 +154,7 @@ const InlineEquationElement = (props: PlateElementProps<TEquationElement>) => {
               'after:-top-0.5 after:-left-1 after:absolute after:inset-0 after:z-1 after:h-[calc(100%)+4px] after:w-[calc(100%+8px)] after:rounded-sm after:content-[""]',
               "h-6",
               inlineSuggestionVariants(),
-              ((element.texExpression.length > 0 && open) || selected) && "after:bg-brand/15",
+              ((element.texExpression.length > 0 && open) || selected) && "after:bg-muted-foreground/15",
               element.texExpression.length === 0 && "text-muted-foreground after:bg-neutral-500/10",
             )}
             contentEditable={false}
@@ -206,7 +183,5 @@ const InlineEquationElement = (props: PlateElementProps<TEquationElement>) => {
     </PlateElement>
   );
 };
-
-
 
 export { EquationElement, InlineEquationElement };
