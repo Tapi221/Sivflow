@@ -8,7 +8,11 @@ import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 const ToggleToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => {
   const state = useToggleToolbarButtonState();
   const { props: buttonProps } = useToggleToolbarButton(state);
-  return <ToolbarButton {...props} {...buttonProps} tooltip="Toggle"><ListCollapseIcon /></ToolbarButton>;
+  return (
+    <ToolbarButton {...props} {...buttonProps} tooltip="Toggle">
+      <ListCollapseIcon />
+    </ToolbarButton>
+  );
 };
 
 export { ToggleToolbarButton };
