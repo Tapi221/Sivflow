@@ -1,30 +1,19 @@
 "use client";
 
 import * as React from "react";
-
 import { AIChatPlugin } from "@platejs/ai/react";
-
-import { CalendarIcon, ChevronRightIcon, Code2, Columns3Icon, Heading1Icon, Heading2Icon, Heading3Icon, LightbulbIcon, ListIcon, ListOrdered, PenToolIcon, PilcrowIcon, Quote, RadicalIcon, SparklesIcon, Square, SuperscriptIcon, Table, TableOfContentsIcon } from "lucide-react";
-
+import { AudioLines, CalendarIcon, ChevronRightIcon, Code2, Columns3Icon, FileUp, Film, Heading1Icon, Heading2Icon, Heading3Icon, ImageIcon, LightbulbIcon, LinkIcon, ListIcon, ListOrdered, PenToolIcon, PilcrowIcon, Quote, RadicalIcon, SparklesIcon, Square, SuperscriptIcon, Table, TableOfContentsIcon } from "lucide-react";
 import type { TComboboxInputElement } from "platejs";
-
 import { KEYS } from "platejs";
-
 import type { PlateEditor, PlateElementProps } from "platejs/react";
-
 import { PlateElement } from "platejs/react";
-
+import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxGroupLabel, InlineComboboxInput, InlineComboboxItem } from "@/chip/ui/plate/inline-combobox";
 import { insertBlock, insertInlineElement } from "@/components/editor/transforms";
-
-import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxGroupLabel, InlineComboboxInput, InlineComboboxItem } from "./inline-combobox";
-
-
 
 type SlashGroup = {
   group: string;
   items: SlashItem[];
 };
-
 type SlashItem = {
   className?: string;
   description?: string;
@@ -35,8 +24,6 @@ type SlashItem = {
   onSelect: (editor: PlateEditor, value: string) => void;
   value: string;
 };
-
-
 
 const groups: SlashGroup[] = [
   {
@@ -135,6 +122,46 @@ const groups: SlashGroup[] = [
     })),
   },
   {
+    group: "Media",
+    items: [
+      {
+        icon: <ImageIcon />,
+        keywords: ["picture", "photo"],
+        label: "Image",
+        value: KEYS.img,
+      },
+      {
+        icon: <Film />,
+        keywords: ["movie", "mp4"],
+        label: "Video",
+        value: KEYS.video,
+      },
+      {
+        icon: <AudioLines />,
+        keywords: ["music", "mp3", "sound"],
+        label: "Audio",
+        value: KEYS.audio,
+      },
+      {
+        icon: <FileUp />,
+        keywords: ["pdf", "attachment"],
+        label: "File",
+        value: KEYS.file,
+      },
+      {
+        icon: <LinkIcon />,
+        keywords: ["embed", "iframe", "youtube"],
+        label: "Embed",
+        value: KEYS.mediaEmbed,
+      },
+    ].map((item) => ({
+      ...item,
+      onSelect: (editor, value) => {
+        insertBlock(editor, value, { upsert: true });
+      },
+    })),
+  },
+  {
     group: "Advanced blocks",
     items: [
       {
@@ -205,8 +232,6 @@ const groups: SlashGroup[] = [
   },
 ];
 
-
-
 const SlashInputElement = (props: PlateElementProps<TComboboxInputElement>) => {
   const { editor, element } = props;
   return (
@@ -240,7 +265,5 @@ const SlashInputElement = (props: PlateElementProps<TComboboxInputElement>) => {
     </PlateElement>
   );
 };
-
-
 
 export { SlashInputElement };
