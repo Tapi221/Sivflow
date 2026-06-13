@@ -1,4 +1,4 @@
-import type { LocalDBFallbackReasonCode } from "@/services/localdbRuntimeState";
+import type { LocalDBFallbackReasonCode } from "@/services/localDBRuntimeState";
 
 type UnknownRecord = Record<string, unknown>;
 type ErrorNameMessage = {
