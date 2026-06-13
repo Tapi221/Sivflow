@@ -33,8 +33,7 @@ const ImageElement = withHOC(ResizableProvider, (props: PlateElementProps<TImage
               className={mediaResizeHandleVariants({ direction: "left" })}
               options={{ direction: "left" }}
             />
-            <div>
-              <Image
+            <Image
                 ref={handleRef}
                 className={cn(
                   "block w-full max-w-full cursor-pointer object-cover px-0",
@@ -44,7 +43,6 @@ const ImageElement = withHOC(ResizableProvider, (props: PlateElementProps<TImage
                 )}
                 alt={props.attributes.alt as string | undefined}
               />
-            </div>
             <ResizeHandle
               className={mediaResizeHandleVariants({
                 direction: "right",

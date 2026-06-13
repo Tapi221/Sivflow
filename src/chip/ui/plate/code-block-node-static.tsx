@@ -123,6 +123,7 @@ const CodeSyntaxLeafDocx = (props: SlateLeafProps) => {
     </span>
   );
 };
+
 const CodeBlockElementStatic = CodeBlockNodeStatic;
 const CodeLineElementStatic = CodeLineNodeStatic;
 const CodeSyntaxLeaf = CodeSyntaxLeafStatic;

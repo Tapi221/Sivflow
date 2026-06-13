@@ -24,6 +24,7 @@ const trailingBlockPlugin = TrailingBlockPlugin.configure({
     },
   },
 });
+const SuggestionKit = [suggestionPlugin, trailingBlockPlugin];
 
 const getInlineSuggestionData = (editor: any, element: TElement) => {
   const suggestionApi = editor.getApi(BaseSuggestionPlugin).suggestion;
@@ -101,7 +102,6 @@ const suggestionPlugin = toTPlatePlugin<SuggestionConfig>(BaseSuggestionPlugin, 
     node: SuggestionLeaf,
   },
 });
-const SuggestionKit = [suggestionPlugin, trailingBlockPlugin];
 
 export { SuggestionKit, suggestionPlugin };
 export type { SuggestionConfig };
