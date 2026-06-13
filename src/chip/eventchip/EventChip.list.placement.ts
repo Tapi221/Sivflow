@@ -19,6 +19,11 @@ type CalendarListVirtualRange = {
   start: number;
   end: number;
 };
+type BuildListPlacementDaysParams = {
+  days: Date[];
+  events: GoogleCalendarEvent[];
+  selectedDate: Date;
+};
 
 const LIST_DAY_SECTION_MIN_HEIGHT_PX = 430;
 const LIST_DAY_GAP_PX = 8;
@@ -56,10 +61,7 @@ const getEventInstanceKey = (dateKey: string, event: GoogleCalendarEvent): strin
   const endsAt = new Date(event.endsAt).getTime();
   return `${dateKey}:${event.id}:${startsAt}:${endsAt}`;
 };
-const buildListPlacementDays = ({ days, events, selectedDate }: { days: Date[];
-  events: GoogleCalendarEvent[];
-  selectedDate: Date;
-}): CalendarListPlacementDay[] => {
+const buildListPlacementDays = ({ days, events, selectedDate }: BuildListPlacementDaysParams): CalendarListPlacementDay[] => {
   const resolvedDays = days.length > 0 ? days : buildMonthDays(selectedDate);
   const today = new Date();
   const eventsByDay = new Map<string, GoogleCalendarEvent[]>();
