@@ -58,7 +58,11 @@ const List = (props: ListItemProps) => {
   );
 };
 const BlockList: RenderNodeWrapper = (props) => {
-  if (!props.element.listStyleType) return;
+  const listStyleType = props.element.listStyleType;
+  if (listStyleType === undefined || listStyleType === null) return;
+  const hasListConfig = LIST_CONFIG[listStyleType] !== undefined;
+  const shouldRenderList = isOrderedList(props.element) || hasListConfig;
+  if (shouldRenderList !== true) return;
   return (nextProps) => <List {...nextProps} />;
 };
 
