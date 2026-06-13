@@ -7,7 +7,7 @@ import { CheckIcon, XIcon } from "lucide-react";
 import { useEditorPlugin, usePluginOption } from "platejs/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/chip/ui/avatar";
 import { Button } from "@/chip/ui/button/button";
-import { Comment, CommentCreateForm, formatCommentDate } from "@/chip/ui/comment";
+import { Comment, CommentCreateForm, formatCommentDate } from "@/chip/ui/plate/comment";
 import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 import type { ResolvedSuggestion } from "@/lib/block-discussion-index";
