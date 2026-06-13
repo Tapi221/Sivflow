@@ -20,6 +20,13 @@ type ListConfig = Record<
 >;
 
 const TODO_CHECKBOX_CLASSNAME = "-left-6 absolute top-1 size-4 border-input bg-background shadow-none data-[state=checked]:border-foreground data-[state=checked]:bg-foreground data-[state=checked]:text-background";
+const LIST_CONFIG: ListConfig = {
+  todo: {
+    Li: TodoLi,
+    Marker: TodoMarker,
+  },
+};
+
 const TodoMarker = (props: PlateElementProps) => {
   const state = useTodoListElementState({ element: props.element });
   const todoProps = Object.values(useTodoListElement(state))[0];
@@ -41,7 +48,7 @@ const TodoLi = (props: ListItemProps) => {
     <li
       className={cn(
         "list-none",
-        (props.element.checked as boolean) && "text-muted-foreground line-through",
+        props.element.checked === true && "text-muted-foreground line-through",
       )}
     >
       {props.children}
@@ -49,15 +56,9 @@ const TodoLi = (props: ListItemProps) => {
     </li>
   );
 };
-const config: ListConfig = {
-  todo: {
-    Li: TodoLi,
-    Marker: TodoMarker,
-  },
-};
 const List = (props: ListItemProps) => {
   const { listStart, listStyleType } = props.element as TListElement;
-  const { Li, Marker } = config[listStyleType] ?? {};
+  const { Li, Marker } = LIST_CONFIG[listStyleType] ?? {};
   const ListTag = isOrderedList(props.element) ? "ol" : "ul";
   return (
     <ListTag className="relative m-0 p-0" style={{ listStyleType }} start={listStart}>
@@ -75,7 +76,6 @@ const List = (props: ListItemProps) => {
 };
 const BlockList: RenderNodeWrapper = (props) => {
   if (!props.element.listStyleType) return;
-  if (!isOrderedList(props.element)) return;
   return (nextProps) => <List {...nextProps} />;
 };
 
