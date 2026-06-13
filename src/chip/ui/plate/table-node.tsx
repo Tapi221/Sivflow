@@ -204,7 +204,6 @@ const useTableResizeController = ({ dragIndicatorRef, effectiveColSizes, hoverIn
   }, [hideIndicator, hoverIndicatorRef]);
   return React.useMemo(() => ({ clearResizePreview, setResizePreview, startResize }), [clearResizePreview, setResizePreview, startResize]);
 };
-
 const TableActionButton = ({ children, disabled, onAction, tooltip }: TableActionButtonProps) => {
   const editor = useEditorRef();
   return (
@@ -392,7 +391,7 @@ const TableCellElement = ({ isHeader, ...props }: TableCellElementProps) => {
   const { colIndex, rowIndex } = getCellIndicesFromPath(path);
   const { element } = props;
   const { api } = editor.getPlugin(TablePlugin);
-  const { minHeight, width } = api.table.getCellSize({ element });
+  const { minHeight, width } = api.table.getCellSize(props);
   const borders = api.table.getCellBorders({ element });
   const colSpan = api.table.getColSpan(element);
   const rowSpan = api.table.getRowSpan(element);
