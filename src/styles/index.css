@@ -17,9 +17,7 @@
 @import "./tokens/font.css";
 @import "./components/index.css";
 @import "./base/utilities.css";
-
 @import "./tokens/code-theme.css";
-
 @config "../../tailwind.config.js";
 
 :root {
@@ -98,16 +96,5 @@ a:hover,
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
-  }
-}
-
-@layer base {
-  :root {
-    --highlight: oklch(0.852 0.199 91.936);
-    --brand: oklch(0.623 0.214 259.815);
-  }
-  .dark {
-    --highlight: oklch(0.852 0.199 91.936);
-    --brand: oklch(0.707 0.165 254.624);
   }
 }
