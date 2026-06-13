@@ -1,6 +1,8 @@
-import "@/chip/panel/panel.css";
+import "./panel.css";
 import { memo } from "react";
 import type { AriaRole, CSSProperties, MouseEventHandler, ReactNode, RefObject } from "react";
+
+
 
 type PanelProps = {
   id?: string;
@@ -13,7 +15,11 @@ type PanelProps = {
   children?: ReactNode;
 };
 
+
+
 const getPanelClassName = (className?: string): string => ["panel", className].filter(Boolean).join(" ");
+
+
 
 const PanelBase = ({ id, panelRef, style, className, role, ariaLabel, onContextMenu, children }: PanelProps) => {
   return (
@@ -23,8 +29,12 @@ const PanelBase = ({ id, panelRef, style, className, role, ariaLabel, onContextM
   );
 };
 
+
+
 const Panel = memo(PanelBase);
 Panel.displayName = "Panel";
 
 export { Panel };
+
+
 export type { PanelProps };
