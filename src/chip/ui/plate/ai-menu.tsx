@@ -20,6 +20,11 @@ type AIAction = {
   prompt?: string;
   toolName?: "edit" | "generate" | "comment";
 };
+type AIChatApi = {
+  aiChat: {
+    submit: (value: string, options?: Pick<AIAction, "prompt" | "toolName">) => unknown;
+  };
+};
 
 const aiActions: AIAction[] = [
   {
@@ -52,13 +57,12 @@ const aiActions: AIAction[] = [
   },
 ];
 
-const submitPrompt = (input: string, action: AIAction, api: ReturnType<typeof useEditorPlugin<typeof AIChatPlugin>>["api"]) => {
+const submitPrompt = (input: string, action: AIAction, api: AIChatApi) => {
   void api.aiChat.submit(input, {
     prompt: action.prompt,
     toolName: action.toolName,
   });
 };
-
 const AIMenuItems = ({ input, setInput, setValue }: AIMenuItemsProps) => {
   const { api, editor } = useEditorPlugin(AIChatPlugin);
   const submitInput = () => {
