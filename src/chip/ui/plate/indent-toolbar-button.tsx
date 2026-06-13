@@ -3,18 +3,21 @@ import { IndentDecreaseIcon, IndentIncreaseIcon } from "lucide-react";
 import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
 import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
-type IndentToolbarButtonProps = ToolbarButtonProps & {
-  reverse?: boolean;
-};
-
-const IndentToolbarButton = ({ children, reverse, ...props }: IndentToolbarButtonProps) => {
-  const { props: buttonProps } = reverse ? useOutdentButton() : useIndentButton();
+const IndentToolbarButton = (props: ToolbarButtonProps) => {
+  const { props: buttonProps } = useIndentButton();
   return (
-    <ToolbarButton {...props} {...buttonProps} tooltip={reverse ? "Outdent" : "Indent"}>
-      {children ?? (reverse ? <IndentDecreaseIcon /> : <IndentIncreaseIcon />)}
+    <ToolbarButton {...props} {...buttonProps} tooltip="Indent">
+      <IndentIncreaseIcon />
+    </ToolbarButton>
+  );
+};
+const OutdentToolbarButton = (props: ToolbarButtonProps) => {
+  const { props: buttonProps } = useOutdentButton();
+  return (
+    <ToolbarButton {...props} {...buttonProps} tooltip="Outdent">
+      <IndentDecreaseIcon />
     </ToolbarButton>
   );
 };
 
-export { IndentToolbarButton };
-export type { IndentToolbarButtonProps };
+export { IndentToolbarButton, OutdentToolbarButton };
