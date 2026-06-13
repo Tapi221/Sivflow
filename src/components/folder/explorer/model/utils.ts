@@ -3,8 +3,6 @@ import { hasOpenModalDialog } from "@/features/hotkey/modalGuards";
 import type { Card, DocumentItem } from "@/types";
 import { toMillis } from "@/utils/toMillis";
 
-
-
 type FolderTreeNode = {
   id?: string;
   folderId?: string;
@@ -24,16 +22,12 @@ type FolderTreeNode = {
   [key: string]: unknown;
 };
 
-
-
 const ROOT_FOLDER_ID = "";
 const DEFAULT_NEW_PROJECT_NAME = "新規プロジェクト";
 const DEFAULT_NEW_FOLDER_NAME = "新規フォルダ";
 const DEFAULT_NEW_CARD_SET_NAME = "新規カードセット";
 const UNTITLED_PROJECT_NAME = "無題のプロジェクト";
 const UNTITLED_FOLDER_NAME = "無題のフォルダ";
-
-
 
 const getFolderId = (folder: FolderTreeNode): string => String(folder?.id ?? folder?.folderId ?? "");
 const getParentFolderId = (folder: FolderTreeNode): string | null => {
@@ -62,9 +56,5 @@ const extractPdfFiles = (fileList: FileList | null): File[] => {
   });
 };
 
-
-
 export { hasOpenModalDialog, ROOT_FOLDER_ID, DEFAULT_NEW_PROJECT_NAME, DEFAULT_NEW_FOLDER_NAME, DEFAULT_NEW_CARD_SET_NAME, UNTITLED_PROJECT_NAME, UNTITLED_FOLDER_NAME, getFolderId, getParentFolderId, normalizeFolderId, isSameFolder, getEntityTime, createOptimisticId, createDocumentId, buildStoragePath, isTextInputTarget, isFileDragEvent, extractPdfFiles };
-
-
 export type { Card, DocumentItem, FolderTreeNode };

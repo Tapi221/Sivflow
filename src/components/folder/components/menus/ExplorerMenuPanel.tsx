@@ -1,10 +1,8 @@
 import React from "react";
 import { DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/chip/panel/dropdown-menu";
 import { floatingPanelPresets } from "@/chip/ui/menu-styles";
-import type { MenuAction } from "./menuActions";
+import type { MenuAction } from "@/components/folder/components/menus/menuActions";
 import { cn } from "@/lib/utils";
-
-
 
 type ExplorerMenuPanelVariant = "default" | "create" | "folderContext";
 interface ExplorerMenuPanelProps extends React.ComponentPropsWithoutRef<
@@ -14,8 +12,6 @@ interface ExplorerMenuPanelProps extends React.ComponentPropsWithoutRef<
   closeMenu?: () => void;
   variant?: ExplorerMenuPanelVariant;
 }
-
-
 
 const DANGER_ITEM_CLASS =
   "ds-floating-panel__row--danger ds-menu__item--danger";
@@ -50,8 +46,6 @@ const PLAIN_MENU_ROW_STYLE = {
 } satisfies React.CSSProperties;
 const PLAIN_MENU_LABEL_CLASS =
   "flex h-full min-w-0 flex-1 items-center truncate pr-1 text-left leading-[26px]";
-
-
 
 /**
  * エクスプローラーの各種メニュー（追加ボタン、コンテキストメニュー）で共有されるパネルコンポーネント
@@ -140,9 +134,5 @@ const ExplorerMenuPanel = ({ actions, closeMenu, className, variant = "default",
   );
 };
 
-
-
 export { ExplorerMenuPanel };
-
-
 export type { ExplorerMenuPanelVariant };

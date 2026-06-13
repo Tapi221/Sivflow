@@ -1,18 +1,11 @@
 "use client";
 
 import * as React from "react";
-
 import type { ResizeHandle as ResizeHandlePrimitive } from "@platejs/resizable";
-
 import { Resizable as ResizablePrimitive, useResizeHandle, useResizeHandleState } from "@platejs/resizable";
-
 import type { VariantProps } from "class-variance-authority";
-
 import { cva } from "class-variance-authority";
-
 import { cn } from "@/lib/utils";
-
-
 
 const mediaResizeHandleVariants = cva(
   cn(
@@ -28,7 +21,6 @@ const mediaResizeHandleVariants = cva(
     },
   },
 );
-
 const resizeHandleVariants = cva("absolute z-40", {
   variants: {
     direction: {
@@ -39,7 +31,6 @@ const resizeHandleVariants = cva("absolute z-40", {
     },
   },
 });
-
 const resizableVariants = cva("", {
   variants: {
     align: {
@@ -49,8 +40,6 @@ const resizableVariants = cva("", {
     },
   },
 });
-
-
 
 const ResizeHandle = ({ className, options, ...props }: React.ComponentProps<typeof ResizeHandlePrimitive> & VariantProps<typeof resizeHandleVariants>) => {
   const state = useResizeHandleState(options ?? {});
@@ -68,11 +57,8 @@ const ResizeHandle = ({ className, options, ...props }: React.ComponentProps<typ
     />
   );
 };
-
 const Resizable = ({ align, className, ...props }: React.ComponentProps<typeof ResizablePrimitive> & VariantProps<typeof resizableVariants>) => {
   return <ResizablePrimitive {...props} className={cn(resizableVariants({ align }), className)} />;
 };
-
-
 
 export { mediaResizeHandleVariants, ResizeHandle, Resizable };

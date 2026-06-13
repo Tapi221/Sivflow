@@ -1,10 +1,8 @@
 import { useMemo } from "react";
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
-import type { ScheduleColumnBuffer } from "./ScheduleColumn.shared";
-import { buildScheduleDisplayDays, buildScheduleInteractionDays, buildScheduleVirtualRail } from "./ScheduleColumn.shared";
+import type { ScheduleColumnBuffer } from "@/features/calendar/grid/ScheduleColumn.shared";
+import { buildScheduleDisplayDays, buildScheduleInteractionDays, buildScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
-
-
 
 type UseScheduleDaysParams = {
   anchorDate: Date;
@@ -12,8 +10,6 @@ type UseScheduleDaysParams = {
   buffer: ScheduleColumnBuffer;
   weekStartDay: CalendarWeekStartDay;
 };
-
-
 
 const VIRTUAL_RAIL_VIEW_MODES = new Set<CalendarViewMode>([
   "days",
@@ -23,8 +19,6 @@ const VIRTUAL_RAIL_VIEW_MODES = new Set<CalendarViewMode>([
   "list",
   "pieChart",
 ]);
-
-
 
 const useScheduleDays = ({ anchorDate, viewMode, buffer, weekStartDay }: UseScheduleDaysParams) => {
   return useMemo(() => {
@@ -50,7 +44,5 @@ const useScheduleDays = ({ anchorDate, viewMode, buffer, weekStartDay }: UseSche
     };
   }, [anchorDate, buffer, viewMode, weekStartDay]);
 };
-
-
 
 export { useScheduleDays };

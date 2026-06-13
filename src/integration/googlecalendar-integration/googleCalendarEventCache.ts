@@ -1,7 +1,5 @@
 import { Dexie } from "dexie";
-import type { GoogleCalendarEvent } from "./gcalSync.types";
-
-
+import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 type GoogleCalendarEventCacheRow = {
   id: string;
@@ -28,14 +26,10 @@ type ReadCachedGoogleCalendarEventsOptions = {
   rangeEnd?: Date;
 };
 
-
-
 const GOOGLE_CALENDAR_EVENT_CACHE_DB_NAME = "flashcard-master-google-calendar-event-cache";
 const GOOGLE_CALENDAR_EVENT_CACHE_ACCOUNT_FALLBACK = "__unknown_account__";
 const GOOGLE_CALENDAR_EVENT_CACHE_CHUNK_SIZE = 500;
 let cacheDb: CalendarEventCacheDatabase | null = null;
-
-
 
 const canUseIndexedDb = (): boolean => typeof indexedDB !== "undefined";
 const getCacheDb = (): CalendarEventCacheDatabase | null => {
@@ -209,7 +203,5 @@ const clearCachedGoogleCalendarAccount = async (accountId: string | undefined): 
 
   await db.googleCalendarEvents.where("accountId").equals(getResolvedAccountId(accountId)).delete();
 };
-
-
 
 export { readCachedGoogleCalendarEvents, upsertCachedGoogleCalendarEvent, replaceCachedGoogleCalendarRange, deleteCachedGoogleCalendarEvent, clearCachedGoogleCalendarAccount };

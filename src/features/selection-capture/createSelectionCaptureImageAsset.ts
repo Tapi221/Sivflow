@@ -5,8 +5,6 @@ import { persistentQueue } from "@/services/PersistentOfflineQueue";
 import type { AssetRecord, UploadedImage } from "@/types";
 import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize.utils";
 
-
-
 const buildAssetRemoteKey = (uid: string, assetId: string) => `users/${uid}/assets/${assetId}`;
 const createSelectionCaptureImageAsset = async ({ blob, userId }: { blob: Blob;
   userId: string;
@@ -70,7 +68,5 @@ const createSelectionCaptureImageAsset = async ({ blob, userId }: { blob: Blob;
     layout: null,
   } satisfies UploadedImage;
 };
-
-
 
 export { createSelectionCaptureImageAsset };

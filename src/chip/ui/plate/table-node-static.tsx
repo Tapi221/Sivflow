@@ -5,13 +5,9 @@ import { SlateElement } from "platejs/static";
 import type { SlateElementProps } from "platejs/static";
 import { cn } from "@/lib/utils";
 
-
-
 type TableCellElementStaticProps = SlateElementProps<TTableCellElement> & {
   isHeader?: boolean;
 };
-
-
 
 const TableElementStatic = ({ children, ...props }: SlateElementProps<TTableElement>) => {
   const { disableMarginLeft } = props.editor.getOptions(BaseTablePlugin);
@@ -86,9 +82,5 @@ const TableCellHeaderElementStatic = (props: SlateElementProps<TTableCellElement
   return <TableCellElementStatic {...props} isHeader />;
 };
 
-
-
 export { TableElementStatic, TableRowElementStatic, TableCellElementStatic, TableCellHeaderElementStatic };
-
-
 export type { TableCellElementStaticProps };

@@ -2,9 +2,7 @@ import React from "react";
 import { Button } from "@/chip/ui/button/button";
 import { Card, CardContent } from "@/chip/ui/card";
 import type { PracticeFilterRating } from "@/features/study/hooks/usePracticeMode";
-import { RatingCountTiles } from "./RatingCountTiles";
-
-
+import { RatingCountTiles } from "@/features/study/RatingCountTiles";
 
 type Tile = {
   rating: PracticeFilterRating; score: number; Icon: unknown; };
@@ -18,8 +16,6 @@ type Props = {
   onBackToSchedule: () => void;
   compact?: boolean;
 };
-
-
 
 const StudyComplete = ({ ratingTiles, ratingCounts, isPracticeFeatureEnabled, results, ratingLabels, handleStartPractice, onBackToSchedule, compact = false }: Props) => {
   const faceDesign = { forgot: { iconWrap: "bg-red-50 text-[#FF5A65] face-badge-convex", labelHover: "group-hover:text-[#FF5A65]", svg: (<> <circle cx="12" cy="12" r="10" stroke="none" /> <path d="M16 16s-1.5-2-4-2-4 2-4 2" /> <line x1="9" y1="9" x2="9.01" y2="9" /> <line x1="15" y1="9" x2="15.01" y2="9" /> </>) }, vague: { iconWrap: "bg-amber-50 text-[#F9A825] face-badge-convex", labelHover: "group-hover:text-[#F9A825]", svg: (<> <line x1="8" y1="15" x2="16" y2="15" /> <line x1="9" y1="9" x2="9.01" y2="9" /> <line x1="15" y1="9" x2="15.01" y2="9" /> </>) }, remembered: { iconWrap: "bg-blue-50 text-[#00A3FF] face-badge-convex", labelHover: "group-hover:text-[#00A3FF]", svg: (<> <path d="M8 14s1.5 2 4 2 4-2 4-2" /> <line x1="9" y1="9" x2="9.01" y2="9" /> <line x1="15" y1="9" x2="15.01" y2="9" /> </>) }, easy: { iconWrap: "bg-emerald-50 text-[#00B67A] face-badge-convex", labelHover: "group-hover:text-[#00B67A]", svg: (<> <path d="M8 13s1.5 3 4 3 4-3 4-3" /> <line x1="9" y1="9" x2="9.01" y2="9" /> <line x1="15" y1="9" x2="15.01" y2="9" /> </>) } } as const;
@@ -132,7 +128,5 @@ const StudyComplete = ({ ratingTiles, ratingCounts, isPracticeFeatureEnabled, re
     </div>
   );
 };
-
-
 
 export { StudyComplete };

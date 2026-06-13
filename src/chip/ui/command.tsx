@@ -5,8 +5,6 @@ import { Search } from "lucide-react";
 import { Dialog, DialogContent } from "@/chip/ui/dialog/dialog";
 import { cn } from "@/lib/utils";
 
-
-
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive>
@@ -117,8 +115,6 @@ const CommandShortcut = ({
     />
   );
 };
-
-
 
 Command.displayName = CommandPrimitive.displayName;
 CommandInput.displayName = CommandPrimitive.Input.displayName;

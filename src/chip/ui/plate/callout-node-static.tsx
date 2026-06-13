@@ -2,11 +2,7 @@ import type { SlateElementProps } from "platejs/static";
 import { SlateElement } from "platejs/static";
 import { cn } from "@/lib/utils";
 
-
-
 const EMOJI_FONT_FAMILY = "\"Apple Color Emoji\", \"Segoe UI Emoji\", NotoColorEmoji, \"Noto Color Emoji\", \"Segoe UI Symbol\", \"Android Emoji\", EmojiSymbols";
-
-
 
 const CalloutElementStatic = ({ children, className, ...props }: SlateElementProps) => {
   const backgroundColor = props.element.backgroundColor as string | undefined;
@@ -74,7 +70,5 @@ const CalloutElementDocx = ({ children, ...props }: SlateElementProps) => {
     </SlateElement>
   );
 };
-
-
 
 export { CalloutElementDocx, CalloutElementStatic };

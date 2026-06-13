@@ -1,6 +1,4 @@
-import type { SelectionCaptureArea, SelectionCapturePoint } from "./selectionCapture.types";
-
-
+import type { SelectionCaptureArea, SelectionCapturePoint } from "@/features/selection-capture/selectionCapture.types";
 
 const drawFreehandPath = (context: CanvasRenderingContext2D, path: SelectionCapturePoint[]): void => {
   if (path.length === 0) return;
@@ -20,7 +18,5 @@ const applySelectionCaptureMask = (context: CanvasRenderingContext2D, area: Sele
   context.fill();
   context.globalCompositeOperation = "source-over";
 };
-
-
 
 export { applySelectionCaptureMask };

@@ -1,37 +1,23 @@
 "use client";
 
 import * as React from "react";
-
 import type { DropdownMenuItemProps, DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
-
 import { useComposedRef } from "@udecode/cn";
-
 import debounce from "lodash/debounce.js";
-
 import { CheckIcon, EraserIcon, PlusIcon } from "lucide-react";
-
 import type { PlateEditor } from "platejs/react";
-
 import { useEditorRef, useEditorSelector } from "platejs/react";
-
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-
 import { buttonVariants } from "@/chip/ui/button/button";
-
-import { ToolbarButton, ToolbarMenuGroup } from "./toolbar";
-
+import { ToolbarButton, ToolbarMenuGroup } from "@/chip/ui/plate/toolbar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/ui/tooltip";
-
 import { cn } from "@/lib/utils";
-
-
 
 type TColor = {
   isBrightColor: boolean;
   name: string;
   value: string;
 };
-
 type ColorDropdownMenuItemProps = {
   isBrightColor: boolean;
   isSelected: boolean;
@@ -39,13 +25,11 @@ type ColorDropdownMenuItemProps = {
   updateColor: (color: string) => void;
   value: string;
 } & DropdownMenuItemProps;
-
 type ColorDropdownMenuItemsProps = {
   color?: string;
   colors: TColor[];
   updateColor: (color: string) => void;
 } & React.ComponentProps<"div">;
-
 type ColorCustomProps = {
   color?: string;
   colors: TColor[];
@@ -56,7 +40,6 @@ type ColorCustomProps = {
   updateCustomColor: (color: string) => void;
   updatedColor?: string;
 } & React.ComponentPropsWithoutRef<"div">;
-
 type PureColorPickerProps = {
   clearColor: () => void;
   color?: string;
@@ -68,20 +51,14 @@ type PureColorPickerProps = {
   updateCustomColor: (color: string) => void;
   updatedColor?: string;
 } & React.ComponentProps<"div">;
-
 type FontColorToolbarButtonProps = {
   nodeType: string;
   tooltip?: string;
 } & DropdownMenuProps;
 
-
-
 const MAX_CUSTOM_COLORS = 19;
-
 const MAX_COLOR_QUEUE = 30;
-
 const HEX_COLOR_RE = /^#[\da-f]{6}$/i;
-
 const DEFAULT_CUSTOM_COLORS: TColor[] = [
   { isBrightColor: false, name: "dark orange 3", value: "#783f04" },
   { isBrightColor: false, name: "dark grey 3", value: "#666" },
@@ -89,7 +66,6 @@ const DEFAULT_CUSTOM_COLORS: TColor[] = [
   { isBrightColor: false, name: "light cornflower blue 1", value: "#6c9eeb" },
   { isBrightColor: false, name: "dark magenta 3", value: "#4c1130" },
 ];
-
 const DEFAULT_COLORS: TColor[] = [
   { isBrightColor: false, name: "black", value: "#000" },
   { isBrightColor: false, name: "dark grey 4", value: "#434343" },
@@ -113,14 +89,9 @@ const DEFAULT_COLORS: TColor[] = [
   { isBrightColor: false, name: "magenta", value: "#f0f" },
 ];
 
-
-
 const normalizeColor = (color: string): string => color.toLowerCase();
-
 const isValidHexColor = (color: string): boolean => HEX_COLOR_RE.test(color);
-
 const isDefaultColor = (color: string): boolean => DEFAULT_COLORS.some((defaultColor) => normalizeColor(defaultColor.value) === color);
-
 const computeIsBrightColor = (hex: string): boolean => {
   if (!isValidHexColor(hex)) return false;
   const r = Number.parseInt(hex.slice(1, 3), 16);
@@ -128,7 +99,6 @@ const computeIsBrightColor = (hex: string): boolean => {
   const b = Number.parseInt(hex.slice(5, 7), 16);
   return (r * 299 + g * 587 + b * 114) / 1000 > 130;
 };
-
 const getEditorColorMarks = (editor: PlateEditor, nodeType: string): string[] => {
   const usedColors = new Set<string>();
   for (const [node] of editor.api.nodes({ at: [], match: (node) => "text" in node && typeof (node as Record<string, unknown>)[nodeType] === "string", mode: "all" })) {
@@ -136,8 +106,6 @@ const getEditorColorMarks = (editor: PlateEditor, nodeType: string): string[] =>
   }
   return Array.from(usedColors);
 };
-
-
 
 const ColorInput = ({ children, className, value = "#000", ...props }: React.ComponentProps<"input"> & { className?: string }) => {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
@@ -148,7 +116,6 @@ const ColorInput = ({ children, className, value = "#000", ...props }: React.Com
     </div>
   );
 };
-
 const ColorDropdownMenuItem = ({ className, isBrightColor, isSelected, name, updateColor, value, ...props }: ColorDropdownMenuItemProps) => {
   const content = (
     <DropdownMenuItem
@@ -175,7 +142,6 @@ const ColorDropdownMenuItem = ({ className, isBrightColor, isSelected, name, upd
     </Tooltip>
   ) : content;
 };
-
 const ColorDropdownMenuItems = ({ className, color, colors, updateColor, ...props }: ColorDropdownMenuItemsProps) => {
   return (
     <div className={cn("grid grid-cols-[repeat(10,1fr)] place-items-center gap-x-1", className)} {...props}>
@@ -195,7 +161,6 @@ const ColorDropdownMenuItems = ({ className, color, colors, updateColor, ...prop
     </div>
   );
 };
-
 const ColorCustom = ({ className, color, colors, colorsQueue, customColors, recordColorUsage, updateColor, updateCustomColor, updatedColor, ...props }: ColorCustomProps) => {
   const [value, setValue] = React.useState<string>(color ?? "#000");
   const fullCustomColors = React.useMemo(
@@ -252,7 +217,6 @@ const ColorCustom = ({ className, color, colors, colorsQueue, customColors, reco
     </div>
   );
 };
-
 const PureColorPicker = ({ className, clearColor, color, colors, colorsQueue, customColors, recordColorUsage, updateColor, updateCustomColor, updatedColor, ...props }: PureColorPickerProps) => {
   return (
     <div className={cn("flex flex-col", className)} {...props}>
@@ -283,7 +247,6 @@ const PureColorPicker = ({ className, clearColor, color, colors, colorsQueue, cu
     </div>
   );
 };
-
 const FontColorToolbarButton = ({ children, nodeType, tooltip, ...props }: FontColorToolbarButtonProps) => {
   const editor = useEditorRef();
   const selectionDefined = useEditorSelector((nextEditor) => Boolean(nextEditor.selection), []);
@@ -366,12 +329,7 @@ const FontColorToolbarButton = ({ children, nodeType, tooltip, ...props }: FontC
   );
 };
 
-
-
 const ColorPicker = React.memo(PureColorPicker, (prev, next) => prev.color === next.color && prev.colors === next.colors && prev.colorsQueue === next.colorsQueue && prev.customColors === next.customColors && prev.updatedColor === next.updatedColor);
 
 export { DEFAULT_COLORS, FontColorToolbarButton, ColorDropdownMenuItems };
-
-
-
 export type { TColor };

@@ -1,18 +1,11 @@
 "use client";
 
 import * as React from "react";
-
 import type { VariantProps } from "class-variance-authority";
-
 import { cva } from "class-variance-authority";
-
 import type { PlateContentProps, PlateViewProps } from "platejs/react";
-
 import { PlateContainer, PlateContent, PlateView } from "platejs/react";
-
 import { cn } from "@/lib/utils";
-
-
 
 const editorContainerVariants = cva(
   "relative w-full cursor-text select-text overflow-y-auto caret-primary selection:bg-brand/25 focus-visible:outline-none [&_.slate-selection-area]:z-50 [&_.slate-selection-area]:border [&_.slate-selection-area]:border-brand/25 [&_.slate-selection-area]:bg-brand/15",
@@ -38,7 +31,6 @@ const editorContainerVariants = cva(
     },
   },
 );
-
 const editorVariants = cva(
   cn(
     "group/editor",
@@ -72,16 +64,11 @@ const editorVariants = cva(
   },
 );
 
-
-
 type EditorProps = PlateContentProps & VariantProps<typeof editorVariants>;
-
-
 
 const EditorContainer = ({ className, variant, ...props }: React.ComponentProps<"div"> & VariantProps<typeof editorContainerVariants>) => {
   return <PlateContainer className={cn("ignore-click-outside/toolbar", editorContainerVariants({ variant }), className)} {...props} />;
 };
-
 const Editor = ({ className, disabled, focused, variant, ref, ...props }: EditorProps & { ref?: React.RefObject<HTMLDivElement | null> }) => {
   return (
     <PlateContent
@@ -100,19 +87,12 @@ const Editor = ({ className, disabled, focused, variant, ref, ...props }: Editor
     />
   );
 };
-
 const EditorView = ({ className, variant, ...props }: PlateViewProps & VariantProps<typeof editorVariants>) => {
   return <PlateView {...props} className={cn(editorVariants({ variant }), className)} />;
 };
 
-
-
 Editor.displayName = "Editor";
-
 EditorView.displayName = "EditorView";
 
 export { EditorContainer, Editor, EditorView };
-
-
-
 export type { EditorProps };

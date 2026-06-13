@@ -3,8 +3,6 @@ import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { ISyncService } from "@/services/interfaces/ISyncService";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 
-
-
 const useSync = () => {
   const { currentUser } = useAuthSession();
   const [syncProgress, setSyncProgress] = useState<string>("");
@@ -38,7 +36,5 @@ const useSync = () => {
 
   return { forceSync, syncProgress };
 };
-
-
 
 export { useSync };
