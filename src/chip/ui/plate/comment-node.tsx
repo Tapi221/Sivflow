@@ -2,9 +2,13 @@ import type { PlateElementProps } from "platejs/react";
 import { PlateElement } from "platejs/react";
 import { cn } from "@/lib/utils";
 
+
+
 type CommentNodeProps = PlateElementProps & {
   active?: boolean;
 };
+
+
 
 const CommentNode = ({ active, className, children, ...props }: CommentNodeProps) => (
   <PlateElement
@@ -15,7 +19,13 @@ const CommentNode = ({ active, className, children, ...props }: CommentNodeProps
   </PlateElement>
 );
 
+
+
 const CommentLeaf = CommentNode;
 
+
+
 export { CommentLeaf, CommentNode };
+
+
 export type { CommentNodeProps };

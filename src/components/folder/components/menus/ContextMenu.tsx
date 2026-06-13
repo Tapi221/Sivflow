@@ -1,9 +1,11 @@
 import { useMemo, useRef } from "react";
 import type { ReactNode } from "react";
 import { DropdownMenu, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-import type { ExplorerMenuPanelVariant } from "@/components/folder/components/menus/ExplorerMenuPanel";
-import { ExplorerMenuPanel } from "@/components/folder/components/menus/ExplorerMenuPanel";
-import type { MenuAction } from "@/components/folder/components/menus/menuActions";
+import type { ExplorerMenuPanelVariant } from "./ExplorerMenuPanel";
+import { ExplorerMenuPanel } from "./ExplorerMenuPanel";
+import type { MenuAction } from "./menuActions";
+
+
 
 interface ContextMenuProps {
   children?: ReactNode;
@@ -15,7 +17,11 @@ interface ContextMenuProps {
   variant?: ExplorerMenuPanelVariant;
 }
 
+
+
 const CONTEXT_MENU_COLLISION_PADDING_PX = 8;
+
+
 
 /**
  * 右クリックなどで表示される汎用的なコンテキストメニューのコンテナ
@@ -71,5 +77,7 @@ const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions, class
     </DropdownMenu>
   );
 };
+
+
 
 export { ContextMenu };

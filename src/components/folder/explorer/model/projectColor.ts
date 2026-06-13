@@ -1,8 +1,12 @@
-import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
-import { getFolderId } from "@/components/folder/explorer/model/utils";
+import type { FolderTreeNode } from "./utils";
+import { getFolderId } from "./utils";
+
+
 
 const PROJECT_COLOR_PALETTE = ["#2f9d63", "#e25555", "#3f7fe5", "#d99600", "#1f9aa5", "#4f8f63", "#7c62d9", "#e8783c"];
 const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
+
+
 
 const isProjectColor = (value: unknown): value is string => typeof value === "string" && HEX_COLOR_PATTERN.test(value);
 const hashString = (value: string): number => {
@@ -22,5 +26,7 @@ const getFolderProjectColor = (folder: FolderTreeNode): string => {
 
   return getFallbackProjectColor(getFolderId(folder));
 };
+
+
 
 export { isProjectColor, getFallbackProjectColor, getFolderProjectColor };

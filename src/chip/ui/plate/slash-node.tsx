@@ -1,19 +1,30 @@
 "use client";
 
 import * as React from "react";
+
 import { AIChatPlugin } from "@platejs/ai/react";
+
 import { CalendarIcon, ChevronRightIcon, Code2, Columns3Icon, Heading1Icon, Heading2Icon, Heading3Icon, LightbulbIcon, ListIcon, ListOrdered, PenToolIcon, PilcrowIcon, Quote, RadicalIcon, SparklesIcon, Square, SuperscriptIcon, Table, TableOfContentsIcon } from "lucide-react";
+
 import type { TComboboxInputElement } from "platejs";
+
 import { KEYS } from "platejs";
+
 import type { PlateEditor, PlateElementProps } from "platejs/react";
+
 import { PlateElement } from "platejs/react";
-import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxGroupLabel, InlineComboboxInput, InlineComboboxItem } from "@/chip/ui/plate/inline-combobox";
+
+import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxGroupLabel, InlineComboboxInput, InlineComboboxItem } from "./inline-combobox";
+
 import { insertBlock, insertInlineElement } from "@/components/editor/transforms";
+
+
 
 type SlashGroup = {
   group: string;
   items: SlashItem[];
 };
+
 type SlashItem = {
   className?: string;
   description?: string;
@@ -24,6 +35,8 @@ type SlashItem = {
   onSelect: (editor: PlateEditor, value: string) => void;
   value: string;
 };
+
+
 
 const groups: SlashGroup[] = [
   {
@@ -192,6 +205,8 @@ const groups: SlashGroup[] = [
   },
 ];
 
+
+
 const SlashInputElement = (props: PlateElementProps<TComboboxInputElement>) => {
   const { editor, element } = props;
   return (
@@ -225,5 +240,7 @@ const SlashInputElement = (props: PlateElementProps<TComboboxInputElement>) => {
     </PlateElement>
   );
 };
+
+
 
 export { SlashInputElement };

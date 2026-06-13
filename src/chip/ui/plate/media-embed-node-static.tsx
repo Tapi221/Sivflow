@@ -3,7 +3,11 @@ import type { PlateElementProps } from "platejs/react";
 import { PlateElement } from "platejs/react";
 import { cn } from "@/lib/utils";
 
+
+
 type MediaEmbedNodeStaticProps = PlateElementProps<TMediaEmbedElement>;
+
+
 
 const MediaEmbedNodeStatic = ({ className, element, children, ...props }: MediaEmbedNodeStaticProps) => (
   <PlateElement className={cn("my-4", className)} element={element} {...props}>
@@ -17,7 +21,13 @@ const MediaEmbedNodeStatic = ({ className, element, children, ...props }: MediaE
   </PlateElement>
 );
 
+
+
 const MediaEmbedElementStatic = MediaEmbedNodeStatic;
 
+
+
 export { MediaEmbedElementStatic, MediaEmbedNodeStatic };
+
+
 export type { MediaEmbedNodeStaticProps };

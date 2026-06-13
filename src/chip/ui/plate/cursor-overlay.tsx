@@ -1,10 +1,16 @@
 "use client";
 
 import * as React from "react";
+
 import type { CursorData, CursorOverlayState } from "@platejs/selection/react";
+
 import { useCursorOverlay } from "@platejs/selection/react";
+
 import { RangeApi } from "platejs";
+
 import { cn } from "@/lib/utils";
+
+
 
 const Cursor = ({ caretPosition, data, id, selection, selectionRects }: CursorOverlayState<CursorData>) => {
   const { style, selectionStyle = style } = data ?? ({} as CursorData);
@@ -35,9 +41,12 @@ const Cursor = ({ caretPosition, data, id, selection, selectionRects }: CursorOv
     ) : [],
   );
 };
+
 const CursorOverlay = () => {
   const { cursors } = useCursorOverlay();
   return cursors.map((cursor) => <Cursor key={cursor.id} {...cursor} />);
 };
+
+
 
 export { CursorOverlay };

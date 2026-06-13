@@ -1,14 +1,21 @@
 "use client";
 
 import * as React from "react";
+
 import { useToggleToolbarButton, useToggleToolbarButtonState } from "@platejs/toggle/react";
+
 import { ListCollapseIcon } from "lucide-react";
-import { ToolbarButton } from "@/chip/ui/plate/toolbar";
+
+import { ToolbarButton } from "./toolbar";
+
+
 
 const ToggleToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => {
   const state = useToggleToolbarButtonState();
   const { props: buttonProps } = useToggleToolbarButton(state);
   return <ToolbarButton {...props} {...buttonProps} tooltip="Toggle"><ListCollapseIcon /></ToolbarButton>;
 };
+
+
 
 export { ToggleToolbarButton };

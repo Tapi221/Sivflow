@@ -3,6 +3,8 @@ import type { PlateElementProps } from "platejs/react";
 import { PlateElement } from "platejs/react";
 import { cn } from "@/lib/utils";
 
+
+
 const ImageElementStatic = (props: PlateElementProps<TImageElement>) => {
   const { element } = props;
   const caption = (element as any).caption?.[0]?.children?.[0]?.text;
@@ -20,5 +22,7 @@ const ImageElementStatic = (props: PlateElementProps<TImageElement>) => {
     </PlateElement>
   );
 };
+
+
 
 export { ImageElementStatic };

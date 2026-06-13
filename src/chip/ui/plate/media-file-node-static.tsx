@@ -2,6 +2,8 @@ import type { TFileElement } from "platejs";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement } from "platejs/react";
 
+
+
 const FileElementStatic = (props: PlateElementProps<TFileElement>) => {
   const { element } = props;
   const label = element.name ?? element.url ?? "file";
@@ -12,5 +14,7 @@ const FileElementStatic = (props: PlateElementProps<TFileElement>) => {
     </PlateElement>
   );
 };
+
+
 
 export { FileElementStatic };
