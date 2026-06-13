@@ -1,27 +1,17 @@
 "use client";
 
-import * as React from "react";
-
-import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
-
 import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
-
+import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
 import { CheckIcon, ChevronRightIcon, Code2, Columns3Icon, FileCodeIcon, Heading1Icon, Heading2Icon, Heading3Icon, Heading4Icon, Heading5Icon, Heading6Icon, ListIcon, ListOrderedIcon, PilcrowIcon, QuoteIcon, SquareIcon } from "lucide-react";
-
-import type { TElement } from "platejs";
-
 import { KEYS } from "platejs";
-
+import type { TElement } from "platejs";
 import { useEditorRef, useSelectionFragmentProp } from "platejs/react";
-
+import { useMemo, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-
 import { getBlockType, setBlockType } from "@/components/editor/transforms";
+import { ToolbarButton, ToolbarMenuGroup } from "@/chip/ui/plate/toolbar";
 
-import { ToolbarButton, ToolbarMenuGroup } from "./toolbar";
-
-
-
+const TURN_INTO_MENU_ITEM_CLASS_NAME = "dropdown-menu__radio-item--check-end min-w-[180px]";
 const turnIntoItems = [
   { icon: <PilcrowIcon />, keywords: ["paragraph"], label: "Text", value: KEYS.p },
   { icon: <Heading1Icon />, keywords: ["title", "h1"], label: "Heading 1", value: "h1" },
@@ -40,16 +30,14 @@ const turnIntoItems = [
   { icon: <Columns3Icon />, label: "3 columns", value: "action_three_columns" },
 ];
 
-
-
 const TurnIntoToolbarButton = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const value = useSelectionFragmentProp({
     defaultValue: KEYS.p,
     getProp: (node) => getBlockType(node as TElement),
   });
-  const selectedItem = React.useMemo(
+  const selectedItem = useMemo(
     () => turnIntoItems.find((item) => item.value === (value ?? KEYS.p)) ?? turnIntoItems[0],
     [value],
   );
@@ -78,10 +66,10 @@ const TurnIntoToolbarButton = (props: DropdownMenuProps) => {
           {turnIntoItems.map(({ icon, label, value: itemValue }) => (
             <DropdownMenuRadioItem
               key={itemValue}
-              className="min-w-[180px] pl-2 *:first:[span]:hidden"
+              className={TURN_INTO_MENU_ITEM_CLASS_NAME}
               value={itemValue}
             >
-              <span className="pointer-events-none absolute right-2 flex size-3.5 items-center justify-center">
+              <span className="dropdown-menu__check-indicator">
                 <DropdownMenuItemIndicator>
                   <CheckIcon />
                 </DropdownMenuItemIndicator>
@@ -95,7 +83,5 @@ const TurnIntoToolbarButton = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
-
-
 
 export { TurnIntoToolbarButton, turnIntoItems };
