@@ -22,6 +22,14 @@ const config = {
         input: "hsl(var(--input) / <alpha-value>)",
         ring: "hsl(var(--ring) / <alpha-value>)",
         foreground: "hsl(var(--foreground) / <alpha-value>)",
+        brand: {
+          DEFAULT: "hsl(var(--foreground) / <alpha-value>)",
+          foreground: "hsl(var(--background) / <alpha-value>)",
+        },
+        highlight: {
+          DEFAULT: "hsl(var(--muted) / <alpha-value>)",
+          foreground: "hsl(var(--muted-foreground) / <alpha-value>)",
+        },
         popover: {
           DEFAULT: "hsl(var(--popover) / <alpha-value>)",
           foreground: "hsl(var(--popover-foreground) / <alpha-value>)",
