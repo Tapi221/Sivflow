@@ -16,12 +16,29 @@ const LineHeightToolbarButton = (props: DropdownMenuProps) => {
   const [open, setOpen] = React.useState(false);
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
-      <DropdownMenuTrigger asChild><ToolbarButton pressed={open} tooltip="Line height" isDropdown><WrapText /></ToolbarButton></DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>
+        <ToolbarButton pressed={open} tooltip="Line height" isDropdown>
+          <WrapText />
+        </ToolbarButton>
+      </DropdownMenuTrigger>
       <DropdownMenuContent className="min-w-0" align="start">
-        <DropdownMenuRadioGroup value={value} onValueChange={(newValue) => {
-          editor.getTransforms(LineHeightPlugin).lineHeight.setNodes(Number(newValue)); editor.tf.focus(); }}
+        <DropdownMenuRadioGroup
+          value={value}
+          onValueChange={(newValue) => {
+            editor.getTransforms(LineHeightPlugin).lineHeight.setNodes(Number(newValue));
+            editor.tf.focus();
+          }}
         >
-          {values.map((nextValue) => <DropdownMenuRadioItem key={nextValue} className="min-w-[180px] pl-2 *:first:[span]:hidden" value={nextValue}><span className="pointer-events-none absolute right-2 flex size-3.5 items-center justify-center"><DropdownMenuItemIndicator><CheckIcon /></DropdownMenuItemIndicator></span>{nextValue}</DropdownMenuRadioItem>)}
+          {values.map((nextValue) => (
+            <DropdownMenuRadioItem key={nextValue} className="min-w-[180px] pl-2 *:first:[span]:hidden" value={nextValue}>
+              <span className="pointer-events-none absolute right-2 flex size-3.5 items-center justify-center">
+                <DropdownMenuItemIndicator>
+                  <CheckIcon />
+                </DropdownMenuItemIndicator>
+              </span>
+              {nextValue}
+            </DropdownMenuRadioItem>
+          ))}
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
