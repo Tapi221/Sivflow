@@ -1,14 +1,25 @@
-import { MessageSquareIcon } from "lucide-react";
-import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
+"use client";
+
+import { MessageSquareTextIcon } from "lucide-react";
+import { useEditorRef } from "platejs/react";
 import { ToolbarButton } from "@/chip/ui/plate/toolbar";
+import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
+import { commentPlugin } from "@/components/editor/plugins/comment-kit";
 
-type CommentToolbarButtonProps = ToolbarButtonProps;
-
-const CommentToolbarButton = ({ children, ...props }: CommentToolbarButtonProps) => (
-  <ToolbarButton tooltip="Comment" {...props}>
-    {children ?? <MessageSquareIcon />}
-  </ToolbarButton>
-);
+const CommentToolbarButton = (props: ToolbarButtonProps) => {
+  const editor = useEditorRef();
+  return (
+    <ToolbarButton
+      {...props}
+      onClick={() => {
+        editor.getTransforms(commentPlugin).comment.setDraft();
+      }}
+      data-plate-prevent-overlay
+      tooltip="Comment"
+    >
+      <MessageSquareTextIcon />
+    </ToolbarButton>
+  );
+};
 
 export { CommentToolbarButton };
-export type { CommentToolbarButtonProps };
