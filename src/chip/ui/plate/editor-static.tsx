@@ -5,8 +5,6 @@ import type { PlateStaticProps } from "platejs/static";
 import { PlateStatic } from "platejs/static";
 import { cn } from "@/lib/utils";
 
-
-
 const editorVariants = cva(
   cn(
     "group/editor",
@@ -39,12 +37,8 @@ const editorVariants = cva(
   },
 );
 
-
-
 const EditorStatic = ({ className, variant, ...props }: PlateStaticProps & VariantProps<typeof editorVariants>) => {
   return <PlateStatic className={cn(editorVariants({ variant }), className)} {...props} />;
 };
-
-
 
 export { EditorStatic, editorVariants };

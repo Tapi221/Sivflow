@@ -1,8 +1,6 @@
 import React from "react";
-import { RowSnap } from "./RowSnap";
+import { RowSnap } from "@/components/card/frame/RowSnap";
 import type { CssVars } from "@/types/style";
-
-
 
 type RowSnappedRootProps = {
   rowPx: number;
@@ -10,8 +8,6 @@ type RowSnappedRootProps = {
   style?: React.CSSProperties;
   children: React.ReactNode;
 };
-
-
 
 const RowSnappedRoot = ({
   rowPx,
@@ -40,7 +36,5 @@ const RowSnappedRoot = ({
     </RowSnap>
   );
 };
-
-
 
 export { RowSnappedRoot };

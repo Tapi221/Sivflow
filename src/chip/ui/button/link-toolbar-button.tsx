@@ -1,14 +1,9 @@
 "use client";
 
 import * as React from "react";
-
 import { useLinkToolbarButton, useLinkToolbarButtonState } from "@platejs/link/react";
-
 import { Link } from "lucide-react";
-
 import { ToolbarButton } from "@/chip/ui/toolbar";
-
-
 
 const LinkToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => {
   const state = useLinkToolbarButtonState();
@@ -20,7 +15,5 @@ const LinkToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) =>
     </ToolbarButton>
   );
 };
-
-
 
 export { LinkToolbarButton };

@@ -1,11 +1,9 @@
 import { format } from "date-fns";
 import type { CSSProperties } from "react";
-import { eventChipDesign } from "./eventChipDesign.generated";
+import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 import { HoverMonthEventTooltip } from "@/chip/toolchip/HoverMonthEventTooltip";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-
-
 
 type CalendarEventChipMonthProps = {
   event: GoogleCalendarEvent;
@@ -19,13 +17,9 @@ type CalendarEventChipMonthStyle = CSSProperties & {
   printColorAdjust: "exact";
 };
 
-
-
 const CHIP_BASE_CLASS_NAME = "flex w-full min-w-0 items-center overflow-hidden text-left shadow-none";
 const CHIP_TITLE_CLASS_NAME = "min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-semibold leading-none tracking-[-0.01em]";
 const CHIP_TIME_CLASS_NAME = "ml-1 shrink-0 overflow-hidden whitespace-nowrap font-semibold leading-none tabular-nums opacity-80";
-
-
 
 const createCalendarEventChipMonthStyle = (backgroundColor: string, accentColor: string, textColor: string, showTimeLabel: boolean, isAllDay: boolean): CalendarEventChipMonthStyle => ({
   "--calendar-event-chip-accent": accentColor,
@@ -55,8 +49,6 @@ const getTimeLabel = (event: GoogleCalendarEvent): string => {
   return `${format(event.startsAt, "H:mm")} ~ ${format(event.endsAt, "H:mm")}`;
 };
 
-
-
 const CalendarEventChipMonth = ({ event, showTimeLabel = true, tooltipDisabled = false }: CalendarEventChipMonthProps) => {
   const tokens = generateColorTokens(event.accentColor);
   const titleLabel = event.title ?? "Untitled";
@@ -72,8 +64,6 @@ const CalendarEventChipMonth = ({ event, showTimeLabel = true, tooltipDisabled =
     </HoverMonthEventTooltip>
   );
 };
-
-
 
 CalendarEventChipMonth.displayName = "CalendarEventChipMonth";
 

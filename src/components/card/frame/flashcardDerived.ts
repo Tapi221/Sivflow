@@ -5,13 +5,11 @@
  * - legacy extra rows 吸収
  * - ink document resolve は含まない（副作用のある resolveInkDocument は呼び出し側）
  */
-import type { FlashcardCardLike, FlashcardMediaLike } from "./flashcard.types";
+import type { FlashcardCardLike, FlashcardMediaLike } from "@/components/card/frame/flashcard.types";
 import { extractCardTextFromBlocks } from "@/domain/card/content";
 import { DEFAULT_LAYOUT_ROWS, LEGACY_BASE_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from "@/domain/card/extraRows";
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardBlock } from "@/types/domain/card";
-
-
 
 // ---------------------------------------------------------------------------
 // Scalar field normalizers
@@ -144,7 +142,5 @@ const resolveQuestionAttachmentReferences = (card: FlashcardCardLike) => {
 const resolveAnswerAttachmentReferences = (card: FlashcardCardLike) => {
   return (card.back?.attachments?.references ?? []).filter((r) => r.url);
 };
-
-
 
 export { resolveCardId, resolveHasUncertainty, resolveIsBookmarked, resolveQuestionText, resolveAnswerText, resolveQuestionImages, resolveAnswerImages, resolveQuestionAttachmentImages, resolveAnswerAttachmentImages, resolveQuestionAudios, resolveAnswerAudios, resolveQuestionAttachmentAudios, resolveAnswerAttachmentAudios, resolveQuestionCode, resolveAnswerCode, resolveLayoutRows, resolveImageUrls, resolveAudioUrls, resolveReferences, resolveQuestionAttachmentReferences, resolveAnswerAttachmentReferences };

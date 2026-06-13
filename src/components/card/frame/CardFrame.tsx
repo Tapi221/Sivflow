@@ -1,12 +1,10 @@
 import React from "react";
-import { CardShell } from "./CardShell";
-import { CardSurface } from "./CardSurface";
-import { ScaleToFitFrame } from "./ScaleToFitFrame";
+import { CardShell } from "@/components/card/frame/CardShell";
+import { CardSurface } from "@/components/card/frame/CardSurface";
+import { ScaleToFitFrame } from "@/components/card/frame/ScaleToFitFrame";
 import { CARD_BASE_WIDTH, CARD_DISPLAY_SCALE, CARD_ROW_PX, CARD_RULED_OFFSET_BOTTOM_PX, CARD_RULED_OFFSET_TOP_PX } from "@/domain/card/cardGeometry.constants";
 import { cn } from "@/lib/utils";
 import type { CssVars } from "@/types/style";
-
-
 
 type CardShellProps = React.ComponentProps<typeof CardShell>;
 interface CardFrameProps extends Omit<CardShellProps, "children" | "className" | "ref"> {
@@ -30,8 +28,6 @@ interface CardFrameProps extends Omit<CardShellProps, "children" | "className" |
   overlay?: React.ReactNode;
   topAttachment?: React.ReactNode;
 }
-
-
 
 const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
   (
@@ -149,11 +145,7 @@ const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
   },
 );
 
-
-
 CardFrame.displayName = "CardFrame";
 
 export { CardFrame };
-
-
 export type { CardFrameProps };

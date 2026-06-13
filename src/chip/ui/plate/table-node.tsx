@@ -1,16 +1,10 @@
 "use client";
 
 import * as React from "react";
-
 import type { TTableCellElement } from "platejs";
-
 import type { PlateElementProps } from "platejs/react";
-
 import { PlateElement } from "platejs/react";
-
 import { cn } from "@/lib/utils";
-
-
 
 const TableElement = (props: PlateElementProps) => {
   return (
@@ -19,11 +13,9 @@ const TableElement = (props: PlateElementProps) => {
     </PlateElement>
   );
 };
-
 const TableRowElement = (props: PlateElementProps) => {
   return <PlateElement as="tr" {...props} />;
 };
-
 const TableCellElement = (props: PlateElementProps<TTableCellElement>) => {
   return (
     <PlateElement
@@ -33,7 +25,6 @@ const TableCellElement = (props: PlateElementProps<TTableCellElement>) => {
     />
   );
 };
-
 const TableCellHeaderElement = (props: PlateElementProps<TTableCellElement>) => {
   return (
     <PlateElement
@@ -43,7 +34,5 @@ const TableCellHeaderElement = (props: PlateElementProps<TTableCellElement>) => 
     />
   );
 };
-
-
 
 export { TableElement, TableRowElement, TableCellElement, TableCellHeaderElement };

@@ -2,11 +2,7 @@ import type { PlateElementProps } from "platejs/react";
 import { PlateElement } from "platejs/react";
 import { cn } from "@/lib/utils";
 
-
-
 type TableNodeStaticProps = PlateElementProps;
-
-
 
 const TableNodeStatic = ({ className, children, ...props }: TableNodeStaticProps) => (
   <PlateElement className={cn("my-4 overflow-x-auto", className)} {...props}>
@@ -33,16 +29,10 @@ const TableCellHeaderStatic = ({ className, children, ...props }: PlateElementPr
   </PlateElement>
 );
 
-
-
 const TableElementStatic = TableNodeStatic;
 const TableRowElementStatic = TableRowNodeStatic;
 const TableCellElementStatic = TableCellNodeStatic;
 const TableCellHeaderElementStatic = TableCellHeaderStatic;
 
-
-
 export { TableCellElementStatic, TableCellHeaderElementStatic, TableCellHeaderStatic, TableCellNodeStatic, TableElementStatic, TableNodeStatic, TableRowElementStatic, TableRowNodeStatic };
-
-
 export type { TableNodeStaticProps };

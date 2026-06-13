@@ -1,28 +1,16 @@
 "use client";
 
 import * as React from "react";
-
 import { formatCodeBlock, isLangSupported } from "@platejs/code-block";
-
 import { BracesIcon, Check, CheckIcon, CopyIcon } from "lucide-react";
-
 import type { TCodeBlockElement, TCodeSyntaxLeaf } from "platejs";
-
 import { NodeApi } from "platejs";
-
 import type { PlateElementProps, PlateLeafProps } from "platejs/react";
-
 import { PlateElement, PlateLeaf, useEditorRef, useElement, useReadOnly } from "platejs/react";
-
 import { Button } from "@/chip/ui/button/button";
-
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/chip/ui/command";
-
 import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
-
 import { cn } from "@/lib/utils";
-
-
 
 const languages: { label: string; value: string }[] = [
   { label: "Auto", value: "auto" },
@@ -38,8 +26,6 @@ const languages: { label: string; value: string }[] = [
   { label: "Swift", value: "swift" },
   { label: "YAML", value: "yaml" },
 ];
-
-
 
 const CodeBlockCombobox = () => {
   const [open, setOpen] = React.useState(false);
@@ -88,7 +74,6 @@ const CodeBlockCombobox = () => {
     </Popover>
   );
 };
-
 const CopyButton = ({ value, ...props }: { value: (() => string) | string } & Omit<React.ComponentProps<typeof Button>, "value">) => {
   const [hasCopied, setHasCopied] = React.useState(false);
   React.useEffect(() => {
@@ -110,7 +95,6 @@ const CopyButton = ({ value, ...props }: { value: (() => string) | string } & Om
     </Button>
   );
 };
-
 const CodeBlockElement = (props: PlateElementProps<TCodeBlockElement>) => {
   const { editor, element } = props;
   return (
@@ -132,16 +116,12 @@ const CodeBlockElement = (props: PlateElementProps<TCodeBlockElement>) => {
     </PlateElement>
   );
 };
-
 const CodeLineElement = (props: PlateElementProps) => {
   return <PlateElement {...props} />;
 };
-
 const CodeSyntaxLeaf = (props: PlateLeafProps<TCodeSyntaxLeaf>) => {
   const tokenClassName = props.leaf.className as string;
   return <PlateLeaf className={tokenClassName} {...props} />;
 };
-
-
 
 export { CodeBlockElement, CodeLineElement, CodeSyntaxLeaf };

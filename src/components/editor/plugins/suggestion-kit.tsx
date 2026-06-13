@@ -12,9 +12,7 @@ import { toTPlatePlugin } from "platejs/react";
 
 import { SuggestionLeaf, SuggestionLineBreak, VoidRemoveSuggestionOverlay } from "@/chip/ui/plate/suggestion-node";
 
-import { discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarget } from "./discussion-kit";
-
-
+import { discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarget } from "@/components/editor/plugins/discussion-kit";
 
 type SuggestionConfig = ExtendConfig<
   BaseSuggestionConfig,
@@ -23,8 +21,6 @@ type SuggestionConfig = ExtendConfig<
     hoverId: string | null;
   }
 >;
-
-
 
 const INLINE_SUGGESTION_TARGET_PLUGINS = [KEYS.date, KEYS.inlineEquation, KEYS.link, KEYS.mention];
 
@@ -35,10 +31,6 @@ const trailingBlockPlugin = TrailingBlockPlugin.configure({
     },
   },
 });
-
-const SuggestionKit = [suggestionPlugin, trailingBlockPlugin];
-
-
 
 const getInlineSuggestionData = (editor: any, element: TElement) => {
   const suggestionApi = editor.getApi(BaseSuggestionPlugin).suggestion;
@@ -59,8 +51,6 @@ const getInlineSuggestionData = (editor: any, element: TElement) => {
     }
   }
 };
-
-
 
 const suggestionPlugin = toTPlatePlugin<SuggestionConfig>(BaseSuggestionPlugin, ({ editor }) => ({
   options: {
@@ -119,10 +109,8 @@ const suggestionPlugin = toTPlatePlugin<SuggestionConfig>(BaseSuggestionPlugin, 
   },
 });
 
-
+const SuggestionKit = [suggestionPlugin, trailingBlockPlugin];
 
 export { SuggestionKit, suggestionPlugin };
-
-
 
 export type { SuggestionConfig };

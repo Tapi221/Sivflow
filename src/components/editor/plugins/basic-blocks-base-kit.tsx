@@ -5,8 +5,6 @@ import { H1ElementStatic, H2ElementStatic, H3ElementStatic, H4ElementStatic, H5E
 import { HrElementStatic } from "@/chip/ui/plate/hr-node-static";
 import { ParagraphElementStatic } from "@/chip/ui/plate/paragraph-node-static";
 
-
-
 const BaseBasicBlocksKit = [
   BaseParagraphPlugin.withComponent(ParagraphElementStatic),
   BaseH1Plugin.withComponent(H1ElementStatic),
@@ -18,7 +16,5 @@ const BaseBasicBlocksKit = [
   BaseBlockquotePlugin.withComponent(BlockquoteElementStatic),
   BaseHorizontalRulePlugin.withComponent(HrElementStatic),
 ];
-
-
 
 export { BaseBasicBlocksKit };

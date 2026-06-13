@@ -1,8 +1,6 @@
 import type { SlateLeafProps } from "platejs/static";
 import { SlateLeaf } from "platejs/static";
 
-
-
 const KbdLeafStatic = (props: SlateLeafProps) => (
   <SlateLeaf
     {...props}
@@ -12,7 +10,5 @@ const KbdLeafStatic = (props: SlateLeafProps) => (
     {props.children}
   </SlateLeaf>
 );
-
-
 
 export { KbdLeafStatic };

@@ -2,11 +2,7 @@ import type { PlateElementProps } from "platejs/react";
 import { PlateElement } from "platejs/react";
 import { cn } from "@/lib/utils";
 
-
-
 type CodeBlockNodeStaticProps = PlateElementProps;
-
-
 
 const CodeBlockNodeStatic = ({ className, children, ...props }: CodeBlockNodeStaticProps) => (
   <PlateElement
@@ -28,15 +24,9 @@ const CodeSyntaxLeafStatic = ({ className, children, ...props }: PlateElementPro
   </span>
 );
 
-
-
 const CodeBlockElementStatic = CodeBlockNodeStatic;
 const CodeLineElementStatic = CodeLineNodeStatic;
 const CodeSyntaxLeaf = CodeSyntaxLeafStatic;
 
-
-
 export { CodeBlockElementStatic, CodeBlockNodeStatic, CodeLineElementStatic, CodeLineNodeStatic, CodeSyntaxLeaf, CodeSyntaxLeafStatic };
-
-
 export type { CodeBlockNodeStaticProps };

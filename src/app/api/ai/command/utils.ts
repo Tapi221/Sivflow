@@ -4,9 +4,7 @@ import type { UIMessage } from "ai";
 import dedent from "dedent";
 import type { SlateEditor } from "platejs";
 import { KEYS, RangeApi } from "platejs";
-import type { ChatMessage } from "./types";
-
-
+import type { ChatMessage } from "@/app/api/ai/command/types";
 
 type StructuredPromptSections = {
   context?: string;
@@ -22,12 +20,8 @@ type StructuredPromptSections = {
   tone?: string;
 };
 
-
-
 const SELECTION_START = "<Selection>";
 const SELECTION_END = "</Selection>";
-
-
 
 const tag = (tag: string, content?: string | null) => {
   if (!content) return "";
@@ -181,9 +175,5 @@ const isSingleCellSelection = (editor: SlateEditor): boolean => {
   return cells.length === 1;
 };
 
-
-
 export { tag, inlineTag, sections, list, buildStructuredPrompt, getTextFromMessage, formatTextFromMessages, getLastUserInstruction, addSelection, isMultiBlocks, getMarkdownWithSelection, isSelectionInTable, isSingleCellSelection };
-
-
 export type { StructuredPromptSections };

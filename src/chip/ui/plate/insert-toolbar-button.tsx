@@ -1,32 +1,19 @@
 "use client";
 
 import * as React from "react";
-
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
-
 import { CalendarIcon, ChevronRightIcon, Code2, Columns3Icon, FileCodeIcon, FilmIcon, Heading1Icon, Heading2Icon, Heading3Icon, ImageIcon, Link2Icon, ListIcon, ListOrderedIcon, MinusIcon, PenToolIcon, PilcrowIcon, PlusIcon, QuoteIcon, RadicalIcon, SquareIcon, SuperscriptIcon, TableIcon, TableOfContentsIcon } from "lucide-react";
-
 import { KEYS } from "platejs";
-
 import type { PlateEditor } from "platejs/react";
-
 import { useEditorRef } from "platejs/react";
-
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-
-import { ToolbarButton, ToolbarMenuGroup } from "./toolbar";
-
+import { ToolbarButton, ToolbarMenuGroup } from "@/chip/ui/plate/toolbar";
 import { insertBlock, insertInlineElement } from "@/components/editor/transforms";
-
-
 
 type Item = {
   icon: React.ReactNode; value: string; onSelect: (editor: PlateEditor, value: string) => void; focusEditor?: boolean; label?: string };
-
 type Group = {
   group: string; items: Item[] };
-
-
 
 const groups: Group[] = [
   { group: "Basic blocks", items: [{ icon: <PilcrowIcon />, label: "Paragraph", value: KEYS.p }, { icon: <Heading1Icon />, label: "Heading 1", value: "h1" }, { icon: <Heading2Icon />, label: "Heading 2", value: "h2" }, { icon: <Heading3Icon />, label: "Heading 3", value: "h3" }, { icon: <TableIcon />, label: "Table", value: KEYS.table }, { icon: <FileCodeIcon />, label: "Code", value: KEYS.codeBlock }, { icon: <QuoteIcon />, label: "Quote", value: KEYS.blockquote }, { icon: <MinusIcon />, label: "Divider", value: KEYS.hr }].map((item) => ({ ...item, onSelect: (editor, value) => {
@@ -40,8 +27,6 @@ const groups: Group[] = [
   { group: "Inline", items: [{ icon: <Link2Icon />, label: "Link", value: KEYS.link }, { focusEditor: true, icon: <CalendarIcon />, label: "Date", value: KEYS.date }, { focusEditor: true, icon: <SuperscriptIcon />, label: "Footnote", value: "action_footnote" }, { focusEditor: false, icon: <RadicalIcon />, label: "Inline Equation", value: KEYS.inlineEquation }].map((item) => ({ ...item, onSelect: (editor, value) => {
     insertInlineElement(editor, value); } })) },
 ];
-
-
 
 const InsertToolbarButton = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
@@ -57,7 +42,5 @@ const InsertToolbarButton = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
-
-
 
 export { InsertToolbarButton };

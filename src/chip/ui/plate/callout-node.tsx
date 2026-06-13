@@ -2,13 +2,9 @@ import type { PlateElementProps } from "platejs/react";
 import { PlateElement } from "platejs/react";
 import { cn } from "@/lib/utils";
 
-
-
 type CalloutNodeProps = PlateElementProps & {
   variant?: "info" | "warning" | "success" | "error";
 };
-
-
 
 const CALLOUT_ICON_BY_VARIANT: Record<NonNullable<CalloutNodeProps["variant"]>, string> = {
   info: "i",
@@ -17,11 +13,7 @@ const CALLOUT_ICON_BY_VARIANT: Record<NonNullable<CalloutNodeProps["variant"]>, 
   error: "!",
 };
 
-
-
 const getCalloutVariant = (variant: CalloutNodeProps["variant"]) => variant ?? "info";
-
-
 
 const CalloutNode = ({ className, variant, children, ...props }: CalloutNodeProps) => {
   const resolvedVariant = getCalloutVariant(variant);
@@ -44,13 +36,7 @@ const CalloutNode = ({ className, variant, children, ...props }: CalloutNodeProp
   );
 };
 
-
-
 const CalloutElement = CalloutNode;
 
-
-
 export { CalloutElement, CalloutNode };
-
-
 export type { CalloutNodeProps };
