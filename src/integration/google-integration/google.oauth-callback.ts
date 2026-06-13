@@ -213,4 +213,5 @@ const renderGoogleOAuthCallback = (): boolean => {
 };
 
 export { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, createGoogleOAuthCallbackPayload, isGoogleOAuthCallbackPayload, renderGoogleOAuthCallback };
+
 export type { GoogleOAuthCallbackPayload };

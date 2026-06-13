@@ -1,5 +1,5 @@
-import rawTranslations from "@shared/i18n/translations.json";
-import type { Locale } from "@shared/i18n/locale.store";
+import rawTranslations from "./translations.json";
+import type { Locale } from "./locale.store";
 
 type RawTranslations = Omit<(typeof rawTranslations)[Locale], "dateFnsLocaleKey"> & {
   dateFnsLocaleKey: "ja" | "en-US" | "zh-CN";
@@ -28,4 +28,5 @@ const TRANSLATIONS: Record<Locale, Translations> = {
 };
 
 export { RAW_TRANSLATIONS, TRANSLATIONS };
+
 export type { RawTranslations, Translations };

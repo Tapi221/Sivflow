@@ -92,4 +92,5 @@ const normalizeReviewLogs = (rawLogs: unknown): NormalizedReviewLog[] => {
 };
 
 export { normalizeReviewLogs };
+
 export type { NormalizedReviewLog };

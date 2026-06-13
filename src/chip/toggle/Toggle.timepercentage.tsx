@@ -56,4 +56,5 @@ const ToggleTimePercentage = memo(ToggleTimePercentageComponent);
 ToggleTimePercentage.displayName = "ToggleTimePercentage";
 
 export { ToggleTimePercentage };
+
 export type { TimePercentageToggleValue };

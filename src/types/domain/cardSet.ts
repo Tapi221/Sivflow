@@ -1,4 +1,4 @@
-import type { BaseEntity } from "@/types/domain/base";
+import type { BaseEntity } from "./base";
 
 type CardDisplayMode = "fixed" | "fluid";
 /**
@@ -22,4 +22,5 @@ const normalizeCardDisplayMode = (value: unknown) => {
 };
 
 export { DEFAULT_CARD_DISPLAY_MODE, normalizeCardDisplayMode };
+
 export type { CardDisplayMode, CardSet };

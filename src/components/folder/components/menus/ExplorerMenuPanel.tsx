@@ -1,8 +1,8 @@
 import React from "react";
 import { DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/chip/panel/dropdown-menu";
 import { floatingPanelPresets } from "@/chip/ui/menu-styles";
-import type { MenuAction } from "@/components/folder/components/menus/menuActions";
 import { cn } from "@/lib/utils";
+import type { MenuAction } from "./menuActions";
 
 type ExplorerMenuPanelVariant = "default" | "create" | "folderContext";
 interface ExplorerMenuPanelProps extends React.ComponentPropsWithoutRef<
@@ -135,4 +135,5 @@ const ExplorerMenuPanel = ({ actions, closeMenu, className, variant = "default",
 };
 
 export { ExplorerMenuPanel };
+
 export type { ExplorerMenuPanelVariant };

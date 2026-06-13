@@ -67,4 +67,5 @@ const calculateNextRiskScore = ({ persistedScore, lastUpdateMs, nowMs, scoreAdde
 };
 
 export { RISK_SCORE_THRESHOLDS, getRiskLevel, resolveDetectionOutcome, applyRiskDecay, calculateNextRiskScore };
+
 export type { SecurityRiskLevel, DetectionOutcome, RiskScoreCalculation };

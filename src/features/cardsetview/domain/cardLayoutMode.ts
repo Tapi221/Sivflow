@@ -35,4 +35,5 @@ const buildCardLayoutPreferenceScopeKey = ({ deviceScope, cardSetId, displayMode
 };
 
 export { DEFAULT_CARD_LAYOUT_MODE, DEFAULT_SPLIT_FALLBACK_CARD_LAYOUT_MODE, resolveDefaultCardLayoutMode, normalizeCardLayoutMode, normalizeSplitFallbackCardLayoutMode, buildCardLayoutPreferenceScopeKey, CARD_LAYOUT_MODE_LABELS };
+
 export type { CardLayoutMode, SplitFallbackCardLayoutMode, CardSetInteractionMode };

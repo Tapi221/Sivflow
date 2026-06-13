@@ -1,7 +1,7 @@
 import { forwardRef } from "react";
 import type { ForwardRefExoticComponent, RefAttributes, SVGProps } from "react";
 import * as stratisIcons from "stratis-ui-icons";
-import { UiIcon } from "@/ui/UiIcon";
+import { UiIcon } from "./UiIcon";
 
 type IconProps = SVGProps<SVGSVGElement> & {
   size?: number;
@@ -329,4 +329,5 @@ Folder.displayName = "Folder";
 FolderOutlineIcon.displayName = "FolderOutlineIcon";
 
 export { AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, ArrowUpDown, BookOpen, Brain, Calendar, Camera, Check, CheckCheck, CheckCircle, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, Clock, Cloud, CloudOff, Construction, Copy, Database, Download, Edit, Eraser, ExternalLink, FileAudio, FileEdit, FileJson, FileText, FileWarning, FileX, Filter, Flame, Folder, Folder as FolderIcon, FolderInput, FolderOutlineIcon, FolderTree, GitMerge, Globe, GripVertical, HardDrive, HelpCircle, HelpCircle as CircleHelp, History, Image, Image as ImageIcon, Info, Keyboard, Layers, Link, List, Loader2, LogOut, Merge, MessageSquare, Minus, MoreVertical, Move, NotebookPenIcon as NotebookPen, Palette, Pause, PenLine, Pencil, Pin, Play, Plus, Redo2, RefreshCw, RotateCcw, Search, SearchX, Settings2, Shield, SigmaIcon as Sigma, Smartphone, Sparkles, Star, Tag, Trash2, Trophy, Type, Undo2, Upload, User, Volume2, X, XCircle, Zap, Code };
+
 export type { IconProps };

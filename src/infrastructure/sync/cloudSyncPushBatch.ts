@@ -3,8 +3,8 @@ import * as Firestore from "firebase/firestore";
 import { Timestamp, writeBatch } from "firebase/firestore";
 import { chunkCloudSyncChangesBySize } from "@/application/usecases/cloudSyncBatching";
 import { getChangeId, getChangeParts, sanitizeSyncDataForCloud } from "@/application/usecases/cloudSyncShared";
-import { getPushDocumentRef, requireCloudSyncFirestore } from "@/infrastructure/sync/cloudSyncFirestoreRefs";
 import type { SyncChange } from "@/services/interfaces/ISyncService";
+import { getPushDocumentRef, requireCloudSyncFirestore } from "./cloudSyncFirestoreRefs";
 
 type SyncChangeWithOperation = SyncChange & {
   operationType?: unknown;

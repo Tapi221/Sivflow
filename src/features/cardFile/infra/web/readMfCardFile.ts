@@ -1,6 +1,6 @@
 import type { MfCardFileV1, MfCardIssue } from "@/features/cardFile/domain/mfCard.types";
 import { MF_CARD_FILE_EXTENSION, MfCardValidationError } from "@/features/cardFile/domain/mfCard.types";
-import { decodeMfCardFile } from "@/features/cardFile/infra/web/mfCardJsonCodec";
+import { decodeMfCardFile } from "./mfCardJsonCodec";
 
 type LoadMfCardFileResult = {
   file: File;
@@ -67,4 +67,5 @@ const readMfCardFile = async (file: File): Promise<LoadMfCardFileResult> => {
 };
 
 export { buildMfCardImportCardSetName, readMfCardFile };
+
 export type { LoadMfCardFileResult };

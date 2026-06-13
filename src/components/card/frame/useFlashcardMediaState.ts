@@ -47,4 +47,5 @@ const useFlashcardMediaState = () => {
 };
 
 export { useFlashcardMediaState };
+
 export type { FlashcardMediaState };

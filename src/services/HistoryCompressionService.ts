@@ -1,5 +1,5 @@
 import { getLocalDb } from "@/services/localdb";
-import { StorageStateManager } from "@/services/StorageStateManager";
+import { StorageStateManager } from "./StorageStateManager";
 
 interface CompressedHistory {
   id: string;

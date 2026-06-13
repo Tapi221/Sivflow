@@ -1,4 +1,4 @@
-import type { CalendarTimetablePeriod, CalendarTimetableSlot, CalendarTimetableVisibleDayCount, CalendarTimetableWeekdayIndex } from "@core/domain/calendar/timetable/timetable.types";
+import type { CalendarTimetablePeriod, CalendarTimetableSlot, CalendarTimetableVisibleDayCount, CalendarTimetableWeekdayIndex } from "./timetable.types";
 
 const TIMETABLE_MIN_VISIBLE_DAY_COUNT: CalendarTimetableVisibleDayCount = 5;
 const TIMETABLE_MAX_WEEKDAY_INDEX = 6;

@@ -5,4 +5,5 @@ const createFolderDragPayload = (folderId: string): FolderDragPayload => ({ enti
 const resolveFolderDragSourceId = (folderId: string | null): string | null => folderId && folderId.trim() ? folderId : null;
 
 export { createFolderDragPayload, resolveFolderDragSourceId };
+
 export type { FolderDragPayload };

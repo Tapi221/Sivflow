@@ -1,8 +1,8 @@
 import React from "react";
-import { MarkdownBlockDisplay } from "@/components/card/blocks/markdown/MarkdownBlockDisplay";
-import { MarkdownEditorDialog } from "@/components/card/blocks/markdown/MarkdownEditorDialog";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { clampMarkdownTabSize, normalizeMarkdownEditorValue, normalizeMarkdownInsertionText, resolveMarkdownTabKeyText } from "@/utils/markdownWhitespace";
+import { MarkdownBlockDisplay } from "./MarkdownBlockDisplay";
+import { MarkdownEditorDialog } from "./MarkdownEditorDialog";
 
 type MarkdownReplaceBlock = | { type: "markdown"; markdown: string; }
   | { type: "code"; code: { language: string; code: string; }; };
@@ -672,4 +672,5 @@ const MarkdownBlockContent = (props: MarkdownBlockContentProps) => {
 };
 
 export { MarkdownBlockContent };
+
 export type { MarkdownReplaceBlock, MarkdownReplaceFocus };

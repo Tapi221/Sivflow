@@ -239,4 +239,5 @@ const formatPortableImportBatchItemSubtitle = (item: Pick<PortableImportBatchIte
 };
 
 export { buildPortableImportBatchItems, importPortableFileBatch, formatPortableImportBatchItemSubtitle };
+
 export type { PortableImportBatchItemStatus, PortableImportBatchItem, PortableImportBatchResult, ImportPortableFileBatchParams };

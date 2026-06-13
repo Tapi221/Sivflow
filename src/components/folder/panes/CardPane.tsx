@@ -1,5 +1,5 @@
-import { CardEditorPane } from "@/components/folder/panes/CardEditorPane";
-import { CardQuestionLinksPanel } from "@/components/folder/panes/CardQuestionLinksPanel";
+import { CardEditorPane } from "./CardEditorPane";
+import { CardQuestionLinksPanel } from "./CardQuestionLinksPanel";
 
 interface CardPaneProps {
   selectedCardId: string | null;

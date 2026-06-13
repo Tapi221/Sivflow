@@ -46,4 +46,5 @@ const MediaUploadToast = ({ id, name, progress, status = "loading", ...props }: 
 };
 
 export { MediaUploadToast };
+
 export type { MediaUploadToastProps };

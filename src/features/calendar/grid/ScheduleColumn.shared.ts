@@ -84,4 +84,5 @@ const getScheduleVirtualRailDate = (rail: ScheduleVirtualRail, index: number): D
 };
 
 export { getScheduleViewStart, getScheduleViewDayCount, buildScheduleDisplayDays, buildScheduleInteractionDays, buildScheduleVirtualRail, buildScheduleVirtualRailDays, getScheduleVirtualRailDate };
+
 export type { ScheduleColumnBuffer, ScheduleVirtualRail };

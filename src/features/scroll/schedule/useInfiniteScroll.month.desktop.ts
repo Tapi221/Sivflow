@@ -354,4 +354,5 @@ const useMonthInfiniteScroll = ({ currentDate, scrollTargetToken, monthRowHeight
 };
 
 export { createInitialMonthVisibleWeekRange, useMonthInfiniteScroll };
+
 export type { UseMonthInfiniteScrollReturn };

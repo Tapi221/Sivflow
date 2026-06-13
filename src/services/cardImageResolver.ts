@@ -1,9 +1,9 @@
 import { getDownloadURL, ref as storageRef } from "firebase/storage";
 import { storage } from "@/infrastructure/firebase/client";
-import { getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
-import { getCachedRemoteUrl, setCachedRemoteUrl } from "@/services/imagePreloadCache";
 import { getLocalDb } from "@/services/localdb";
 import type { AssetRecord, ResolvableImageRef, UploadedImage } from "@/types";
+import { getOrCreateImageBlobUrl } from "./imageBlobUrlSessionCache";
+import { getCachedRemoteUrl, setCachedRemoteUrl } from "./imagePreloadCache";
 
 type ImageRecordLike =
   | {
@@ -201,4 +201,5 @@ const resolveCardImageUrl = async (image: ResolvableImageRef, userId?: string | 
 };
 
 export { resolveCardImageUrl };
+
 export type { ResolvedCardImage };

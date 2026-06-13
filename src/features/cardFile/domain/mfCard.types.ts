@@ -52,4 +52,5 @@ class MfCardExportError extends Error {
 }
 
 export { MF_CARD_FORMAT, MF_CARD_VERSION, MF_CARD_FILE_EXTENSION, MF_CARD_MIME_TYPE, MfCardValidationError, MfCardExportError };
+
 export type { MfCardIssue, MfCardFileV1, MfCardValidationResult };

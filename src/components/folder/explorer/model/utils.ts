@@ -57,4 +57,5 @@ const extractPdfFiles = (fileList: FileList | null): File[] => {
 };
 
 export { hasOpenModalDialog, ROOT_FOLDER_ID, DEFAULT_NEW_PROJECT_NAME, DEFAULT_NEW_FOLDER_NAME, DEFAULT_NEW_CARD_SET_NAME, UNTITLED_PROJECT_NAME, UNTITLED_FOLDER_NAME, getFolderId, getParentFolderId, normalizeFolderId, isSameFolder, getEntityTime, createOptimisticId, createDocumentId, buildStoragePath, isTextInputTarget, isFileDragEvent, extractPdfFiles };
+
 export type { Card, DocumentItem, FolderTreeNode };

@@ -41,4 +41,5 @@ const useCalendarToolbar = ({ onSelectCalendar, onSelectTask, onSelectViewMode }
 };
 
 export { useCalendarToolbar };
+
 export type { CalendarViewMode };

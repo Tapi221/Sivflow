@@ -102,4 +102,5 @@ const classifyGoogleTokenEndpointFailure = ({ context, status, googleError, desc
 };
 
 export { isGoogleOAuthServerConfigurationError, classifyGoogleTokenEndpointFailure };
+
 export type { GoogleOAuthTokenErrorReason, ClassifiedGoogleTokenEndpointFailure, GoogleOAuthServerErrorReason };

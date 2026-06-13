@@ -108,4 +108,5 @@ const toLayoutEvent = (id: string, startsAt: Date, minutes: number, minimumDurat
 };
 
 export { computeEventLayout, toLayoutEvent };
+
 export type { LayoutEvent, LayoutResult };

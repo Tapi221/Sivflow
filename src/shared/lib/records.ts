@@ -11,4 +11,5 @@ const pick = (...values: unknown[]): unknown => {
 };
 
 export { asRecord, pick };
+
 export type { UnknownRecord };

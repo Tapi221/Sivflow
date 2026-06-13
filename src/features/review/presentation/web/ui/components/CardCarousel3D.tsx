@@ -45,4 +45,5 @@ const CardCarousel3D = <T,>({ cards, syncIndex, initialIndex = 0, onIndexChange,
 };
 
 export { CardCarousel3D };
+
 export type { CardCarousel3DProps };

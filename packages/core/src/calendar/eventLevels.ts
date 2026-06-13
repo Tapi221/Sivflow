@@ -1,5 +1,5 @@
-import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
 import { addDays, differenceInCalendarDays, isSameDay, max, min, startOfDay } from "date-fns";
+import type { CalendarEvent } from "./calendarEvent.types";
 
 type CalendarEventSegment = {
   event: CalendarEvent;
@@ -83,4 +83,5 @@ const getCalendarEventLevels = (rowSegments: readonly CalendarEventSegment[], li
 };
 
 export { getCalendarEventSegment, calendarEventSegmentsOverlap, getCalendarEventLevels };
+
 export type { CalendarEventSegment, CalendarEventLevelsResult };

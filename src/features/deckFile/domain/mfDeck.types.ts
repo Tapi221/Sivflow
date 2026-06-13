@@ -124,4 +124,5 @@ class MfDeckExportError extends Error {
 }
 
 export { MF_DECK_FORMAT, MF_DECK_VERSION, MF_DECK_MANIFEST_PATH, MF_DECK_CARDS_PATH, MF_DECK_MEDIA_DIRECTORY, MF_DECK_MEDIA_MANIFEST_PATH, MF_DECK_FILE_EXTENSION, MF_DECK_MIME_TYPE, MF_DECK_MEDIA_URI_PREFIX, MF_DECK_MAX_CARDS, MF_DECK_MAX_BLOCKS_PER_FACE, MF_DECK_MAX_MEDIA_ENTRIES, MfDeckValidationError, MfDeckExportError };
+
 export type { MfDeckIssueLevel, MfDeckIssueCode, MfDeckIssue, MfDeckMediaKindV1, MfDeckMediaEntryV1, MfDeckMediaManifestV1, MfDeckManifestV1, MfDeckCardFlagsV1, MfDeckCardFaceV1, MfDeckCardV1, MfDeckCardsJsonV1, MfDeckArchiveV1, MfDeckValidationResult };

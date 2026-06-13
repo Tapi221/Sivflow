@@ -1,9 +1,13 @@
 "use client";
 
 import { BoldRules, CodeRules, HighlightRules, ItalicRules, MarkComboRules, StrikethroughRules, SubscriptRules, SuperscriptRules, UnderlineRules } from "@platejs/basic-nodes";
+
 import { BoldPlugin, CodePlugin, HighlightPlugin, ItalicPlugin, KbdPlugin, StrikethroughPlugin, SubscriptPlugin, SuperscriptPlugin, UnderlinePlugin } from "@platejs/basic-nodes/react";
+
 import { CodeLeaf } from "@/chip/ui/plate/code-node";
+
 import { HighlightLeaf } from "@/chip/ui/plate/highlight-node";
+
 import { KbdLeaf } from "@/chip/ui/plate/kbd-node";
 
 const BasicMarksKit = [

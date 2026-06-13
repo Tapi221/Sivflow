@@ -1,4 +1,4 @@
-import "@/chip/panel/panel.css";
+import "./panel.css";
 import { memo } from "react";
 import type { AriaRole, CSSProperties, MouseEventHandler, ReactNode, RefObject } from "react";
 
@@ -27,4 +27,5 @@ const Panel = memo(PanelBase);
 Panel.displayName = "Panel";
 
 export { Panel };
+
 export type { PanelProps };

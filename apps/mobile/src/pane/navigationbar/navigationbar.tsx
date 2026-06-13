@@ -1,4 +1,4 @@
-import "@mobile/pane/navigationbar/navigationbar.css";
+import "./navigationbar.css";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { GalleryIcon, HomeIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";
@@ -103,4 +103,5 @@ const NavigationBarMobile = memo(NavigationBarMobileComponent);
 NavigationBarMobile.displayName = "NavigationBarMobile";
 
 export { NavigationBarMobile };
+
 export type { NavigationBarItemId, NavigationBarMobileProps };

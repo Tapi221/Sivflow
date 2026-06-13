@@ -1,3 +1,3 @@
 
 
-export { FadeSkeleton } from "@/features/fade/skeltom/FadeSkeleton";
+export { FadeSkeleton } from "./FadeSkeleton";

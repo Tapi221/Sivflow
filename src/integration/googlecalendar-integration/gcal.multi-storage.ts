@@ -1,5 +1,5 @@
-import { clearCachedGoogleCalendarAccount } from "@/integration/googlecalendar-integration/googleCalendarEventCache";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
+import { clearCachedGoogleCalendarAccount } from "./googleCalendarEventCache";
 
 // ─────────────────────────────────────────────────────────────
 // Types
@@ -263,4 +263,5 @@ const updateStoredAccountCalendarIds = (accountId: string, selectedCalendarIds: 
 };
 
 export { isStoredTokenValid, buildTokenExpiry, readStoredAccounts, writeStoredAccounts, upsertStoredAccount, removeStoredAccount, updateStoredAccountToken, updateStoredAccountCalendarIds };
+
 export type { StoredGoogleAccount, StoredGoogleAccountProfile };

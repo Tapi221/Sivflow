@@ -5,9 +5,9 @@ import type { SlateEditor, Value } from "platejs";
 import { createSlateEditor, nanoid } from "platejs";
 import { z } from "zod";
 import { buildEditTableMultiCellPrompt, getChooseToolPrompt, getCommentPrompt, getEditPrompt, getGeneratePrompt } from "@/app/api/ai/command/prompt";
-import type { ChatMessage, ToolName } from "@/app/api/ai/command/types";
 import { BaseEditorKit } from "@/components/editor/editor-base-kit";
 import { markdownJoinerTransform } from "@/lib/markdown-joiner-transform";
+import type { ChatMessage, ToolName } from "./types";
 
 type CommandContext = {
   children: Value;

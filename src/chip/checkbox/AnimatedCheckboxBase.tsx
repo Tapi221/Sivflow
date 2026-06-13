@@ -125,4 +125,5 @@ const AnimatedCheckboxBase = ({
 };
 
 export { AnimatedCheckboxBase };
+
 export type { AnimatedCheckboxShape, AnimatedCheckboxVariant, AnimatedCheckboxBaseProps };

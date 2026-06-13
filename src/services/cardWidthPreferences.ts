@@ -87,4 +87,5 @@ const setCardSetWidthPreference = (cardSetId: string, mode: CardWidthPaneMode, w
 };
 
 export { getCardSetWidthPreference, setCardSetWidthPreference };
+
 export type { CardWidthPaneMode };

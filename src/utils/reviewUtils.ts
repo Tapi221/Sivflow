@@ -1,6 +1,6 @@
 import type { SubjectiveScore } from "@/domain/card/review/stability";
 import { normalizeMemoryStability } from "@/domain/card/review/stability";
-import { calculateRetentionProbability } from "@/utils/reviewMetrics";
+import { calculateRetentionProbability } from "./reviewMetrics";
 
 type StabilityPhase = {
   key: "unstable" | "fragile" | "growing" | "stable" | "solid";
@@ -72,4 +72,5 @@ const getStabilityPhase = (stabilityInternal: number, intervalDays: number = 1):
 
 export { normalizeMemoryStability, type SubjectiveScore };
 export { getStabilityPhase };
+
 export type { StabilityPhase };

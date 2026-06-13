@@ -1,7 +1,7 @@
 import React from "react";
 import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
-import { MarkdownBlockDisplay } from "@/components/card/blocks/markdown/MarkdownBlockDisplay";
 import { cn } from "@/lib/utils";
+import { MarkdownBlockDisplay } from "./MarkdownBlockDisplay";
 
 interface MarkdownBlockViewProps {
   md: string;
@@ -57,4 +57,5 @@ const MarkdownBlockView: React.FC<MarkdownBlockViewProps> = ({ md, ...rest }) =>
 };
 
 export { MarkdownBlockView };
+
 export type { MarkdownBlockPreviewProps };

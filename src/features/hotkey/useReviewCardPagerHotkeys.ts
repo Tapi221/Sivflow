@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { hasPrimaryModifier, isTypingTarget } from "@/features/hotkey/hotkeyGuards";
+import { hasPrimaryModifier, isTypingTarget } from "./hotkeyGuards";
 
 type UseReviewCardPagerHotkeysParams = {
   onFlip?: () => void;

@@ -272,4 +272,5 @@ class GoogleCalendarWatchManager {
 }
 
 export { GoogleCalendarWatchManager };
+
 export type { WatchChannel };

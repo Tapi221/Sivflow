@@ -15,4 +15,5 @@ const DateNodeStatic = ({ className, date, children, ...props }: DateNodeStaticP
 const DateElementStatic = DateNodeStatic;
 
 export { DateElementStatic, DateNodeStatic };
+
 export type { DateNodeStaticProps };

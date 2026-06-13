@@ -1,18 +1,19 @@
 
 
-export * from "@/types/domain/assets";
-export * from "@/types/domain/card";
-export * from "@/types/domain/cardSet";
-export * from "@/types/domain/document";
-export * from "@/types/domain/explorer";
-export * from "@/types/domain/folder";
-export * from "@/types/domain/media";
-export * from "@/types/domain/notification";
-export * from "@/types/domain/storageStats";
-export * from "@/types/domain/sync";
-export * from "@/types/domain/telemetry";
-export { CURRENT_SCHEMA_VERSION } from "@/types/domain/storage";
-export { CURRENT_SCHEMA_VERSION as SNAPSHOT_SCHEMA_VERSION } from "@/types/domain/snapshot";
-export type { ReviewLog } from "@/types/domain/base";
-export type { ReviewLog as SnapshotReviewLog, UserSettings as SnapshotUserSettings } from "@/types/domain/snapshot";
-export type { UserSettings, UserStats } from "@/types/domain/user";
+export * from "./assets";
+export * from "./card";
+export * from "./cardSet";
+export * from "./document";
+export * from "./explorer";
+export * from "./folder";
+export * from "./media";
+export * from "./notification";
+export * from "./storageStats";
+export * from "./sync";
+export * from "./telemetry";
+export { CURRENT_SCHEMA_VERSION } from "./storage";
+export { CURRENT_SCHEMA_VERSION as SNAPSHOT_SCHEMA_VERSION } from "./snapshot";
+
+export type { ReviewLog } from "./base";
+export type { ReviewLog as SnapshotReviewLog, UserSettings as SnapshotUserSettings } from "./snapshot";
+export type { UserSettings, UserStats } from "./user";

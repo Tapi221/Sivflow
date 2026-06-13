@@ -1,4 +1,4 @@
-import "@/features/settings/SettingsWorkspaceScreen.css";
+import "./SettingsWorkspaceScreen.css";
 import { useEffect, useMemo, useState } from "react";
 import type { LocalAiSettings } from "@platform/ai/localAiSettings";
 import { getLocalAiSettings, setLocalAiSettings } from "@platform/ai/localAiSettings";

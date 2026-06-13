@@ -18,4 +18,5 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
 };
 
 export { AuthProvider };
+
 export type { AuthProviderProps };

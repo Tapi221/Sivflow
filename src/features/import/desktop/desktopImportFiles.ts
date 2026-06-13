@@ -102,4 +102,5 @@ const selectDesktopImportFiles = async (): Promise<File[]> => {
 };
 
 export { canUseDesktopImportFiles, subscribeDesktopImportFileOpen, readDesktopImportFile, selectDesktopImportFiles, readDesktopImportFiles };
+
 export type { DesktopImportFileOpenPayload, DesktopImportFileReadResult };

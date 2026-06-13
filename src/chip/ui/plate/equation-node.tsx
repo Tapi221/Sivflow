@@ -1,24 +1,37 @@
 "use client";
 
 import * as React from "react";
+
 import { useEquationElement, useEquationInput } from "@platejs/math/react";
+
 import { BlockSelectionPlugin } from "@platejs/selection/react";
+
 import { CornerDownLeftIcon, RadicalIcon } from "lucide-react";
+
 import type { TEquationElement } from "platejs";
+
 import type { PlateElementProps } from "platejs/react";
+
 import { createPrimitiveComponent, PlateElement, useEditorRef, useEditorSelector, useElement, useReadOnly, useSelected } from "platejs/react";
+
 import type { TextareaAutosizeProps } from "react-textarea-autosize";
+
 import TextareaAutosize from "react-textarea-autosize";
+
 import { Button } from "@/chip/ui/button/button";
-import { inlineSuggestionVariants } from "@/chip/ui/plate/suggestion";
+
 import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
+
 import { cn } from "@/lib/utils";
+
+import { inlineSuggestionVariants } from "./suggestion";
 
 type EquationPopoverContentProps = {
   isInline: boolean;
   open: boolean;
   setOpen: (open: boolean) => void;
 } & TextareaAutosizeProps;
+
 type EquationElementWithBadgeProps = PlateElementProps<TEquationElement> & {
   lineBreakBadge?: React.ReactNode;
 };
@@ -34,6 +47,7 @@ const EQUATION_RENDER_OPTIONS = {
   throwOnError: false,
   trust: false,
 };
+
 const EquationInput = createPrimitiveComponent(TextareaAutosize)({
   propsHook: useEquationInput,
 });
@@ -78,6 +92,7 @@ const EquationPopoverContent = ({ className, isInline, open, setOpen, ...props }
     </PopoverContent>
   );
 };
+
 const EquationElement = (props: PlateElementProps<TEquationElement>) => {
   const selected = useSelected();
   const [open, setOpen] = React.useState(selected);
@@ -127,6 +142,7 @@ const EquationElement = (props: PlateElementProps<TEquationElement>) => {
     </PlateElement>
   );
 };
+
 const InlineEquationElement = (props: PlateElementProps<TEquationElement>) => {
   const { element } = props;
   const katexRef = React.useRef<HTMLDivElement | null>(null);

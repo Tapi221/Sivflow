@@ -1,4 +1,4 @@
-import { getImageBlob } from "@/services/imageFileStore";
+import { getImageBlob } from "./imageFileStore";
 
 type BlobScopeOptions = {
   userId?: string | null;
@@ -160,4 +160,5 @@ const getBlobCacheStats = () => {
 };
 
 export { getOrCreateImageBlobUrl, removeImageBlobUrl, pinImageBlobUrl, unpinImageBlobUrl, getBlobCacheStats };
+
 export type { BlobCacheStats };

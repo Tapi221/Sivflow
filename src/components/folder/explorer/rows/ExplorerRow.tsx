@@ -1,6 +1,6 @@
 import React from "react";
-import { EXPLORER_ROW_BASE_CLASS_NAME, getExplorerRowStyle } from "@/components/folder/explorer/rows/shared";
 import { cn } from "@/lib/utils";
+import { EXPLORER_ROW_BASE_CLASS_NAME, getExplorerRowStyle } from "./shared";
 
 interface ExplorerRowProps extends React.HTMLAttributes<HTMLDivElement> {
   depth?: number;

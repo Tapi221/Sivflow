@@ -1,7 +1,7 @@
 import { addDays, getDaysInMonth, isSameDay, startOfMonth } from "date-fns";
-import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+import { eventChipDesign } from "./eventChipDesign.generated";
 
 type CalendarListPlacementDay = {
   date: Date;
@@ -159,4 +159,5 @@ const getListVisibleDate = (days: CalendarListPlacementDay[], metrics: CalendarL
 };
 
 export { LIST_DAY_SECTION_MIN_HEIGHT_PX, LIST_DAY_GAP_PX, LIST_EMPTY_DAY_HEIGHT_PX, LIST_EVENT_ROW_HEIGHT_PX, LIST_EVENT_CHIP_HEIGHT_PX, LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX, LIST_ALL_DAY_EVENT_CHIP_HEIGHT_PX, LIST_EVENT_ROW_GAP_PX, LIST_VIRTUAL_OVERSCAN_PX, getEventInstanceKey, buildListPlacementDays, getListDayEstimatedHeight, getListDayHeight, buildListVirtualMetrics, getListVirtualRange, areListVirtualRangesEqual, getListVisibleDate };
+
 export type { CalendarListPlacementDay, CalendarListVirtualMetrics, CalendarListVirtualRange };

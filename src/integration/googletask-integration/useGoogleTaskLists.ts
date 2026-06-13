@@ -2,8 +2,8 @@ import { useEffect, useMemo, useReducer } from "react";
 import { refreshConnectedServiceAccessToken, requestConnectedServiceAccessToken } from "@/integration/google-integration/google.oauth";
 import { getServerStoredGoogleConnectedServiceAccessToken, isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
 import type { GoogleConnectedServiceAccountEntry, GoogleConnectedServiceAccountTokenUpdate } from "@/integration/google-integration/googleAccount.types";
-import { fetchGoogleTaskLists } from "@/integration/googletask-integration/gtask.api";
 import type { GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
+import { fetchGoogleTaskLists } from "./gtask.api";
 
 type GoogleTaskListAccountState = {
   taskLists: GoogleTaskListItem[];
@@ -268,4 +268,5 @@ const useGoogleTaskLists = (accounts: GoogleConnectedServiceAccountEntry[], onAc
 };
 
 export { useGoogleTaskLists };
+
 export type { GoogleTaskListAccountState };

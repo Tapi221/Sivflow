@@ -183,4 +183,5 @@ const parseEditorBlockSettings = (input: readonly unknown[] | null | undefined):
 };
 
 export { isEditorBlockType, getEditorBlockDefinition, createDefaultEditorBlockSettings, normalizeEditorBlockSettings, parseEditorBlockSettings };
+
 export type { EditorBlockType, EditorBlockIconName, EditorBlockDefinition, EditorBlockConfig };

@@ -1,5 +1,5 @@
-import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
 import { addDays, format, startOfDay } from "date-fns";
+import type { CalendarEvent } from "./calendarEvent.types";
 
 const toDate = (value: Date): Date | null => {
   const date = value instanceof Date ? value : new Date(value);

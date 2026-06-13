@@ -115,4 +115,5 @@ const getPdfPageWindowKeepSet: PdfPageWindowKeepSet = (first: PdfPageWindowMetri
 };
 
 export { getPdfPageWindowKeepSet, getSafePdfPageNumber };
+
 export type { PdfPageWindowMetric, PdfPageWindowOptions };

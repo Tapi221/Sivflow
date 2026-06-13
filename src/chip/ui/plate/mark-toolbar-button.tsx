@@ -1,6 +1,6 @@
 import { useMarkToolbarButton, useMarkToolbarButtonState } from "platejs/react";
-import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
-import { ToolbarButton } from "@/chip/ui/plate/toolbar";
+import type { ToolbarButtonProps } from "./toolbar";
+import { ToolbarButton } from "./toolbar";
 
 type MarkToolbarButtonProps = ToolbarButtonProps & {
   nodeType: string;
@@ -13,4 +13,5 @@ const MarkToolbarButton = ({ nodeType, ...props }: MarkToolbarButtonProps) => {
 };
 
 export { MarkToolbarButton };
+
 export type { MarkToolbarButtonProps };

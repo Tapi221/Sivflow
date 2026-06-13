@@ -1,3 +1,3 @@
-import { LogseqSandboxPage } from "@/sandbox/logseq/LogseqSandboxPage";
+import { LogseqSandboxPage } from "./LogseqSandboxPage";
 
 export { LogseqSandboxPage };

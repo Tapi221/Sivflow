@@ -33,4 +33,5 @@ const UiIcon = ({
 };
 
 export { UiIcon };
+
 export type { UiIconProps };

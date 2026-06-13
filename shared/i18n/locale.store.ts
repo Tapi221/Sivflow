@@ -65,4 +65,5 @@ const useLocaleStore = create<LocaleState>()(
 );
 
 export { readStoredLocale, useLocaleStore };
+
 export type { Locale };

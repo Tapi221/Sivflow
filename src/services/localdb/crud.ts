@@ -1,9 +1,9 @@
 import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueuePayloadGuards";
-import { assertNoBlobUrlInCardPayload } from "@/services/localdb/blobUrl";
-import type { DocDbCtx } from "@/services/localdb/documentsLifecycle";
-import { cleanupBeforeDocumentDelete, cleanupBeforeDocumentSoftDelete, cleanupBeforeDocumentUpdate } from "@/services/localdb/documentsLifecycle";
-import { CURRENT_TAG_STORE } from "@/services/localdb/tagStoreNames";
 import type { Card, Folder } from "@/types";
+import { assertNoBlobUrlInCardPayload } from "./blobUrl";
+import type { DocDbCtx } from "./documentsLifecycle";
+import { cleanupBeforeDocumentDelete, cleanupBeforeDocumentSoftDelete, cleanupBeforeDocumentUpdate } from "./documentsLifecycle";
+import { CURRENT_TAG_STORE } from "./tagStoreNames";
 
 type EnqueueSync = (table: string, type: "upload" | "download", payload: unknown) => Promise<void>;
 interface TableLike<T extends object> {
@@ -542,4 +542,5 @@ const upsert: Upsert = async (db: DbLike, tableName: string, data: unknown, skip
 };
 
 export { addItem, updateItem, deleteItem, softDelete, bulkUpsert, upsert };
+
 export type { EnqueueSync, TableLike, DbLike };

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import type { PresentationTarget } from "@/platform/presentation/getPresentationTarget";
-import { getPresentationTargetFromWindow } from "@/platform/presentation/getPresentationTarget";
+import type { PresentationTarget } from "./getPresentationTarget";
+import { getPresentationTargetFromWindow } from "./getPresentationTarget";
 
 const bindMediaQueryChange = (
   mediaQueryList: MediaQueryList,

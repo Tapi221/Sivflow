@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import type { CalendarEventMoveHandler } from "@/features/calendar/scheduleScreen.types";
 import type { GCalWritableEventUpdateInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
+import type { CalendarEventMoveHandler } from "./scheduleScreen.types";
 
 type CalendarEventMoveOverride = {
   startsAt: Date; endsAt: Date; isAllDay: boolean; };
@@ -193,4 +193,5 @@ const useCalendarEventMoveController = ({ updateGoogleCalendarEvent }: UseCalend
 };
 
 export { applyCalendarEventMoveOverrides, useCalendarEventMoveController };
+
 export type { CalendarEventMoveOverride, UseCalendarEventMoveControllerOptions, UseCalendarEventMoveControllerReturn };

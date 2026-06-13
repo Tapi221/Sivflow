@@ -18,4 +18,5 @@ const MentionNodeStatic = ({ className, value, children, ...props }: MentionNode
 const MentionElementStatic = MentionNodeStatic;
 
 export { MentionElementStatic, MentionNodeStatic };
+
 export type { MentionNodeStaticProps };

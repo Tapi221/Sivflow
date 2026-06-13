@@ -1,8 +1,11 @@
 "use client";
 
 import { AIChatPlugin } from "@platejs/ai/react";
+
 import { BlockSelectionPlugin } from "@platejs/selection/react";
+
 import { getPluginTypes, isHotkey, KEYS } from "platejs";
+
 import { BlockSelection } from "@/chip/ui/plate/block-selection";
 
 const hasSelectableClass = ({ attributes, className }: { attributes: { className?: string; };

@@ -78,4 +78,5 @@ const usePdfSelectionCapture = ({ targetRef, selectionCaptureSide, sourceUnavail
 };
 
 export { usePdfSelectionCapture };
+
 export type { UsePdfSelectionCaptureParams, UsePdfSelectionCaptureResult };

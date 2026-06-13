@@ -21,11 +21,11 @@ import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceExplorerTab, WorkspaceNoteTab, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
-import { MobileCalendarSidebar, MobileCalendarSidebarOpenButton } from "@/pane.desktop/view/MobileCalendarSidebar";
-import { ScheduleScreen as CalendarScheduleScreen } from "@/pane.desktop/view/ScheduleScreen.desktop";
-import { WorkspaceActionToolbar } from "@/pane.desktop/view/WorkspaceActionToolbar";
 import type { DocumentItem, Folder, Note, SelectedExplorerItem } from "@/types";
 import { Search } from "@/ui/icons";
+import { MobileCalendarSidebar, MobileCalendarSidebarOpenButton } from "./MobileCalendarSidebar";
+import { ScheduleScreen as CalendarScheduleScreen } from "./ScheduleScreen.desktop";
+import { WorkspaceActionToolbar } from "./WorkspaceActionToolbar";
 
 type ExplorerWorkspaceContentProps = {
   explorerState: ExplorerRouteState;

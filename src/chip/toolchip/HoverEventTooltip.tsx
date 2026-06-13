@@ -1,8 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ReactNode } from "react";
-import { emitHoverTooltipOpen, subscribeHoverTooltipOpen } from "@/chip/toolchip/hoverTooltipEvents";
 import { cn } from "@/lib/utils";
+import { emitHoverTooltipOpen, subscribeHoverTooltipOpen } from "./hoverTooltipEvents";
 
 type TooltipSide = "top" | "bottom";
 type TooltipPosition = {

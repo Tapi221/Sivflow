@@ -1,7 +1,7 @@
 import React from "react";
 import type { TagColorKey } from "@/chip/tag/tagColor";
-import { TagBadge } from "@/components/tag/TagBadge";
 import { cn } from "@/lib/utils";
+import { TagBadge } from "./TagBadge";
 
 interface TagChipProps {
   label: string;
@@ -35,4 +35,5 @@ const TagChip = ({
 };
 
 export { TagChip };
+
 export type { TagChipProps };

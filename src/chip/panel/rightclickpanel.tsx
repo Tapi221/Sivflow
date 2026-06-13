@@ -1,7 +1,7 @@
-import "@/chip/panel/rightclickpanel.css";
+import "./rightclickpanel.css";
 import { memo } from "react";
 import type { CSSProperties, MouseEvent as ReactMouseEvent, ReactNode, RefObject } from "react";
-import { Panel } from "@/chip/panel/panel";
+import { Panel } from "./panel";
 
 type RightClickPanelProps = {
   id?: string;
@@ -36,4 +36,5 @@ const RightClickPanel = memo(RightClickPanelBase);
 RightClickPanel.displayName = "RightClickPanel";
 
 export { RightClickPanel };
+
 export type { RightClickPanelProps };
