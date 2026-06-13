@@ -116,6 +116,7 @@ const createTableTool = (editor: SlateEditor, { messagesRaw, model, writer }: Ai
       });
     },
   });
+
 const POST = async (req: Request) => {
   try {
     const { apiKey, ctx, messages: messagesRaw, model } = await req.json() as CommandRequestPayload;

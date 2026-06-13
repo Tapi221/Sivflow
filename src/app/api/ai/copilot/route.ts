@@ -11,6 +11,7 @@ type CopilotRequestPayload = {
 const DEFAULT_COPILOT_MODEL = "openai/gpt-4o-mini";
 
 const createErrorResponse = (status: number, error: string) => Response.json({ error }, { status });
+
 const POST = async (req: Request) => {
   try {
     const { apiKey, model, prompt, system } = await req.json() as CopilotRequestPayload;
