@@ -8,13 +8,15 @@ import { cn } from "@/lib/utils";
 const LINK_ELEMENT_CLASS_NAME = "font-medium text-inherit underline decoration-current underline-offset-4";
 
 const LinkElementStatic = (props: SlateElementProps<TLinkElement>) => {
-  const { attributes, children, editor, element } = props;
+  const { attributes, children, editor, element, ...rest } = props;
   return (
     <SlateElement
       as="a"
       className={cn(LINK_ELEMENT_CLASS_NAME, inlineSuggestionVariants())}
       attributes={{ ...attributes, ...getLinkAttributes(editor, element) }}
-      {...props}
+      editor={editor}
+      element={element}
+      {...rest}
     >
       {children}
     </SlateElement>

@@ -4,7 +4,7 @@ import { PlateElement } from "platejs/react";
 
 const AudioElementStatic = (props: PlateElementProps<TAudioElement>) => {
   const { element } = props;
-  const caption = element.caption?.[0]?.children?.[0]?.text;
+  const caption = (element as any).caption?.[0]?.children?.[0]?.text;
   return (
     <PlateElement {...props} className="py-2.5">
       <figure className="my-0">

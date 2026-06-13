@@ -1,20 +1,16 @@
-import { BaseLinkPlugin } from "@platejs/link";
-import { useEditorRef } from "platejs/react";
-import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
+import { useLinkToolbarButton, useLinkToolbarButtonState } from "@platejs/link/react";
 import { ToolbarButton } from "@/chip/ui/plate/toolbar";
+import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
 
 type LinkToolbarButtonProps = ToolbarButtonProps;
 
-const LinkToolbarButton = ({ onClick, ...props }: LinkToolbarButtonProps) => {
-  const editor = useEditorRef();
+const LinkToolbarButton = (props: LinkToolbarButtonProps) => {
+  const state = useLinkToolbarButtonState();
+  const { props: buttonProps } = useLinkToolbarButton(state);
   return (
-    <ToolbarButton
-      {...props}
-      onClick={(event) => {
-        onClick?.(event);
-        editor.getApi(BaseLinkPlugin).link.showFloatingLink();
-      }}
-    />
+    <ToolbarButton {...props} {...buttonProps} data-plate-focus tooltip="Link">
+      {props.children}
+    </ToolbarButton>
   );
 };
 

@@ -1,25 +1,15 @@
-import { useEditorRef } from "platejs/react";
-import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
+import { useIndentButton, useOutdentButton } from "@platejs/indent/react";
 import { ToolbarButton } from "@/chip/ui/plate/toolbar";
+import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
 
 type IndentToolbarButtonProps = ToolbarButtonProps & {
   reverse?: boolean;
 };
 
-const IndentToolbarButton = ({ reverse, onClick, ...props }: IndentToolbarButtonProps) => {
-  const editor = useEditorRef();
+const IndentToolbarButton = ({ reverse, ...props }: IndentToolbarButtonProps) => {
+  const { props: buttonProps } = reverse ? useOutdentButton() : useIndentButton();
   return (
-    <ToolbarButton
-      {...props}
-      onClick={(event) => {
-        onClick?.(event);
-        if (reverse) {
-          editor.tf.outdent();
-          return;
-        }
-        editor.tf.indent();
-      }}
-    />
+    <ToolbarButton {...props} {...buttonProps} tooltip={reverse ? "Outdent" : "Indent"} />
   );
 };
 
