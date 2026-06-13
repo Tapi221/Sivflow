@@ -4,8 +4,13 @@ import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import react from "@vitejs/plugin-react";
-import { defineConfig, type Plugin } from "vite";
+import { defineConfig } from "vite";
+import type { Plugin } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+
+type ApiRouteModule = {
+  POST?: (request: Request) => Promise<Response> | Response;
+};
 
 const optimizedDependencyIncludes = [
   "@radix-ui/react-alert-dialog",
@@ -31,7 +36,10 @@ const optimizedDependencyIncludes = [
   "@platejs/table/react",
   "platejs/react",
 ];
-
+const apiRouteModulePaths = {
+  "/api/ai/command": "src/app/api/ai/command/route.ts",
+  "/api/ai/copilot": "src/app/api/ai/copilot/route.ts",
+};
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const distOutputPath = "dist";
 const pdfjsAssetRoute = "/pdfjs/";
@@ -43,9 +51,7 @@ const browserExternalizedWarningText = "has been externalized for browser compat
 let hasCleanedDistOutput = false;
 
 const resolveFromRoot = (relativePath: string) => path.resolve(repoRoot, relativePath);
-
 const resolvePdfjsDistPath = (relativePath: string) => resolveFromRoot(path.join("node_modules/pdfjs-dist", relativePath));
-
 const getPdfjsAssetContentType = (filePath: string): string => {
   if (filePath.endsWith(".bcmap")) return "application/octet-stream";
   if (filePath.endsWith(".wasm")) return "application/wasm";
@@ -53,11 +59,9 @@ const getPdfjsAssetContentType = (filePath: string): string => {
   if (filePath.endsWith(".ttf")) return "font/ttf";
   return "application/octet-stream";
 };
-
 const readRequestBody = (request: IncomingMessage): Promise<string> => {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
-
     request.on("data", (chunk: Buffer) => {
       chunks.push(chunk);
     });
@@ -67,19 +71,45 @@ const readRequestBody = (request: IncomingMessage): Promise<string> => {
     request.on("error", reject);
   });
 };
-
 const writeJsonResponse = (response: ServerResponse, statusCode: number, payload: unknown) => {
   response.statusCode = statusCode;
   response.setHeader("Content-Type", "application/json");
   response.end(JSON.stringify(payload));
 };
-
+const createRequestHeaders = (request: IncomingMessage): Headers => {
+  const headers = new Headers();
+  Object.entries(request.headers).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach((entry) => headers.append(key, entry));
+      return;
+    }
+    if (value !== undefined) {
+      headers.set(key, value);
+    }
+  });
+  return headers;
+};
+const writeWebResponse = async (response: ServerResponse, webResponse: Response) => {
+  response.statusCode = webResponse.status;
+  webResponse.headers.forEach((value, key) => {
+    response.setHeader(key, value);
+  });
+  if (!webResponse.body) {
+    response.end(await webResponse.text());
+    return;
+  }
+  const reader = webResponse.body.getReader();
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    response.write(value);
+  }
+  response.end();
+};
 const getFiniteNumber = (payload: Record<string, unknown>, key: string, fallback: number): number => {
   const value = payload[key];
-
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 };
-
 const createEventChipDesignSource = (payload: Record<string, unknown>): string => {
   const values = {
     backgroundAlpha: getFiniteNumber(payload, "backgroundAlpha", 0.16),
@@ -123,7 +153,6 @@ const createEventChipDesignSource = (payload: Record<string, unknown>): string =
     tooltipMonthRadius: getFiniteNumber(payload, "tooltipMonthRadius", 10),
     tooltipWeekdayRadius: getFiniteNumber(payload, "tooltipWeekdayRadius", 14),
   };
-
   return `export type EventChipDesign = {
   backgroundAlpha: number;
   month: {
@@ -231,7 +260,43 @@ export const eventChipDesign: EventChipDesign = {
 };
 `;
 };
-
+const createApiRoutesPlugin = (): Plugin => {
+  return {
+    name: "serve-plate-ai-api-routes",
+    apply: "serve",
+    configureServer(server) {
+      server.middlewares.use(async (request, response, next) => {
+        const requestPath = request.url?.split("?")[0] ?? "";
+        const modulePath = apiRouteModulePaths[requestPath as keyof typeof apiRouteModulePaths];
+        if (!modulePath) {
+          next();
+          return;
+        }
+        if (request.method !== "POST") {
+          writeJsonResponse(response, 405, { ok: false, error: "Method not allowed" });
+          return;
+        }
+        try {
+          const body = await readRequestBody(request);
+          const routeModule = await server.ssrLoadModule(`/@fs/${resolveFromRoot(modulePath)}`) as ApiRouteModule;
+          if (!routeModule.POST) {
+            writeJsonResponse(response, 500, { ok: false, error: "Route handler is missing" });
+            return;
+          }
+          const webRequest = new Request(`http://localhost${request.url ?? requestPath}`, {
+            body,
+            headers: createRequestHeaders(request),
+            method: request.method,
+          });
+          const webResponse = await routeModule.POST(webRequest);
+          await writeWebResponse(response, webResponse);
+        } catch (error) {
+          writeJsonResponse(response, 500, { ok: false, error: error instanceof Error ? error.message : "Invalid request" });
+        }
+      });
+    },
+  };
+};
 const createDistCleanerPlugin = (): Plugin => {
   return {
     name: "clean-dist-before-build",
@@ -241,13 +306,11 @@ const createDistCleanerPlugin = (): Plugin => {
       if (hasCleanedDistOutput) {
         return;
       }
-
       hasCleanedDistOutput = true;
       await fs.rm(resolveFromRoot(distOutputPath), { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     },
   };
 };
-
 const createPdfjsAssetsPlugin = (): Plugin => {
   return {
     name: "serve-pdfjs-assets",
@@ -258,7 +321,6 @@ const createPdfjsAssetsPlugin = (): Plugin => {
           next();
           return;
         }
-
         try {
           const rawRelativePath = decodeURIComponent(requestUrl.slice(pdfjsAssetRoute.length).split("?")[0] ?? "");
           const assetFilePath = resolvePdfjsDistPath(rawRelativePath);
@@ -268,7 +330,6 @@ const createPdfjsAssetsPlugin = (): Plugin => {
             response.end();
             return;
           }
-
           const file = await fs.readFile(assetFilePath);
           response.setHeader("Content-Type", getPdfjsAssetContentType(assetFilePath));
           response.setHeader("Cache-Control", "public, max-age=31536000, immutable");
@@ -286,7 +347,6 @@ const createPdfjsAssetsPlugin = (): Plugin => {
     },
   };
 };
-
 const createEventChipDesignWriterPlugin = (): Plugin => {
   return {
     name: "event-chip-design-writer",
@@ -298,18 +358,15 @@ const createEventChipDesignWriterPlugin = (): Plugin => {
           next();
           return;
         }
-
         if (request.method !== "PUT") {
           writeJsonResponse(response, 405, { ok: false, error: "Method not allowed" });
           return;
         }
-
         try {
           const body = await readRequestBody(request);
           const payload = JSON.parse(body) as Record<string, unknown>;
           const source = createEventChipDesignSource(payload);
           const outputPath = resolveFromRoot(eventChipDesignOutputPath);
-
           await fs.writeFile(outputPath, source, "utf8");
           server.watcher.emit("change", outputPath);
           writeJsonResponse(response, 200, { ok: true, path: eventChipDesignOutputPath });
@@ -321,7 +378,6 @@ const createEventChipDesignWriterPlugin = (): Plugin => {
   };
 };
 
-// https://vite.dev/config/
 export default defineConfig(({ command }) => ({
   root: resolveFromRoot("apps/web"),
   envDir: repoRoot,
@@ -332,6 +388,7 @@ export default defineConfig(({ command }) => ({
     react(),
     createPdfjsAssetsPlugin(),
     createEventChipDesignWriterPlugin(),
+    createApiRoutesPlugin(),
     VitePWA({
       strategies: "injectManifest",
       srcDir: resolveFromRoot("apps/web/src"),
@@ -406,7 +463,6 @@ export default defineConfig(({ command }) => ({
         if (warning.message.includes(browserExternalizedWarningText)) {
           throw new Error(warning.message);
         }
-
         warn(warning);
       },
       output: {},
