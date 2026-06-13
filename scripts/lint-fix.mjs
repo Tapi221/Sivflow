@@ -48,12 +48,10 @@ const runSourceConventionFixes = () => {
   const statuses = [
     runNodeScript(NODE_SCRIPT_PATHS.fixTypeOnlyImports),
     runNodeScript(NODE_SCRIPT_PATHS.fixConstArrowFunctions),
-    runNodeScript(NODE_SCRIPT_PATHS.fixBlankLines),
     runNodeScript(NODE_SCRIPT_PATHS.fixShortHexColors),
     runNodeScript(NODE_SCRIPT_PATHS.fixNullishFallback),
     runNodeScript(NODE_SCRIPT_PATHS.fixStrictEquality),
     runNodeScript(NODE_SCRIPT_PATHS.fixKnownLintErrors),
-    runNodeScript(NODE_SCRIPT_PATHS.fixImportSpacing),
     runNodeScript(NODE_SCRIPT_PATHS.fixSourceOrder),
     runNodeScript(NODE_SCRIPT_PATHS.fixImportSpacing),
     runNodeScript(NODE_SCRIPT_PATHS.fixJsxChildSpacing),
@@ -82,9 +80,8 @@ const runSourceConventionVerification = () => {
   return statuses.find((status) => status !== 0) ?? 0;
 };
 
-const firstFixStatus = runSourceConventionFixes();
 const lintStatus = runNodeScript(NODE_SCRIPT_PATHS.lintEslintJa, ["--fix"]);
-const finalFixStatus = runSourceConventionFixes();
+const fixStatus = runSourceConventionFixes();
 const verifyStatus = runSourceConventionVerification();
 
-process.exitCode = [firstFixStatus, lintStatus, finalFixStatus, verifyStatus].find((status) => status !== 0) ?? 0;
+process.exitCode = [lintStatus, fixStatus, verifyStatus].find((status) => status !== 0) ?? 0;

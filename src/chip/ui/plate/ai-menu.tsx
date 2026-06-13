@@ -5,7 +5,6 @@ import { AIChatPlugin } from "@platejs/ai/react";
 import { Loader2Icon, PauseIcon, SendIcon, XIcon } from "lucide-react";
 import { useEditorPlugin, usePluginOption } from "platejs/react";
 import { Button } from "@/chip/ui/button/button";
-import { cn } from "@/lib/utils";
 
 type AIMenuItemsProps = {
   input: string;
@@ -48,7 +47,7 @@ const AIMenu = () => {
   return (
     <div className="absolute right-4 bottom-4 z-50 w-[min(420px,calc(100vw-2rem))] rounded-lg border bg-popover text-popover-foreground shadow-md">
       <div className="flex items-center gap-2 border-b px-3 py-2 text-muted-foreground text-sm">
-        {isLoading && <Loader2Icon className="size-4 animate-spin" />}
+        {isLoading ? <Loader2Icon className="size-4 animate-spin" /> : null}
         <span>{isLoading ? "AI is working..." : "Ask AI"}</span>
       </div>
       <textarea
@@ -84,11 +83,7 @@ const AILoadingBar = () => {
   if (!isLoading) return null;
 
   return (
-    <div
-      className={cn(
-        "-translate-x-1/2 absolute bottom-4 left-1/2 z-50 flex items-center gap-3 rounded-md border bg-muted px-3 py-1.5 text-muted-foreground text-sm shadow-md",
-      )}
-    >
+    <div className="-translate-x-1/2 absolute bottom-4 left-1/2 z-50 flex items-center gap-3 rounded-md border bg-muted px-3 py-1.5 text-muted-foreground text-sm shadow-md">
       <Loader2Icon className="size-4 animate-spin" />
       <span>{chat.status === "submitted" ? "Thinking..." : "Writing..."}</span>
       <Button size="sm" variant="ghost" className="flex items-center gap-1 text-xs" onClick={() => api.aiChat.stop()}>
