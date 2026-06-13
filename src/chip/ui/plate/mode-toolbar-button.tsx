@@ -1,15 +1,25 @@
 "use client";
 
 import * as React from "react";
+
 import { SuggestionPlugin } from "@platejs/suggestion/react";
+
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
+
 import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
+
 import { CheckIcon, EyeIcon, PencilLineIcon, PenIcon } from "lucide-react";
+
 import { useEditorReadOnly, useEditorRef, usePluginOption } from "platejs/react";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-import { ToolbarButton } from "@/chip/ui/plate/toolbar";
+
+import { ToolbarButton } from "./toolbar";
+
+
 
 const Indicator = () => <span className="pointer-events-none absolute right-2 flex size-3.5 items-center justify-center"><DropdownMenuItemIndicator><CheckIcon /></DropdownMenuItemIndicator></span>;
+
 const ModeToolbarButton = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
   const readOnly = useEditorReadOnly();
@@ -26,5 +36,7 @@ const ModeToolbarButton = (props: DropdownMenuProps) => {
       editor.tf.focus(); return; } }} value={value}
   ><DropdownMenuRadioItem className="pl-2 *:first:[span]:hidden *:[svg]:text-muted-foreground" value="editing"><Indicator />{item.editing.icon}{item.editing.label}</DropdownMenuRadioItem><DropdownMenuRadioItem className="pl-2 *:first:[span]:hidden *:[svg]:text-muted-foreground" value="viewing"><Indicator />{item.viewing.icon}{item.viewing.label}</DropdownMenuRadioItem><DropdownMenuRadioItem className="pl-2 *:first:[span]:hidden *:[svg]:text-muted-foreground" value="suggestion"><Indicator />{item.suggestion.icon}{item.suggestion.label}</DropdownMenuRadioItem></DropdownMenuRadioGroup></DropdownMenuContent></DropdownMenu>);
 };
+
+
 
 export { ModeToolbarButton };

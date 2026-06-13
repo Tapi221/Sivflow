@@ -2,6 +2,8 @@ import type { TAudioElement } from "platejs";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement } from "platejs/react";
 
+
+
 const AudioElementStatic = (props: PlateElementProps<TAudioElement>) => {
   const { element } = props;
   const caption = (element as any).caption?.[0]?.children?.[0]?.text;
@@ -15,5 +17,7 @@ const AudioElementStatic = (props: PlateElementProps<TAudioElement>) => {
     </PlateElement>
   );
 };
+
+
 
 export { AudioElementStatic };

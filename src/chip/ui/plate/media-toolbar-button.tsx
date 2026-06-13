@@ -1,17 +1,30 @@
 "use client";
 
 import * as React from "react";
+
 import { PlaceholderPlugin } from "@platejs/media/react";
+
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
+
 import { AudioLinesIcon, FileUpIcon, FilmIcon, ImageIcon, LinkIcon } from "lucide-react";
+
 import { isUrl, KEYS } from "platejs";
+
 import { useEditorRef } from "platejs/react";
+
 import { toast } from "sonner";
+
 import { useFilePicker } from "use-file-picker";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
+
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/chip/ui/dialog/alert-dialog";
+
 import { Input } from "@/chip/ui/input";
-import { ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary } from "@/chip/ui/plate/toolbar";
+
+import { ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary } from "./toolbar";
+
+
 
 const MEDIA_CONFIG: Record<string, { accept: string[]; icon: React.ReactNode; title: string; tooltip: string }> = {
   [KEYS.audio]: { accept: ["audio/*"], icon: <AudioLinesIcon className="size-4" />, title: "Insert Audio", tooltip: "Audio" },
@@ -19,6 +32,8 @@ const MEDIA_CONFIG: Record<string, { accept: string[]; icon: React.ReactNode; ti
   [KEYS.img]: { accept: ["image/*"], icon: <ImageIcon className="size-4" />, title: "Insert Image", tooltip: "Image" },
   [KEYS.video]: { accept: ["video/*"], icon: <FilmIcon className="size-4" />, title: "Insert Video", tooltip: "Video" },
 };
+
+
 
 const MediaUrlDialogContent = ({ currentConfig, nodeType, setOpen }: { currentConfig: (typeof MEDIA_CONFIG)[string]; nodeType: string; setOpen: (value: boolean) => void; }) => {
   const editor = useEditorRef();
@@ -31,6 +46,7 @@ const MediaUrlDialogContent = ({ currentConfig, nodeType, setOpen }: { currentCo
     e.preventDefault(); embedMedia(); }}
   >Accept</AlertDialogAction></AlertDialogFooter></>);
 };
+
 const MediaToolbarButton = ({ nodeType, ...props }: DropdownMenuProps & { nodeType: string }) => {
   const currentConfig = MEDIA_CONFIG[nodeType];
   const editor = useEditorRef();
@@ -46,5 +62,7 @@ const MediaToolbarButton = ({ nodeType, ...props }: DropdownMenuProps & { nodeTy
     setDialogOpen(value); }}
   ><AlertDialogContent className="gap-6"><MediaUrlDialogContent currentConfig={currentConfig} nodeType={nodeType} setOpen={setDialogOpen} /></AlertDialogContent></AlertDialog></>);
 };
+
+
 
 export { MediaToolbarButton };

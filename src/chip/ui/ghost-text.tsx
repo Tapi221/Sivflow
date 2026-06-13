@@ -1,8 +1,12 @@
 "use client";
 
 import * as React from "react";
+
 import { CopilotPlugin } from "@platejs/ai/react";
+
 import { useElement, usePluginOption } from "platejs/react";
+
+
 
 const GhostTextContent = () => {
   const suggestionText = usePluginOption(CopilotPlugin, "suggestionText");
@@ -13,6 +17,7 @@ const GhostTextContent = () => {
     </span>
   );
 };
+
 const GhostText = () => {
   const element = useElement();
 
@@ -22,5 +27,7 @@ const GhostText = () => {
 
   return <GhostTextContent />;
 };
+
+
 
 export { GhostText };

@@ -1,10 +1,14 @@
 import { AppInitializer } from "@/services/AppInitializer";
 import { getLocalDb, initializeDB } from "@/services/localdb";
 
+
+
 type CleanupCapableLocalDb = Awaited<ReturnType<typeof getLocalDb>> & {
   cleanupSyncHistory?: () => Promise<void>;
   cleanupSyncErrors?: () => Promise<void>;
 };
+
+
 
 const bootstrapUser = async (userId: string) => {
   await initializeDB(userId);
@@ -23,5 +27,7 @@ const bootstrapUser = async (userId: string) => {
   await cleanupDb.cleanupSyncHistory?.();
   await cleanupDb.cleanupSyncErrors?.();
 };
+
+
 
 export { bootstrapUser };

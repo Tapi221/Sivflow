@@ -1,6 +1,8 @@
 import type { CardBlock } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 type SharedCardContentBaseProps = Readonly<{ blocks: CardBlock[];
   className?: string;
 }>;

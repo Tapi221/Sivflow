@@ -2,7 +2,7 @@ import { normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
 import { normalizeUploadedImages } from "@/domain/assets/uploadedImageNormalizer";
 import { isGridOffsetType } from "@/domain/card/blockOffset";
 import { LEGACY_BASE_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from "@/domain/card/extraRows";
-import { normalizeReviewLogs } from "@/domain/card/normalizers/reviewLogs";
+import { normalizeReviewLogs } from "./reviewLogs";
 import { normalizeMemoryStability } from "@/domain/card/review/stability";
 import { normalizeDate } from "@/shared/codec/date";
 import { toArrayOr, toBoolOr, toFiniteNumber, toStringOr } from "@/shared/codec/primitives";
@@ -13,7 +13,11 @@ import type { UploadedPdf } from "@/types/domain/assets";
 import type { SubjectiveScoreValue } from "@/types/domain/base";
 import type { Card, CardBlock } from "@/types/domain/card";
 
+
+
 type GridBlockType = Parameters<typeof isGridOffsetType>[0];
+
+
 
 const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
   "text",
@@ -27,6 +31,8 @@ const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
   "pdf",
 ]);
 const SUBJECTIVE_SCORE_VALUES = new Set<SubjectiveScoreValue>([0, 1, 2, 3]);
+
+
 
 const isGridBlockType = (value: unknown): value is GridBlockType => {
   return (
@@ -485,5 +491,7 @@ const normalizeCard = (raw: unknown): Card => {
 
   return normalized;
 };
+
+
 
 export { normalizeCard };

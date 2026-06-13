@@ -1,8 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Toolbar } from "@/chip/ui/plate/toolbar";
+
+import { Toolbar } from "./toolbar";
+
 import { cn } from "@/lib/utils";
+
+
 
 const FloatingToolbar = ({ className, ...props }: React.ComponentProps<typeof Toolbar>) => {
   return (
@@ -16,5 +20,7 @@ const FloatingToolbar = ({ className, ...props }: React.ComponentProps<typeof To
     />
   );
 };
+
+
 
 export { FloatingToolbar };
