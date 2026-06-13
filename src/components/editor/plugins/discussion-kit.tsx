@@ -1,7 +1,7 @@
 "use client";
 
 import { createPlatePlugin } from "platejs/react";
-import { BlockDiscussion } from "@/chip/ui/block/block-discussion";
+import { BlockDiscussion } from "@/chip/ui/plate/block-discussion";
 import type { TComment } from "@/chip/ui/comment";
 
 type TDiscussion = {
