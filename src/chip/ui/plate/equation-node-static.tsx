@@ -11,7 +11,7 @@ const EQUATION_RENDER_OPTIONS = {
   errorColor: "#c00",
   fleqn: false,
   leqno: false,
-  macros: { "\f": "#1f(#2)" },
+  macros: { "\\f": "#1f(#2)" },
   output: "htmlAndMathml" as const,
   strict: "warn" as const,
   throwOnError: false,
@@ -52,8 +52,8 @@ const InlineEquationElementStatic = (props: SlateElementProps<TEquationElement>)
   });
   return (
     <SlateElement
-      {...props}
       className="inline-block select-none rounded-sm [&_.katex-display]:my-0"
+      {...props}
     >
       <div
         className={cn(
@@ -102,14 +102,14 @@ const InlineEquationElementDocx = (props: SlateElementProps<TEquationElement>) =
   const { element } = props;
   if (!element.texExpression || element.texExpression.length === 0) {
     return (
-      <SlateElement {...props} as="span">
+      <SlateElement as="span" {...props}>
         <span style={{ color: "#888", fontStyle: "italic" }}>[equation]</span>
         {props.children}
       </SlateElement>
     );
   }
   return (
-    <SlateElement {...props} as="span">
+    <SlateElement as="span" {...props}>
       <span style={{ fontFamily: "Cambria Math, Consolas, monospace" }}>
         {element.texExpression}
       </span>
