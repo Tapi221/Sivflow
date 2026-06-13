@@ -88,4 +88,5 @@ const CalendarEventChipListComponent = ({ event }: CalendarEventChipListProps) =
 
 const CalendarEventChipList = memo(CalendarEventChipListComponent);
 CalendarEventChipList.displayName = "CalendarEventChipList";
+
 export { CalendarEventChipList };
