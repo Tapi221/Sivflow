@@ -49,5 +49,4 @@ const generateTextLocally = ({ prompt, systemPrompt }: LocalTextGenerationOption
 };
 
 export { generateTextLocally };
-
 export type { LocalTextGenerationOptions };

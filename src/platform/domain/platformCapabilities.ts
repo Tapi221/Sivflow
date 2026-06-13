@@ -15,5 +15,4 @@ const IOS_NATIVE_PLATFORM_CAPABILITIES: PlatformCapabilities = { runtimeKind: "i
 const ANDROID_NATIVE_PLATFORM_CAPABILITIES: PlatformCapabilities = { runtimeKind: "android-native", canOpenExternalUrl: true, canControlWindow: false, canUseNativeShare: true, canUseSecureStorage: true, canImportFromFileSystem: true, canUseSystemClipboard: true };
 
 export { WEB_PLATFORM_CAPABILITIES, DESKTOP_PLATFORM_CAPABILITIES, IOS_NATIVE_PLATFORM_CAPABILITIES, ANDROID_NATIVE_PLATFORM_CAPABILITIES };
-
 export type { PlatformRuntimeKind, PlatformCapabilities };

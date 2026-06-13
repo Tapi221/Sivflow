@@ -298,5 +298,4 @@ const bundleMediaInMfDeckCards = async <TCard extends { id?: string; front?: unk
 };
 
 export { bundleMediaInMfDeckCards };
-
 export type { MfDeckMediaBundle };

@@ -7,5 +7,4 @@ const platform: PlatformApi = hasDesktopBridge() ? desktopPlatform : webPlatform
 
 export default platform;
 export { platform };
-
 export type { PlatformApi } from "./desktopApi";

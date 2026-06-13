@@ -143,5 +143,4 @@ const useCalendarEventDragAutoScroll = <TElement extends HTMLElement>({ scrollCo
 };
 
 export { CALENDAR_EVENT_DRAGGING_STYLE, areSameCalendarEventTimes, createCalendarEventDragPointerSnapshot, createCalendarEventDragPreview, createCalendarEventKey, getCalendarEventDateOrNull, isCalendarEventDraggable, isSameCalendarEventMove, useCalendarEventDragAutoScroll, useCalendarEventDragBodyStyle };
-
 export type { CalendarEventDragPointerSnapshot };

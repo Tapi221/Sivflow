@@ -7,5 +7,4 @@ const ourFileRouter = { editorUploader: f(["image", "text", "blob", "pdf", "vide
 type OurFileRouter = typeof ourFileRouter;
 
 export { ourFileRouter };
-
 export type { OurFileRouter };

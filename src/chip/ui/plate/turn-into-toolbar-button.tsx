@@ -1,23 +1,14 @@
 "use client";
 
 import * as React from "react";
-
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
-
 import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
-
 import { CheckIcon, ChevronRightIcon, Code2, Columns3Icon, FileCodeIcon, Heading1Icon, Heading2Icon, Heading3Icon, Heading4Icon, Heading5Icon, Heading6Icon, ListIcon, ListOrderedIcon, PilcrowIcon, QuoteIcon, SquareIcon } from "lucide-react";
-
 import type { TElement } from "platejs";
-
 import { KEYS } from "platejs";
-
 import { useEditorRef, useSelectionFragmentProp } from "platejs/react";
-
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-
 import { getBlockType, setBlockType } from "@/components/editor/transforms";
-
 import { ToolbarButton, ToolbarMenuGroup } from "./toolbar";
 
 const turnIntoItems = [

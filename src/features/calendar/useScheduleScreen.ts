@@ -249,5 +249,4 @@ const useScheduleScreen = ({ allowMultiSelectViewMode = true, weekStartDay }: Us
 };
 
 export { useScheduleScreen };
-
 export type { UseScheduleScreenReturn };

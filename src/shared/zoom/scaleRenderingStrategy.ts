@@ -71,5 +71,4 @@ const resolveScaleRenderingStrategy = ({ disableScale, effectiveScale, supportsC
 };
 
 export { detectCssZoomSupport, resolveScaleRenderingStrategy };
-
 export type { ScaleRenderingMode, ResolveScaleRenderingStrategyArgs, ScaleRenderingStrategy };

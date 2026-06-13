@@ -212,5 +212,4 @@ const useCardFlipBehavior = ({ isCardClickable, previewMode, onFlip, onPreviewFl
 };
 
 export { TAP_MOVE_CANCEL_THRESHOLD_PX, shouldIgnoreFlipTarget, useCardFlipBehavior };
-
 export type { UseCardFlipBehaviorParams, UseCardFlipBehaviorResult };

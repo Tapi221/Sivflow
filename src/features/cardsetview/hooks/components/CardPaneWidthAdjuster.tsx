@@ -98,5 +98,4 @@ const CardPaneWidthAdjuster = ({ modeLabel, value, min, max, defaultValue, step 
 };
 
 export { CardPaneWidthAdjuster };
-
 export type { CardPaneWidthAdjusterProps };

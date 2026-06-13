@@ -114,5 +114,4 @@ const moveCardSetToFolderUseCase = async <TCardSet extends CardSetCommandEntity>
 };
 
 export { createCardSetUseCase, updateCardSetUseCase, moveCardSetToFolderUseCase };
-
 export type { CardSetCommandEntity, CreateCardSetOptions, CardSetCreateDraft, CardSetCommandRepository };

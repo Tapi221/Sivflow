@@ -97,6 +97,5 @@ const useFoldersRouteAdapter = (): FoldersRouteAdapter => {
 };
 
 export { useFoldersRouteAdapter };
-
 export type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 export type { FoldersRouteAdapter };

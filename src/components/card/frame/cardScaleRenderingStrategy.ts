@@ -18,5 +18,4 @@ const resolveCardScaleRenderingStrategy = ({
 };
 
 export { detectCssZoomSupport, resolveCardScaleRenderingStrategy };
-
 export type { CardScaleRenderingMode, CardScaleRenderingStrategy, ResolveCardScaleRenderingStrategyArgs };

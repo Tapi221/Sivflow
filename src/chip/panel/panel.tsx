@@ -27,5 +27,4 @@ const Panel = memo(PanelBase);
 Panel.displayName = "Panel";
 
 export { Panel };
-
 export type { PanelProps };

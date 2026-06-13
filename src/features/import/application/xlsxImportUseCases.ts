@@ -133,5 +133,4 @@ const executeXlsxImport = async ({ folderId, file, result, destinationMode, newC
 };
 
 export { loadXlsxImportFile, executeXlsxImport };
-
 export type { CreateCardSet, CreateCard, ImportDestinationMode, LoadXlsxImportFileResult, ExecuteXlsxImportResult };

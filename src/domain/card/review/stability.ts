@@ -29,5 +29,4 @@ const normalizeMemoryStability = (value?: number | null, legacyLevel?: number | 
 };
 
 export { normalizeMemoryStability };
-
 export type { SubjectiveScore };

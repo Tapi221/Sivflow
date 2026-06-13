@@ -122,5 +122,4 @@ const persistProjectCalendarLinks = (links: ProjectCalendarLink[]) => {
 };
 
 export { PROJECT_CALENDAR_LINKS_STORAGE_KEY, buildProjectCalendarLinkId, createProjectCalendarLink, readStoredProjectCalendarLinks, persistProjectCalendarLinks };
-
 export type { CreateProjectCalendarLinkInput };

@@ -444,5 +444,4 @@ const layoutCalendarTimeGridEvents = ({ events, rangeStart, rangeEnd, layoutMode
 };
 
 export { layoutCalendarTimeGridEvents };
-
 export type { CalendarTimeGridLayoutMode, CalendarTimeGridStyle, CalendarTimeGridLayoutEntry, CalendarTimeGridLayoutOptions };

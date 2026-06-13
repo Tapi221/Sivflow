@@ -78,5 +78,4 @@ const applyHandwritingStrokeDelta = ({ document, message, expectedSessionId, exp
 };
 
 export { createHandwritingStrokeDeltaMessage, applyHandwritingStrokeDelta };
-
 export type { CreateHandwritingStrokeDeltaInput, ApplyHandwritingStrokeDeltaInput, ApplyHandwritingStrokeDeltaResult };

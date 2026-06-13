@@ -83,5 +83,4 @@ const TableCellHeaderElementStatic = (props: SlateElementProps<TTableCellElement
 };
 
 export { TableElementStatic, TableRowElementStatic, TableCellElementStatic, TableCellHeaderElementStatic };
-
 export type { TableCellElementStaticProps };

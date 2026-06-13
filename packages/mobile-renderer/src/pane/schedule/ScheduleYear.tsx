@@ -375,5 +375,4 @@ const ScheduleYear = memo(ScheduleYearComponent);
 ScheduleYear.displayName = "ScheduleYear";
 
 export { ScheduleYear };
-
 export type { CalendarWeekStartDay, ScheduleYearProps };

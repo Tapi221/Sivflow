@@ -345,6 +345,5 @@ const VerticalCardPagerFn = <T,>({
 const VerticalCardPager = React.memo(VerticalCardPagerFn) as typeof VerticalCardPagerFn;
 
 export { VerticalCardPager, ACTIVE_INDEX_RENDER_RADIUS };
-
 export type { VerticalCardPagerItemWidthSpec } from "./verticalCardPagerWidthSpec";
 export type { VerticalCardPagerProps };

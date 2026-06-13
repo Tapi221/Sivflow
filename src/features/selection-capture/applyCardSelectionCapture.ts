@@ -63,5 +63,4 @@ const appendSelectionCaptureBlocks = ({ blocks, side, image, ocrText }: { blocks
 };
 
 export { normalizeSelectionCaptureOcrText, appendSelectionCaptureBlocks };
-
 export type { ApplyCardSelectionCaptureSide, CapturedCardImage };

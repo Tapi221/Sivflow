@@ -62,5 +62,4 @@ const FilterPanelShell = ({ title, searchValue, searchPlaceholder = "検索...",
 };
 
 export { FilterPanelShell };
-
 export type { FilterPanelShellProps };

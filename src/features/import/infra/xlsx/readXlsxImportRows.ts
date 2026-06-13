@@ -56,5 +56,4 @@ const readXlsxImportRows = (fileBuffer: ArrayBuffer): ReadXlsxImportRowsResult =
 };
 
 export { readXlsxImportRows };
-
 export type { ReadXlsxImportRowsResult };

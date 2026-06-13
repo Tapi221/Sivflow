@@ -63,5 +63,4 @@ const getCardCode = (card: Card, side: CardSide) => {
 };
 
 export { getCardFace, getCardBlocks, getCardInk, getCardExtraRows, extractCardTextFromBlocks, getCardText, getCardImages, getCardAudios, getCardCode };
-
 export type { CardSide };

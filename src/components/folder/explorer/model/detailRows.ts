@@ -392,5 +392,4 @@ const buildExplorerDetailRows = ({ folders, cards, cardSets, documents, currentF
 };
 
 export { buildExplorerDetailRows };
-
 export type { ExplorerDetailRowKind, ExplorerDetailLocalSyncState, ExplorerDetailRow };

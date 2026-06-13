@@ -103,5 +103,4 @@ const NavigationBarMobile = memo(NavigationBarMobileComponent);
 NavigationBarMobile.displayName = "NavigationBarMobile";
 
 export { NavigationBarMobile };
-
 export type { NavigationBarItemId, NavigationBarMobileProps };

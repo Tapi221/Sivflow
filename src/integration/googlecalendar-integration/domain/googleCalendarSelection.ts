@@ -19,5 +19,4 @@ const resolveSelectedCalendarIds = (storedIds: string[], calendars: GoogleCalend
 };
 
 export { toCachedCalendars, getDefaultCalendarIds, resolveSelectedCalendarIds };
-
 export type { CachedGoogleCalendar };

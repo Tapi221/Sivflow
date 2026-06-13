@@ -39,5 +39,4 @@ const CalloutNode = ({ className, variant, children, ...props }: CalloutNodeProp
 const CalloutElement = CalloutNode;
 
 export { CalloutElement, CalloutNode };
-
 export type { CalloutNodeProps };

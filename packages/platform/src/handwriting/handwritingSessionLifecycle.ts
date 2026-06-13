@@ -34,5 +34,4 @@ const isHandwritingSessionActive = (session: Pick<HandwritingSession, "status">)
 };
 
 export { createDesktopHandwritingSession, attachMobileDeviceToHandwritingSession, updateHandwritingSessionStatus, closeHandwritingSession, failHandwritingSession, isHandwritingSessionActive };
-
 export type { CreateDesktopHandwritingSessionInput, AttachMobileDeviceToHandwritingSessionInput, UpdateHandwritingSessionStatusInput };

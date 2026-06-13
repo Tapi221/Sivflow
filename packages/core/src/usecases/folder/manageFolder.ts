@@ -97,5 +97,4 @@ const reorderFoldersUseCase = async <TFolder extends FolderCommandEntity>({ user
 };
 
 export { createFolderUseCase, updateFolderUseCase, reorderFoldersUseCase };
-
 export type { FolderCommandEntity, CreateFolderOptions, FolderCreateDraft, FolderCommandRepository };

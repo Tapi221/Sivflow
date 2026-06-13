@@ -141,5 +141,4 @@ const deleteImageBlobsByUser = async (userId: string): Promise<void> => {
 };
 
 export { putImageBlob, getImageBlob, deleteImageBlob, deleteImageBlobsByUser };
-
 export type { PutImageBlobOptions, ImageBlobRecord };

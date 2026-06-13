@@ -15,5 +15,4 @@ const getSecurityEventCatalogEntry = (type: SecurityEventType) => {
 };
 
 export { SECURITY_EVENT_CATALOG, getSecurityEventCatalogEntry };
-
 export type { SecurityEventCatalogEntry };

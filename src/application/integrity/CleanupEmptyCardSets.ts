@@ -81,5 +81,4 @@ const cleanupEmptyCardSets = async (db: LocalDB, userId: string): Promise<Cleanu
 };
 
 export { cleanupEmptyCardSets };
-
 export type { CleanupEmptyCardSetsResult };

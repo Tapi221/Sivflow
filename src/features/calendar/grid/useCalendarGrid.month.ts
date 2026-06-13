@@ -61,5 +61,4 @@ const useCalendarGrid = ({ monthWeeks, selectedKey, todayKey }: Params): Calenda
 };
 
 export { useCalendarGrid };
-
 export type { CalendarDayModel, CalendarWeekModel, CalendarGridModel };

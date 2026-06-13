@@ -75,5 +75,4 @@ const getWeekdayTimedEventPositionStyle = (entry: CalendarTimeGridLayoutEntry, r
 };
 
 export { WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX, getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle };
-
 export type { WeekdayTimedEventPositionStyle, WeekdayTimedEventFrame, WeekdayTimedEventPositionOptions };

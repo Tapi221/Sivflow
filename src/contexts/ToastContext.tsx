@@ -5,5 +5,4 @@ const ToastProvider = RendererToastContext.ToastProvider;
 const useToast = RendererToastContext.useToast;
 
 export { ToastProvider, useToast };
-
 export type { Toast };

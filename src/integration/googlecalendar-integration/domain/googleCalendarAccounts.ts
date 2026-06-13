@@ -162,5 +162,4 @@ const reduceGoogleCalendarAccounts = (state: GoogleAccountEntry[], action: Googl
 };
 
 export { reduceGoogleCalendarAccounts };
-
 export type { GoogleAccountEntry, GoogleAccountTokenUpdate, GoogleAccountsAction };

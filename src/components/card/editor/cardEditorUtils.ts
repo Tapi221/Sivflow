@@ -95,5 +95,4 @@ const shouldAutoOpenEditorForCard = (card: unknown) => {
 };
 
 export { makeEmptyCardFaceAttachments, normalizeSelectedCardId, makeNewDraft, sanitizeReferences, normalizeOrderIndex, shouldAutoOpenEditorForCard };
-
 export type { EditorDraft };

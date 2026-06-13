@@ -62,5 +62,4 @@ const MemoizedIpadInkToolbar = memo(IpadInkToolbar);
 MemoizedIpadInkToolbar.displayName = "IpadInkToolbar";
 
 export default MemoizedIpadInkToolbar;
-
 export type { IpadInkToolbarProps };

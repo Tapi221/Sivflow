@@ -137,5 +137,4 @@ const LayeredColorMenu = memo(LayeredColorMenuBase);
 LayeredColorMenu.displayName = "LayeredColorMenu";
 
 export { LayeredColorMenu, LAYERED_COLOR_MENU_PANEL_ID, LAYERED_COLOR_MENU_OPTIONS, LAYERED_COLOR_MENU_WIDTH, LAYERED_COLOR_MENU_HEIGHT, LAYERED_COLOR_MENU_MARGIN };
-
 export type { LayeredColorMenuOption };

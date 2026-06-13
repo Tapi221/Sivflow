@@ -11,5 +11,4 @@ const TOOLTIP_PRESET_CLASS_NAMES = { default: { tooltip: `${TOOLTIP_SIZE_CLASS_N
 type TooltipPreset = keyof typeof TOOLTIP_PRESET_CLASS_NAMES;
 
 export { TOOLTIP_SIZE_CLASS_NAMES, TOOLTIP_PRESET_CLASS_NAMES };
-
 export type { TooltipSize, TooltipPreset };

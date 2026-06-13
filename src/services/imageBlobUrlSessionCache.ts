@@ -160,5 +160,4 @@ const getBlobCacheStats = () => {
 };
 
 export { getOrCreateImageBlobUrl, removeImageBlobUrl, pinImageBlobUrl, unpinImageBlobUrl, getBlobCacheStats };
-
 export type { BlobCacheStats };

@@ -95,5 +95,4 @@ class PersistentOfflineQueue {
 const persistentQueue = new PersistentOfflineQueue();
 
 export { persistentQueue };
-
 export type { AssetUploadRequest };

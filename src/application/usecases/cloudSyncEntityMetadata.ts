@@ -8,5 +8,4 @@ const PULLABLE_ENTITY_TYPES: readonly PullableEntityType[] = ["card", "folder", 
 const isCloudEntityType = (value: unknown): value is CloudEntityType => typeof value === "string" && value in COLLECTION_BY_TYPE;
 
 export { CURRENT_TAG_COLLECTION, COLLECTION_BY_TYPE, PULLABLE_ENTITY_TYPES, isCloudEntityType };
-
 export type { CloudEntityType, PullableEntityType };

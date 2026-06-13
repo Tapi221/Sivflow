@@ -143,5 +143,4 @@ const buildCardSetDashboardRows = ({ cardSets, cards, folders, tagById }: BuildC
 };
 
 export { buildCardSetDashboardRows };
-
 export type { CardSetDashboardRow };

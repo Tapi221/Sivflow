@@ -36,5 +36,4 @@ const RightClickPanel = memo(RightClickPanelBase);
 RightClickPanel.displayName = "RightClickPanel";
 
 export { RightClickPanel };
-
 export type { RightClickPanelProps };

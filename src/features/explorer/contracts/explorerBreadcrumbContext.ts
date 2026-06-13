@@ -5,5 +5,4 @@ const EMPTY_EXPLORER_BREADCRUMB_CONTEXT = EMPTY_CONTEXT;
 const areExplorerBreadcrumbContextsEqual = areContextsEqual;
 
 export { EMPTY_EXPLORER_BREADCRUMB_CONTEXT, areExplorerBreadcrumbContextsEqual };
-
 export type { ExplorerBreadcrumbContext };

@@ -136,5 +136,4 @@ const persistScheduleMonthVisibleEventCount = (monthVisibleEventCount: number) =
 };
 
 export { SCHEDULE_NAVIGATION_STORAGE_KEY, normalizeScheduleMonthVisibleEventCount, readStoredScheduleNavigationState, readStoredScheduleCalendarScrollTop, readStoredScheduleMonthVisibleEventCount, persistScheduleNavigationState, persistScheduleCalendarScrollTop, persistScheduleMonthVisibleEventCount };
-
 export type { ScheduleNavigationState };

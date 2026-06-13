@@ -29,5 +29,4 @@ const DialogDesktopPanel = memo(DialogDesktopPanelBase);
 DialogDesktopPanel.displayName = "DialogDesktopPanel";
 
 export { DialogDesktopPanel };
-
 export type { DialogDesktopPanelProps };

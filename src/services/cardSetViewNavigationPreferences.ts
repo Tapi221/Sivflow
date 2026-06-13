@@ -129,5 +129,4 @@ const setCardSetViewNavigationPreference = (scope: CardSetViewNavigationPreferen
 };
 
 export { getCardSetViewNavigationPreference, setCardSetViewNavigationPreference };
-
 export type { CardSetViewNavigationPreference };

@@ -78,5 +78,4 @@ const PdfLibraryWorkspaceToolbar = ({ activeSection, onSelectSection, onAddPdf }
 };
 
 export { PdfLibraryWorkspaceToolbar };
-
 export type { PdfLibraryWorkspaceSection };

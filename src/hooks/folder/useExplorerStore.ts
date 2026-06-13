@@ -212,5 +212,4 @@ const useExplorerStore = create<ExplorerState>()(
 );
 
 export { useExplorerStore };
-
 export type { ExplorerLayoutMode, ExplorerState };

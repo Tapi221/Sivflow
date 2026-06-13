@@ -5,5 +5,4 @@ const SECURITY_EVENT_TYPES = ["LOGIN_SUCCESS", "LOGIN_FAILED", "DEVICE_REVOKED",
 const isSupportedSecurityEventType = (value: string): value is SecurityEventType => SECURITY_EVENT_TYPES.includes(value as SecurityEventType);
 
 export { SECURITY_EVENT_TYPES, isSupportedSecurityEventType };
-
 export type { SecurityEventType };

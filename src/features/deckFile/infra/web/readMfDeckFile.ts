@@ -79,5 +79,4 @@ const readMfDeckFile = async (file: File): Promise<LoadMfDeckFileResult> => {
 };
 
 export { buildMfDeckSuggestedCardSetName, readMfDeckFile };
-
 export type { LoadMfDeckFileResult };
