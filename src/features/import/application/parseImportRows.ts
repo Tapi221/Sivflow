@@ -1,6 +1,6 @@
 import type { ImportBlock, ImportColumnKey, ImportIssue, ImportParseResult, ImportSheetName, ImportSide, ParsedImportRow } from "@/features/import/domain/import.types";
 import { isImportBlockType, isImportSide } from "@/features/import/domain/import.types";
-import { groupParsedRowsToCards } from "./groupParsedRowsToCards";
+import { groupParsedRowsToCards } from "@/features/import/application/groupParsedRowsToCards";
 
 type HeaderMap = Partial<Record<ImportColumnKey, number>>;
 type RowCellMap = Partial<Record<ImportColumnKey, string>>;

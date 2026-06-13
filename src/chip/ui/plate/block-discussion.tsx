@@ -16,8 +16,8 @@ import { commentPlugin } from "@/components/editor/plugins/comment-kit";
 import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
 import { suggestionPlugin } from "@/components/editor/plugins/suggestion-kit";
 import { useBlockDiscussionItems } from "@/lib/block-discussion-index";
-import { BlockSuggestionCard, isResolvedSuggestion } from "./block-suggestion";
-import { Comment, CommentCreateForm } from "./comment";
+import { BlockSuggestionCard, isResolvedSuggestion } from "@/chip/ui/plate/block-suggestion";
+import { Comment, CommentCreateForm } from "@/chip/ui/plate/comment";
 
 const BlockComment = ({ discussion, isLast }: { discussion: TDiscussion; isLast: boolean; }) => {
   const [editingId, setEditingId] = React.useState<string | null>(null);

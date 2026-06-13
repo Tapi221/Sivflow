@@ -2,8 +2,8 @@ import { resolveBlocksFromCardData, resolveExtraRowsFromCardData, resolveInkFrom
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { cloneStorageRecord, isStorageRecord } from "@/domain/shared/storage/storageRecordUtils";
 import type { Card } from "@/types";
-import { cleanupLegacyCardStorageFields } from "./cardStorageFieldCleanup";
-import { sanitizeCardStorageBlockImages } from "./cardStorageImageTransforms";
+import { cleanupLegacyCardStorageFields } from "@/domain/card/storage/cardStorageFieldCleanup";
+import { sanitizeCardStorageBlockImages } from "@/domain/card/storage/cardStorageImageTransforms";
 
 type StorageLike = Record<string, unknown>;
 

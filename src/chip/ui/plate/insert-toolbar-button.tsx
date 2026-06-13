@@ -8,7 +8,7 @@ import type { PlateEditor } from "platejs/react";
 import { useEditorRef } from "platejs/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { insertBlock, insertInlineElement } from "@/components/editor/transforms";
-import { ToolbarButton, ToolbarMenuGroup } from "./toolbar";
+import { ToolbarButton, ToolbarMenuGroup } from "@/chip/ui/plate/toolbar";
 
 type Item = {
   focusEditor?: boolean;

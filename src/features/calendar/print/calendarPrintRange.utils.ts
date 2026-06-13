@@ -4,7 +4,7 @@ import type { CalendarDateRange } from "@/features/calendar/calendarRange.types"
 import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
-import type { CalendarPrintRangeState } from "./calendarPrint.types";
+import type { CalendarPrintRangeState } from "@/features/calendar/print/calendarPrint.types";
 
 type CalendarPrintRangeInput = {
   printRange: CalendarPrintRangeState;

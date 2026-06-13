@@ -1,4 +1,4 @@
-import { TAG_COLOR_KEYS } from "./tag.constants";
+import { TAG_COLOR_KEYS } from "@/chip/tag/tag.constants";
 
 type TagColorKey = (typeof TAG_COLOR_KEYS)[number];
 type TagColorPalette = {

@@ -12,7 +12,7 @@ import TextareaAutosize from "react-textarea-autosize";
 import { Button } from "@/chip/ui/button/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
 import { cn } from "@/lib/utils";
-import { inlineSuggestionVariants } from "./suggestion";
+import { inlineSuggestionVariants } from "@/chip/ui/plate/suggestion";
 
 type EquationPopoverContentProps = {
   isInline: boolean;

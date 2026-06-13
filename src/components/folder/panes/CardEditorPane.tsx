@@ -23,10 +23,10 @@ import type { Card, CardBlock, CardFaceAttachments } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { X } from "@/ui/icons";
 import { toMillisOrNull } from "@/utils/toMillis";
-import { CardEditorPaneMediaDialogs } from "./CardEditorPaneMediaDialogs";
-import { CardEditorPaneReadonlySurface } from "./CardEditorPaneReadonlySurface";
-import { useCardEditorPaneController } from "./useCardEditorPaneController";
-import { CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX, CARD_PANE_WIDTH_STEP_PX, useCardEditorPaneWidth } from "./useCardEditorPaneWidth";
+import { CardEditorPaneMediaDialogs } from "@/components/folder/panes/CardEditorPaneMediaDialogs";
+import { CardEditorPaneReadonlySurface } from "@/components/folder/panes/CardEditorPaneReadonlySurface";
+import { useCardEditorPaneController } from "@/components/folder/panes/useCardEditorPaneController";
+import { CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX, CARD_PANE_WIDTH_STEP_PX, useCardEditorPaneWidth } from "@/components/folder/panes/useCardEditorPaneWidth";
 
 type CardEditorPaneSettings = {
   accentColor?: string;

@@ -3,8 +3,8 @@
 import * as React from "react";
 import { AIChatPlugin } from "@platejs/ai/react";
 import { useEditorPlugin } from "platejs/react";
-import type { ToolbarButtonProps } from "./toolbar";
-import { ToolbarButton } from "./toolbar";
+import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
+import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
 const AIToolbarButton = (props: ToolbarButtonProps) => {
   const { api } = useEditorPlugin(AIChatPlugin);

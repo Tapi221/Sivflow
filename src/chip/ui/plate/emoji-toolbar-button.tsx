@@ -11,7 +11,7 @@ import { AppleIcon, ClockIcon, CompassIcon, FlagIcon, LeafIcon, LightbulbIcon, M
 import { Button } from "@/chip/ui/button/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { ToolbarButton } from "./toolbar";
+import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
 const emojiCategoryIcons: Record<
   EmojiCategoryList,

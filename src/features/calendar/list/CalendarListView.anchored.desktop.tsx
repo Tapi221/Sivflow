@@ -2,7 +2,7 @@ import { memo, useCallback, useLayoutEffect, useRef } from "react";
 import type { MutableRefObject } from "react";
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { CalendarListView } from "./CalendarListView.desktop";
+import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
 
 type CalendarListViewAnchoredProps = {
   days: Date[];

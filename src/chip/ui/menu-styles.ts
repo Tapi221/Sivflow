@@ -1,4 +1,4 @@
-import type { FloatingSurfaceVariantProps } from "./floating-surface";
+import type { FloatingSurfaceVariantProps } from "@/chip/ui/floating-surface";
 
 type FloatingSurface = NonNullable<FloatingSurfaceVariantProps["surface"]>;
 interface FloatingPanelPreset {

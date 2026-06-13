@@ -23,9 +23,9 @@ import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/us
 import type { WorkspaceExplorerTab, WorkspaceNoteTab, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 import type { DocumentItem, Folder, Note, SelectedExplorerItem } from "@/types";
 import { Search } from "@/ui/icons";
-import { MobileCalendarSidebar, MobileCalendarSidebarOpenButton } from "./MobileCalendarSidebar";
-import { ScheduleScreen as CalendarScheduleScreen } from "./ScheduleScreen.desktop";
-import { WorkspaceActionToolbar } from "./WorkspaceActionToolbar";
+import { MobileCalendarSidebar, MobileCalendarSidebarOpenButton } from "@/pane.desktop/view/MobileCalendarSidebar";
+import { ScheduleScreen as CalendarScheduleScreen } from "@/pane.desktop/view/ScheduleScreen.desktop";
+import { WorkspaceActionToolbar } from "@/pane.desktop/view/WorkspaceActionToolbar";
 
 type ExplorerWorkspaceContentProps = {
   explorerState: ExplorerRouteState;

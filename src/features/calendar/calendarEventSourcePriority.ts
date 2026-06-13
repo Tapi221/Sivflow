@@ -1,6 +1,6 @@
 import type { CalendarYearEventDisplay, CalendarYearEventDisplayResolver } from "@/features/calendar/grid/CalendarView.year";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import type { AppCalendarItem, GoogleAccountDisplay, ProjectCalendarLink } from "./scheduleScreen.types";
+import type { AppCalendarItem, GoogleAccountDisplay, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
 
 type CalendarEventSourcePriorityInput = {
   appProjects: AppCalendarItem[];

@@ -7,7 +7,7 @@ import { z } from "zod";
 import { buildEditTableMultiCellPrompt, getChooseToolPrompt, getCommentPrompt, getEditPrompt, getGeneratePrompt } from "@/app/api/ai/command/prompt";
 import { BaseEditorKit } from "@/components/editor/editor-base-kit";
 import { markdownJoinerTransform } from "@/lib/markdown-joiner-transform";
-import type { ChatMessage, ToolName } from "./types";
+import type { ChatMessage, ToolName } from "@/app/api/ai/command/types";
 
 type CommandContext = {
   children: Value;

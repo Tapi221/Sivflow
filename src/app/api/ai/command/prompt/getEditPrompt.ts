@@ -2,8 +2,8 @@ import dedent from "dedent";
 import type { SlateEditor } from "platejs";
 import type { ChatMessage } from "@/app/api/ai/command/types";
 import { addSelection, buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction, getMarkdownWithSelection, isMultiBlocks, isSelectionInTable, isSingleCellSelection } from "@/app/api/ai/command/utils";
-import { commonEditRules } from "./common";
-import { buildEditTableMultiCellPrompt } from "./getEditTablePrompt";
+import { commonEditRules } from "@/app/api/ai/command/prompt/common";
+import { buildEditTableMultiCellPrompt } from "@/app/api/ai/command/prompt/getEditTablePrompt";
 
 const buildEditMultiBlockPrompt = (editor: SlateEditor, messages: ChatMessage[]) => {
   const selectingMarkdown = getMarkdownWithSelection(editor);

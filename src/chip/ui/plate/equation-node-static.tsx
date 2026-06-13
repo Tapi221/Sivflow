@@ -4,7 +4,7 @@ import type { TEquationElement } from "platejs";
 import type { SlateElementProps } from "platejs/static";
 import { SlateElement } from "platejs/static";
 import { cn } from "@/lib/utils";
-import { inlineSuggestionVariants } from "./suggestion";
+import { inlineSuggestionVariants } from "@/chip/ui/plate/suggestion";
 
 const EQUATION_RENDER_OPTIONS = {
   displayMode: true,

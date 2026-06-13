@@ -1,4 +1,4 @@
-import "./dialog.css";
+import "@/chip/panel/dialog.desktop/dialog.css";
 import { memo } from "react";
 import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import { cn } from "@/lib/utils";

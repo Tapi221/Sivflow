@@ -4,7 +4,7 @@ import { Timestamp, writeBatch } from "firebase/firestore";
 import { chunkCloudSyncChangesBySize } from "@/application/usecases/cloudSyncBatching";
 import { getChangeId, getChangeParts, sanitizeSyncDataForCloud } from "@/application/usecases/cloudSyncShared";
 import type { SyncChange } from "@/services/interfaces/ISyncService";
-import { getPushDocumentRef, requireCloudSyncFirestore } from "./cloudSyncFirestoreRefs";
+import { getPushDocumentRef, requireCloudSyncFirestore } from "@/infrastructure/sync/cloudSyncFirestoreRefs";
 
 type SyncChangeWithOperation = SyncChange & {
   operationType?: unknown;

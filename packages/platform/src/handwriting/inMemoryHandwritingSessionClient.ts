@@ -1,5 +1,5 @@
-import type { HandwritingSession, HandwritingSessionMessage, HandwritingSessionStatus, HandwritingStrokeDeltaMessage } from "./handwritingSession.types";
-import type { HandwritingSessionClient, HandwritingSessionMessageHandler, HandwritingSessionStatusHandler, HandwritingSessionUnsubscribe } from "./handwritingSessionClient";
+import type { HandwritingSession, HandwritingSessionMessage, HandwritingSessionStatus, HandwritingStrokeDeltaMessage } from "@platform/handwriting/handwritingSession.types";
+import type { HandwritingSessionClient, HandwritingSessionMessageHandler, HandwritingSessionStatusHandler, HandwritingSessionUnsubscribe } from "@platform/handwriting/handwritingSessionClient";
 
 type InMemoryHandwritingSessionHub = {
   clients: Set<InMemoryHandwritingSessionClient>;

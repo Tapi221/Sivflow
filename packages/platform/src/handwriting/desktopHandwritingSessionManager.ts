@@ -1,9 +1,9 @@
 import type { InkDocument, InkSide } from "@core/domain/card/ink/inkDocument";
 import { normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
-import type { DesktopHandwritingReceiverReason, DesktopHandwritingReceiverSession } from "./desktopHandwritingReceiver";
-import { receiveDesktopHandwritingMessage } from "./desktopHandwritingReceiver";
-import type { HandwritingDeviceInfo, HandwritingSession, HandwritingSessionMessage } from "./handwritingSession.types";
-import { attachMobileDeviceToHandwritingSession, closeHandwritingSession, createDesktopHandwritingSession, failHandwritingSession } from "./handwritingSessionLifecycle";
+import type { DesktopHandwritingReceiverReason, DesktopHandwritingReceiverSession } from "@platform/handwriting/desktopHandwritingReceiver";
+import { receiveDesktopHandwritingMessage } from "@platform/handwriting/desktopHandwritingReceiver";
+import type { HandwritingDeviceInfo, HandwritingSession, HandwritingSessionMessage } from "@platform/handwriting/handwritingSession.types";
+import { attachMobileDeviceToHandwritingSession, closeHandwritingSession, createDesktopHandwritingSession, failHandwritingSession } from "@platform/handwriting/handwritingSessionLifecycle";
 
 type DesktopHandwritingDocumentKey = `${string}:${InkSide}`;
 type DesktopHandwritingSessionManagerState = {

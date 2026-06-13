@@ -1,4 +1,4 @@
-import { asRecord } from "./records";
+import { asRecord } from "@/shared/lib/records";
 
 const makeFallbackId = () => {
   try {

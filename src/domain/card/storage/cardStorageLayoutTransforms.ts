@@ -1,5 +1,5 @@
 import { isStorageRecord } from "@/domain/shared/storage/storageRecordUtils";
-import { readCardStorageFiniteNumberField } from "./cardStorageFieldReaders";
+import { readCardStorageFiniteNumberField } from "@/domain/card/storage/cardStorageFieldReaders";
 
 const sanitizeCardStorageLayout = (layoutValue: unknown) => {
   if (!isStorageRecord(layoutValue)) return null;

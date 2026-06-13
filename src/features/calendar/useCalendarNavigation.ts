@@ -2,11 +2,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { addDays, addMonths, addYears, startOfDay, startOfMonth, startOfWeek, startOfYear, subDays, subMonths, subYears } from "date-fns";
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
 import { createCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
-import type { CalendarWeekStartDay } from "./calendar.types";
-import { getCalendarWeekStartsOn } from "./calendarWeekStart";
-import type { ScheduleNavigationState } from "./scheduleNavigationPersistence";
-import { persistScheduleNavigationState, readStoredScheduleNavigationState } from "./scheduleNavigationPersistence";
-import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScreen.types";
+import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
+import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
+import type { ScheduleNavigationState } from "@/features/calendar/scheduleNavigationPersistence";
+import { persistScheduleNavigationState, readStoredScheduleNavigationState } from "@/features/calendar/scheduleNavigationPersistence";
+import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/calendar/scheduleScreen.types";
 
 type CalendarNavigationOptions = {
   allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay; };

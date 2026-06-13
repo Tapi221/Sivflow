@@ -4,17 +4,17 @@ import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import { CANONICAL_CARD_WIDTH, CARD_DISPLAY_SCALE, layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
 import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { CardFrame } from "./CardFrame";
-import { CARD_SHELL_COMMON_CLASS_NAME } from "./cardShellClassNames";
-import type { FlashcardCardLike } from "./flashcard.types";
-import { useFlashcardCornerControls } from "./FlashcardCornerControls";
-import { FlashcardInkOverlay } from "./FlashcardInkOverlay";
-import { FlashcardMediaDialogs } from "./FlashcardMediaDialogs";
-import { FlashcardNavigation } from "./FlashcardNavigation";
-import { useCardFlipBehavior } from "./useCardFlipBehavior";
-import { useFlashcardDerived } from "./useFlashcardDerived";
-import { useFlashcardInk } from "./useFlashcardInk";
-import { useFlashcardMediaState } from "./useFlashcardMediaState";
+import { CardFrame } from "@/components/card/frame/CardFrame";
+import { CARD_SHELL_COMMON_CLASS_NAME } from "@/components/card/frame/cardShellClassNames";
+import type { FlashcardCardLike } from "@/components/card/frame/flashcard.types";
+import { useFlashcardCornerControls } from "@/components/card/frame/FlashcardCornerControls";
+import { FlashcardInkOverlay } from "@/components/card/frame/FlashcardInkOverlay";
+import { FlashcardMediaDialogs } from "@/components/card/frame/FlashcardMediaDialogs";
+import { FlashcardNavigation } from "@/components/card/frame/FlashcardNavigation";
+import { useCardFlipBehavior } from "@/components/card/frame/useCardFlipBehavior";
+import { useFlashcardDerived } from "@/components/card/frame/useFlashcardDerived";
+import { useFlashcardInk } from "@/components/card/frame/useFlashcardInk";
+import { useFlashcardMediaState } from "@/components/card/frame/useFlashcardMediaState";
 
 interface FlashcardProps {
   card: FlashcardCardLike | null | undefined;

@@ -11,7 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { buttonVariants } from "@/chip/ui/button/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { ToolbarButton, ToolbarMenuGroup } from "./toolbar";
+import { ToolbarButton, ToolbarMenuGroup } from "@/chip/ui/plate/toolbar";
 
 type TColor = {
   isBrightColor: boolean;

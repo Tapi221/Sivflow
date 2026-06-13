@@ -15,8 +15,7 @@ const createDismissedNotification = (id: string): Notification => {
     duration: 0,
   };
 };
-
-const NotificationService = class {
+class NotificationService {
   private readonly listeners = new Set<NotificationListener>();
   private readonly notifications = new Map<string, Notification>();
 
@@ -110,7 +109,9 @@ const NotificationService = class {
   public readonly getAll = (): Notification[] => {
     return Array.from(this.notifications.values());
   };
-};
+}
+;
+
 const notificationService = new NotificationService();
 
 export { notificationService };
