@@ -44,7 +44,6 @@ import { ToggleKit } from "@/components/editor/plugins/toggle-kit";
 const EditorKit = [
   ...CopilotKit,
   ...AIKit,
-  ...BlockMenuKit,
 
   // Elements
   ...BasicBlocksKit,
@@ -79,6 +78,7 @@ const EditorKit = [
   ...SlashKit,
   ...AutoformatKit,
   ...CursorOverlayKit,
+  ...BlockMenuKit,
   ...DndKit,
   ...EmojiKit,
   ...ExitBreakKit,
