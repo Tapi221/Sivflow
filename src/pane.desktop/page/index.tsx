@@ -1,5 +1,5 @@
-import "./index.css";
 import React from "react";
+import "@/pane.desktop/page/index.css";
 
 const Breadcrumb = () => {
   return (

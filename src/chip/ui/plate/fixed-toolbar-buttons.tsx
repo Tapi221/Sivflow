@@ -3,7 +3,6 @@
 import { ArrowUpToLineIcon, BaselineIcon, BoldIcon, Code2Icon, HighlighterIcon, ItalicIcon, PaintBucketIcon, StrikethroughIcon, UnderlineIcon, WandSparklesIcon } from "lucide-react";
 import { KEYS } from "platejs";
 import { useEditorReadOnly } from "platejs/react";
-import { TableToolbarButton } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Table";
 import { AiToolbarButton } from "@/chip/ui/plate/ai-toolbar-button";
 import { AlignToolbarButton } from "@/chip/ui/plate/align-toolbar-button";
 import { CommentToolbarButton } from "@/chip/ui/plate/comment-toolbar-button";
@@ -24,7 +23,8 @@ import { ModeToolbarButton } from "@/chip/ui/plate/mode-toolbar-button";
 import { MoreToolbarButton } from "@/chip/ui/plate/more-toolbar-button";
 import { ToggleToolbarButton } from "@/chip/ui/plate/toggle-toolbar-button";
 import { ToolbarGroup } from "@/chip/ui/plate/toolbar";
-import { TurnIntoToolbarButton } from "@/chip/ui/turn-into-toolbar-button";
+import { TableToolbarButton } from "@/chip/ui/plate/table-toolbar-button";
+import { TurnIntoToolbarButton } from "@/chip/ui/plate/turn-into-toolbar-button";
 
 const FixedToolbarButtons = () => {
   const readOnly = useEditorReadOnly();

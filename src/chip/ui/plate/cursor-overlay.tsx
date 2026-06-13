@@ -25,7 +25,7 @@ const Cursor = ({ caretPosition, data, id, selection, selectionRects }: CursorOv
           }}
         />
       ))}
-      {caretPosition && (
+      {caretPosition ? (
         <div
           className={cn(
             "pointer-events-none absolute z-10 w-0.5",
@@ -33,7 +33,7 @@ const Cursor = ({ caretPosition, data, id, selection, selectionRects }: CursorOv
           )}
           style={{ ...caretPosition, ...style }}
         />
-      )}
+      ) : null}
     </>
   );
 };
