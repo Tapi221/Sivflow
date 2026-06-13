@@ -3,7 +3,6 @@ import { BaseBasicBlocksKit } from "@/components/editor/plugins/basic-blocks-bas
 import { BaseBasicMarksKit } from "@/components/editor/plugins/basic-marks-base-kit";
 import { BaseCalloutKit } from "@/components/editor/plugins/callout-base-kit";
 import { BaseCodeBlockKit } from "@/components/editor/plugins/code-block-base-kit";
-import { BaseCodeDrawingKit } from "@/components/editor/plugins/code-drawing-base-kit";
 import { BaseColumnKit } from "@/components/editor/plugins/column-base-kit";
 import { BaseCommentKit } from "@/components/editor/plugins/comment-base-kit";
 import { BaseDateKit } from "@/components/editor/plugins/date-base-kit";
@@ -24,7 +23,6 @@ import { BaseToggleKit } from "@/components/editor/plugins/toggle-base-kit";
 const BaseEditorKit = [
   ...BaseBasicBlocksKit,
   ...BaseCodeBlockKit,
-  ...BaseCodeDrawingKit,
   ...BaseTableKit,
   ...BaseToggleKit,
   ...BaseTocKit,
