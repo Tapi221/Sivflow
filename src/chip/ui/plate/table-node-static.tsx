@@ -36,8 +36,8 @@ const TableRowElementStatic = (props: SlateElementProps) => {
     </SlateElement>
   );
 };
-const TableCellElementStatic = ({ isHeader, ...props }: TableCellElementStaticProps) => {
-  const { editor, element } = props;
+const TableCellElementStatic = (props: TableCellElementStaticProps) => {
+  const { editor, element, isHeader } = props;
   const { api } = editor.getPlugin(BaseTablePlugin);
   const { minHeight, width } = api.table.getCellSize(props);
   const borders = api.table.getCellBorders({ element });
