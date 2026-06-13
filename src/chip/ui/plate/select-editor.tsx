@@ -8,9 +8,9 @@ import { Fzf } from "fzf";
 import { PlusIcon } from "lucide-react";
 import { isHotkey, KEYS } from "platejs";
 import { Plate, useEditorContainerRef, useEditorRef, usePlateEditor } from "platejs/react";
-import { Popover, PopoverAnchor, PopoverContent } from "@/chip/ui/popover";
 import { Editor, EditorContainer } from "@/chip/ui/plate/editor";
 import { TagElement } from "@/chip/ui/plate/tag-node";
+import { Popover, PopoverAnchor, PopoverContent } from "@/chip/ui/popover";
 import { cn } from "@/lib/utils";
 
 type SelectItem = {
@@ -27,6 +27,7 @@ type SelectEditorContextValue = {
 };
 
 const SelectEditorContext = React.createContext<SelectEditorContextValue | undefined>(undefined);
+
 const useSelectEditorContext = () => {
   const context = React.useContext(SelectEditorContext);
   if (!context) {
@@ -60,6 +61,7 @@ const fzfFilter = (value: string, search: string): boolean => {
   });
   return fzf.find(search).length > 0;
 };
+
 const Command = ({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) => {
   return (
     <CommandPrimitive

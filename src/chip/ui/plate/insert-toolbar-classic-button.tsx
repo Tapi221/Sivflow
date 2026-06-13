@@ -43,9 +43,11 @@ const groups: InsertToolbarGroup[] = [
     ],
   },
 ];
+
 const insertClassicBlock = (editor: PlateEditor, type: string) => {
   insertBlock(editor, type);
 };
+
 const InsertToolbarButton = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);

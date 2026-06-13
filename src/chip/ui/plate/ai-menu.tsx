@@ -58,6 +58,7 @@ const submitPrompt = (input: string, action: AIAction, api: ReturnType<typeof us
     toolName: action.toolName,
   });
 };
+
 const AIMenuItems = ({ input, setInput, setValue }: AIMenuItemsProps) => {
   const { api, editor } = useEditorPlugin(AIChatPlugin);
   const submitInput = () => {
