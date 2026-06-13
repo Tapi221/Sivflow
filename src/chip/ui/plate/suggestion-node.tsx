@@ -74,6 +74,16 @@ const getBlockSuggestionWrapperClassName = ({ elementType, isActive, isHover, is
   }),
 );
 const isVoidRemoveSuggestion = (editor: PlateEditor, element: TElement) => editor.getApi(SuggestionPlugin).suggestion.suggestionData(element)?.type === "remove";
+const createLineBreakBadgeProps = (setOption: (key: "activeId", value: string | null) => void, suggestionData: TSuggestionData) => ({
+  onClick: (event: React.MouseEvent) => {
+    event.stopPropagation();
+    setOption("activeId", suggestionData.id);
+  },
+  onMouseDown: (event: React.MouseEvent) => {
+    event.preventDefault();
+  },
+});
+
 const VoidRemoveSuggestionOverlay = ({ editor, element }: VoidRemoveSuggestionOverlayProps) => {
   const active = editor.api.isVoid(element) && !editor.api.isInline(element) && isVoidRemoveSuggestion(editor, element);
   if (!active) {
@@ -172,15 +182,6 @@ const SuggestionLeaf = (props: PlateLeafProps<TSuggestionText>) => {
     </PlateLeaf>
   );
 };
-const createLineBreakBadgeProps = (setOption: (key: "activeId", value: string | null) => void, suggestionData: TSuggestionData) => ({
-  onClick: (event: React.MouseEvent) => {
-    event.stopPropagation();
-    setOption("activeId", suggestionData.id);
-  },
-  onMouseDown: (event: React.MouseEvent) => {
-    event.preventDefault();
-  },
-});
 const SuggestionLineBreakContent = ({ children, elementType, suggestionData }: SuggestionLineBreakContentProps) => {
   const { isLineBreak, type } = suggestionData;
   const isRemove = type === "remove";

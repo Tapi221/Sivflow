@@ -10,8 +10,8 @@ import { createPrimitiveComponent, PlateElement, useEditorRef, useEditorSelector
 import type { TextareaAutosizeProps } from "react-textarea-autosize";
 import TextareaAutosize from "react-textarea-autosize";
 import { Button } from "@/chip/ui/button/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
 import { inlineSuggestionVariants } from "@/chip/ui/plate/suggestion";
+import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
 import { cn } from "@/lib/utils";
 
 type EquationPopoverContentProps = {

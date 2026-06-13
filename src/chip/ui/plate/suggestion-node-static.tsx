@@ -33,6 +33,7 @@ const voidRemoveSuggestionVariants = cva("", {
 });
 
 const isStaticVoidRemoveSuggestion = (element: TElement) => (element as StaticSuggestionElement).suggestion?.type === "remove";
+
 const VoidRemoveSuggestionOverlayStatic = ({ editor, element }: { editor: any; element: TElement }) => {
   const active = editor.api.isVoid(element) && !editor.api.isInline(element) && isStaticVoidRemoveSuggestion(element);
   if (!active) {

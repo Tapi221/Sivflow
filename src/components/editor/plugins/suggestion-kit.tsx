@@ -44,6 +44,7 @@ const getInlineSuggestionData = (editor: any, element: TElement) => {
     }
   }
 };
+
 const suggestionPlugin = toTPlatePlugin<SuggestionConfig>(BaseSuggestionPlugin, ({ editor }) => ({
   options: {
     activeId: null,
