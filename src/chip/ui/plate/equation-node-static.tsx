@@ -3,14 +3,12 @@ import { RadicalIcon } from "lucide-react";
 import type { TEquationElement } from "platejs";
 import type { SlateElementProps } from "platejs/static";
 import { SlateElement } from "platejs/static";
+import { inlineSuggestionVariants } from "@/chip/ui/plate/suggestion";
 import { cn } from "@/lib/utils";
-import { inlineSuggestionVariants } from "./suggestion";
-
-
 
 const EQUATION_RENDER_OPTIONS = {
   displayMode: true,
-  errorColor: "#c00",
+  errorColor: "#cc0000",
   fleqn: false,
   leqno: false,
   macros: { "\\f": "#1f(#2)" },
@@ -19,8 +17,6 @@ const EQUATION_RENDER_OPTIONS = {
   throwOnError: false,
   trust: false,
 };
-
-
 
 const EquationElementStatic = (props: SlateElementProps<TEquationElement>) => {
   const { element } = props;
@@ -32,7 +28,7 @@ const EquationElementStatic = (props: SlateElementProps<TEquationElement>) => {
     <SlateElement className="my-1" {...props}>
       <div
         className={cn(
-          "group flex select-none items-center justify-center rounded-sm hover:bg-primary/10 data-[selected=true]:bg-primary/10",
+          "group flex select-none items-center justify-center rounded-sm hover:bg-muted/60 data-[selected=true]:bg-muted/60",
           element.texExpression.length === 0 ? "bg-muted p-3 pr-9" : "px-2 py-1",
         )}
       >
@@ -81,7 +77,7 @@ const EquationElementDocx = (props: SlateElementProps<TEquationElement>) => {
   if (!element.texExpression || element.texExpression.length === 0) {
     return (
       <SlateElement {...props}>
-        <p style={{ color: "#888", fontStyle: "italic" }}>[Empty equation]</p>
+        <p style={{ color: "#888888", fontStyle: "italic" }}>[Empty equation]</p>
         {props.children}
       </SlateElement>
     );
@@ -107,7 +103,7 @@ const InlineEquationElementDocx = (props: SlateElementProps<TEquationElement>) =
   if (!element.texExpression || element.texExpression.length === 0) {
     return (
       <SlateElement as="span" {...props}>
-        <span style={{ color: "#888", fontStyle: "italic" }}>[equation]</span>
+        <span style={{ color: "#888888", fontStyle: "italic" }}>[equation]</span>
         {props.children}
       </SlateElement>
     );
@@ -121,7 +117,5 @@ const InlineEquationElementDocx = (props: SlateElementProps<TEquationElement>) =
     </SlateElement>
   );
 };
-
-
 
 export { EquationElementDocx, EquationElementStatic, InlineEquationElementDocx, InlineEquationElementStatic };
