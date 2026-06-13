@@ -11,14 +11,14 @@ import { CaptionButton } from "@/chip/ui/plate/caption";
 import { Popover, PopoverAnchor, PopoverContent } from "@/chip/ui/popover";
 import { Separator } from "@/chip/ui/separator";
 
-const inputVariants = cva(
-  "flex h-[28px] w-full rounded-md border-none bg-transparent px-1.5 py-1 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-transparent md:text-sm",
-);
-
 type MediaToolbarProps = {
   children: React.ReactNode;
   plugin: WithRequiredKey;
 };
+
+const inputVariants = cva(
+  "flex h-[28px] w-full rounded-md border-none bg-transparent px-1.5 py-1 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-transparent md:text-sm",
+);
 
 const MediaToolbar = ({ children, plugin }: MediaToolbarProps) => {
   const editor = useEditorRef();
