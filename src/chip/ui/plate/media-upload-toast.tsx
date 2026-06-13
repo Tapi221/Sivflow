@@ -1,9 +1,7 @@
-import * as React from "react";
+import type * as React from "react";
 import { CheckCircleIcon, Loader2Icon, XCircleIcon } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-
-
 
 type MediaUploadToastProps = React.ComponentPropsWithoutRef<"div"> & {
   id?: string | number;
@@ -12,12 +10,7 @@ type MediaUploadToastProps = React.ComponentPropsWithoutRef<"div"> & {
   status?: "error" | "loading" | "success";
 };
 
-
-
 const getProgress = (progress: MediaUploadToastProps["progress"]) => Math.max(0, Math.min(100, progress ?? 0));
-
-
-
 const MediaUploadToast = ({ id, name, progress, status = "loading", ...props }: MediaUploadToastProps) => {
   const resolvedProgress = getProgress(progress);
   return (
@@ -31,7 +24,7 @@ const MediaUploadToast = ({ id, name, progress, status = "loading", ...props }: 
         <div className="truncate text-sm font-medium">{name}</div>
         <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
           <div
-            className={cn("h-full rounded-full bg-primary transition-all", status === "error" && "bg-destructive")}
+            className={cn("h-full rounded-full bg-foreground transition-all", status === "error" && "bg-destructive")}
             style={{ width: `${resolvedProgress}%` }}
           />
         </div>
@@ -51,9 +44,5 @@ const MediaUploadToast = ({ id, name, progress, status = "loading", ...props }: 
   );
 };
 
-
-
 export { MediaUploadToast };
-
-
 export type { MediaUploadToastProps };
