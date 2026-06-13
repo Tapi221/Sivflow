@@ -189,4 +189,4 @@ if (import.meta.env.DEV) {
   debugFirebase();
 }
 
-export { missingFirebaseEnvVars, isFirebaseClientAvailable, firebaseApp, auth, storage, functionsClient, firestoreDb, db, requireFirebaseClient
+export { missingFirebaseEnvVars, isFirebaseClientAvailable, firebaseApp, auth, storage, functionsClient, firestoreDb, db, requireFirebaseClient, requireFirestoreDb };
