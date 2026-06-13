@@ -4,6 +4,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPOSITORY_ROOT = path.resolve(SCRIPT_DIR, "..");
+const FIXERS_ONLY_ARGUMENT = "--fixers-only";
 const FIXER_SCRIPT_PATHS = [
   path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-type-only-imports.mjs"),
   path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-const-arrow-functions.mjs"),
@@ -31,6 +32,7 @@ const NODE_SCRIPT_PATHS = {
   verifyStrictEquality: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-strict-equality.mjs"),
   verifyTypeOnlyImports: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-type-only-imports.mjs"),
 };
+const isFixersOnly = process.argv.includes(FIXERS_ONLY_ARGUMENT);
 
 process.chdir(REPOSITORY_ROOT);
 
@@ -94,8 +96,12 @@ const runSourceConventionVerification = () => {
   return statuses.find((status) => status !== 0) ?? 0;
 };
 
-const lintStatus = runNodeScript(NODE_SCRIPT_PATHS.lintEslintJa, ["--fix"]);
 const fixStatus = await runSourceConventionFixes();
-const verifyStatus = runSourceConventionVerification();
 
-process.exitCode = [lintStatus, fixStatus, verifyStatus].find((status) => status !== 0) ?? 0;
+if (isFixersOnly) {
+  process.exitCode = fixStatus;
+} else {
+  const lintStatus = runNodeScript(NODE_SCRIPT_PATHS.lintEslintJa, ["--fix"]);
+  const verifyStatus = runSourceConventionVerification();
+  process.exitCode = [fixStatus, lintStatus, verifyStatus].find((status) => status !== 0) ?? 0;
+}
