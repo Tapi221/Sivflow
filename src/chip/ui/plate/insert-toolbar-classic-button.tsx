@@ -49,22 +49,16 @@ const groups: InsertToolbarGroup[] = [
   {
     group: "Lists",
     items: [
-      { icon: <ListIcon />, label: "Bulleted list", value: KEYS.ulClassic },
-      { icon: <ListOrderedIcon />, label: "Numbered list", value: KEYS.olClassic },
-      { icon: <SquareIcon />, label: "To-do list", value: KEYS.taskList },
+      { icon: <ListIcon />, label: "Bulleted list", value: KEYS.ul },
+      { icon: <ListOrderedIcon />, label: "Numbered list", value: KEYS.ol },
+      { icon: <SquareIcon />, label: "To-do list", value: KEYS.listTodo },
       { icon: <ChevronRightIcon />, label: "Toggle list", value: KEYS.toggle },
     ],
   },
 ];
-
-
-
 const insertClassicBlock = (editor: PlateEditor, type: string) => {
   insertBlock(editor, type);
 };
-
-
-
 const InsertToolbarButton = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
