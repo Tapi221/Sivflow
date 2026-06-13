@@ -1,28 +1,15 @@
 "use client";
-
 import * as React from "react";
-
 import { SuggestionPlugin } from "@platejs/suggestion/react";
-
 import { cva } from "class-variance-authority";
-
 import { CornerDownLeftIcon } from "lucide-react";
-
 import type { AnyPluginConfig, TElement, TSuggestionData, TSuggestionText, WithRequiredKey } from "platejs";
-
 import { KEYS } from "platejs";
-
 import type { PlateEditor, PlateLeafProps, RenderNodeWrapper } from "platejs/react";
-
 import { PlateLeaf, useEditorPlugin, usePluginOption } from "platejs/react";
-
+import { voidRemoveSuggestionOverlayVariants } from "@/chip/ui/plate/suggestion-node-static";
 import type { SuggestionConfig } from "@/components/editor/plugins/suggestion-kit";
-
 import { cn } from "@/lib/utils";
-
-import { voidRemoveSuggestionOverlayVariants } from "./suggestion-node-static";
-
-
 
 type BlockSuggestionWrapperOptions = {
   elementType?: string;
@@ -31,34 +18,27 @@ type BlockSuggestionWrapperOptions = {
   isInsert: boolean;
   isRemove: boolean;
 };
-
 type VoidRemoveSuggestionOverlayProps = {
   editor: PlateEditor;
   element: TElement;
 };
-
 type SuggestionLineBreakAnchorProps = {
   badgeProps?: React.ComponentProps<"span">;
   children: React.ReactNode;
   className?: string;
 };
-
 type SuggestionLineBreakElementAnchorProps = {
   badgeProps?: React.ComponentProps<"span">;
   children: React.ReactElement<any>;
   className?: string;
 };
-
 type SuggestionLineBreakContentProps = {
   children: React.ReactNode;
   elementType?: string;
   suggestionData: TSuggestionData;
 };
 
-
-
 const suggestionPlugin = SuggestionPlugin as WithRequiredKey<SuggestionConfig>;
-
 const suggestionVariants = cva(
   cn("bg-emerald-100 text-emerald-700 no-underline transition-colors duration-200"),
   {
@@ -84,8 +64,6 @@ const suggestionVariants = cva(
   },
 );
 
-
-
 const getBlockSuggestionWrapperClassName = ({ elementType, isActive, isHover, isInsert, isRemove }: BlockSuggestionWrapperOptions) => cn(
   elementType === KEYS.columnGroup && "flex size-full rounded",
   suggestionVariants({
@@ -94,9 +72,7 @@ const getBlockSuggestionWrapperClassName = ({ elementType, isActive, isHover, is
     removeActive: (isActive || isHover) && isRemove,
   }),
 );
-
 const isVoidRemoveSuggestion = (editor: PlateEditor, element: TElement) => editor.getApi(SuggestionPlugin).suggestion.suggestionData(element)?.type === "remove";
-
 const createLineBreakBadgeProps = (setOption: (key: "activeId", value: string | null) => void, suggestionData: TSuggestionData) => ({
   onClick: (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -106,9 +82,6 @@ const createLineBreakBadgeProps = (setOption: (key: "activeId", value: string | 
     event.preventDefault();
   },
 });
-
-
-
 const VoidRemoveSuggestionOverlay = ({ editor, element }: VoidRemoveSuggestionOverlayProps) => {
   const active = editor.api.isVoid(element) && !editor.api.isInline(element) && isVoidRemoveSuggestion(editor, element);
   if (!active) {
@@ -122,7 +95,6 @@ const VoidRemoveSuggestionOverlay = ({ editor, element }: VoidRemoveSuggestionOv
     />
   );
 };
-
 const SuggestionLineBreakAnchor = ({ badgeProps, children, className }: SuggestionLineBreakAnchorProps) => {
   const badge = (
     <span
@@ -139,7 +111,6 @@ const SuggestionLineBreakAnchor = ({ badgeProps, children, className }: Suggesti
   );
   return <>{children}{badge}</>;
 };
-
 const SuggestionLineBreakElementAnchor = ({ badgeProps, children, className }: SuggestionLineBreakElementAnchorProps) => {
   if (!React.isValidElement(children)) {
     return children;
@@ -176,7 +147,6 @@ const SuggestionLineBreakElementAnchor = ({ badgeProps, children, className }: S
   }
   return React.cloneElement(children as React.ReactElement<any>, { lineBreakBadge: badge });
 };
-
 const SuggestionLeaf = (props: PlateLeafProps<TSuggestionText>) => {
   const { api, setOption } = useEditorPlugin(suggestionPlugin);
   const leaf = props.leaf;
@@ -210,7 +180,6 @@ const SuggestionLeaf = (props: PlateLeafProps<TSuggestionText>) => {
     </PlateLeaf>
   );
 };
-
 const SuggestionLineBreakContent = ({ children, elementType, suggestionData }: SuggestionLineBreakContentProps) => {
   const { isLineBreak, type } = suggestionData;
   const isRemove = type === "remove";
@@ -247,7 +216,6 @@ const SuggestionLineBreakContent = ({ children, elementType, suggestionData }: S
     </div>
   );
 };
-
 const SuggestionLineBreak: RenderNodeWrapper<AnyPluginConfig> = ({ api, element }) => {
   if (!api.suggestion.isBlockSuggestion(element)) {
     return;
@@ -259,7 +227,5 @@ const SuggestionLineBreak: RenderNodeWrapper<AnyPluginConfig> = ({ api, element 
     </SuggestionLineBreakContent>
   );
 };
-
-
 
 export { SuggestionLeaf, SuggestionLineBreak, SuggestionLineBreakAnchor, SuggestionLineBreakContent, VoidRemoveSuggestionOverlay, getBlockSuggestionWrapperClassName, isVoidRemoveSuggestion, suggestionVariants };
