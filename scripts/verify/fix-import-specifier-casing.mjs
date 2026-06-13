@@ -6,12 +6,12 @@ const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx"]);
 const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src", "tests", "scripts"].map((directory) => path.join(ROOT_DIR, directory));
 const IMPORT_SPECIFIER_REPLACEMENTS = [
   { from: "@/services/localDB", to: "@/services/localdb" },
+  { from: "@/services/localdbRuntimeState", to: "@/services/localDBRuntimeState" },
   { from: "@/services/firebase", to: "@/infrastructure/firebase/client" },
 ];
 
 const walkSourceFiles = (directory) => {
   if (!existsSync(directory)) return [];
-
   return readdirSync(directory).flatMap((entry) => {
     const entryPath = path.join(directory, entry);
     const stat = statSync(entryPath);
