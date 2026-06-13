@@ -1,4 +1,3 @@
-import Prism from "prismjs";
 import "prismjs/components/prism-clike";
 import "prismjs/components/prism-markup";
 import "prismjs/components/prism-css";
@@ -22,6 +21,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { codeTheme } from "@shared/design-tokens/codeTheme";
 import type { RenderProps } from "prism-react-renderer";
 import { Highlight } from "prism-react-renderer";
+import Prism from "prismjs";
 import type { ClipboardEvent as ReactClipboardEvent, FormEvent as ReactFormEvent, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { CodeBlockFrame } from "@/components/card/blocks/code/CodeBlockFrame";
 import { getViewerLanguageLabels, normalizeEditorLanguage, normalizeViewerLanguage } from "@/components/card/blocks/code/codeBlockLanguage";

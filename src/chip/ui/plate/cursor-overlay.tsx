@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useCursorOverlay } from "@platejs/selection/react";
 import type { CursorData, CursorOverlayState } from "@platejs/selection/react";
+import { useCursorOverlay } from "@platejs/selection/react";
 import { RangeApi } from "platejs";
 import { cn } from "@/lib/utils";
 
