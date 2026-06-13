@@ -4,7 +4,7 @@ import { IndexedDBMetadataService } from "@/services/IndexedDBMetadataService";
 import { rebuildIndexedDb } from "@/services/indexedDbRebuildCoordinator";
 import { ensureLegacyCardsBackfilled } from "@/services/legacyCardSetMigrationBackfill";
 import { getLocalDb, getLocalDBRuntimeStatus, LOCALDB_RECOVERY_GUIDE_URL } from "@/services/localdb";
-import { warnOncePerSession } from "@/services/localdbRuntimeState";
+import { warnOncePerSession } from "@/services/localDBRuntimeState";
 
 // NOTE: 初期化時のユーザー向け INFO 通知は UI 上で邪魔になるため表示しない。
 
