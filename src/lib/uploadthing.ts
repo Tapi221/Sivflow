@@ -1,18 +1,16 @@
-import type { FileRouter } from "uploadthing/next";
-import { createUploadthing } from "uploadthing/next";
+type UploadThingFileRouter = {
+  editorUploader: {
+    allowedTypes: readonly ["image", "text", "blob", "pdf", "video", "audio"];
+  };
+};
 
-
-
-const f = createUploadthing();
-const ourFileRouter = { editorUploader: f(["image", "text", "blob", "pdf", "video", "audio"]).middleware(() => ({})).onUploadComplete(({ file }) => ({ key: file.key, name: file.name, size: file.size, type: file.type, url: file.ufsUrl })) } satisfies FileRouter;
-
-
+const ourFileRouter = {
+  editorUploader: {
+    allowedTypes: ["image", "text", "blob", "pdf", "video", "audio"],
+  },
+} satisfies UploadThingFileRouter;
 
 type OurFileRouter = typeof ourFileRouter;
 
-
-
 export { ourFileRouter };
-
-
 export type { OurFileRouter };
