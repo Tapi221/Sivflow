@@ -66,18 +66,86 @@ const BlockCommentContent = ({ children, element }: PlateElementProps) => {
   if (suggestionsCount + resolvedDiscussions.length === 0 && !draftCommentNode) return <div className="w-full">{children}</div>;
   return (
     <div className="flex w-full justify-between">
-      <Popover open={open} onOpenChange={(_open_) => {
-        if (!_open_ && isCommenting && draftCommentNode) {
-          editor.tf.unsetNodes(getDraftCommentKey(), { at: [], mode: "lowest", match: (n) => n[getDraftCommentKey()] });
-        }
-        setOpen(_open_);
-      }}>
+      <Popover
+        open={open}
+        onOpenChange={(_open_) => {
+          if (!_open_ && isCommenting && draftCommentNode) {
+            editor.tf.unsetNodes(getDraftCommentKey(), {
+              at: [],
+              mode: "lowest",
+              match: (n) => n[getDraftCommentKey()],
+            });
+          }
+          setOpen(_open_);
+        }}
+      >
         <div className="w-full">{children}</div>
         {anchorElement && <PopoverAnchor asChild className="w-full" virtualRef={{ current: anchorElement }} />}
-        <PopoverContent className="max-h-[min(50dvh,calc(-24px+var(--radix-popper-available-height)))] w-[380px] min-w-[130px] max-w-[calc(100vw-24px)] overflow-y-auto p-0 data-[state=closed]:opacity-0" onCloseAutoFocus={(e) => e.preventDefault()} onOpenAutoFocus={(e) => e.preventDefault()} align="center" side="bottom">
-          {isCommenting ? <CommentCreateForm className="p-4" focusOnMount /> : noneActive ? sortedMergedData.map((item, index) => isResolvedSuggestion(item) ? <BlockSuggestionCard key={item.suggestionId} idx={index} isLast={index === sortedMergedData.length - 1} suggestion={item} /> : <BlockComment key={item.id} discussion={item} isLast={index === sortedMergedData.length - 1} />) : (<><>{activeSuggestion && <BlockSuggestionCard key={activeSuggestion.suggestionId} idx={0} isLast={true} suggestion={activeSuggestion} />}</><>{activeDiscussion && <BlockComment discussion={activeDiscussion} isLast={true} />}</>)}
+        <PopoverContent
+          className="max-h-[min(50dvh,calc(-24px+var(--radix-popper-available-height)))] w-[380px] min-w-[130px] max-w-[calc(100vw-24px)] overflow-y-auto p-0 data-[state=closed]:opacity-0"
+          onCloseAutoFocus={(e) => e.preventDefault()}
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          align="center"
+          side="bottom"
+        >
+          {isCommenting ? (
+            <CommentCreateForm className="p-4" focusOnMount />
+          ) : noneActive ? (
+            sortedMergedData.map((item, index) =>
+              isResolvedSuggestion(item) ? (
+                <BlockSuggestionCard
+                  key={item.suggestionId}
+                  idx={index}
+                  isLast={index === sortedMergedData.length - 1}
+                  suggestion={item}
+                />
+              ) : (
+                <BlockComment
+                  key={item.id}
+                  discussion={item}
+                  isLast={index === sortedMergedData.length - 1}
+                />
+              ),
+            )
+          ) : (
+            <>
+              {activeSuggestion ? (
+                <BlockSuggestionCard
+                  key={activeSuggestion.suggestionId}
+                  idx={0}
+                  isLast={true}
+                  suggestion={activeSuggestion}
+                />
+              ) : null}
+              {activeDiscussion ? (
+                <BlockComment discussion={activeDiscussion} isLast={true} />
+              ) : null}
+            </>
+          )}
         </PopoverContent>
-        {totalCount > 0 && <div className="relative left-0 size-0 select-none"><PopoverTrigger asChild><Button variant="ghost" className="!px-1.5 mt-1 ml-1 flex h-6 gap-1 py-0 text-muted-foreground/80 hover:text-muted-foreground/80 data-[active=true]:bg-muted" data-active={open} contentEditable={false}>{suggestionsCount > 0 && discussionsCount === 0 && <PencilLineIcon className="size-4 shrink-0" />}{suggestionsCount === 0 && discussionsCount > 0 && <MessageSquareTextIcon className="size-4 shrink-0" />}{suggestionsCount > 0 && discussionsCount > 0 && <MessagesSquareIcon className="size-4 shrink-0" />}<span className="font-semibold text-xs">{totalCount}</span></Button></PopoverTrigger></div>}
+        {totalCount > 0 ? (
+          <div className="relative left-0 size-0 select-none">
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                className="!px-1.5 mt-1 ml-1 flex h-6 gap-1 py-0 text-muted-foreground/80 hover:text-muted-foreground/80 data-[active=true]:bg-muted"
+                data-active={open}
+                contentEditable={false}
+              >
+                {suggestionsCount > 0 && discussionsCount === 0 ? (
+                  <PencilLineIcon className="size-4 shrink-0" />
+                ) : null}
+                {suggestionsCount === 0 && discussionsCount > 0 ? (
+                  <MessageSquareTextIcon className="size-4 shrink-0" />
+                ) : null}
+                {suggestionsCount > 0 && discussionsCount > 0 ? (
+                  <MessagesSquareIcon className="size-4 shrink-0" />
+                ) : null}
+                <span className="font-semibold text-xs">{totalCount}</span>
+              </Button>
+            </PopoverTrigger>
+          </div>
+        ) : null}
       </Popover>
     </div>
   );
