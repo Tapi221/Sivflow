@@ -3,8 +3,8 @@ import { BaseAudioPlugin, BaseFilePlugin, BaseImagePlugin, BaseMediaEmbedPlugin,
 import { KEYS } from "platejs";
 import { AudioElementStatic } from "@/chip/ui/node/media-audio-node-static";
 import { FileElementStatic } from "@/chip/ui/node/media-file-node-static";
-import { ImageElementStatic } from "@/chip/ui/node/media-image-node-static";
 import { VideoElementStatic } from "@/chip/ui/node/media-video-node-static";
+import { ImageElementStatic } from "@/chip/ui/plate/media-image-node-static";
 
 const BaseMediaKit = [
   BaseImagePlugin.withComponent(ImageElementStatic),
