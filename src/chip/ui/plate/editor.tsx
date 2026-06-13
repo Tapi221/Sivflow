@@ -1,21 +1,13 @@
 "use client";
-
-import * as React from "react";
-
+import type * as React from "react";
 import type { VariantProps } from "class-variance-authority";
-
 import { cva } from "class-variance-authority";
-
 import type { PlateContentProps, PlateViewProps } from "platejs/react";
-
 import { PlateContainer, PlateContent, PlateView } from "platejs/react";
-
 import { cn } from "@/lib/utils";
 
-
-
 const editorContainerVariants = cva(
-  "relative w-full cursor-text select-text overflow-y-auto caret-primary selection:bg-brand/25 focus-visible:outline-none [&_.slate-selection-area]:z-50 [&_.slate-selection-area]:border [&_.slate-selection-area]:border-brand/25 [&_.slate-selection-area]:bg-brand/15",
+  "relative w-full cursor-text select-text overflow-y-auto caret-foreground selection:bg-muted-foreground/20 focus-visible:outline-none [&_.slate-selection-area]:z-50 [&_.slate-selection-area]:border [&_.slate-selection-area]:border-ring/30 [&_.slate-selection-area]:bg-muted-foreground/15",
   {
     defaultVariants: {
       variant: "default",
@@ -25,7 +17,7 @@ const editorContainerVariants = cva(
         comment: cn(
           "flex flex-wrap justify-between gap-1 px-1 py-0.5 text-sm",
           "rounded-md border-[1.5px] border-transparent bg-transparent",
-          "has-[[data-slate-editor]:focus]:border-brand/50 has-[[data-slate-editor]:focus]:ring-2 has-[[data-slate-editor]:focus]:ring-brand/30",
+          "has-[[data-slate-editor]:focus]:border-ring/50 has-[[data-slate-editor]:focus]:ring-2 has-[[data-slate-editor]:focus]:ring-ring/30",
           "has-aria-disabled:border-input has-aria-disabled:bg-muted",
         ),
         default: "h-full",
@@ -38,7 +30,6 @@ const editorContainerVariants = cva(
     },
   },
 );
-
 const editorVariants = cva(
   cn(
     "group/editor",
@@ -72,16 +63,11 @@ const editorVariants = cva(
   },
 );
 
-
-
 type EditorProps = PlateContentProps & VariantProps<typeof editorVariants>;
-
-
 
 const EditorContainer = ({ className, variant, ...props }: React.ComponentProps<"div"> & VariantProps<typeof editorContainerVariants>) => {
   return <PlateContainer className={cn("ignore-click-outside/toolbar", editorContainerVariants({ variant }), className)} {...props} />;
 };
-
 const Editor = ({ className, disabled, focused, variant, ref, ...props }: EditorProps & { ref?: React.RefObject<HTMLDivElement | null> }) => {
   return (
     <PlateContent
@@ -100,19 +86,12 @@ const Editor = ({ className, disabled, focused, variant, ref, ...props }: Editor
     />
   );
 };
-
 const EditorView = ({ className, variant, ...props }: PlateViewProps & VariantProps<typeof editorVariants>) => {
   return <PlateView {...props} className={cn(editorVariants({ variant }), className)} />;
 };
 
-
-
 Editor.displayName = "Editor";
-
 EditorView.displayName = "EditorView";
 
 export { EditorContainer, Editor, EditorView };
-
-
-
 export type { EditorProps };
