@@ -7,7 +7,6 @@ const REPOSITORY_ROOT = path.resolve(SCRIPT_DIR, "..");
 const NODE_SCRIPT_PATHS = {
   fixBlankLines: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-repeated-blank-lines.mjs"),
   fixConstArrowFunctions: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-const-arrow-functions.mjs"),
-  fixImportPaths: path.resolve(REPOSITORY_ROOT, "scripts/fix-src-import-paths.mjs"),
   fixImportSpacing: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-import-spacing.mjs"),
   fixJsxChildSpacing: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-jsx-child-spacing.mjs"),
   fixKnownLintErrors: path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-known-lint-errors.mjs"),
@@ -38,7 +37,7 @@ const runNodeScript = (scriptPath, args = []) => {
   });
 
   if (result.error) {
-    console.error(`script の実行に失敗しました: ${result.error.message}`);
+    console.error(`script failed: ${result.error.message}`);
     return 1;
   }
 
@@ -54,7 +53,6 @@ const runSourceConventionFixes = () => {
     runNodeScript(NODE_SCRIPT_PATHS.fixNullishFallback),
     runNodeScript(NODE_SCRIPT_PATHS.fixStrictEquality),
     runNodeScript(NODE_SCRIPT_PATHS.fixKnownLintErrors),
-    runNodeScript(NODE_SCRIPT_PATHS.fixImportPaths),
     runNodeScript(NODE_SCRIPT_PATHS.fixImportSpacing),
     runNodeScript(NODE_SCRIPT_PATHS.fixSourceOrder),
     runNodeScript(NODE_SCRIPT_PATHS.fixImportSpacing),
