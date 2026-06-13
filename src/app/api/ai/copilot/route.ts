@@ -1,39 +1,32 @@
-import { generateText } from "ai";
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
+import { createGateway } from "@ai-sdk/gateway";
+import { streamText } from "ai";
 
-const POST = async (req: NextRequest) => {
-  const { apiKey: key, model = "gpt-4o-mini", prompt, system } = await req.json();
+type CopilotRequestPayload = {
+  apiKey?: string;
+  model?: string;
+  prompt?: string;
+  system?: string;
+};
 
-  const apiKey = key || process.env.AI_GATEWAY_API_KEY;
+const DEFAULT_COPILOT_MODEL = "openai/gpt-4o-mini";
 
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "Missing ai gateway API key." },
-      { status: 401 },
-    );
-  }
-
+const createErrorResponse = (status: number, error: string) => Response.json({ error }, { status });
+const POST = async (req: Request) => {
   try {
-    const result = await generateText({
-      abortSignal: req.signal,
-      maxOutputTokens: 50,
-      model: `openai/${model}`,
-      prompt,
-      system,
-      temperature: 0.7,
-    });
-
-    return NextResponse.json(result);
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      return NextResponse.json(null, { status: 408 });
+    const { apiKey, model, prompt, system } = await req.json() as CopilotRequestPayload;
+    const credential = apiKey ?? process.env.AI_GATEWAY_API_KEY;
+    if (!credential) {
+      return createErrorResponse(401, "Missing AI credential.");
     }
-
-    return NextResponse.json(
-      { error: "Failed to process AI request" },
-      { status: 500 },
-    );
+    const gatewayProvider = createGateway({ apiKey: credential });
+    const result = streamText({
+      model: gatewayProvider(model ?? DEFAULT_COPILOT_MODEL),
+      prompt: prompt ?? "",
+      system,
+    });
+    return result.toTextStreamResponse();
+  } catch {
+    return createErrorResponse(500, "Failed to process copilot request.");
   }
 };
 
