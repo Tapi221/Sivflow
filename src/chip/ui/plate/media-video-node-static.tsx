@@ -3,11 +3,7 @@ import type { PlateElementProps } from "platejs/react";
 import { PlateElement } from "platejs/react";
 import { cn } from "@/lib/utils";
 
-
-
 type MediaVideoNodeStaticProps = PlateElementProps<TMediaElement>;
-
-
 
 const MediaVideoNodeStatic = ({ className, element, children, ...props }: MediaVideoNodeStaticProps) => (
   <PlateElement className={cn("my-4", className)} element={element} {...props}>
@@ -21,13 +17,7 @@ const MediaVideoNodeStatic = ({ className, element, children, ...props }: MediaV
   </PlateElement>
 );
 
-
-
 const VideoElementStatic = MediaVideoNodeStatic;
 
-
-
 export { MediaVideoNodeStatic, VideoElementStatic };
-
-
 export type { MediaVideoNodeStaticProps };

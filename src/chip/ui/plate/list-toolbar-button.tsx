@@ -2,16 +2,12 @@ import { ListStyleType, toggleList } from "@platejs/list";
 import { useIndentTodoToolBarButton, useIndentTodoToolBarButtonState } from "@platejs/list/react";
 import { ListIcon, ListOrderedIcon, ListTodoIcon } from "lucide-react";
 import { useEditorRef } from "platejs/react";
-import type { ToolbarButtonProps } from "./toolbar";
-import { ToolbarButton } from "./toolbar";
-
-
+import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
+import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
 type ListToolbarButtonProps = ToolbarButtonProps & {
   listStyleType?: ListStyleType;
 };
-
-
 
 const ListToolbarButton = ({ listStyleType = ListStyleType.Disc, onClick, ...props }: ListToolbarButtonProps) => {
   const editor = useEditorRef();
@@ -49,9 +45,5 @@ const TodoListToolbarButton = ({ children, tooltip = "Todo list", ...props }: To
   );
 };
 
-
-
 export { BulletedListToolbarButton, ListToolbarButton, NumberedListToolbarButton, TodoListToolbarButton };
-
-
 export type { ListToolbarButtonProps };

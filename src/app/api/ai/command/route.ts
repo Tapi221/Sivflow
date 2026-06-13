@@ -6,11 +6,9 @@ import { NextResponse } from "next/server";
 import type { SlateEditor } from "platejs";
 import { createSlateEditor, nanoid } from "platejs";
 import { z } from "zod";
-import { AI_COMMAND_PLATE_PLUGINS } from "./editorKit";
+import { AI_COMMAND_PLATE_PLUGINS } from "@/app/api/ai/command/editorKit";
 import { buildEditTableMultiCellPrompt, getChooseToolPrompt, getCommentPrompt, getEditPrompt, getGeneratePrompt } from "@/app/api/ai/command/prompt";
-import type { ChatMessage, ToolName } from "./types";
-
-
+import type { ChatMessage, ToolName } from "@/app/api/ai/command/types";
 
 const POST = async (req: NextRequest) => {
   const { apiKey: key, ctx, messages: messagesRaw, model } = await req.json();
@@ -154,8 +152,6 @@ const POST = async (req: NextRequest) => {
   }
 };
 
-
-
 const getCommentTool = (
   editor: SlateEditor,
   {
@@ -288,7 +284,5 @@ const getTableTool = (
       });
     },
   });
-
-
 
 export { POST };

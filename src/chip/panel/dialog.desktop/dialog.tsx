@@ -1,9 +1,7 @@
-import "./dialog.css";
+import "@/chip/panel/dialog.desktop/dialog.css";
 import { memo } from "react";
 import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import { cn } from "@/lib/utils";
-
-
 
 type DialogDesktopPanelProps = {
   className?: string;
@@ -12,8 +10,6 @@ type DialogDesktopPanelProps = {
   children?: ReactNode;
   onClose?: () => void;
 };
-
-
 
 const DialogDesktopPanelBase = ({ className, surfaceClassName, ariaLabel, children, onClose }: DialogDesktopPanelProps) => {
   const handleBackdropMouseDown = (event: ReactMouseEvent<HTMLDivElement>) => {
@@ -29,12 +25,8 @@ const DialogDesktopPanelBase = ({ className, surfaceClassName, ariaLabel, childr
   );
 };
 
-
-
 const DialogDesktopPanel = memo(DialogDesktopPanelBase);
 DialogDesktopPanel.displayName = "DialogDesktopPanel";
 
 export { DialogDesktopPanel };
-
-
 export type { DialogDesktopPanelProps };

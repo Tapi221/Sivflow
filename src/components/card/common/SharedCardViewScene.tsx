@@ -2,9 +2,7 @@ import React from "react";
 import { CardBlocksScene } from "@/components/card/blocks/shared/CardBlocksScene";
 import { filterRenderableCardBlocks } from "@/components/card/blocks/shared/isRenderableCardBlock";
 import { useViewerSceneProps } from "@/components/card/blocks/shared/useViewerSceneProps";
-import type { SharedCardContentViewProps } from "./SharedCardContent.types";
-
-
+import type { SharedCardContentViewProps } from "@/components/card/common/SharedCardContent.types";
 
 const SharedCardViewScene = ({ blocks, onGalleryFullscreenChange, displayMode, zoom }: SharedCardContentViewProps) => {
   const viewerProps = useViewerSceneProps({ onGalleryFullscreenChange, displayMode, zoom });
@@ -28,7 +26,5 @@ const SharedCardViewScene = ({ blocks, onGalleryFullscreenChange, displayMode, z
     />
   );
 };
-
-
 
 export { SharedCardViewScene };
