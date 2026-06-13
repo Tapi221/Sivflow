@@ -3,7 +3,7 @@
 import { BulletedListRules, isOrderedList, OrderedListRules, TaskListRules } from "@platejs/list";
 import { ListPlugin } from "@platejs/list/react";
 import { KEYS } from "platejs";
-import { BlockList } from "@/chip/ui/list/block-list";
+import { BlockList } from "@/chip/ui/plate/block-list";
 import { IndentKit } from "@/components/editor/plugins/indent-kit";
 
 const ListKit = [
@@ -22,7 +22,6 @@ const ListKit = [
         nodeKey: KEYS.listType,
         query: ({ nodeProps }) => {
           const element = nodeProps.element;
-
           return !!element?.listStyleType && !isOrderedList(element);
         },
         transformProps: ({ props }) => ({
