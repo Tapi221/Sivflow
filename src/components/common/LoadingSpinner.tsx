@@ -1,5 +1,5 @@
 import "pdfjs-dist/legacy/web/pdf_viewer.css";
-import "@/components/common/LoadingSpinner.css";
+import "./LoadingSpinner.css";
 import { cn } from "@/lib/utils";
 
 type LoadingSpinnerProps = {

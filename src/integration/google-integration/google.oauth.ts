@@ -4,8 +4,8 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { readEmail } from "@/integration/googlecalendar-integration/gcal.storage";
 import { oauthBridge } from "@/platform/capabilities/oauthBridge";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
-import type { GoogleOAuthCallbackPayload } from "@/integration/google-integration/google.oauth-callback";
-import { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, isGoogleOAuthCallbackPayload } from "@/integration/google-integration/google.oauth-callback";
+import type { GoogleOAuthCallbackPayload } from "./google.oauth-callback";
+import { GOOGLE_OAUTH_CALLBACK_CHANNEL, GOOGLE_OAUTH_CALLBACK_STORAGE_KEY, isGoogleOAuthCallbackPayload } from "./google.oauth-callback";
 
 type GoogleCalendarAccess = {
   accessToken: string;

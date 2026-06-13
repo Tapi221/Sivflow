@@ -1,5 +1,5 @@
-import "@/pane.desktop/leftpane/sidebar.desktop.css";
-import "@/pane.desktop/leftpane/sidebar.layered-directory.css";
+import "./sidebar.desktop.css";
+import "./sidebar.layered-directory.css";
 import { useT } from "@shared/i18n/useT";
 import type { MouseEvent, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";

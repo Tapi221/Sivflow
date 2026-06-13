@@ -7,7 +7,7 @@ import type { AppCalendarItem, CalendarAllDayEventOrderMap, CalendarAllDayEventR
 import { CalendarTimetableView } from "@/features/calendar/timetable/CalendarTimetableView";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
-import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
+import { CalendarPieChartView } from "./Calendar.PieChartView";
 
 type CalendarSelectedViewsSplitViewProps = {
   selectedViewModes: readonly CalendarViewMode[];

@@ -3,8 +3,8 @@ import { refreshConnectedServiceAccessToken, requestConnectedServiceAccessToken 
 import { getServerStoredGoogleConnectedServiceAccessToken, isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
 import type { GoogleConnectedServiceAccountEntry, GoogleConnectedServiceAccountTokenUpdate } from "@/integration/google-integration/googleAccount.types";
 import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
-import { createGoogleTask, deleteGoogleTask, fetchGoogleTasks, moveGoogleTask, patchGoogleTask } from "@/integration/googletask-integration/gtask.api";
-import type { GoogleTaskListAccountState } from "@/integration/googletask-integration/useGoogleTaskLists";
+import { createGoogleTask, deleteGoogleTask, fetchGoogleTasks, moveGoogleTask, patchGoogleTask } from "./gtask.api";
+import type { GoogleTaskListAccountState } from "./useGoogleTaskLists";
 
 type GoogleTasksAccountState = {
   tasks: GoogleTaskItem[];

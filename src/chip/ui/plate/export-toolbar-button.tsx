@@ -12,8 +12,8 @@ import { serializeHtml } from "platejs/static";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { BaseEditorKit } from "@/components/editor/editor-base-kit";
 import { DocxExportKit } from "@/components/editor/plugins/docx-export-kit";
-import { EditorStatic } from "@/chip/ui/plate/editor-static";
-import { ToolbarButton } from "@/chip/ui/plate/toolbar";
+import { EditorStatic } from "./editor-static";
+import { ToolbarButton } from "./toolbar";
 
 const siteUrl = "https://platejs.org";
 

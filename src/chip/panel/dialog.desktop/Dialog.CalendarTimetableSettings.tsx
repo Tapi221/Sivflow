@@ -1,7 +1,7 @@
 import type { CalendarTimetablePeriod, CalendarTimetableVisibleDayCount } from "@core/domain/calendar/timetable/timetable.types";
 import { normalizeVisibleDayCount } from "@/features/calendar/timetable/calendarTimetable.storage";
 import { cn } from "@/lib/utils";
-import { DialogDesktopPanel } from "@/chip/panel/dialog.desktop/dialog";
+import { DialogDesktopPanel } from "./dialog";
 
 type CalendarTimetableSettingsDialogProps = {
   periods: CalendarTimetablePeriod[];

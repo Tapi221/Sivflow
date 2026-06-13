@@ -1,4 +1,4 @@
-import { applyPdfViewerZoomPatch } from "@/features/pdf/pdfViewerZoomPatch";
+import { applyPdfViewerZoomPatch } from "./pdfViewerZoomPatch";
 
 type PdfPerformanceDetail = Record<string, unknown>;
 type PdfPerformanceMarkOptions = {

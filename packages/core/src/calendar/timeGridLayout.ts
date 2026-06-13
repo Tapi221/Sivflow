@@ -1,4 +1,4 @@
-import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
+import type { CalendarEvent } from "./calendarEvent.types";
 
 type CalendarTimeGridLayoutMode = "overlap" | "no-overlap";
 type CalendarTimeGridStyle = {

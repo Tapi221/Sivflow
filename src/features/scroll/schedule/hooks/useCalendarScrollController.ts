@@ -5,8 +5,8 @@ import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColum
 import { getScheduleVirtualRailDate } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { persistScheduleCalendarScrollTop, readStoredScheduleCalendarScrollTop } from "@/features/calendar/scheduleNavigationPersistence";
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
-import { useCalendarScrollPositionSync } from "@/features/scroll/schedule/hooks/useCalendarScrollPositionSync";
-import { useSyncedHorizontalScroll } from "@/features/scroll/schedule/hooks/useSyncedHorizontalScroll";
+import { useCalendarScrollPositionSync } from "./useCalendarScrollPositionSync";
+import { useSyncedHorizontalScroll } from "./useSyncedHorizontalScroll";
 
 type CalendarBuffer = {
   before: number;

@@ -1,4 +1,4 @@
-import type { LocalDB } from "@/services/localdb/LocalDB";
+import type { LocalDB } from "./LocalDB";
 
 const defineNoteSchema = (_db: LocalDB): void => {};
 

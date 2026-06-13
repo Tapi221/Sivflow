@@ -1,6 +1,6 @@
 
 
-export { appInfo } from "@/platform/capabilities/appInfo";
-export { externalNavigation } from "@/platform/capabilities/externalNavigation";
-export { oauthBridge } from "@/platform/capabilities/oauthBridge";
-export { windowControls } from "@/platform/capabilities/windowControls";
+export { appInfo } from "./appInfo";
+export { externalNavigation } from "./externalNavigation";
+export { oauthBridge } from "./oauthBridge";
+export { windowControls } from "./windowControls";

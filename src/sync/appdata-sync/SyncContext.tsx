@@ -6,8 +6,8 @@ import type { SyncableEntityTable } from "@/services/localdb/types";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 import type { SyncConflict, SyncEntity, SyncSettings } from "@/types/domain/sync";
 import { DEFAULT_SYNC_SETTINGS } from "@/types/domain/sync";
-import type { SyncContextType, SyncNotice, SyncProviderProps, SyncStatus } from "@/sync/appdata-sync/SyncContextCore";
-import { SyncContext } from "@/sync/appdata-sync/SyncContextCore";
+import type { SyncContextType, SyncNotice, SyncProviderProps, SyncStatus } from "./SyncContextCore";
+import { SyncContext } from "./SyncContextCore";
 
 type ConflictResolvingLocalDb = Awaited<ReturnType<typeof getLocalDb>> & {
   conflicts: {

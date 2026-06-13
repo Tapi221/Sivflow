@@ -1,6 +1,6 @@
 import type { UploadFallbackReason, UploadSource } from "@/types";
 import type { BlobUrl, StorageUrl } from "@/types/core/branded";
-import { generateUploadedImageId } from "@/domain/assets/uploadedImageFactory";
+import { generateUploadedImageId } from "./uploadedImageFactory";
 
 type NormalizeUploadedImageOptions = {
   onInvalid?: "skip" | "throw";

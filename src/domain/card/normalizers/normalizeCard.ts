@@ -11,7 +11,7 @@ import { asRecord, pick } from "@/shared/lib/records";
 import type { UploadedPdf } from "@/types/domain/assets";
 import type { SubjectiveScoreValue } from "@/types/domain/base";
 import type { Card, CardBlock } from "@/types/domain/card";
-import { normalizeReviewLogs } from "@/domain/card/normalizers/reviewLogs";
+import { normalizeReviewLogs } from "./reviewLogs";
 
 type GridBlockType = Parameters<typeof isGridOffsetType>[0];
 

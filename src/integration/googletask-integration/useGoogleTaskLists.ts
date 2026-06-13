@@ -3,7 +3,7 @@ import { refreshConnectedServiceAccessToken, requestConnectedServiceAccessToken 
 import { getServerStoredGoogleConnectedServiceAccessToken, isServerStoredGoogleOAuthEnabled } from "@/integration/google-integration/google.server-oauth";
 import type { GoogleConnectedServiceAccountEntry, GoogleConnectedServiceAccountTokenUpdate } from "@/integration/google-integration/googleAccount.types";
 import type { GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
-import { fetchGoogleTaskLists } from "@/integration/googletask-integration/gtask.api";
+import { fetchGoogleTaskLists } from "./gtask.api";
 
 type GoogleTaskListAccountState = {
   taskLists: GoogleTaskListItem[];

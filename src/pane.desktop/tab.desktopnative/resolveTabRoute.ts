@@ -1,4 +1,4 @@
-import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
+import type { WorkspaceTab } from "./Tab";
 
 const encodeRouteSegment = encodeURIComponent;
 

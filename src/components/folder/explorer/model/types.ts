@@ -1,3 +1,3 @@
-import type { PinnedItem, PinnedItemType } from "@/components/folder/explorer/model/pinnedItem.types";
+import type { PinnedItem, PinnedItemType } from "./pinnedItem.types";
 
 export type { PinnedItem, PinnedItemType };

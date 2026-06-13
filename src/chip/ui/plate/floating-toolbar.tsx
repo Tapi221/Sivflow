@@ -7,7 +7,7 @@ import { useComposedRef } from "@udecode/cn";
 import { KEYS } from "platejs";
 import { useEditorId, useEventEditorValue, usePluginOption } from "platejs/react";
 import { cn } from "@/lib/utils";
-import { Toolbar } from "@/chip/ui/plate/toolbar";
+import { Toolbar } from "./toolbar";
 
 const FloatingToolbar = ({ children, className, state, ...props }: React.ComponentProps<typeof Toolbar> & { state?: FloatingToolbarState; }) => {
   const editorId = useEditorId();

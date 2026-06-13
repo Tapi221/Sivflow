@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "@/Layout";
 import { ScheduleRoute } from "@/routes/Schedule";
-import { getDevRouteElements } from "@web-renderer/app/routing/DevRoutes";
-import { ProtectedRoute } from "@web-renderer/app/routing/ProtectedRoute";
+import { getDevRouteElements } from "./DevRoutes";
+import { ProtectedRoute } from "./ProtectedRoute";
 
 const Materials = lazy(() => import("@/routes/Materials"));
 const Settings = lazy(() => import("@/routes/SettingScreen"));

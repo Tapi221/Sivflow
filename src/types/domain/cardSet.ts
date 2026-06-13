@@ -1,4 +1,4 @@
-import type { BaseEntity } from "@/types/domain/base";
+import type { BaseEntity } from "./base";
 
 type CardDisplayMode = "fixed" | "fluid";
 /**

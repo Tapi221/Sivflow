@@ -1,4 +1,4 @@
-import type { SelectionCaptureArea, SelectionCapturePoint } from "@/features/selection-capture/selectionCapture.types";
+import type { SelectionCaptureArea, SelectionCapturePoint } from "./selectionCapture.types";
 
 const drawFreehandPath = (context: CanvasRenderingContext2D, path: SelectionCapturePoint[]): void => {
   if (path.length === 0) return;

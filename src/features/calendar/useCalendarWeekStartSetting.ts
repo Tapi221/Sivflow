@@ -1,6 +1,6 @@
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
-import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
+import type { CalendarWeekStartDay } from "./calendar.types";
 
 const useCalendarWeekStartSetting = (override?: CalendarWeekStartDay): CalendarWeekStartDay => {
   const { settings } = useUserSettings();

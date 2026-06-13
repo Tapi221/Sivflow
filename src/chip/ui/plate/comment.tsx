@@ -16,7 +16,7 @@ import { BasicMarksKit } from "@/components/editor/plugins/basic-marks-kit";
 import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 import { cn } from "@/lib/utils";
-import { Editor, EditorContainer } from "@/chip/ui/plate/editor";
+import { Editor, EditorContainer } from "./editor";
 
 type TComment = {
   id: string;

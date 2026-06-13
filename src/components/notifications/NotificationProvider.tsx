@@ -3,7 +3,7 @@ import { ErrorDialog } from "@/chip/panel/dialog.desktop/Dialog.Error";
 import { WarningDialog } from "@/chip/panel/dialog.desktop/Dialog.Warning";
 import { notificationService } from "@/services/NotificationService";
 import type { Notification } from "@/types/notification";
-import { InfoToast } from "@/components/notifications/InfoToast";
+import { InfoToast } from "./InfoToast";
 
 /**
  * 通知プロバイダー

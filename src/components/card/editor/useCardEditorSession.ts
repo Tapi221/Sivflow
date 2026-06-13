@@ -2,10 +2,10 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type { SetStateAction } from "react";
 import { useCardEntity } from "@/components/card/hooks/useCardEntity";
 import type { Card, CardPatch } from "@/types/domain/card";
-import type { PersistOperation, PersistResult } from "@/components/card/editor/cardEditorSessionCore";
-import { AUTOSAVE_DELAY_MS, buildCardPatchForToggle, buildDraftFromCard, buildSavePayload, createPanelCard, draftSignature, extractCreatedCardId, hasMeaningfulDraft, NEW_SENTINEL, snapshotDraft, toDateOrNull } from "@/components/card/editor/cardEditorSessionCore";
-import type { EditorDraft } from "@/components/card/editor/cardEditorUtils";
-import { makeNewDraft, normalizeSelectedCardId, shouldAutoOpenEditorForCard } from "@/components/card/editor/cardEditorUtils";
+import type { PersistOperation, PersistResult } from "./cardEditorSessionCore";
+import { AUTOSAVE_DELAY_MS, buildCardPatchForToggle, buildDraftFromCard, buildSavePayload, createPanelCard, draftSignature, extractCreatedCardId, hasMeaningfulDraft, NEW_SENTINEL, snapshotDraft, toDateOrNull } from "./cardEditorSessionCore";
+import type { EditorDraft } from "./cardEditorUtils";
+import { makeNewDraft, normalizeSelectedCardId, shouldAutoOpenEditorForCard } from "./cardEditorUtils";
 
 type CreateCardPayload = CardPatch & {
   folderId: string;

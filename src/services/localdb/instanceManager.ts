@@ -1,9 +1,9 @@
 import { InMemoryLocalDB } from "@/services/InMemoryLocalDB";
 import { clearLocalDBResetFailureReason, markLocalDBGenerationBumped, saveLocalDBResetFailureReason, updateLocalDBRuntimeStatus, warnOncePerSession } from "@/services/localDBRuntimeState";
-import { migrateLegacyLocalDbBrandIfNeeded } from "@/services/localdb/brandMigration";
-import { deleteUserPersistentDatabases, getDatabaseNameForUser } from "@/services/localdb/generation";
-import { LocalDB } from "@/services/localdb/LocalDB";
-import type { LocalDBSyncStore } from "@/services/localdb/types";
+import { migrateLegacyLocalDbBrandIfNeeded } from "./brandMigration";
+import { deleteUserPersistentDatabases, getDatabaseNameForUser } from "./generation";
+import { LocalDB } from "./LocalDB";
+import type { LocalDBSyncStore } from "./types";
 
 type LocalDbGlobal = typeof globalThis & {
   __ALLOW_LOCAL_DB_CONSTRUCTION?: boolean;

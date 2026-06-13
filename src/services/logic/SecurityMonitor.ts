@@ -3,7 +3,7 @@ import { addDoc, collection, doc, onSnapshot, query, serverTimestamp, updateDoc,
 import { firestoreDb, requireFirestoreDb } from "@/infrastructure/firebase/client";
 import type { SecurityState as SyncSecurityState } from "@/services/interfaces/ISyncService";
 import type { SecurityEventType, SecurityLog, SecurityMetadata } from "@/types/domain/telemetry";
-import { getSecurityEventCatalogEntry } from "@/services/logic/securityEventCatalog";
+import { getSecurityEventCatalogEntry } from "./securityEventCatalog";
 
 interface SecurityAlert {
   id: string;

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { isPrimaryShortcut, isTypingTarget } from "@/features/hotkey/hotkeyGuards";
+import { isPrimaryShortcut, isTypingTarget } from "./hotkeyGuards";
 
 type UseTreeViewSidebarHotkeyParams = {
   onToggle: () => void;

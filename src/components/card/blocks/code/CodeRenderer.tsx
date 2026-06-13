@@ -1,4 +1,4 @@
-import { CodeBlockContent } from "@/components/card/blocks/code/CodeBlockContent";
+import { CodeBlockContent } from "./CodeBlockContent";
 
 interface CodeRendererProps {
   code: string;
