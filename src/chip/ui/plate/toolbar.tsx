@@ -31,7 +31,6 @@ const toolbarButtonVariants = cva(
     },
   },
 );
-
 const dropdownArrowVariants = cva(
   "inline-flex items-center justify-center rounded-r-md font-medium text-foreground text-sm transition-colors disabled:pointer-events-none disabled:opacity-50",
   {
@@ -62,26 +61,21 @@ type ToolbarButtonProps = {
   tooltipTriggerProps?: React.ComponentPropsWithoutRef<typeof TooltipTrigger>;
 } & Omit<React.ComponentPropsWithoutRef<typeof ToolbarPrimitive.Button>, "asChild" | "value"> &
   VariantProps<typeof toolbarButtonVariants>;
-
 type ToolbarSplitButtonPrimaryProps = Omit<React.ComponentPropsWithoutRef<typeof ToolbarPrimitive.ToggleItem>, "value"> &
   VariantProps<typeof toolbarButtonVariants>;
 
 const Toolbar = ({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Root>) => {
   return <ToolbarPrimitive.Root className={cn("relative flex select-none items-center", className)} {...props} />;
 };
-
 const ToolbarToggleGroup = ({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.ToolbarToggleGroup>) => {
   return <ToolbarPrimitive.ToolbarToggleGroup className={cn("flex items-center", className)} {...props} />;
 };
-
 const ToolbarLink = ({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Link>) => {
   return <ToolbarPrimitive.Link className={cn("font-medium underline underline-offset-4", className)} {...props} />;
 };
-
 const ToolbarSeparator = ({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Separator>) => {
   return <ToolbarPrimitive.Separator className={cn("mx-2 my-1 w-px shrink-0 bg-border", className)} {...props} />;
 };
-
 const ToolbarSplitButtonSecondary = ({ className, size, variant, ...props }: React.ComponentPropsWithoutRef<"span"> & VariantProps<typeof dropdownArrowVariants>) => {
   return (
     <span
@@ -98,11 +92,9 @@ const ToolbarSplitButtonSecondary = ({ className, size, variant, ...props }: Rea
     </span>
   );
 };
-
 const ToolbarToggleItem = ({ className, size = "sm", variant, ...props }: React.ComponentProps<typeof ToolbarPrimitive.ToggleItem> & VariantProps<typeof toolbarButtonVariants>) => {
   return <ToolbarPrimitive.ToggleItem className={cn(toolbarButtonVariants({ size, variant }), className)} {...props} />;
 };
-
 const ToolbarSplitButtonPrimary = ({ children, className, size = "sm", variant, ...props }: ToolbarSplitButtonPrimaryProps) => {
   return (
     <span
@@ -118,7 +110,6 @@ const ToolbarSplitButtonPrimary = ({ children, className, size = "sm", variant, 
     </span>
   );
 };
-
 const ToolbarGroup = ({ children, className }: React.ComponentProps<"div">) => {
   return (
     <div className={cn("group/toolbar-group relative hidden has-[button]:flex", className)}>
@@ -129,7 +120,6 @@ const ToolbarGroup = ({ children, className }: React.ComponentProps<"div">) => {
     </div>
   );
 };
-
 const ToolbarMenuGroup = ({ children, className, label, ...props }: React.ComponentProps<typeof DropdownMenuRadioGroup> & { label?: string }) => {
   return (
     <>
@@ -141,7 +131,6 @@ const ToolbarMenuGroup = ({ children, className, label, ...props }: React.Compon
     </>
   );
 };
-
 const ToolbarButton = ({
   children,
   className,
@@ -197,22 +186,9 @@ const ToolbarButton = ({
 
   return button;
 };
-
 const ToolbarSplitButton = ({ className, ...props }: React.ComponentPropsWithoutRef<typeof ToolbarButton>) => {
   return <ToolbarButton className={cn("group flex gap-0 px-0 hover:bg-transparent", className)} {...props} />;
 };
 
-export {
-  Toolbar,
-  ToolbarToggleGroup,
-  ToolbarLink,
-  ToolbarSeparator,
-  ToolbarButton,
-  ToolbarSplitButton,
-  ToolbarSplitButtonPrimary,
-  ToolbarSplitButtonSecondary,
-  ToolbarToggleItem,
-  ToolbarGroup,
-  ToolbarMenuGroup,
-};
+export { Toolbar, ToolbarToggleGroup, ToolbarLink, ToolbarSeparator, ToolbarButton, ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary, ToolbarToggleItem, ToolbarGroup, ToolbarMenuGroup };
 export type { ToolbarButtonProps };

@@ -55,6 +55,7 @@ const getHeadingList = (editor?: SlateEditor) => {
   });
   return headingList;
 };
+
 const TocElementStatic = (props: SlateElementProps) => {
   const { editor } = props;
   const headingList = getHeadingList(editor);

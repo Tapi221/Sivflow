@@ -29,6 +29,7 @@ const getInlineSuggestionData = (editor: any, element: TElement) => {
     }
   }
 };
+
 const BaseSuggestionKit = [
   BaseSuggestionPlugin.configure({
     inject: {
