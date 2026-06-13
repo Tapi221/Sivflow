@@ -11,6 +11,7 @@ const DEFAULT_TARGET_FILE_PATHS = [
   "src/features/library-cardset/model/cardSetLibraryRow.ts",
   "src/features/library-pdf/components/PdfLibraryDashboard.tsx",
   "src/features/library-pdf/model/pdfLibraryRow.ts",
+  "src/services/NotificationService.ts",
 ].map((filePath) => path.join(ROOT_DIR, filePath));
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 const SIMPLE_MEMBER_EXPRESSION_PATTERN = String.raw`[A-Za-z_$][\w$]*(?:\?\.[A-Za-z_$][\w$]*|\.[A-Za-z_$][\w$]*|\[[^\]\n]+\])*`;
@@ -22,6 +23,9 @@ const CALENDAR_TIMETABLE_ICON_DECLARATIONS = "const StratisCheckIcon = resolveSt
 const SCHEDULE_SCREEN_ICON_DECLARATIONS = "const StratisCheckIcon = resolveStratisIcon(STRATIS_CHECK_ICON_NAMES);\nconst StratisPlusIcon = resolveStratisIcon(STRATIS_PLUS_ICON_NAMES);\n";
 const PDF_PANE_ICON_DECLARATIONS = "const StratisBookmarkIcon = resolveStratisIcon(STRATIS_BOOKMARK_ICON_NAMES);\n";
 const PDF_DOCUMENT_SOURCE_RESOLUTION_REPLACEMENT = "const waitForPdfSourceResolution: PdfSourceResolutionWaiter = async (promise) => {";
+const CONST_CLASS_DECLARATION_REPLACEMENTS = [
+  { from: "const NotificationService = class {", to: "class NotificationService {" },
+];
 
 const normalizeLineEndings = (source) => source.split("\r\n").join("\n").split("\r").join("\n");
 
@@ -78,6 +82,10 @@ const applyNoConstantBinaryExpressionFixes = (source) => {
   nextSource = nextSource.replace(JOIN_NULLISH_FALLBACK_PATTERN, (_match, arrayExpression, separatorExpression, fallbackExpression) => `${arrayExpression}.length > 0 ? ${arrayExpression}.join(${separatorExpression}) : ${fallbackExpression}`);
 
   return nextSource;
+};
+
+const applyConstClassDeclarationFixes = (source) => {
+  return CONST_CLASS_DECLARATION_REPLACEMENTS.reduce((nextSource, { from, to }) => replaceAll(nextSource, from, to), source);
 };
 
 const applyPdfDocumentPaneFixes = (source) => {
@@ -137,6 +145,7 @@ const applyKnownLintFixes = (filePath, source) => {
   const relativePath = path.relative(ROOT_DIR, filePath).split(path.sep).join("/");
   let nextSource = normalizeLineEndings(source);
   nextSource = applyNoConstantBinaryExpressionFixes(nextSource);
+  nextSource = applyConstClassDeclarationFixes(nextSource);
 
   if (relativePath === "src/features/calendar/timetable/CalendarTimetableView.tsx") return applyCalendarTimetableFixes(nextSource);
   if (relativePath === "src/features/pdf/PdfDocumentPane.tsx") return applyPdfDocumentPaneFixes(nextSource);
