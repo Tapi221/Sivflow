@@ -204,6 +204,7 @@ const useTableResizeController = ({ dragIndicatorRef, effectiveColSizes, hoverIn
   }, [hideIndicator, hoverIndicatorRef]);
   return React.useMemo(() => ({ clearResizePreview, setResizePreview, startResize }), [clearResizePreview, setResizePreview, startResize]);
 };
+
 const TableActionButton = ({ children, disabled, onAction, tooltip }: TableActionButtonProps) => {
   const editor = useEditorRef();
   return (
