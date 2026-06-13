@@ -1,3 +1,1 @@
-void "db-runtime-state";
-
-export { warnOncePerSession } from "@/services/localdbRuntimeState";
+export { warnOncePerSession } from "@/services/localDBRuntimeState";
