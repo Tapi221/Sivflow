@@ -139,7 +139,7 @@ const useRealChat = () => {
     ...options,
   });
   React.useEffect(() => {
-    editor.setOption(AIChatPlugin, "chat", chat as any);
+    editor.setOption(AIChatPlugin, "chat", chat as Chat);
   }, [chat.status, chat.messages, chat.error]);
   return chat;
 };
