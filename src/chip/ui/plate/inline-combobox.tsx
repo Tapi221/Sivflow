@@ -51,10 +51,12 @@ const comboboxItemVariants = cva(
   },
 );
 const InlineComboboxRow = ComboboxRow;
+
 const defaultFilter: FilterFn = ({ group, keywords = [], label, value }, search) => {
   const uniqueTerms = new Set([value, ...keywords, group, label].filter(Boolean));
   return Array.from(uniqueTerms).some((keyword) => filterWords(keyword!, search));
 };
+
 const InlineCombobox = ({ children, element, filter = defaultFilter, hideWhenNoValue = false, setValue: setValueProp, showTrigger = true, trigger, value: valueProp }: InlineComboboxProps) => {
   const editor = useEditorRef();
   const inputRef = React.useRef<HTMLInputElement>(null);

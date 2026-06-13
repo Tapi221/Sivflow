@@ -104,12 +104,12 @@ const initializeFirebaseClient = (isAvailable: boolean, missingEnvVars: string[]
 const missingFirebaseEnvVars = getMissingFirebaseEnvVars();
 const isFirebaseClientAvailable = missingFirebaseEnvVars.length === 0;
 const firebaseClientState = initializeFirebaseClient(isFirebaseClientAvailable, missingFirebaseEnvVars);
-const firebaseApp = firebaseClientState.app;
-const auth = firebaseClientState.auth as Auth;
-const storage = firebaseClientState.storage as FirebaseStorage;
-const functionsClient = firebaseClientState.functionsClient as Functions;
 const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
 const db: Firestore | null = firebaseClientState.firestoreDb;
+const functionsClient = firebaseClientState.functionsClient as Functions;
+const storage = firebaseClientState.storage as FirebaseStorage;
+const auth = firebaseClientState.auth as Auth;
+const firebaseApp = firebaseClientState.app;
 
 const requireFirebaseClient = (): FirebaseClientState => {
   if (isFirebaseClientAvailable && firebaseClientState.app) {

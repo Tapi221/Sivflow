@@ -127,6 +127,7 @@ const calcDragButtonTop = (editor: PlateEditor, element: TElement): number => {
   const currentMarginTop = Number(currentMarginTopString.replace("px", ""));
   return currentMarginTop;
 };
+
 const Gutter = ({ children, className, ...props }: React.ComponentProps<"div">) => {
   const editor = useEditorRef();
   const element = useElement();
@@ -291,6 +292,7 @@ const Draggable = (props: PlateElementProps) => {
     </div>
   );
 };
+
 const DragHandle = React.memo(({
   isDragging,
   previewRef,

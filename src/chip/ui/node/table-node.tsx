@@ -286,7 +286,7 @@ const TableCellElement = ({ isHeader = false, ...props }: TableCellElementProps)
       </div>
       {metrics.tablePath && metrics.colIndex === 0 && !disableMarginLeft && <TableResizeHandle colIndex={metrics.colIndex} direction="left" editor={editor} marginLeft={metrics.marginLeft} minColumnWidth={minColumnWidth} nextWidth={metrics.nextWidth} rowIndex={metrics.rowIndex} tablePath={metrics.tablePath} width={metrics.width} />}
       {metrics.tablePath && <TableResizeHandle colIndex={metrics.colIndex} direction="right" editor={editor} marginLeft={metrics.marginLeft} minColumnWidth={minColumnWidth} nextWidth={metrics.nextWidth} rowIndex={metrics.rowIndex} tablePath={metrics.tablePath} width={metrics.width} />}
-      {metrics.tablePath && <TableResizeHandle colIndex={metrics.colIndex} direction="bottom" editor={editor} marginLeft={metrics.marginLeft} minColumnWidth={minColumnWidth} nextWidth={metrics.nextWidth} rowIndex={metrics.rowIndex} tablePath={metrics.tablePath} width={metrics.minHeight || 24} />}
+      {metrics.tablePath && <TableResizeHandle colIndex={metrics.colIndex} direction="bottom" editor={editor} marginLeft={metrics.marginLeft} minColumnWidth={minColumnWidth} nextWidth={metrics.nextWidth} rowIndex={metrics.rowIndex} tablePath={metrics.tablePath} width={metrics.minHeight ?? 24} />}
     </PlateElement>
   );
 };

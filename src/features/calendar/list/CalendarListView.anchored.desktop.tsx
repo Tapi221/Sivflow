@@ -1,7 +1,7 @@
 import { memo, useCallback, useLayoutEffect, useRef } from "react";
 import type { MutableRefObject } from "react";
-import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
+import { CalendarListView } from "@/features/calendar/list/CalendarListView.desktop";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 type CalendarListViewAnchoredProps = {
@@ -89,4 +89,5 @@ const CalendarListViewAnchoredComponent = ({ scrollViewportRef: externalRef, onS
 
 const CalendarListViewAnchored = memo(CalendarListViewAnchoredComponent);
 CalendarListViewAnchored.displayName = "CalendarListViewAnchored";
+
 export { CalendarListViewAnchored };

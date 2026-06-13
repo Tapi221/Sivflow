@@ -1,10 +1,10 @@
 "use client";
 
-import type { ComponentProps } from "react";
 import { PreviewImage, useImagePreview, useImagePreviewValue, useScaleInput } from "@platejs/media/react";
 import { cva } from "class-variance-authority";
 import { ArrowLeft, ArrowRight, Minus, Plus, X } from "lucide-react";
 import { useEditorRef } from "platejs/react";
+import type { ComponentProps } from "react";
 import { cn } from "@/lib/utils";
 
 const SCROLL_SPEED = 4;

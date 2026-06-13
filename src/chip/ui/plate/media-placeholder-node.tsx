@@ -18,6 +18,25 @@ type ImageProgressProps = {
   progress?: number;
 };
 
+const formatBytes = (
+  bytes: number,
+  opts: {
+    decimals?: number;
+    sizeType?: "accurate" | "normal";
+  } = {},
+) => {
+  const { decimals = 0, sizeType = "normal" } = opts;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const accurateSizes = ["Bytes", "KiB", "MiB", "GiB", "TiB"];
+  if (bytes === 0) return "0 Byte";
+  const index = Math.floor(Math.log(bytes) / Math.log(1024));
+  return `${(bytes / 1024 ** index).toFixed(decimals)} ${
+    sizeType === "accurate"
+      ? (accurateSizes[index] ?? "Bytest")
+      : (sizes[index] ?? "Bytes")
+  }`;
+};
+
 const CONTENT: Record<
   string,
   {
@@ -46,25 +65,6 @@ const CONTENT: Record<
     content: "Add a video",
     icon: <Film />,
   },
-};
-
-const formatBytes = (
-  bytes: number,
-  opts: {
-    decimals?: number;
-    sizeType?: "accurate" | "normal";
-  } = {},
-) => {
-  const { decimals = 0, sizeType = "normal" } = opts;
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-  const accurateSizes = ["Bytes", "KiB", "MiB", "GiB", "TiB"];
-  if (bytes === 0) return "0 Byte";
-  const index = Math.floor(Math.log(bytes) / Math.log(1024));
-  return `${(bytes / 1024 ** index).toFixed(decimals)} ${
-    sizeType === "accurate"
-      ? (accurateSizes[index] ?? "Bytest")
-      : (sizes[index] ?? "Bytes")
-  }`;
 };
 const ImageProgress = ({ className, file, imageRef, progress = 0 }: ImageProgressProps) => {
   const [objectUrl, setObjectUrl] = React.useState<string | null>(null);
@@ -164,11 +164,11 @@ const PlaceholderElement = withHOC(PlaceholderProvider, (props: PlateElementProp
             {currentContent.icon}
           </div>
           <div className="whitespace-nowrap text-muted-foreground text-sm">
-            <div>{loading ? uploadingFile?.name : currentContent.content}</div>
+            <>{loading ? uploadingFile?.name : currentContent.content}</>
             {loading && !isImage && (
               <div className="mt-1 flex items-center gap-1.5">
-                <div>{formatBytes(uploadingFile?.size ?? 0)}</div>
-                <div>–</div>
+                <>{formatBytes(uploadingFile?.size ?? 0)}</>
+                <>–</>
                 <div className="flex items-center">
                   <Loader2Icon className="mr-1 size-3.5 animate-spin text-muted-foreground" />
                   {progress ?? 0}%
