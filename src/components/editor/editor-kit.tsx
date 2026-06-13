@@ -12,9 +12,9 @@ import { BlockMenuKit } from "@/components/editor/plugins/block-menu-kit";
 import { BlockPlaceholderKit } from "@/components/editor/plugins/block-placeholder-kit";
 import { CalloutKit } from "@/components/editor/plugins/callout-kit";
 import { CodeBlockKit } from "@/components/editor/plugins/code-block-kit";
-import { CodeDrawingKit } from "@/components/editor/plugins/code-drawing-kit";
 import { ColumnKit } from "@/components/editor/plugins/column-kit";
 import { CommentKit } from "@/components/editor/plugins/comment-kit";
+import { CopilotKit } from "@/components/editor/plugins/copilot-kit";
 import { CursorOverlayKit } from "@/components/editor/plugins/cursor-overlay-kit";
 import { DateKit } from "@/components/editor/plugins/date-kit";
 import { DiscussionKit } from "@/components/editor/plugins/discussion-kit";
@@ -25,7 +25,6 @@ import { ExitBreakKit } from "@/components/editor/plugins/exit-break-kit";
 import { FixedToolbarKit } from "@/components/editor/plugins/fixed-toolbar-kit";
 import { FloatingToolbarKit } from "@/components/editor/plugins/floating-toolbar-kit";
 import { FontKit } from "@/components/editor/plugins/font-kit";
-import { FootnoteKit } from "@/components/editor/plugins/footnote-kit";
 import { LineHeightKit } from "@/components/editor/plugins/line-height-kit";
 import { LinkKit } from "@/components/editor/plugins/link-kit";
 import { ListKit } from "@/components/editor/plugins/list-kit";
@@ -40,11 +39,10 @@ import { TocKit } from "@/components/editor/plugins/toc-kit";
 import { ToggleKit } from "@/components/editor/plugins/toggle-kit";
 
 const EditorKit = [
+  ...CopilotKit,
   ...AIKit,
-  ...BlockMenuKit,
   ...BasicBlocksKit,
   ...CodeBlockKit,
-  ...CodeDrawingKit,
   ...TableKit,
   ...ToggleKit,
   ...TocKit,
@@ -66,13 +64,13 @@ const EditorKit = [
   ...SlashKit,
   ...AutoformatKit,
   ...CursorOverlayKit,
+  ...BlockMenuKit,
   ...DndKit,
   ...EmojiKit,
   ...ExitBreakKit,
   TrailingBlockPlugin,
   ...DocxKit,
   ...MarkdownKit,
-  ...FootnoteKit,
   ...BlockPlaceholderKit,
   ...FixedToolbarKit,
   ...FloatingToolbarKit,
