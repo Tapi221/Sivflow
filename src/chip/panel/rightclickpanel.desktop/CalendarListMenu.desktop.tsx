@@ -3,8 +3,6 @@ import { RightClickPanel } from "@/chip/panel/rightclickpanel";
 import type { RightClickPanelId } from "@/chip/panel/rightClickPanel.utils";
 import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE } from "@/chip/panel/rightClickPanel.utils";
 
-
-
 type CalendarListMenuAction = {
   id: "add-project" | "change-color";
   label: string;
@@ -20,15 +18,11 @@ type CalendarListMenuProps = {
   panelId?: RightClickPanelId;
 };
 
-
-
 const CALENDAR_LIST_MENU_PANEL_ID = "calendar-list-context-menu";
 const CALENDAR_LIST_MENU_LABELS = ["プロジェクトに追加", "色を変更"];
 const CALENDAR_LIST_MENU_WIDTH = resolveRightClickPanelTextWidth(CALENDAR_LIST_MENU_LABELS);
 const CALENDAR_LIST_MENU_HEIGHT = CALENDAR_LIST_MENU_LABELS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
 const CALENDAR_LIST_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
-
-
 
 const CalendarListMenu = ({ x, y, actions, menuRef, noDragStyle, panelId = CALENDAR_LIST_MENU_PANEL_ID }: CalendarListMenuProps) => {
   return (
@@ -50,9 +44,5 @@ const CalendarListMenu = ({ x, y, actions, menuRef, noDragStyle, panelId = CALEN
   );
 };
 
-
-
 export { CALENDAR_LIST_MENU_PANEL_ID, CALENDAR_LIST_MENU_WIDTH, CALENDAR_LIST_MENU_HEIGHT, CALENDAR_LIST_MENU_MARGIN, CalendarListMenu };
-
-
 export type { CalendarListMenuAction };
