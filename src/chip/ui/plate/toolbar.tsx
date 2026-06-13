@@ -65,6 +65,7 @@ const dropdownArrowVariants = cva(
     },
   },
 );
+
 const withTooltip = <T extends React.ElementType,>(Component: T) => {
   const ExtendComponent = ({
     tooltip,
@@ -92,7 +93,6 @@ const withTooltip = <T extends React.ElementType,>(Component: T) => {
   };
   return ExtendComponent;
 };
-
 const Toolbar = ({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Root>) => {
   return <ToolbarPrimitive.Root className={cn("relative flex select-none items-center", className)} {...props} />;
 };
@@ -113,7 +113,7 @@ const TooltipContent = ({ children, className, sideOffset = 4, ...props }: React
     <TooltipPrimitive.Portal>
       <TooltipPrimitive.Content
         className={cn(
-          "z-50 w-fit origin-(--radix-tooltip-content-transform-origin) text-balance rounded-md bg-foreground px-3 py-1.5 text-background text-xs",
+          "z-50 w-fit origin-(--radix-tooltip-content-transform-origin) text-balance rounded-md bg-primary px-3 py-1.5 text-primary-foreground text-xs",
           className,
         )}
         data-slot="tooltip-content"
@@ -150,7 +150,9 @@ const ToolbarButton = withTooltip(({
             <div className="flex flex-1 items-center gap-2 whitespace-nowrap">
               {children}
             </div>
-            <ChevronDown className="size-3.5 text-muted-foreground" data-icon />
+            <div>
+              <ChevronDown className="size-3.5 text-muted-foreground" data-icon />
+            </div>
           </>
         ) : (
           children
