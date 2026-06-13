@@ -14,11 +14,16 @@ import type { ResolvedSuggestion } from "@/lib/block-discussion-index";
 import { BLOCK_SUGGESTION_TOKEN } from "@/lib/block-discussion-index";
 
 const isResolvedSuggestion = (suggestion: ResolvedSuggestion | TDiscussion): suggestion is ResolvedSuggestion => "suggestionId" in suggestion;
+
 const BlockSuggestionCard = ({ idx, isLast, suggestion }: { idx: number; isLast: boolean; suggestion: ResolvedSuggestion; }) => {
   const { api, editor } = useEditorPlugin(SuggestionPlugin);
   const userInfo = usePluginOption(discussionPlugin, "user", suggestion.userId);
-  const accept = (currentSuggestion: ResolvedSuggestion) => { api.suggestion.withoutSuggestions(() => { acceptSuggestion(editor, currentSuggestion); }); };
-  const reject = (currentSuggestion: ResolvedSuggestion) => { api.suggestion.withoutSuggestions(() => { rejectSuggestion(editor, currentSuggestion); }); };
+  const accept = (currentSuggestion: ResolvedSuggestion) => {
+    api.suggestion.withoutSuggestions(() => {
+      acceptSuggestion(editor, currentSuggestion); }); };
+  const reject = (currentSuggestion: ResolvedSuggestion) => {
+    api.suggestion.withoutSuggestions(() => {
+      rejectSuggestion(editor, currentSuggestion); }); };
   const [hovering, setHovering] = React.useState(false);
   const suggestionText2Array = (text: string) => text === BLOCK_SUGGESTION_TOKEN ? ["line breaks"] : text.split(BLOCK_SUGGESTION_TOKEN).filter(Boolean);
   const getRemoveSummaryItems = (text: string) => {
