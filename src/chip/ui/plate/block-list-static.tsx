@@ -13,10 +13,10 @@ type ListConfig = Record<
   }
 >;
 
-const TODO_CHECKBOX_CLASSNAME = "peer -left-6 pointer-events-none absolute top-1 size-4 shrink-0 rounded-sm border border-input bg-background text-background shadow-none ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[state=checked]:border-foreground data-[state=checked]:bg-foreground data-[state=checked]:text-background";
+const TODO_CHECKBOX_CLASSNAME = "peer pointer-events-none absolute top-1 -left-6 size-4 shrink-0 rounded-sm border border-primary bg-background ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground";
 
 const TodoMarkerStatic = (props: SlateRenderElementProps) => {
-  const checked = props.element.checked === true;
+  const checked = props.element.checked as boolean;
   return (
     <div contentEditable={false}>
       <button
@@ -36,7 +36,7 @@ const TodoLiStatic = (props: SlateRenderElementProps) => {
     <li
       className={cn(
         "list-none",
-        props.element.checked === true && "text-muted-foreground line-through",
+        (props.element.checked as boolean) && "text-muted-foreground line-through",
       )}
     >
       {props.children}
@@ -59,8 +59,8 @@ const List = (props: SlateRenderElementProps) => {
   return (
     <ListTag
       className="relative m-0 p-0"
-      style={{ listStyleType, marginLeft }}
       start={listStart}
+      style={{ listStyleType, marginLeft }}
     >
       {Marker ? <Marker {...props} /> : null}
       {Li ? <Li {...props} /> : <li>{props.children}</li>}
@@ -68,11 +68,8 @@ const List = (props: SlateRenderElementProps) => {
   );
 };
 const BlockListStatic: RenderStaticNodeWrapper = (props) => {
-  const listStyleType = props.element.listStyleType;
-  if (listStyleType === undefined || listStyleType === null) return;
-  const hasListConfig = LIST_CONFIG[listStyleType] !== undefined;
-  const shouldRenderList = isOrderedList(props.element) || hasListConfig;
-  if (shouldRenderList !== true) return;
+  if (!props.element.listStyleType) return;
+  if (!isOrderedList(props.element)) return;
   return (nextProps) => <List {...nextProps} />;
 };
 
