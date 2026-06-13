@@ -16,11 +16,10 @@ const PlateEditor = ({ initialValue, onChange }: PlateEditorProps) => {
     plugins: EditorKit,
     value: initialValue,
   });
-
   return (
     <Plate editor={editor} onChange={onChange}>
       <EditorContainer>
-        <Editor placeholder="本文を入力" spellCheck />
+        <Editor placeholder="本文を入力" spellCheck variant="demo" />
       </EditorContainer>
       <SettingsDialog />
     </Plate>
