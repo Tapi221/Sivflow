@@ -23,14 +23,35 @@ const ImportToolbarButton = (props: DropdownMenuProps) => {
     if (type === "markdown") return editor.getApi(MarkdownPlugin).markdown.deserialize(text);
     return [];
   };
-  const { openFilePicker: openMdFilePicker } = useFilePicker({ accept: [".md", ".mdx"], multiple: false, onFilesSelected: async ({ plainFiles }) => {
-    const text = await plainFiles[0].text(); editor.tf.insertNodes(getFileNodes(text, "markdown")); } });
-  const { openFilePicker: openHtmlFilePicker } = useFilePicker({ accept: ["text/html"], multiple: false, onFilesSelected: async ({ plainFiles }) => {
-    const text = await plainFiles[0].text(); editor.tf.insertNodes(getFileNodes(text, "html")); } });
+  const { openFilePicker: openMdFilePicker } = useFilePicker({
+    accept: [".md", ".mdx"],
+    multiple: false,
+    onFilesSelected: async ({ plainFiles }) => {
+      const text = await plainFiles[0].text();
+      editor.tf.insertNodes(getFileNodes(text, "markdown"));
+    },
+  });
+  const { openFilePicker: openHtmlFilePicker } = useFilePicker({
+    accept: ["text/html"],
+    multiple: false,
+    onFilesSelected: async ({ plainFiles }) => {
+      const text = await plainFiles[0].text();
+      editor.tf.insertNodes(getFileNodes(text, "html"));
+    },
+  });
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
-      <DropdownMenuTrigger asChild><ToolbarButton pressed={open} tooltip="Import" isDropdown><ArrowUpToLineIcon className="size-4" /></ToolbarButton></DropdownMenuTrigger>
-      <DropdownMenuContent align="start"><DropdownMenuGroup><DropdownMenuItem onSelect={() => openHtmlFilePicker()}>Import from HTML</DropdownMenuItem><DropdownMenuItem onSelect={() => openMdFilePicker()}>Import from Markdown</DropdownMenuItem></DropdownMenuGroup></DropdownMenuContent>
+      <DropdownMenuTrigger asChild>
+        <ToolbarButton pressed={open} tooltip="Import" isDropdown>
+          <ArrowUpToLineIcon className="size-4" />
+        </ToolbarButton>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        <DropdownMenuGroup>
+          <DropdownMenuItem onSelect={() => openHtmlFilePicker()}>Import from HTML</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => openMdFilePicker()}>Import from Markdown</DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
     </DropdownMenu>
   );
 };
