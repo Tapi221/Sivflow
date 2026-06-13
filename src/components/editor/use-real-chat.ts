@@ -14,7 +14,6 @@ import type { TNode } from "platejs";
 import { KEYS, nanoid, NodeApi, TextApi } from "platejs";
 import type { PlateEditor } from "platejs/react";
 import { useEditorRef, usePluginOption } from "platejs/react";
-import { aiChatPlugin } from "@/components/editor/plugins/ai-kit";
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 
 type ToolName = "comment" | "edit" | "generate";
@@ -113,7 +112,7 @@ const applyCommentUpdate = (editor: PlateEditor, commentData: TComment) => {
 };
 const useRealChat = () => {
   const editor = useEditorRef();
-  const options = usePluginOption(aiChatPlugin, "chatOptions");
+  const options = usePluginOption(AIChatPlugin, "chatOptions");
   const body = React.useMemo(() => options.body ?? {}, [options.body]);
   const transport = React.useMemo(
     () =>
