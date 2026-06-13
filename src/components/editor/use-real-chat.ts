@@ -40,6 +40,14 @@ type MessageDataPart = {
 type ChatMessage = UIMessage<object, MessageDataPart>;
 type Chat = UseChatHelpers<ChatMessage>;
 
+type ChatOptions = {
+  api?: string;
+  body?: Record<string, unknown>;
+};
+
+const DEFAULT_CHAT_API = "/api/ai/command";
+const EMPTY_BODY: Record<string, unknown> = {};
+
 const createChatTransport = ({
   api,
   body,
@@ -112,15 +120,16 @@ const applyCommentUpdate = (editor: PlateEditor, commentData: TComment) => {
 };
 const useRealChat = () => {
   const editor = useEditorRef();
-  const options = usePluginOption(AIChatPlugin, "chatOptions");
-  const body = React.useMemo(() => options.body ?? {}, [options.body]);
+  const options = (usePluginOption(AIChatPlugin, "chatOptions") ?? {}) as ChatOptions;
+  const api = options.api ?? DEFAULT_CHAT_API;
+  const body = React.useMemo(() => options.body ?? EMPTY_BODY, [options.body]);
   const transport = React.useMemo(
     () =>
       createChatTransport({
-        api: options.api ?? "/api/ai/command",
+        api,
         body,
       }),
-    [body, options.api],
+    [api, body],
   );
   const chat = useBaseChat<ChatMessage>({
     id: "editor",
@@ -140,7 +149,7 @@ const useRealChat = () => {
   });
   React.useEffect(() => {
     editor.setOption(AIChatPlugin, "chat", chat as Chat);
-  }, [chat.status, chat.messages, chat.error]);
+  }, [editor, chat.status, chat.messages, chat.error]);
   return chat;
 };
 
