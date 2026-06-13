@@ -21,9 +21,9 @@ import { MarkToolbarButton } from "@/chip/ui/plate/mark-toolbar-button";
 import { MediaToolbarButton } from "@/chip/ui/plate/media-toolbar-button";
 import { ModeToolbarButton } from "@/chip/ui/plate/mode-toolbar-button";
 import { MoreToolbarButton } from "@/chip/ui/plate/more-toolbar-button";
+import { TableToolbarButton } from "@/chip/ui/plate/table-toolbar-button";
 import { ToggleToolbarButton } from "@/chip/ui/plate/toggle-toolbar-button";
 import { ToolbarGroup } from "@/chip/ui/plate/toolbar";
-import { TableToolbarButton } from "@/chip/ui/plate/table-toolbar-button";
 import { TurnIntoToolbarButton } from "@/chip/ui/plate/turn-into-toolbar-button";
 
 const FixedToolbarButtons = () => {
