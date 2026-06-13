@@ -1,12 +1,12 @@
 import "@/styles/backpane.css";
-import "@/layout/AppLayout.css";
+import "./AppLayout.css";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { SettingsWorkspaceDialog } from "@/features/settings/SettingsWorkspaceDialog";
 import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
-import { WorkspaceLayoutRevisionProvider } from "@/layout/WorkspaceLayoutRevisionContext";
-import { WorkspaceShell } from "@/layout/WorkspaceShell";
+import { WorkspaceLayoutRevisionProvider } from "./WorkspaceLayoutRevisionContext";
+import { WorkspaceShell } from "./WorkspaceShell";
 
 type AppLayoutOutletContext = {
   isLeftPanelCollapsed: boolean;

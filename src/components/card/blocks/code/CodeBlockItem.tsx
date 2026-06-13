@@ -3,7 +3,7 @@ import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { cn } from "@/lib/utils";
 import type { CodeBlockData } from "@/types/core/code-block";
 import { Code } from "@/ui/icons";
-import { CodeBlockEditor } from "@/components/card/blocks/code/CodeBlockEditor";
+import { CodeBlockEditor } from "./CodeBlockEditor";
 
 interface CodeBlockItemProps {
   data: CodeBlockData;

@@ -6,7 +6,7 @@ import { KeyboardIcon, MoreHorizontalIcon, SubscriptIcon, SuperscriptIcon } from
 import { KEYS } from "platejs";
 import { useEditorRef } from "platejs/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-import { ToolbarButton } from "@/chip/ui/plate/toolbar";
+import { ToolbarButton } from "./toolbar";
 
 const MoreToolbarButton = (props: DropdownMenuProps) => {
   const editor = useEditorRef();

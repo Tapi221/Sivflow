@@ -11,7 +11,7 @@ import { CARD_ROW_PX } from "@/domain/card/cardGeometry.constants";
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { createEditorBlock, isEditorInsertableBlockType } from "@/components/card/blocks/editor/blockEditorInsertPolicy";
+import { createEditorBlock, isEditorInsertableBlockType } from "./blockEditorInsertPolicy";
 
 type CssVars = React.CSSProperties & Record<`--${string}`, string>;
 interface BlockEditorProps {

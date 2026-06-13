@@ -1,5 +1,5 @@
-import type { CardBlockLayoutReplaceBlock, EditorProps, ViewerProps } from "@/components/card/blocks/shared/CardBlockSceneRenderer";
-import { CardBlockSceneRenderer } from "@/components/card/blocks/shared/CardBlockSceneRenderer";
+import type { CardBlockLayoutReplaceBlock, EditorProps, ViewerProps } from "./CardBlockSceneRenderer";
+import { CardBlockSceneRenderer } from "./CardBlockSceneRenderer";
 
 const CardBlockLayoutRenderer = CardBlockSceneRenderer;
 

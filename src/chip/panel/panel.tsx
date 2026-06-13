@@ -1,4 +1,4 @@
-import "@/chip/panel/panel.css";
+import "./panel.css";
 import { memo } from "react";
 import type { AriaRole, CSSProperties, MouseEventHandler, ReactNode, RefObject } from "react";
 

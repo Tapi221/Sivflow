@@ -1,7 +1,7 @@
 import { Pencil, Tag, Trash2 } from "@/ui/icons";
-import { AddDocumentIcon, BulkImportIcon, CreateCardIcon, CreateCardSetIcon, CreateFolderIcon, FolderContextCardSetIcon, FolderContextFolderIcon, FolderContextRenameIcon, FolderContextTrashIcon } from "@/components/folder/components/menus/explorerMenuActionIcons";
-import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
-import type { MenuAction } from "@/components/folder/components/menus/menuActions";
+import { AddDocumentIcon, BulkImportIcon, CreateCardIcon, CreateCardSetIcon, CreateFolderIcon, FolderContextCardSetIcon, FolderContextFolderIcon, FolderContextRenameIcon, FolderContextTrashIcon } from "./explorerMenuActionIcons";
+import { beginInlineRename } from "./explorerMenuStateHelpers";
+import type { MenuAction } from "./menuActions";
 
 interface BuildFolderMenuActionsParams {
   onCreateSubfolder?: () => void;

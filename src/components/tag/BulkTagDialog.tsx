@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/chip/ui/dialog/dialog";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
 import { Tag as TagIcon } from "@/ui/icons";
-import { TagBadge } from "@/components/tag/TagBadge";
+import { TagBadge } from "./TagBadge";
 
 interface BulkTagDialogProps {
   open?: boolean;

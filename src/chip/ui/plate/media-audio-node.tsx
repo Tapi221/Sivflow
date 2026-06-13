@@ -7,7 +7,7 @@ import type { TAudioElement } from "platejs";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement, withHOC } from "platejs/react";
 import { cn } from "@/lib/utils";
-import { Caption, CaptionTextarea } from "@/chip/ui/plate/caption";
+import { Caption, CaptionTextarea } from "./caption";
 
 const AudioElement = withHOC(ResizableProvider, (props: PlateElementProps<TAudioElement>) => {
   const { align = "center", readOnly, unsafeUrl } = useMediaState();

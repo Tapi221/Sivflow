@@ -1,4 +1,4 @@
-import { getLocalAiSettings } from "@platform/ai/localAiSettings";
+import { getLocalAiSettings } from "./localAiSettings";
 
 type GenerateOllamaAnswerInput = {
   question: string;

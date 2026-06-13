@@ -6,7 +6,7 @@ import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { getLocalDb } from "@/services/localdb";
 import { auditAndRepairTags } from "@/services/localdb/audit/tags";
 import type { TagRecord } from "@/services/localdb/types";
-import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
+import { useUserSettings } from "./useUserSettings";
 
 type TagCategory = string;
 type Tag = TagRecord;

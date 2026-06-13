@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DragEvent as ReactDragEvent } from "react";
-import { LAYERED_TREE_AUTO_EXPAND_DELAY_MS, LAYERED_TREE_DND_MIME_TYPE } from "@/pane.desktop/leftpane/folder/layeredTreeDnd.constants";
-import type { LayeredTreeDropInstruction, LayeredTreeItem, UseLayeredTreeDragDropParams } from "@/pane.desktop/leftpane/folder/layeredTreeDnd.types";
-import { applyLayeredTreeDragPreview, createLayeredTreeItemMap, createLayeredTreeReorderedSiblingList, getLayeredTreeAutoScrollStep, getLayeredTreeDropParentId, getLayeredTreeDropPosition, getLayeredTreeDropPositionFromTarget, isLayeredTreeDropInstructionEqual, isLayeredTreeItemAncestorOf, resolveLayeredTreeEventDropTarget } from "@/pane.desktop/leftpane/folder/layeredTreeDnd.utils";
+import { LAYERED_TREE_AUTO_EXPAND_DELAY_MS, LAYERED_TREE_DND_MIME_TYPE } from "./layeredTreeDnd.constants";
+import type { LayeredTreeDropInstruction, LayeredTreeItem, UseLayeredTreeDragDropParams } from "./layeredTreeDnd.types";
+import { applyLayeredTreeDragPreview, createLayeredTreeItemMap, createLayeredTreeReorderedSiblingList, getLayeredTreeAutoScrollStep, getLayeredTreeDropParentId, getLayeredTreeDropPosition, getLayeredTreeDropPositionFromTarget, isLayeredTreeDropInstructionEqual, isLayeredTreeItemAncestorOf, resolveLayeredTreeEventDropTarget } from "./layeredTreeDnd.utils";
 
 const useLayeredTreeDragDrop = <TItem extends LayeredTreeItem>({ rootItems, rootDropParentId, scrollContainerRef, getChildItems, getParentId, getOrderIndex, updateItem, setExpandedIds }: UseLayeredTreeDragDropParams<TItem>) => {
   const itemMap = useMemo(() => createLayeredTreeItemMap(rootItems, getChildItems), [getChildItems, rootItems]);

@@ -3,7 +3,7 @@ import { normalizeCalendarRecurrenceRule } from "@core/calendar";
 import type { Calendar as ExpoCalendarItem, Event as ExpoCalendarEvent, PermissionResponse, RecurrenceRule as ExpoRecurrenceRule } from "expo-calendar";
 import * as ExpoCalendar from "expo-calendar";
 import { Platform } from "react-native";
-import type { IosCalendarEvent, IosCalendarListItem, IosCalendarPermissionStatus, IosCalendarWritableEventDeleteInput, IosCalendarWritableEventInput, IosCalendarWritableEventUpdateInput } from "@mobile/integration/ioscalendar/iosCalendar.types";
+import type { IosCalendarEvent, IosCalendarListItem, IosCalendarPermissionStatus, IosCalendarWritableEventDeleteInput, IosCalendarWritableEventInput, IosCalendarWritableEventUpdateInput } from "./iosCalendar.types";
 
 type ExpoCalendarCreateEventDetails = NonNullable<Parameters<typeof ExpoCalendar.createEventAsync>[1]>;
 type ExpoCalendarUpdateEventDetails = NonNullable<Parameters<typeof ExpoCalendar.updateEventAsync>[1]>;

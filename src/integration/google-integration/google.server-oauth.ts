@@ -1,8 +1,8 @@
 import { httpsCallable } from "firebase/functions";
 import { auth, functionsClient } from "@/infrastructure/firebase/client";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
-import type { GoogleCalendarAccess } from "@/integration/google-integration/google.oauth";
-import { consumeGoogleCalendarServerCodeVerifier } from "@/integration/google-integration/google.oauth";
+import type { GoogleCalendarAccess } from "./google.oauth";
+import { consumeGoogleCalendarServerCodeVerifier } from "./google.oauth";
 
 type GoogleOAuthReconnectDiagnosis = {
   cause: string; reconnectRequired: boolean; action: string; };

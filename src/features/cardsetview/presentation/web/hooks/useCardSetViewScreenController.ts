@@ -14,12 +14,12 @@ import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 import { resolveSplitFallbackLayoutModePreference } from "@/services/cardLayoutFallbackPreferences";
 import { getCardSetViewNavigationPreference, setCardSetViewNavigationPreference } from "@/services/cardSetViewNavigationPreferences";
-import { useCardSetViewData } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewData";
-import { useCardSetViewPaneWidth } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewPaneWidth";
-import { useCardSetViewState } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewState";
-import { useCardSetViewWindowEvents } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewWindowEvents";
-import { useCardSetViewZoom } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewZoom";
-import { useCardSetViewZoomInput } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewZoomInput";
+import { useCardSetViewData } from "./useCardSetViewData";
+import { useCardSetViewPaneWidth } from "./useCardSetViewPaneWidth";
+import { useCardSetViewState } from "./useCardSetViewState";
+import { useCardSetViewWindowEvents } from "./useCardSetViewWindowEvents";
+import { useCardSetViewZoom } from "./useCardSetViewZoom";
+import { useCardSetViewZoomInput } from "./useCardSetViewZoomInput";
 
 type ScrollAnchorFace = "question" | "answer";
 type UseCardSetViewScreenControllerParams = {

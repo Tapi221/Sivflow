@@ -4,7 +4,7 @@ import { useGoogleCalendarLayer } from "@/features/calendar/useGoogleCalendarLay
 import { useProjectCalendarActions } from "@/features/calendar/useProjectCalendarActions";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import { CalendarSidebarContent } from "@/pane.desktop/leftpane/schedule/CalendarSidebar";
+import { CalendarSidebarContent } from "./CalendarSidebar";
 
 type CalendarSidebarControllerProps = {
   onOpenSettings?: () => void;

@@ -1,6 +1,6 @@
-import type { Locale } from "@shared/i18n/locale.store";
-import { RAW_TRANSLATIONS } from "@shared/i18n/translations";
-import type { RawTranslations } from "@shared/i18n/translations";
+import type { Locale } from "./locale.store";
+import { RAW_TRANSLATIONS } from "./translations";
+import type { RawTranslations } from "./translations";
 
 type TranslationKey = keyof RawTranslations;
 type TranslationParams = {

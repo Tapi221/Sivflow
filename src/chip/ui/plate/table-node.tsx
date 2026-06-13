@@ -11,10 +11,10 @@ import type { PlateElementProps } from "platejs/react";
 import { PlateElement, useEditorPlugin, useEditorRef, useFocusedLast, useReadOnly, useSelected } from "platejs/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { Popover, PopoverAnchor, PopoverContent } from "@/chip/ui/popover";
-import { blockSelectionVariants } from "@/chip/ui/plate/block-selection";
-import { ColorDropdownMenuItems, DEFAULT_COLORS } from "@/chip/ui/plate/font-color-toolbar-button";
-import { Toolbar, ToolbarButton, ToolbarGroup, ToolbarMenuGroup } from "@/chip/ui/plate/toolbar";
 import { cn } from "@/lib/utils";
+import { blockSelectionVariants } from "./block-selection";
+import { ColorDropdownMenuItems, DEFAULT_COLORS } from "./font-color-toolbar-button";
+import { Toolbar, ToolbarButton, ToolbarGroup, ToolbarMenuGroup } from "./toolbar";
 
 type TableResizeDirection = "bottom" | "right";
 type TableResizeStartOptions = {

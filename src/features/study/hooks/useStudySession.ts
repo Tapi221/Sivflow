@@ -6,7 +6,7 @@ import { computeNextReview, createReviewLogEntry } from "@/services/reviewAlgori
 import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
 import type { Card, CardPatch, CardSet, SubjectiveScoreValue, UserSettings } from "@/types";
 import { normalizeMemoryStability } from "@/utils/reviewUtils";
-import type { PracticeFilterRating } from "@/features/study/hooks/usePracticeMode";
+import type { PracticeFilterRating } from "./usePracticeMode";
 
 type StudySessionRating = PracticeFilterRating;
 type StudySessionResult = {

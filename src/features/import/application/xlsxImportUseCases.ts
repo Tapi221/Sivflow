@@ -2,8 +2,8 @@ import type { ImportParseResult } from "@/features/import/domain/import.types";
 import { hasImportBlockingError } from "@/features/import/domain/import.types";
 import { parseXlsxImport } from "@/features/import/infra/web/parseXlsxImport";
 import type { Card, CardSet } from "@/types";
-import type { ImportDestination } from "@/features/import/application/importCards";
-import { buildImportCardSetName, importCardsFromPayload } from "@/features/import/application/importCards";
+import type { ImportDestination } from "./importCards";
+import { buildImportCardSetName, importCardsFromPayload } from "./importCards";
 
 type CreateCardSet = (name: string, targetFolderId?: string | null, opts?: { description?: string;
   id?: string;

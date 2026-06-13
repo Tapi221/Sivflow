@@ -2,7 +2,7 @@ import { normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
 import type { MfDeckArchiveV1, MfDeckCardV1, MfDeckIssue } from "@/features/deckFile/domain/mfDeck.types";
 import type { Card, CardBlock, CardSet } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { restoreMfDeckMediaInBlocks } from "@/features/deckFile/application/mfDeckMediaRestorer";
+import { restoreMfDeckMediaInBlocks } from "./mfDeckMediaRestorer";
 
 type CreateMfDeckCardSet = (name: string, targetFolderId?: string | null, opts?: { description?: string;
   id?: string;

@@ -10,7 +10,7 @@ import type { PlateEditor, PlateLeafProps, RenderNodeWrapper } from "platejs/rea
 import { PlateLeaf, useEditorPlugin, usePluginOption } from "platejs/react";
 import type { SuggestionConfig } from "@/components/editor/plugins/suggestion-kit";
 import { cn } from "@/lib/utils";
-import { voidRemoveSuggestionOverlayVariants } from "@/chip/ui/plate/suggestion-node-static";
+import { voidRemoveSuggestionOverlayVariants } from "./suggestion-node-static";
 
 type BlockSuggestionWrapperOptions = {
   elementType?: string;

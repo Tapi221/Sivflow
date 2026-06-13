@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { createDefaultCalendarTimetablePeriods } from "@core/domain/calendar/timetable/timetable.model";
 import type { CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTimetableDepartment, CalendarTimetableInstitution, CalendarTimetablePeriod, CalendarTimetableSettings, CalendarTimetableSyllabusCourse, CalendarTimetableSyllabusCourseDisplay, CalendarTimetableSyllabusCourseDraft, CalendarTimetableVisibleDayCount } from "@core/domain/calendar/timetable/timetable.types";
 import { liveQuery } from "dexie";
-import { addCalendarTimetableCourseFromSyllabus, addCalendarTimetablePeriod, deleteCalendarTimetableCourse, deleteCalendarTimetablePeriod, ensureCalendarTimetableSeedData, getCalendarTimetableSettings, listCalendarTimetableCourses, listCalendarTimetableDepartments, listCalendarTimetableInstitutions, listCalendarTimetablePeriods, saveCalendarTimetableCourse, saveCalendarTimetableSyllabusCourse, searchCalendarTimetableSyllabusCourses, updateCalendarTimetablePeriod, updateCalendarTimetableVisibleDayCount } from "@/features/calendar/timetable/calendarTimetable.storage";
+import { addCalendarTimetableCourseFromSyllabus, addCalendarTimetablePeriod, deleteCalendarTimetableCourse, deleteCalendarTimetablePeriod, ensureCalendarTimetableSeedData, getCalendarTimetableSettings, listCalendarTimetableCourses, listCalendarTimetableDepartments, listCalendarTimetableInstitutions, listCalendarTimetablePeriods, saveCalendarTimetableCourse, saveCalendarTimetableSyllabusCourse, searchCalendarTimetableSyllabusCourses, updateCalendarTimetablePeriod, updateCalendarTimetableVisibleDayCount } from "./calendarTimetable.storage";
 
 type UseCalendarTimetableState = {
   courses: CalendarTimetableCourse[];

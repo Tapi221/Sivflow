@@ -3,7 +3,7 @@ import { Button } from "@/chip/ui/button/button";
 import { Card, CardContent } from "@/chip/ui/card";
 import type { PracticeFilterRating, PracticeSessionState } from "@/features/study/hooks/usePracticeMode";
 import type { Card as StudyEntityCard } from "@/types";
-import StudyCard from "@/features/study/StudyCard";
+import StudyCard from "./StudyCard";
 
 type Props = {
   practiceState: PracticeSessionState;

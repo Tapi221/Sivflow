@@ -3,7 +3,7 @@ import AutoResizeTextarea from "@/chip/ui/AutoResizeTextarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/chip/ui/dialog/dialog";
 import { cn } from "@/lib/utils";
 import type { MathBlockData } from "@/types/domain/base";
-import { MathRenderer } from "@/components/card/blocks/math/MathBlockContent";
+import { MathRenderer } from "./MathBlockContent";
 
 type CSSCustomProperties = React.CSSProperties & Record<`--${string}`, string>;
 interface MathEditorDialogProps {

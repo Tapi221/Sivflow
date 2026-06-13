@@ -20,8 +20,8 @@ import { createCalendarEventsScopeKey, useTransientEmptyCalendarEvents } from "@
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
-import { MobileCalendarEventComposer } from "@/pane.desktop/view/MobileCalendarEventComposer";
-import { MobileCalendarSidebar, MobileCalendarSidebarOpenButton } from "@/pane.desktop/view/MobileCalendarSidebar";
+import { MobileCalendarEventComposer } from "./MobileCalendarEventComposer";
+import { MobileCalendarSidebar, MobileCalendarSidebarOpenButton } from "./MobileCalendarSidebar";
 
 type CalendarEventDisplayRange = {
   start: Date; end: Date; };

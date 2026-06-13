@@ -8,9 +8,9 @@ import { TagChip } from "@/components/tag/TagChip";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
 import { Check, Palette, Plus, Tag as TagIcon } from "@/ui/icons";
-import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "@/chip/ui/command";
-import { PlaceholderText } from "@/chip/ui/placeholder-text";
-import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
+import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "./command";
+import { PlaceholderText } from "./placeholder-text";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 interface TagInputProps {
   tags: string[];

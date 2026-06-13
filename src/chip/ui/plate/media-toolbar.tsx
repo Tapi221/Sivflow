@@ -9,7 +9,7 @@ import { useEditorRef, useEditorSelector, useElement, useFocusedLast, useReadOnl
 import { Button, buttonVariants } from "@/chip/ui/button/button";
 import { Popover, PopoverAnchor, PopoverContent } from "@/chip/ui/popover";
 import { Separator } from "@/chip/ui/separator";
-import { CaptionButton } from "@/chip/ui/plate/caption";
+import { CaptionButton } from "./caption";
 
 type MediaToolbarProps = {
   children: React.ReactNode;

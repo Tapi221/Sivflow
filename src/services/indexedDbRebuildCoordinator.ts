@@ -1,6 +1,6 @@
 import { getLocalDb } from "@/services/localdb";
-import { IndexedDBMetadataService } from "@/services/IndexedDBMetadataService";
-import { IndexedDBRebuildOrchestrator } from "@/services/IndexedDBRebuildOrchestrator";
+import { IndexedDBMetadataService } from "./IndexedDBMetadataService";
+import { IndexedDBRebuildOrchestrator } from "./IndexedDBRebuildOrchestrator";
 
 type ResettableLocalDb = {
   delete: () => Promise<void>;

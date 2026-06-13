@@ -1,6 +1,6 @@
-import { generateTextLocally } from "@/services/openai/localTextGenerator";
-import type { OpenAiSettings } from "@/services/openai/openAiSettings";
-import { DEFAULT_OPEN_AI_SETTINGS, loadOpenAiSettings } from "@/services/openai/openAiSettings";
+import { generateTextLocally } from "./localTextGenerator";
+import type { OpenAiSettings } from "./openAiSettings";
+import { DEFAULT_OPEN_AI_SETTINGS, loadOpenAiSettings } from "./openAiSettings";
 
 type GenerateTextOptions = {
   prompt: string;

@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 import { Eraser, PenLine, Redo2, Trash2, Undo2 } from "@/ui/icons";
 import type { RectLike } from "@/utils/inkCoords";
 import { clientPointToPaperPoint, paperPointToCanvasPoint, squaredDistance } from "@/utils/inkCoords";
-import type { InkHistoryState, InkLayerHandle } from "@/components/ink/inkLayer.types";
-import { saveInkToStorage } from "@/components/ink/inkStorage";
+import type { InkHistoryState, InkLayerHandle } from "./inkLayer.types";
+import { saveInkToStorage } from "./inkStorage";
 
 interface InkLayerProps {
   cardId?: string | null;

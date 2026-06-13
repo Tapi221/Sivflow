@@ -5,9 +5,9 @@ import { auth, isFirebaseClientAvailable } from "@/infrastructure/firebase/clien
 import { hydrateServerStoredGoogleCalendarAccounts } from "@/integration/googlecalendar-integration/gcal.server-account-list";
 import { initializeDB, resetLocalDBForLogout } from "@/services/localdb";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
-import type { AuthSessionContextType, AuthSessionProviderProps } from "@/contexts/auth/AuthSessionContextCore";
-import { AuthSessionContext } from "@/contexts/auth/AuthSessionContextCore";
-import { bootstrapUser } from "@/contexts/auth/bootstrapUser";
+import type { AuthSessionContextType, AuthSessionProviderProps } from "./AuthSessionContextCore";
+import { AuthSessionContext } from "./AuthSessionContextCore";
+import { bootstrapUser } from "./bootstrapUser";
 
 const refreshAuthProfile = async (user: FirebaseUser): Promise<FirebaseUser> => {
   await user.reload();

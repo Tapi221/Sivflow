@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/infrastructure/firebase/client";
-import type { BuildCalendarEventSyncRangeOptions, CalendarEventSyncRange } from "@/sync/googlecalendar-sync/calendarEventSyncRange";
-import { buildCalendarEventPrioritySyncRange, buildCalendarEventSyncRange } from "@/sync/googlecalendar-sync/calendarEventSyncRange";
-import { useGoogleCalendarPushSync } from "@/sync/googlecalendar-sync/useGoogleCalendarPushSync";
+import type { BuildCalendarEventSyncRangeOptions, CalendarEventSyncRange } from "./calendarEventSyncRange";
+import { buildCalendarEventPrioritySyncRange, buildCalendarEventSyncRange } from "./calendarEventSyncRange";
+import { useGoogleCalendarPushSync } from "./useGoogleCalendarPushSync";
 
 type GoogleCalendarSlice = {
   selectedCalendarIds: Set<string>;

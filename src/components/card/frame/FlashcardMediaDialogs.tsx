@@ -11,7 +11,7 @@ import { AudioPlayer, ImageGallery } from "@/components/card/media/CardMedia";
 import { ReferencePopup } from "@/components/card/overlays/ReferencePopup";
 import type { ReferenceBlockData } from "@/types";
 import { Volume2, X } from "@/ui/icons";
-import type { FlashcardMediaLike } from "@/components/card/frame/flashcard.types";
+import type { FlashcardMediaLike } from "./flashcard.types";
 
 interface FlashcardMediaDialogsProps {
   isImagePopupOpen: boolean;

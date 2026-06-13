@@ -6,7 +6,7 @@ import { useIndentTodoToolBarButton, useIndentTodoToolBarButtonState } from "@pl
 import { ListIcon, ListOrderedIcon, ListTodoIcon } from "lucide-react";
 import { useEditorRef, useEditorSelector } from "platejs/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-import { ToolbarButton, ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary } from "@/chip/ui/plate/toolbar";
+import { ToolbarButton, ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary } from "./toolbar";
 
 const BulletedListToolbarButton = () => {
   const editor = useEditorRef();

@@ -1,4 +1,4 @@
-import type { SelectionCaptureArea, SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
+import type { SelectionCaptureArea, SelectionCaptureRect } from "./selectionCapture.types";
 
 type CardSelectionCaptureSide = "question" | "answer";
 type CardSelectionCaptureTaskResult = string | void;

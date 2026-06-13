@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import type { ViewerProps } from "@/components/card/blocks/shared/CardBlockLayoutRenderer";
+import type { ViewerProps } from "./CardBlockLayoutRenderer";
 
 type UseViewerScenePropsArgs = Readonly<{
   onGalleryFullscreenChange?: (isFullscreen: boolean) => void;

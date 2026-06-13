@@ -1,5 +1,5 @@
 import { addDays, differenceInCalendarDays, isSameDay, max, min, startOfDay } from "date-fns";
-import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
+import type { CalendarEvent } from "./calendarEvent.types";
 
 type CalendarEventSegment = {
   event: CalendarEvent;
