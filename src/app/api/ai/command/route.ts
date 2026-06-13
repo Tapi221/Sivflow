@@ -4,9 +4,10 @@ import { createUIMessageStream, createUIMessageStreamResponse, generateText, Out
 import type { SlateEditor, Value } from "platejs";
 import { createSlateEditor, nanoid } from "platejs";
 import { z } from "zod";
-import { AI_COMMAND_PLATE_PLUGINS } from "@/app/api/ai/command/editorKit";
 import { buildEditTableMultiCellPrompt, getChooseToolPrompt, getCommentPrompt, getEditPrompt, getGeneratePrompt } from "@/app/api/ai/command/prompt";
 import type { ChatMessage, ToolName } from "@/app/api/ai/command/types";
+import { BaseEditorKit } from "@/components/editor/editor-base-kit";
+import { markdownJoinerTransform } from "@/lib/markdown-joiner-transform";
 
 type CommandContext = {
   children: Value;
@@ -122,7 +123,7 @@ const POST = async (req: Request) => {
     const { apiKey, ctx, messages: messagesRaw, model } = await req.json() as CommandRequestPayload;
     const { children, selection, toolName: toolNameParam } = ctx;
     const editor = createSlateEditor({
-      plugins: AI_COMMAND_PLATE_PLUGINS,
+      plugins: BaseEditorKit,
       selection,
       value: children,
     });
@@ -150,6 +151,7 @@ const POST = async (req: Request) => {
           writeToolName(writer, toolName);
         }
         const aiStream = streamText({
+          experimental_transform: markdownJoinerTransform(),
           model: gatewayProvider(model ?? DEFAULT_TEXT_MODEL),
           prompt: "",
           tools: {

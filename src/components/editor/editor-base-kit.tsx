@@ -3,6 +3,7 @@ import { BaseBasicBlocksKit } from "@/components/editor/plugins/basic-blocks-bas
 import { BaseBasicMarksKit } from "@/components/editor/plugins/basic-marks-base-kit";
 import { BaseCalloutKit } from "@/components/editor/plugins/callout-base-kit";
 import { BaseCodeBlockKit } from "@/components/editor/plugins/code-block-base-kit";
+import { BaseCodeDrawingKit } from "@/components/editor/plugins/code-drawing-base-kit";
 import { BaseColumnKit } from "@/components/editor/plugins/column-base-kit";
 import { BaseCommentKit } from "@/components/editor/plugins/comment-base-kit";
 import { BaseDateKit } from "@/components/editor/plugins/date-base-kit";
@@ -20,6 +21,29 @@ import { BaseTableKit } from "@/components/editor/plugins/table-base-kit";
 import { BaseTocKit } from "@/components/editor/plugins/toc-base-kit";
 import { BaseToggleKit } from "@/components/editor/plugins/toggle-base-kit";
 
-const BaseEditorKit = [...BaseBasicBlocksKit, ...BaseCodeBlockKit, ...BaseTableKit, ...BaseToggleKit, ...BaseTocKit, ...BaseMediaKit, ...BaseCalloutKit, ...BaseColumnKit, ...BaseMathKit, ...BaseDateKit, ...BaseLinkKit, ...BaseMentionKit, ...BaseBasicMarksKit, ...BaseFontKit, ...BaseListKit, ...BaseAlignKit, ...BaseLineHeightKit, ...BaseCommentKit, ...BaseSuggestionKit, ...MarkdownKit, ...BaseFootnoteKit];
+const BaseEditorKit = [
+  ...BaseBasicBlocksKit,
+  ...BaseCodeBlockKit,
+  ...BaseCodeDrawingKit,
+  ...BaseTableKit,
+  ...BaseToggleKit,
+  ...BaseTocKit,
+  ...BaseMediaKit,
+  ...BaseCalloutKit,
+  ...BaseColumnKit,
+  ...BaseMathKit,
+  ...BaseDateKit,
+  ...BaseLinkKit,
+  ...BaseMentionKit,
+  ...BaseBasicMarksKit,
+  ...BaseFontKit,
+  ...BaseListKit,
+  ...BaseAlignKit,
+  ...BaseLineHeightKit,
+  ...BaseCommentKit,
+  ...BaseSuggestionKit,
+  ...MarkdownKit,
+  ...BaseFootnoteKit,
+];
 
 export { BaseEditorKit };
