@@ -4,6 +4,8 @@ import type { Card, CardBlock, CardSet } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { restoreMfDeckMediaInBlocks } from "./mfDeckMediaRestorer";
 
+
+
 type CreateMfDeckCardSet = (name: string, targetFolderId?: string | null, opts?: { description?: string;
   id?: string;
   orderIndex?: number;
@@ -36,6 +38,8 @@ type ImportMfDeckArchiveResult = {
   createdCount: number;
   issues: MfDeckIssue[];
 };
+
+
 
 const cloneJson = <T>(value: T): T => {
   if (value === undefined) return value;
@@ -235,5 +239,9 @@ const importMfDeckArchive = async ({ archive, folderId, createCardSet, updateCar
   };
 };
 
+
+
 export { importMfDeckArchive };
+
+
 export type { CreateMfDeckCardSet, UpdateMfDeckCardSet, CreateMfDeckCard, EnsureMfDeckTagByName, MfDeckImportDestination, ImportMfDeckArchiveParams, ImportMfDeckArchiveResult };

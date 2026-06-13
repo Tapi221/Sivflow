@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import { resetStartupTasks, runStartupTasks } from "./RunStartupTasks";
 
+
+
 const useStartupTasks = (userId?: string | null) => {
   const startedUserIdRef = useRef<string | null>(null);
 
@@ -34,5 +36,7 @@ const useStartupTasks = (userId?: string | null) => {
     };
   }, [userId]);
 };
+
+
 
 export { useStartupTasks };

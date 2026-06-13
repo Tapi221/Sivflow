@@ -1,9 +1,14 @@
 "use client";
 
 import type { TTagElement } from "platejs";
+
 import type { PlateElementProps } from "platejs/react";
+
 import { PlateElement, useFocused, useReadOnly, useSelected } from "platejs/react";
+
 import { cn } from "@/lib/utils";
+
+
 
 const TagElement = (props: PlateElementProps<TTagElement>) => {
   const { element } = props;
@@ -40,5 +45,7 @@ const TagElement = (props: PlateElementProps<TTagElement>) => {
     </PlateElement>
   );
 };
+
+
 
 export { TagElement };

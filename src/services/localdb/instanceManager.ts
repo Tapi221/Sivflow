@@ -5,9 +5,13 @@ import { deleteUserPersistentDatabases, getDatabaseNameForUser } from "./generat
 import { LocalDB } from "./LocalDB";
 import type { LocalDBSyncStore } from "./types";
 
+
+
 type LocalDbGlobal = typeof globalThis & {
   __ALLOW_LOCAL_DB_CONSTRUCTION?: boolean;
 };
+
+
 
 let instance: LocalDB | null = null;
 let cachedInstance: LocalDB | InMemoryLocalDB | null = null;
@@ -16,6 +20,8 @@ let persistentOpenDisabled = false;
 let resettingPromise: Promise<void> | null = null;
 const fallbackInstances = new Map<string, InMemoryLocalDB>();
 const generationBumps = new Map<string, number>();
+
+
 
 const getLocalDbGlobal = (): LocalDbGlobal => globalThis as LocalDbGlobal;
 const safeStringifyError = (error: unknown): string => {
@@ -223,5 +229,7 @@ const resetForLogout = async (userId?: string): Promise<void> => {
   }
 };
 const resetLocalDBForLogout = async (userId?: string) => resetForLogout(userId);
+
+
 
 export { getLocalDb, getLocalDbSync, getInstanceUserId, getInstance, initializeDB, clearInstance, resetForLogout, resetLocalDBForLogout };
