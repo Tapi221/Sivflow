@@ -66,9 +66,9 @@ const FixedToolbarButtons = () => {
           </ToolbarGroup>
           <ToolbarGroup>
             <AlignToolbarButton />
-            <ListToolbarButton nodeType={KEYS.ulClassic} />
-            <ListToolbarButton nodeType={KEYS.olClassic} />
-            <ListToolbarButton nodeType={KEYS.taskList} />
+            <ListToolbarButton nodeType={KEYS.ul} />
+            <ListToolbarButton nodeType={KEYS.ol} />
+            <ListToolbarButton nodeType={KEYS.listTodo} />
             <ToggleToolbarButton />
           </ToolbarGroup>
           <ToolbarGroup>
