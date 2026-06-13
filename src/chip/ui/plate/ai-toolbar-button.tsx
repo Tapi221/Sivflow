@@ -6,7 +6,7 @@ import { useEditorPlugin } from "platejs/react";
 import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
 import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
-const AiToolbarButton = (props: ToolbarButtonProps) => {
+const AIToolbarButton = (props: ToolbarButtonProps) => {
   const { api } = useEditorPlugin(AIChatPlugin);
   return (
     <ToolbarButton
@@ -21,4 +21,4 @@ const AiToolbarButton = (props: ToolbarButtonProps) => {
   );
 };
 
-export { AiToolbarButton };
+export { AIToolbarButton };
