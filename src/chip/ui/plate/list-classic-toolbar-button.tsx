@@ -15,18 +15,17 @@ type IndentToolbarButtonProps = ToolbarButtonProps & {
 
 const ListToolbarButton = ({ nodeType, ...props }: ListToolbarButtonProps) => {
   const editor = useEditorRef();
-  const icon = nodeType === KEYS.olClassic ? <ListOrderedIcon /> : <ListIcon />;
+  const isOrdered = nodeType === KEYS.ol;
   return (
     <ToolbarButton
       {...props}
-      tooltip={nodeType === KEYS.olClassic ? "Numbered list" : "Bulleted list"}
+      tooltip={isOrdered ? "Numbered list" : "Bulleted list"}
       onClick={() => {
         editor.tf.toggleBlock(nodeType);
         editor.tf.focus();
       }}
-      onMouseDown={(event) => event.preventDefault()}
     >
-      {props.children ?? icon}
+      {props.children ?? (isOrdered ? <ListOrderedIcon /> : <ListIcon />)}
     </ToolbarButton>
   );
 };
@@ -39,19 +38,19 @@ const IndentToolbarButton = ({ reverse = false, ...props }: IndentToolbarButtonP
       onClick={() => {
         if (reverse) {
           editor.tf.outdent();
-        } else {
-          editor.tf.indent();
+          editor.tf.focus();
+          return;
         }
+        editor.tf.indent();
         editor.tf.focus();
       }}
-      onMouseDown={(event) => event.preventDefault()}
     >
       {props.children ?? (reverse ? <OutdentIcon /> : <IndentIcon />)}
     </ToolbarButton>
   );
 };
 const TodoListToolbarButton = (props: ToolbarButtonProps) => {
-  return <ListToolbarButton {...props} nodeType={KEYS.taskList} />;
+  return <ListToolbarButton {...props} nodeType={KEYS.listTodo} />;
 };
 
 export { IndentToolbarButton, ListToolbarButton, TodoListToolbarButton };
