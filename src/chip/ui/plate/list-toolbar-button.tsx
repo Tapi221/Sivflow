@@ -1,7 +1,7 @@
 import { toggleList } from "@platejs/list";
 import { useEditorRef } from "platejs/react";
-import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
+import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
 type ListToolbarButtonProps = ToolbarButtonProps & {
   nodeType: string;

@@ -1,10 +1,10 @@
 import { BaseCaptionPlugin } from "@platejs/caption";
 import { BaseAudioPlugin, BaseFilePlugin, BaseImagePlugin, BaseMediaEmbedPlugin, BasePlaceholderPlugin, BaseVideoPlugin } from "@platejs/media";
 import { KEYS } from "platejs";
-import { VideoElementStatic } from "@/chip/ui/plate/media-video-node-static";
 import { AudioElementStatic } from "@/chip/ui/plate/media-audio-node-static";
 import { FileElementStatic } from "@/chip/ui/plate/media-file-node-static";
 import { ImageElementStatic } from "@/chip/ui/plate/media-image-node-static";
+import { VideoElementStatic } from "@/chip/ui/plate/media-video-node-static";
 
 const BaseMediaKit = [
   BaseImagePlugin.withComponent(ImageElementStatic),

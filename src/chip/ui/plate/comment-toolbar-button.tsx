@@ -1,6 +1,6 @@
 import { MessageSquareIcon } from "lucide-react";
-import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
+import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
 type CommentToolbarButtonProps = ToolbarButtonProps;
 
