@@ -1,10 +1,11 @@
 import { createGateway } from "@ai-sdk/gateway";
-import type { UIMessageStreamWriter } from "ai";
-import { createUIMessageStream, createUIMessageStreamResponse, generateText, Output, streamText } from "ai";
+import type { LanguageModel, UIMessageStreamWriter } from "ai";
+import { createUIMessageStream, createUIMessageStreamResponse, generateText, Output, streamText, tool } from "ai";
 import type { SlateEditor, Value } from "platejs";
-import { createSlateEditor } from "platejs";
+import { createSlateEditor, nanoid } from "platejs";
+import { z } from "zod";
 import { AI_COMMAND_PLATE_PLUGINS } from "@/app/api/ai/command/editorKit";
-import { getChooseToolPrompt, getEditPrompt, getGeneratePrompt } from "@/app/api/ai/command/prompt";
+import { buildEditTableMultiCellPrompt, getChooseToolPrompt, getCommentPrompt, getEditPrompt, getGeneratePrompt } from "@/app/api/ai/command/prompt";
 import type { ChatMessage, ToolName } from "@/app/api/ai/command/types";
 
 type CommandContext = {
@@ -18,6 +19,11 @@ type CommandRequestPayload = {
   messages: ChatMessage[];
   model?: string;
 };
+type AiToolProps = {
+  messagesRaw: ChatMessage[];
+  model: LanguageModel;
+  writer: UIMessageStreamWriter<ChatMessage>;
+};
 
 const DEFAULT_ROUTING_MODEL = "google/gemini-2.5-flash";
 const DEFAULT_TEXT_MODEL = "openai/gpt-4o-mini";
@@ -29,6 +35,87 @@ const writeToolName = (writer: UIMessageStreamWriter<ChatMessage>, toolName: Too
     type: "data-toolName",
   });
 };
+const createCommentTool = (editor: SlateEditor, { messagesRaw, model, writer }: AiToolProps) =>
+  tool({
+    description: "Comment on selected editor content",
+    inputSchema: z.object({}),
+    strict: true,
+    execute: async () => {
+      const commentSchema = z.object({
+        blockId: z.string(),
+        comment: z.string(),
+        content: z.string(),
+      });
+      const { partialOutputStream } = streamText({
+        model,
+        output: Output.array({ element: commentSchema }),
+        prompt: getCommentPrompt(editor, {
+          messages: messagesRaw,
+        }),
+      });
+      let lastLength = 0;
+      for await (const partialArray of partialOutputStream) {
+        for (let i = lastLength; i < partialArray.length; i++) {
+          writer.write({
+            id: nanoid(),
+            data: {
+              comment: partialArray[i],
+              status: "streaming",
+            },
+            type: "data-comment",
+          });
+        }
+        lastLength = partialArray.length;
+      }
+      writer.write({
+        id: nanoid(),
+        data: {
+          comment: null,
+          status: "finished",
+        },
+        type: "data-comment",
+      });
+    },
+  });
+const createTableTool = (editor: SlateEditor, { messagesRaw, model, writer }: AiToolProps) =>
+  tool({
+    description: "Edit selected table cells",
+    inputSchema: z.object({}),
+    strict: true,
+    execute: async () => {
+      const cellUpdateSchema = z.object({
+        content: z.string(),
+        id: z.string(),
+      });
+      const { partialOutputStream } = streamText({
+        model,
+        output: Output.array({ element: cellUpdateSchema }),
+        prompt: buildEditTableMultiCellPrompt(editor, messagesRaw),
+      });
+      let lastLength = 0;
+      for await (const partialArray of partialOutputStream) {
+        for (let i = lastLength; i < partialArray.length; i++) {
+          writer.write({
+            id: nanoid(),
+            data: {
+              cellUpdate: partialArray[i],
+              status: "streaming",
+            },
+            type: "data-table",
+          });
+        }
+        lastLength = partialArray.length;
+      }
+      writer.write({
+        id: nanoid(),
+        data: {
+          cellUpdate: null,
+          status: "finished",
+        },
+        type: "data-table",
+      });
+    },
+  });
 const POST = async (req: Request) => {
   try {
     const { apiKey, ctx, messages: messagesRaw, model } = await req.json() as CommandRequestPayload;
@@ -61,12 +148,72 @@ const POST = async (req: Request) => {
           toolName = output as ToolName;
           writeToolName(writer, toolName);
         }
-        const prompt = toolName === "edit"
-          ? getEditPrompt(editor, { isSelecting, messages: messagesRaw })[0]
-          : getGeneratePrompt(editor, { isSelecting, messages: messagesRaw });
         const aiStream = streamText({
           model: gatewayProvider(model ?? DEFAULT_TEXT_MODEL),
-          prompt,
+          prompt: "",
+          tools: {
+            comment: createCommentTool(editor, {
+              messagesRaw,
+              model: gatewayProvider(model ?? DEFAULT_ROUTING_MODEL),
+              writer,
+            }),
+            table: createTableTool(editor, {
+              messagesRaw,
+              model: gatewayProvider(model ?? DEFAULT_ROUTING_MODEL),
+              writer,
+            }),
+          },
+          prepareStep: async (step) => {
+            if (toolName === "comment") {
+              return {
+                ...step,
+                toolChoice: { toolName: "comment", type: "tool" },
+              };
+            }
+            if (toolName === "edit") {
+              const [editPrompt, editType] = getEditPrompt(editor, {
+                isSelecting,
+                messages: messagesRaw,
+              });
+              if (editType === "table") {
+                return {
+                  ...step,
+                  toolChoice: { toolName: "table", type: "tool" },
+                };
+              }
+              return {
+                ...step,
+                activeTools: [],
+                messages: [
+                  {
+                    content: editPrompt,
+                    role: "user",
+                  },
+                ],
+                model:
+                  editType === "selection"
+                    ? gatewayProvider(model ?? DEFAULT_ROUTING_MODEL)
+                    : gatewayProvider(model ?? DEFAULT_TEXT_MODEL),
+              };
+            }
+            if (toolName === "generate") {
+              const generatePrompt = getGeneratePrompt(editor, {
+                isSelecting,
+                messages: messagesRaw,
+              });
+              return {
+                ...step,
+                activeTools: [],
+                messages: [
+                  {
+                    content: generatePrompt,
+                    role: "user",
+                  },
+                ],
+                model: gatewayProvider(model ?? DEFAULT_TEXT_MODEL),
+              };
+            }
+          },
         });
         writer.merge(aiStream.toUIMessageStream({ sendFinish: false }));
       },
