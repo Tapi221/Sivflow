@@ -3,7 +3,6 @@
 import { CaptionPlugin } from "@platejs/caption/react";
 import { AudioPlugin, FilePlugin, ImagePlugin, MediaEmbedPlugin, PlaceholderPlugin, VideoPlugin } from "@platejs/media/react";
 import { KEYS } from "platejs";
-import { MediaPreviewDialog } from "@/chip/ui/dialog/media-preview-dialog";
 import { MediaUploadToast } from "@/chip/ui/media-upload-toast";
 import { MediaEmbedElement } from "@/chip/ui/node/media-embed-node";
 import { VideoElement } from "@/chip/ui/node/media-video-node";
@@ -11,6 +10,7 @@ import { AudioElement } from "@/chip/ui/plate/media-audio-node";
 import { FileElement } from "@/chip/ui/plate/media-file-node";
 import { ImageElement } from "@/chip/ui/plate/media-image-node";
 import { PlaceholderElement } from "@/chip/ui/plate/media-placeholder-node";
+import { MediaPreviewDialog } from "@/chip/ui/plate/media-preview-dialog";
 
 const MediaKit = [
   ImagePlugin.configure({
