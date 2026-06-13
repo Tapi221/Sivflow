@@ -1,4 +1,5 @@
 "use client";
+
 import * as React from "react";
 import { resizeLengthClampStatic } from "@platejs/resizable";
 import { useBlockSelected } from "@platejs/selection/react";
@@ -203,6 +204,7 @@ const useTableResizeController = ({ dragIndicatorRef, effectiveColSizes, hoverIn
   }, [hideIndicator, hoverIndicatorRef]);
   return React.useMemo(() => ({ clearResizePreview, setResizePreview, startResize }), [clearResizePreview, setResizePreview, startResize]);
 };
+
 const TableActionButton = ({ children, disabled, onAction, tooltip }: TableActionButtonProps) => {
   const editor = useEditorRef();
   return (
@@ -421,8 +423,8 @@ const TableCellElement = ({ isHeader, ...props }: TableCellElementProps) => {
       style={
         {
           "--cellBackground": element.background,
-          maxWidth: width || 240,
-          minWidth: width || 120,
+          maxWidth: width ?? 240,
+          minWidth: width ?? 120,
         } as React.CSSProperties
       }
     >

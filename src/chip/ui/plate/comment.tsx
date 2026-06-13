@@ -58,6 +58,7 @@ const formatCommentDate = (date: Date) => {
   }
   return format(date, "MM/dd/yyyy");
 };
+
 const CommentMoreDropdown = (props: {
   comment: TComment;
   dropdownOpen: boolean;

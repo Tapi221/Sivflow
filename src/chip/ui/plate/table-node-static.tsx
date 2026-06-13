@@ -67,8 +67,8 @@ const TableCellElementStatic = ({ isHeader, ...props }: TableCellElementStaticPr
       style={
         {
           "--cellBackground": element.background,
-          maxWidth: width || 240,
-          minWidth: width || 120,
+          maxWidth: width ?? 240,
+          minWidth: width ?? 120,
         } as React.CSSProperties
       }
     >
