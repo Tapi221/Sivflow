@@ -4,6 +4,7 @@ import { SlateElement, SlateLeaf } from "platejs/static";
 import { cn } from "@/lib/utils";
 
 type CodeBlockNodeStaticProps = SlateElementProps<TCodeBlockElement>;
+
 const CODE_BLOCK_CLASS_NAME = "my-4 overflow-x-auto rounded-md border bg-muted px-4 py-3 font-mono text-sm";
 const syntaxColors: Record<string, string> = {
   "hljs-addition": "#22863a",
