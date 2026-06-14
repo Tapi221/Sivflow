@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@shared/i18n/useT";
-import type { ChangeEvent, CSSProperties, FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent } from "react";
+import type { ChangeEvent, CSSProperties, FocusEvent, FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent } from "react";
 import { GoogleIcon } from "@/chip/icons/icons.schedule";
 import type { CalendarListMenuAction } from "@/chip/panel/rightclickpanel.desktop/CalendarListMenu.desktop";
 import { CALENDAR_LIST_MENU_HEIGHT, CALENDAR_LIST_MENU_PANEL_ID, CALENDAR_LIST_MENU_WIDTH, CalendarListMenu } from "@/chip/panel/rightclickpanel.desktop/CalendarListMenu.desktop";
@@ -85,6 +85,8 @@ const CALENDAR_SIDEBAR_GOOGLE_LIST_CLASS_NAME = "min-h-0 flex-1 overflow-y-auto 
 const CALENDAR_SIDEBAR_HEADING_ROW_CLASS_NAME = "flex min-h-[22px] items-center gap-[3px] px-4";
 const CALENDAR_SIDEBAR_GOOGLE_HEADING_ROW_CLASS_NAME = cn(CALENDAR_SIDEBAR_HEADING_ROW_CLASS_NAME, "group");
 const CALENDAR_SIDEBAR_GOOGLE_ADD_BUTTON_CLASS_NAME = "app-layered-directory__add-button opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100";
+const CALENDAR_SIDEBAR_GOOGLE_ADD_BUTTON_HIDDEN_STYLE: CSSProperties = { opacity: 0, pointerEvents: "none" };
+const CALENDAR_SIDEBAR_GOOGLE_ADD_BUTTON_VISIBLE_STYLE: CSSProperties = { opacity: 1 };
 const CALENDAR_SIDEBAR_PROJECT_LIST_CLASS_NAME = "max-h-[55%] shrink-0 overflow-y-auto px-4 pb-1";
 const CALENDAR_SIDEBAR_ROW_CONTENT_CLASS_NAME = "pl-0";
 const COLOR_INPUT_STYLE: CSSProperties = { position: "fixed", left: -9999, top: -9999, width: 1, height: 1, opacity: 0, pointerEvents: "none" };
@@ -249,10 +251,23 @@ const CalendarSidebarContent = ({ appProjects, projectCalendarLinks, googleCalen
   const [calendarContextMenu, setCalendarContextMenu] = useState<CalendarContextMenuState | null>(null);
   const [projectLinksContextMenu, setProjectLinksContextMenu] = useState<ProjectLinksContextMenuState | null>(null);
   const [colorPickerTarget, setColorPickerTarget] = useState<CalendarColorPickerTarget | null>(null);
+  const [isGoogleCalendarAddButtonVisible, setIsGoogleCalendarAddButtonVisible] = useState(false);
+  const googleCalendarAddButtonStyle = isGoogleCalendarAddButtonVisible ? CALENDAR_SIDEBAR_GOOGLE_ADD_BUTTON_VISIBLE_STYLE : CALENDAR_SIDEBAR_GOOGLE_ADD_BUTTON_HIDDEN_STYLE;
   useRightClickPanelDismiss(CALENDAR_LIST_MENU_PANEL_ID, calendarContextMenu !== null, calendarContextMenuRef, () => setCalendarContextMenu(null));
   useRightClickPanelDismiss(PROJECT_CALENDAR_LINKS_MENU_PANEL_ID, projectLinksContextMenu !== null, projectLinksContextMenuRef, () => setProjectLinksContextMenu(null));
   const handleStartAddingProject = useCallback(() => {
     setIsAddingProject(true);
+  }, []);
+  const handleShowGoogleCalendarAddButton = useCallback(() => {
+    setIsGoogleCalendarAddButtonVisible(true);
+  }, []);
+  const handleHideGoogleCalendarAddButton = useCallback(() => {
+    setIsGoogleCalendarAddButtonVisible(false);
+  }, []);
+  const handleGoogleCalendarHeadingBlur = useCallback((event: FocusEvent<HTMLDivElement>) => {
+    const relatedTarget = event.relatedTarget as Node | null;
+    if (relatedTarget !== null && event.currentTarget.contains(relatedTarget)) return;
+    setIsGoogleCalendarAddButtonVisible(false);
   }, []);
   const handleAddGoogleCalendar = useCallback(() => {
     if (isAnyCalendarConnecting) return;
@@ -353,9 +368,9 @@ const CalendarSidebarContent = ({ appProjects, projectCalendarLinks, googleCalen
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <div className={CALENDAR_SIDEBAR_PROJECT_LIST_CLASS_NAME}><AppProjectsSection projects={appProjects} isAdding={isAddingProject} onAddProject={onAddProject} onToggleProject={onToggleProject} onOpenProjectLinksContextMenu={handleOpenProjectLinksContextMenu} onAddingChange={setIsAddingProject} /></div>
           <div className="shrink-0 pt-2">
-            <div className={CALENDAR_SIDEBAR_GOOGLE_HEADING_ROW_CLASS_NAME}>
+            <div className={CALENDAR_SIDEBAR_GOOGLE_HEADING_ROW_CLASS_NAME} onMouseEnter={handleShowGoogleCalendarAddButton} onMouseLeave={handleHideGoogleCalendarAddButton} onFocus={handleShowGoogleCalendarAddButton} onBlur={handleGoogleCalendarHeadingBlur}>
               <h2 className="app-layered-directory__section-heading" aria-label={GOOGLE_CALENDAR_SECTION_LABEL}><GoogleCalendarHeadingSvg /></h2>
-              <button type="button" className={CALENDAR_SIDEBAR_GOOGLE_ADD_BUTTON_CLASS_NAME} onClick={handleAddGoogleCalendar} disabled={isAnyCalendarConnecting} aria-label={ADD_GOOGLE_CALENDAR_LABEL} title={ADD_GOOGLE_CALENDAR_LABEL}><IconPlus className="h-4 w-4" /></button>
+              <button type="button" className={CALENDAR_SIDEBAR_GOOGLE_ADD_BUTTON_CLASS_NAME} style={googleCalendarAddButtonStyle} onClick={handleAddGoogleCalendar} disabled={isAnyCalendarConnecting} aria-label={ADD_GOOGLE_CALENDAR_LABEL} title={ADD_GOOGLE_CALENDAR_LABEL}><IconPlus className="h-4 w-4" /></button>
             </div>
           </div>
           <div className={CALENDAR_SIDEBAR_GOOGLE_LIST_CLASS_NAME}><GoogleAccountsSection accounts={googleAccounts} isConnecting={isAnyCalendarConnecting} projectCalendarLinks={projectCalendarLinks} googleCalendarColorOverrides={googleCalendarColorOverrides} onAddCalendar={handleAddGoogleCalendar} onToggleCalendar={onToggleCalendar} onOpenCalendarContextMenu={handleOpenCalendarContextMenu} onReconnectAccount={onReconnectAccount} /></div>
@@ -363,7 +378,7 @@ const CalendarSidebarContent = ({ appProjects, projectCalendarLinks, googleCalen
       </nav>
       <input ref={colorInputRef} type="color" aria-label="カレンダー色" style={COLOR_INPUT_STYLE} onChange={handleChangeCalendarColor} />
       {calendarContextMenu ? createPortal(<CalendarListMenu x={calendarContextMenu.x} y={calendarContextMenu.y} actions={calendarMenuActions} menuRef={calendarContextMenuRef} noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} />, document.body) : null}
-      {projectLinksContextMenu ? createPortal(<ProjectCalendarLinksMenu x={projectLinksContextMenu.x} y={projectLinksContextMenu.y} actions={projectLinksMenuActions} menuRef={projectLinksContextMenuRef} noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} />, document.body) : null}
+      {projectLinksContextMenu ? createPortal(<ProjectCalendarLinksMenu x={projectLinksContextMenu.x} y={projectLinksMenuActions} actions={projectLinksMenuActions} menuRef={projectLinksContextMenuRef} noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} />, document.body) : null}
     </div>
   );
 };
