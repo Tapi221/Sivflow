@@ -1,6 +1,6 @@
 import React from "react";
-import type { TagColorKey } from "@/chip/budge/tag/tagColor";
 import { TagBadge } from "@/chip/budge/tag/Badge.Tag";
+import type { TagColorKey } from "@/chip/budge/tag/tagColor";
 import { cn } from "@/lib/utils";
 
 interface TagChipProps {

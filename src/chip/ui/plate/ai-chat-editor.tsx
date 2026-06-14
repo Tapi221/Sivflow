@@ -3,8 +3,8 @@
 import { memo } from "react";
 import { useAIChatEditor } from "@platejs/ai/react";
 import { usePlateEditor } from "platejs/react";
-import { EditorStatic } from "./editor-static";
 import { BaseEditorKit } from "@/components/editor/editor-base-kit";
+import { EditorStatic } from "./editor-static";
 
 type AIChatEditorProps = {
   content: string;

@@ -1,11 +1,11 @@
 "use client";
 
-import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
-import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
+import { useState } from "react";
 import { SuggestionPlugin } from "@platejs/suggestion/react";
+import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
+import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
 import { CheckIcon, EyeIcon, PencilLineIcon, PenIcon } from "lucide-react";
 import { useEditorReadOnly, useEditorRef, usePluginOption } from "platejs/react";
-import { useState } from "react";
 import type { ReactNode } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { ToolbarButton } from "@/chip/ui/plate/toolbar";

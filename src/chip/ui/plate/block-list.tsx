@@ -1,10 +1,10 @@
 "use client";
-import type * as React from "react";
 import { isOrderedList } from "@platejs/list";
 import { useTodoListElement, useTodoListElementState } from "@platejs/list/react";
 import type { TListElement } from "platejs";
 import type { PlateElementProps, RenderNodeWrapper } from "platejs/react";
 import { useReadOnly } from "platejs/react";
+import type * as React from "react";
 import { Checkbox } from "@/chip/ui/checkbox";
 import { cn } from "@/lib/utils";
 

@@ -1,8 +1,8 @@
-import type * as React from "react";
 import { isOrderedList } from "@platejs/list";
 import { CheckIcon } from "lucide-react";
 import type { RenderStaticNodeWrapper, TListElement } from "platejs";
 import type { SlateRenderElementProps } from "platejs/static";
+import type * as React from "react";
 import { cn } from "@/lib/utils";
 
 type ListConfig = Record<

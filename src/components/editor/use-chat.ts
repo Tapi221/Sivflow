@@ -1,7 +1,7 @@
 "use client";
 
+import type { Chat, ChatMessage, MessageDataPart, TComment, ToolName, TTableCellUpdate } from "@/components/editor/use-real-chat";
 import { useRealChat } from "@/components/editor/use-real-chat";
-import type { Chat, ChatMessage, MessageDataPart, TComment, TTableCellUpdate, ToolName } from "@/components/editor/use-real-chat";
 
 const useChat = useRealChat;
 

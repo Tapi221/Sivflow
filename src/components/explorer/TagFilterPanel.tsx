@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent, MouseEvent } from "react";
+import { TagBadge } from "@/chip/budge/tag/Badge.Tag";
 import type { TagColorKey } from "@/chip/budge/tag/tagColor";
 import { getTagColorKey } from "@/chip/budge/tag/tagColor";
 import { SurfaceButton } from "@/chip/ui/button/surface-button";
@@ -7,7 +8,6 @@ import { FilterPanelShell } from "@/components/panel/FilterPanelShell";
 import { PanelEmptyState } from "@/components/panel/PanelEmptyState";
 import type { SegmentedOption } from "@/components/panel/SegmentedControlGroup";
 import { SegmentedControlGroup } from "@/components/panel/SegmentedControlGroup";
-import { TagBadge } from "@/chip/budge/tag/Badge.Tag";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
