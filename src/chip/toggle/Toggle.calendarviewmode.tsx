@@ -22,6 +22,7 @@ const CALENDAR_VIEW_MODE_INACTIVE_TEXT_CLASS = "text-neutral-500";
 const CALENDAR_VIEW_MODE_HOVER_TEXT_CLASS = "hover:text-neutral-900";
 const CALENDAR_VIEW_MODE_DISABLED_TEXT_CLASS = "cursor-not-allowed text-neutral-300";
 const CALENDAR_VIEW_MODE_INDICATOR_CLASS = "pointer-events-none absolute inset-0 z-0 rounded-xl bg-white shadow-none";
+const CALENDAR_VIEW_MODE_LABEL_CLASS = "relative z-10 inline-flex origin-center scale-95";
 const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_MODES);
 const STATIC_TIMETABLE_VIEW_MODE = "timetable" satisfies CalendarViewMode;
@@ -138,7 +139,7 @@ const ToggleCalendarViewMode = ({
             />
           )
         )}
-        <span className="relative z-10">{option.label}</span>
+        <span className={CALENDAR_VIEW_MODE_LABEL_CLASS}>{option.label}</span>
       </button>
     );
   }), [displayedValue, handleChange, options, shouldRenderStaticIndicators]);
@@ -164,7 +165,7 @@ const ToggleCalendarViewMode = ({
             CALENDAR_VIEW_MODE_DISABLED_TEXT_CLASS,
           )}
         >
-          <span className="relative z-10">{t.viewTimetable}</span>
+          <span className={CALENDAR_VIEW_MODE_LABEL_CLASS}>{t.viewTimetable}</span>
         </button>
       )}
     </div>
