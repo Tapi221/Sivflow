@@ -23,7 +23,7 @@ import { applyCalendarEventMoveOverrides, useCalendarEventMoveController } from 
 import { useProjectCalendarActions } from "@/features/calendar/useProjectCalendarActions";
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
 import { createCalendarEventsScopeKey, useTransientEmptyCalendarEvents } from "@/features/calendar/useTransientEmptyCalendarEvents";
-import { ScheduleScreenHeaderDesktop } from "@/features/header/ScheduleScreenHeader.desktop";
+import { ScheduleScreenHeaderDesktop } from "@/features/header/Header.Schedule.desktop";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
