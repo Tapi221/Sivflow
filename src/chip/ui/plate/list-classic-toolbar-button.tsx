@@ -1,26 +1,34 @@
 "use client";
-
 import { IndentIcon, ListIcon, ListOrderedIcon, OutdentIcon } from "lucide-react";
-
 import { KEYS } from "platejs";
-
 import { useEditorRef } from "platejs/react";
-
-import type { ToolbarButtonProps } from "./toolbar";
-
-import { ToolbarButton } from "./toolbar";
-
-
+import { ToolbarButton } from "@/chip/ui/plate/toolbar";
+import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
 
 type ListToolbarButtonProps = ToolbarButtonProps & {
   nodeType: string;
 };
-
 type IndentToolbarButtonProps = ToolbarButtonProps & {
   reverse?: boolean;
 };
+type IndentTransforms = {
+  indent: () => void;
+  outdent: () => void;
+};
 
-
+const getIndentTransforms = (editor: ReturnType<typeof useEditorRef>) => {
+  return editor.tf as typeof editor.tf & IndentTransforms;
+};
+const runIndentCommand = (editor: ReturnType<typeof useEditorRef>, reverse: boolean) => {
+  const indentTransforms = getIndentTransforms(editor);
+  if (reverse) {
+    indentTransforms.outdent();
+    editor.tf.focus();
+    return;
+  }
+  indentTransforms.indent();
+  editor.tf.focus();
+};
 
 const ListToolbarButton = ({ nodeType, ...props }: ListToolbarButtonProps) => {
   const editor = useEditorRef();
@@ -38,36 +46,21 @@ const ListToolbarButton = ({ nodeType, ...props }: ListToolbarButtonProps) => {
     </ToolbarButton>
   );
 };
-
 const IndentToolbarButton = ({ reverse = false, ...props }: IndentToolbarButtonProps) => {
   const editor = useEditorRef();
   return (
     <ToolbarButton
       {...props}
       tooltip={reverse ? "Outdent" : "Indent"}
-      onClick={() => {
-        if (reverse) {
-          editor.tf.outdent();
-          editor.tf.focus();
-          return;
-        }
-        editor.tf.indent();
-        editor.tf.focus();
-      }}
+      onClick={() => runIndentCommand(editor, reverse)}
     >
       {props.children ?? (reverse ? <OutdentIcon /> : <IndentIcon />)}
     </ToolbarButton>
   );
 };
-
 const TodoListToolbarButton = (props: ToolbarButtonProps) => {
   return <ListToolbarButton {...props} nodeType={KEYS.listTodo} />;
 };
 
-
-
 export { IndentToolbarButton, ListToolbarButton, TodoListToolbarButton };
-
-
-
 export type { IndentToolbarButtonProps, ListToolbarButtonProps };
