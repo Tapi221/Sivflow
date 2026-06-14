@@ -45,11 +45,13 @@ beforeAll(() => {
 });
 
 afterEach(() => {
+  vi.restoreAllMocks();
   cleanup();
 });
 
 describe("PlateEditor table rendering", () => {
   it("renders a table document without requiring a missing table store provider", () => {
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
     const MinimalTableEditor = () => {
       const editor = usePlateEditor({
         plugins: TableKit,
@@ -68,5 +70,6 @@ describe("PlateEditor table rendering", () => {
     render(<MinimalTableEditor />);
 
     expect(screen.getByText("Table cell")).not.toBeNull();
+    expect(consoleErrorSpy.mock.calls).toEqual([]);
   });
 });
