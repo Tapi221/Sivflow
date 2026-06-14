@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CardEditorPaneMediaDialogs } from "@/chip/panel/dialog.desktop/Dialog.CardEditorPaneMedia";
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
 import { CardOverlayTopRight } from "@/components/card/frame/CardOverlayTopRight";
 import { FaceSwitchBadge } from "@/components/card/frame/FaceSwitchBadge";
-import { CardEditorPaneMediaDialogs } from "@/components/folder/panes/CardEditorPaneMediaDialogs";
 import { useCardEditorPaneController } from "@/components/folder/panes/useCardEditorPaneController";
 import { CANONICAL_CARD_WIDTH, CARD_ROW_PX, layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
