@@ -10,7 +10,13 @@ const ourFileRouter = {
     pdf: { maxFileSize: "32MB" },
     text: { maxFileSize: "8MB" },
     video: { maxFileSize: "256MB" },
-  }).onUploadComplete(({ file }) => file),
+  }).onUploadComplete(({ file }) => ({
+    key: file.key,
+    name: file.name,
+    size: file.size,
+    type: file.type,
+    url: file.url,
+  })),
 } satisfies FileRouter;
 
 type OurFileRouter = typeof ourFileRouter;
