@@ -1,15 +1,14 @@
 "use client";
-
 import { LineHeightPlugin } from "@platejs/basic-styles/react";
-import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
+import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
 import { CheckIcon, WrapText } from "lucide-react";
 import { useEditorRef, useSelectionFragmentProp } from "platejs/react";
 import { useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
-const LINE_HEIGHT_MENU_ITEM_CLASS_NAME = "dropdown-menu__radio-item--check-end min-w-[180px]";
+const LINE_HEIGHT_MENU_ITEM_CLASS_NAME = "dropdown-menu__radio-item--check-end min-w-44";
 
 const LineHeightToolbarButton = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
