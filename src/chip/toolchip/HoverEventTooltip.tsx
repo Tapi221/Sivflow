@@ -1,10 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ReactNode } from "react";
+import { emitHoverTooltipOpen, subscribeHoverTooltipOpen } from "@/chip/toolchip/hoverTooltipEvents";
 import { cn } from "@/lib/utils";
-import { emitHoverTooltipOpen, subscribeHoverTooltipOpen } from "./hoverTooltipEvents";
-
-
 
 type TooltipSide = "top" | "bottom";
 type TooltipPosition = {
@@ -31,10 +29,8 @@ type HoverEventTooltipProps = {
   onEdit?: () => void;
 };
 
-
-
 const TOOLTIP_SURFACE_CLASS_NAME = "relative flex max-w-64 flex-col gap-1.5 overflow-visible rounded-2xl border border-white/70 bg-white/85 px-3 py-2.5 text-slate-600 shadow-xl backdrop-blur-2xl";
-const TOOLTIP_BACKDROP_FADE_CLASS_NAME = "pointer-events-none absolute -inset-x-7 -inset-y-5 rounded-3xl bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.9)_0%,rgba(255,255,255,0.68)_42%,rgba(255,255,255,0)_78%)] blur-md";
+const TOOLTIP_BACKDROP_FADE_CLASS_NAME = "pointer-events-none absolute -inset-x-7 -inset-y-5 rounded-3xl bg-white/70 blur-md";
 const TOOLTIP_EDIT_BUTTON_CLASS_NAME = "-mr-1 -mt-1 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-transparent text-slate-600 opacity-70 transition hover:bg-white/65 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/40";
 const TOOLTIP_ARROW_CLASS_NAME = "absolute h-2.5 w-2.5 rotate-45 border-white/70 bg-white/85 backdrop-blur-2xl";
 const TOOLTIP_VIEWPORT_MARGIN = 12;
@@ -42,23 +38,17 @@ const TOOLTIP_BOUNDARY_GAP = 8;
 const TOOLTIP_ARROW_MARGIN = 18;
 const TOOLTIP_CLOSE_DELAY_MS = 120;
 
-
-
 const clampNumber = (value: number, min: number, max: number) => {
   if (max < min) return min;
-
   return Math.min(Math.max(value, min), max);
 };
 const getScrollBoundary = (element: HTMLElement): TooltipBoundary => {
   let current = element.parentElement;
-
   while (current && current !== document.body) {
     const style = window.getComputedStyle(current);
     const overflow = `${style.overflow}${style.overflowX}${style.overflowY}`;
-
     if (/(auto|scroll|overlay)/.test(overflow)) {
       const rect = current.getBoundingClientRect();
-
       return {
         top: Math.max(TOOLTIP_VIEWPORT_MARGIN, rect.top + TOOLTIP_BOUNDARY_GAP),
         bottom: Math.min(
@@ -67,10 +57,8 @@ const getScrollBoundary = (element: HTMLElement): TooltipBoundary => {
         ),
       };
     }
-
     current = current.parentElement;
   }
-
   return {
     top: TOOLTIP_VIEWPORT_MARGIN,
     bottom: window.innerHeight - TOOLTIP_VIEWPORT_MARGIN,
@@ -86,15 +74,11 @@ const resolveSide = (
   const neededSpace = tooltipHeight + offset;
   const spaceAbove = anchorRect.top - boundary.top;
   const spaceBelow = boundary.bottom - anchorRect.bottom;
-
   if (preferredSide === "top") {
     if (spaceAbove >= neededSpace || spaceAbove >= spaceBelow) return "top";
-
     return "bottom";
   }
-
   if (spaceBelow >= neededSpace || spaceBelow >= spaceAbove) return "bottom";
-
   return "top";
 };
 const resolvePosition = (
@@ -121,7 +105,6 @@ const resolvePosition = (
     TOOLTIP_ARROW_MARGIN,
     tooltipRect.width - TOOLTIP_ARROW_MARGIN,
   );
-
   return { x, y, side, arrowX, measured: true };
 };
 const getInitialPosition = (
@@ -131,16 +114,12 @@ const getInitialPosition = (
 ): TooltipPosition => {
   const x = anchorRect.left + anchorRect.width / 2;
   const y = preferredSide === "top" ? anchorRect.top - offset : anchorRect.bottom + offset;
-
   return { x, y, side: preferredSide, arrowX: 0, measured: false };
 };
 const getArrowClassName = (side: TooltipSide) => {
   if (side === "bottom") return "-top-1 -translate-x-1/2 border-l border-t";
-
   return "-bottom-1 -translate-x-1/2 border-b border-r";
 };
-
-
 
 const HoverEventTooltip = ({
   title,
@@ -159,23 +138,18 @@ const HoverEventTooltip = ({
   const closeTimerRef = useRef<number | null>(null);
   const tooltipIdRef = useRef(Symbol("hover-event-tooltip"));
   const [position, setPosition] = useState<TooltipPosition | null>(null);
-
   const tooltipTitle = title.trim();
   const tooltipSubtitle = subtitle?.trim();
   const hasContent = tooltipTitle.length > 0 || !!tooltipSubtitle;
-
   const clearCloseTimer = () => {
     if (closeTimerRef.current === null) return;
-
     window.clearTimeout(closeTimerRef.current);
     closeTimerRef.current = null;
   };
-
   const hideTooltip = () => {
     clearCloseTimer();
     setPosition(null);
   };
-
   const scheduleHideTooltip = () => {
     clearCloseTimer();
     closeTimerRef.current = window.setTimeout(() => {
@@ -183,30 +157,23 @@ const HoverEventTooltip = ({
       setPosition(null);
     }, TOOLTIP_CLOSE_DELAY_MS);
   };
-
   const showTooltip = () => {
     clearCloseTimer();
     if (disabled || !hasContent || !anchorRef.current) return;
-
     emitHoverTooltipOpen(tooltipIdRef.current);
-
     const rect = anchorRef.current.getBoundingClientRect();
     setPosition(getInitialPosition(rect, side, offset));
   };
-
   const handleEditButtonClick = () => {
     onEdit?.();
     hideTooltip();
   };
-
   useLayoutEffect(() => {
     if (!position || !anchorRef.current || !tooltipRef.current) return;
-
     const anchorRect = anchorRef.current.getBoundingClientRect();
     const tooltipRect = tooltipRef.current.getBoundingClientRect();
     const boundary = getScrollBoundary(anchorRef.current);
     const nextPosition = resolvePosition(anchorRect, tooltipRect, side, offset, boundary);
-
     setPosition((currentPosition) => {
       if (
         currentPosition?.measured &&
@@ -217,47 +184,36 @@ const HoverEventTooltip = ({
       ) {
         return currentPosition;
       }
-
       return nextPosition;
     });
   }, [offset, position, side]);
-
   useEffect(() => {
     return subscribeHoverTooltipOpen((tooltipId) => {
       if (tooltipId === tooltipIdRef.current) return;
-
       hideTooltip();
     });
   }, []);
-
   useEffect(() => {
     if (!position) return;
-
     const closeTooltip = () => {
       hideTooltip();
     };
-
     window.addEventListener("scroll", closeTooltip, true);
     window.addEventListener("resize", closeTooltip);
-
     return () => {
       window.removeEventListener("scroll", closeTooltip, true);
       window.removeEventListener("resize", closeTooltip);
     };
   }, [position]);
-
   useEffect(() => {
     if (!disabled && hasContent) return;
-
     hideTooltip();
   }, [disabled, hasContent]);
-
   useEffect(() => {
     return () => {
       clearCloseTimer();
     };
   }, []);
-
   return (
     <>
       <div
@@ -268,7 +224,6 @@ const HoverEventTooltip = ({
       >
         {children}
       </div>
-
       {position &&
         hasContent &&
         typeof document !== "undefined" &&
@@ -284,7 +239,7 @@ const HoverEventTooltip = ({
               pointerEvents: onEdit ? "auto" : "none",
             }}
             className={cn(
-              "animate-in fade-in-0 zoom-in-[0.98] duration-150 ease-out",
+              "animate-in fade-in-0 zoom-in-95 duration-150 ease-out",
               !position.measured && "opacity-0",
             )}
             onMouseEnter={onEdit ? clearCloseTimer : undefined}
@@ -306,7 +261,6 @@ const HoverEventTooltip = ({
                           {tooltipTitle}
                         </span>
                       )}
-
                       {tooltipSubtitle && (
                         <span className="mt-1 inline-flex rounded-full bg-sky-50/90 px-2 py-0.5 text-xs font-semibold leading-none tabular-nums text-slate-500">
                           {tooltipSubtitle}
@@ -314,7 +268,6 @@ const HoverEventTooltip = ({
                       )}
                     </span>
                   </div>
-
                   {onEdit && (
                     <button type="button" className={TOOLTIP_EDIT_BUTTON_CLASS_NAME} aria-label={editLabel} title={editLabel} onClick={handleEditButtonClick}>
                       <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -337,9 +290,6 @@ const HoverEventTooltip = ({
     </>
   );
 };
-
-
-
 HoverEventTooltip.displayName = "HoverEventTooltip";
 
 export { HoverEventTooltip };
