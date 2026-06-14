@@ -69,7 +69,7 @@ const renderMessage = (text: OAuthCallbackText): void => {
     "color": "#475569",
     "display": "flex",
     "flex-direction": "column",
-    "font-family": "var(--app-font-family-ui), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    "font-family": "var(--app-font-family-ui)",
     "justify-content": "center",
     "min-height": "100dvh",
     "padding": "24px",
