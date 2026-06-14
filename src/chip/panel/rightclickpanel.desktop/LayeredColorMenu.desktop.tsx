@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { TAG_COLOR_PALETTE } from "@shared/design-tokens/tag.palette";
+import { TAG_COLOR_PALETTE } from "@shared/design-tokens/Color.Tag";
 import type { CSSProperties, RefObject } from "react";
 import type { TagColorKey } from "@/chip/budge/tag/tagColor";
 import { getTagColorSwatchStyle, TAG_COLOR_KEYS } from "@/chip/budge/tag/tagColor";
