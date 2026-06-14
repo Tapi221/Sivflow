@@ -22,6 +22,7 @@ const SOURCE_ROW_CHECKED_TEXT_CLASS_NAME = "text-[#85827e]";
 const SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME = "text-[#85827e] opacity-70";
 const SOURCE_ROW_SWITCH_CLASS_NAME = "mr-0";
 const SOURCE_ROW_SWITCH_SIZE_CLASS_NAME = "h-4 w-4";
+const SOURCE_ROW_SWITCH_CHECK_STROKE_WIDTH = 2.4;
 
 const SelectableGoogleSourceSwitch = ({ label, checked, color, onToggle }: SelectableGoogleSourceSwitchProps) => {
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
@@ -30,7 +31,7 @@ const SelectableGoogleSourceSwitch = ({ label, checked, color, onToggle }: Selec
   };
   return (
     <button type="button" role="switch" aria-checked={checked} aria-label={`${label} を${checked ? "非表示" : "表示"}`} onClick={handleClick} className={cn("flex shrink-0 items-center justify-center rounded-full transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d7d7d7]", SOURCE_ROW_SWITCH_SIZE_CLASS_NAME, SOURCE_ROW_SWITCH_CLASS_NAME)}>
-      {checked ? <AnimatedCheckboxBase checked={checked} color={color} className={SOURCE_ROW_SWITCH_SIZE_CLASS_NAME} /> : <span className={cn("rounded-full border-[1.5px] border-[#d7d7d7] bg-white", SOURCE_ROW_SWITCH_SIZE_CLASS_NAME)} aria-hidden="true" />}
+      {checked ? <AnimatedCheckboxBase checked={checked} color={color} className={SOURCE_ROW_SWITCH_SIZE_CLASS_NAME} strokeWidth={SOURCE_ROW_SWITCH_CHECK_STROKE_WIDTH} /> : <span className={cn("rounded-full border-[1.5px] border-[#d7d7d7] bg-white", SOURCE_ROW_SWITCH_SIZE_CLASS_NAME)} aria-hidden="true" />}
     </button>
   );
 };
