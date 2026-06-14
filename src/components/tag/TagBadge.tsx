@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties, SVGProps } from "react";
-import type { TagColorKey } from "@/chip/tag/tagColor";
-import { getTagColorStyle } from "@/chip/tag/tagColor";
+import type { TagColorKey } from "@/chip/budge/tag/tagColor";
+import { getTagColorStyle } from "@/chip/budge/tag/tagColor";
 import { cn } from "@/lib/utils";
 import { X } from "@/ui/icons";
 

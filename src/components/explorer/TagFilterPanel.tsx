@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent, MouseEvent } from "react";
-import type { TagColorKey } from "@/chip/tag/tagColor";
-import { getTagColorKey } from "@/chip/tag/tagColor";
+import type { TagColorKey } from "@/chip/budge/tag/tagColor";
+import { getTagColorKey } from "@/chip/budge/tag/tagColor";
 import { SurfaceButton } from "@/chip/ui/button/surface-button";
 import { FilterPanelShell } from "@/components/panel/FilterPanelShell";
 import { PanelEmptyState } from "@/components/panel/PanelEmptyState";

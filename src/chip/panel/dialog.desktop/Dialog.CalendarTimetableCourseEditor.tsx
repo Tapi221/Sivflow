@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import type { CalendarTimetableColorKey, CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTimetablePeriod, CalendarTimetableSlot, CalendarTimetableVisibleDayCount, CalendarTimetableWeekdayIndex } from "@core/domain/calendar/timetable/timetable.types";
 import type { ComponentType, SVGProps } from "react";
 import * as stratisIcons from "stratis-ui-icons";
-import { TAG_COLOR_KEYS } from "@/chip/tag/tag.constants";
-import { getTagColorStyle } from "@/chip/tag/tag.style";
+import { TAG_COLOR_KEYS } from "@/chip/budge/tag/tag.constants";
+import { getTagColorStyle } from "@/chip/budge/tag/tag.style";
 import { cn } from "@/lib/utils";
 
 

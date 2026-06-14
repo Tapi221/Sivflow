@@ -1,4 +1,4 @@
-import type { TagColorKey, TagColorPalette } from "@/chip/tag/tag.types";
+import type { TagColorKey, TagColorPalette } from "@/chip/budge/tag/tag.types";
 
 
 

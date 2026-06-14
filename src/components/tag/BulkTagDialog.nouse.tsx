@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getTagColorKey } from "@/chip/tag/tagColor";
+import { getTagColorKey } from "@/chip/budge/tag/tagColor";
 import { Button } from "@/chip/ui/button/button";
 import { Dialog, DialogContent, DialogTitle } from "@/chip/ui/dialog/dialog";
 import { useTags } from "@/features/settings/hooks/useTags";

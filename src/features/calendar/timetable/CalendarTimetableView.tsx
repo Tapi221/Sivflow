@@ -7,7 +7,7 @@ import * as stratisIcons from "stratis-ui-icons";
 import { CalendarTimetableCourseEditorDialog } from "@/chip/panel/dialog.desktop/Dialog.CalendarTimetableCourseEditor";
 import { CalendarTimetableSettingsDialog } from "@/chip/panel/dialog.desktop/Dialog.CalendarTimetableSettings";
 import { CalendarTimetableSyllabusCatalogDialog } from "@/chip/panel/dialog.desktop/Dialog.CalendarTimetableSyllabusCatalog";
-import { getTagColorStyle } from "@/chip/tag/tag.style";
+import { getTagColorStyle } from "@/chip/budge/tag/tag.style";
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
 import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
