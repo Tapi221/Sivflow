@@ -60,7 +60,7 @@ vi.mock("@shared/i18n/useT", () => ({
 
 const createGoogleAccountDisplay = (): GoogleAccountDisplay => ({
   accountId: "google-account-1",
-  email: "akari.tt221@gmail.com",
+  email: "account@example.com",
   name: null,
   photoUrl: null,
   accessToken: null,
@@ -110,12 +110,13 @@ describe("CalendarSidebar", () => {
     expect(within(myProjectsButton).queryByTestId("my-projects-calendar-icon")).toBeNull();
   });
 
-  it("GOOGLE CALENDARS のセクション見出しと追加ボタンを描画しない", () => {
+  it("GOOGLE CALENDARS のセクション見出しと追加ボタンとアカウント見出しを描画しない", () => {
     render(<CalendarSidebar {...createCalendarSidebarProps()} googleAccounts={[createGoogleAccountDisplay()]} />);
 
     expect(screen.queryByText("GOOGLE CALENDARS")).toBeNull();
     expect(screen.queryByRole("button", { name: "Googleカレンダーを追加" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "akari.tt221" })).not.toBeNull();
+    expect(screen.queryByRole("button", { name: "account" })).toBeNull();
+    expect(screen.queryByText("Primary")).not.toBeNull();
   });
 
   it("MY PROJECTS と Google アカウント一覧の間に区切り線を描画しない", () => {
