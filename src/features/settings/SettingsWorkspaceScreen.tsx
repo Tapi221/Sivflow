@@ -1,17 +1,15 @@
-import "./SettingsWorkspaceScreen.css";
 import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import type { LocalAiSettings } from "@platform/ai/localAiSettings";
 import { getLocalAiSettings, setLocalAiSettings } from "@platform/ai/localAiSettings";
 import { testOllamaConnection } from "@platform/ai/ollamaClient";
-import type { ReactNode } from "react";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
 import { readStoredAccounts } from "@/integration/googlecalendar-integration/gcal.multi-storage";
+import { cn } from "@/lib/utils";
 import type { UserSettings } from "@/types";
 import { Brain, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/ui/icons";
-
-
 
 type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "ai" | "hotkey";
 type SettingsLanguage = UserSettings["language"];
@@ -65,12 +63,12 @@ type AccountProfile = {
 type SettingsWorkspaceCopy = {
   ariaLabel: string;
   navAriaLabel: string;
-  sections: Record<SettingsSectionId, { label: string; }>;
-  languageOptions: Record<SettingsLanguage, { label: string; }>;
-  weekStartOptions: Record<UserSettings["weekStartDay"], { label: string; }>;
-  questionDisplayOptions: Record<QuestionDisplayMode, { label: string; }>;
-  markdownTabOptions: Record<MarkdownTabSize, { label: string; }>;
-  hotkeys: readonly { label: string; keys: string; }[];
+  sections: Record<SettingsSectionId, { label: string }>;
+  languageOptions: Record<SettingsLanguage, { label: string }>;
+  weekStartOptions: Record<UserSettings["weekStartDay"], { label: string }>;
+  questionDisplayOptions: Record<QuestionDisplayMode, { label: string }>;
+  markdownTabOptions: Record<MarkdownTabSize, { label: string }>;
+  hotkeys: readonly { label: string; keys: string }[];
   accountProfileTitle: string;
   accountProfileDescription: string;
   emailUnset: string;
@@ -134,8 +132,6 @@ type SettingsWorkspaceCopy = {
   localAiStatusFailed: string;
   hotkeyDescription: string;
 };
-
-
 
 const SETTINGS_SECTION_IDS: readonly SettingsSectionId[] = ["account", "preferences", "study", "editor", "audio", "ai", "hotkey"];
 const GOOGLE_PROVIDER_ID = "google.com";
@@ -245,21 +241,21 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     autoCarryOverLabel: "Carry over unfinished reviews",
     autoCarryOverDescription: "Move unfinished reviews to the next day.",
     delayBonusLabel: "Delay bonus",
-    delayBonusDescription: "Apply interval correction for overdue cards.",
-    reviewStartNextDayLabel: "Start reviews next day",
+    delayBonusDescription: "Use interval adjustment for overdue cards.",
+    reviewStartNextDayLabel: "Start review next day",
     reviewStartNextDayDescription: "Start reviewing new cards from the next day.",
     editorTitle: "Editor",
     editorDescription: "Input assistance for card editing.",
     questionDisplayLabel: "Question display",
-    markdownTabLabel: "Markdown tab size",
-    previewDefaultLabel: "Preview by default",
-    previewDefaultDescription: "Show the card body preview by default.",
-    autoDraftLabel: "Auto draft",
-    autoDraftDescription: "Keep drafts automatically while editing.",
+    markdownTabLabel: "Markdown tab width",
+    previewDefaultLabel: "Show preview by default",
+    previewDefaultDescription: "Open the card body preview by default.",
+    autoDraftLabel: "Auto keep drafts",
+    autoDraftDescription: "Keep editing drafts automatically.",
     autoSaveLabel: "Auto save",
     autoSaveDescription: "Save edits automatically.",
     audioTitle: "Audio",
-    audioDescription: "Voice playback and sound effects during study.",
+    audioDescription: "Study audio playback and sound effects.",
     soundEffectsLabel: "Sound effects",
     soundEffectsDescription: "Enable operation and review result sounds.",
     questionVoiceLabel: "Question voice",
@@ -267,32 +263,32 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     answerVoiceLabel: "Answer voice",
     answerVoiceDescription: "Automatically play answer text audio.",
     aiTitle: "Local AI",
-    aiDescription: "Device-local LLM connection used by Q&A card creation. This setting is not synced.",
-    localAiEnabledLabel: "Local AI answers",
-    localAiEnabledDescription: "Enable local LLM answer drafts in Q&A chat.",
+    aiDescription: "Per-device local LLM connection for Q&A card creation. This setting does not sync.",
+    localAiEnabledLabel: "Local AI answer suggestions",
+    localAiEnabledDescription: "Enable local LLM answer suggestions in Q&A chat.",
     localAiProviderLabel: "Provider",
     localAiBaseUrlLabel: "Base URL",
     localAiBaseUrlDescription: "Enter the Ollama base URL. Example: http://127.0.0.1:11434",
     localAiModelLabel: "Model",
-    localAiModelDescription: "Enter an installed Ollama model. Example: llama3.2:3b",
+    localAiModelDescription: "Enter the model name already pulled in Ollama. Example: llama3.2:3b",
     localAiConnectionLabel: "Connection",
     localAiTestButton: "Test connection",
     localAiStatusIdle: "Not checked",
     localAiStatusTesting: "Checking",
     localAiStatusConnected: "Connected",
     localAiStatusModelMissing: "Connected / model not found",
-    localAiStatusFailed: "Connection failed",
-    hotkeyDescription: "Keyboard controls",
+    localAiStatusFailed: "Could not connect",
+    hotkeyDescription: "Keyboard shortcuts",
   },
   zh: {
     ariaLabel: "设置",
-    navAriaLabel: "设置分类",
-    sections: { account: { label: "账号" }, preferences: { label: "偏好设置" }, study: { label: "学习" }, editor: { label: "编辑器" }, audio: { label: "音频" }, ai: { label: "本地 AI" }, hotkey: { label: "Hotkey" } },
+    navAriaLabel: "设置类别",
+    sections: { account: { label: "账户" }, preferences: { label: "偏好设置" }, study: { label: "学习" }, editor: { label: "编辑器" }, audio: { label: "音频" }, ai: { label: "本地 AI" }, hotkey: { label: "快捷键" } },
     languageOptions: { ja: { label: "日本語" }, en: { label: "English" }, zh: { label: "中文" } },
     weekStartOptions: { monday: { label: "星期一" }, sunday: { label: "星期日" } },
     questionDisplayOptions: { tap_to_reveal: { label: "点击显示" }, always: { label: "始终显示" } },
     markdownTabOptions: { 2: { label: "2" }, 4: { label: "4" }, 8: { label: "8" } },
-    hotkeys: [{ label: "打开搜索", keys: "⌘K / Ctrl K" }, { label: "切换左侧边栏", keys: "⌘B / Ctrl B" }, { label: "切换右侧边栏", keys: "⌘⇧B / Ctrl Shift B" }, { label: "翻转卡片", keys: "Space / Enter" }, { label: "在卡片之间移动", keys: "↑ / ↓" }],
+    hotkeys: [{ label: "打开搜索", keys: "⌘K / Ctrl K" }, { label: "切换左侧栏", keys: "⌘B / Ctrl B" }, { label: "切换右侧栏", keys: "⌘⇧B / Ctrl Shift B" }, { label: "翻转卡片", keys: "Space / Enter" }, { label: "移动卡片", keys: "↑ / ↓" }],
     accountProfileTitle: "个人资料",
     accountProfileDescription: "当前登录会话。",
     emailUnset: "未设置邮箱地址",
@@ -301,37 +297,37 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     statusLabel: "状态",
     signedIn: "已登录",
     guest: "访客",
-    providerLabel: "提供商",
+    providerLabel: "提供方",
     preferencesTitle: "偏好设置",
-    preferencesDescription: "显示和日期的基本设置。",
+    preferencesDescription: "显示和日期的基础设置。",
     languageLabel: "语言",
-    weekStartLabel: "一周开始于",
+    weekStartLabel: "每周开始日",
     notificationsLabel: "通知",
     notificationsDescription: "启用复习通知。",
     studyTitle: "学习",
-    studyDescription: "复习卡片显示和日期转移行为。",
+    studyDescription: "复习卡片显示和顺延行为。",
     showHardLabel: "显示 Hard",
     showHardDescription: "在复习结果中显示 Hard。",
     showEasyLabel: "显示 Easy",
     showEasyDescription: "在复习结果中显示 Easy。",
-    autoCarryOverLabel: "结转未完成复习",
-    autoCarryOverDescription: "将未完成的复习结转到第二天。",
+    autoCarryOverLabel: "顺延未完成内容",
+    autoCarryOverDescription: "将未完成的复习顺延到次日。",
     delayBonusLabel: "延迟奖励",
-    delayBonusDescription: "为逾期复习的卡片使用间隔修正。",
+    delayBonusDescription: "对逾期复习的卡片使用间隔修正。",
     reviewStartNextDayLabel: "次日开始复习",
-    reviewStartNextDayDescription: "新卡片从第二天开始复习。",
+    reviewStartNextDayDescription: "新卡片从次日开始复习。",
     editorTitle: "编辑器",
     editorDescription: "卡片编辑界面的输入辅助。",
     questionDisplayLabel: "问题显示",
-    markdownTabLabel: "Markdown 缩进宽度",
-    previewDefaultLabel: "默认预览",
-    previewDefaultDescription: "默认显示卡片正文预览。",
-    autoDraftLabel: "自动草稿",
-    autoDraftDescription: "编辑时自动保留草稿。",
+    markdownTabLabel: "Markdown 制表宽度",
+    previewDefaultLabel: "默认显示预览",
+    previewDefaultDescription: "默认打开卡片正文预览。",
+    autoDraftLabel: "自动保留草稿",
+    autoDraftDescription: "自动保留编辑中的草稿。",
     autoSaveLabel: "自动保存",
     autoSaveDescription: "自动保存编辑内容。",
     audioTitle: "音频",
-    audioDescription: "学习时的语音播放和音效。",
+    audioDescription: "学习时的音频播放和音效。",
     soundEffectsLabel: "音效",
     soundEffectsDescription: "启用操作音和复习结果音。",
     questionVoiceLabel: "问题语音",
@@ -339,26 +335,25 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
     answerVoiceLabel: "答案语音",
     answerVoiceDescription: "自动播放答案文本语音。",
     aiTitle: "本地 AI",
-    aiDescription: "Q&A 卡片创建使用的本机 LLM 连接。此设置不会同步。",
-    localAiEnabledLabel: "本地 AI 答案",
-    localAiEnabledDescription: "在 Q&A 聊天中启用本地 LLM 答案草稿。",
-    localAiProviderLabel: "提供商",
+    aiDescription: "Q&A 卡片创建使用的每设备本地 LLM 连接。此设置不会同步。",
+    localAiEnabledLabel: "本地 AI 答案建议",
+    localAiEnabledDescription: "在 Q&A 聊天中启用本地 LLM 答案建议。",
+    localAiProviderLabel: "提供方",
     localAiBaseUrlLabel: "连接 URL",
     localAiBaseUrlDescription: "输入 Ollama base URL。例: http://127.0.0.1:11434",
     localAiModelLabel: "模型",
-    localAiModelDescription: "输入已安装的 Ollama 模型。例: llama3.2:3b",
+    localAiModelDescription: "输入已在 Ollama pull 的模型名。例: llama3.2:3b",
     localAiConnectionLabel: "连接状态",
-    localAiTestButton: "测试连接",
+    localAiTestButton: "连接测试",
     localAiStatusIdle: "未确认",
     localAiStatusTesting: "确认中",
     localAiStatusConnected: "已连接",
-    localAiStatusModelMissing: "已连接 / 未找到模型",
-    localAiStatusFailed: "连接失败",
-    hotkeyDescription: "键盘操作",
+    localAiStatusModelMissing: "已连接 / 未检测到模型",
+    localAiStatusFailed: "无法连接",
+    hotkeyDescription: "键盘快捷键",
   },
 };
-
-
+const SETTINGS_NAV_ICON_CLASS_NAME = "h-4 w-4";
 
 const buildSettingsSections = (copy: SettingsWorkspaceCopy): SettingsSectionDefinition[] => SETTINGS_SECTION_IDS.map((id) => ({ id, label: copy.sections[id].label }));
 const normalizeAccountEmail = (email: string | null | undefined): string | null => {
@@ -368,13 +363,11 @@ const normalizeAccountEmail = (email: string | null | undefined): string | null 
 const getStoredSignedInGoogleAccount = (currentUser: AuthSessionUser, storedAccounts: readonly StoredGoogleAccount[]): StoredGoogleAccount | null => {
   const userEmail = normalizeAccountEmail(currentUser?.email);
   if (!userEmail) return storedAccounts[0] ?? null;
-
   return storedAccounts.find((account) => normalizeAccountEmail(account.email) === userEmail) ?? null;
 };
 const getAccountProfile = (currentUser: AuthSessionUser, storedAccounts: readonly StoredGoogleAccount[]): AccountProfile => {
   const providerProfile = currentUser?.providerData.find((profile) => profile.providerId === GOOGLE_PROVIDER_ID) ?? currentUser?.providerData.at(0) ?? null;
   const storedAccount = getStoredSignedInGoogleAccount(currentUser, storedAccounts);
-
   return {
     displayName: storedAccount?.name ?? providerProfile?.displayName ?? currentUser?.displayName ?? null,
     email: storedAccount?.email ?? currentUser?.email ?? providerProfile?.email ?? null,
@@ -385,10 +378,8 @@ const getAccountProfile = (currentUser: AuthSessionUser, storedAccounts: readonl
 const getAccountDisplayName = (displayName: string | null | undefined, email: string | null | undefined, fallbackLabel: string): string => {
   const trimmedDisplayName = displayName?.trim();
   if (trimmedDisplayName) return trimmedDisplayName;
-
   const emailLocalPart = email?.split("@")[0]?.trim();
   if (emailLocalPart) return emailLocalPart;
-
   return fallbackLabel;
 };
 const getAccountInitial = (displayName: string): string => {
@@ -402,52 +393,50 @@ const getLocalAiConnectionStatusLabel = (status: LocalAiConnectionStatus, copy: 
   if (status === "failed") return copy.localAiStatusFailed;
   return copy.localAiStatusIdle;
 };
-const getSectionIcon = (sectionId: SettingsSectionId, className: string): ReactNode => {
-  if (sectionId === "account") return <User className={className} size={17} />;
-  if (sectionId === "preferences") return <Globe className={className} size={17} />;
-  if (sectionId === "study") return <Shield className={className} size={17} />;
-  if (sectionId === "editor") return <Type className={className} size={17} />;
-  if (sectionId === "audio") return <Volume2 className={className} size={17} />;
-  if (sectionId === "ai") return <Brain className={className} size={17} />;
-  if (sectionId === "hotkey") return <Keyboard className={className} size={17} />;
+const getSectionIcon = (sectionId: SettingsSectionId): ReactNode => {
+  if (sectionId === "account") return <User className={SETTINGS_NAV_ICON_CLASS_NAME} size={16} />;
+  if (sectionId === "preferences") return <Globe className={SETTINGS_NAV_ICON_CLASS_NAME} size={16} />;
+  if (sectionId === "study") return <Shield className={SETTINGS_NAV_ICON_CLASS_NAME} size={16} />;
+  if (sectionId === "editor") return <Type className={SETTINGS_NAV_ICON_CLASS_NAME} size={16} />;
+  if (sectionId === "audio") return <Volume2 className={SETTINGS_NAV_ICON_CLASS_NAME} size={16} />;
+  if (sectionId === "ai") return <Brain className={SETTINGS_NAV_ICON_CLASS_NAME} size={16} />;
+  if (sectionId === "hotkey") return <Keyboard className={SETTINGS_NAV_ICON_CLASS_NAME} size={16} />;
   return null;
 };
 
-
-
 const SettingsSectionBlock = ({ title, description, children }: SettingsSectionBlockProps) => {
   return (
-    <section className="settings-workspace__section-card" aria-label={title}>
-      <div className="settings-workspace__section-heading">
-        <h3>{title}</h3>
-        {description ? <p>{description}</p> : null}
+    <section className="w-full overflow-visible border-0 bg-white" aria-label={title}>
+      <div className="border-b border-stone-100 px-6 pb-4 pt-5">
+        <h3 className="m-0 text-base font-semibold leading-6 tracking-tight text-neutral-900">{title}</h3>
+        {description ? <p className="mt-0.5 text-sm font-medium leading-5 text-stone-500">{description}</p> : null}
       </div>
-      <div className="settings-workspace__section-content">{children}</div>
+      <div className="flex flex-col">{children}</div>
     </section>
   );
 };
 const SettingToggle = ({ label, description, checked, onChange }: SettingToggleProps) => {
   return (
-    <div className="settings-workspace__row">
-      <div className="settings-workspace__row-copy">
-        <span className="settings-workspace__row-title">{label}</span>
-        {description ? <span className="settings-workspace__row-description">{description}</span> : null}
+    <div className="flex min-h-14 items-center gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="text-sm font-medium leading-5 tracking-tight text-neutral-800">{label}</span>
+        {description ? <span className="text-xs font-normal leading-5 text-stone-500">{description}</span> : null}
       </div>
-      <button type="button" className={`settings-workspace__switch${checked ? " is-checked" : ""}`} role="switch" aria-checked={checked} onClick={() => onChange(!checked)}>
-        <span className="settings-workspace__switch-thumb" />
+      <button type="button" className={cn("relative h-5 w-9 min-w-9 rounded-full border-0 p-0 outline-none transition-colors duration-100 ease-out", checked ? "bg-stone-500" : "bg-stone-300")} role="switch" aria-checked={checked} onClick={() => onChange(!checked)}>
+        <span className={cn("absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-100 ease-out", checked ? "translate-x-4" : "translate-x-0")} />
       </button>
     </div>
   );
 };
 const SettingChoiceRow = <T extends string | number,>({ label, value, options, onChange }: SettingChoiceRowProps<T>) => {
   return (
-    <div className="settings-workspace__row settings-workspace__row--choice">
-      <span className="settings-workspace__row-title">{label}</span>
-      <div className="settings-workspace__choice-options">
+    <div className="flex min-h-14 items-start justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
+      <span className="pt-1 text-sm font-medium leading-5 tracking-tight text-neutral-900">{label}</span>
+      <div className="flex max-w-sm shrink-0 flex-wrap justify-end gap-1.5">
         {options.map((option) => {
           const isSelected = option.value === value;
           return (
-            <button key={String(option.value)} type="button" className={`settings-workspace__choice-option${isSelected ? " is-selected" : ""}`} onClick={() => onChange(option.value)}>
+            <button key={String(option.value)} type="button" className={cn("inline-flex flex-none items-center justify-center rounded-full border-0 px-3 py-1.5 text-center text-xs font-semibold leading-4 outline-none transition-colors duration-100 ease-out", isSelected ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-500")} onClick={() => onChange(option.value)}>
               {option.label}
             </button>
           );
@@ -458,20 +447,20 @@ const SettingChoiceRow = <T extends string | number,>({ label, value, options, o
 };
 const SettingTextInputRow = ({ label, description, value, placeholder, onChange }: SettingTextInputRowProps) => {
   return (
-    <div className="settings-workspace__row settings-workspace__row--input">
-      <div className="settings-workspace__row-copy">
-        <span className="settings-workspace__row-title">{label}</span>
-        {description ? <span className="settings-workspace__row-description">{description}</span> : null}
+    <div className="flex min-h-14 items-start justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span className="text-sm font-medium leading-5 tracking-tight text-neutral-800">{label}</span>
+        {description ? <span className="text-xs font-normal leading-5 text-stone-500">{description}</span> : null}
       </div>
-      <input className="settings-workspace__text-input" value={value} placeholder={placeholder} onChange={(event) => onChange(event.target.value)} />
+      <input className="h-9 w-64 min-w-48 rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm font-medium leading-5 tracking-tight text-neutral-800 outline-none placeholder:text-stone-400 focus:border-stone-300 focus:bg-white" value={value} placeholder={placeholder} onChange={(event) => onChange(event.target.value)} />
     </div>
   );
 };
 const SettingKeyValue = ({ label, value }: SettingKeyValueProps) => {
   return (
-    <div className="settings-workspace__key-value">
-      <span>{label}</span>
-      <strong>{value}</strong>
+    <div className="flex min-h-14 items-center justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
+      <span className="text-sm font-medium tracking-tight text-stone-500">{label}</span>
+      <strong className="max-w-sm overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium tracking-tight text-neutral-800">{value}</strong>
     </div>
   );
 };
@@ -497,25 +486,20 @@ const SettingsWorkspaceScreen = () => {
   const weekStartDay = settings?.weekStartDay ?? "monday";
   const questionDisplayMode = settings?.questionDisplayMode ?? "tap_to_reveal";
   const markdownTabSize = settings?.markdownTabSize ?? 2;
-
   const updateBooleanSetting = (key: BooleanSettingsKey, checked: boolean) => {
     void updateSettings({ [key]: checked } as Partial<UserSettings>);
   };
-
   const handleLanguageChange = (nextLanguage: SettingsLanguage) => {
     setPendingLanguage(nextLanguage);
     void updateSettings({ language: nextLanguage });
   };
-
   const handleLocalAiSettingsChange = (nextSettings: LocalAiSettings) => {
     const savedSettings = setLocalAiSettings(nextSettings);
     setLocalAiSettingsState(savedSettings);
     setLocalAiConnectionStatus("idle");
   };
-
   const handleLocalAiConnectionTest = async () => {
     setLocalAiConnectionStatus("testing");
-
     try {
       const result = await testOllamaConnection();
       setLocalAiConnectionStatus(result.modelAvailable ? "connected" : "model-missing");
@@ -523,39 +507,36 @@ const SettingsWorkspaceScreen = () => {
       setLocalAiConnectionStatus("failed");
     }
   };
-
   const handleLogout = () => {
     void logout();
   };
-
   useEffect(() => {
     if (pendingLanguage === null || pendingLanguage !== persistedLanguage) return;
     setPendingLanguage(null);
   }, [pendingLanguage, persistedLanguage]);
-
   return (
-    <div className="settings-workspace" aria-label={copy.ariaLabel}>
-      <aside className="settings-workspace__nav" aria-label={copy.navAriaLabel}>
-        <nav className="settings-workspace__nav-list">
+    <div className="flex h-full min-h-0 w-full min-w-0 overflow-hidden bg-white text-neutral-800 [font-family:var(--app-font-family-sidebar,Inter,system-ui,sans-serif)]" aria-label={copy.ariaLabel}>
+      <aside className="flex h-full w-60 min-w-56 shrink-0 flex-col gap-4 overflow-y-auto bg-stone-100 pl-3 pt-5 max-md:h-auto max-md:max-h-48 max-md:w-full max-md:min-w-0 max-md:px-3 max-md:py-3" aria-label={copy.navAriaLabel}>
+        <nav className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto pr-3 max-md:flex-row max-md:overflow-x-auto max-md:overflow-y-hidden">
           {sections.map((section) => {
             const isActive = section.id === activeSectionId;
             return (
-              <button key={section.id} type="button" className={`settings-workspace__nav-item${isActive ? " is-active" : ""}`} onClick={() => setActiveSectionId(section.id)} aria-current={isActive ? "page" : undefined}>
-                <span className="settings-workspace__nav-icon">{getSectionIcon(section.id, "settings-workspace__nav-icon-svg")}</span>
-                <span className="settings-workspace__nav-copy"><span>{section.label}</span></span>
+              <button key={section.id} type="button" className={cn("flex h-7 w-full shrink-0 items-center rounded-lg border-0 bg-transparent px-2 py-1 text-left text-sm leading-5 text-neutral-800 outline-none transition-colors duration-100 ease-out hover:bg-stone-200 focus-visible:bg-stone-200 max-md:w-auto max-md:min-w-36", isActive ? "bg-stone-200 text-neutral-900" : "")} onClick={() => setActiveSectionId(section.id)} aria-current={isActive ? "page" : undefined}>
+                <span className="mr-2.5 inline-flex h-4 w-4 min-w-4 items-center justify-center text-neutral-600">{getSectionIcon(section.id)}</span>
+                <span className="block min-w-0 flex-1"><span className="block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium leading-5 tracking-tight text-inherit">{section.label}</span></span>
               </button>
             );
           })}
         </nav>
       </aside>
-      <main className="settings-workspace__main">
-        <div className="settings-workspace__content-scroll">
+      <main className="flex min-h-0 min-w-0 flex-1 flex-col bg-white max-md:h-full">
+        <div className="flex min-h-0 min-w-0 flex-1 overflow-y-auto px-4 pb-5 pt-10">
           {activeSectionId === "account" ? (
             <SettingsSectionBlock title={copy.accountProfileTitle} description={copy.accountProfileDescription}>
-              <div className="settings-workspace__profile-card">
-                <div className="settings-workspace__avatar" aria-hidden="true">{accountProfile.photoUrl ? <img src={accountProfile.photoUrl} alt="" /> : <span>{accountInitial}</span>}</div>
-                <div className="settings-workspace__profile-copy"><strong>{accountName}</strong><span>{accountProfile.email ?? copy.emailUnset}</span></div>
-                <button type="button" className="settings-workspace__secondary-button" onClick={handleLogout} disabled={loading || !currentUser}>{copy.logout}</button>
+              <div className="flex min-h-20 items-center gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
+                <div className="relative flex h-9 min-w-9 items-center justify-center overflow-hidden rounded-lg bg-stone-100 text-base font-semibold tracking-tight text-stone-700" aria-hidden="true">{accountProfile.photoUrl ? <img className="absolute inset-0 h-full w-full object-cover" src={accountProfile.photoUrl} alt="" /> : <span className="absolute inset-0 flex items-center justify-center">{accountInitial}</span>}</div>
+                <div className="flex min-w-0 flex-1 flex-col gap-0.5"><strong className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-5 tracking-tight text-neutral-800">{accountName}</strong><span className="overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal leading-5 text-stone-500">{accountProfile.email ?? copy.emailUnset}</span></div>
+                <button type="button" className="h-8 rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm font-medium tracking-tight text-neutral-800 outline-none hover:bg-stone-100 focus-visible:bg-stone-100 disabled:opacity-50" onClick={handleLogout} disabled={loading || !currentUser}>{copy.logout}</button>
               </div>
               <SettingKeyValue label={copy.statusLabel} value={currentUser ? copy.signedIn : copy.guest} />
               <SettingKeyValue label={copy.providerLabel} value={accountProfile.providerId ?? "-"} />
@@ -599,18 +580,18 @@ const SettingsWorkspaceScreen = () => {
               <SettingKeyValue label={copy.localAiProviderLabel} value="Ollama" />
               <SettingTextInputRow label={copy.localAiBaseUrlLabel} description={copy.localAiBaseUrlDescription} value={localAiSettings.baseUrl} placeholder="http://127.0.0.1:11434" onChange={(value) => handleLocalAiSettingsChange({ ...localAiSettings, baseUrl: value })} />
               <SettingTextInputRow label={copy.localAiModelLabel} description={copy.localAiModelDescription} value={localAiSettings.model} placeholder="llama3.2:3b" onChange={(value) => handleLocalAiSettingsChange({ ...localAiSettings, model: value })} />
-              <div className="settings-workspace__key-value">
-                <span>{copy.localAiConnectionLabel}</span>
-                <div className="settings-workspace__status-actions">
-                  <strong>{getLocalAiConnectionStatusLabel(localAiConnectionStatus, copy)}</strong>
-                  <button type="button" className="settings-workspace__secondary-button" onClick={handleLocalAiConnectionTest} disabled={localAiConnectionStatus === "testing"}>{copy.localAiTestButton}</button>
+              <div className="flex min-h-14 items-center justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
+                <span className="text-sm font-medium tracking-tight text-stone-500">{copy.localAiConnectionLabel}</span>
+                <div className="inline-flex min-w-0 items-center justify-end gap-2.5">
+                  <strong className="max-w-sm overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium tracking-tight text-neutral-800">{getLocalAiConnectionStatusLabel(localAiConnectionStatus, copy)}</strong>
+                  <button type="button" className="h-8 rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm font-medium tracking-tight text-neutral-800 outline-none hover:bg-stone-100 focus-visible:bg-stone-100 disabled:opacity-50" onClick={handleLocalAiConnectionTest} disabled={localAiConnectionStatus === "testing"}>{copy.localAiTestButton}</button>
                 </div>
               </div>
             </SettingsSectionBlock>
           ) : null}
           {activeSectionId === "hotkey" ? (
             <SettingsSectionBlock title={copy.sections.hotkey.label} description={copy.hotkeyDescription}>
-              {copy.hotkeys.map((hotkey) => <SettingKeyValue key={hotkey.keys} label={hotkey.label} value={<code>{hotkey.keys}</code>} />)}
+              {copy.hotkeys.map((hotkey) => <SettingKeyValue key={hotkey.keys} label={hotkey.label} value={<code className="font-inherit">{hotkey.keys}</code>} />)}
             </SettingsSectionBlock>
           ) : null}
         </div>
@@ -618,7 +599,5 @@ const SettingsWorkspaceScreen = () => {
     </div>
   );
 };
-
-
 
 export { SettingsWorkspaceScreen };
