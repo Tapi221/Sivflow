@@ -2,7 +2,7 @@
 import * as React from "react";
 import { useBlockSelected } from "@platejs/selection/react";
 import { getTableColumnCount } from "@platejs/table";
-import { TablePlugin, useTableColSizes } from "@platejs/table/react";
+import { TablePlugin, TableProvider, useTableColSizes } from "@platejs/table/react";
 import type { TTableCellElement, TTableElement, TTableRowElement } from "platejs";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement, useEditorRef } from "platejs/react";
@@ -21,7 +21,7 @@ const getElementPath = (props: { path?: number[] }): number[] => {
   return Array.isArray(path) ? path : EMPTY_ELEMENT_PATH;
 };
 
-const TableElement = ({ children, ...props }: PlateElementProps<TTableElement>) => {
+const TableElementContent = ({ children, ...props }: PlateElementProps<TTableElement>) => {
   const { element } = props;
   const colSizes = useTableColSizes({ disableOverrides: true });
   const columnCount = Math.max(getTableColumnCount(element), colSizes.length, 1);
@@ -45,6 +45,13 @@ const TableElement = ({ children, ...props }: PlateElementProps<TTableElement>) 
         </table>
       </div>
     </PlateElement>
+  );
+};
+const TableElement = (props: PlateElementProps<TTableElement>) => {
+  return (
+    <TableProvider>
+      <TableElementContent {...props} />
+    </TableProvider>
   );
 };
 const TableRowElement = (props: PlateElementProps<TTableRowElement>) => {
