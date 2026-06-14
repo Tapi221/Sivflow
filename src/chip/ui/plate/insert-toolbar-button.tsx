@@ -59,7 +59,6 @@ const createInlineItems = (items: Omit<Item, "onSelect">[]): Item[] => items.map
     insertInlineElement(editor, value);
   },
 }));
-
 const groups: Group[] = [
   {
     group: "Basic blocks",
@@ -124,13 +123,13 @@ const InsertToolbarButton = (props: DropdownMenuProps) => {
           <PlusIcon />
         </ToolbarButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="flex max-h-[500px] min-w-0 flex-col overflow-y-auto" align="start">
+      <DropdownMenuContent className="flex max-h-96 min-w-0 flex-col overflow-y-auto" align="start">
         {groups.map(({ group, items: nestedItems }) => (
           <ToolbarMenuGroup key={group} label={group}>
             {nestedItems.map(({ icon, label, onSelect, value }) => (
               <DropdownMenuItem
                 key={value}
-                className="min-w-[180px]"
+                className="min-w-44"
                 onSelect={() => {
                   onSelect(editor, value);
                   editor.tf.focus();
