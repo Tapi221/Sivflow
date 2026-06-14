@@ -2,6 +2,7 @@ import { createCardSetUseCase, deleteCardSetWithCards, listCardSetsForFolder, mo
 import { createWebCardSetRepository } from "@platform/storage/cardSetRepository.web";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
+import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
 import type { CardSet } from "@/types";
 import { DEFAULT_CARD_DISPLAY_MODE } from "@/types/domain/cardSet";
 
@@ -11,7 +12,7 @@ type UseCardSetsOptions = {
 
 const useCardSets = (folderId?: string | null, options?: UseCardSetsOptions) => {
   const { currentUser } = useAuthSession();
-  const userId = currentUser?.uid ?? null;
+  const userId = useEffectiveLocalUserId();
   const enabled = options?.enabled ?? true;
 
   const cardSets = useLiveQuery(async () => {
