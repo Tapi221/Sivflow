@@ -7,14 +7,13 @@ import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
 import { AlignCenterIcon, AlignJustifyIcon, AlignLeftIcon, AlignRightIcon } from "lucide-react";
 import { useEditorPlugin, useSelectionFragmentProp } from "platejs/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-import { ToolbarButton } from "./toolbar";
+import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
-const ALIGN_MENU_ITEM_CLASS_NAME = "dropdown-menu__radio-item--icon-only";
 const items = [
-  { icon: AlignLeftIcon, value: "left" },
-  { icon: AlignCenterIcon, value: "center" },
-  { icon: AlignRightIcon, value: "right" },
-  { icon: AlignJustifyIcon, value: "justify" },
+  { icon: AlignLeftIcon, label: "Align left", value: "left" },
+  { icon: AlignCenterIcon, label: "Align center", value: "center" },
+  { icon: AlignRightIcon, label: "Align right", value: "right" },
+  { icon: AlignJustifyIcon, label: "Justify", value: "justify" },
 ];
 
 const AlignToolbarButton = (props: DropdownMenuProps) => {
@@ -32,7 +31,7 @@ const AlignToolbarButton = (props: DropdownMenuProps) => {
           <IconValue />
         </ToolbarButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="min-w-0" align="start">
+      <DropdownMenuContent className="min-w-44" align="start">
         <DropdownMenuRadioGroup
           value={value}
           onValueChange={(nextValue) => {
@@ -40,9 +39,10 @@ const AlignToolbarButton = (props: DropdownMenuProps) => {
             editor.tf.focus();
           }}
         >
-          {items.map(({ icon: Icon, value: itemValue }) => (
-            <DropdownMenuRadioItem key={itemValue} className={ALIGN_MENU_ITEM_CLASS_NAME} value={itemValue}>
+          {items.map(({ icon: Icon, label, value: itemValue }) => (
+            <DropdownMenuRadioItem key={itemValue} value={itemValue}>
               <Icon />
+              {label}
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>
