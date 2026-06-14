@@ -52,7 +52,7 @@ type ToolbarActionButtonProps = {
 };
 
 const SCHEDULE_SCREEN_HEADER_CLASS_NAME = "mb-1 flex shrink-0 items-center justify-between gap-3 px-4 pt-2";
-const SCHEDULE_SCREEN_HEADER_TITLE_CLASS_NAME = "min-w-40 max-w-72 shrink-0 truncate text-2xl font-bold leading-tight tracking-tight text-[#1c1c1e]";
+const SCHEDULE_SCREEN_HEADER_TITLE_CLASS_NAME = "flex h-8 min-w-40 max-w-72 shrink-0 items-center truncate text-2xl font-bold leading-none tracking-tight text-[#1c1c1e]";
 const SCHEDULE_SCREEN_HEADER_ACTIONS_CLASS_NAME = "ml-auto flex min-w-0 shrink-0 items-center gap-1.5";
 const SCHEDULE_SCREEN_HEADER_LABEL_CLASS_NAME = "min-w-0 truncate whitespace-nowrap";
 const TOOLBAR_ACTION_BUTTON_CLASS_NAME = "relative z-10 flex h-6 min-h-0 min-w-14 shrink-0 items-center justify-center gap-1 rounded-md border-0 bg-transparent px-1.5 text-xs font-semibold leading-none tracking-tight text-[#85827e] shadow-none outline-none ring-0 transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eee] hover:text-[#2f343b] active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-[#eee] focus-visible:text-[#2f343b] focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100 disabled:cursor-wait disabled:opacity-60";
