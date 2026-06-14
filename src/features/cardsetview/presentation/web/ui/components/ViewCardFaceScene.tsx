@@ -1,8 +1,8 @@
 import React from "react";
+import { FlashcardMediaDialogs } from "@/chip/panel/dialog.desktop/Dialog.FlashcardMedia";
 import type { FlashcardCardLike } from "@/components/card/frame/Flashcard";
 import { useFlashcardCornerControls } from "@/components/card/frame/FlashcardCornerControls";
 import { FlashcardInkOverlay } from "@/components/card/frame/FlashcardInkOverlay";
-import { FlashcardMediaDialogs } from "@/components/card/frame/FlashcardMediaDialogs";
 import { useCardFlipBehavior } from "@/components/card/frame/useCardFlipBehavior";
 import { useFlashcardDerived } from "@/components/card/frame/useFlashcardDerived";
 import { useFlashcardInk } from "@/components/card/frame/useFlashcardInk";
