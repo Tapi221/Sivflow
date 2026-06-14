@@ -90,7 +90,7 @@ const EMPTY_DAY_LINE_CLASS_NAME =
 const EMPTY_DAY_DOT_CLASS_NAME =
   "relative mt-2 h-2 w-2 rounded-full border-2 border-[#dedede] bg-white shadow-[0_1px_4px_rgba(15,23,42,0.08)]";
 const EMPTY_DAY_CHIP_CLASS_NAME =
-  "flex h-[34px] items-center rounded-[16px] bg-[#f7f7fa] px-3 text-[12px] font-semibold text-[#8e8e93]";
+  "flex h-[34px] items-center rounded-[16px] border border-[#eceff3] bg-white px-3 text-[12px] font-semibold text-[#8e8e93]";
 
 const createRail = (selectedDate: Date): ScheduleVirtualRail => ({
   startDate: subDays(startOfMonth(selectedDate), LOCAL_DAYS),
