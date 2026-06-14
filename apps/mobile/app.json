@@ -9,7 +9,7 @@
     "newArchEnabled": true,
     "icon": "../../shared/assets/icons/app-icon.svg",
     "android": {
-      "package": "com.sivflow.android",
+      "package": "com.sivflow.mobile",
       "adaptiveIcon": {
         "foregroundImage": "../../shared/assets/icons/app-icon.svg",
         "backgroundColor": "#F8FAFB"
