@@ -1,10 +1,8 @@
 "use client";
-
 import * as React from "react";
 import { generateReactHelpers } from "@uploadthing/react";
 import { toast } from "sonner";
 import { z } from "zod";
-import type { OurFileRouter } from "@/lib/uploadthing";
 
 type UploadThingResponseFile<T = unknown> = {
   appUrl?: string;
@@ -36,7 +34,7 @@ type UseUploadFileProps = {
 };
 
 const UNKNOWN_ERROR_MESSAGE = "Something went wrong, please try again later.";
-const { uploadFiles, useUploadThing: useUploadThingBase } = generateReactHelpers<OurFileRouter>();
+const { uploadFiles, useUploadThing: useUploadThingBase } = generateReactHelpers();
 
 const getProgressValue = (progress: UploadProgressValue) => {
   if (typeof progress === "number") {
