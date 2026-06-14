@@ -90,13 +90,13 @@ const ADD_PROJECT_LABEL = "プロジェクトを追加";
 const CALENDAR_CONTEXT_MENU_DIMENSIONS = { width: CALENDAR_LIST_MENU_WIDTH, height: CALENDAR_LIST_MENU_HEIGHT };
 const CALENDAR_SIDEBAR_CONTENT_CLASS_NAME = "pt-2";
 const CALENDAR_SIDEBAR_GOOGLE_LIST_CLASS_NAME = "min-h-0 flex-1 overflow-y-auto px-4 pt-1";
-const CALENDAR_SIDEBAR_HEADING_ROW_CLASS_NAME = "group flex min-h-[22px] items-center gap-[3px] px-4";
+const CALENDAR_SIDEBAR_HEADING_ROW_CLASS_NAME = "group flex min-h-6 items-center gap-1 px-4";
 const CALENDAR_SIDEBAR_ADD_BUTTON_CLASS_NAME = "app-layered-directory__add-button opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100";
-const CALENDAR_SIDEBAR_PROJECT_LIST_CLASS_NAME = "max-h-[55%] shrink-0 overflow-y-auto px-4 pb-1";
+const CALENDAR_SIDEBAR_PROJECT_LIST_CLASS_NAME = "max-h-80 shrink-0 overflow-y-auto px-4 pb-1";
 const CALENDAR_SIDEBAR_ROW_CONTENT_CLASS_NAME = "pl-0";
 const COLOR_INPUT_STYLE: CSSProperties = { position: "fixed", left: -9999, top: -9999, width: 1, height: 1, opacity: 0, pointerEvents: "none" };
 const CONNECTING_GOOGLE_CALENDAR_LABEL = "接続中...";
-const DEFAULT_CALENDAR_COLOR = "#74798b";
+const DEFAULT_CALENDAR_COLOR = "#64748b";
 const GOOGLE_CALENDAR_SECTION_LABEL = "Google Calendar";
 const PROJECT_LINKED_GOOGLE_CALENDARS_LABEL = "プロジェクトに追加したカレンダー";
 
@@ -140,8 +140,7 @@ const createGoogleProjectLinkActionLabel = (target: MatchingGoogleCalendarTarget
 const createGoogleCalendarActionLabel = (account: GoogleAccountDisplay, accountCount: number): string => accountCount <= 1 ? "Googleカレンダーとして追加" : `Googleカレンダーとして追加: ${getGoogleAccountLabel(account)}`;
 
 const IconChevronRight = ({ className }: IconProps) => <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
-const IconPlus = ({ className }: IconProps) => <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>;
-const GoogleCalendarHeadingSvg = () => <svg aria-hidden="true" className="block h-4 w-[118px] text-[#111]" viewBox="0 0 118 16" fill="none" xmlns="http://www.w3.org/2000/svg"><text x="0" y="13" fill="currentColor" fontFamily="var(--app-font-family-sidebar)" fontSize="13" fontWeight="700" letterSpacing="0" textRendering="geometricPrecision">{GOOGLE_CALENDAR_SECTION_LABEL}</text></svg>;
+const IconPlus = ({ className }: IconProps) => <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>;
 const CalendarSidebarHeading = ({ heading, addLabel, onAdd, disabled = false, headingAriaLabel }: CalendarSidebarHeadingProps) => (
   <div className={CALENDAR_SIDEBAR_HEADING_ROW_CLASS_NAME}>
     <h2 className="app-layered-directory__section-heading" aria-label={headingAriaLabel}>{heading}</h2>
@@ -154,11 +153,11 @@ const GoogleCalendarSourceRow = ({ account, calendar, color, onToggleCalendar, o
   </div>
 );
 const ProjectLinkedGoogleCalendarRow = ({ accountId, calendar, color }: { accountId: string; calendar: GoogleCalendarListItem; color: string; }) => (
-  <div className={cn(GOOGLE_SOURCE_ROW_CLASS_NAME, CALENDAR_SIDEBAR_ROW_CONTENT_CLASS_NAME, "text-[#6d7380]")} title={getGoogleCalendarName(calendar)} data-calendar-account-id={accountId}>
+  <div className={cn(GOOGLE_SOURCE_ROW_CLASS_NAME, CALENDAR_SIDEBAR_ROW_CONTENT_CLASS_NAME, "text-slate-500")} title={getGoogleCalendarName(calendar)} data-calendar-account-id={accountId}>
     <span className="flex h-5 w-5 shrink-0 items-center justify-center" aria-hidden="true">
-      <span className="h-2.5 w-2.5 rounded-full border border-white shadow-[0_0_0_1px_rgba(0,0,0,0.08)]" style={{ backgroundColor: color }} />
+      <span className="h-2.5 w-2.5 rounded-full border border-white ring-1 ring-black/10" style={{ backgroundColor: color }} />
     </span>
-    <span className="truncate text-[12px] font-medium text-[#8c9099]">{calendar.summary}</span>
+    <span className="truncate text-xs font-medium text-zinc-500">{calendar.summary}</span>
   </div>
 );
 const ProjectLinkedGoogleCalendarsSection = ({ account, calendars, googleCalendarColorOverrides }: { account: GoogleAccountDisplay; calendars: GoogleCalendarListItem[]; googleCalendarColorOverrides: GoogleCalendarColorOverrideMap; }) => {
@@ -166,10 +165,10 @@ const ProjectLinkedGoogleCalendarsSection = ({ account, calendars, googleCalenda
   if (calendars.length === 0) return null;
   return (
     <div className="mt-1">
-      <button type="button" className="group flex h-7 w-full items-center gap-1.5 rounded-[10px] px-1.5 text-left transition-all duration-150 hover:bg-[#f7f7f7] active:bg-[#f1f1f1]" onClick={() => setIsOpen((value) => !value)} aria-expanded={isOpen}>
-        <span className={cn("flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full text-[#b3b3b3] transition-all duration-200 group-hover:bg-white group-hover:text-[#8c8c8c]", !isOpen && "-rotate-90")}><IconChevronRight className="h-3 w-3" /></span>
-        <span className="min-w-0 flex-1 truncate text-[11px] font-bold text-[#9a9a9a]">{PROJECT_LINKED_GOOGLE_CALENDARS_LABEL}</span>
-        <span className="shrink-0 rounded-full bg-[#eef1f4] px-1.5 py-0.5 text-[10px] font-bold text-[#808894]">{calendars.length}</span>
+      <button type="button" className="group flex h-7 w-full items-center gap-1.5 rounded-lg px-1.5 text-left transition-all duration-150 hover:bg-neutral-100 active:bg-neutral-200" onClick={() => setIsOpen((value) => !value)} aria-expanded={isOpen}>
+        <span className={cn("flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full text-zinc-400 transition-all duration-200 group-hover:bg-white group-hover:text-zinc-500", !isOpen && "-rotate-90")}><IconChevronRight className="h-3 w-3" /></span>
+        <span className="min-w-0 flex-1 truncate text-xs font-bold text-zinc-400">{PROJECT_LINKED_GOOGLE_CALENDARS_LABEL}</span>
+        <span className="shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-xs font-bold text-slate-500">{calendars.length}</span>
       </button>
       {isOpen ? <div className="mt-0.5 flex flex-col gap-0.5 pl-2">{calendars.map((calendar) => <ProjectLinkedGoogleCalendarRow key={calendar.id} accountId={account.accountId} calendar={calendar} color={resolveCalendarColor(account.accountId, calendar, googleCalendarColorOverrides)} />)}</div> : null}
     </div>
@@ -209,11 +208,11 @@ const AppProjectsSection = ({ projects, isAdding, onAddProject, onToggleProject,
             <input ref={inputRef} value={projectName} onChange={(event) => {
               setProjectName(event.target.value);
               if (addError !== null) setAddError(null);
-            }} onKeyDown={handleProjectNameKeyDown} autoFocus placeholder="プロジェクト名" aria-label="プロジェクト名" aria-invalid={Boolean(addError)} aria-describedby={addError ? "app-project-add-error" : undefined} className={cn("min-w-0 flex-1 rounded-full bg-white px-3 py-1 text-[12px] font-medium text-[#2f2f2f] outline-none transition focus:ring-2", addError ? "border border-[#e08b8b] focus:border-[#e08b8b] focus:ring-[#f9e8e8]" : "border border-[#e6e6e6] focus:border-[#d7d7d7] focus:ring-[#f2f2f2]")}
+            }} onKeyDown={handleProjectNameKeyDown} autoFocus placeholder="プロジェクト名" aria-label="プロジェクト名" aria-invalid={Boolean(addError)} aria-describedby={addError ? "app-project-add-error" : undefined} className={cn("min-w-0 flex-1 rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-700 outline-none transition focus:ring-2", addError ? "border border-red-300 focus:border-red-300 focus:ring-red-50" : "border border-neutral-200 focus:border-neutral-300 focus:ring-neutral-100")}
             />
-            <button type="submit" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f4f4f4] text-[#6d7380] transition hover:bg-[#ececec] active:scale-[0.94]" aria-label="プロジェクトを追加"><IconPlus className="h-3.5 w-3.5" /></button>
+            <button type="submit" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-slate-500 transition hover:bg-neutral-200 active:scale-95" aria-label="プロジェクトを追加"><IconPlus className="h-3.5 w-3.5" /></button>
           </form>
-          {addError ? <p id="app-project-add-error" className="px-3 text-[10px] font-semibold text-[#c25f5f]">{addError}</p> : null}
+          {addError ? <p id="app-project-add-error" className="px-3 text-xs font-semibold text-red-500">{addError}</p> : null}
         </div>
       ) : null}
     </div>
@@ -227,16 +226,16 @@ const GoogleAccountSection = ({ account, projectCalendarLinks, googleCalendarCol
   return (
     <div className="mt-1">
       <div className="mb-1 flex h-6 shrink-0 items-center gap-1.5 px-2">
-        <button type="button" className="group flex min-w-0 flex-1 items-center gap-1.5 rounded-[10px] text-left transition-all duration-150 hover:text-[#5f6574]" onClick={() => setIsOpen((value) => !value)} aria-expanded={isOpen}>
-          <span className={cn("flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full text-[#b3b3b3] transition-all duration-200 group-hover:bg-white group-hover:text-[#8c8c8c]", !isOpen && "-rotate-90")}><IconChevronRight className="h-3 w-3" /></span>
-          <span className="min-w-0 flex-1 truncate text-[11px] font-bold uppercase tracking-[0.04em] text-[#9a9a9a]">{accountName}</span>
+        <button type="button" className="group flex min-w-0 flex-1 items-center gap-1.5 rounded-lg text-left transition-all duration-150 hover:text-slate-600" onClick={() => setIsOpen((value) => !value)} aria-expanded={isOpen}>
+          <span className={cn("flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full text-zinc-400 transition-all duration-200 group-hover:bg-white group-hover:text-zinc-500", !isOpen && "-rotate-90")}><IconChevronRight className="h-3 w-3" /></span>
+          <span className="min-w-0 flex-1 truncate text-xs font-bold uppercase tracking-wide text-zinc-400">{accountName}</span>
         </button>
       </div>
       {isOpen ? (
         <div className="mt-0.5 flex flex-col gap-0.5">
           {regularCalendars.map((calendar) => <GoogleCalendarSourceRow key={calendar.id} account={account} calendar={calendar} color={resolveCalendarColor(account.accountId, calendar, googleCalendarColorOverrides)} onToggleCalendar={onToggleCalendar} onOpenCalendarContextMenu={onOpenCalendarContextMenu} />)}
           <ProjectLinkedGoogleCalendarsSection account={account} calendars={projectLinkedCalendars} googleCalendarColorOverrides={googleCalendarColorOverrides} />
-          {account.error ? <div className="px-5 py-1 text-[11px] text-[#c25f5f]"><p>Google カレンダーを取得できませんでした。</p><p className="mt-0.5 text-[#9a9a9a]">{account.error}</p><button type="button" className="mt-1 rounded-full bg-[#f4f4f4] px-2 py-0.5 text-[11px] font-semibold text-[#5f6574] transition hover:bg-[#ececec] active:scale-[0.97]" onClick={onReconnect}>再連携</button></div> : null}
+          {account.error ? <div className="px-5 py-1 text-xs text-red-500"><p>Google カレンダーを取得できませんでした。</p><p className="mt-0.5 text-zinc-400">{account.error}</p><button type="button" className="mt-1 rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-slate-500 transition hover:bg-neutral-200 active:scale-95" onClick={onReconnect}>再連携</button></div> : null}
         </div>
       ) : null}
     </div>
@@ -249,7 +248,7 @@ const GoogleAccountsSection = ({ accounts, isConnecting, projectCalendarLinks, g
   }, [isConnecting, onAddCalendar]);
   return (
     <div className="mt-0.5">
-      {accounts.length === 0 ? <button type="button" className="ml-2 flex h-7 items-center gap-1.5 rounded-[10px] px-1.5 text-left text-[11px] font-semibold text-[#8c9099] transition hover:bg-[#f7f7f7] hover:text-[#5f6574] active:bg-[#f1f1f1] disabled:cursor-not-allowed disabled:opacity-60" onClick={handleAddCalendar} disabled={isConnecting}><GoogleIcon className="size-[16px] shrink-0 text-[#5f6368]" label="Google" /><span>{isConnecting ? CONNECTING_GOOGLE_CALENDAR_LABEL : ADD_GOOGLE_CALENDAR_LABEL}</span></button> : accounts.map((account) => <GoogleAccountSection key={account.accountId} account={account} projectCalendarLinks={projectCalendarLinks} googleCalendarColorOverrides={googleCalendarColorOverrides} onToggleCalendar={(calendarId) => onToggleCalendar(account.accountId, calendarId)} onOpenCalendarContextMenu={onOpenCalendarContextMenu} onReconnect={() => onReconnectAccount(account.accountId)} />)}
+      {accounts.length === 0 ? <button type="button" className="ml-2 flex h-7 items-center gap-1.5 rounded-lg px-1.5 text-left text-xs font-semibold text-zinc-500 transition hover:bg-neutral-100 hover:text-slate-600 active:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-60" onClick={handleAddCalendar} disabled={isConnecting}><GoogleIcon className="size-4 shrink-0 text-neutral-500" label="Google" /><span>{isConnecting ? CONNECTING_GOOGLE_CALENDAR_LABEL : ADD_GOOGLE_CALENDAR_LABEL}</span></button> : accounts.map((account) => <GoogleAccountSection key={account.accountId} account={account} projectCalendarLinks={projectCalendarLinks} googleCalendarColorOverrides={googleCalendarColorOverrides} onToggleCalendar={(calendarId) => onToggleCalendar(account.accountId, calendarId)} onOpenCalendarContextMenu={onOpenCalendarContextMenu} onReconnect={() => onReconnectAccount(account.accountId)} />)}
     </div>
   );
 };
@@ -357,12 +356,12 @@ const CalendarSidebarContent = ({ appProjects, projectCalendarLinks, googleCalen
     return [...createActions, ...linkActions, ...unlinkActions];
   }, [googleAccounts, onCreateProjectGoogleCalendar, onLinkProjectToGoogleCalendar, onUnlinkProjectCalendar, projectLinksContextMenu]);
   return (
-    <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden pb-0 text-[#2f2f2f]", className)}>
+    <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden pb-0 text-neutral-700", className)}>
       <nav className="flex min-h-0 w-full flex-1 flex-col overflow-hidden pb-0" aria-label="カレンダー一覧">
         <CalendarSidebarHeading heading={t.myProjects} addLabel={ADD_PROJECT_LABEL} onAdd={handleStartAddingProject} />
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <div className={CALENDAR_SIDEBAR_PROJECT_LIST_CLASS_NAME}><AppProjectsSection projects={appProjects} isAdding={isAddingProject} onAddProject={onAddProject} onToggleProject={onToggleProject} onOpenProjectLinksContextMenu={handleOpenProjectLinksContextMenu} onAddingChange={setIsAddingProject} /></div>
-          <div className="shrink-0 pt-2"><CalendarSidebarHeading heading={<GoogleCalendarHeadingSvg />} addLabel={ADD_GOOGLE_CALENDAR_LABEL} onAdd={handleAddGoogleCalendar} disabled={isAnyCalendarConnecting} headingAriaLabel={GOOGLE_CALENDAR_SECTION_LABEL} /></div>
+          <div className="shrink-0 pt-2"><CalendarSidebarHeading heading={GOOGLE_CALENDAR_SECTION_LABEL} addLabel={ADD_GOOGLE_CALENDAR_LABEL} onAdd={handleAddGoogleCalendar} disabled={isAnyCalendarConnecting} headingAriaLabel={GOOGLE_CALENDAR_SECTION_LABEL} /></div>
           <div className={CALENDAR_SIDEBAR_GOOGLE_LIST_CLASS_NAME}><GoogleAccountsSection accounts={googleAccounts} isConnecting={isAnyCalendarConnecting} projectCalendarLinks={projectCalendarLinks} googleCalendarColorOverrides={googleCalendarColorOverrides} onAddCalendar={handleAddGoogleCalendar} onToggleCalendar={onToggleCalendar} onOpenCalendarContextMenu={handleOpenCalendarContextMenu} onReconnectAccount={onReconnectAccount} /></div>
         </div>
       </nav>
