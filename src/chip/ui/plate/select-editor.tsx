@@ -1,15 +1,6 @@
 "use client";
 import * as React from "react";
-import { isEqualTags } from "@platejs/tag";
-import { MultiSelectPlugin, TagPlugin, useSelectableItems, useSelectEditorCombobox } from "@platejs/tag/react";
-import { Command as CommandPrimitive, useCommandActions } from "@udecode/cmdk";
-import { Fzf } from "fzf";
 import { PlusIcon } from "lucide-react";
-import { isHotkey, KEYS } from "platejs";
-import { Plate, useEditorContainerRef, useEditorRef, usePlateEditor } from "platejs/react";
-import { Editor, EditorContainer } from "@/chip/ui/plate/editor";
-import { TagElement } from "@/chip/ui/plate/tag-node";
-import { Popover, PopoverAnchor, PopoverContent } from "@/chip/ui/popover";
 import { cn } from "@/lib/utils";
 
 type SelectItem = {
@@ -19,222 +10,129 @@ type SelectItem = {
 type SelectEditorContextValue = {
   items: SelectItem[];
   open: boolean;
+  search: string;
   setOpen: (open: boolean) => void;
+  setSearch: (search: string) => void;
+  setValue: (items: SelectItem[]) => void;
+  value: SelectItem[];
+};
+type SelectEditorProps = {
+  children: React.ReactNode;
+  className?: string;
   defaultValue?: SelectItem[];
+  items?: SelectItem[];
   value?: SelectItem[];
   onValueChange?: (items: SelectItem[]) => void;
 };
+type SelectEditorInputProps = React.HTMLAttributes<HTMLDivElement> & {
+  ref?: React.Ref<HTMLDivElement>;
+};
 
 const SelectEditorContext = React.createContext<SelectEditorContextValue | undefined>(undefined);
-
 const useSelectEditorContext = () => {
   const context = React.useContext(SelectEditorContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error("useSelectEditor must be used within SelectEditor");
   }
   return context;
 };
-const createEditorValue = (value?: SelectItem[]) => [
-  {
-    children: [
-      { text: "" },
-      ...(value?.flatMap((item) => [
-        {
-          children: [{ text: "" }],
-          type: KEYS.tag,
-          ...item,
-        },
-        {
-          text: "",
-        },
-      ]) ?? []),
-    ],
-    type: KEYS.p,
-  },
-];
-const fzfFilter = (value: string, search: string): boolean => {
-  if (!search) return true;
-  const fzf = new Fzf([value], {
-    casing: "case-insensitive",
-    selector: (targetValue: string) => targetValue,
-  });
-  return fzf.find(search).length > 0;
+const getSelectableItems = (items: SelectItem[], search: string) => {
+  const trimmedSearch = search.trim();
+  const normalizedSearch = trimmedSearch.toLowerCase();
+  const filteredItems = normalizedSearch.length === 0
+    ? items
+    : items.filter((item) => item.value.toLowerCase().includes(normalizedSearch));
+  const hasExactItem = items.some((item) => item.value.toLowerCase() === normalizedSearch);
+  if (trimmedSearch.length === 0 || hasExactItem) return filteredItems;
+  return [...filteredItems, { value: trimmedSearch, isNew: true }];
+};
+const getNextValue = (value: SelectItem[], item: SelectItem) => {
+  if (value.some((selectedItem) => selectedItem.value === item.value)) return value;
+  return [...value, { value: item.value }];
+};
+const selectItem = (context: SelectEditorContextValue, item: SelectItem) => {
+  context.setValue(getNextValue(context.value, item));
+  context.setSearch("");
 };
 
-const Command = ({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) => {
-  return (
-    <CommandPrimitive
-      className={cn(
-        "flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground",
-        className,
-      )}
-      data-slot="command"
-      {...props}
-    />
-  );
-};
-const CommandList = ({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.List>) => {
-  return (
-    <CommandPrimitive.List
-      className={cn(
-        "max-h-72 scroll-py-1 overflow-y-auto overflow-x-hidden",
-        className,
-      )}
-      data-slot="command-list"
-      {...props}
-    />
-  );
-};
-const CommandGroup = ({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.Group>) => {
-  return (
-    <CommandPrimitive.Group
-      className={cn(
-        "overflow-hidden p-1 text-foreground [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group-heading]]:text-xs",
-        className,
-      )}
-      data-slot="command-group"
-      {...props}
-    />
-  );
-};
-const CommandItem = ({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.Item>) => {
-  return (
-    <CommandPrimitive.Item
-      className={cn(
-        "relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden data-[disabled=true]:pointer-events-none data-[selected=true]:bg-accent data-[selected=true]:text-accent-foreground data-[disabled=true]:opacity-50 [&_svg:not([class*=\"size-\"])]:size-4 [&_svg:not([class*=\"text-\"])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0",
-        className,
-      )}
-      data-slot="command-item"
-      {...props}
-    />
-  );
-};
-const SelectEditor = ({ children, defaultValue, items = [], value, onValueChange }: { children: React.ReactNode; defaultValue?: SelectItem[]; items?: SelectItem[]; value?: SelectItem[]; onValueChange?: (items: SelectItem[]) => void }) => {
+const SelectEditor = ({ children, className, defaultValue, items = [], value, onValueChange }: SelectEditorProps) => {
   const [open, setOpen] = React.useState(false);
-  const [internalValue] = React.useState(defaultValue);
+  const [search, setSearch] = React.useState("");
+  const [internalValue, setInternalValue] = React.useState<SelectItem[]>(defaultValue ?? []);
+  const resolvedValue = value ?? internalValue;
+  const setValue = React.useCallback(
+    (nextValue: SelectItem[]) => {
+      if (value === undefined) {
+        setInternalValue(nextValue);
+      }
+      onValueChange?.(nextValue);
+    },
+    [onValueChange, value],
+  );
   return (
-    <SelectEditorContext.Provider
-      value={{
-        items,
-        open,
-        setOpen,
-        value: value ?? internalValue,
-        onValueChange,
-      }}
-    >
-      <Command className="overflow-visible bg-transparent has-data-readonly:w-fit" shouldFilter={false} loop>
+    <SelectEditorContext.Provider value={{ items, open, search, setOpen, setSearch, setValue, value: resolvedValue }}>
+      <div className={cn("relative flex h-full w-full flex-col overflow-visible bg-transparent has-data-readonly:w-fit", className)}>
         {children}
-      </Command>
+      </div>
     </SelectEditorContext.Provider>
   );
 };
-const SelectEditorContent = ({ children }: { children: React.ReactNode }) => {
-  const { value } = useSelectEditorContext();
-  const { setSearch } = useCommandActions();
-  const editor = usePlateEditor(
-    {
-      plugins: [MultiSelectPlugin.withComponent(TagElement)],
-      value: createEditorValue(value),
-    },
-    [],
-  );
-  React.useEffect(() => {
-    if (!isEqualTags(editor, value)) {
-      editor.tf.replaceNodes(createEditorValue(value), {
-        at: [],
-        children: true,
-      });
-    }
-  }, [editor, value]);
-  return (
-    <Plate
-      onValueChange={({ editor: currentEditor }) => {
-        setSearch(currentEditor.api.string([]));
-      }}
-      editor={editor}
-    >
-      <EditorContainer variant="select">{children}</EditorContainer>
-    </Plate>
-  );
+const SelectEditorContent = ({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement> & { children: React.ReactNode }) => {
+  return <div className={cn("relative", className)} {...props}>{children}</div>;
 };
-const SelectEditorInput = ({ ref, ...props }: React.ComponentPropsWithoutRef<typeof Editor> & { ref?: React.RefObject<HTMLDivElement | null> }) => {
-  const editor = useEditorRef();
-  const { setOpen } = useSelectEditorContext();
-  const { selectCurrentItem, selectFirstItem } = useCommandActions();
+const SelectEditorInput = ({ ref, className, onBlur, onFocus, onInput, onKeyDown, tabIndex, ...props }: SelectEditorInputProps) => {
+  const context = useSelectEditorContext();
   return (
-    <Editor
+    <div
+      {...props}
       ref={ref}
-      variant="select"
-      onBlur={() => setOpen(false)}
-      onFocusCapture={() => {
-        setOpen(true);
-        selectFirstItem();
+      className={cn("min-h-9 w-full rounded-md px-2 py-1.5 text-sm outline-none", className)}
+      contentEditable
+      role="textbox"
+      suppressContentEditableWarning
+      tabIndex={tabIndex ?? 0}
+      onBlur={(event) => {
+        context.setOpen(false);
+        onBlur?.(event);
+      }}
+      onFocus={(event) => {
+        context.setOpen(true);
+        onFocus?.(event);
+      }}
+      onInput={(event) => {
+        context.setSearch(event.currentTarget.textContent ?? "");
+        onInput?.(event);
       }}
       onKeyDown={(event) => {
-        if (isHotkey("enter", event)) {
+        if (event.key === "Enter") {
           event.preventDefault();
-          selectCurrentItem();
-          editor.tf.removeNodes({ at: [], empty: false, text: true });
+          const [firstItem] = getSelectableItems(context.items, context.search);
+          if (firstItem !== undefined) {
+            selectItem(context, firstItem);
+            event.currentTarget.textContent = "";
+          }
         }
-        if (isHotkey("escape", event) || isHotkey("mod+enter", event)) {
+        if (event.key === "Escape") {
           event.preventDefault();
           event.currentTarget.blur();
         }
+        onKeyDown?.(event);
       }}
-      autoFocusOnEditable
-      {...props}
     />
   );
 };
 const SelectEditorCombobox = () => {
-  const editor = useEditorRef();
-  const containerRef = useEditorContainerRef();
-  const { items, open, onValueChange } = useSelectEditorContext();
-  const selectableItems = useSelectableItems({
-    filter: fzfFilter,
-    items,
-  });
-  const { selectFirstItem } = useCommandActions();
-  useSelectEditorCombobox({ open, selectFirstItem, onValueChange });
-  if (!open || selectableItems.length === 0) return null;
+  const context = useSelectEditorContext();
+  const selectableItems = React.useMemo(() => getSelectableItems(context.items, context.search), [context.items, context.search]);
+  if (!context.open || selectableItems.length === 0) return null;
   return (
-    <Popover open={open}>
-      <PopoverAnchor virtualRef={containerRef as React.RefObject<HTMLElement>} />
-      <PopoverContent
-        className="p-0 data-[state=open]:animate-none"
-        style={{
-          width: (containerRef.current?.offsetWidth ?? 0) + 8,
-        }}
-        onCloseAutoFocus={(event) => event.preventDefault()}
-        onOpenAutoFocus={(event) => event.preventDefault()}
-        align="start"
-        alignOffset={-4}
-        sideOffset={8}
-      >
-        <CommandList>
-          <CommandGroup>
-            {selectableItems.map((item) => (
-              <CommandItem
-                key={item.value}
-                className="cursor-pointer gap-2"
-                onMouseDown={(event) => event.preventDefault()}
-                onSelect={() => {
-                  editor.getTransforms(TagPlugin).insert.tag(item);
-                }}
-              >
-                {item.isNew ? (
-                  <div className="flex items-center gap-1">
-                    <PlusIcon className="size-4 text-foreground" />
-                    Create new label:
-                    <span className="text-gray-600">&quot;{item.value}&quot;</span>
-                  </div>
-                ) : item.value}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </CommandList>
-      </PopoverContent>
-    </Popover>
+    <div className="absolute left-0 top-full z-50 mt-2 w-full rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
+      {selectableItems.map((item) => (
+        <button key={item.value} className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent hover:text-accent-foreground" type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => selectItem(context, item)}>
+          {item.isNew === true ? <span className="flex items-center gap-1"><PlusIcon className="size-4 text-foreground" />Create new label:<span className="text-gray-600">&quot;{item.value}&quot;</span></span> : item.value}
+        </button>
+      ))}
+    </div>
   );
 };
 
