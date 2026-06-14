@@ -2,11 +2,11 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
+import type * as DialogModule from "@/chip/ui/dialog/dialog";
+import type * as ReferencePopupModule from "@/chip/panel/dialog.desktop/Dialog.ReferencePopup";
 import type * as SharedCardContentModule from "@/components/card/common/SharedCardContent";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import type * as CardFrameModule from "@/components/card/frame/CardFrame";
-import type * as ReferencePopupModule from "@/components/card/overlays/ReferencePopup";
-import type * as DialogModule from "@/chip/ui/dialog/dialog";
 import { layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
 
 vi.mock("@/components/card/frame/CardFrame", () => ({
@@ -21,7 +21,7 @@ vi.mock("@/components/card/common/SharedCardContent", () => ({
   SharedCardContent: () => <div data-testid="mock-shared-content" />,
 } satisfies Partial<Record<keyof typeof SharedCardContentModule, unknown>>));
 
-vi.mock("@/components/card/overlays/ReferencePopup", () => ({
+vi.mock("@/chip/panel/dialog.desktop/Dialog.ReferencePopup", () => ({
   ReferencePopup: () => null,
 } satisfies Partial<Record<keyof typeof ReferencePopupModule, unknown>>));
 
