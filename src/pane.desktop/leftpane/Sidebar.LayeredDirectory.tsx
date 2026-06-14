@@ -1,4 +1,3 @@
-import "./sidebar.layered-directory.css";
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent, ReactNode, RefObject } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
@@ -19,14 +18,13 @@ import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { useNotes } from "@/hooks/note/useNotes";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
+import { cn } from "@/lib/utils";
 import { LibraryHierarchySidebar, ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
 import { TagTreeSidebar } from "@/pane.desktop/leftpane/folder/TagTreeSidebar";
 import { useFolderTagModeStore } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 import { Tag } from "@/ui/icons";
-
-
 
 type IconProps = {
   className?: string;
@@ -54,8 +52,6 @@ type SidebarLayeredDirectoryProps = {
   onToggleLeftPanel?: () => void;
   onOpenSettings?: () => void;
 };
-
-
 
 const WORKSPACE_OWNER_FALLBACK_NAME = "Akari T";
 const WORKSPACE_NAME_SUFFIX = "のWorkspace";
@@ -87,8 +83,24 @@ const PROJECT_ADD_MENU_WIDTH = resolveRightClickPanelTextWidth(PROJECT_ADD_MENU_
 const PROJECT_ADD_MENU_HEIGHT = PROJECT_ADD_MENU_ITEM_DEFINITIONS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
 const EMPTY_COLLECTION: never[] = [];
 const OPENABLE_ENTITY_SELECTOR = "[data-directory-entity-kind='cardSet'], [data-directory-entity-kind='document'], [data-directory-entity-kind='note']";
-
-
+const ROOT_CLASS_NAME = "relative isolate z-[1] flex h-full min-h-0 w-60 min-w-60 shrink-0 flex-col overflow-hidden bg-transparent font-sans text-stone-500 antialiased [-webkit-app-region:no-drag] [&_*]:[-webkit-app-region:no-drag] [&_svg]:pointer-events-none";
+const PRIMARY_NAV_CLASS_NAME = "flex flex-col gap-2.5 px-4 pb-3 pt-3.5";
+const WORKSPACE_HEADER_CLASS_NAME = "flex min-h-6 items-center gap-2";
+const WORKSPACE_TOGGLE_CLASS_NAME = "flex h-6 min-h-6 w-6 min-w-6 items-center justify-center rounded-md border-0 bg-transparent p-0 text-zinc-400 outline-none transition-colors hover:bg-stone-100 hover:text-stone-800 focus-visible:bg-stone-100 focus-visible:text-stone-800 disabled:opacity-55";
+const WORKSPACE_BUTTON_CLASS_NAME = "flex min-w-0 flex-1 items-center gap-2 rounded-md border-0 bg-transparent px-2 py-1 text-left text-sm font-semibold leading-5 text-stone-950 outline-none transition-colors hover:bg-stone-100 focus-visible:bg-stone-100";
+const WORKSPACE_AVATAR_CLASS_NAME = "flex h-6 min-w-6 items-center justify-center rounded-md bg-stone-100 text-xs font-bold leading-none text-stone-600";
+const NAV_CLASS_NAME = "flex w-full items-center justify-start gap-2";
+const NAV_ICON_CLASS_NAME = "h-5 min-w-5 w-5";
+const SECTION_STRIP_CLASS_NAME = "flex flex-col gap-3.5 py-1";
+const FAVORITES_SECTION_CLASS_NAME = "flex min-w-0 flex-col gap-2 px-4";
+const SECTION_CLASS_NAME = "flex min-w-0 flex-col gap-2";
+const SECTION_ROW_CLASS_NAME = "flex min-h-6 items-center gap-1 px-4";
+const SECTION_HEADING_CLASS_NAME = "m-0 text-sm font-bold leading-5 tracking-normal text-stone-950";
+const SECTION_HEADING_BUTTON_CLASS_NAME = "flex min-w-0 flex-1 items-center gap-2 border-0 bg-transparent p-0 text-left text-sm font-bold leading-5 tracking-normal text-stone-950";
+const SECTION_CHEVRON_CLASS_NAME = "h-3.5 min-w-3.5 w-3.5 text-zinc-400";
+const ADD_BUTTON_CLASS_NAME = "flex h-5 min-h-5 w-5 min-w-5 items-center justify-center rounded-full border-0 bg-transparent p-0 text-stone-500 outline-none transition-colors hover:bg-stone-100 hover:text-stone-800 focus-visible:bg-stone-100 focus-visible:text-stone-800";
+const EMPTY_MESSAGE_CLASS_NAME = "m-0 pr-3 text-xs font-bold leading-4 tracking-normal text-stone-500";
+const PROJECT_ADD_MENU_ITEM_CLASS_NAME = "flex min-h-8 w-full items-center px-3 text-left text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 focus-visible:bg-stone-100 focus-visible:outline-none";
 
 const getFolderName = (folder: FolderTreeNode): string => {
   const name = folder.folderName ?? folder.folder_name;
@@ -98,7 +110,6 @@ const getUniqueTagName = (baseName: string, tagNames: readonly string[]): string
   const usedTagNameSet = new Set(tagNames.map((tagName) => tagName.trim().toLowerCase()).filter((tagName) => tagName.length > 0));
   const normalizedBaseName = baseName.toLowerCase();
   if (!usedTagNameSet.has(normalizedBaseName)) return baseName;
-
   let suffix = 2;
   while (usedTagNameSet.has(`${normalizedBaseName} ${suffix}`)) suffix += 1;
   return `${baseName} ${suffix}`;
@@ -106,27 +117,21 @@ const getUniqueTagName = (baseName: string, tagNames: readonly string[]): string
 const createFolderLookup = (rootFolders: FolderTreeNode[], getChildFolders: (folderId: string) => FolderTreeNode[]): Map<string, FolderTreeNode> => {
   const map = new Map<string, FolderTreeNode>();
   const stack = [...rootFolders];
-
   while (stack.length > 0) {
     const folder = stack.pop();
     if (!folder) continue;
-
     const folderId = getFolderId(folder);
     if (!folderId || map.has(folderId)) continue;
-
     map.set(folderId, folder);
     stack.push(...getChildFolders(folderId));
   }
-
   return map;
 };
 const getWorkspaceOwnerName = (displayName: string | null | undefined, email: string | null | undefined): string => {
   const trimmedDisplayName = displayName?.trim();
   if (trimmedDisplayName) return trimmedDisplayName;
-
   const emailLocalPart = email?.split("@")[0]?.trim();
   if (emailLocalPart) return emailLocalPart;
-
   return WORKSPACE_OWNER_FALLBACK_NAME;
 };
 const getWorkspaceInitial = (workspaceOwnerName: string): string => {
@@ -150,8 +155,10 @@ const scheduleLeftPanelClose = (onToggleLeftPanel?: () => void) => {
   if (!onToggleLeftPanel) return;
   window.setTimeout(onToggleLeftPanel, 0);
 };
-
-
+const getNavActionClassName = (isActive: boolean): string => cn(
+  "flex h-7 min-h-7 w-7 min-w-7 items-center justify-center rounded-lg border-0 bg-transparent p-0 text-stone-500 outline-none transition-[background-color,color,transform] duration-150 hover:bg-stone-100 hover:text-stone-800 focus-visible:bg-stone-100 focus-visible:text-stone-800 active:scale-95 disabled:cursor-default",
+  isActive && "bg-stone-100 text-stone-800",
+);
 
 const IconPlus = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
 const IconChevronDown = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M4 6.25L8 10.25L12 6.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>);
@@ -159,29 +166,24 @@ const ProjectAddMenu = ({ x, y, menuRef, onCreateNote, onCreateCardSet, onCreate
   const handleItemClick = (event: ReactMouseEvent<HTMLButtonElement>, id: ProjectAddMenuActionId) => {
     event.preventDefault();
     event.stopPropagation();
-
     if (id === "create-note") {
       onCreateNote();
       return;
     }
-
     if (id === "create-card-set") {
       onCreateCardSet();
       return;
     }
-
     if (id === "create-folder") {
       onCreateFolder();
       return;
     }
-
     onImportPdf();
   };
-
   return (
     <RightClickPanel id={PROJECT_ADD_MENU_PANEL_ID} x={x} y={y} width={PROJECT_ADD_MENU_WIDTH} panelRef={menuRef} style={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} ariaLabel="project add menu">
       {PROJECT_ADD_MENU_ITEM_DEFINITIONS.map((item) => (
-        <button key={item.id} type="button" className="panel__item" role="menuitem" onClick={(event) => handleItemClick(event, item.id)}>
+        <button key={item.id} type="button" className={PROJECT_ADD_MENU_ITEM_CLASS_NAME} role="menuitem" onClick={(event) => handleItemClick(event, item.id)}>
           <span>{item.label}</span>
         </button>
       ))}
@@ -230,44 +232,35 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
   const resolvedOnOpenSettings = onOpenSettings ?? outletOpenSettings;
   const resolvedOnToggleLeftPanel = onToggleLeftPanel ?? outletToggleLeftPanel;
   const { fileInputRef, handleToolbarAddDocument, currentFileAccept, handleToolbarFileInputChange } = useFolderDocumentUpload({ actionFolderId: selectedNavigationFolderId, getNextOrderIndex, setExpandedFolders: setProjectAddExpandedFolderIds });
-
   const closeProjectAddMenu = useCallback(() => {
     setProjectAddMenu(null);
   }, []);
-
   useRightClickPanelDismiss(PROJECT_ADD_MENU_PANEL_ID, projectAddMenu !== null, projectAddMenuRef, closeProjectAddMenu);
-
   const handleCreateRootFolder = useCallback(() => {
     void createFolder(DEFAULT_NEW_PROJECT_NAME);
   }, [createFolder]);
-
   const handleCreateRootTag = useCallback(() => {
     void addTag(getUniqueTagName(DEFAULT_NEW_TAG_NAME, existingTagNames));
   }, [addTag, existingTagNames]);
-
   const handleOpenHome = useCallback(() => {
     navigate("/schedule");
     openSectionTab("home");
   }, [navigate, openSectionTab]);
-
   const handleOpenProjectList = useCallback(() => {
     navigate("/schedule");
     setFolderTagMode("folder");
     openExplorerTab({ title: "Library", explorerState: { isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null } });
   }, [navigate, openExplorerTab, setFolderTagMode]);
-
   const handleOpenTagTree = useCallback(() => {
     navigate("/schedule");
     setFolderTagMode("tag");
     openExplorerTab({ title: "Library", explorerState: { isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null } });
   }, [navigate, openExplorerTab, setFolderTagMode]);
-
   const handleOpenProjectAddMenu = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
     setProjectAddMenu(getProjectAddMenuPosition(event));
   }, []);
-
   const handleCreateSelectedFolderNote = useCallback(() => {
     if (!selectedNavigationFolderId) return;
     closeProjectAddMenu();
@@ -276,107 +269,98 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
       openNoteTab({ noteId: note.id, title: note.title, folderId: note.folderId });
     })();
   }, [closeProjectAddMenu, createNote, getNextOrderIndex, openNoteTab, selectedNavigationFolderId]);
-
   const handleCreateSelectedFolderCardSet = useCallback(() => {
     if (!selectedNavigationFolderId) return;
     closeProjectAddMenu();
     void createCardSet(DEFAULT_NEW_CARD_SET_NAME, selectedNavigationFolderId);
   }, [closeProjectAddMenu, createCardSet, selectedNavigationFolderId]);
-
   const handleCreateSelectedFolderChild = useCallback(() => {
     if (!selectedNavigationFolderId) return;
     closeProjectAddMenu();
     void createFolder(DEFAULT_NEW_FOLDER_NAME, selectedNavigationFolderId);
   }, [closeProjectAddMenu, createFolder, selectedNavigationFolderId]);
-
   const handleImportSelectedFolderPdf = useCallback(() => {
     handleToolbarAddDocument();
     closeProjectAddMenu();
   }, [closeProjectAddMenu, handleToolbarAddDocument]);
-
   const handleOpenSchedule = useCallback(() => {
     navigate("/schedule");
     openSectionTab("schedule");
   }, [navigate, openSectionTab]);
-
   const handleOpenExplore = useCallback(() => {
     openSearch();
   }, [openSearch]);
-
   const handleOpenSettings = useCallback(() => {
     resolvedOnOpenSettings();
   }, [resolvedOnOpenSettings]);
-
   const handleDirectoryClickCapture = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
     if (!isOpenableEntityEventTarget(event.target)) return;
     scheduleLeftPanelClose(resolvedOnToggleLeftPanel);
   }, [resolvedOnToggleLeftPanel]);
-
   const handleDirectoryKeyDownCapture = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key !== "Enter" && event.key !== " ") return;
     if (!isOpenableEntityEventTarget(event.target)) return;
     scheduleLeftPanelClose(resolvedOnToggleLeftPanel);
   }, [resolvedOnToggleLeftPanel]);
-
   return (
-    <div className="app-layered-directory flex h-full min-h-0 shrink-0 flex-col overflow-hidden bg-transparent font-sans text-[var(--app-sidebar-text)] antialiased" onClickCapture={handleDirectoryClickCapture} onKeyDownCapture={handleDirectoryKeyDownCapture}>
-      <div className="app-layered-directory__primary-nav">
-        <div className="app-layered-directory__workspace-header">
-          <button type="button" className="app-layered-directory__workspace-toggle" onClick={resolvedOnToggleLeftPanel} aria-label="サイドバーを閉じる" disabled={!resolvedOnToggleLeftPanel}>
-            <SidebarOpenIcon className="app-layered-directory__workspace-toggle-icon" />
+    <div className={ROOT_CLASS_NAME} onClickCapture={handleDirectoryClickCapture} onKeyDownCapture={handleDirectoryKeyDownCapture}>
+      <div className={PRIMARY_NAV_CLASS_NAME}>
+        <div className={WORKSPACE_HEADER_CLASS_NAME}>
+          <button type="button" className={WORKSPACE_TOGGLE_CLASS_NAME} onClick={resolvedOnToggleLeftPanel} aria-label="サイドバーを閉じる" disabled={!resolvedOnToggleLeftPanel}>
+            <SidebarOpenIcon className={NAV_ICON_CLASS_NAME} />
           </button>
-          <button type="button" className="app-layered-directory__workspace-button" onClick={handleOpenProjectList} aria-label={`${workspaceName}を開く`}>
-            <span className="app-layered-directory__workspace-avatar" aria-hidden="true">{workspaceInitial}</span>
-            <span className="app-layered-directory__workspace-name">{workspaceName}</span>
+          <button type="button" className={WORKSPACE_BUTTON_CLASS_NAME} onClick={handleOpenProjectList} aria-label={`${workspaceName}を開く`}>
+            <span className={WORKSPACE_AVATAR_CLASS_NAME} aria-hidden="true">{workspaceInitial}</span>
+            <span className="block min-w-0 overflow-hidden truncate text-stone-950">{workspaceName}</span>
           </button>
         </div>
-        <nav className="app-layered-directory__notion-nav" aria-label="ワークスペースナビゲーション">
-          <button type="button" className={`app-layered-directory__notion-action${isHomeActive ? " is-active" : ""}`} onClick={handleOpenHome} aria-current={isHomeActive ? "page" : undefined} aria-label={WORKSPACE_HOME_LABEL} title={WORKSPACE_HOME_LABEL}>
-            <HomeIcon className="app-layered-directory__notion-icon" />
+        <nav className={NAV_CLASS_NAME} aria-label="ワークスペースナビゲーション">
+          <button type="button" className={getNavActionClassName(isHomeActive)} onClick={handleOpenHome} aria-current={isHomeActive ? "page" : undefined} aria-label={WORKSPACE_HOME_LABEL} title={WORKSPACE_HOME_LABEL}>
+            <HomeIcon className={NAV_ICON_CLASS_NAME} />
           </button>
-          <button type="button" className={`app-layered-directory__notion-action${isFolderActive ? " is-active" : ""}`} onClick={handleOpenProjectList} aria-current={isFolderActive ? "page" : undefined} aria-label={WORKSPACE_LIBRARY_LABEL} title={WORKSPACE_LIBRARY_LABEL}>
-            <ExplorerChromeFolderIcon className="app-layered-directory__notion-icon" />
+          <button type="button" className={getNavActionClassName(isFolderActive)} onClick={handleOpenProjectList} aria-current={isFolderActive ? "page" : undefined} aria-label={WORKSPACE_LIBRARY_LABEL} title={WORKSPACE_LIBRARY_LABEL}>
+            <ExplorerChromeFolderIcon className={NAV_ICON_CLASS_NAME} />
           </button>
-          <button type="button" className={`app-layered-directory__notion-action${isTagActive ? " is-active" : ""}`} onClick={handleOpenTagTree} aria-current={isTagActive ? "page" : undefined} aria-label={WORKSPACE_TAGS_LABEL} title={WORKSPACE_TAGS_LABEL}>
-            <Tag className="app-layered-directory__notion-icon" />
+          <button type="button" className={getNavActionClassName(isTagActive)} onClick={handleOpenTagTree} aria-current={isTagActive ? "page" : undefined} aria-label={WORKSPACE_TAGS_LABEL} title={WORKSPACE_TAGS_LABEL}>
+            <Tag className={NAV_ICON_CLASS_NAME} />
           </button>
-          <button type="button" className={`app-layered-directory__notion-action${isScheduleActive ? " is-active" : ""}`} onClick={handleOpenSchedule} aria-current={isScheduleActive ? "page" : undefined} aria-label={WORKSPACE_SCHEDULE_LABEL} title={WORKSPACE_SCHEDULE_LABEL}>
-            <CalendarIcon className="app-layered-directory__notion-icon" />
+          <button type="button" className={getNavActionClassName(isScheduleActive)} onClick={handleOpenSchedule} aria-current={isScheduleActive ? "page" : undefined} aria-label={WORKSPACE_SCHEDULE_LABEL} title={WORKSPACE_SCHEDULE_LABEL}>
+            <CalendarIcon className={NAV_ICON_CLASS_NAME} />
           </button>
-          <button type="button" className="app-layered-directory__notion-action" onClick={handleOpenExplore} aria-label={WORKSPACE_EXPLORE_LABEL} title={WORKSPACE_EXPLORE_LABEL}>
-            <GalleryIcon className="app-layered-directory__notion-icon" />
+          <button type="button" className={getNavActionClassName(false)} onClick={handleOpenExplore} aria-label={WORKSPACE_EXPLORE_LABEL} title={WORKSPACE_EXPLORE_LABEL}>
+            <GalleryIcon className={NAV_ICON_CLASS_NAME} />
           </button>
-          <button type="button" className="app-layered-directory__notion-action" onClick={handleOpenSettings} aria-label={WORKSPACE_SETTINGS_LABEL} title={WORKSPACE_SETTINGS_LABEL}>
-            <SettingIcon className="app-layered-directory__notion-icon" />
+          <button type="button" className={getNavActionClassName(false)} onClick={handleOpenSettings} aria-label={WORKSPACE_SETTINGS_LABEL} title={WORKSPACE_SETTINGS_LABEL}>
+            <SettingIcon className={NAV_ICON_CLASS_NAME} />
           </button>
         </nav>
       </div>
       {shouldShowDirectoryContent ? (
         <>
-          <div className="app-layered-directory__section-strip">
+          <div className={SECTION_STRIP_CLASS_NAME}>
             {shouldShowFavoriteSection ? (
-              <section className="app-layered-directory__section app-layered-directory__section--favorites" aria-label={FAVORITE_SECTION_LABEL}>
-                <h2 className="app-layered-directory__section-heading">{FAVORITE_SECTION_LABEL}</h2>
-                <p className="app-layered-directory__empty-message">{FAVORITE_EMPTY_MESSAGE}</p>
+              <section className={FAVORITES_SECTION_CLASS_NAME} aria-label={FAVORITE_SECTION_LABEL}>
+                <h2 className={SECTION_HEADING_CLASS_NAME}>{FAVORITE_SECTION_LABEL}</h2>
+                <p className={EMPTY_MESSAGE_CLASS_NAME}>{FAVORITE_EMPTY_MESSAGE}</p>
               </section>
             ) : null}
-            <section className="app-layered-directory__section" aria-label={sectionLabel}>
-              <div className="app-layered-directory__section-heading-row">
+            <section className={SECTION_CLASS_NAME} aria-label={sectionLabel}>
+              <div className={SECTION_ROW_CLASS_NAME}>
                 {folderTagMode !== "tag" && selectedFolder ? (
-                  <button type="button" className="app-layered-directory__section-heading-button" onClick={handleOpenProjectList} aria-label="プロジェクト一覧を開く">
+                  <button type="button" className={SECTION_HEADING_BUTTON_CLASS_NAME} onClick={handleOpenProjectList} aria-label="プロジェクト一覧を開く">
                     <span className="block truncate">{sectionLabel}</span>
-                    <IconChevronDown className="app-layered-directory__section-chevron" />
+                    <IconChevronDown className={SECTION_CHEVRON_CLASS_NAME} />
                   </button>
                 ) : (
-                  <h2 className="app-layered-directory__section-heading">{sectionLabel}</h2>
+                  <h2 className={SECTION_HEADING_CLASS_NAME}>{sectionLabel}</h2>
                 )}
-                <TagFilterPopover allTags={existingTagNames} ariaLabel={FILTER_ARIA_LABEL} className="app-layered-directory__add-button" />
+                <TagFilterPopover allTags={existingTagNames} ariaLabel={FILTER_ARIA_LABEL} className={ADD_BUTTON_CLASS_NAME} />
                 {folderTagMode === "tag" ? (
-                  <button type="button" onClick={handleCreateRootTag} aria-label={ADD_TAG_ARIA_LABEL} title={ADD_TAG_ARIA_LABEL} className="app-layered-directory__add-button">
+                  <button type="button" onClick={handleCreateRootTag} aria-label={ADD_TAG_ARIA_LABEL} title={ADD_TAG_ARIA_LABEL} className={ADD_BUTTON_CLASS_NAME}>
                     <IconPlus className="h-4 w-4" />
                   </button>
                 ) : (
-                  <button type="button" onClick={selectedFolder ? handleOpenProjectAddMenu : handleCreateRootFolder} aria-label={selectedFolder ? ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} title={selectedFolder ? ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} className="app-layered-directory__add-button">
+                  <button type="button" onClick={selectedFolder ? handleOpenProjectAddMenu : handleCreateRootFolder} aria-label={selectedFolder ? ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} title={selectedFolder ? ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} className={ADD_BUTTON_CLASS_NAME}>
                     <IconPlus className="h-4 w-4" />
                   </button>
                 )}
@@ -394,7 +378,5 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
     </div>
   );
 };
-
-
 
 export { LibraryHierarchySidebar, ProjectListSidebar, SidebarLayeredDirectory, TagTreeSidebar };
