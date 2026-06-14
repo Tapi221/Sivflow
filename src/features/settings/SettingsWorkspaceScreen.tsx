@@ -418,7 +418,7 @@ const SettingsSectionBlock = ({ title, description, children }: SettingsSectionB
 const SettingToggle = ({ label, description, checked, onChange }: SettingToggleProps) => {
   return (
     <div className="flex min-h-14 items-center gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="text-sm font-medium leading-5 tracking-tight text-neutral-800">{label}</span>
         {description ? <span className="text-xs font-normal leading-5 text-stone-500">{description}</span> : null}
       </div>
@@ -432,11 +432,11 @@ const SettingChoiceRow = <T extends string | number,>({ label, value, options, o
   return (
     <div className="flex min-h-14 items-start justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
       <span className="pt-1 text-sm font-medium leading-5 tracking-tight text-neutral-900">{label}</span>
-      <div className="flex max-w-sm shrink-0 flex-wrap justify-end gap-1.5">
+      <div className="flex max-w-sm shrink-0 flex-wrap justify-end gap-2">
         {options.map((option) => {
           const isSelected = option.value === value;
           return (
-            <button key={String(option.value)} type="button" className={cn("inline-flex flex-none items-center justify-center rounded-full border-0 px-3 py-1.5 text-center text-xs font-semibold leading-4 outline-none transition-colors duration-100 ease-out", isSelected ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-500")} onClick={() => onChange(option.value)}>
+            <button key={String(option.value)} type="button" className={cn("inline-flex flex-none items-center justify-center rounded-full border-0 px-3 py-2 text-center text-xs font-semibold leading-4 outline-none transition-colors duration-100 ease-out", isSelected ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-500")} onClick={() => onChange(option.value)}>
               {option.label}
             </button>
           );
@@ -448,7 +448,7 @@ const SettingChoiceRow = <T extends string | number,>({ label, value, options, o
 const SettingTextInputRow = ({ label, description, value, placeholder, onChange }: SettingTextInputRowProps) => {
   return (
     <div className="flex min-h-14 items-start justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="text-sm font-medium leading-5 tracking-tight text-neutral-800">{label}</span>
         {description ? <span className="text-xs font-normal leading-5 text-stone-500">{description}</span> : null}
       </div>
@@ -517,12 +517,12 @@ const SettingsWorkspaceScreen = () => {
   return (
     <div className="flex h-full min-h-0 w-full min-w-0 overflow-hidden bg-white text-neutral-800" aria-label={copy.ariaLabel}>
       <aside className="flex h-full w-60 min-w-56 shrink-0 flex-col gap-4 overflow-y-auto bg-stone-100 pl-3 pt-5 max-md:h-auto max-md:max-h-48 max-md:w-full max-md:min-w-0 max-md:px-3 max-md:py-3" aria-label={copy.navAriaLabel}>
-        <nav className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto pr-3 max-md:flex-row max-md:overflow-x-auto max-md:overflow-y-hidden">
+        <nav className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-3 max-md:flex-row max-md:overflow-x-auto max-md:overflow-y-hidden">
           {sections.map((section) => {
             const isActive = section.id === activeSectionId;
             return (
               <button key={section.id} type="button" className={cn("flex h-7 w-full shrink-0 items-center rounded-lg border-0 bg-transparent px-2 py-1 text-left text-sm leading-5 text-neutral-800 outline-none transition-colors duration-100 ease-out hover:bg-stone-200 focus-visible:bg-stone-200 max-md:w-auto max-md:min-w-36", isActive ? "bg-stone-200 text-neutral-900" : "")} onClick={() => setActiveSectionId(section.id)} aria-current={isActive ? "page" : undefined}>
-                <span className="mr-2.5 inline-flex h-4 w-4 min-w-4 items-center justify-center text-neutral-600">{getSectionIcon(section.id)}</span>
+                <span className="mr-3 inline-flex h-4 w-4 min-w-4 items-center justify-center text-neutral-600">{getSectionIcon(section.id)}</span>
                 <span className="block min-w-0 flex-1"><span className="block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium leading-5 tracking-tight text-inherit">{section.label}</span></span>
               </button>
             );
@@ -536,7 +536,7 @@ const SettingsWorkspaceScreen = () => {
               <SettingsSectionBlock title={copy.accountProfileTitle} description={copy.accountProfileDescription}>
                 <div className="flex min-h-20 items-center gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
                   <div className="relative flex h-9 min-w-9 items-center justify-center overflow-hidden rounded-lg bg-stone-100 text-base font-semibold tracking-tight text-stone-700" aria-hidden="true">{accountProfile.photoUrl ? <img className="absolute inset-0 h-full w-full object-cover" src={accountProfile.photoUrl} alt="" /> : <span className="absolute inset-0 flex items-center justify-center">{accountInitial}</span>}</div>
-                  <div className="flex min-w-0 flex-1 flex-col gap-0.5"><strong className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-5 tracking-tight text-neutral-800">{accountName}</strong><span className="overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal leading-5 text-stone-500">{accountProfile.email ?? copy.emailUnset}</span></div>
+                  <div className="flex min-w-0 flex-1 flex-col gap-1"><strong className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-5 tracking-tight text-neutral-800">{accountName}</strong><span className="overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal leading-5 text-stone-500">{accountProfile.email ?? copy.emailUnset}</span></div>
                   <button type="button" className="h-8 rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm font-medium tracking-tight text-neutral-800 outline-none hover:bg-stone-100 focus-visible:bg-stone-100 disabled:opacity-50" onClick={handleLogout} disabled={loading || !currentUser}>{copy.logout}</button>
                 </div>
                 <SettingKeyValue label={copy.statusLabel} value={currentUser ? copy.signedIn : copy.guest} />
@@ -583,7 +583,7 @@ const SettingsWorkspaceScreen = () => {
                 <SettingTextInputRow label={copy.localAiModelLabel} description={copy.localAiModelDescription} value={localAiSettings.model} placeholder="llama3.2:3b" onChange={(value) => handleLocalAiSettingsChange({ ...localAiSettings, model: value })} />
                 <div className="flex min-h-14 items-center justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
                   <span className="text-sm font-medium tracking-tight text-stone-500">{copy.localAiConnectionLabel}</span>
-                  <div className="inline-flex min-w-0 items-center justify-end gap-2.5">
+                  <div className="inline-flex min-w-0 items-center justify-end gap-3">
                     <strong className="max-w-sm overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium tracking-tight text-neutral-800">{getLocalAiConnectionStatusLabel(localAiConnectionStatus, copy)}</strong>
                     <button type="button" className="h-8 rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm font-medium tracking-tight text-neutral-800 outline-none hover:bg-stone-100 focus-visible:bg-stone-100 disabled:opacity-50" onClick={handleLocalAiConnectionTest} disabled={localAiConnectionStatus === "testing"}>{copy.localAiTestButton}</button>
                   </div>
