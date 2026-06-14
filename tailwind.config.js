@@ -51,15 +51,15 @@ const config = {
           foreground: "hsl(var(--destructive-foreground) / <alpha-value>)",
         },
         primary: {
-          DEFAULT: "rgb(var(--ds-color-primary-500-rgb) / <alpha-value>)",
-          50: "rgb(var(--ds-color-primary-50-rgb) / <alpha-value>)",
-          100: "rgb(var(--ds-color-primary-100-rgb) / <alpha-value>)",
-          200: "rgb(var(--ds-color-primary-200-rgb) / <alpha-value>)",
-          300: "rgb(var(--ds-color-primary-300-rgb) / <alpha-value>)",
-          400: "rgb(var(--ds-color-primary-400-rgb) / <alpha-value>)",
-          500: "rgb(var(--ds-color-primary-500-rgb) / <alpha-value>)",
-          600: "rgb(var(--ds-color-primary-600-rgb) / <alpha-value>)",
-          700: "rgb(var(--ds-color-primary-700-rgb) / <alpha-value>)",
+          DEFAULT: "rgb(var(--ds-color-neutral-900-rgb) / <alpha-value>)",
+          50: "rgb(var(--ds-color-neutral-50-rgb) / <alpha-value>)",
+          100: "rgb(var(--ds-color-neutral-100-rgb) / <alpha-value>)",
+          200: "rgb(var(--ds-color-neutral-200-rgb) / <alpha-value>)",
+          300: "rgb(var(--ds-color-neutral-300-rgb) / <alpha-value>)",
+          400: "rgb(var(--ds-color-neutral-400-rgb) / <alpha-value>)",
+          500: "rgb(var(--ds-color-neutral-500-rgb) / <alpha-value>)",
+          600: "rgb(var(--ds-color-neutral-600-rgb) / <alpha-value>)",
+          700: "rgb(var(--ds-color-neutral-700-rgb) / <alpha-value>)",
         },
         neutral: {
           DEFAULT: "rgb(var(--ds-color-neutral-500-rgb) / <alpha-value>)",
@@ -98,17 +98,17 @@ const config = {
       },
       backgroundImage: {
         "gradient-primary":
-          "linear-gradient(135deg, var(--ds-color-primary-600) 0%, var(--ds-color-primary-400) 100%)",
+          "linear-gradient(135deg, var(--ds-color-neutral-800) 0%, var(--ds-color-neutral-500) 100%)",
         "gradient-secondary":
-          "linear-gradient(135deg, var(--ds-color-primary-500) 0%, var(--ds-color-primary-700) 100%)",
+          "linear-gradient(135deg, var(--ds-color-neutral-700) 0%, var(--ds-color-neutral-900) 100%)",
         "gradient-accent":
           "linear-gradient(135deg, var(--ds-color-status-warning) 0%, var(--ds-color-status-danger) 100%)",
         "gradient-purple":
           "linear-gradient(135deg, var(--ds-color-tag-purple-border) 0%, var(--ds-color-tag-purple-fg) 100%)",
         "gradient-warm":
-          "linear-gradient(135deg, var(--ds-semantic-color-background-app) 0%, var(--ds-semantic-color-action-primary-soft) 100%)",
+          "linear-gradient(135deg, var(--ds-semantic-color-background-app) 0%, var(--ds-color-neutral-100) 100%)",
         "gradient-hero":
-          "linear-gradient(135deg, var(--ds-color-primary-600) 0%, var(--ds-color-primary-400) 50%, var(--ds-color-status-warning) 100%)",
+          "linear-gradient(135deg, var(--ds-color-neutral-800) 0%, var(--ds-color-neutral-500) 50%, var(--ds-color-status-warning) 100%)",
       },
       boxShadow: {
         soft: "var(--ds-elevation-shadow-soft)",
