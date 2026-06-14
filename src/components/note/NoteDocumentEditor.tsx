@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { nanoid } from "nanoid";
 import type { Value } from "platejs";
 import { PlateEditor } from "@/components/editor/plate-editor";
 import type { Note, NoteBlockContent } from "@/types";
@@ -12,6 +13,7 @@ type PlateTextNode = {
   [key: string]: unknown;
 };
 type PlateElementNode = {
+  id?: string;
   type: string;
   children: PlateNode[];
   [key: string]: unknown;
@@ -31,7 +33,13 @@ const NOTE_TITLE_CLASS_NAME = "mx-auto mb-7 w-full max-w-3xl truncate px-6 text-
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === "object" && !Array.isArray(value);
 const isPlateTextNode = (value: unknown): value is PlateTextNode => isRecord(value) && typeof value.text === "string";
 const isPlateElementNode = (value: unknown): value is PlateElementNode => isRecord(value) && typeof value.type === "string" && Array.isArray(value.children);
-const createEmptyValue = (): PlateElementNode[] => [{ type: "p", children: [{ text: "" }] }];
+const createPlateElementId = () => nanoid();
+const withPlateElementIds = (node: PlateElementNode): PlateElementNode => ({
+  ...node,
+  children: node.children.map((child) => isPlateElementNode(child) ? withPlateElementIds(child) : child),
+  id: typeof node.id === "string" && node.id.length > 0 ? node.id : createPlateElementId(),
+});
+const createEmptyValue = (): PlateElementNode[] => [withPlateElementIds({ type: "p", children: [{ text: "" }] })];
 const getVisibleNoteTitle = (note: Note): string => {
   const trimmedTitle = note.title.trim();
   return trimmedTitle === "" ? EMPTY_NOTE_TITLE_LABEL : trimmedTitle;
@@ -45,14 +53,14 @@ const getNodeText = (node: unknown): string => {
 const getPlainText = (nodes: unknown[]): string => nodes.map(getNodeText).filter(Boolean).join("\n");
 const toInitialValue = (content: NoteBlockContent | undefined): PlateElementNode[] => {
   if (!Array.isArray(content) || content.length === 0) return createEmptyValue();
-  if (content.every(isPlateElementNode)) return content as PlateElementNode[];
+  if (content.every(isPlateElementNode)) return content.map(withPlateElementIds);
   const migrated = content.map((block) => {
     const legacyText = isRecord(block) ? getTextFromLegacyContent(block.content) : "";
     const fallbackText = isRecord(block) && typeof block.text === "string" ? block.text : "";
     const text = legacyText === "" ? fallbackText : legacyText;
     return { type: "p", children: [{ text }] };
   }).filter((node) => getNodeText(node).trim().length > 0);
-  return migrated.length > 0 ? migrated : createEmptyValue();
+  return migrated.length > 0 ? migrated.map(withPlateElementIds) : createEmptyValue();
 };
 const getChangeValue = (change: PlateChangePayload): unknown[] | null => {
   if (Array.isArray(change)) return change;
