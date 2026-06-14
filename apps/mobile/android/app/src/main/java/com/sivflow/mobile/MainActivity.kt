@@ -1,4 +1,4 @@
-package com.sivflow.android
+package com.sivflow.mobile
 
 import android.os.Build
 import android.os.Bundle
