@@ -3,6 +3,7 @@ import type { Locale } from "@shared/i18n/locale.store";
 import { useLocaleStore } from "@shared/i18n/locale.store";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
+import { DEFAULT_THEME_ACCENT_COLOR, normalizeThemeAccentColor } from "@/features/settings/themeAccent";
 import { createDefaultEditorBlockSettings, parseEditorBlockSettings } from "@/lib/editorBlockSettings";
 import { getLocalDb } from "@/services/localdb";
 import type { UserSettings } from "@/types";
@@ -12,7 +13,7 @@ const LEGACY_SETTING_KEYS = [
   "profileImage",
   "folder" + "SidebarDisplayMode",
 ] as const;
-const DEFAULT_SETTINGS: Partial<UserSettings> = { language: "ja", weekStartDay: "monday", notificationsEnabled: false, soundEnabled: true, showReviewHard: true, showReviewEasy: true, autoCarryOver: true, delayBonusEnabled: false, reviewStartNextDay: true, defaultPreviewEnabled: false, autoDraftEnabled: true, autoSaveEnabled: true, autoVoiceQuestion: false, autoVoiceAnswer: false, cardEditorHeightPx: null, questionDisplayMode: "tap_to_reveal" as const, markdownTabSize: 2, editorBlockSettings: createDefaultEditorBlockSettings() };
+const DEFAULT_SETTINGS: Partial<UserSettings> = { language: "ja", weekStartDay: "monday", notificationsEnabled: false, soundEnabled: true, showReviewHard: true, showReviewEasy: true, autoCarryOver: true, delayBonusEnabled: false, reviewStartNextDay: true, defaultPreviewEnabled: false, autoDraftEnabled: true, autoSaveEnabled: true, autoVoiceQuestion: false, autoVoiceAnswer: false, cardEditorHeightPx: null, questionDisplayMode: "tap_to_reveal" as const, markdownTabSize: 2, accentColor: DEFAULT_THEME_ACCENT_COLOR, editorBlockSettings: createDefaultEditorBlockSettings() };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
@@ -25,6 +26,7 @@ const toLocale = (language: UserSettings["language"] | undefined): Locale => {
 };
 const buildBootSettingsSnapshot = (): Partial<UserSettings> => ({
   ...DEFAULT_SETTINGS,
+  accentColor: DEFAULT_THEME_ACCENT_COLOR,
   editorBlockSettings: createDefaultEditorBlockSettings(),
 });
 const removeLegacySettingsFields = (
@@ -57,6 +59,9 @@ const normalizeStoredSettingsRecord = (
 
   return {
     ...merged,
+    accentColor: normalizeThemeAccentColor(
+      typeof merged["accentColor"] === "string" ? merged["accentColor"] : undefined,
+    ),
     editorBlockSettings,
   };
 };
@@ -156,6 +161,14 @@ const useUserSettings = () => {
 
       const normalizedSettings: Partial<UserSettings> = {
         ...newSettings,
+        ...(Object.prototype.hasOwnProperty.call(
+          newSettings,
+          "accentColor",
+        )
+          ? {
+            accentColor: normalizeThemeAccentColor(newSettings.accentColor),
+          }
+          : {}),
         ...(Object.prototype.hasOwnProperty.call(
           newSettings,
           "editorBlockSettings",
