@@ -1,4 +1,4 @@
-import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/typography";
+import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/Typography";
 import { buildTypographyStyle, mergeStyles } from "@/components/card/common/cardSetViewZoom";
 import { cn } from "@/lib/utils";
 import { MathRenderer } from "./MathBlockContent";
