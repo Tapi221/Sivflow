@@ -1,31 +1,21 @@
-import type { PlateElementProps } from "platejs/react";
-import { PlateElement } from "platejs/react";
+import type { PlateLeafProps } from "platejs/react";
+import { PlateLeaf } from "platejs/react";
 import { cn } from "@/lib/utils";
 
-
-
-type CommentNodeProps = PlateElementProps & {
+type CommentNodeProps = PlateLeafProps & {
   active?: boolean;
 };
 
-
-
 const CommentNode = ({ active, className, children, ...props }: CommentNodeProps) => (
-  <PlateElement
+  <PlateLeaf
     className={cn("rounded-sm bg-yellow-500/20 px-0.5 ring-yellow-500/30", active && "ring-2", className)}
     {...props}
   >
     {children}
-  </PlateElement>
+  </PlateLeaf>
 );
-
-
 
 const CommentLeaf = CommentNode;
 
-
-
 export { CommentLeaf, CommentNode };
-
-
 export type { CommentNodeProps };
