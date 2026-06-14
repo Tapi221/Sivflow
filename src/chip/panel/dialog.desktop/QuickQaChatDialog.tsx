@@ -1,15 +1,13 @@
 import { memo, useCallback, useMemo, useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
 import { generateOllamaAnswer } from "@platform/ai/ollamaClient";
 import { useToast } from "@web-renderer/contexts/ToastContext";
-import type { KeyboardEvent } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/chip/ui/dialog/dialog";
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { MessageSquare, Plus, Sparkles } from "@/ui/icons";
-
-
 
 type QuickQaChatDialogProps = {
   open: boolean;
@@ -25,12 +23,8 @@ type LoadingStatusPillProps = {
   label: string;
 };
 
-
-
 const MAX_QUESTION_LENGTH = 240;
 const MAX_ANSWER_LENGTH = 3000;
-
-
 
 const createChatMessage = (role: ChatMessage["role"], text: string): ChatMessage => ({
   id: crypto.randomUUID(),
@@ -43,8 +37,6 @@ const createCardTitle = (question: string): string => {
   const normalized = question.replace(/\s+/g, " ").trim();
   return normalized.length > 80 ? `${normalized.slice(0, 80)}…` : normalized;
 };
-
-
 
 const LoadingStatusPill = ({ label }: LoadingStatusPillProps) => {
   return (
@@ -67,30 +59,24 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
   const [messages, setMessages] = useState<ChatMessage[]>(createInitialMessages);
   const [isCreating, setIsCreating] = useState(false);
   const [isGeneratingAiAnswer, setIsGeneratingAiAnswer] = useState(false);
-
   const placeholder = step === "question" ? "例: GPUアクセラレーションって何？" : "回答を入力...";
   const inputMaxLength = step === "question" ? MAX_QUESTION_LENGTH : MAX_ANSWER_LENGTH;
   const canSend = inputValue.trim().length > 0 && !isCreating && !isGeneratingAiAnswer;
   const canGenerateAiAnswer = step === "answer" && pendingQuestion.trim().length > 0 && !isCreating && !isGeneratingAiAnswer;
-
   const resetChat = useCallback(() => {
     setStep("question");
     setPendingQuestion("");
     setInputValue("");
     setMessages(createInitialMessages());
   }, []);
-
   const focusInputSoon = useCallback(() => {
     window.setTimeout(() => inputRef.current?.focus(), 0);
   }, []);
-
   const appendMessages = useCallback((nextMessages: ChatMessage[]) => {
     setMessages((currentMessages) => [...currentMessages, ...nextMessages]);
   }, []);
-
   const handleCreateCardFromAnswer = useCallback(async (question: string, answer: string) => {
     setIsCreating(true);
-
     try {
       const title = createCardTitle(question);
       const createdCard = await createCard({
@@ -104,7 +90,6 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
           blocks: [{ id: crypto.randomUUID(), type: "text", orderIndex: 0, content: answer }],
         },
       });
-
       appendMessages([
         createChatMessage("assistant", `カードを作成しました: ${title}`),
         createChatMessage("assistant", "続けて次の疑問を入力できます。"),
@@ -122,14 +107,11 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
       setIsCreating(false);
     }
   }, [appendMessages, createCard, focusInputSoon, openCardTab, toast]);
-
   const handleGenerateAiAnswer = useCallback(async () => {
     const question = trimMessage(pendingQuestion, MAX_QUESTION_LENGTH);
     if (!question || !canGenerateAiAnswer) return;
-
     setIsGeneratingAiAnswer(true);
     appendMessages([createChatMessage("assistant", "ローカルAIで回答案を作成しています。")]);
-
     try {
       const result = await generateOllamaAnswer({ question });
       setInputValue(result.answer.slice(0, MAX_ANSWER_LENGTH));
@@ -144,11 +126,9 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
       setIsGeneratingAiAnswer(false);
     }
   }, [appendMessages, canGenerateAiAnswer, focusInputSoon, pendingQuestion, toast]);
-
   const handleSend = useCallback(() => {
     const value = trimMessage(inputValue, inputMaxLength);
     if (!value || isCreating || isGeneratingAiAnswer) return;
-
     if (step === "question") {
       setPendingQuestion(value);
       setStep("answer");
@@ -160,31 +140,24 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
       focusInputSoon();
       return;
     }
-
     appendMessages([createChatMessage("user", value)]);
     void handleCreateCardFromAnswer(pendingQuestion, value);
   }, [appendMessages, focusInputSoon, handleCreateCardFromAnswer, inputMaxLength, inputValue, isCreating, isGeneratingAiAnswer, pendingQuestion, step]);
-
   const handleCreateDraftWithoutAnswer = useCallback(() => {
     const question = trimMessage(pendingQuestion, MAX_QUESTION_LENGTH);
     if (!question || isCreating || isGeneratingAiAnswer) return;
-
     appendMessages([createChatMessage("assistant", "回答なしの下書きカードとして作成します。")]);
     void handleCreateCardFromAnswer(question, "");
   }, [appendMessages, handleCreateCardFromAnswer, isCreating, isGeneratingAiAnswer, pendingQuestion]);
-
   const handleInputKeyDown = useCallback((event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
-
     event.preventDefault();
     handleSend();
   }, [handleSend]);
-
   const latestQuestionLabel = useMemo(() => {
     if (!pendingQuestion) return null;
     return pendingQuestion.length > 56 ? `${pendingQuestion.slice(0, 56)}…` : pendingQuestion;
   }, [pendingQuestion]);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="app-modal-surface max-w-96 gap-0 p-0">
@@ -245,13 +218,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
     </Dialog>
   );
 };
-
-
-
 const QuickQaChatDialog = memo(QuickQaChatDialogComponent);
 QuickQaChatDialog.displayName = "QuickQaChatDialog";
-
 export { QuickQaChatDialog };
-
-
 export type { QuickQaChatDialogProps };
