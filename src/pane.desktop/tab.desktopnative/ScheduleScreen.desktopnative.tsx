@@ -2,8 +2,12 @@ import type { ScheduleScreenProps } from "@/features/calendar/scheduleScreen.typ
 import { ScheduleScreen } from "@/pane.desktop/view/ScheduleScreen.desktop";
 import { TabsBar } from "./TabsBar";
 
+
+
 const ScheduleScreenDesktopNative = (props: ScheduleScreenProps) => {
   return <ScheduleScreen {...props} contentToolbar={<TabsBar variant="titlebar" />} />;
 };
+
+
 
 export { ScheduleScreenDesktopNative };

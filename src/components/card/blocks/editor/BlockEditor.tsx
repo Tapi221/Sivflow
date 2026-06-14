@@ -13,6 +13,8 @@ import type { CardBlock } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { createEditorBlock, isEditorInsertableBlockType } from "./blockEditorInsertPolicy";
 
+
+
 type CssVars = React.CSSProperties & Record<`--${string}`, string>;
 interface BlockEditorProps {
   blocks: CardBlock[];
@@ -39,13 +41,19 @@ interface BlockEditorHandle {
   addBlock: (type: CardBlock["type"]) => void;
 }
 
+
+
 const ROW_STEP_PX = CARD_ROW_PX;
 const EMPTY_HIDDEN_BLOCK_TYPES: CardBlock["type"][] = [];
+
+
 
 const uid = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : Math.random().toString(36).slice(2);
+
+
 
 const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>(({ blocks = [], onChange, prefix, label, accentColor, duplicateToOpposite = false, onCrossDuplicate, autoFocus = false, customPlaceholders, hideToolbar = false, onDelete, minDeletableIndex = 0, hiddenBlockTypes = EMPTY_HIDDEN_BLOCK_TYPES, settings = undefined, toolbarMount = null, toolbarDesktopLayout = "horizontal", enableBlockSelectionState = true, displayMode = "fixed", zoom = 1 }, ref) => {
   const [selectedContainerBlockId, setSelectedContainerBlockId] = useState<string | null>(null);
@@ -613,7 +621,11 @@ const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>(({ blo
 },
 );
 
+
+
 BlockEditor.displayName = "BlockEditor";
 
 export { BlockEditor };
+
+
 export type { BlockEditorHandle };

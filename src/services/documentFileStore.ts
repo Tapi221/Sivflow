@@ -2,6 +2,8 @@ import { getLocalDb } from "@/services/localdb";
 import type { QueryableTable } from "@/services/localdb/types";
 import type { DocumentItem } from "@/types";
 
+
+
 type BlobScopeOptions = {
   userId?: string | null;
 };
@@ -18,6 +20,8 @@ type SaveDocumentWithBlobParams = {
 type LocalDbWithDocumentFiles = Awaited<ReturnType<typeof getLocalDb>> & {
   documentFiles: QueryableTable<StoredDocumentFile, string>;
 };
+
+
 
 const getDocumentFilesTable = (db: Awaited<ReturnType<typeof getLocalDb>>) =>
   (db as LocalDbWithDocumentFiles).documentFiles;
@@ -68,5 +72,7 @@ const deleteDocumentBlobsByUser = async (userId: string): Promise<void> => {
   const db = await getLocalDb(userId);
   await getDocumentFilesTable(db).clear();
 };
+
+
 
 export { saveDocumentWithBlob, saveDocumentBlob, getDocumentBlob, deleteDocumentBlob, deleteDocumentBlobsByUser };

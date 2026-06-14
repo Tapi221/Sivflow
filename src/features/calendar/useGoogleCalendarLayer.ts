@@ -7,7 +7,11 @@ import { useServerStoredGoogleAccountBootstrap } from "@/integration/googlecalen
 import { useGoogleTaskLists } from "@/integration/googletask-integration/useGoogleTaskLists";
 import { useGoogleTasks } from "@/integration/googletask-integration/useGoogleTasks";
 
+
+
 const RECURRENCE_REFRESH_FUTURE_DAYS = 366;
+
+
 
 const resolveExternalEventId = (accountId: string, calendarId: string, eventId: string): string => {
   const accountPrefix = `${accountId}:${calendarId}:`;
@@ -193,5 +197,9 @@ const useGoogleCalendarLayer = () => {
   };
 };
 
+
+
 export { useGoogleCalendarLayer };
+
+
 export type { GoogleAccountEntry };

@@ -3,7 +3,11 @@ type GoogleAccountChipProps = {
   photoUrl?: string | null;
 };
 
+
+
 const GOOGLE_ACCOUNT_CHIP_SIZE_CLASS_NAME = "size-4";
+
+
 
 const GoogleAccountChip = ({ name, photoUrl }: GoogleAccountChipProps) => {
   if (photoUrl) {
@@ -18,5 +22,7 @@ const GoogleAccountChip = ({ name, photoUrl }: GoogleAccountChipProps) => {
     </div>
   );
 };
+
+
 
 export { GoogleAccountChip };

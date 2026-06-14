@@ -1,20 +1,38 @@
 "use client";
+
 import * as React from "react";
+
 import { exportToDocx } from "@platejs/docx-io";
+
 import { MarkdownPlugin } from "@platejs/markdown";
+
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
+
 import { ArrowDownToLineIcon } from "lucide-react";
+
 import type { SlatePlugin } from "platejs";
+
 import { createSlateEditor } from "platejs";
+
 import { useEditorRef } from "platejs/react";
+
 import { serializeHtml } from "platejs/static";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-import { EditorStatic } from "@/chip/ui/plate/editor-static";
-import { ToolbarButton } from "@/chip/ui/plate/toolbar";
+
 import { BaseEditorKit } from "@/components/editor/editor-base-kit";
+
 import { DocxExportKit } from "@/components/editor/plugins/docx-export-kit";
 
+import { EditorStatic } from "./editor-static";
+
+import { ToolbarButton } from "./toolbar";
+
+
+
 const siteUrl = "https://platejs.org";
+
+
 
 const ExportToolbarButton = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
@@ -132,5 +150,7 @@ const ExportToolbarButton = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
+
+
 
 export { ExportToolbarButton };

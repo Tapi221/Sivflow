@@ -3,11 +3,15 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import type { ReferenceBlockData } from "@/types";
 import { ExternalLink, Globe, Link as LinkIcon } from "@/ui/icons";
 
+
+
 interface ReferencePopupProps {
   isOpen: boolean;
   onClose: () => void;
   references: ReferenceBlockData[];
 }
+
+
 
 const ReferencePopup = ({ isOpen, onClose, references }: ReferencePopupProps) => {
   return (<Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}> <DialogContent className="sm:max-w-96 rounded-3xl border-none shadow-2xl p-0 overflow-hidden"> <DialogHeader className="p-6 pb-2"> <DialogTitle className="text-xl font-bold text-slate-800 flex items-center gap-2"> <LinkIcon className="w-5 h-5 text-primary-600" /> 参考資料 </DialogTitle> <DialogDescription className="text-slate-400 text-xs font-medium uppercase tracking-widest"> {references.length} 件のリンクがあります </DialogDescription> </DialogHeader> <div className="px-6 pb-8 space-y-3 max-h-[60vh] overflow-y-auto"> {references.map((ref, index) => {
@@ -30,5 +34,7 @@ const ReferencePopup = ({ isOpen, onClose, references }: ReferencePopupProps) =>
   </Dialog>
   );
 };
+
+
 
 export { ReferencePopup };

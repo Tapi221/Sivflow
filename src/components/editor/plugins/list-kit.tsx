@@ -1,9 +1,16 @@
 "use client";
+
 import { BulletedListRules, isOrderedList, OrderedListRules, TaskListRules } from "@platejs/list";
+
 import { ListPlugin } from "@platejs/list/react";
+
 import { KEYS } from "platejs";
+
 import { BlockList } from "@/chip/ui/plate/block-list";
-import { IndentKit } from "@/components/editor/plugins/indent-kit";
+
+import { IndentKit } from "./indent-kit";
+
+
 
 const ListKit = [
   ...IndentKit,
@@ -46,5 +53,7 @@ const ListKit = [
     },
   }),
 ];
+
+
 
 export { ListKit };

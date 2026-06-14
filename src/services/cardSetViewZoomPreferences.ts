@@ -2,6 +2,8 @@ import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 import type { CardLayoutMode, CardSetInteractionMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
+
+
 interface CardSetViewZoomPreferencesStore {
   version: 2;
   byScope: Record<string, number>;
@@ -24,6 +26,8 @@ type LegacyCardSetViewZoomPreferenceScope = {
   interactionMode: CardSetInteractionMode;
   cardLayoutMode: CardLayoutMode;
 };
+
+
 
 const emptyStore = (): CardSetViewZoomPreferencesStore => ({
   version: 2,
@@ -247,5 +251,9 @@ const setCardSetViewZoomPreference = (scope: CardSetViewZoomPreferenceScope, zoo
   writeStore(store);
 };
 
+
+
 export { buildCardSetViewZoomPreferenceScopeKey, getCardSetViewZoomPreference, setCardSetViewZoomPreference };
+
+
 export type { CardSetViewZoomPreferenceScope };
