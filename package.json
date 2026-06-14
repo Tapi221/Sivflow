@@ -80,6 +80,7 @@
     "@ai-sdk/react": "3",
     "@ariakit/react": "^0.4.29",
     "@emoji-mart/data": "1.2.1",
+    "@excalidraw/excalidraw": "0.18.0",
     "@faker-js/faker": "^10.4.0",
     "@hello-pangea/dnd": "^18.0.1",
     "@mantine/core": "^8.3.18",
