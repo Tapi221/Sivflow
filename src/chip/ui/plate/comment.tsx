@@ -299,15 +299,15 @@ const Comment = (props: {
         )}
       </div>
       {isFirst && showDocumentContent && (
-        <div className="relative mt-1 flex pl-[32px] text-muted-foreground text-sm">
+        <div className="relative mt-1 flex pl-8 text-muted-foreground text-sm">
           {discussionLength > 1 && (
-            <div className="absolute top-[5px] left-3 h-full w-0.5 shrink-0 bg-muted" />
+            <div className="absolute top-1 left-3 h-full w-0.5 shrink-0 bg-muted" />
           )}
           <div className="my-px w-0.5 shrink-0 bg-muted-foreground/35" />
           {documentContent && <div className="ml-2">{documentContent}</div>}
         </div>
       )}
-      <div className="relative my-1 pl-[26px]">
+      <div className="relative my-1 pl-7">
         {!isLast && (
           <div className="absolute top-0 left-3 h-full w-0.5 shrink-0 bg-muted" />
         )}
@@ -323,13 +323,13 @@ const Comment = (props: {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="size-[28px]"
+                  className="size-7"
                   onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
                     event.stopPropagation();
                     void onCancel();
                   }}
                 >
-                  <div className="flex size-5 shrink-0 items-center justify-center rounded-[50%] bg-muted">
+                  <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted">
                     <XIcon className="size-3 stroke-[3px] text-muted-foreground" />
                   </div>
                 </Button>
@@ -341,7 +341,7 @@ const Comment = (props: {
                     void onSave();
                   }}
                 >
-                  <div className="flex size-5 shrink-0 items-center justify-center rounded-[50%] bg-foreground">
+                  <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-foreground">
                     <CheckIcon className="size-3 stroke-[3px] text-background" />
                   </div>
                 </Button>
@@ -482,7 +482,7 @@ const CommentCreateForm = ({ autoFocus = false, className, discussionId: discuss
           <EditorContainer variant="comment">
             <Editor
               variant="comment"
-              className="min-h-[25px] grow pt-0.5 pr-8"
+              className="min-h-6 grow pt-0.5 pr-8"
               onKeyDown={(event) => {
                 if (event.key === "Enter" && !event.shiftKey) {
                   event.preventDefault();
