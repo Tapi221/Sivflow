@@ -129,7 +129,7 @@ iOS app
 
 root script では、Android は `android:*`、iOS は `ios:*` に分ける。`mobile:ios`、`mobile:android` のような横断名は使わない。
 
-`apps/mobile` の物理 path は既存互換として残っているが、責務名は Android app とする。新規 code、doc、issue、commit message では原則として Android app と呼ぶ。
+`apps/mobile` の物理 path は既存互換として残っているが、責務名は Android app とする。新規 code、doc、issue、commit message では原則として Android app と呼ぶ。例外として、既存 path、alias、package 名に含まれる `mobile` は段階的に解消する。
 
 ## constants フォルダを作らない
 
