@@ -1,4 +1,4 @@
-import "./PdfPane.css";
+import "@/features/pdf/PdfPane.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
@@ -6,13 +6,12 @@ import type { ChangeEvent, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
 import type { PdfViewerState } from "@/types";
-import type { PdfDocumentSource } from "./pdfDocumentSource";
-import { releasePdfDocumentSourceSoon, retainPdfDocumentSource, toPdfDocumentLoadSource } from "./pdfDocumentSource";
-import { waitForPdfLoadingTask } from "./pdfLoadingTaskTimeout";
-import { getSafePdfPageNumber } from "./pdfPageWindow";
-import { PDF_ZOOM_BUTTON_SCALE_FACTOR, PDF_ZOOM_MAX_SCALE, PDF_ZOOM_MIN_SCALE } from "./pdfZoom.constants";
-
-
+import { releasePdfDocumentSourceSoon, retainPdfDocumentSource, toPdfDocumentLoadSource } from "@/features/pdf/pdfDocumentSource";
+import type { PdfDocumentSource } from "@/features/pdf/pdfDocumentSource";
+import { waitForPdfLoadingTask } from "@/features/pdf/pdfLoadingTaskTimeout";
+import { getSafePdfPageNumber } from "@/features/pdf/pdfPageWindow";
+import { PDF_TRACKPAD_ZOOM_SENSITIVITY, PDF_ZOOM_BUTTON_SCALE_FACTOR, PDF_ZOOM_MAX_SCALE, PDF_ZOOM_MIN_SCALE, PDF_ZOOM_SCALE_EPSILON } from "@/features/pdf/pdfZoom.constants";
+import { clampScale, computeNextScaleFromGesture, normalizeScale } from "@/features/pdf/pdfZoom.utils";
 
 type PdfViewerStateChangePersistence = "immediate" | "deferred" | "none";
 type PdfViewerStateChangeOptions = {
@@ -60,8 +59,10 @@ type PdfPageCanvasProps = {
   scrollRoot: HTMLDivElement | null;
   onPageSizeChange: (pageNumber: number, pageSize: PdfPageSize) => void;
 };
-
-
+type PdfZoomAnchor = {
+  clientX: number;
+  clientY: number;
+};
 
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 640;
 const PDF_FALLBACK_PAGE_SIZE: PdfPageSize = { width: 612, height: 792 };
@@ -75,12 +76,13 @@ const PDF_TOOLBAR_BUTTON_CLASS_NAME = "inline-flex h-8 min-w-8 items-center just
 const PDF_TOOLBAR_INPUT_CLASS_NAME = "h-8 w-14 rounded-md border border-black/10 bg-white/90 px-2 text-center text-[12px] font-medium text-[#4a4a4a] shadow-sm outline-none focus:border-black/25";
 const PDF_MARK_KEY_PATTERN = /^[a-z0-9]$/i;
 const PDF_RANGE_CHUNK_SIZE = 65_536;
+const PDF_WHEEL_DELTA_LINE_HEIGHT_PX = 16;
+const PDF_WHEEL_DELTA_MODE_LINE = 1;
+const PDF_WHEEL_DELTA_MODE_PAGE = 2;
 const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
-
-
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 const createDefaultToolbarState = (): PdfToolbarState => ({
@@ -94,7 +96,7 @@ const getLegacyViewerState = (viewerState: PdfViewerState | null | undefined): L
 };
 const clampPdfViewerScale = (scale: number): number => {
   if (!Number.isFinite(scale) || scale <= 0) return 1;
-  return Math.min(Math.max(scale, PDF_ZOOM_MIN_SCALE), PDF_ZOOM_MAX_SCALE);
+  return normalizeScale(clampScale(scale, PDF_ZOOM_MIN_SCALE, PDF_ZOOM_MAX_SCALE));
 };
 const clampPdfPageNumber = (pageNumber: number, pageCount: number): number => {
   const safePageNumber = getSafePdfPageNumber(pageNumber);
@@ -173,7 +175,6 @@ const getNearestPageNumber = (container: HTMLElement, pageElements: Map<number, 
   const anchorY = containerRect.top + Math.min(containerRect.height * 0.35, 220);
   let nearestPageNumber: number | null = null;
   let nearestDistance = Number.POSITIVE_INFINITY;
-
   for (const [pageNumber, pageElement] of pageElements) {
     const rect = pageElement.getBoundingClientRect();
     const intersects = rect.bottom >= containerRect.top && rect.top <= containerRect.bottom;
@@ -183,11 +184,47 @@ const getNearestPageNumber = (container: HTMLElement, pageElements: Map<number, 
     nearestDistance = distance;
     nearestPageNumber = pageNumber;
   }
-
   return nearestPageNumber;
 };
-
-
+const getNormalizedPdfWheelDeltaY = (event: WheelEvent, container: HTMLElement): number => {
+  if (event.deltaMode === PDF_WHEEL_DELTA_MODE_LINE) return event.deltaY * PDF_WHEEL_DELTA_LINE_HEIGHT_PX;
+  if (event.deltaMode === PDF_WHEEL_DELTA_MODE_PAGE) return event.deltaY * Math.max(container.clientHeight, 1);
+  return event.deltaY;
+};
+const computeNextScaleFromTrackpadWheel = (currentScale: number, deltaY: number): number | null => {
+  if (!Number.isFinite(currentScale) || currentScale <= 0) return null;
+  if (!Number.isFinite(deltaY) || deltaY === 0) return null;
+  const rawNextScale = currentScale * Math.exp(-deltaY * PDF_TRACKPAD_ZOOM_SENSITIVITY);
+  if (!Number.isFinite(rawNextScale)) return null;
+  return normalizeScale(clampScale(rawNextScale, PDF_ZOOM_MIN_SCALE, PDF_ZOOM_MAX_SCALE));
+};
+const getPdfGestureScale = (event: Event): number | null => {
+  const gestureScale = (event as { scale?: unknown }).scale;
+  return typeof gestureScale === "number" && Number.isFinite(gestureScale) && gestureScale > 0 ? gestureScale : null;
+};
+const preventPdfZoomDefault = (event: Event): void => {
+  if (event.cancelable) event.preventDefault();
+};
+const getPdfZoomAnchor = (event: Event, container: HTMLElement): PdfZoomAnchor => {
+  const rect = container.getBoundingClientRect();
+  const eventPosition = event as Partial<Pick<MouseEvent, "clientX" | "clientY">>;
+  const clientX = typeof eventPosition.clientX === "number" && Number.isFinite(eventPosition.clientX) ? eventPosition.clientX : rect.left + rect.width / 2;
+  const clientY = typeof eventPosition.clientY === "number" && Number.isFinite(eventPosition.clientY) ? eventPosition.clientY : rect.top + rect.height / 2;
+  return { clientX, clientY };
+};
+const restorePdfZoomAnchor = (container: HTMLElement, anchor: PdfZoomAnchor, previousScale: number, nextScale: number): void => {
+  if (!Number.isFinite(previousScale) || previousScale <= 0 || !Number.isFinite(nextScale) || nextScale <= 0) return;
+  const rect = container.getBoundingClientRect();
+  const anchorLeft = anchor.clientX - rect.left;
+  const anchorTop = anchor.clientY - rect.top;
+  const contentLeft = container.scrollLeft + anchorLeft;
+  const contentTop = container.scrollTop + anchorTop;
+  const scaleRatio = nextScale / previousScale;
+  globalThis.requestAnimationFrame(() => {
+    container.scrollLeft = contentLeft * scaleRatio - anchorLeft;
+    container.scrollTop = contentTop * scaleRatio - anchorTop;
+  });
+};
 
 const PdfPageCanvas = ({ pdfDocument, pageNumber, pageSize, registerPageElement, scale, scrollRoot, onPageSizeChange }: PdfPageCanvasProps) => {
   const pageElementRef = useRef<HTMLDivElement | null>(null);
@@ -196,7 +233,6 @@ const PdfPageCanvas = ({ pdfDocument, pageNumber, pageSize, registerPageElement,
   const [isNearViewport, setIsNearViewport] = useState(false);
   const [renderErrorMessage, setRenderErrorMessage] = useState<string | null>(null);
   const renderedPageSize = getRenderedPageSize(pageSize, scale);
-
   const setPageElement = useCallback(
     (element: HTMLDivElement | null) => {
       pageElementRef.current = element;
@@ -204,7 +240,6 @@ const PdfPageCanvas = ({ pdfDocument, pageNumber, pageSize, registerPageElement,
     },
     [pageNumber, registerPageElement],
   );
-
   useEffect(() => {
     const pageElement = pageElementRef.current;
     if (!pageElement) return;
@@ -212,7 +247,6 @@ const PdfPageCanvas = ({ pdfDocument, pageNumber, pageSize, registerPageElement,
       setIsNearViewport(true);
       return;
     }
-
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsNearViewport(entry.isIntersecting);
@@ -224,53 +258,44 @@ const PdfPageCanvas = ({ pdfDocument, pageNumber, pageSize, registerPageElement,
       observer.disconnect();
     };
   }, [scrollRoot]);
-
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !isNearViewport) return;
-
     let isCancelled = false;
-
     const renderPage = async () => {
       renderTaskRef.current?.cancel();
       renderTaskRef.current = null;
       setRenderErrorMessage(null);
       const page = await pdfDocument.getPage(pageNumber);
       if (isCancelled) return;
-
       const baseViewport = page.getViewport({ scale: 1 });
       onPageSizeChange(pageNumber, { width: baseViewport.width, height: baseViewport.height });
       const viewport = page.getViewport({ scale: clampPdfViewerScale(scale) });
       const outputScale = Math.min(Math.max(globalThis.devicePixelRatio ?? 1, 1), PDF_RENDER_OUTPUT_SCALE_MAX);
       const canvasContext = canvas.getContext("2d");
       if (!canvasContext) throw new Error("PDF Canvas を初期化できませんでした。");
-
       canvas.width = Math.floor(viewport.width * outputScale);
       canvas.height = Math.floor(viewport.height * outputScale);
       canvas.style.width = `${viewport.width}px`;
       canvas.style.height = `${viewport.height}px`;
       canvasContext.setTransform(outputScale, 0, 0, outputScale, 0, 0);
       canvasContext.clearRect(0, 0, viewport.width, viewport.height);
-
       const renderParameters = { canvas, canvasContext, viewport } as Parameters<PdfPageProxy["render"]>[0];
       const renderTask = page.render(renderParameters);
       renderTaskRef.current = renderTask;
       await renderTask.promise;
       if (renderTaskRef.current === renderTask) renderTaskRef.current = null;
     };
-
     void renderPage().catch((error: unknown) => {
       if (isCancelled || isRenderingCancelled(error)) return;
       setRenderErrorMessage(getErrorMessage(error, "PDFページの描画に失敗しました。"));
     });
-
     return () => {
       isCancelled = true;
       renderTaskRef.current?.cancel();
       renderTaskRef.current = null;
     };
   }, [isNearViewport, onPageSizeChange, pageNumber, pdfDocument, scale]);
-
   return (
     <div ref={setPageElement} className="pdf-pane__page" data-page-number={pageNumber} style={{ width: `${renderedPageSize.width}px`, minHeight: `${renderedPageSize.height}px` }}>
       <canvas ref={canvasRef} className="pdf-pane__page-canvas" aria-label={`PDF ${pageNumber} ページ`} />
@@ -281,10 +306,12 @@ const PdfPageCanvas = ({ pdfDocument, pageNumber, pageSize, registerPageElement,
 };
 const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadError, onViewerStateChange }: PdfPaneProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const gestureBaseScaleRef = useRef<number | null>(null);
   const pageElementsRef = useRef<Map<number, HTMLElement>>(new Map());
   const pdfDocumentRef = useRef<PdfDocumentProxy | null>(null);
   const scrollIdleTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | null>(null);
   const sourceReleaseTimerRef = useRef<ReturnType<typeof globalThis.setTimeout> | null>(null);
+  const toolbarScaleRef = useRef(getViewerStateScale(viewerState));
   const viewerStateRef = useRef<PdfViewerState | null>(viewerState);
   const [scrollRoot, setScrollRoot] = useState<HTMLDivElement | null>(null);
   const [pdfDocument, setPdfDocument] = useState<PdfDocumentProxy | null>(null);
@@ -294,31 +321,26 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
   const [toolbarState, setToolbarState] = useState<PdfToolbarState>(createDefaultToolbarState);
   const [bookmarkPages, setBookmarkPages] = useState<number[]>(() => getViewerStateBookmarkPages(viewerState));
   const [zoomInputValue, setZoomInputValue] = useState(String(Math.round(getViewerStateScale(viewerState) * 100)));
-
   useEffect(() => {
     viewerStateRef.current = viewerState;
   }, [viewerState]);
-
   useEffect(() => {
+    toolbarScaleRef.current = toolbarState.scale;
     setZoomInputValue(String(Math.round(toolbarState.scale * 100)));
   }, [toolbarState.scale]);
-
   const handleContainerRef = useCallback((element: HTMLDivElement | null) => {
     containerRef.current = element;
     setScrollRoot(element);
   }, []);
-
   const setActiveDocument = useCallback((nextDocument: PdfDocumentProxy | null) => {
     const currentDocument = pdfDocumentRef.current;
     if (currentDocument && currentDocument !== nextDocument) void currentDocument.destroy();
     pdfDocumentRef.current = nextDocument;
     setPdfDocument(nextDocument);
   }, []);
-
   const emitViewerStateChange = useCallback((nextState: PdfViewerState, options?: PdfViewerStateChangeOptions) => {
     void onViewerStateChange?.(nextState, options);
   }, [onViewerStateChange]);
-
   const buildViewerState = useCallback((updates: Partial<LegacyPdfViewerState>): PdfViewerState => {
     const currentViewerState = (viewerStateRef.current ?? {}) as LegacyPdfViewerState;
     return {
@@ -326,13 +348,11 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       ...updates,
     } as PdfViewerState;
   }, []);
-
   const persistViewerState = useCallback((updates: Partial<LegacyPdfViewerState>, options?: PdfViewerStateChangeOptions) => {
     const nextState = buildViewerState(updates);
     viewerStateRef.current = nextState;
     emitViewerStateChange(nextState, options);
   }, [buildViewerState, emitViewerStateChange]);
-
   const registerPageElement = useCallback((pageNumber: number, element: HTMLDivElement | null) => {
     if (element) {
       pageElementsRef.current.set(pageNumber, element);
@@ -340,12 +360,10 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     }
     pageElementsRef.current.delete(pageNumber);
   }, []);
-
   const scrollToPage = useCallback((pageNumber: number) => {
     const pageElement = pageElementsRef.current.get(pageNumber);
     pageElement?.scrollIntoView({ block: "start" });
   }, []);
-
   const updatePageState = useCallback((pageNumber: number, options?: PdfViewerStateChangeOptions, shouldScroll = true) => {
     const nextPage = clampPdfPageNumber(pageNumber, toolbarState.pageCount);
     const nextHistoryBackPages = appendHistoryPage(getViewerStateHistoryBackPages(viewerStateRef.current), nextPage);
@@ -353,13 +371,16 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     persistViewerState({ currentPage: nextPage, page: nextPage, history: nextHistoryBackPages, historyBackPages: nextHistoryBackPages }, options);
     if (shouldScroll) globalThis.requestAnimationFrame(() => scrollToPage(nextPage));
   }, [bookmarkPages, persistViewerState, scrollToPage, toolbarState.pageCount]);
-
-  const updateScaleState = useCallback((scale: number, fitMode: PdfViewerState["fitMode"], options?: PdfViewerStateChangeOptions) => {
+  const updateScaleState = useCallback((scale: number, fitMode: PdfViewerState["fitMode"], options?: PdfViewerStateChangeOptions, anchor?: PdfZoomAnchor) => {
+    const currentScale = toolbarScaleRef.current;
     const nextScale = clampPdfViewerScale(scale);
+    if (Math.abs(nextScale - currentScale) < PDF_ZOOM_SCALE_EPSILON) return;
+    const container = containerRef.current;
+    toolbarScaleRef.current = nextScale;
     setToolbarState((currentState) => ({ ...currentState, scale: nextScale }));
     persistViewerState({ scale: nextScale, fitMode }, options);
+    if (anchor && container) restorePdfZoomAnchor(container, anchor, currentScale, nextScale);
   }, [persistViewerState]);
-
   const updatePageSize = useCallback((pageNumber: number, nextPageSize: PdfPageSize) => {
     setPageSizes((currentPageSizes) => {
       const index = pageNumber - 1;
@@ -370,23 +391,18 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       return nextPageSizes;
     });
   }, []);
-
   const goToPreviousPage = useCallback(() => {
     updatePageState(toolbarState.currentPage - 1, { persistence: "immediate" });
   }, [toolbarState.currentPage, updatePageState]);
-
   const goToNextPage = useCallback(() => {
     updatePageState(toolbarState.currentPage + 1, { persistence: "immediate" });
   }, [toolbarState.currentPage, updatePageState]);
-
   const zoomIn = useCallback(() => {
-    updateScaleState(toolbarState.scale * PDF_ZOOM_BUTTON_SCALE_FACTOR, "manual", { persistence: "deferred" });
-  }, [toolbarState.scale, updateScaleState]);
-
+    updateScaleState(toolbarScaleRef.current * PDF_ZOOM_BUTTON_SCALE_FACTOR, "manual", { persistence: "deferred" });
+  }, [updateScaleState]);
   const zoomOut = useCallback(() => {
-    updateScaleState(toolbarState.scale / PDF_ZOOM_BUTTON_SCALE_FACTOR, "manual", { persistence: "deferred" });
-  }, [toolbarState.scale, updateScaleState]);
-
+    updateScaleState(toolbarScaleRef.current / PDF_ZOOM_BUTTON_SCALE_FACTOR, "manual", { persistence: "deferred" });
+  }, [updateScaleState]);
   const applyPageWidth = useCallback(() => {
     const container = containerRef.current;
     const currentPageSize = pageSizes[toolbarState.currentPage - 1] ?? PDF_FALLBACK_PAGE_SIZE;
@@ -394,12 +410,10 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     const availableWidth = Math.max(container.clientWidth - PDF_PAGE_WIDTH_PADDING_PX, 1);
     updateScaleState(availableWidth / currentPageSize.width, "width", { persistence: "immediate" });
   }, [pageSizes, toolbarState.currentPage, updateScaleState]);
-
   const handlePageInputChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const nextPage = Number(event.target.value);
     if (Number.isFinite(nextPage)) updatePageState(nextPage, { persistence: "immediate" });
   }, [updatePageState]);
-
   const handleZoomInputChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;
     setZoomInputValue(nextValue);
@@ -407,7 +421,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     if (!Number.isFinite(nextPercent) || nextPercent <= 0) return;
     updateScaleState(nextPercent / 100, "manual", { persistence: "deferred" });
   }, [updateScaleState]);
-
   const handleZoomInputKeyDown = useCallback((event: ReactKeyboardEvent<HTMLInputElement>) => {
     if (event.key !== "Enter") return;
     const nextPercent = Number(zoomInputValue);
@@ -415,7 +428,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     updateScaleState(nextPercent / 100, "manual", { persistence: "immediate" });
     event.currentTarget.blur();
   }, [updateScaleState, zoomInputValue]);
-
   const toggleBookmark = useCallback(() => {
     const currentPage = toolbarState.currentPage;
     const nextBookmarkPages = isBookmarkedPage(bookmarkPages, currentPage)
@@ -425,7 +437,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     setToolbarState((currentState) => ({ ...currentState, isBookmarked: isBookmarkedPage(nextBookmarkPages, currentPage) }));
     persistViewerState({ bookmark: isBookmarkedPage(nextBookmarkPages, currentPage), bookmarkPages: nextBookmarkPages }, { persistence: "immediate" });
   }, [bookmarkPages, persistViewerState, toolbarState.currentPage]);
-
   const goBackInHistory = useCallback(() => {
     const historyBackPages = getViewerStateHistoryBackPages(viewerStateRef.current);
     const previousPage = historyBackPages.length >= 2 ? historyBackPages[historyBackPages.length - 2] : null;
@@ -435,7 +446,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     persistViewerState({ currentPage: previousPage, page: previousPage, history: nextHistoryBackPages, historyBackPages: nextHistoryBackPages }, { persistence: "immediate" });
     globalThis.requestAnimationFrame(() => scrollToPage(previousPage));
   }, [bookmarkPages, persistViewerState, scrollToPage]);
-
   useEffect(() => {
     if (!source) {
       setActiveDocument(null);
@@ -445,10 +455,10 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       setBookmarkPages([]);
       setPageSizes([]);
       setZoomInputValue("100");
+      gestureBaseScaleRef.current = null;
       pageElementsRef.current.clear();
       return;
     }
-
     let isCancelled = false;
     const activeViewerState = viewerStateRef.current;
     retainPdfDocumentSource(source);
@@ -456,21 +466,19 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       globalThis.clearTimeout(sourceReleaseTimerRef.current);
       sourceReleaseTimerRef.current = null;
     }
-
     setIsLoading(true);
     setErrorMessage(null);
-
     void loadPdfDocument(source, viewerOptions)
       .then((loadedDocument) => {
         if (isCancelled) {
           void loadedDocument.destroy();
           return;
         }
-
         const nextPageCount = loadedDocument.numPages;
         const nextPage = clampPdfPageNumber(getViewerStatePage(activeViewerState), nextPageCount);
         const nextScale = getViewerStateScale(activeViewerState);
         const nextBookmarkPages = getViewerStateBookmarkPages(activeViewerState);
+        toolbarScaleRef.current = nextScale;
         setActiveDocument(loadedDocument);
         setPageSizes(Array.from({ length: nextPageCount }, () => null));
         setBookmarkPages(nextBookmarkPages);
@@ -488,7 +496,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         setErrorMessage(message);
         onLoadError?.(error);
       });
-
     return () => {
       isCancelled = true;
       sourceReleaseTimerRef.current = globalThis.setTimeout(() => {
@@ -497,11 +504,9 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       }, 0);
     };
   }, [onLoadError, scrollToPage, setActiveDocument, source, viewerOptions]);
-
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-
     const handleScroll = () => {
       const nearestPage = getNearestPageNumber(container, pageElementsRef.current);
       if (nearestPage === null) return;
@@ -513,7 +518,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         scrollIdleTimerRef.current = null;
       }, PDF_SCROLL_IDLE_DELAY_MS);
     };
-
     container.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
       container.removeEventListener("scroll", handleScroll);
@@ -521,7 +525,49 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       scrollIdleTimerRef.current = null;
     };
   }, [bookmarkPages, persistViewerState, scrollRoot]);
-
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const handleWheel = (event: WheelEvent) => {
+      if (!isReady || !event.ctrlKey && !event.metaKey) return;
+      preventPdfZoomDefault(event);
+      const currentScale = toolbarScaleRef.current;
+      const nextScale = computeNextScaleFromTrackpadWheel(currentScale, getNormalizedPdfWheelDeltaY(event, container));
+      if (nextScale === null || Math.abs(nextScale - currentScale) < PDF_ZOOM_SCALE_EPSILON) return;
+      updateScaleState(nextScale, "manual", { persistence: "deferred" }, getPdfZoomAnchor(event, container));
+    };
+    const handleGestureStart = (event: Event) => {
+      if (!isReady) return;
+      preventPdfZoomDefault(event);
+      gestureBaseScaleRef.current = toolbarScaleRef.current;
+    };
+    const handleGestureChange = (event: Event) => {
+      if (!isReady) return;
+      const gestureScale = getPdfGestureScale(event);
+      if (gestureScale === null) return;
+      preventPdfZoomDefault(event);
+      const currentScale = toolbarScaleRef.current;
+      const nextScale = computeNextScaleFromGesture({ currentScale, baseScale: gestureBaseScaleRef.current, gestureScale, minScale: PDF_ZOOM_MIN_SCALE, maxScale: PDF_ZOOM_MAX_SCALE });
+      if (nextScale === null || Math.abs(nextScale - currentScale) < PDF_ZOOM_SCALE_EPSILON) return;
+      updateScaleState(nextScale, "manual", { persistence: "deferred" }, getPdfZoomAnchor(event, container));
+    };
+    const handleGestureEnd = () => {
+      gestureBaseScaleRef.current = null;
+    };
+    container.addEventListener("wheel", handleWheel, { passive: false });
+    container.addEventListener("gesturestart", handleGestureStart, { passive: false });
+    container.addEventListener("gesturechange", handleGestureChange, { passive: false });
+    container.addEventListener("gestureend", handleGestureEnd);
+    container.addEventListener("gesturecancel", handleGestureEnd);
+    return () => {
+      container.removeEventListener("wheel", handleWheel);
+      container.removeEventListener("gesturestart", handleGestureStart);
+      container.removeEventListener("gesturechange", handleGestureChange);
+      container.removeEventListener("gestureend", handleGestureEnd);
+      container.removeEventListener("gesturecancel", handleGestureEnd);
+      gestureBaseScaleRef.current = null;
+    };
+  }, [isReady, scrollRoot, updateScaleState]);
   useEffect(() => {
     return () => {
       setActiveDocument(null);
@@ -529,53 +575,44 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       if (scrollIdleTimerRef.current !== null) globalThis.clearTimeout(scrollIdleTimerRef.current);
     };
   }, [setActiveDocument]);
-
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!shouldHandlePdfKeyboardEvent(event)) return;
-
       if ((event.ctrlKey || event.metaKey) && event.key === "+") {
         event.preventDefault();
         zoomIn();
         return;
       }
-
       if ((event.ctrlKey || event.metaKey) && event.key === "-") {
         event.preventDefault();
         zoomOut();
         return;
       }
-
       if ((event.ctrlKey || event.metaKey) && event.key === "0") {
         event.preventDefault();
         applyPageWidth();
         return;
       }
-
       if (event.key === "ArrowLeft" || event.key === "PageUp") {
         event.preventDefault();
         goToPreviousPage();
         return;
       }
-
       if (event.key === "ArrowRight" || event.key === "PageDown" || event.key === " ") {
         event.preventDefault();
         goToNextPage();
         return;
       }
-
       if (event.key.toLowerCase() === "b") {
         event.preventDefault();
         toggleBookmark();
         return;
       }
-
       if (event.key.toLowerCase() === "h") {
         event.preventDefault();
         goBackInHistory();
         return;
       }
-
       if (PDF_MARK_KEY_PATTERN.test(event.key)) {
         const markPages = {
           ...(viewerStateRef.current?.markPages ?? {}),
@@ -584,16 +621,13 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
         persistViewerState({ mark: event.key.toLowerCase(), markPages }, { persistence: "immediate" });
       }
     };
-
     globalThis.addEventListener("keydown", handleKeyDown);
     return () => {
       globalThis.removeEventListener("keydown", handleKeyDown);
     };
   }, [applyPageWidth, goBackInHistory, goToNextPage, goToPreviousPage, persistViewerState, toolbarState.currentPage, toggleBookmark, zoomIn, zoomOut]);
-
   const isReady = !isLoading && !errorMessage && toolbarState.pageCount > 0;
   const shouldUseCompactWidth = containerRef.current ? containerRef.current.clientWidth <= PDF_COMPACT_VIEWPORT_MAX_WIDTH : false;
-
   return (
     <section className={cn("pdf-pane", className)} aria-label="PDFビューア">
       <div className="pdf-pane__toolbar" role="toolbar" aria-label="PDF操作">
@@ -670,7 +704,5 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     </section>
   );
 };
-
-
 
 export { PdfPane };
