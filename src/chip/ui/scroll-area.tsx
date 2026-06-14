@@ -2,15 +2,11 @@ import * as React from "react";
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import { cn } from "@/lib/utils";
 
-
-
 type ScrollAreaProps = React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> & {
   viewportClassName?: string;
   viewportProps?: Omit<React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Viewport>, "children">;
   viewportRef?: React.Ref<React.ElementRef<typeof ScrollAreaPrimitive.Viewport>>;
 };
-
-
 
 const ScrollBar = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.ScrollAreaScrollbar>,
@@ -20,14 +16,14 @@ const ScrollBar = React.forwardRef<
     ref={ref}
     orientation={orientation}
     className={cn(
-      "flex touch-none select-none transition-colors",
-      orientation === "vertical" && "h-full w-[var(--scrollbar-size)] p-[var(--scrollbar-thumb-inset)]",
-      orientation === "horizontal" && "h-[var(--scrollbar-size)] flex-col p-[var(--scrollbar-thumb-inset)]",
+      "flex touch-none select-none p-0.5 transition-colors",
+      orientation === "vertical" && "h-full w-2",
+      orientation === "horizontal" && "h-2 flex-col",
       className,
     )}
     {...props}
   >
-    <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-[var(--scrollbar-radius)] bg-[var(--scrollbar-thumb)] transition-colors hover:bg-[var(--scrollbar-thumb-hover)] active:bg-[var(--scrollbar-thumb-active)]" />
+    <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-slate-300 transition-colors hover:bg-slate-400 active:bg-slate-500" />
   </ScrollAreaPrimitive.ScrollAreaScrollbar>
 ));
 const ScrollArea = React.forwardRef<
@@ -44,12 +40,10 @@ const ScrollArea = React.forwardRef<
   ...props
 }, ref) => {
   const { className: viewportPropsClassName, ...restViewportProps } = viewportProps ?? {};
-
   return (
     <ScrollAreaPrimitive.Root
       ref={ref}
-      type={
-        type}
+      type={type}
       scrollHideDelay={scrollHideDelay}
       className={cn("relative overflow-hidden", className)}
       {...props}
@@ -66,8 +60,6 @@ const ScrollArea = React.forwardRef<
     </ScrollAreaPrimitive.Root>
   );
 });
-
-
 
 ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName;
 ScrollArea.displayName = ScrollAreaPrimitive.Root.displayName;
