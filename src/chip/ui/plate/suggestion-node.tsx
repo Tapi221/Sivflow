@@ -100,7 +100,7 @@ const SuggestionLineBreakAnchor = ({ badgeProps, children, className }: Suggesti
     <span
       {...badgeProps}
       className={cn(
-        "inline-flex h-[calc(1lh+2px)] w-[1lh] shrink-0 items-center justify-center leading-none",
+        "inline-flex size-6 shrink-0 items-center justify-center leading-none",
         badgeProps?.className,
         className,
       )}
@@ -119,7 +119,7 @@ const SuggestionLineBreakElementAnchor = ({ badgeProps, children, className }: S
     <span
       {...badgeProps}
       className={cn(
-        "inline-flex h-[calc(1lh+2px)] w-[1lh] shrink-0 items-center justify-center leading-none",
+        "inline-flex size-6 shrink-0 items-center justify-center leading-none",
         badgeProps?.className,
         className,
       )}
