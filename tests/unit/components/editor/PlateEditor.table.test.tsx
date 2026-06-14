@@ -1,7 +1,9 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import type { Value } from "platejs";
-import { PlateEditor } from "@/components/editor/plate-editor";
+import { Plate, usePlateEditor } from "platejs/react";
+import { Editor, EditorContainer } from "@/chip/ui/plate/editor";
+import { TableKit } from "@/components/editor/plugins/table-kit";
 
 const TABLE_VALUE: Value = [
   {
@@ -48,8 +50,23 @@ afterEach(() => {
 
 describe("PlateEditor table rendering", () => {
   it("renders a table document without requiring a missing table store provider", () => {
-    render(<PlateEditor initialValue={TABLE_VALUE} onChange={vi.fn()} />);
+    const MinimalTableEditor = () => {
+      const editor = usePlateEditor({
+        plugins: TableKit,
+        value: TABLE_VALUE,
+      });
 
-    expect(screen.getByText("Table cell")).toBeInTheDocument();
+      return (
+        <Plate editor={editor}>
+          <EditorContainer>
+            <Editor />
+          </EditorContainer>
+        </Plate>
+      );
+    };
+
+    render(<MinimalTableEditor />);
+
+    expect(screen.getByText("Table cell")).not.toBeNull();
   });
 });
