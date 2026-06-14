@@ -74,23 +74,27 @@ const LIST_MATERIALIZE_OVERSCAN_PX = 8_000;
 const LIST_MAX_RANGE_UPDATE_GUARD_PX = 2_400;
 const DATE_KEY_PART_COUNT = 3;
 const LIST_DAY_RAIL_CLASS_NAME =
-  "pointer-events-none absolute -bottom-2 left-[67px] top-0 w-px -translate-x-1/2 bg-[#eceff3]";
+  "pointer-events-none absolute -bottom-2 left-16 top-0 w-px -translate-x-1/2 bg-slate-200";
 const LIST_GLOBAL_RAIL_CLASS_NAME =
-  "pointer-events-none absolute bottom-0 left-[127px] top-0 w-px -translate-x-1/2 bg-[#eceff3] md:left-[183px]";
+  "pointer-events-none absolute bottom-0 left-32 top-0 w-px -translate-x-1/2 bg-slate-200 md:left-44";
 const DAY_DATE_NUMBER_CLASS_NAME =
-  "flex h-8 w-8 items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-all duration-150";
+  "flex h-8 w-8 items-center justify-center rounded-full text-base font-bold leading-none tracking-tight tabular-nums transition-all duration-150";
 const DAY_WEEKDAY_CLASS_NAME =
-  "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
+  "text-xs font-semibold leading-none text-slate-500";
 const SELECTED_DAY_DATE_NUMBER_CLASS_NAME =
-  "border-0 bg-[var(--ds-color-tag-sky-bg)] text-[var(--ds-color-tag-sky-fg)] shadow-none ring-0";
+  "border-0 bg-sky-100 text-sky-600 shadow-none ring-0";
 const EMPTY_DAY_ROW_CLASS_NAME =
-  "grid h-full min-h-[38px] grid-cols-[54px_26px_minmax(0,1fr)] items-stretch";
+  "flex h-full min-h-10 items-stretch";
+const EMPTY_DAY_TIME_CLASS_NAME =
+  "w-12 shrink-0 px-1 pt-2.5 text-right text-xs font-medium leading-none text-slate-400";
+const EMPTY_DAY_RAIL_CLASS_NAME =
+  "relative flex w-8 shrink-0 justify-center";
 const EMPTY_DAY_LINE_CLASS_NAME =
-  "absolute -bottom-1.5 left-1/2 top-0 w-px -translate-x-1/2 bg-[#eceff3]";
+  "absolute -bottom-2 left-1/2 top-0 w-px -translate-x-1/2 bg-slate-200";
 const EMPTY_DAY_DOT_CLASS_NAME =
-  "relative mt-2 h-2 w-2 rounded-full border-2 border-[#dedede] bg-white shadow-[0_1px_4px_rgba(15,23,42,0.08)]";
+  "relative mt-2 h-2 w-2 rounded-full border-2 border-slate-300 bg-white shadow-sm";
 const EMPTY_DAY_CHIP_CLASS_NAME =
-  "flex h-[34px] items-center rounded-[16px] border border-[#eceff3] bg-white px-3 text-[12px] font-semibold text-[#8e8e93]";
+  "flex h-8 min-w-0 flex-1 items-center rounded-2xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-400";
 
 const createRail = (selectedDate: Date): ScheduleVirtualRail => ({
   startDate: subDays(startOfMonth(selectedDate), LOCAL_DAYS),
@@ -347,16 +351,16 @@ const getDayDateNumberClassName = (day: CalendarListDay): string =>
     day.isSelected
       ? SELECTED_DAY_DATE_NUMBER_CLASS_NAME
       : day.isToday
-        ? "text-[#0a84ff]"
-        : "text-[#1c1c1e]",
+        ? "text-sky-500"
+        : "text-slate-950",
   );
 
 const EmptyDayCard = () => (
   <div className={EMPTY_DAY_ROW_CLASS_NAME}>
-    <div className="pt-2.5 text-right text-[12px] font-medium leading-none text-[#b3b3b3]">
+    <div className={EMPTY_DAY_TIME_CLASS_NAME}>
       —
     </div>
-    <div className="relative flex justify-center">
+    <div className={EMPTY_DAY_RAIL_CLASS_NAME}>
       <span className={EMPTY_DAY_LINE_CLASS_NAME} aria-hidden="true" />
       <span className={EMPTY_DAY_DOT_CLASS_NAME} aria-hidden="true" />
     </div>
@@ -371,14 +375,14 @@ const CalendarListItemRowComponent = ({
   onSelectDate,
 }: CalendarListItemRowProps) => (
   <section
-    className="grid grid-cols-[56px_minmax(0,1fr)] gap-1 md:grid-cols-[108px_minmax(0,1fr)] md:gap-2"
+    className="flex gap-1 md:gap-2"
     style={createItemRowStyle(item.rowHeight)}
     aria-label={getCalendarListItemAriaLabel(item)}
   >
     {showDayHeader ? (
       <button
         type="button"
-        className="group mt-0.5 flex h-8 items-center justify-end gap-1 rounded-[10px] pr-0.5 text-right transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25"
+        className="group mt-0.5 flex h-8 w-14 shrink-0 items-center justify-end gap-1 rounded-xl pr-0.5 text-right transition focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/25 md:w-28"
         onClick={() => onSelectDate?.(item.day.date)}
       >
         <span className={getDayDateNumberClassName(item.day)}>
@@ -389,9 +393,9 @@ const CalendarListItemRowComponent = ({
         </span>
       </button>
     ) : (
-      <div className="mt-0.5 h-8" aria-hidden="true" />
+      <div className="mt-0.5 h-8 w-14 shrink-0 md:w-28" aria-hidden="true" />
     )}
-    <div className="relative h-full overflow-visible">
+    <div className="relative h-full min-w-0 flex-1 overflow-visible">
       <span className={LIST_DAY_RAIL_CLASS_NAME} aria-hidden="true" />
       <div className="relative h-full overflow-hidden">
         {item.kind === "event" ? (
