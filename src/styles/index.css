@@ -44,108 +44,108 @@
   }
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) {
   background: #fff;
   color: #1f2328;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) aside {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) aside {
   background: #f5f5f3;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) nav button {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) nav button {
   color: #232323;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) nav button:hover,
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) nav button:focus-visible,
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) nav button[aria-current="page"] {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) nav button:hover,
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) nav button:focus-visible,
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) nav button[aria-current="page"] {
   background: #e9e9e7;
   color: #202124;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) nav button > span:first-child {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) nav button > span:first-child {
   color: #565656;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) main,
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) main,
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section {
   background: #fff;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section > div:first-child,
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section > div:last-child > div {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section > div:first-child,
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section > div:last-child > div {
   border-color: #f0f0ef;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section h3 {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section h3 {
   color: #1f2328;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section h3 + p,
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section > div:last-child > div > div > span:not(:first-child),
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section > div:last-child > div > div > span:last-child {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section h3 + p,
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section > div:last-child > div > div > span:not(:first-child),
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section > div:last-child > div > div > span:last-child {
   color: #8f8a84;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section > div:last-child > div > span:first-child {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section > div:last-child > div > span:first-child {
   color: #8f8a84;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section > div:last-child > div:has(> div > button) > span:first-child {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section > div:last-child > div:has(> div > button) > span:first-child {
   color: #1c1c1e;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section > div:last-child > div > div > span:first-child,
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section strong {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section > div:last-child > div > div > span:first-child,
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) section strong {
   color: #232323;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) button[class*="bg-neutral-900"] {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) button[class*="bg-neutral-900"] {
   background: #1c1c1e;
   color: #fff;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) button[class*="bg-neutral-100"] {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) button[class*="bg-neutral-100"] {
   background: #f0f0f4;
   color: #6e6e73;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) button[class*="bg-stone-50"] {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) button[class*="bg-stone-50"] {
   border-color: #e2e2df;
   background: #fafaf9;
   color: #232323;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) button[class*="bg-stone-50"]:hover,
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) button[class*="bg-stone-50"]:focus-visible {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) button[class*="bg-stone-50"]:hover,
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) button[class*="bg-stone-50"]:focus-visible {
   background: #f0f0ee;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) button[role="switch"][class*="bg-stone-500"] {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) button[role="switch"][class*="bg-stone-500"] {
   background: #8f8a84;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) button[role="switch"][class*="bg-stone-300"] {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) button[role="switch"][class*="bg-stone-300"] {
   background: #d9d9d6;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) input {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) input {
   border-color: #e2e2df;
   background: #fafaf9;
   color: #232323;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) input:focus {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) input:focus {
   border-color: #c9c7c1;
   background: #fff;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) input::placeholder {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) input::placeholder {
   color: #aaa49d;
 }
 
-:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) [aria-hidden="true"] {
+main:is([aria-label="設定"], [aria-label="Settings"], [aria-label="设置"]) [aria-hidden="true"] {
   background: #f0f0ee;
   color: #3d3a36;
 }
