@@ -1,10 +1,9 @@
-export type ReferenceLink = {
+type ReferenceLink = {
   title: string;
   description: string;
   href: string;
 };
-
-export type ReferenceSandboxPageProperties = {
+type ReferenceSandboxPageProperties = {
   label: string;
   title: string;
   description: string;
@@ -73,3 +72,4 @@ const ReferenceSandboxPage = ({
 };
 
 export { ReferenceSandboxPage };
+export type { ReferenceLink, ReferenceSandboxPageProperties };
