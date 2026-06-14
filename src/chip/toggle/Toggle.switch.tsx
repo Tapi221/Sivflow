@@ -15,7 +15,6 @@ type ToggleSwitchProps = Omit<HTMLAttributes<HTMLLabelElement>, "onChange"> & {
    */
   padding?: number;
 };
-
 type ToggleSwitchStyles = {
   label: CSSProperties;
   input: CSSProperties;
@@ -30,7 +29,7 @@ const SWITCH_BORDER_RADIUS = 37;
 const SWITCH_TRANSITION = "200ms all";
 const SWITCH_THUMB_TRANSITION = "all .2s cubic-bezier(0.27, 0.2, 0.25, 1.51)";
 const SWITCH_DISABLED_BACKGROUND_COLOR = "var(--toggle-disable-background-color, #d9d9d6)";
-const SWITCH_CIRCLE_BACKGROUND_COLOR = "var(--toggle-circle-background-color, #fff)";
+const SWITCH_CIRCLE_BACKGROUND_COLOR = "var(--toggle-circle-background-color, #ffffff)";
 const SWITCH_CHECKED_BACKGROUND_COLOR = "var(--primary-color, #1e96eb)";
 
 const createToggleSwitchStyles = ({
