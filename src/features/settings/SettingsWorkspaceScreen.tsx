@@ -531,69 +531,71 @@ const SettingsWorkspaceScreen = () => {
       </aside>
       <main className="flex min-h-0 min-w-0 flex-1 flex-col bg-white max-md:h-full">
         <div className="flex min-h-0 min-w-0 flex-1 overflow-y-auto px-4 pb-5 pt-10">
-          {activeSectionId === "account" ? (
-            <SettingsSectionBlock title={copy.accountProfileTitle} description={copy.accountProfileDescription}>
-              <div className="flex min-h-20 items-center gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
-                <div className="relative flex h-9 min-w-9 items-center justify-center overflow-hidden rounded-lg bg-stone-100 text-base font-semibold tracking-tight text-stone-700" aria-hidden="true">{accountProfile.photoUrl ? <img className="absolute inset-0 h-full w-full object-cover" src={accountProfile.photoUrl} alt="" /> : <span className="absolute inset-0 flex items-center justify-center">{accountInitial}</span>}</div>
-                <div className="flex min-w-0 flex-1 flex-col gap-0.5"><strong className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-5 tracking-tight text-neutral-800">{accountName}</strong><span className="overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal leading-5 text-stone-500">{accountProfile.email ?? copy.emailUnset}</span></div>
-                <button type="button" className="h-8 rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm font-medium tracking-tight text-neutral-800 outline-none hover:bg-stone-100 focus-visible:bg-stone-100 disabled:opacity-50" onClick={handleLogout} disabled={loading || !currentUser}>{copy.logout}</button>
-              </div>
-              <SettingKeyValue label={copy.statusLabel} value={currentUser ? copy.signedIn : copy.guest} />
-              <SettingKeyValue label={copy.providerLabel} value={accountProfile.providerId ?? "-"} />
-            </SettingsSectionBlock>
-          ) : null}
-          {activeSectionId === "preferences" ? (
-            <SettingsSectionBlock title={copy.preferencesTitle} description={copy.preferencesDescription}>
-              <SettingChoiceRow label={copy.languageLabel} value={language} options={languageOptions} onChange={handleLanguageChange} />
-              <SettingChoiceRow label={copy.weekStartLabel} value={weekStartDay} options={weekStartOptions} onChange={(value) => void updateSettings({ weekStartDay: value })} />
-              <SettingToggle label={copy.notificationsLabel} description={copy.notificationsDescription} checked={settings?.notificationsEnabled ?? false} onChange={(checked) => updateBooleanSetting("notificationsEnabled", checked)} />
-            </SettingsSectionBlock>
-          ) : null}
-          {activeSectionId === "study" ? (
-            <SettingsSectionBlock title={copy.studyTitle} description={copy.studyDescription}>
-              <SettingToggle label={copy.showHardLabel} description={copy.showHardDescription} checked={settings?.showReviewHard ?? true} onChange={(checked) => updateBooleanSetting("showReviewHard", checked)} />
-              <SettingToggle label={copy.showEasyLabel} description={copy.showEasyDescription} checked={settings?.showReviewEasy ?? true} onChange={(checked) => updateBooleanSetting("showReviewEasy", checked)} />
-              <SettingToggle label={copy.autoCarryOverLabel} description={copy.autoCarryOverDescription} checked={settings?.autoCarryOver ?? true} onChange={(checked) => updateBooleanSetting("autoCarryOver", checked)} />
-              <SettingToggle label={copy.delayBonusLabel} description={copy.delayBonusDescription} checked={settings?.delayBonusEnabled ?? false} onChange={(checked) => updateBooleanSetting("delayBonusEnabled", checked)} />
-              <SettingToggle label={copy.reviewStartNextDayLabel} description={copy.reviewStartNextDayDescription} checked={settings?.reviewStartNextDay ?? true} onChange={(checked) => updateBooleanSetting("reviewStartNextDay", checked)} />
-            </SettingsSectionBlock>
-          ) : null}
-          {activeSectionId === "editor" ? (
-            <SettingsSectionBlock title={copy.editorTitle} description={copy.editorDescription}>
-              <SettingChoiceRow label={copy.questionDisplayLabel} value={questionDisplayMode} options={questionDisplayOptions} onChange={(value) => void updateSettings({ questionDisplayMode: value })} />
-              <SettingChoiceRow label={copy.markdownTabLabel} value={markdownTabSize} options={markdownTabOptions} onChange={(value) => void updateSettings({ markdownTabSize: value })} />
-              <SettingToggle label={copy.previewDefaultLabel} description={copy.previewDefaultDescription} checked={settings?.defaultPreviewEnabled ?? false} onChange={(checked) => updateBooleanSetting("defaultPreviewEnabled", checked)} />
-              <SettingToggle label={copy.autoDraftLabel} description={copy.autoDraftDescription} checked={settings?.autoDraftEnabled ?? true} onChange={(checked) => updateBooleanSetting("autoDraftEnabled", checked)} />
-              <SettingToggle label={copy.autoSaveLabel} description={copy.autoSaveDescription} checked={settings?.autoSaveEnabled ?? true} onChange={(checked) => updateBooleanSetting("autoSaveEnabled", checked)} />
-            </SettingsSectionBlock>
-          ) : null}
-          {activeSectionId === "audio" ? (
-            <SettingsSectionBlock title={copy.audioTitle} description={copy.audioDescription}>
-              <SettingToggle label={copy.soundEffectsLabel} description={copy.soundEffectsDescription} checked={settings?.soundEnabled ?? true} onChange={(checked) => updateBooleanSetting("soundEnabled", checked)} />
-              <SettingToggle label={copy.questionVoiceLabel} description={copy.questionVoiceDescription} checked={settings?.autoVoiceQuestion ?? false} onChange={(checked) => updateBooleanSetting("autoVoiceQuestion", checked)} />
-              <SettingToggle label={copy.answerVoiceLabel} description={copy.answerVoiceDescription} checked={settings?.autoVoiceAnswer ?? false} onChange={(checked) => updateBooleanSetting("autoVoiceAnswer", checked)} />
-            </SettingsSectionBlock>
-          ) : null}
-          {activeSectionId === "ai" ? (
-            <SettingsSectionBlock title={copy.aiTitle} description={copy.aiDescription}>
-              <SettingToggle label={copy.localAiEnabledLabel} description={copy.localAiEnabledDescription} checked={localAiSettings.enabled} onChange={(checked) => handleLocalAiSettingsChange({ ...localAiSettings, enabled: checked })} />
-              <SettingKeyValue label={copy.localAiProviderLabel} value="Ollama" />
-              <SettingTextInputRow label={copy.localAiBaseUrlLabel} description={copy.localAiBaseUrlDescription} value={localAiSettings.baseUrl} placeholder="http://127.0.0.1:11434" onChange={(value) => handleLocalAiSettingsChange({ ...localAiSettings, baseUrl: value })} />
-              <SettingTextInputRow label={copy.localAiModelLabel} description={copy.localAiModelDescription} value={localAiSettings.model} placeholder="llama3.2:3b" onChange={(value) => handleLocalAiSettingsChange({ ...localAiSettings, model: value })} />
-              <div className="flex min-h-14 items-center justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
-                <span className="text-sm font-medium tracking-tight text-stone-500">{copy.localAiConnectionLabel}</span>
-                <div className="inline-flex min-w-0 items-center justify-end gap-2.5">
-                  <strong className="max-w-sm overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium tracking-tight text-neutral-800">{getLocalAiConnectionStatusLabel(localAiConnectionStatus, copy)}</strong>
-                  <button type="button" className="h-8 rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm font-medium tracking-tight text-neutral-800 outline-none hover:bg-stone-100 focus-visible:bg-stone-100 disabled:opacity-50" onClick={handleLocalAiConnectionTest} disabled={localAiConnectionStatus === "testing"}>{copy.localAiTestButton}</button>
+          <div className="mx-auto w-full max-w-xl">
+            {activeSectionId === "account" ? (
+              <SettingsSectionBlock title={copy.accountProfileTitle} description={copy.accountProfileDescription}>
+                <div className="flex min-h-20 items-center gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
+                  <div className="relative flex h-9 min-w-9 items-center justify-center overflow-hidden rounded-lg bg-stone-100 text-base font-semibold tracking-tight text-stone-700" aria-hidden="true">{accountProfile.photoUrl ? <img className="absolute inset-0 h-full w-full object-cover" src={accountProfile.photoUrl} alt="" /> : <span className="absolute inset-0 flex items-center justify-center">{accountInitial}</span>}</div>
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5"><strong className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-5 tracking-tight text-neutral-800">{accountName}</strong><span className="overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal leading-5 text-stone-500">{accountProfile.email ?? copy.emailUnset}</span></div>
+                  <button type="button" className="h-8 rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm font-medium tracking-tight text-neutral-800 outline-none hover:bg-stone-100 focus-visible:bg-stone-100 disabled:opacity-50" onClick={handleLogout} disabled={loading || !currentUser}>{copy.logout}</button>
                 </div>
-              </div>
-            </SettingsSectionBlock>
-          ) : null}
-          {activeSectionId === "hotkey" ? (
-            <SettingsSectionBlock title={copy.sections.hotkey.label} description={copy.hotkeyDescription}>
-              {copy.hotkeys.map((hotkey) => <SettingKeyValue key={hotkey.keys} label={hotkey.label} value={<code className="font-inherit">{hotkey.keys}</code>} />)}
-            </SettingsSectionBlock>
-          ) : null}
+                <SettingKeyValue label={copy.statusLabel} value={currentUser ? copy.signedIn : copy.guest} />
+                <SettingKeyValue label={copy.providerLabel} value={accountProfile.providerId ?? "-"} />
+              </SettingsSectionBlock>
+            ) : null}
+            {activeSectionId === "preferences" ? (
+              <SettingsSectionBlock title={copy.preferencesTitle} description={copy.preferencesDescription}>
+                <SettingChoiceRow label={copy.languageLabel} value={language} options={languageOptions} onChange={handleLanguageChange} />
+                <SettingChoiceRow label={copy.weekStartLabel} value={weekStartDay} options={weekStartOptions} onChange={(value) => void updateSettings({ weekStartDay: value })} />
+                <SettingToggle label={copy.notificationsLabel} description={copy.notificationsDescription} checked={settings?.notificationsEnabled ?? false} onChange={(checked) => updateBooleanSetting("notificationsEnabled", checked)} />
+              </SettingsSectionBlock>
+            ) : null}
+            {activeSectionId === "study" ? (
+              <SettingsSectionBlock title={copy.studyTitle} description={copy.studyDescription}>
+                <SettingToggle label={copy.showHardLabel} description={copy.showHardDescription} checked={settings?.showReviewHard ?? true} onChange={(checked) => updateBooleanSetting("showReviewHard", checked)} />
+                <SettingToggle label={copy.showEasyLabel} description={copy.showEasyDescription} checked={settings?.showReviewEasy ?? true} onChange={(checked) => updateBooleanSetting("showReviewEasy", checked)} />
+                <SettingToggle label={copy.autoCarryOverLabel} description={copy.autoCarryOverDescription} checked={settings?.autoCarryOver ?? true} onChange={(checked) => updateBooleanSetting("autoCarryOver", checked)} />
+                <SettingToggle label={copy.delayBonusLabel} description={copy.delayBonusDescription} checked={settings?.delayBonusEnabled ?? false} onChange={(checked) => updateBooleanSetting("delayBonusEnabled", checked)} />
+                <SettingToggle label={copy.reviewStartNextDayLabel} description={copy.reviewStartNextDayDescription} checked={settings?.reviewStartNextDay ?? true} onChange={(checked) => updateBooleanSetting("reviewStartNextDay", checked)} />
+              </SettingsSectionBlock>
+            ) : null}
+            {activeSectionId === "editor" ? (
+              <SettingsSectionBlock title={copy.editorTitle} description={copy.editorDescription}>
+                <SettingChoiceRow label={copy.questionDisplayLabel} value={questionDisplayMode} options={questionDisplayOptions} onChange={(value) => void updateSettings({ questionDisplayMode: value })} />
+                <SettingChoiceRow label={copy.markdownTabLabel} value={markdownTabSize} options={markdownTabOptions} onChange={(value) => void updateSettings({ markdownTabSize: value })} />
+                <SettingToggle label={copy.previewDefaultLabel} description={copy.previewDefaultDescription} checked={settings?.defaultPreviewEnabled ?? false} onChange={(checked) => updateBooleanSetting("defaultPreviewEnabled", checked)} />
+                <SettingToggle label={copy.autoDraftLabel} description={copy.autoDraftDescription} checked={settings?.autoDraftEnabled ?? true} onChange={(checked) => updateBooleanSetting("autoDraftEnabled", checked)} />
+                <SettingToggle label={copy.autoSaveLabel} description={copy.autoSaveDescription} checked={settings?.autoSaveEnabled ?? true} onChange={(checked) => updateBooleanSetting("autoSaveEnabled", checked)} />
+              </SettingsSectionBlock>
+            ) : null}
+            {activeSectionId === "audio" ? (
+              <SettingsSectionBlock title={copy.audioTitle} description={copy.audioDescription}>
+                <SettingToggle label={copy.soundEffectsLabel} description={copy.soundEffectsDescription} checked={settings?.soundEnabled ?? true} onChange={(checked) => updateBooleanSetting("soundEnabled", checked)} />
+                <SettingToggle label={copy.questionVoiceLabel} description={copy.questionVoiceDescription} checked={settings?.autoVoiceQuestion ?? false} onChange={(checked) => updateBooleanSetting("autoVoiceQuestion", checked)} />
+                <SettingToggle label={copy.answerVoiceLabel} description={copy.answerVoiceDescription} checked={settings?.autoVoiceAnswer ?? false} onChange={(checked) => updateBooleanSetting("autoVoiceAnswer", checked)} />
+              </SettingsSectionBlock>
+            ) : null}
+            {activeSectionId === "ai" ? (
+              <SettingsSectionBlock title={copy.aiTitle} description={copy.aiDescription}>
+                <SettingToggle label={copy.localAiEnabledLabel} description={copy.localAiEnabledDescription} checked={localAiSettings.enabled} onChange={(checked) => handleLocalAiSettingsChange({ ...localAiSettings, enabled: checked })} />
+                <SettingKeyValue label={copy.localAiProviderLabel} value="Ollama" />
+                <SettingTextInputRow label={copy.localAiBaseUrlLabel} description={copy.localAiBaseUrlDescription} value={localAiSettings.baseUrl} placeholder="http://127.0.0.1:11434" onChange={(value) => handleLocalAiSettingsChange({ ...localAiSettings, baseUrl: value })} />
+                <SettingTextInputRow label={copy.localAiModelLabel} description={copy.localAiModelDescription} value={localAiSettings.model} placeholder="llama3.2:3b" onChange={(value) => handleLocalAiSettingsChange({ ...localAiSettings, model: value })} />
+                <div className="flex min-h-14 items-center justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
+                  <span className="text-sm font-medium tracking-tight text-stone-500">{copy.localAiConnectionLabel}</span>
+                  <div className="inline-flex min-w-0 items-center justify-end gap-2.5">
+                    <strong className="max-w-sm overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium tracking-tight text-neutral-800">{getLocalAiConnectionStatusLabel(localAiConnectionStatus, copy)}</strong>
+                    <button type="button" className="h-8 rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm font-medium tracking-tight text-neutral-800 outline-none hover:bg-stone-100 focus-visible:bg-stone-100 disabled:opacity-50" onClick={handleLocalAiConnectionTest} disabled={localAiConnectionStatus === "testing"}>{copy.localAiTestButton}</button>
+                  </div>
+                </div>
+              </SettingsSectionBlock>
+            ) : null}
+            {activeSectionId === "hotkey" ? (
+              <SettingsSectionBlock title={copy.sections.hotkey.label} description={copy.hotkeyDescription}>
+                {copy.hotkeys.map((hotkey) => <SettingKeyValue key={hotkey.keys} label={hotkey.label} value={<code className="font-inherit">{hotkey.keys}</code>} />)}
+              </SettingsSectionBlock>
+            ) : null}
+          </div>
         </div>
       </main>
     </div>
