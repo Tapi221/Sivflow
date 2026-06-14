@@ -14,7 +14,7 @@ const PlateEditor = ({ initialValue, onChange }: PlateEditorProps) => {
   const editor = usePlateEditor({
     plugins: EditorKit,
     value: initialValue,
-  });
+  }, [initialValue]);
   return (
     <Plate editor={editor} onValueChange={onChange}>
       <EditorContainer>

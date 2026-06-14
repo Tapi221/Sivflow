@@ -80,8 +80,17 @@ const omitPlateContentDomBlockedProps = (props: PlateContentProps): PlateContent
   return nextProps as PlateContentProps;
 };
 
+const omitPlateDomBlockedProps = <TProps extends Record<string, unknown>>(props: TProps): TProps => {
+  const nextProps = { ...props };
+  plateContentDomBlockedPropNames.forEach((propName) => {
+    delete nextProps[propName];
+  });
+  return nextProps;
+};
+
 const EditorContainer = ({ className, variant, ...props }: React.ComponentProps<"div"> & VariantProps<typeof editorContainerVariants>) => {
-  return <PlateContainer className={cn("ignore-click-outside/toolbar", editorContainerVariants({ variant }), className)} {...props} />;
+  const containerProps = omitPlateDomBlockedProps(props);
+  return <PlateContainer className={cn("ignore-click-outside/toolbar", editorContainerVariants({ variant }), className)} {...containerProps} />;
 };
 const Editor = ({ className, disabled, focused, variant, ref, ...props }: EditorProps & { ref?: React.RefObject<HTMLDivElement | null> }) => {
   const contentProps = omitPlateContentDomBlockedProps(props);
@@ -102,7 +111,8 @@ const Editor = ({ className, disabled, focused, variant, ref, ...props }: Editor
   );
 };
 const EditorView = ({ className, variant, ...props }: PlateViewProps & VariantProps<typeof editorVariants>) => {
-  return <PlateView {...props} className={cn(editorVariants({ variant }), className)} />;
+  const viewProps = omitPlateDomBlockedProps(props);
+  return <PlateView {...viewProps} className={cn(editorVariants({ variant }), className)} />;
 };
 
 Editor.displayName = "Editor";
