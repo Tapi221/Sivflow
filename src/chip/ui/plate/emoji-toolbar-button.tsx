@@ -106,6 +106,7 @@ const emojiSearchIcons = {
   delete: <XIcon className="size-4 text-current" />,
   loupe: <SearchIcon className="size-4 text-current" />,
 };
+const EMOJI_FONT_FAMILY = "var(--emoji-font-family)";
 
 const EmojiPopover = ({ children, control, isOpen, setIsOpen }: { children: React.ReactNode;
   control: React.ReactNode;
@@ -517,10 +518,7 @@ const EmojiButton = React.memo(({
       />
       <span
         className="relative"
-        style={{
-          fontFamily:
-            '"Apple Color Emoji", "Segoe UI Emoji", NotoColorEmoji, "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", EmojiSymbols',
-        }}
+        style={{ fontFamily: EMOJI_FONT_FAMILY }}
         data-emoji-set="native"
       >
         {emoji.skins[0].native}
