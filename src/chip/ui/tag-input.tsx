@@ -3,14 +3,14 @@ import type { DropResult } from "@hello-pangea/dnd";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import type { TagColorKey } from "@/chip/budge/tag/tagColor";
 import { getTagColorKey, getTagColorSwatchStyle } from "@/chip/budge/tag/tagColor";
-import { TagBadge } from "@/chip/budge/tag/tag/Badge.Tag";
-import { TagChip } from "@/chip/budge/tag/tag/TagChip";
+import { TagBadge } from "@/chip/budge/tag/Badge.Tag";
+import { TagChip } from "@/chip/budge/tag/TagChip";
+import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "@/chip/ui/command";
+import { PlaceholderText } from "@/chip/ui/placeholder-text";
+import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
 import { Check, Palette, Plus, Tag as TagIcon } from "@/ui/icons";
-import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "./command";
-import { PlaceholderText } from "./placeholder-text";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 interface TagInputProps {
   tags: string[];
