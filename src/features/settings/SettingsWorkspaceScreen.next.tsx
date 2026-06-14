@@ -1,3 +1,11 @@
-import { SettingsWorkspaceScreen } from "@/features/settings/SettingsWorkspaceScreen";
+import { SettingsThemeColorControl } from "@/features/settings/SettingsThemeColorControl";
 
-export { SettingsWorkspaceScreen };
+const SettingsWorkspaceScreenNext = () => {
+  return (
+    <div className="flex flex-col">
+      <SettingsThemeColorControl />
+    </div>
+  );
+};
+
+export { SettingsWorkspaceScreenNext };
