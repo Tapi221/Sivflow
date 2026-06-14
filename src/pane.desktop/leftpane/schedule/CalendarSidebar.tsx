@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@shared/i18n/useT";
-import type { ChangeEvent, CSSProperties, FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent } from "react";
+import type { ChangeEvent, CSSProperties, FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import { GoogleIcon } from "@/chip/icons/icons.schedule";
 import type { CalendarListMenuAction } from "@/chip/panel/rightclickpanel.desktop/CalendarListMenu.desktop";
 import { CALENDAR_LIST_MENU_HEIGHT, CALENDAR_LIST_MENU_PANEL_ID, CALENDAR_LIST_MENU_WIDTH, CalendarListMenu } from "@/chip/panel/rightclickpanel.desktop/CalendarListMenu.desktop";
@@ -39,6 +39,13 @@ type ProjectLinksContextMenuState = {
 };
 type CalendarSidebarContentProps = CalendarSidebarProps & {
   className?: string;
+};
+type CalendarSidebarHeadingProps = {
+  heading: ReactNode;
+  addLabel: string;
+  onAdd: () => void;
+  disabled?: boolean;
+  headingAriaLabel?: string;
 };
 type AppProjectsSectionProps = {
   projects: AppCalendarItem[];
@@ -79,6 +86,7 @@ type IconProps = {
 
 const ADD_GOOGLE_CALENDAR_LABEL = "Googleカレンダーを追加";
 const ADD_PROJECT_EMPTY_MESSAGE = "プロジェクト名を入力してください";
+const ADD_PROJECT_LABEL = "プロジェクトを追加";
 const CALENDAR_CONTEXT_MENU_DIMENSIONS = { width: CALENDAR_LIST_MENU_WIDTH, height: CALENDAR_LIST_MENU_HEIGHT };
 const CALENDAR_SIDEBAR_CONTENT_CLASS_NAME = "pt-2";
 const CALENDAR_SIDEBAR_GOOGLE_LIST_CLASS_NAME = "min-h-0 flex-1 overflow-y-auto px-4 pt-1";
@@ -134,6 +142,12 @@ const createGoogleCalendarActionLabel = (account: GoogleAccountDisplay, accountC
 const IconChevronRight = ({ className }: IconProps) => <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 const IconPlus = ({ className }: IconProps) => <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>;
 const GoogleCalendarHeadingSvg = () => <svg aria-hidden="true" className="block h-4 w-[118px] text-[#111]" viewBox="0 0 118 16" fill="none" xmlns="http://www.w3.org/2000/svg"><text x="0" y="13" fill="currentColor" fontFamily="var(--app-font-family-sidebar)" fontSize="13" fontWeight="700" letterSpacing="0" textRendering="geometricPrecision">{GOOGLE_CALENDAR_SECTION_LABEL}</text></svg>;
+const CalendarSidebarHeading = ({ heading, addLabel, onAdd, disabled = false, headingAriaLabel }: CalendarSidebarHeadingProps) => (
+  <div className={CALENDAR_SIDEBAR_HEADING_ROW_CLASS_NAME}>
+    <h2 className="app-layered-directory__section-heading" aria-label={headingAriaLabel}>{heading}</h2>
+    <button type="button" className={CALENDAR_SIDEBAR_ADD_BUTTON_CLASS_NAME} onClick={onAdd} disabled={disabled} aria-label={addLabel} title={addLabel}><IconPlus className="h-4 w-4" /></button>
+  </div>
+);
 const GoogleCalendarSourceRow = ({ account, calendar, color, onToggleCalendar, onOpenCalendarContextMenu }: GoogleCalendarSourceRowProps) => (
   <div onContextMenu={(event) => onOpenCalendarContextMenu(event, account, calendar)}>
     <SelectableGoogleSourceRow id={calendar.id} label={calendar.summary} checked={account.selectedCalendarIds.has(calendar.id)} color={color} className={CALENDAR_SIDEBAR_ROW_CONTENT_CLASS_NAME} onToggle={onToggleCalendar} />
@@ -345,18 +359,10 @@ const CalendarSidebarContent = ({ appProjects, projectCalendarLinks, googleCalen
   return (
     <div className={cn("flex min-h-0 flex-1 flex-col overflow-hidden pb-0 text-[#2f2f2f]", className)}>
       <nav className="flex min-h-0 w-full flex-1 flex-col overflow-hidden pb-0" aria-label="カレンダー一覧">
-        <div className={CALENDAR_SIDEBAR_HEADING_ROW_CLASS_NAME}>
-          <h2 className="app-layered-directory__section-heading">{t.myProjects}</h2>
-          <button type="button" className={CALENDAR_SIDEBAR_ADD_BUTTON_CLASS_NAME} onClick={handleStartAddingProject} aria-label="プロジェクトを追加" title="プロジェクトを追加"><IconPlus className="h-4 w-4" /></button>
-        </div>
+        <CalendarSidebarHeading heading={t.myProjects} addLabel={ADD_PROJECT_LABEL} onAdd={handleStartAddingProject} />
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <div className={CALENDAR_SIDEBAR_PROJECT_LIST_CLASS_NAME}><AppProjectsSection projects={appProjects} isAdding={isAddingProject} onAddProject={onAddProject} onToggleProject={onToggleProject} onOpenProjectLinksContextMenu={handleOpenProjectLinksContextMenu} onAddingChange={setIsAddingProject} /></div>
-          <div className="shrink-0 pt-2">
-            <div className={CALENDAR_SIDEBAR_HEADING_ROW_CLASS_NAME}>
-              <h2 className="app-layered-directory__section-heading" aria-label={GOOGLE_CALENDAR_SECTION_LABEL}><GoogleCalendarHeadingSvg /></h2>
-              <button type="button" className={CALENDAR_SIDEBAR_ADD_BUTTON_CLASS_NAME} onClick={handleAddGoogleCalendar} disabled={isAnyCalendarConnecting} aria-label={ADD_GOOGLE_CALENDAR_LABEL} title={ADD_GOOGLE_CALENDAR_LABEL}><IconPlus className="h-4 w-4" /></button>
-            </div>
-          </div>
+          <div className="shrink-0 pt-2"><CalendarSidebarHeading heading={<GoogleCalendarHeadingSvg />} addLabel={ADD_GOOGLE_CALENDAR_LABEL} onAdd={handleAddGoogleCalendar} disabled={isAnyCalendarConnecting} headingAriaLabel={GOOGLE_CALENDAR_SECTION_LABEL} /></div>
           <div className={CALENDAR_SIDEBAR_GOOGLE_LIST_CLASS_NAME}><GoogleAccountsSection accounts={googleAccounts} isConnecting={isAnyCalendarConnecting} projectCalendarLinks={projectCalendarLinks} googleCalendarColorOverrides={googleCalendarColorOverrides} onAddCalendar={handleAddGoogleCalendar} onToggleCalendar={onToggleCalendar} onOpenCalendarContextMenu={handleOpenCalendarContextMenu} onReconnectAccount={onReconnectAccount} /></div>
         </div>
       </nav>
