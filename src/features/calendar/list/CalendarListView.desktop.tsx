@@ -89,6 +89,8 @@ const EMPTY_DAY_LINE_CLASS_NAME =
   "absolute -bottom-1.5 left-1/2 top-0 w-px -translate-x-1/2 bg-[#eceff3]";
 const EMPTY_DAY_DOT_CLASS_NAME =
   "relative mt-2 h-2 w-2 rounded-full border-2 border-[#dedede] bg-white shadow-[0_1px_4px_rgba(15,23,42,0.08)]";
+const EMPTY_DAY_CHIP_CLASS_NAME =
+  "flex h-[34px] items-center rounded-[16px] bg-[#f7f7fa] px-3 text-[12px] font-semibold text-[#8e8e93]";
 
 const createRail = (selectedDate: Date): ScheduleVirtualRail => ({
   startDate: subDays(startOfMonth(selectedDate), LOCAL_DAYS),
@@ -358,7 +360,7 @@ const EmptyDayCard = () => (
       <span className={EMPTY_DAY_LINE_CLASS_NAME} aria-hidden="true" />
       <span className={EMPTY_DAY_DOT_CLASS_NAME} aria-hidden="true" />
     </div>
-    <div className="flex h-[34px] items-center rounded-[10px] border border-dashed border-[#dedede] bg-white px-3 text-[12px] font-semibold text-[#8e8e93]">
+    <div className={EMPTY_DAY_CHIP_CLASS_NAME}>
       {EMPTY_DAY_LABEL}
     </div>
   </div>
@@ -519,89 +521,62 @@ const CalendarListViewComponent = ({
     useImmediateVirtualScrollRange<HTMLDivElement>({
       updateRange,
       onDeferredScroll: handleDeferredScroll,
+      resetKey: metrics,
     });
+  useEffect(() => {
+    rangeRef.current = initialRange;
+    setRange(initialRange);
+  }, [initialRange]);
   useLayoutEffect(() => {
     const element = scrollRef.current;
-    if (
-      !element ||
-      lastScrollTargetSignatureRef.current === scrollTargetSignature ||
-      scrollTargetItemIndex < 0 ||
-      scrollTargetItemIndex >= metrics.items.length
-    ) {
-      return;
-    }
-    lastScrollTargetSignatureRef.current = scrollTargetSignature;
-    element.scrollTop = getSelectedDateScrollTop(
-      metrics,
-      scrollTargetItemIndex,
-    );
-    updateRange(element, true);
-  }, [
-    metrics,
-    scrollRef,
-    scrollTargetItemIndex,
-    scrollTargetSignature,
-    updateRange,
-  ]);
-  useLayoutEffect(() => {
-    updateRange(scrollRef.current, true);
-  }, [scrollRef, updateRange]);
+    if (!element) return;
+    const signature = scrollTargetSignature;
+    if (lastScrollTargetSignatureRef.current === signature) return;
+    lastScrollTargetSignatureRef.current = signature;
+    const nextScrollTop = getSelectedDateScrollTop(metrics, scrollTargetItemIndex);
+    element.scrollTop = nextScrollTop;
+    setRangeIfChanged(getSelectedDateRange(metrics, scrollTargetItemIndex));
+    updateVisibleDate(element);
+    onScrollTopChange?.(nextScrollTop);
+  }, [metrics, onScrollTopChange, scrollRef, scrollTargetItemIndex, scrollTargetSignature, setRangeIfChanged, updateVisibleDate]);
   useEffect(() => {
     const element = scrollRef.current;
     if (!element) return;
-    const handleScroll = () => {
-      handleScrollElement(element);
-    };
-    element.addEventListener("scroll", handleScroll, { passive: true });
-    return () => element.removeEventListener("scroll", handleScroll);
-  }, [handleScrollElement, scrollRef]);
+    updateRange(element, true);
+  }, [scrollRef, updateRange]);
   return (
     <div
+      ref={scrollRef}
       className={cn(
-        "flex min-h-0 flex-1 flex-col overflow-hidden bg-white",
+        "relative h-full overflow-y-auto overflow-x-hidden bg-white px-3 pb-12 pt-3 scrollbar-hide",
         className,
       )}
+      onScroll={(event) => handleScrollElement(event.currentTarget)}
     >
-      <div
-        ref={scrollRef}
-        className="scrollbar-hidden min-h-0 flex-1 overflow-y-auto px-2 pb-6 pt-2 md:px-4"
-      >
-        <div className="mx-auto w-full max-w-[940px]">
-          <div className="relative w-full" style={{ height: totalHeight }}>
-            <span className={LIST_GLOBAL_RAIL_CLASS_NAME} aria-hidden="true" />
-            {visibleItems.map((item, offset) => {
-              const itemIndex = range.start + offset;
-              const previousVisibleItem = visibleItems[offset - 1];
-              const showDayHeader =
-                item.isFirstDayItem ||
-                previousVisibleItem?.day.dateKey !== item.day.dateKey;
-              return (
-                <div
-                  key={item.key}
-                  className="absolute left-0 right-0 top-0"
-                  style={createVirtualItemStyle(
-                    metrics,
-                    itemIndex,
-                    item.height,
-                  )}
-                >
-                  <CalendarListItemRow
-                    item={item}
-                    showDayHeader={showDayHeader}
-                    onSelectDate={onSelectDate}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        </div>
+      <span className={LIST_GLOBAL_RAIL_CLASS_NAME} aria-hidden="true" />
+      <div className="relative" style={{ height: totalHeight }}>
+        {visibleItems.map((item, visibleIndex) => {
+          const itemIndex = range.start + visibleIndex;
+          return (
+            <div
+              key={item.key}
+              className="absolute left-0 right-0 top-0"
+              style={createVirtualItemStyle(metrics, itemIndex, item.height)}
+            >
+              <CalendarListItemRowComponent
+                item={item}
+                showDayHeader={item.isFirstDayItem}
+                onSelectDate={onSelectDate}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 };
 
-const CalendarListItemRow = memo(CalendarListItemRowComponent);
-CalendarListItemRow.displayName = "CalendarListItemRow";
 const CalendarListView = memo(CalendarListViewComponent);
 CalendarListView.displayName = "CalendarListView";
+
 export { CalendarListView };
