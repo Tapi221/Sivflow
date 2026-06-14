@@ -75,7 +75,7 @@ const getEditorColorMarks = (editor: PlateEditor, nodeType: string): string[] =>
   return Array.from(usedColors);
 };
 
-const ColorInput = ({ children, className, value = "#000", ...props }: React.ComponentProps<"input"> & { className?: string }) => {
+const ColorInput = ({ children, className, value = "#000000", ...props }: React.ComponentProps<"input"> & { className?: string }) => {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   return (
     <div className={cn("flex flex-col items-center", className)}>
@@ -105,7 +105,7 @@ const ColorDropdownMenuItem = ({ className, isBrightColor, isSelected, name, upd
   );
   return name ? (
     <Tooltip>
-      <TooltipTrigger asChild>{content}</TooltipTrigger>
+      <TooltipTrigger>{content}</TooltipTrigger>
       <TooltipContent className="mb-1 capitalize">{name}</TooltipContent>
     </Tooltip>
   ) : content;
@@ -130,7 +130,7 @@ const ColorDropdownMenuItems = ({ className, color, colors, updateColor, ...prop
   );
 };
 const ColorCustom = ({ className, color, colors, colorsQueue, customColors, recordColorUsage, updateColor, updateCustomColor, updatedColor, ...props }: ColorCustomProps) => {
-  const [value, setValue] = React.useState<string>(color ?? "#000");
+  const [value, setValue] = React.useState<string>(color ?? "#000000");
   const fullCustomColors = React.useMemo(
     () => colorsQueue
       .filter((queuedColor) => normalizeColor(queuedColor) !== normalizeColor(updatedColor ?? ""))
@@ -206,7 +206,7 @@ const PureColorPicker = ({ className, clearColor, color, colors, colorsQueue, cu
       </ToolbarMenuGroup>
       {color ? (
         <ToolbarMenuGroup>
-          <DropdownMenuItem className="p-2" onSelect={clearColor}>
+          <DropdownMenuItem className="p-2" onClick={clearColor}>
             <EraserIcon />
             <span>Clear</span>
           </DropdownMenuItem>
