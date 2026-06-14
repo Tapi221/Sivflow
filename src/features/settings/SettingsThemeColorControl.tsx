@@ -1,4 +1,6 @@
+import { useLayoutEffect, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
+import { SettingsWorkspaceRootScreen } from "@/features/settings/SettingsWorkspaceRootScreen";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { DEFAULT_THEME_ACCENT_COLOR, normalizeThemeAccentColor } from "@/features/settings/themeAccent";
 import { cn } from "@/lib/utils";
@@ -34,18 +36,30 @@ const THEME_COLOR_CONTROL_COPY: Record<SettingsLanguage, ThemeColorControlCopy> 
 };
 
 const SettingsThemeColorControl = ({ className, labelClassName }: SettingsThemeColorControlProps) => {
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const [isLegacyDialogRoot, setIsLegacyDialogRoot] = useState(false);
   const { settings, updateSettings } = useUserSettings();
   const language = settings?.language ?? "ja";
   const copy = THEME_COLOR_CONTROL_COPY[language];
   const accentColor = normalizeThemeAccentColor(settings?.accentColor);
+  useLayoutEffect(() => {
+    setIsLegacyDialogRoot(rootRef.current?.parentElement?.classList.contains("settings-workspace-dialog") ?? false);
+  }, []);
   const handleColorChange = (event: ChangeEvent<HTMLInputElement>) => {
     void updateSettings({ accentColor: event.target.value });
   };
   const handleReset = () => {
     void updateSettings({ accentColor: DEFAULT_THEME_ACCENT_COLOR });
   };
+  if (isLegacyDialogRoot) {
+    return (
+      <div ref={rootRef} className="absolute inset-0 z-20 flex h-full min-h-0 w-full min-w-0 bg-white">
+        <SettingsWorkspaceRootScreen />
+      </div>
+    );
+  }
   return (
-    <div className={cn("flex min-h-14 items-center justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0", className)}>
+    <div ref={rootRef} className={cn("settings-theme-color-control flex min-h-14 items-center justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0", className)}>
       <span className={cn("text-sm font-medium leading-5 tracking-tight text-neutral-800", labelClassName)}>{copy.label}</span>
       <div className="flex shrink-0 items-center gap-2">
         <label className="relative h-7 w-7 cursor-pointer overflow-hidden rounded-full border border-stone-200 shadow-sm" style={{ backgroundColor: accentColor }}>
