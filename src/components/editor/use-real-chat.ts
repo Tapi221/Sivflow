@@ -68,6 +68,22 @@ const setAIChat = (editor: PlateEditor, chat: Chat) => {
   const setOption = editor.setOption.bind(editor) as AIChatOptionWriter;
   setOption(AIChatPlugin, "chat", chat);
 };
+const getMessageTextSignature = (message: ChatMessage | undefined): string => {
+  if (!message) return "";
+  return message.parts
+    .map((part) => part.type === "text" ? part.text : `${part.type}:${JSON.stringify(part)}`)
+    .join("|");
+};
+const getChatPublishKey = (chat: Chat): string => {
+  const lastMessage = chat.messages.at(-1);
+  return [
+    chat.status,
+    chat.error instanceof Error ? chat.error.message : "",
+    chat.messages.length,
+    lastMessage?.id ?? "",
+    getMessageTextSignature(lastMessage),
+  ].join("\u001f");
+};
 const applyTableUpdate = (editor: PlateEditor, tableData: TTableCellUpdate) => {
   if (tableData.status === "finished") {
     const chatSelection = editor.getOption(AIChatPlugin, "chatSelection");
@@ -155,7 +171,11 @@ const useRealChat = () => {
     },
     ...options,
   });
+  const lastPublishedChatKeyRef = React.useRef<string | null>(null);
   React.useEffect(() => {
+    const nextChatKey = getChatPublishKey(chat as Chat);
+    if (lastPublishedChatKeyRef.current === nextChatKey) return;
+    lastPublishedChatKeyRef.current = nextChatKey;
     setAIChat(editor, chat as Chat);
   }, [editor, chat, chat.error, chat.messages, chat.status]);
   return chat;
