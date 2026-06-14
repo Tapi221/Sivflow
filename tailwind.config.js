@@ -52,6 +52,7 @@ const config = {
         },
         primary: {
           DEFAULT: "rgb(var(--ds-color-neutral-900-rgb) / <alpha-value>)",
+          foreground: "rgb(var(--ds-color-neutral-0-rgb) / <alpha-value>)",
           50: "rgb(var(--ds-color-neutral-50-rgb) / <alpha-value>)",
           100: "rgb(var(--ds-color-neutral-100-rgb) / <alpha-value>)",
           200: "rgb(var(--ds-color-neutral-200-rgb) / <alpha-value>)",
