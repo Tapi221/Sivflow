@@ -173,42 +173,42 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
 
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-3 z-40 flex justify-center px-3">
-      <div className="pointer-events-auto w-full max-w-[520px] overflow-hidden rounded-[18px] border border-[#dddcd5] bg-white/92 shadow-[0_18px_48px_rgba(15,23,42,0.16)] backdrop-blur-xl">
-        <button type="button" className="flex h-10 w-full items-center gap-2 px-3 text-left text-[12px] font-semibold tracking-[-0.01em] text-[#343434] transition hover:bg-[#f7f6f2]" onClick={() => setIsOpen((value) => !value)} aria-expanded={isOpen}>
+      <div className="pointer-events-auto w-full max-w-96 overflow-hidden rounded-2xl border border-stone-300 bg-white/92 shadow-[0_18px_48px_rgba(15,23,42,0.16)] backdrop-blur-xl">
+        <button type="button" className="flex h-10 w-full items-center gap-2 px-3 text-left text-xs font-semibold tracking-tight text-[#343434] transition hover:bg-[#f7f6f2]" onClick={() => setIsOpen((value) => !value)} aria-expanded={isOpen}>
           <Link className="h-4 w-4 text-[#85827e]" />
           <span className="min-w-0 flex-1 truncate">疑問リンク</span>
-          <span className="rounded-full border border-[#dddcd5] bg-[#f7f6f2] px-2 py-1 text-[10px] leading-none text-[#77736d]">{linkedCount}</span>
+          <span className="rounded-full border border-stone-300 bg-[#f7f6f2] px-2 py-1 text-xs leading-none text-[#77736d]">{linkedCount}</span>
         </button>
         {isOpen ? (
           <div className="border-t border-[#eceae4] px-3 pb-3 pt-2">
             <div className="space-y-2">
-              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9a9690]">この回答から作る</p>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.08em] text-[#9a9690]">この回答から作る</p>
               <div className="flex flex-wrap gap-1.5">
                 {candidateTerms.length > 0 ? candidateTerms.map((term) => (
-                  <button key={term} type="button" className="inline-flex h-7 max-w-[180px] items-center gap-1 rounded-[8px] border border-[#dddcd5] bg-[#f7f6f2] px-2 text-[11px] font-medium text-[#5f5f5f] transition hover:bg-[#eee] disabled:opacity-60" onClick={() => void handleCreateLinkedQuestion(term)} disabled={creatingTerm !== null} title={`${term} から疑問を作る`}>
+                  <button key={term} type="button" className="inline-flex h-7 max-w-44 items-center gap-1 rounded-lg border border-stone-300 bg-[#f7f6f2] px-2 text-xs font-medium text-[#5f5f5f] transition hover:bg-slate-100 disabled:opacity-60" onClick={() => void handleCreateLinkedQuestion(term)} disabled={creatingTerm !== null} title={`${term} から疑問を作る`}>
                     {creatingTerm === term ? <LoadingSpinner iconClassName="h-3 w-3" label="疑問リンクを作成中" /> : <Plus className="h-3 w-3" />}
                     <span className="truncate">{term}</span>
                   </button>
-                )) : <span className="text-[11px] text-[#9a9690]">候補語句がありません。</span>}
+                )) : <span className="text-xs text-[#9a9690]">候補語句がありません。</span>}
               </div>
               <div className="flex gap-1.5">
                 <input value={customTerm} onChange={(event) => setCustomTerm(event.target.value)} onKeyDown={(event) => {
-                  if (event.key === "Enter") handleCreateCustomQuestion(); }} placeholder="語句を入力して疑問にする" className="h-8 min-w-0 flex-1 rounded-[9px] border border-[#dddcd5] bg-white px-2.5 text-[12px] text-[#343434] outline-none transition placeholder:text-[#aaa49d] focus:border-[#c8c6bf]" maxLength={MAX_CUSTOM_TERM_LENGTH}
+                  if (event.key === "Enter") handleCreateCustomQuestion(); }} placeholder="語句を入力して疑問にする" className="h-8 min-w-0 flex-1 rounded-lg border border-stone-300 bg-white px-2.5 text-xs text-[#343434] outline-none transition placeholder:text-[#aaa49d] focus:border-[#c8c6bf]" maxLength={MAX_CUSTOM_TERM_LENGTH}
                 />
-                <button type="button" className="inline-flex h-8 shrink-0 items-center justify-center rounded-[9px] border border-[#dddcd5] bg-[#f7f6f2] px-2.5 text-[11px] font-semibold text-[#5f5f5f] transition hover:bg-[#eee] disabled:opacity-60" onClick={handleCreateCustomQuestion} disabled={!sanitizeCustomTerm(customTerm) || creatingTerm !== null}>追加</button>
+                <button type="button" className="inline-flex h-8 shrink-0 items-center justify-center rounded-lg border border-stone-300 bg-[#f7f6f2] px-2.5 text-xs font-semibold text-[#5f5f5f] transition hover:bg-slate-100 disabled:opacity-60" onClick={handleCreateCustomQuestion} disabled={!sanitizeCustomTerm(customTerm) || creatingTerm !== null}>追加</button>
               </div>
             </div>
             <div className="mt-3 border-t border-[#eceae4] pt-2">
-              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9a9690]">つながっている疑問</p>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.08em] text-[#9a9690]">つながっている疑問</p>
               {snapshot.linkedCards.length > 0 ? (
-                <div className="flex max-h-[120px] flex-col gap-1 overflow-y-auto pr-1">
+                <div className="flex max-h-28 flex-col gap-1 overflow-y-auto pr-1">
                   {snapshot.linkedCards.map((linkedCard) => (
-                    <button key={linkedCard.id} type="button" className={cn("flex min-h-8 items-center rounded-[9px] px-2 text-left text-[12px] text-[#4b4b4b] transition hover:bg-[#f7f6f2]", linkedCard.id === selectedCardId && "bg-[#f7f6f2]")} onClick={() => handleOpenLinkedCard(linkedCard)}>
+                    <button key={linkedCard.id} type="button" className={cn("flex min-h-8 items-center rounded-lg px-2 text-left text-xs text-[#4b4b4b] transition hover:bg-[#f7f6f2]", linkedCard.id === selectedCardId && "bg-[#f7f6f2]")} onClick={() => handleOpenLinkedCard(linkedCard)}>
                       <span className="min-w-0 truncate">{getCardTitle(linkedCard)}</span>
                     </button>
                   ))}
                 </div>
-              ) : <p className="text-[11px] leading-relaxed text-[#9a9690]">まだリンクはありません。回答内の語句から疑問を作ると、ここに表示されます。</p>}
+              ) : <p className="text-xs leading-relaxed text-[#9a9690]">まだリンクはありません。回答内の語句から疑問を作ると、ここに表示されます。</p>}
             </div>
           </div>
         ) : null}

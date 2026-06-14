@@ -131,7 +131,7 @@ const SharedBlockShell = ({ mode, className, contentClassName, label, icon, acce
 const CodeLanguageSelector = ({ value, onChange }: Readonly<{ value: string; onChange: (next: string) => void; }>) => {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="h-5 w-auto min-w-0 min-h-0 rounded-md px-1.5 py-0 bg-zinc-900/5 border-none shadow-none text-[10px] font-bold text-zinc-500 tracking-wider uppercase hover:text-zinc-700 hover:bg-zinc-900/10 focus:ring-0 gap-1">
+      <SelectTrigger className="h-5 w-auto min-w-0 min-h-0 rounded-md px-1.5 py-0 bg-zinc-900/5 border-none shadow-none text-xs font-bold text-zinc-500 tracking-wider uppercase hover:text-zinc-700 hover:bg-zinc-900/10 focus:ring-0 gap-1">
         <SelectValue placeholder="Language" />
       </SelectTrigger>
       <SelectContent className="bg-white">
@@ -183,7 +183,7 @@ const ReferenceBlockScene = ({ mode, block, editorProps }: SceneProps) => {
   return (
     <SharedBlockShell mode={mode} className="bg-transparent px-0 py-0" contentClassName="px-0" label="Reference" icon={Link} {...renderEditorShellProps(editorProps)}>
       <section className="rounded-xl border border-slate-200/80 bg-white/70 px-3 py-3 shadow-sm">
-        <div className="mb-2 text-[11px] font-semibold tracking-wide text-slate-500">References</div>
+        <div className="mb-2 text-xs font-semibold tracking-wide text-slate-500">References</div>
         {references.length > 0 ? <ul className="space-y-1.5">{references.map((reference, index) => {
           const href = reference.url?.trim() ?? ""; const label = reference.name?.trim() || href; return <li key={`${href}-${index}`} className="min-w-0">{href ? <a href={href} target="_blank" rel="noreferrer" className="block truncate text-sm text-sky-700 underline underline-offset-2 hover:text-sky-800">{label}</a> : <span className="block truncate text-sm text-slate-600">{label}</span>}</li>; })}</ul> : <div className="text-sm text-slate-400">リンクがありません</div>}
       </section>

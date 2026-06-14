@@ -99,7 +99,7 @@ const MobileSidebarDrawer = ({ id, isOpen, onClose, children }: MobileSidebarDra
   return (
     <div className={cn("fixed inset-0 z-[80] transition md:hidden", isOpen ? "pointer-events-auto" : "pointer-events-none")} aria-hidden={!isOpen}>
       <button type="button" className={cn("absolute inset-0 bg-black/35 transition-opacity", isOpen ? "opacity-100" : "opacity-0")} onClick={onClose} aria-label="サイドバーを閉じる" tabIndex={isOpen ? 0 : -1} />
-      <aside id={id} className={cn("absolute left-0 top-0 h-full w-[82vw] max-w-[320px] min-w-[260px] overflow-hidden rounded-r-[28px] bg-white transition-transform duration-200 ease-out", isOpen ? "translate-x-0" : "-translate-x-full")} role="dialog" aria-modal="true" aria-label="サイドバー" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchCancel}>
+      <aside id={id} className={cn("absolute left-0 top-0 h-full w-[82vw] max-w-80 min-w-64 overflow-hidden rounded-r-[28px] bg-white transition-transform duration-200 ease-out", isOpen ? "translate-x-0" : "-translate-x-full")} role="dialog" aria-modal="true" aria-label="サイドバー" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchCancel}>
         {children}
       </aside>
     </div>

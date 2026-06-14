@@ -24,8 +24,8 @@ const headingItemVariants = cva(
       },
       depth: {
         1: "pl-0.5",
-        2: "pl-[26px]",
-        3: "pl-[50px]",
+        2: "pl-6",
+        3: "pl-12",
       },
     },
   },

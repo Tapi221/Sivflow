@@ -274,7 +274,7 @@ const TableCellBackgroundButton = ({ color, path }: { color?: string; path: numb
           <PaintBucketIcon />
         </ToolbarButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[220px]">
+      <DropdownMenuContent align="start" className="w-56">
         <ToolbarMenuGroup label="Background">
           <ColorDropdownMenuItems className="px-2" color={color} colors={DEFAULT_COLORS} updateColor={updateColor} />
           {color ? (

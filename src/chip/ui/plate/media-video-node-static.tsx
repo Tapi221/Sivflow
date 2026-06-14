@@ -11,7 +11,7 @@ type MediaVideoNodeStaticProps = SlateElementProps<TMediaElement>;
 
 const MediaVideoNodeStatic = ({ children, className, element, ...props }: MediaVideoNodeStaticProps) => (
   <SlateElement className={cn("my-4", className)} element={element} {...props}>
-    <video className="mx-auto max-h-[420px] max-w-full rounded-md" controls src={element.url} />
+    <video className="mx-auto max-h-96 max-w-full rounded-md" controls src={element.url} />
     {(element as any).caption?.[0]?.children?.[0]?.text ? (
       <figcaption className="mt-2 text-center text-muted-foreground text-sm">
         {(element as any).caption[0].children[0].text}

@@ -213,7 +213,7 @@ const SelectionCaptureOverlay = ({ targetRef, active, busy = false, shape = "rec
             </>
           )}
           <div
-            className="absolute rounded border border-slate-900/70 bg-slate-950/80 px-1.5 py-0.5 text-[10px] font-medium text-white shadow-sm"
+            className="absolute rounded border border-slate-900/70 bg-slate-950/80 px-1.5 py-0.5 text-xs font-medium text-white shadow-sm"
             style={{
               left: Math.min(selectionRect.x, Math.max(0, selectionRect.x + selectionRect.width - 96)),
               top: selectionRect.y > 24 ? selectionRect.y - 24 : selectionRect.y + selectionRect.height + 6,

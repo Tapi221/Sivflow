@@ -155,7 +155,7 @@ const CardSetRow = ({ treeNode, style, depth, isOpen, isSelected, toggle, editin
       )}
       trailing={
         hasChildren ? (
-          <span className="ds-list-item__subtitle ml-auto text-[10px] tabular-nums">
+          <span className="ds-list-item__subtitle ml-auto text-xs tabular-nums">
             {treeNode.children!.length}
           </span>
         ) : null

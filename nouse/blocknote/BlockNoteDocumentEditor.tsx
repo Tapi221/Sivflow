@@ -47,7 +47,7 @@ const BlockNoteDocumentEditor = ({ note, onChange }: BlockNoteDocumentEditorProp
 
   return (
     <div className="h-full min-h-0 w-full overflow-y-auto bg-white px-16 py-14 text-[#202124]">
-      <div className="mx-auto w-full max-w-[820px]">
+      <div className="mx-auto w-full max-w-96">
         <h1 className="mb-7 truncate text-[32px] font-semibold leading-tight tracking-[-0.04em] text-[#202124]">{note.title}</h1>
         <BlockNoteView editor={editor} onChange={() => {
           const document = editor.document as unknown[];

@@ -114,13 +114,13 @@ const resolveCloseButtonClassName = (isTitlebar: boolean): string => {
 const resolveAddButtonClassName = (isTitlebar: boolean): string => {
   if (isTitlebar) {
     return cn(
-      "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border-0 outline-none transition-colors",
+      "explorer-workspace-tab-add mb-px ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-0 outline-none transition-colors",
       "bg-transparent text-[var(--app-titlebar-icon)] hover:bg-white/10 hover:text-[var(--app-titlebar-text-strong)]",
     );
   }
 
   return cn(
-    "explorer-workspace-tab-add mb-[1px] ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] border-0 outline-none transition-colors",
+    "explorer-workspace-tab-add mb-px ml-2 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border-0 outline-none transition-colors",
     "text-[var(--app-sidebar-text)] hover:bg-black/5 hover:text-[var(--app-sidebar-text-strong)]",
   );
 };
@@ -286,7 +286,7 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
         }}
         className={cn(
           "explorer-chrome-font explorer-tab-bar explorer-workspace-tabs-bar relative z-30 flex shrink-0 items-end gap-0 overflow-visible border-b-0",
-          isTitlebar ? "h-full min-w-0 flex-1 px-0 pt-0" : "h-[40px] w-full min-w-0 px-1.5 pt-0",
+          isTitlebar ? "h-full min-w-0 flex-1 px-0 pt-0" : "h-10 w-full min-w-0 px-1.5 pt-0",
           className,
         )}
       >
@@ -316,7 +316,7 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
                 onDragEnd={handleTabDragEnd}
                 style={resolveTabSlotLayoutStyle(tab, interactiveStyle)}
                 className={cn(
-                  "explorer-workspace-tab-slot relative flex min-w-[92px] max-w-[180px] flex-[1_1_150px] items-end overflow-visible",
+                  "explorer-workspace-tab-slot relative flex min-w-24 max-w-44 flex-[1_1_150px] items-end overflow-visible",
                   canReorderTabs ? "cursor-grab active:cursor-grabbing" : "cursor-default",
                 )}
                 data-workspace-tab-slot-active={selected ? "true" : undefined}
@@ -335,8 +335,8 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
                   data-workspace-tab-kind={tab.kind}
                   data-workspace-tab-active={selected ? "true" : undefined}
                   className={cn(
-                    "explorer-workspace-tab group/tab relative flex min-w-0 items-center overflow-visible border-0 text-[13px]",
-                    "mb-0 h-[36px] rounded-tl-[8px] rounded-tr-[8px]",
+                    "explorer-workspace-tab group/tab relative flex min-w-0 items-center overflow-visible border-0 text-xs",
+                    "mb-0 h-9 rounded-tl-[8px] rounded-tr-[8px]",
                     "transition-[color,transform] duration-300 ease-[cubic-bezier(.22,1,.36,1)]",
                     tabStateClassName,
                     isOpening && "explorer-workspace-tab--opening",
@@ -350,13 +350,13 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
                         ...ACTIVE_TAB_JOIN_STYLE,
                       }}
                       className={cn(
-                        "pointer-events-none absolute bottom-[-1px] left-0 right-0 z-0 h-[33px] rounded-t-[10px]",
+                        "pointer-events-none absolute -bottom-px left-0 right-0 z-0 h-8 rounded-t-[10px]",
                         "transition-opacity duration-[220ms] ease-[cubic-bezier(.22,1,.36,1)]",
                         "motion-reduce:transition-none",
                       )}
                     >
-                      <span aria-hidden="true" className="absolute bottom-[-1px] left-[-16px] h-[18px] w-[18px]" style={ACTIVE_TAB_LEFT_CURVE_STYLE} />
-                      <span aria-hidden="true" className="absolute bottom-[-1px] right-[-16px] h-[18px] w-[18px]" style={ACTIVE_TAB_RIGHT_CURVE_STYLE} />
+                      <span aria-hidden="true" className="absolute -bottom-px -left-4 h-4 w-4" style={ACTIVE_TAB_LEFT_CURVE_STYLE} />
+                      <span aria-hidden="true" className="absolute -bottom-px -right-4 h-4 w-4" style={ACTIVE_TAB_RIGHT_CURVE_STYLE} />
                     </div>
                   ) : null}
 

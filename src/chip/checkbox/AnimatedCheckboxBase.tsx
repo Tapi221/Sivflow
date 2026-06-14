@@ -33,7 +33,7 @@ const AnimatedCheckboxBase = ({
   const active = checked || indeterminate;
   const borderColor = active ? color : inactiveBorderColor ?? color;
   let radiusClass = "rounded-full";
-  if (shape === "square") radiusClass = "rounded-[4px]";
+  if (shape === "square") radiusClass = "rounded";
   let strokeColor = color;
   if (variant === "filled") strokeColor = "white";
   let strokeDashoffset = 16;

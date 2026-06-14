@@ -31,7 +31,7 @@ const LocalDBStatusBanner = () => {
           )}
           <span>ストレージ警告</span>
         </div>
-        <div className="flex-1 min-w-[240px]">
+        <div className="flex-1 min-w-60">
           <p>{message}</p>
           {status.resetFailedReason && (
             <p className="mt-1 text-xs opacity-80 break-all">

@@ -135,7 +135,7 @@ const CodeBlockEditor = ({ value, onChange, className, zoom }: CodeBlockEditorPr
         {recentLangItems.length > 0 && (
           <>
             <SelectGroup>
-              <SelectLabel className="text-[10px] text-slate-400 uppercase tracking-widest px-2 py-1">
+              <SelectLabel className="text-xs text-slate-400 uppercase tracking-widest px-2 py-1">
                 最近使った言語
               </SelectLabel>
               {recentLangItems.map((language) => (
@@ -154,7 +154,7 @@ const CodeBlockEditor = ({ value, onChange, className, zoom }: CodeBlockEditorPr
 
         <SelectGroup>
           {recentLangItems.length > 0 && (
-            <SelectLabel className="text-[10px] text-slate-400 uppercase tracking-widest px-2 py-1">
+            <SelectLabel className="text-xs text-slate-400 uppercase tracking-widest px-2 py-1">
               すべての言語
             </SelectLabel>
           )}

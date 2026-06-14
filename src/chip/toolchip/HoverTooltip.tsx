@@ -30,7 +30,7 @@ type HoverTooltipProps = {
 
 
 const HOVER_CAPABLE_MEDIA_QUERY = "(hover: hover) and (pointer: fine)";
-const TOOLTIP_ARROW_BORDER_CLASS_NAME = "border-[rgba(0,0,0,0.12)]";
+const TOOLTIP_ARROW_BORDER_CLASS_NAME = "border-black/10";
 const TOOLTIP_ARROW_SURFACE_CLASS_NAME = "absolute -z-10 rotate-45 rounded-[2px]";
 
 
@@ -118,7 +118,7 @@ const getPosition = (
 const getArrowClassName = (side: TooltipSide, align: TooltipAlign) => {
   if (side === "top") {
     return cn(
-      "bottom-[-5px] border-b border-r",
+      "-bottom-1 border-b border-r",
       TOOLTIP_ARROW_BORDER_CLASS_NAME,
       align === "start"
         ? "left-4"
@@ -130,7 +130,7 @@ const getArrowClassName = (side: TooltipSide, align: TooltipAlign) => {
 
   if (side === "bottom") {
     return cn(
-      "top-[-5px] border-l border-t",
+      "-top-1 border-l border-t",
       TOOLTIP_ARROW_BORDER_CLASS_NAME,
       align === "start"
         ? "left-4"
@@ -142,7 +142,7 @@ const getArrowClassName = (side: TooltipSide, align: TooltipAlign) => {
 
   if (side === "left") {
     return cn(
-      "right-[-5px] border-r border-t",
+      "-right-1 border-r border-t",
       TOOLTIP_ARROW_BORDER_CLASS_NAME,
       align === "start"
         ? "top-4"
@@ -153,7 +153,7 @@ const getArrowClassName = (side: TooltipSide, align: TooltipAlign) => {
   }
 
   return cn(
-    "left-[-5px] border-b border-l",
+    "-left-1 border-b border-l",
     TOOLTIP_ARROW_BORDER_CLASS_NAME,
     align === "start"
       ? "top-4"
@@ -259,7 +259,7 @@ const HoverTooltip = ({ label, children, side = "top", align = "center", offset 
           >
             <div
               className={cn(
-                "relative isolate inline-flex items-center overflow-visible whitespace-nowrap font-medium tracking-[-0.01em]",
+                "relative isolate inline-flex items-center overflow-visible whitespace-nowrap font-medium tracking-tight",
                 presetClassNames.tooltip,
                 tooltipClassName,
               )}

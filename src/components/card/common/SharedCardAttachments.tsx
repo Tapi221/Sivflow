@@ -51,7 +51,7 @@ const SharedCardAttachments = ({ attachments, className }: SharedCardAttachments
 
       {references.length > 0 ? (
         <section className="rounded-xl border border-slate-200/80 bg-white/80 px-3 py-3 shadow-sm">
-          <div className="mb-2 text-[11px] font-semibold tracking-wide text-slate-500">
+          <div className="mb-2 text-xs font-semibold tracking-wide text-slate-500">
             References
           </div>
           <ul className="space-y-1.5">

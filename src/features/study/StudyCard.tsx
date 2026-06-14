@@ -268,7 +268,7 @@ const StudyCardInner = ({
             <line x1="15" y1="9" x2="15.01" y2="9" />
           </svg>
         </div>
-        <span className="text-[10px] font-bold text-slate-600 group-hover:text-[#FF5A65] md:text-xs">
+        <span className="text-xs font-bold text-slate-600 group-hover:text-[#FF5A65] md:text-xs">
           忘れた
         </span>
       </button>
@@ -298,7 +298,7 @@ const StudyCardInner = ({
               <line x1="15" y1="9" x2="15.01" y2="9" />
             </svg>
           </div>
-          <span className="text-[10px] font-bold text-slate-600 group-hover:text-[#F9A825] md:text-xs">
+          <span className="text-xs font-bold text-slate-600 group-hover:text-[#F9A825] md:text-xs">
             あいまい
           </span>
         </button>
@@ -328,7 +328,7 @@ const StudyCardInner = ({
             <line x1="15" y1="9" x2="15.01" y2="9" />
           </svg>
         </div>
-        <span className="text-[10px] font-bold text-slate-600 group-hover:text-[#00A3FF] md:text-xs">
+        <span className="text-xs font-bold text-slate-600 group-hover:text-[#00A3FF] md:text-xs">
           覚えた
         </span>
       </button>
@@ -358,7 +358,7 @@ const StudyCardInner = ({
               <line x1="15" y1="9" x2="15.01" y2="9" />
             </svg>
           </div>
-          <span className="text-[10px] font-bold text-slate-600 group-hover:text-[#00B67A] md:text-xs">
+          <span className="text-xs font-bold text-slate-600 group-hover:text-[#00B67A] md:text-xs">
             余裕
           </span>
         </button>
@@ -383,7 +383,7 @@ const StudyCardInner = ({
   const showReviewCount = typeof reviewCount === "number" && reviewCount >= 0;
 
   return (
-    <div className="reviewStudyCard mx-auto flex w-full max-w-[520px] flex-col gap-6">
+    <div className="reviewStudyCard mx-auto flex w-full max-w-96 flex-col gap-6">
       <div className="reviewCardViewport">
         <Flashcard
           card={flashcardCard}
@@ -403,7 +403,7 @@ const StudyCardInner = ({
               {showReviewCount && (
                 <Badge
                   variant="outline"
-                  className="whitespace-nowrap bg-slate-50/50 text-[10px] font-bold tabular-nums text-slate-400 backdrop-blur-sm border-slate-200"
+                  className="whitespace-nowrap bg-slate-50/50 text-xs font-bold tabular-nums text-slate-400 backdrop-blur-sm border-slate-200"
                 >
                   {reviewCount + 1}回目の復習
                 </Badge>

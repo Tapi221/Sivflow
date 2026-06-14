@@ -41,7 +41,7 @@ const PDF_VIEWER_STATE_SAVE_RETRY_DELAY_MS = 1_000;
 const PDF_SOURCE_TIMEOUT_ERROR_MESSAGE = "PDFデータの取得がタイムアウトしました。もう一度開き直してください。";
 const PDF_SOURCE_MISSING_ERROR_MESSAGE = "表示できるPDFデータが見つかりません。PDFを再インポートしてください。";
 const PDF_DOCUMENT_PANE_CLASS_NAME = "flex h-full min-h-0 w-full min-w-0 flex-1";
-const PDF_DOCUMENT_STATUS_CLASS_NAME = "flex h-full min-h-0 w-full min-w-0 flex-1 items-center justify-center bg-[var(--carvepanel-surface)] px-6 text-center text-[13px] leading-6 text-[#6d6d6d]";
+const PDF_DOCUMENT_STATUS_CLASS_NAME = "flex h-full min-h-0 w-full min-w-0 flex-1 items-center justify-center bg-[var(--carvepanel-surface)] px-6 text-center text-xs leading-6 text-[#6d6d6d]";
 
 
 

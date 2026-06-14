@@ -46,7 +46,7 @@ const WORKSPACE_TAB_MOTION_TRANSITION: Transition = {
   ease: [0.22, 1, 0.36, 1],
 };
 const segmentedActionGroupClassName =
-  "relative z-10 inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f7f7f7] p-0.5";
+  "relative z-10 inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-zinc-100 p-0.5";
 const segmentedActionButtonClassName = cn(
   "group/action relative z-10 flex h-7 w-11 min-w-0 items-center justify-center rounded-lg p-0",
   "appearance-none select-none text-[#b3b3b3]",
@@ -75,7 +75,7 @@ const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions
     indicatorId: string,
   ) => {
     return (
-      <div className="relative inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-[#f7f7f7] p-0.5">
+      <div className="relative inline-grid h-8 w-max grid-flow-col items-center gap-1 rounded-xl bg-zinc-100 p-0.5">
         {segmentedTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeValue === tab.value;
@@ -106,7 +106,7 @@ const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions
                 {isActive && (
                   <motion.span
                     layoutId={indicatorId}
-                    className="absolute inset-0 -z-10 rounded-lg border border-[#eee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+                    className="absolute inset-0 -z-10 rounded-lg border border-slate-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
                     transition={WORKSPACE_TAB_MOTION_TRANSITION}
                   />
                 )}
@@ -211,8 +211,8 @@ const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions
                     <button
                       type="button"
                       className={cn(
-                        "flex h-7 items-center gap-[6px] rounded py-[3px] pl-0 pr-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                        isActive ? "text-[#25272d]" : "text-[#8f929c]",
+                        "flex h-7 items-center gap-[6px] rounded py-0.5 pl-0 pr-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        isActive ? "text-[#25272d]" : "text-slate-500",
                       )}
                       aria-pressed={isActive}
                       onClick={tab.onClick}
@@ -252,7 +252,7 @@ const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions
                       type="button"
                       className={cn(
                         "flex h-7 items-center gap-[6px] rounded px-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                        isActive ? "text-[#25272d]" : "text-[#8f929c]",
+                        isActive ? "text-[#25272d]" : "text-slate-500",
                       )}
                       aria-pressed={isActive}
                       onClick={tab.onClick}

@@ -46,7 +46,7 @@ const MultiSelectDropdown = ({ value, onChange, options, placeholder = "Select" 
             rounded-full border border-[#d7dae0]
             bg-white px-2.5 py-1
 
-            text-[12px] font-medium text-[#25272d]
+            text-xs font-medium text-[#25272d]
             leading-none
 
             transition
@@ -72,7 +72,7 @@ const MultiSelectDropdown = ({ value, onChange, options, placeholder = "Select" 
             relative
             z-50
 
-            min-w-[84px]
+            min-w-20
             overflow-visible
 
             rounded-md
@@ -91,7 +91,7 @@ const MultiSelectDropdown = ({ value, onChange, options, placeholder = "Select" 
           <span
             className="
               absolute
-              top-[-5px]
+              -top-1
               right-3
               h-2 w-2
               rotate-45
@@ -100,7 +100,7 @@ const MultiSelectDropdown = ({ value, onChange, options, placeholder = "Select" 
               bg-white
             "
           />
-          <div className="px-2 py-1 text-[10px] font-medium text-[#a0a4b0]">
+          <div className="px-2 py-1 text-xs font-medium text-[#a0a4b0]">
             Filters
           </div>
 
@@ -118,7 +118,7 @@ const MultiSelectDropdown = ({ value, onChange, options, placeholder = "Select" 
 
                   px-2 py-1
 
-                  text-[11px]
+                  text-xs
                   font-medium
                   leading-none
                   text-left

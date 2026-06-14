@@ -904,7 +904,7 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
   const readonlyEditButton = (
     <button
       type="button"
-      className="inline-flex h-7 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 px-2 text-[10px] font-semibold leading-none text-slate-700 shadow-sm backdrop-blur-[2px] hover:bg-white"
+      className="inline-flex h-7 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 px-2 text-xs font-semibold leading-none text-slate-700 shadow-sm backdrop-blur-[2px] hover:bg-white"
       onClick={() => setIsEditing(true)}
     >
       編集
@@ -987,7 +987,7 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
                 "flex w-full flex-col items-center gap-4",
                 embeddedInPager &&
                 (forcedPaneWidthPx === null || forcedPaneWidthPx === undefined) &&
-                (dockToolbarsToTop ? "max-w-[1000px]" : "max-w-[820px]"),
+                (dockToolbarsToTop ? "max-w-96" : "max-w-96"),
               )}
               style={{
                 ...(activePaneWidthStyle ?? {}),

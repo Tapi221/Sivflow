@@ -136,7 +136,7 @@ const OverlayToolbarIndexNavigator = ({ value, total, onCommit, inputAriaLabel, 
   return (
     <div
       className={cn(
-        "flex items-center gap-1 text-[10px] font-semibold tabular-nums text-[#6b5f55]",
+        "flex items-center gap-1 text-xs font-semibold tabular-nums text-[#6b5f55]",
         className,
       )}
     >
@@ -152,7 +152,7 @@ const OverlayToolbarIndexNavigator = ({ value, total, onCommit, inputAriaLabel, 
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         className={cn(
-          "h-6 w-12 rounded-full border border-[rgba(225,214,203,0.9)] bg-[rgba(255,250,244,0.84)] px-2 text-center text-[10px] font-semibold text-[#463c35] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] outline-none transition focus:border-[rgba(189,166,144,0.92)] focus:bg-[rgba(255,252,247,0.98)] sm:w-14",
+          "h-6 w-12 rounded-full border border-[rgba(225,214,203,0.9)] bg-[rgba(255,250,244,0.84)] px-2 text-center text-xs font-semibold text-[#463c35] shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] outline-none transition focus:border-[rgba(189,166,144,0.92)] focus:bg-[rgba(255,252,247,0.98)] sm:w-14",
           inputClassName,
         )}
         aria-label={inputAriaLabel}

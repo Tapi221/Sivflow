@@ -34,9 +34,9 @@ const MarkdownEditorDialog: React.FC<MarkdownEditorDialogProps> = ({ open, onOpe
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[min(92vw,780px)] max-w-[780px] p-0 overflow-hidden">
+      <DialogContent className="w-[min(92vw,780px)] max-w-96 p-0 overflow-hidden">
         <DialogHeader className="border-b border-slate-100 px-4 py-3">
-          <DialogTitle className="font-serif text-[11px] font-medium tracking-[0.12em] uppercase text-slate-500">
+          <DialogTitle className="font-serif text-xs font-medium tracking-[0.12em] uppercase text-slate-500">
             Markdown Editor
           </DialogTitle>
           <DialogDescription className="sr-only">
@@ -68,7 +68,7 @@ const MarkdownEditorDialog: React.FC<MarkdownEditorDialogProps> = ({ open, onOpe
 
           {error ? (
             <p
-              className="text-[10px] text-red-600 mt-1 font-medium"
+              className="text-xs text-red-600 mt-1 font-medium"
               role="alert"
             >
               {error}

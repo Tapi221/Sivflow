@@ -105,14 +105,14 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
     <div className={cn("flex h-full min-h-0 min-w-0 flex-col bg-white text-[#1c1c1e]", className)}>
       <div className={cn("flex shrink-0 flex-wrap items-center justify-between gap-3 pb-3 pt-1", isCompact ? "px-4" : "px-5")}>
         <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <span className={cn("rounded-full border border-[#eee] bg-[#f8f8f9] font-semibold tabular-nums text-[#6e6e73]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>{weekRangeLabel}</span>
-          <span className={cn("rounded-full border border-[#eee] bg-white font-semibold text-[#8f929c]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>{visibleDayCount}日 / {periods.length}限</span>
-          <span className={cn("rounded-full border border-[#eee] bg-white font-semibold text-[#8f929c]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>{isLoading ? "読み込み中" : `${registeredCountLabel}登録済み`}</span>
-          <span className={cn("rounded-full border border-[#eee] bg-white font-semibold text-[#8f929c]", isCompact ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-[12px]")}>授業DB {syllabusCourses.length}件</span>
+          <span className={cn("rounded-full border border-slate-200 bg-[#f8f8f9] font-semibold tabular-nums text-[#6e6e73]", isCompact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-xs")}>{weekRangeLabel}</span>
+          <span className={cn("rounded-full border border-slate-200 bg-white font-semibold text-slate-500", isCompact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-xs")}>{visibleDayCount}日 / {periods.length}限</span>
+          <span className={cn("rounded-full border border-slate-200 bg-white font-semibold text-slate-500", isCompact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-xs")}>{isLoading ? "読み込み中" : `${registeredCountLabel}登録済み`}</span>
+          <span className={cn("rounded-full border border-slate-200 bg-white font-semibold text-slate-500", isCompact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-xs")}>授業DB {syllabusCourses.length}件</span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <button type="button" className={cn("rounded-full border border-[#e5e5ea] bg-white font-bold text-[#007aff] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "h-8 px-3 text-[12px]" : "h-9 px-4 text-[13px]")} onClick={handleOpenSyllabusCatalog}>授業DB</button>
-          <button type="button" aria-label="時間割設定" className={cn("flex items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[#6e6e73] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "h-8 w-8" : "h-9 w-9")} onClick={handleOpenSettings}>{StratisSettingsIcon ? <StratisSettingsIcon className={cn(isCompact ? "h-3.5 w-3.5" : "h-4 w-4")} aria-hidden="true" focusable="false" /> : null}</button>
+          <button type="button" className={cn("rounded-full border border-[#e5e5ea] bg-white font-bold text-blue-500 shadow-sm hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "h-8 px-3 text-xs" : "h-9 px-4 text-xs")} onClick={handleOpenSyllabusCatalog}>授業DB</button>
+          <button type="button" aria-label="時間割設定" className={cn("flex items-center justify-center rounded-full border border-[#e5e5ea] bg-white text-[#6e6e73] shadow-sm hover:bg-[#f7f7f8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "h-8 w-8" : "h-9 w-9")} onClick={handleOpenSettings}>{StratisSettingsIcon ? <StratisSettingsIcon className={cn(isCompact ? "h-3.5 w-3.5" : "h-4 w-4")} aria-hidden="true" focusable="false" /> : null}</button>
         </div>
       </div>
       <div className={cn("min-h-0 flex-1 text-center scrollbar-hidden", isCompact ? "overflow-y-auto overflow-x-hidden px-4 pb-3" : "overflow-auto px-5 pb-5")}>
@@ -122,25 +122,25 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
             const isToday = isSameDay(day, today);
             return (
               <div key={day.toISOString()} className={cn("flex min-w-0 items-center justify-center text-center", isCompact ? "h-7 gap-1" : "h-8 gap-1.5")}>
-                <span className={cn("font-bold tracking-[-0.02em]", isCompact ? "text-[11px]" : "text-[13px]", isToday ? "text-[#007aff]" : "text-[#1c1c1e]")}>{format(day, "E", { locale: ja })}</span>
-                <span className={cn("rounded-full font-semibold tabular-nums", isCompact ? "px-1 py-0.5 text-[9px]" : "px-1.5 py-0.5 text-[10px]", isToday ? "bg-[#e8f2ff] text-[#007aff]" : "bg-[#f7f7f8] text-[#8f929c]")}>{format(day, "M/d", { locale: ja })}</span>
+                <span className={cn("font-bold tracking-tight", isCompact ? "text-xs" : "text-xs", isToday ? "text-blue-500" : "text-[#1c1c1e]")}>{format(day, "E", { locale: ja })}</span>
+                <span className={cn("rounded-full font-semibold tabular-nums", isCompact ? "px-1 py-0.5 text-[9px]" : "px-1.5 py-0.5 text-xs", isToday ? "bg-[#e8f2ff] text-blue-500" : "bg-[#f7f7f8] text-slate-500")}>{format(day, "M/d", { locale: ja })}</span>
               </div>
             );
           })}
           {periods.map((period) => (
             <div key={period.id} className="contents">
-              <div className={cn("flex items-center justify-end pr-1", isCompact ? "min-h-[48px]" : "min-h-[52px]")}>
+              <div className={cn("flex items-center justify-end pr-1", isCompact ? "min-h-12" : "min-h-12")}>
                 <div className={cn("flex items-center justify-end text-right", isCompact ? "gap-1" : "gap-2")}>
-                  <div className={cn("font-bold leading-none tracking-[-0.04em] text-[#111]", isCompact ? "text-[17px]" : "text-[20px]")}>{period.label}</div>
-                  <div className={cn("flex flex-col items-center font-medium leading-none tabular-nums text-[#8f929c]", isCompact ? "text-[8px]" : "text-[10px]")}><span>{period.startTime}</span><span aria-hidden="true" className="my-0.5 h-2 w-px bg-[#d8d8df]" /><span>{period.endTime}</span></div>
+                  <div className={cn("font-bold leading-none tracking-[-0.04em] text-[#111]", isCompact ? "text-[17px]" : "text-xl")}>{period.label}</div>
+                  <div className={cn("flex flex-col items-center font-medium leading-none tabular-nums text-slate-500", isCompact ? "text-[8px]" : "text-xs")}><span>{period.startTime}</span><span aria-hidden="true" className="my-0.5 h-2 w-px bg-[#d8d8df]" /><span>{period.endTime}</span></div>
                 </div>
               </div>
               {weekDays.map((day) => {
                 const slot = { dayIndex: getTimetableEntryDayIndex(day), periodId: period.id };
                 const entry = courseSlotMap.get(createTimetableSlotKey(slot)) ?? null;
                 return (
-                  <button key={`${day.toISOString()}-${period.id}`} type="button" aria-label={`${format(day, "M月d日 EEEE", { locale: ja })} ${period.label}限`} className={cn("relative min-w-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "min-h-[48px] rounded-[14px]" : "min-h-[52px] rounded-[18px]", entry ? (isCompact ? "border px-1.5 py-1" : "border px-2.5 py-1") : "border border-dashed border-[#dadde3] bg-[rgba(255,255,255,0.62)] text-[#a1a1aa] hover:border-[#c7c7cc] hover:bg-[#fafafa]")} style={entry ? getTimetableEntryStyle(entry.colorKey) : undefined} onClick={() => handleOpenCourseEditor(entry, slot)}>
-                    {entry ? <span className={cn("flex h-full flex-col items-center justify-center text-center", isCompact ? "min-h-[36px]" : "min-h-[40px]")}><span className={cn("max-w-full truncate font-semibold leading-snug tracking-[-0.01em] text-inherit", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.title}</span><span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-80", isCompact ? "text-[10px]" : "text-[11px]")}>{getTimetableCourseSecondaryText(entry)}</span>{entry.memo ? <span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-60", isCompact ? "text-[10px]" : "text-[11px]")}>{entry.memo}</span> : null}</span> : <span className="flex h-full items-center justify-center text-center">{StratisPlusIcon ? <StratisPlusIcon className="h-5 w-5" aria-hidden="true" focusable="false" /> : null}</span>}
+                  <button key={`${day.toISOString()}-${period.id}`} type="button" aria-label={`${format(day, "M月d日 EEEE", { locale: ja })} ${period.label}限`} className={cn("relative min-w-0 text-left outline-none focus-visible:ring-2 focus-visible:ring-[#007aff]", isCompact ? "min-h-12 rounded-2xl" : "min-h-12 rounded-2xl", entry ? (isCompact ? "border px-1.5 py-1" : "border px-2.5 py-1") : "border border-dashed border-[#dadde3] bg-[rgba(255,255,255,0.62)] text-[#a1a1aa] hover:border-[#c7c7cc] hover:bg-slate-50")} style={entry ? getTimetableEntryStyle(entry.colorKey) : undefined} onClick={() => handleOpenCourseEditor(entry, slot)}>
+                    {entry ? <span className={cn("flex h-full flex-col items-center justify-center text-center", isCompact ? "min-h-9" : "min-h-10")}><span className={cn("max-w-full truncate font-semibold leading-snug tracking-tight text-inherit", isCompact ? "text-xs" : "text-xs")}>{entry.title}</span><span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-80", isCompact ? "text-xs" : "text-xs")}>{getTimetableCourseSecondaryText(entry)}</span>{entry.memo ? <span className={cn("mt-0.5 max-w-full truncate font-semibold leading-snug opacity-60", isCompact ? "text-xs" : "text-xs")}>{entry.memo}</span> : null}</span> : <span className="flex h-full items-center justify-center text-center">{StratisPlusIcon ? <StratisPlusIcon className="h-5 w-5" aria-hidden="true" focusable="false" /> : null}</span>}
                   </button>
                 );
               })}

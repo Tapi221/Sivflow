@@ -68,7 +68,7 @@ const ExportMfDeckButton = ({
       disabled={disabled || isExporting}
       title={label}
       aria-label={isExporting ? "MFDeckを書き出し中" : label}
-      className="min-w-0 max-w-[150px] overflow-hidden rounded-full bg-white/85 shadow-sm backdrop-blur"
+      className="min-w-0 max-w-36 overflow-hidden rounded-full bg-white/85 shadow-sm backdrop-blur"
     >
       {isExporting ? (
         <LoadingSpinner iconClassName="h-4 w-4" label="MFDeckを書き出し中" />

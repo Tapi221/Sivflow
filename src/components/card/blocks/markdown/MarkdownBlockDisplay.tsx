@@ -51,7 +51,7 @@ const MarkdownBlockDisplay = ({ markdown, emptyPlaceholder = "Markdownを入力.
     <div className={cn("px-0 py-0", className)}>
       <div className={cn("markdownBlockPreview bg-transparent border-0 rounded-lg overflow-visible p-0", interactive && "cursor-text", previewClassName)} data-testid={dataTestId} tabIndex={tabIndex} role={role} aria-label={ariaLabel} onClick={onClick} onKeyDown={onKeyDown}>
         {isEmpty ? (
-          <div className={cn(TEXT_BLOCK_CONTENT_CLASS, "min-h-[24px] text-slate-300")} style={emptyStyle}>
+          <div className={cn(TEXT_BLOCK_CONTENT_CLASS, "min-h-6 text-slate-300")} style={emptyStyle}>
             {emptyPlaceholder}
           </div>
         ) : (

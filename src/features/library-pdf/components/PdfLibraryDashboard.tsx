@@ -23,7 +23,7 @@ type IconBadgeProps = {
 
 
 
-const cardClassName = "box-border rounded-[10px] border border-[#D1D1D1] bg-[#fff] p-4 shadow-[0_6px_3px_0_rgba(0,0,0,0.06),0_10px_10px_0_rgba(0,0,0,0.05)]";
+const cardClassName = "box-border rounded-xl border border-[#D1D1D1] bg-[#fff] p-4 shadow-[0_6px_3px_0_rgba(0,0,0,0.06),0_10px_10px_0_rgba(0,0,0,0.05)]";
 
 
 
@@ -50,10 +50,10 @@ const getIconBadgeToneClassName = (tone: NonNullable<IconBadgeProps["tone"]>): s
 
 const IconBadge = ({ label, tone = "slate" }: IconBadgeProps) => {
   if (label === "PDF") {
-    return <span className="inline-flex h-6 min-w-8 items-center justify-center rounded-md border border-[#f1c7c7] bg-[#fff8f8] px-1.5 text-[10px] font-semibold text-[#E72A2A]" aria-label="PDF">PDF</span>;
+    return <span className="inline-flex h-6 min-w-8 items-center justify-center rounded-md border border-[#f1c7c7] bg-[#fff8f8] px-1.5 text-xs font-semibold text-[#E72A2A]" aria-label="PDF">PDF</span>;
   }
 
-  return <span className={cn("inline-flex h-8 w-8 items-center justify-center rounded-[999px] text-[12px] font-semibold", getIconBadgeToneClassName(tone))}>{label}</span>;
+  return <span className={cn("inline-flex h-8 w-8 items-center justify-center rounded-[999px] text-xs font-semibold", getIconBadgeToneClassName(tone))}>{label}</span>;
 };
 const PdfLibraryDashboard = ({ documents, folders, onOpenDocument, showToolbar = true }: PdfLibraryDashboardProps) => {
   const { tagById } = useTags();

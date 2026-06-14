@@ -146,11 +146,11 @@ const CodeBlockCombobox = () => {
           {languages.find((language) => language.value === value)?.label ?? "Plain Text"}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0" onCloseAutoFocus={() => setSearchValue("")}>
+      <PopoverContent className="w-48 p-0" onCloseAutoFocus={() => setSearchValue("")}>
         <Command shouldFilter={false}>
           <CommandInput className="h-9" value={searchValue} onValueChange={(value) => setSearchValue(value)} placeholder="Search language..." />
           <CommandEmpty>No language found.</CommandEmpty>
-          <CommandList className="h-[344px] overflow-y-auto">
+          <CommandList className="h-80 overflow-y-auto">
             <CommandGroup>
               {items.map((language) => (
                 <CommandItem

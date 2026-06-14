@@ -28,7 +28,7 @@ const FadeSkeleton = ({ ariaLabel = "読み込み中", className, itemClassName,
       {Array.from({ length: rowCount }, (_, index) => {
         const width = normalizedWidths[index % normalizedWidths.length] ?? DEFAULT_WIDTHS[0];
 
-        return <div key={index} className={cn("h-[18px] rounded-full bg-[#eef0f3]", itemClassName)} style={{ marginLeft: (index % normalizedIndentCycle) * indentStepPx, width: `${width}%` }} />;
+        return <div key={index} className={cn("h-4 rounded-full bg-[#eef0f3]", itemClassName)} style={{ marginLeft: (index % normalizedIndentCycle) * indentStepPx, width: `${width}%` }} />;
       })}
     </div>
   );

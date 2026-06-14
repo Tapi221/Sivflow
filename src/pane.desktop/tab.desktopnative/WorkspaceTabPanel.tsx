@@ -18,7 +18,7 @@ type WorkspaceTabPanelProps = {
 
 
 
-const workspaceTabPanelTextClassName = "text-[18px] leading-6";
+const workspaceTabPanelTextClassName = "text-lg leading-6";
 
 
 

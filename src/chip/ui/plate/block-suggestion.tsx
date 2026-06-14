@@ -72,7 +72,7 @@ const BlockSuggestionCard = ({
             </span>
           </div>
         </div>
-        <div className="relative mt-1 mb-4 pl-[32px]">
+        <div className="relative mt-1 mb-4 pl-8">
           <div className="flex flex-col gap-2">
             {suggestion.type === "remove"
               ? getRemoveSummaryItems(suggestion.text!).map((text, index) => (

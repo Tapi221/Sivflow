@@ -93,7 +93,7 @@ const createCalendarSidebarProps = (): CalendarSidebarProps => ({
   onToggleCalendar: vi.fn(),
 });
 
-const hasCalendarListDividerClass = (calendarList: HTMLElement): boolean => Array.from(calendarList.querySelectorAll("*")).some((element) => element.classList.contains("border-t") || element.classList.contains("border-[#eee]"));
+const hasCalendarListDividerClass = (calendarList: HTMLElement): boolean => Array.from(calendarList.querySelectorAll("*")).some((element) => element.classList.contains("border-t") || element.classList.contains("border-slate-200"));
 
 describe("CalendarSidebar", () => {
   afterEach(() => {

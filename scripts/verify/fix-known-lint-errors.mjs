@@ -127,7 +127,7 @@ const applyCalendarTimetableFixes = (source) => {
 const applyScheduleScreenFixes = (source) => {
   let nextSource = removeStratisOptionalIcon(source);
   nextSource = insertAfterResolveStratisIcon(nextSource, SCHEDULE_SCREEN_ICON_DECLARATIONS);
-  nextSource = replaceAll(nextSource, "{isActive ? <StratisOptionalIcon names={STRATIS_CHECK_ICON_NAMES} className=\"h-3 w-3 text-[#8e8e93]\" /> : null}", "{isActive && StratisCheckIcon ? <StratisCheckIcon className=\"h-3 w-3 text-[#8e8e93]\" aria-hidden=\"true\" focusable=\"false\" /> : null}");
+  nextSource = replaceAll(nextSource, "{isActive ? <StratisOptionalIcon names={STRATIS_CHECK_ICON_NAMES} className=\"h-3 w-3 text-zinc-500\" /> : null}", "{isActive && StratisCheckIcon ? <StratisCheckIcon className=\"h-3 w-3 text-zinc-500\" aria-hidden=\"true\" focusable=\"false\" /> : null}");
   nextSource = replaceAll(nextSource, "<StratisOptionalIcon names={STRATIS_PLUS_ICON_NAMES} className=\"h-7 w-7\" />", "{StratisPlusIcon ? <StratisPlusIcon className=\"h-7 w-7\" aria-hidden=\"true\" focusable=\"false\" /> : null}");
 
   return nextSource;

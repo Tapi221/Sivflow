@@ -11,16 +11,16 @@ const MONTH_GRID_WEEKDAY_HEADER_HEIGHT_CLASS = "h-8";
 const MONTH_GRID_DAY_HEADER_POSITION_CLASS = "left-0 top-0 md:left-3 md:top-1";
 const MONTH_GRID_EVENTS_CONTAINER_POSITION_CLASS = "inset-x-px top-8";
 const MONTH_GRID_EVENTS_GAP_CLASS = "gap-[3px]";
-const MONTH_GRID_OVERFLOW_TEXT_CLASS = "w-full pr-3 text-right text-[11px] leading-none";
+const MONTH_GRID_OVERFLOW_TEXT_CLASS = "w-full pr-3 text-right text-xs leading-none";
 //Daydetail
 const DAY_DETAIL_HEADER_HEIGHT_CLASS = "h-8";
 const DAY_DETAIL_TIME_LABEL_WIDTH_CLASS = "w-12";
 const DAY_DETAIL_EVENT_PADDING_CLASS = "px-2 py-1";
 const DAY_DETAIL_EVENT_RADIUS_CLASS = "rounded-md";
-const DAY_DETAIL_EVENT_TEXT_CLASS = "text-[12px]";
+const DAY_DETAIL_EVENT_TEXT_CLASS = "text-xs";
 const DAY_DETAIL_SCROLL_AREA_CLASS = "overflow-y-auto";
 const DAY_DETAIL_CURRENT_TIME_LINE_CLASS = "left-12 right-0 h-px";
-const DAY_DETAIL_CURRENT_TIME_LABEL_CLASS = "-translate-y-1/2 text-[10px]";
+const DAY_DETAIL_CURRENT_TIME_LABEL_CLASS = "-translate-y-1/2 text-xs";
 // WeekDay
 
 // time / grid

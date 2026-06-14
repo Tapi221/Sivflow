@@ -83,8 +83,8 @@ const EMPTY_DAY_LABEL = "予定なし";
 const DEFAULT_COLOR = "#8e8e93";
 const GAP_COLOR = "#f2f2f7";
 const DATE_KEY_PART_COUNT = 3;
-const DAY_DATE_NUMBER_CLASS_NAME = "flex h-8 w-8 items-center justify-center rounded-full text-[16px] font-bold leading-none tracking-[-0.03em] tabular-nums transition-all duration-150";
-const DAY_WEEKDAY_CLASS_NAME = "text-[11px] font-semibold leading-none text-[rgba(60,60,67,0.58)]";
+const DAY_DATE_NUMBER_CLASS_NAME = "flex h-8 w-8 items-center justify-center rounded-full text-base font-bold leading-none tracking-tight tabular-nums transition-all duration-150";
+const DAY_WEEKDAY_CLASS_NAME = "text-xs font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 
 
 
@@ -296,9 +296,9 @@ const getSplitDayDateNumberClassName = (day: SplitDay): string => cn(DAY_DATE_NU
 
 
 
-const EmptyDayCard = () => <div className="flex h-[34px] items-center rounded-[10px] border border-dashed border-[#dedede] bg-white px-3 text-[12px] font-semibold text-[#8e8e93]">{EMPTY_DAY_LABEL}</div>;
+const EmptyDayCard = () => <div className="flex h-8 items-center rounded-xl border border-dashed border-[#dedede] bg-white px-3 text-xs font-semibold text-zinc-500">{EMPTY_DAY_LABEL}</div>;
 const SplitDayDateButton = ({ day, onSelectDate }: SplitDayDateButtonProps) => (
-  <button type="button" className="mt-0.5 flex h-8 items-center justify-end gap-1 rounded-[10px] pr-0.5 text-right transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25" onClick={() => onSelectDate?.(day.date)}>
+  <button type="button" className="mt-0.5 flex h-8 items-center justify-end gap-1 rounded-xl pr-0.5 text-right transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25" onClick={() => onSelectDate?.(day.date)}>
     <span className={getSplitDayDateNumberClassName(day)}>{format(day.date, "d")}</span>
     <span className={DAY_WEEKDAY_CLASS_NAME}>{format(day.date, "EEE", { locale: ja })}</span>
   </button>
@@ -308,7 +308,7 @@ const SplitDaySectionComponent = ({ day, onSelectDate }: SplitDaySectionProps) =
 
   return (
     <section className="grid h-full grid-cols-2" aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}>
-      <div className="h-full min-h-0 min-w-0 border-r border-[#eee] px-4">
+      <div className="h-full min-h-0 min-w-0 border-r border-slate-200 px-4">
         <div className="grid grid-cols-[58px_minmax(0,1fr)] gap-2">
           <SplitDayDateButton day={day} onSelectDate={onSelectDate} />
           <div className="space-y-1.5 overflow-hidden">
@@ -321,16 +321,16 @@ const SplitDaySectionComponent = ({ day, onSelectDate }: SplitDaySectionProps) =
         <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_180px] items-start gap-4">
           <div className="min-w-0 space-y-1.5 overflow-hidden">
             {day.segments.slice(0, 6).map((segment) => (
-              <div key={segment.id} className="flex items-center gap-2 text-[12px] font-medium text-[#3a3a3c]">
+              <div key={segment.id} className="flex items-center gap-2 text-xs font-medium text-slate-700">
                 <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: segment.color }} />
                 <span className="truncate">{segment.label}</span>
-                <span className="ml-auto shrink-0 tabular-nums text-[#8e8e93]">{Math.round(segment.minutes / 60 * 10) / 10}h</span>
+                <span className="ml-auto shrink-0 tabular-nums text-zinc-500">{Math.round(segment.minutes / 60 * 10) / 10}h</span>
               </div>
             ))}
-            {day.segments.length === 0 ? <div className="text-[13px] font-semibold text-[#8e8e93]">時間指定なし</div> : null}
+            {day.segments.length === 0 ? <div className="text-xs font-semibold text-zinc-500">時間指定なし</div> : null}
           </div>
-          <div className="mx-auto flex aspect-square w-full max-w-[180px] items-center justify-center rounded-full border border-[#eee]" style={{ background: buildConicGradient(day.segments) }}>
-            <div className="flex h-[44%] w-[44%] items-center justify-center rounded-full bg-white text-[12px] font-semibold text-[#3a3a3c] shadow-sm">{hours}h</div>
+          <div className="mx-auto flex aspect-square w-full max-w-44 items-center justify-center rounded-full border border-slate-200" style={{ background: buildConicGradient(day.segments) }}>
+            <div className="flex h-[44%] w-[44%] items-center justify-center rounded-full bg-white text-xs font-semibold text-slate-700 shadow-sm">{hours}h</div>
           </div>
         </div>
       </div>

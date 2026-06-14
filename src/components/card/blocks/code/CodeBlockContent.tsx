@@ -273,7 +273,7 @@ const CodeBlockContent = (props: CodeBlockContentProps) => {
         void handleCopy();
       }}
       className={cn(
-        "flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium",
+        "flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium",
         "opacity-0 group-hover/code-block:opacity-100 focus-visible:opacity-100 transition-opacity duration-150",
         "text-zinc-400 hover:text-zinc-600 hover:bg-zinc-900/5",
         "focus:outline-none",
@@ -283,9 +283,9 @@ const CodeBlockContent = (props: CodeBlockContentProps) => {
       type="button"
     >
       {copied ? (
-        <Check className="h-[11px] w-[11px]" />
+        <Check className="h-2.5 w-2.5" />
       ) : (
-        <Copy className="h-[11px] w-[11px]" />
+        <Copy className="h-2.5 w-2.5" />
       )}
       <span>{copied ? "Copied" : "Copy"}</span>
     </button>

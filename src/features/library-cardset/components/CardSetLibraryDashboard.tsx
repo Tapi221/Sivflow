@@ -25,7 +25,7 @@ type CardSetMetricProps = {
 
 
 
-const CARD_CLASS_NAME = "group flex w-full min-w-0 flex-col rounded-[18px] border border-[#dddcd5] bg-[#fff] p-4 text-left shadow-[0_6px_18px_rgba(15,23,42,0.06)] outline-none transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out hover:border-[#c9c7bf] hover:bg-[#fbfaf7] hover:shadow-[0_10px_28px_rgba(15,23,42,0.08)] active:scale-[0.99] focus-visible:border-[#a8a49a] focus-visible:ring-2 focus-visible:ring-[#d8d4c8] motion-reduce:transition-none motion-reduce:active:scale-100";
+const CARD_CLASS_NAME = "group flex w-full min-w-0 flex-col rounded-2xl border border-stone-300 bg-[#fff] p-4 text-left shadow-[0_6px_18px_rgba(15,23,42,0.06)] outline-none transition-[border-color,box-shadow,transform,background-color] duration-150 ease-out hover:border-[#c9c7bf] hover:bg-stone-50 hover:shadow-[0_10px_28px_rgba(15,23,42,0.08)] active:scale-[0.99] focus-visible:border-[#a8a49a] focus-visible:ring-2 focus-visible:ring-[#d8d4c8] motion-reduce:transition-none motion-reduce:active:scale-100";
 const DATE_FORMATTER = new Intl.DateTimeFormat("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" });
 const NUMBER_FORMATTER = new Intl.NumberFormat("ja-JP");
 
@@ -47,11 +47,11 @@ const getCardSetInitial = (title: string): string => {
 
 const CardSetMetric = ({ label, value }: CardSetMetricProps) => {
   return (
-    <span className="flex min-w-0 flex-col gap-1 rounded-[12px] bg-[#f5f4ef] px-3 py-2">
-      <span className="text-[10px] font-semibold leading-none tracking-[0.08em] text-[#8b8780] uppercase">
+    <span className="flex min-w-0 flex-col gap-1 rounded-xl bg-[#f5f4ef] px-3 py-2">
+      <span className="text-xs font-semibold leading-none tracking-[0.08em] text-[#8b8780] uppercase">
         {label}
       </span>
-      <span className="truncate text-[12px] font-bold leading-none text-[#35312b]">
+      <span className="truncate text-xs font-bold leading-none text-[#35312b]">
         {value}
       </span>
     </span>
@@ -68,21 +68,21 @@ const CardSetLibraryCard = ({ row, onOpenCardSet }: CardSetLibraryCardProps) => 
       aria-label={`${row.title}を開く`}
     >
       <div className="flex min-w-0 items-start gap-3">
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] bg-[#f0eee7] text-[18px] font-bold text-[#6f675d] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#f0eee7] text-lg font-bold text-[#6f675d] shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)]">
           {getCardSetInitial(row.title)}
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="truncate text-[15px] font-bold leading-[1.35] tracking-[-0.02em] text-[#24211d]">
+          <span className="truncate text-sm font-bold leading-[1.35] tracking-tight text-stone-900">
             {row.title}
           </span>
-          <span className="truncate text-[12px] font-medium leading-[1.35] text-[#7a756d]">
+          <span className="truncate text-xs font-medium leading-[1.35] text-stone-500">
             {row.folderPathLabel}
           </span>
         </span>
       </div>
 
       {row.description ? (
-        <p className="mt-3 line-clamp-2 text-[12px] font-medium leading-[1.6] text-[#66615a]">
+        <p className="mt-3 line-clamp-2 text-xs font-medium leading-[1.6] text-[#66615a]">
           {row.description}
         </p>
       ) : null}
@@ -92,7 +92,7 @@ const CardSetLibraryCard = ({ row, onOpenCardSet }: CardSetLibraryCardProps) => 
           {row.tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-full bg-[#f2f0ea] px-2 py-1 text-[11px] font-semibold leading-none text-[#7b7469]"
+              className="rounded-full bg-[#f2f0ea] px-2 py-1 text-xs font-semibold leading-none text-[#7b7469]"
             >
               #{tag}
             </span>
@@ -141,11 +141,11 @@ const CardSetLibraryDashboard = ({
             ))}
           </div>
         ) : (
-          <div className="flex h-full min-h-[220px] flex-col items-center justify-center rounded-[18px] border border-dashed border-[#d8d4ca] bg-[#fbfaf7] px-6 text-center">
-            <p className="text-[14px] font-bold text-[#3f3a33]">
+          <div className="flex h-full min-h-56 flex-col items-center justify-center rounded-2xl border border-dashed border-stone-300 bg-stone-50 px-6 text-center">
+            <p className="text-sm font-bold text-[#3f3a33]">
               カードセットがありません
             </p>
-            <p className="mt-2 max-w-[280px] text-[12px] font-medium leading-[1.7] text-[#7c756c]">
+            <p className="mt-2 max-w-72 text-xs font-medium leading-7 text-[#7c756c]">
               フォルダにカードセットを作成すると、ここに表示されます。
             </p>
           </div>
