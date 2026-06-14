@@ -1,7 +1,6 @@
 import { memo, startTransition, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useDateFnsLocale, useT } from "@shared/i18n/useT";
 import { addDays, addYears, eachMonthOfInterval, endOfDay, endOfYear, format, isSameMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns";
-import type { CSSProperties } from "react";
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
 import { getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
@@ -29,9 +28,10 @@ type CalendarYearViewProps = {
   onRenderedRangeChange?: (range: CalendarDateRange) => void;
   onSyncRangeChange?: (range: CalendarDateRange) => void;
 };
+type CalendarYearEventTone = "blue" | "emerald" | "rose" | "amber" | "violet" | "zinc";
 type CalendarYearDayEvents = {
   count: number;
-  backgroundColor: string;
+  tone: CalendarYearEventTone;
   priority: CalendarYearEventPriority;
 };
 type CalendarYearDay = {
@@ -69,10 +69,17 @@ const YEAR_SCROLL_EDGE_THRESHOLD_PX = 1200;
 const YEAR_SYNC_RANGE_NOTIFY_DELAY_MS = 180;
 const YEAR_SCROLL_SYNC_DEBOUNCE_MS = 120;
 const YEAR_SYNC_RANGE_SAMPLE_OFFSET_PX = 160;
-const EVENT_DAY_BACKGROUND_ALPHA = 0.16;
 const EMPTY_YEAR_EVENTS: GoogleCalendarEvent[] = [];
 const DEFAULT_YEAR_EVENT_PRIORITY: CalendarYearEventPriority = { group: Number.MAX_SAFE_INTEGER, index: Number.MAX_SAFE_INTEGER };
 const DEFAULT_YEAR_EVENT_DISPLAY: CalendarYearEventDisplay = { priority: DEFAULT_YEAR_EVENT_PRIORITY };
+const YEAR_EVENT_TONE_CLASSES: Record<CalendarYearEventTone, string> = {
+  blue: "bg-blue-100",
+  emerald: "bg-emerald-100",
+  rose: "bg-rose-100",
+  amber: "bg-amber-100",
+  violet: "bg-violet-100",
+  zinc: "bg-zinc-100",
+};
 
 const createDayAriaLabel = (date: Date, eventCount: number): string => {
   const baseLabel = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
@@ -88,15 +95,20 @@ const normalizeColor = (color: string): string => {
   }
   return color;
 };
-const colorToRgba = (color: string, alpha: number): string => {
+const colorToYearEventTone = (color: string): CalendarYearEventTone => {
   const normalized = normalizeColor(color);
   const match = /^#([0-9a-f]{6})$/i.exec(normalized);
-  if (!match) return color;
+  if (!match) return "zinc";
   const value = match[1];
   const red = Number.parseInt(value.slice(0, 2), 16);
   const green = Number.parseInt(value.slice(2, 4), 16);
   const blue = Number.parseInt(value.slice(4, 6), 16);
-  return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+  if (red >= green + 24 && red >= blue + 24) return red >= 220 && green >= 120 ? "rose" : "rose";
+  if (green >= red + 24 && green >= blue + 8) return "emerald";
+  if (blue >= red + 24 && blue >= green + 8) return "blue";
+  if (red >= 180 && green >= 120 && blue < 140) return "amber";
+  if (red >= 120 && blue >= 120) return "violet";
+  return "zinc";
 };
 const resolveDefaultYearEventDisplay: CalendarYearEventDisplayResolver = () => DEFAULT_YEAR_EVENT_DISPLAY;
 const compareCalendarYearEventPriority = (left: CalendarYearEventPriority, right: CalendarYearEventPriority): number => {
@@ -108,19 +120,19 @@ const buildEventsByDay = (events: GoogleCalendarEvent[], eventDisplayResolver: C
   const eventsByDay = new Map<string, CalendarYearDayEvents>();
   for (const event of events) {
     const display = eventDisplayResolver(event);
-    const backgroundColor = colorToRgba(display.color ?? event.accentColor, EVENT_DAY_BACKGROUND_ALPHA);
+    const tone = colorToYearEventTone(display.color ?? event.accentColor);
     for (const dayKey of getEventDateKeys(event)) {
       const current = eventsByDay.get(dayKey);
       if (current) {
         current.count += 1;
         if (compareCalendarYearEventPriority(display.priority, current.priority) < 0) {
-          current.backgroundColor = backgroundColor;
+          current.tone = tone;
           current.priority = display.priority;
         }
       } else {
         eventsByDay.set(dayKey, {
           count: 1,
-          backgroundColor,
+          tone,
           priority: display.priority,
         });
       }
@@ -172,12 +184,9 @@ const createInitialYearVirtualWindow = (): YearVirtualWindow => ({
   endOffset: YEAR_INITIAL_RENDERED_FUTURE_YEARS,
 });
 const isSameYearVirtualWindow = (left: YearVirtualWindow, right: YearVirtualWindow): boolean => left.startOffset === right.startOffset && left.endOffset === right.endOffset;
-const getDayButtonStyle = (day: CalendarYearDay, selected: boolean): CSSProperties | undefined => {
-  if (selected || !day.events) return undefined;
-  return {
-    backgroundColor: day.events.backgroundColor,
-    transition: "none",
-  };
+const getDayEventToneClassName = (day: CalendarYearDay, selected: boolean): string | null => {
+  if (selected || !day.events) return null;
+  return YEAR_EVENT_TONE_CLASSES[day.events.tone];
 };
 
 const CalendarYearViewComponent = ({
@@ -414,6 +423,7 @@ const CalendarYearViewComponent = ({
                               className={cn(
                                 "mx-auto flex h-6 w-6 items-center justify-center rounded-full font-medium transition-colors duration-150 ease-out",
                                 "appearance-none select-none outline-none ring-0 focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-300",
+                                getDayEventToneClassName(day, selected),
                                 selected
                                   ? "bg-blue-500 text-white shadow-sm"
                                   : isToday
@@ -422,7 +432,6 @@ const CalendarYearViewComponent = ({
                                       ? "text-zinc-800 hover:bg-zinc-100"
                                       : "text-zinc-400 hover:bg-zinc-100",
                               )}
-                              style={getDayButtonStyle(day, selected)}
                               onClick={() => onSelectDate(day.date)}
                             >
                               {day.dayOfMonth}
