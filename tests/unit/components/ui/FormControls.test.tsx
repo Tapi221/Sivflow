@@ -25,7 +25,7 @@ describe("form control primitives", () => {
     expect(
       screen.getByRole("checkbox", { name: "Accept" }).className,
     ).toContain("ds-checkbox");
-    expect(screen.getByRole("checkbox", { name: "Enabled" })).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Enabled" })).toBeTruthy();
   });
 
   it("select を共有 token-backed contract に保つ", () => {
