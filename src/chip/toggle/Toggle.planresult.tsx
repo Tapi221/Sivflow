@@ -51,7 +51,7 @@ const TogglePlanResult = ({ value, onChange, className }: TogglePlanResultProps)
       role="group"
       aria-label="予定・実績"
       className={cn(
-        "relative inline-grid h-6 w-max grid-flow-col items-center gap-1 rounded-lg bg-[#f7f7f7] p-0.5",
+        "relative inline-grid h-6 w-max grid-flow-col items-center gap-1 rounded-lg bg-neutral-100 p-0.5",
         className,
       )}
     >
@@ -66,15 +66,15 @@ const TogglePlanResult = ({ value, onChange, className }: TogglePlanResultProps)
             className={cn(
               "relative z-10 flex h-5 min-h-0 min-w-6 items-center justify-center rounded-md px-1.5",
               "appearance-none select-none text-xs font-semibold leading-none tracking-tight",
-              "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none",
+              "outline-none ring-0 transition-colors duration-300 ease-out motion-reduce:transition-none",
               "focus:outline-none focus:ring-0 focus-visible:outline-none",
-              isActive ? "text-[#8c8c8c]" : "text-[#b3b3b3] hover:text-[#8c8c8c]",
+              isActive ? "text-neutral-500" : "text-neutral-400 hover:text-neutral-500",
             )}
           >
             {isActive && (
               <motion.span
                 layoutId={`${PLAN_RESULT_INDICATOR_ID}-${option.value}`}
-                className="absolute inset-0 -z-10 rounded-md border border-[#eee] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+                className="absolute inset-0 -z-10 rounded-md border border-neutral-200 bg-white shadow-none"
                 transition={PLAN_RESULT_MOTION_TRANSITION}
               />
             )}
