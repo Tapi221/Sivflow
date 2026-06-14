@@ -378,7 +378,7 @@ const CalendarSidebarContent = ({ appProjects, projectCalendarLinks, googleCalen
       </nav>
       <input ref={colorInputRef} type="color" aria-label="カレンダー色" style={COLOR_INPUT_STYLE} onChange={handleChangeCalendarColor} />
       {calendarContextMenu ? createPortal(<CalendarListMenu x={calendarContextMenu.x} y={calendarContextMenu.y} actions={calendarMenuActions} menuRef={calendarContextMenuRef} noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} />, document.body) : null}
-      {projectLinksContextMenu ? createPortal(<ProjectCalendarLinksMenu x={projectLinksContextMenu.x} y={projectLinksMenuActions} actions={projectLinksMenuActions} menuRef={projectLinksContextMenuRef} noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} />, document.body) : null}
+      {projectLinksContextMenu ? createPortal(<ProjectCalendarLinksMenu x={projectLinksContextMenu.x} y={projectLinksContextMenu.y} actions={projectLinksMenuActions} menuRef={projectLinksContextMenuRef} noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} />, document.body) : null}
     </div>
   );
 };
