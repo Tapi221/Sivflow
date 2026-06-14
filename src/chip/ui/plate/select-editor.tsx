@@ -1,36 +1,21 @@
 "use client";
-
 import * as React from "react";
-
 import { isEqualTags } from "@platejs/tag";
-
 import { MultiSelectPlugin, TagPlugin, useSelectableItems, useSelectEditorCombobox } from "@platejs/tag/react";
-
 import { Command as CommandPrimitive, useCommandActions } from "@udecode/cmdk";
-
 import { Fzf } from "fzf";
-
 import { PlusIcon } from "lucide-react";
-
 import { isHotkey, KEYS } from "platejs";
-
 import { Plate, useEditorContainerRef, useEditorRef, usePlateEditor } from "platejs/react";
-
-import { Editor, EditorContainer } from "./editor";
-
-import { TagElement } from "./tag-node";
-
+import { Editor, EditorContainer } from "@/chip/ui/plate/editor";
+import { TagElement } from "@/chip/ui/plate/tag-node";
 import { Popover, PopoverAnchor, PopoverContent } from "@/chip/ui/popover";
-
 import { cn } from "@/lib/utils";
-
-
 
 type SelectItem = {
   value: string;
   isNew?: boolean;
 };
-
 type SelectEditorContextValue = {
   items: SelectItem[];
   open: boolean;
@@ -40,11 +25,7 @@ type SelectEditorContextValue = {
   onValueChange?: (items: SelectItem[]) => void;
 };
 
-
-
 const SelectEditorContext = React.createContext<SelectEditorContextValue | undefined>(undefined);
-
-
 
 const useSelectEditorContext = () => {
   const context = React.useContext(SelectEditorContext);
@@ -53,7 +34,6 @@ const useSelectEditorContext = () => {
   }
   return context;
 };
-
 const createEditorValue = (value?: SelectItem[]) => [
   {
     children: [
@@ -72,7 +52,6 @@ const createEditorValue = (value?: SelectItem[]) => [
     type: KEYS.p,
   },
 ];
-
 const fzfFilter = (value: string, search: string): boolean => {
   if (!search) return true;
   const fzf = new Fzf([value], {
@@ -81,8 +60,6 @@ const fzfFilter = (value: string, search: string): boolean => {
   });
   return fzf.find(search).length > 0;
 };
-
-
 
 const Command = ({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) => {
   return (
@@ -96,12 +73,11 @@ const Command = ({ className, ...props }: React.ComponentProps<typeof CommandPri
     />
   );
 };
-
 const CommandList = ({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.List>) => {
   return (
     <CommandPrimitive.List
       className={cn(
-        "max-h-[300px] scroll-py-1 overflow-y-auto overflow-x-hidden",
+        "max-h-72 scroll-py-1 overflow-y-auto overflow-x-hidden",
         className,
       )}
       data-slot="command-list"
@@ -109,7 +85,6 @@ const CommandList = ({ className, ...props }: React.ComponentProps<typeof Comman
     />
   );
 };
-
 const CommandGroup = ({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.Group>) => {
   return (
     <CommandPrimitive.Group
@@ -122,7 +97,6 @@ const CommandGroup = ({ className, ...props }: React.ComponentProps<typeof Comma
     />
   );
 };
-
 const CommandItem = ({ className, ...props }: React.ComponentProps<typeof CommandPrimitive.Item>) => {
   return (
     <CommandPrimitive.Item
@@ -135,7 +109,6 @@ const CommandItem = ({ className, ...props }: React.ComponentProps<typeof Comman
     />
   );
 };
-
 const SelectEditor = ({ children, defaultValue, items = [], value, onValueChange }: { children: React.ReactNode; defaultValue?: SelectItem[]; items?: SelectItem[]; value?: SelectItem[]; onValueChange?: (items: SelectItem[]) => void }) => {
   const [open, setOpen] = React.useState(false);
   const [internalValue] = React.useState(defaultValue);
@@ -155,7 +128,6 @@ const SelectEditor = ({ children, defaultValue, items = [], value, onValueChange
     </SelectEditorContext.Provider>
   );
 };
-
 const SelectEditorContent = ({ children }: { children: React.ReactNode }) => {
   const { value } = useSelectEditorContext();
   const { setSearch } = useCommandActions();
@@ -185,7 +157,6 @@ const SelectEditorContent = ({ children }: { children: React.ReactNode }) => {
     </Plate>
   );
 };
-
 const SelectEditorInput = ({ ref, ...props }: React.ComponentPropsWithoutRef<typeof Editor> & { ref?: React.RefObject<HTMLDivElement | null> }) => {
   const editor = useEditorRef();
   const { setOpen } = useSelectEditorContext();
@@ -215,7 +186,6 @@ const SelectEditorInput = ({ ref, ...props }: React.ComponentPropsWithoutRef<typ
     />
   );
 };
-
 const SelectEditorCombobox = () => {
   const editor = useEditorRef();
   const containerRef = useEditorContainerRef();
@@ -268,10 +238,5 @@ const SelectEditorCombobox = () => {
   );
 };
 
-
-
 export { SelectEditor, SelectEditorContent, SelectEditorInput, SelectEditorCombobox };
-
-
-
 export type { SelectItem };
