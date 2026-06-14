@@ -12,9 +12,9 @@ type Props = {
 };
 
 const TODAY_NAV_BUTTON_CLASS_NAME =
-  "relative z-10 flex h-6 min-h-0 w-6 min-w-0 shrink-0 items-center justify-center rounded-md p-0 appearance-none select-none text-[#85827e] outline-none ring-0 transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eee] hover:text-[#2f343b] active:scale-[0.94] focus:outline-none focus:ring-0 focus-visible:bg-[#eee] focus-visible:text-[#2f343b] focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100";
+  "relative z-10 flex h-6 min-h-0 w-6 min-w-0 shrink-0 items-center justify-center rounded-md p-0 appearance-none select-none text-neutral-500 outline-none ring-0 transition-all duration-150 ease-out hover:bg-neutral-100 hover:text-neutral-800 active:scale-95 focus:outline-none focus:ring-0 focus-visible:bg-neutral-100 focus-visible:text-neutral-800 focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100";
 const TODAY_BUTTON_CLASS_NAME =
-  "relative z-10 flex h-6 min-h-0 min-w-12 max-w-20 items-center justify-center overflow-hidden rounded-md border-0 bg-transparent px-2 text-xs font-semibold leading-none tracking-tight text-[#85827e] shadow-none outline-none ring-0 transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eee] hover:text-[#2f343b] active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-[#eee] focus-visible:text-[#2f343b] focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100";
+  "relative z-10 flex h-6 min-h-0 min-w-12 max-w-20 items-center justify-center overflow-hidden rounded-md border-0 bg-transparent px-2 text-xs font-semibold leading-none tracking-tight text-neutral-500 shadow-none outline-none ring-0 transition-all duration-150 ease-out hover:bg-neutral-100 hover:text-neutral-800 active:scale-95 focus:outline-none focus:ring-0 focus-visible:bg-neutral-100 focus-visible:text-neutral-800 focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100";
 
 const TodayBar = ({ onPrevious, onNext, onToday, className }: Props) => {
   const t = useT();
