@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { addDays, addHours, format, startOfDay } from "date-fns";
 import type { SVGProps, UIEvent } from "react";
-import { Switch } from "@/chip/ui/switch";
+import { ToggleSwitch } from "@/chip/toggle/Toggle.switch";
 import type { GoogleAccountDisplay, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
 import type { GCalWritableEventInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
@@ -604,9 +604,9 @@ const MobileCalendarEventComposer = ({
               {/* All-day toggle */}
               <div className="flex min-h-12 items-center justify-between border-b border-zinc-200 px-4">
                 <span className="text-base tracking-tight text-neutral-950">終日</span>
-                <Switch
+                <ToggleSwitch
                   checked={form.isAllDay}
-                  onCheckedChange={(checked) => {
+                  onChange={(checked) => {
                     setFormValue({ isAllDay: checked }); setActivePickerField(null); }}
                   aria-label="終日"
                 />
