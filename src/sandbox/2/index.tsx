@@ -152,7 +152,7 @@ const SelectionCaptureSandboxPage = () => {
           <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-4">
             <div
               ref={targetRef}
-              className="relative min-h-[620px] overflow-hidden rounded-2xl border border-slate-700 bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.18),_transparent_30%),linear-gradient(135deg,_#0f172a,_#111827_55%,_#1e1b4b)] p-6"
+              className="relative min-h-96 overflow-hidden rounded-2xl border border-slate-700 bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.18),_transparent_30%),linear-gradient(135deg,_#0f172a,_#111827_55%,_#1e1b4b)] p-6"
             >
               <div data-selection-capture-ignore="true" className="absolute right-4 top-4 z-20 rounded-full border border-white/15 bg-slate-950/70 px-3 py-1 text-xs font-medium text-slate-200 shadow-sm backdrop-blur">
                 このラベルは capture から除外
@@ -205,9 +205,9 @@ const SelectionCaptureSandboxPage = () => {
               {STATUS_LABELS[status]}
             </div>
             <h2 className="mt-6 text-xl font-semibold text-white">プレビュー</h2>
-            <div className="mt-4 flex min-h-[260px] items-center justify-center overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
+            <div className="mt-4 flex min-h-64 items-center justify-center overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/70 p-3">
               {previewUrl ? (
-                <img src={previewUrl} alt="capture preview" className="max-h-[320px] max-w-full rounded-xl object-contain" />
+                <img src={previewUrl} alt="capture preview" className="max-h-80 max-w-full rounded-xl object-contain" />
               ) : (
                 <p className="text-center text-sm leading-7 text-slate-500">まだ capture 結果はありません。</p>
               )}

@@ -19,7 +19,7 @@ const CalloutElementStatic = ({ children, className, ...props }: SlateElementPro
     >
       <div className="flex w-full gap-2 rounded-md">
         <div
-          className="size-6 select-none text-[18px]"
+          className="size-6 select-none text-lg"
           style={{ fontFamily: EMOJI_FONT_FAMILY }}
         >
           <span data-plate-prevent-deserialization>{icon}</span>

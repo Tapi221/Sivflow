@@ -182,7 +182,7 @@ const TagTreeRow = ({ item, selectedTagNames, dragState, onToggleTag, onSelectTa
         onDragEnd={onTagDragEnd}
         data-tag-drop-position={dropPosition ?? undefined}
         className={cn(
-          "group/directory-tree-row relative flex h-8 cursor-grab items-center gap-1.5 rounded-[8px] pr-2 text-[14px] font-medium text-[var(--app-sidebar-text)] transition-[background,box-shadow,opacity,transform] duration-150 hover:bg-[#eee] active:cursor-grabbing focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7c7]",
+          "group/directory-tree-row relative flex h-8 cursor-grab items-center gap-1.5 rounded-lg pr-2 text-sm font-medium text-[var(--app-sidebar-text)] transition-[background,box-shadow,opacity,transform] duration-150 hover:bg-slate-100 active:cursor-grabbing focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7c7]",
           isSelected && "bg-[#e9e9e9]",
           isDragging && "scale-[0.995] opacity-35",
           dropPosition === "inside" && "bg-[#e2e2e2] shadow-[inset_0_0_0_1px_#c7c7c7]",
@@ -196,7 +196,7 @@ const TagTreeRow = ({ item, selectedTagNames, dragState, onToggleTag, onSelectTa
             type="button"
             onClick={handleToggleClick}
             aria-label={item.isExpanded ? `${item.name} を閉じる` : `${item.name} を開く`}
-            className="flex h-8 w-4 shrink-0 items-center justify-center rounded-[4px] text-[var(--app-sidebar-icon)] transition-colors hover:text-[var(--app-sidebar-text)]"
+            className="flex h-8 w-4 shrink-0 items-center justify-center rounded text-[var(--app-sidebar-icon)] transition-colors hover:text-[var(--app-sidebar-text)]"
           >
             <IconChevronRight className={cn("h-4 w-4 transition-transform", item.isExpanded && "rotate-90")} />
           </button>
@@ -262,7 +262,7 @@ const TagTreeSidebar = () => {
         <div role="tree" aria-label="タグツリー" className="flex min-h-full flex-col gap-0.5" onDragOver={handleListDragOver} onDragLeave={handleListDragLeave} onDrop={handleListDrop}>
           {visibleTagItems.length > 0 ? visibleTagItems.map((item) => (
             <TagTreeRow key={item.id} item={item} selectedTagNames={selectedTagNames} dragState={dragState} onToggleTag={handleToggleTag} onSelectTag={handleSelectTag} onTagDragStart={handleItemDragStart} onTagDragOver={handleItemDragOver} onTagDragLeave={handleItemDragLeave} onTagDrop={handleItemDrop} onTagDragEnd={handleItemDragEnd} />
-          )) : <p className="px-1 py-2 text-[13px] font-medium text-[#9aa1ad]">{EMPTY_TAG_MESSAGE}</p>}
+          )) : <p className="px-1 py-2 text-xs font-medium text-[#9aa1ad]">{EMPTY_TAG_MESSAGE}</p>}
           {isAppendingToRoot ? <LayeredTreeDropIndicator position="append" left={LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX} className="mx-2" /> : null}
           <div aria-hidden="true" className="min-h-8 flex-1" />
         </div>

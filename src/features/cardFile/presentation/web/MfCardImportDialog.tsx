@@ -346,7 +346,7 @@ const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
                     {(card.tagNames ?? []).map((tag) => (
                       <span
                         key={tag}
-                        className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-700"
+                        className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
                       >
                         {tag}
                       </span>

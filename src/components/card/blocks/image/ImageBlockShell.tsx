@@ -12,7 +12,7 @@ type ImageBlockShellProps = {
 
 
 const ImageBlockShell = ({ children, className }: ImageBlockShellProps) => {
-  return (<BlockInset variant="image"> <div className={cn("relative rounded-[11px] overflow-hidden", className)}> {children} </div> </BlockInset>);
+  return (<BlockInset variant="image"> <div className={cn("relative rounded-xl overflow-hidden", className)}> {children} </div> </BlockInset>);
 };
 
 

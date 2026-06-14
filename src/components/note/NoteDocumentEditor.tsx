@@ -99,7 +99,7 @@ const NoteDocumentEditor = ({ note, onChange }: NoteDocumentEditorProps) => {
 
   return (
     <div className="h-full min-h-0 w-full bg-white text-[#18181b]">
-      <div className="mx-auto flex h-full min-h-0 w-full max-w-[1120px] flex-col px-4 py-10 lg:px-8">
+      <div className="mx-auto flex h-full min-h-0 w-full max-w-96 flex-col px-4 py-10 lg:px-8">
         <h1 className="mb-7 truncate text-[32px] font-semibold leading-tight tracking-[-0.04em] text-[#202124]" title={getVisibleNoteTitle(note)}>{getVisibleNoteTitle(note)}</h1>
         <div className="min-h-0 flex-1">
           <PlateEditor key={note.id} initialValue={initialValue as Value} onChange={handleChange} />

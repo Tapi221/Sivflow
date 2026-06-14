@@ -65,7 +65,7 @@ const LinkEditor = ({ items, onChange }: LinkEditorProps) => {
                 spellCheck={false}
                 data-lpignore="true"
                 data-1p-ignore
-                className="h-8 flex-[3] bg-white text-[11px] text-[#202123] surface-concave focus-visible:ring-0 focus-visible:border-[#cfcfcf] focus-visible:bg-white"
+                className="h-8 flex-[3] bg-white text-xs text-[#202123] surface-concave focus-visible:ring-0 focus-visible:border-[#cfcfcf] focus-visible:bg-white"
                 autoFocus={index === refs.length - 1}
               />
               <Input
@@ -76,7 +76,7 @@ const LinkEditor = ({ items, onChange }: LinkEditorProps) => {
                 spellCheck={false}
                 data-lpignore="true"
                 data-1p-ignore
-                className="h-8 flex-[2] bg-white text-[11px] text-[#202123] surface-concave focus-visible:ring-0 focus-visible:border-[#cfcfcf] focus-visible:bg-white"
+                className="h-8 flex-[2] bg-white text-xs text-[#202123] surface-concave focus-visible:ring-0 focus-visible:border-[#cfcfcf] focus-visible:bg-white"
               />
             </div>
           </div>
@@ -88,7 +88,7 @@ const LinkEditor = ({ items, onChange }: LinkEditorProps) => {
         variant="outline"
         onClick={add}
         className={cn(
-          "flex h-8 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed text-[11px] font-bold text-slate-400 transition-all hover:border-primary-200 hover:bg-primary-50/30 hover:text-primary-600",
+          "flex h-8 w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed text-xs font-bold text-slate-400 transition-all hover:border-primary-200 hover:bg-primary-50/30 hover:text-primary-600",
           refs.length > 0
             ? "mt-1.5 border-slate-100 bg-slate-50/10"
             : "border-slate-200",

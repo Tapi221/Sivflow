@@ -59,11 +59,11 @@ const getPosition = (
   return { x: rect.right + offset, y: rect.top + rect.height / 2 };
 };
 const getArrowClassName = (side: TooltipSide) => {
-  if (side === "top") return "bottom-[-3px] left-1/2 -translate-x-1/2";
-  if (side === "bottom") return "top-[-3px] left-1/2 -translate-x-1/2";
-  if (side === "left") return "right-[-3px] top-1/2 -translate-y-1/2";
+  if (side === "top") return "-bottom-0.5 left-1/2 -translate-x-1/2";
+  if (side === "bottom") return "-top-0.5 left-1/2 -translate-x-1/2";
+  if (side === "left") return "-right-0.5 top-1/2 -translate-y-1/2";
 
-  return "left-[-3px] top-1/2 -translate-y-1/2";
+  return "-left-0.5 top-1/2 -translate-y-1/2";
 };
 
 
@@ -153,12 +153,12 @@ const HoverSuggestionTooltip = ({ children, items, side = "right", offset = 10, 
           >
             <div
               className={cn(
-                "relative min-w-[180px] rounded-xl border border-[#e6e8ee] bg-white p-1.5 text-[#24272f] shadow-[0_12px_32px_rgba(20,22,30,0.16)]",
+                "relative min-w-44 rounded-xl border border-[#e6e8ee] bg-white p-1.5 text-[#24272f] shadow-[0_12px_32px_rgba(20,22,30,0.16)]",
                 tooltipClassName,
               )}
             >
               {title && (
-                <div className="px-2 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-wide text-[#9aa0aa]">
+                <div className="px-2 pb-1 pt-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
                   {title}
                 </div>
               )}
@@ -191,12 +191,12 @@ const HoverSuggestionTooltip = ({ children, items, side = "right", offset = 10, 
                       )}
 
                       <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[12px] font-medium leading-tight text-[#2d3039]">
+                        <span className="block truncate text-xs font-medium leading-tight text-[#2d3039]">
                           {item.label}
                         </span>
 
                         {item.description && (
-                          <span className="mt-0.5 block truncate text-[10px] leading-tight text-[#9aa0aa]">
+                          <span className="mt-0.5 block truncate text-xs leading-tight text-slate-400">
                             {item.description}
                           </span>
                         )}
@@ -205,7 +205,7 @@ const HoverSuggestionTooltip = ({ children, items, side = "right", offset = 10, 
                   ))}
                 </div>
               ) : (
-                <div className="px-2 py-1.5 text-[11px] text-[#9aa0aa]">
+                <div className="px-2 py-1.5 text-xs text-slate-400">
                   {emptyLabel}
                 </div>
               )}

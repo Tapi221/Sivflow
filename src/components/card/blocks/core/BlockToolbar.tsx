@@ -515,7 +515,7 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
               type="button"
               className={cn(
                 overlayGlassPillClassName,
-                "text-[12px] font-semibold text-[#5f554d]",
+                "text-xs font-semibold text-[#5f554d]",
               )}
               aria-label={`${label} にブロックを追加`}
             >
@@ -525,7 +525,7 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             align="start"
-            className="rounded-xl border-slate-100 shadow-lg p-1.5 min-w-[200px]"
+            className="rounded-xl border-slate-100 shadow-lg p-1.5 min-w-48"
           >
             {visibleConfigs.length === 0 ? (
               <div className="px-2 py-2 text-xs text-slate-400">
@@ -543,7 +543,7 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
                     <span className="inline-flex items-center justify-center w-6 h-6 rounded-md bg-slate-100 border border-slate-200/70">
                       <Icon className="w-3.5 h-3.5" />
                     </span>
-                    <span className="text-[12px] font-medium">
+                    <span className="text-xs font-medium">
                       {config.label}
                     </span>
                   </DropdownMenuItem>

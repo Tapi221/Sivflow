@@ -15,7 +15,7 @@ const surfaceButtonVariants = cva(
         convexActive: "ds-surface-button--convexActive font-medium",
       },
       size: {
-        xs: "px-2 py-0.5 text-[11px]",
+        xs: "px-2 py-0.5 text-xs",
         sm: "px-2 py-1 text-xs",
         md: "px-3 py-1.5 text-sm",
       },

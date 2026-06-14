@@ -175,7 +175,7 @@ const MobileCalendarDateButton = ({ label, value, isActive, onClick }: MobileCal
   <button
     type="button"
     className={cn(
-      "h-9 min-w-[142px] rounded-[10px] px-3 text-right text-[17px] tracking-[-0.03em] outline-none transition-colors tabular-nums font-medium",
+      "h-9 min-w-36 rounded-xl px-3 text-right text-[17px] tracking-tight outline-none transition-colors tabular-nums font-medium",
       isActive
         ? "bg-[#ff3b30]/10 text-[#ff3b30]"
         : "bg-[#f2f2f7] text-[#111]",
@@ -192,7 +192,7 @@ const MobileCalendarTimeButton = ({ label, value, isActive, onClick }: MobileCal
   <button
     type="button"
     className={cn(
-      "h-9 w-[80px] rounded-[10px] px-2 text-right text-[17px] tracking-[-0.03em] outline-none transition-colors tabular-nums font-medium",
+      "h-9 w-20 rounded-xl px-2 text-right text-[17px] tracking-tight outline-none transition-colors tabular-nums font-medium",
       isActive
         ? "bg-[#ff3b30]/10 text-[#ff3b30]"
         : "bg-[#f2f2f7] text-[#111]",
@@ -226,12 +226,12 @@ const MobileCalendarInlineDatePicker = ({ value, onChange }: MobileCalendarInlin
 
   return (
     <div className="border-t border-[#e5e5ea] px-4 py-3 animate-in slide-in-from-top-1 duration-200">
-      <div className="rounded-[18px] bg-[#fbfbfd] px-4 pb-4 pt-3 shadow-[inset_0_0_0_0.5px_rgba(60,60,67,0.18)]">
+      <div className="rounded-2xl bg-[#fbfbfd] px-4 pb-4 pt-3 shadow-[inset_0_0_0_0.5px_rgba(60,60,67,0.18)]">
         {/* Month navigation */}
         <div className="mb-2 flex h-9 items-center justify-between">
           <button
             type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-full text-[#007aff] transition-colors active:bg-[#f2f2f7]"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-blue-500 transition-colors active:bg-[#f2f2f7]"
             aria-label="前の月"
             onClick={() => handleMoveMonth(-1)}
           >
@@ -239,12 +239,12 @@ const MobileCalendarInlineDatePicker = ({ value, onChange }: MobileCalendarInlin
               <path fill="currentColor" d="M14.71 6.71a1 1 0 0 0-1.41 0L8.71 11.3a1 1 0 0 0 0 1.41l4.59 4.59a1 1 0 1 0 1.41-1.41L10.83 12l3.88-3.88a1 1 0 0 0 0-1.41Z" />
             </svg>
           </button>
-          <div className="text-[15px] font-semibold tracking-[-0.02em] text-[#111]">
+          <div className="text-sm font-semibold tracking-tight text-[#111]">
             {visibleMonth.year}年{visibleMonth.month}月
           </div>
           <button
             type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-full text-[#007aff] transition-colors active:bg-[#f2f2f7]"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-blue-500 transition-colors active:bg-[#f2f2f7]"
             aria-label="次の月"
             onClick={() => handleMoveMonth(1)}
           >
@@ -260,8 +260,8 @@ const MobileCalendarInlineDatePicker = ({ value, onChange }: MobileCalendarInlin
             <div
               key={label}
               className={cn(
-                "h-7 text-center text-[12px] font-semibold leading-7 tracking-[-0.01em]",
-                index === 0 ? "text-[#ff3b30]" : index === 6 ? "text-[#007aff]" : "text-[#8e8e93]",
+                "h-7 text-center text-xs font-semibold leading-7 tracking-tight",
+                index === 0 ? "text-[#ff3b30]" : index === 6 ? "text-blue-500" : "text-zinc-500",
               )}
             >
               {label}
@@ -287,7 +287,7 @@ const MobileCalendarInlineDatePicker = ({ value, onChange }: MobileCalendarInlin
               >
                 <span
                   className={cn(
-                    "flex h-[34px] w-[34px] items-center justify-center rounded-full text-[15px] tracking-[-0.02em] tabular-nums transition-colors",
+                    "flex h-8 w-8 items-center justify-center rounded-full text-sm tracking-tight tabular-nums transition-colors",
                     isSelected
                       ? "bg-[#ff3b30] font-semibold text-white"
                       : isToday
@@ -297,7 +297,7 @@ const MobileCalendarInlineDatePicker = ({ value, onChange }: MobileCalendarInlin
                           : isSunday
                             ? "text-[#ff3b30]"
                             : isSaturday
-                              ? "text-[#007aff]"
+                              ? "text-blue-500"
                               : "text-[#111]",
                   )}
                 >
@@ -335,23 +335,23 @@ const MobileCalendarInlineTimeWheel = ({ value, onChange }: MobileCalendarInline
   return (
     <div className="border-t border-[#e5e5ea] px-4 py-3 animate-in slide-in-from-top-1 duration-200">
       <div
-        className="relative overflow-hidden rounded-[18px] bg-[#fbfbfd] px-5 py-3 shadow-[inset_0_0_0_0.5px_rgba(60,60,67,0.18)]"
+        className="relative overflow-hidden rounded-2xl bg-[#fbfbfd] px-5 py-3 shadow-[inset_0_0_0_0.5px_rgba(60,60,67,0.18)]"
         role="group"
         aria-label="時刻"
       >
         {/* Selection highlight */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute left-5 right-5 top-1/2 z-0 h-[44px] -translate-y-1/2 rounded-[11px] bg-[#f2f2f7]"
+          className="pointer-events-none absolute left-5 right-5 top-1/2 z-0 h-11 -translate-y-1/2 rounded-xl bg-[#f2f2f7]"
         />
         {/* Fade overlays */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-20 h-[72px] bg-gradient-to-b from-[#fbfbfd] to-transparent" />
-        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[72px] bg-gradient-to-t from-[#fbfbfd] to-transparent" />
-        <div className="relative z-10 grid h-[220px] grid-cols-[1fr_28px_1fr] items-center">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-20 h-16 bg-gradient-to-b from-[#fbfbfd] to-transparent" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-16 bg-gradient-to-t from-[#fbfbfd] to-transparent" />
+        <div className="relative z-10 grid h-56 grid-cols-[1fr_28px_1fr] items-center">
           {/* Hour wheel */}
           <div
             ref={hourWheelRef}
-            className="h-[220px] snap-y snap-mandatory overflow-y-auto overscroll-contain px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="h-56 snap-y snap-mandatory overflow-y-auto overscroll-contain px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             onScroll={handleHourScroll}
             aria-label="時"
           >
@@ -361,10 +361,10 @@ const MobileCalendarInlineTimeWheel = ({ value, onChange }: MobileCalendarInline
                 key={hour}
                 type="button"
                 className={cn(
-                  "block h-[44px] w-full snap-center rounded-[10px] text-center tracking-[-0.04em] transition-all tabular-nums",
+                  "block h-11 w-full snap-center rounded-xl text-center tracking-[-0.04em] transition-all tabular-nums",
                   hour === hours
                     ? "text-[30px] font-semibold text-[#111]"
-                    : "text-[24px] font-normal text-[#8e8e93]",
+                    : "text-2xl font-normal text-zinc-500",
                 )}
                 onClick={() => onChange(createTimeInputValue(hour, minutes))}
               >
@@ -375,14 +375,14 @@ const MobileCalendarInlineTimeWheel = ({ value, onChange }: MobileCalendarInline
           </div>
 
           {/* Colon separator */}
-          <div className="pointer-events-none flex h-[44px] items-center justify-center text-[28px] font-semibold tracking-[-0.04em] text-[#111]">
+          <div className="pointer-events-none flex h-11 items-center justify-center text-[28px] font-semibold tracking-[-0.04em] text-[#111]">
             :
           </div>
 
           {/* Minute wheel */}
           <div
             ref={minuteWheelRef}
-            className="h-[220px] snap-y snap-mandatory overflow-y-auto overscroll-contain px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            className="h-56 snap-y snap-mandatory overflow-y-auto overscroll-contain px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             onScroll={handleMinuteScroll}
             aria-label="分"
           >
@@ -392,10 +392,10 @@ const MobileCalendarInlineTimeWheel = ({ value, onChange }: MobileCalendarInline
                 key={minute}
                 type="button"
                 className={cn(
-                  "block h-[44px] w-full snap-center rounded-[10px] text-center tracking-[-0.04em] transition-all tabular-nums",
+                  "block h-11 w-full snap-center rounded-xl text-center tracking-[-0.04em] transition-all tabular-nums",
                   minute === minutes
                     ? "text-[30px] font-semibold text-[#111]"
-                    : "text-[24px] font-normal text-[#8e8e93]",
+                    : "text-2xl font-normal text-zinc-500",
                 )}
                 onClick={() => onChange(createTimeInputValue(hours, minute))}
               >
@@ -551,13 +551,13 @@ const MobileCalendarEventComposer = ({
           role="dialog"
           aria-modal="true"
           aria-labelledby="mobile-calendar-event-composer-title"
-          className="flex h-[min(92vh,760px)] w-full max-w-[720px] flex-col overflow-hidden rounded-t-[20px] bg-[#f2f2f7] shadow-[0_-2px_32px_rgba(0,0,0,0.18)]"
+          className="flex h-[min(92vh,760px)] w-full max-w-96 flex-col overflow-hidden rounded-t-[20px] bg-[#f2f2f7] shadow-[0_-2px_32px_rgba(0,0,0,0.18)]"
         >
           {/* Header */}
-          <header className="flex h-[56px] shrink-0 items-center justify-between border-b border-[#c6c6c8] bg-[#f2f2f7]/90 px-4 backdrop-blur-xl">
+          <header className="flex h-14 shrink-0 items-center justify-between border-b border-[#c6c6c8] bg-[#f2f2f7]/90 px-4 backdrop-blur-xl">
             <button
               type="button"
-              className="text-[17px] font-normal tracking-[-0.03em] text-[#007aff] disabled:text-[#c7c7cc] active:opacity-60 transition-opacity"
+              className="text-[17px] font-normal tracking-tight text-blue-500 disabled:text-[#c7c7cc] active:opacity-60 transition-opacity"
               onClick={handleClose}
               disabled={isSubmitting}
             >
@@ -565,13 +565,13 @@ const MobileCalendarEventComposer = ({
             </button>
             <h2
               id="mobile-calendar-event-composer-title"
-              className="text-[17px] font-semibold tracking-[-0.03em] text-[#111]"
+              className="text-[17px] font-semibold tracking-tight text-[#111]"
             >
               新規イベント
             </h2>
             <button
               type="button"
-              className="text-[17px] font-semibold tracking-[-0.03em] text-[#007aff] disabled:text-[#c7c7cc] active:opacity-60 transition-opacity"
+              className="text-[17px] font-semibold tracking-tight text-blue-500 disabled:text-[#c7c7cc] active:opacity-60 transition-opacity"
               onClick={handleSubmit}
               disabled={isSubmitDisabled}
             >
@@ -583,9 +583,9 @@ const MobileCalendarEventComposer = ({
           <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-5 space-y-5">
 
             {/* ── Card 1: Title & Location ── */}
-            <div className="overflow-hidden rounded-[14px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)]">
+            <div className="overflow-hidden rounded-2xl bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)]">
               <input
-                className="h-[54px] w-full border-0 border-b border-[#e5e5ea] bg-transparent px-4 text-[20px] font-normal tracking-[-0.03em] text-[#111] outline-none placeholder:text-[#c7c7cc]"
+                className="h-14 w-full border-0 border-b border-[#e5e5ea] bg-transparent px-4 text-xl font-normal tracking-tight text-[#111] outline-none placeholder:text-[#c7c7cc]"
                 value={form.title}
                 onChange={(event) => setFormValue({ title: event.target.value })}
                 placeholder="タイトル"
@@ -594,7 +594,7 @@ const MobileCalendarEventComposer = ({
               <button
                 type="button"
                 className={cn(
-                  "flex h-[46px] w-full items-center px-4 text-left text-[17px] tracking-[-0.03em] outline-none",
+                  "flex h-11 w-full items-center px-4 text-left text-[17px] tracking-tight outline-none",
                   form.location.trim() ? "text-[#111]" : "text-[#c7c7cc]",
                 )}
                 onClick={() => {
@@ -602,16 +602,16 @@ const MobileCalendarEventComposer = ({
               >
                 <span className="min-w-0 flex-1 truncate">{form.location.trim() ?? "場所またはビデオ通話"}</span>
                 {form.location.trim() && (
-                  <ChevronRightIcon className="h-[18px] w-[18px] shrink-0 text-[#c7c7cc]" />
+                  <ChevronRightIcon className="h-4 w-4 shrink-0 text-[#c7c7cc]" />
                 )}
               </button>
             </div>
 
             {/* ── Card 2: Date & Time ── */}
-            <div className="overflow-hidden rounded-[14px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)]">
+            <div className="overflow-hidden rounded-2xl bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)]">
               {/* All-day toggle */}
-              <div className="flex min-h-[50px] items-center justify-between border-b border-[#e5e5ea] px-4">
-                <span className="text-[17px] tracking-[-0.03em] text-[#111]">終日</span>
+              <div className="flex min-h-12 items-center justify-between border-b border-[#e5e5ea] px-4">
+                <span className="text-[17px] tracking-tight text-[#111]">終日</span>
                 <Switch
                   checked={form.isAllDay}
                   onCheckedChange={(checked) => {
@@ -622,8 +622,8 @@ const MobileCalendarEventComposer = ({
 
               {/* Start */}
               <div className="border-b border-[#e5e5ea]">
-                <div className="flex min-h-[50px] items-center justify-between gap-3 px-4">
-                  <span className="text-[17px] tracking-[-0.03em] text-[#111]">開始</span>
+                <div className="flex min-h-12 items-center justify-between gap-3 px-4">
+                  <span className="text-[17px] tracking-tight text-[#111]">開始</span>
                   <span className="flex min-w-0 items-center gap-2">
                     <MobileCalendarDateButton
                       label="開始日"
@@ -651,8 +651,8 @@ const MobileCalendarEventComposer = ({
 
               {/* End */}
               <div className="border-b border-[#e5e5ea]">
-                <div className="flex min-h-[50px] items-center justify-between gap-3 px-4">
-                  <span className="text-[17px] tracking-[-0.03em] text-[#111]">終了</span>
+                <div className="flex min-h-12 items-center justify-between gap-3 px-4">
+                  <span className="text-[17px] tracking-tight text-[#111]">終了</span>
                   <span className="flex min-w-0 items-center gap-2">
                     <MobileCalendarDateButton
                       label="終了日"
@@ -679,17 +679,17 @@ const MobileCalendarEventComposer = ({
               </div>
 
               {/* Travel time */}
-              <div className="flex min-h-[50px] items-center justify-between px-4">
-                <span className="text-[17px] tracking-[-0.03em] text-[#111]">移動時間</span>
-                <span className="text-[17px] tracking-[-0.03em] text-[#8e8e93]">なし</span>
+              <div className="flex min-h-12 items-center justify-between px-4">
+                <span className="text-[17px] tracking-tight text-[#111]">移動時間</span>
+                <span className="text-[17px] tracking-tight text-zinc-500">なし</span>
               </div>
             </div>
 
             {/* ── Card 3: Calendar selector ── */}
-            <div className="overflow-hidden rounded-[14px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)]">
+            <div className="overflow-hidden rounded-2xl bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)]">
               {calendarOptions.length > 0 ? (
-                <label className="flex min-h-[50px] items-center justify-between gap-4 px-4">
-                  <span className="text-[17px] tracking-[-0.03em] text-[#111]">カレンダー</span>
+                <label className="flex min-h-12 items-center justify-between gap-4 px-4">
+                  <span className="text-[17px] tracking-tight text-[#111]">カレンダー</span>
                   <span className="flex min-w-0 flex-1 items-center justify-end gap-2">
                     <span
                       aria-hidden="true"
@@ -697,7 +697,7 @@ const MobileCalendarEventComposer = ({
                       style={{ backgroundColor: selectedCalendarOption?.color ?? MOBILE_EVENT_COMPOSER_FALLBACK_CALENDAR_COLOR }}
                     />
                     <select
-                      className="min-w-0 max-w-[70%] bg-transparent text-right text-[17px] tracking-[-0.03em] text-[#8e8e93] outline-none"
+                      className="min-w-0 max-w-[70%] bg-transparent text-right text-[17px] tracking-tight text-zinc-500 outline-none"
                       value={form.calendarKey}
                       onChange={(event) => setFormValue({ calendarKey: event.target.value })}
                     >
@@ -708,13 +708,13 @@ const MobileCalendarEventComposer = ({
                   </span>
                 </label>
               ) : (
-                <div className="flex min-h-[84px] items-center justify-between gap-4 px-4 py-3">
-                  <p className="min-w-0 text-[15px] leading-5 tracking-[-0.03em] text-[#6e6e73]">
+                <div className="flex min-h-20 items-center justify-between gap-4 px-4 py-3">
+                  <p className="min-w-0 text-sm leading-5 tracking-tight text-[#6e6e73]">
                     Google カレンダーを接続すると予定を追加できます。
                   </p>
                   <button
                     type="button"
-                    className="shrink-0 rounded-full bg-[#007aff] px-4 py-2 text-[14px] font-semibold tracking-[-0.03em] text-white active:opacity-80 transition-opacity"
+                    className="shrink-0 rounded-full bg-[#007aff] px-4 py-2 text-sm font-semibold tracking-tight text-white active:opacity-80 transition-opacity"
                     onClick={handleAddCalendar}
                   >
                     接続
@@ -724,9 +724,9 @@ const MobileCalendarEventComposer = ({
             </div>
 
             {/* ── Card 4: Memo ── */}
-            <div className="overflow-hidden rounded-[14px] bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)]">
+            <div className="overflow-hidden rounded-2xl bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)]">
               <textarea
-                className="h-[140px] w-full resize-none border-0 bg-transparent px-4 py-3 text-[17px] leading-6 tracking-[-0.03em] text-[#111] outline-none placeholder:text-[#c7c7cc]"
+                className="h-36 w-full resize-none border-0 bg-transparent px-4 py-3 text-[17px] leading-6 tracking-tight text-[#111] outline-none placeholder:text-[#c7c7cc]"
                 value={form.description}
                 onChange={(event) => setFormValue({ description: event.target.value })}
                 placeholder="メモ"
@@ -735,7 +735,7 @@ const MobileCalendarEventComposer = ({
 
             {/* Error */}
             {error && (
-              <p className="px-1 text-[13px] leading-5 tracking-[-0.02em] text-[#ff3b30]">{error}</p>
+              <p className="px-1 text-xs leading-5 tracking-tight text-[#ff3b30]">{error}</p>
             )}
           </div>
         </section>
@@ -751,16 +751,16 @@ const MobileCalendarEventComposer = ({
             role="dialog"
             aria-modal="true"
             aria-label="場所"
-            className="flex h-[min(88vh,720px)] w-full max-w-[720px] flex-col overflow-hidden rounded-t-[13px] bg-white shadow-[0_-2px_32px_rgba(0,0,0,0.15)]"
+            className="flex h-[min(88vh,720px)] w-full max-w-96 flex-col overflow-hidden rounded-t-[13px] bg-white shadow-[0_-2px_32px_rgba(0,0,0,0.15)]"
           >
             {/* Sheet header */}
-            <header className="relative flex h-[56px] shrink-0 items-center px-4 border-b border-[#e5e5ea]">
-              <h3 className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[17px] font-semibold tracking-[-0.03em] text-[#111]">
+            <header className="relative flex h-14 shrink-0 items-center px-4 border-b border-[#e5e5ea]">
+              <h3 className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[17px] font-semibold tracking-tight text-[#111]">
                 場所
               </h3>
               <button
                 type="button"
-                className="ml-auto text-[17px] font-normal tracking-[-0.03em] text-[#007aff] active:opacity-60 transition-opacity"
+                className="ml-auto text-[17px] font-normal tracking-tight text-blue-500 active:opacity-60 transition-opacity"
                 onClick={() => setIsLocationSheetOpen(false)}
               >
                 キャンセル
@@ -769,11 +769,11 @@ const MobileCalendarEventComposer = ({
 
             {/* Search field */}
             <div className="px-4 pb-3 pt-3 border-b border-[#e5e5ea]">
-              <label className="flex h-[36px] items-center rounded-[10px] bg-[#f2f2f7] px-3 gap-2">
-                <MobileCalendarSearchIcon className="h-[18px] w-[18px] shrink-0 text-[#8e8e93]" />
+              <label className="flex h-9 items-center rounded-xl bg-[#f2f2f7] px-3 gap-2">
+                <MobileCalendarSearchIcon className="h-4 w-4 shrink-0 text-zinc-500" />
                 <input
                   autoFocus
-                  className="min-w-0 flex-1 border-0 bg-transparent text-[17px] leading-none tracking-[-0.03em] text-[#111] outline-none placeholder:text-[#8e8e93]"
+                  className="min-w-0 flex-1 border-0 bg-transparent text-[17px] leading-none tracking-tight text-[#111] outline-none placeholder:text-zinc-500"
                   value={form.location}
                   onChange={(event) => setFormValue({ location: event.target.value })}
                   onKeyDown={(event) => {
@@ -789,26 +789,26 @@ const MobileCalendarEventComposer = ({
               {/* Current location */}
               <button
                 type="button"
-                className="flex min-h-[60px] w-full items-center gap-4 border-b border-[#e5e5ea] px-4 text-left active:bg-[#f2f2f7] transition-colors"
+                className="flex min-h-14 w-full items-center gap-4 border-b border-[#e5e5ea] px-4 text-left active:bg-[#f2f2f7] transition-colors"
                 onClick={handleSelectCurrentLocation}
               >
-                <MobileCalendarCurrentLocationIcon className="h-[36px] w-[36px] shrink-0" />
-                <span className="text-[17px] tracking-[-0.03em] text-[#111]">現在地</span>
-                <ChevronRightIcon className="ml-auto h-[18px] w-[18px] shrink-0 text-[#c7c7cc]" />
+                <MobileCalendarCurrentLocationIcon className="h-9 w-9 shrink-0" />
+                <span className="text-[17px] tracking-tight text-[#111]">現在地</span>
+                <ChevronRightIcon className="ml-auto h-4 w-4 shrink-0 text-[#c7c7cc]" />
               </button>
 
               {/* Video call section */}
               <div className="border-b border-[#e5e5ea] bg-[#f2f2f7] px-4 py-2">
-                <span className="text-[13px] font-semibold uppercase tracking-[0.04em] text-[#8e8e93]">ビデオ通話</span>
+                <span className="text-xs font-semibold uppercase tracking-[0.04em] text-zinc-500">ビデオ通話</span>
               </div>
               <button
                 type="button"
-                className="flex min-h-[60px] w-full items-center gap-4 border-b border-[#e5e5ea] px-4 text-left active:bg-[#f2f2f7] transition-colors"
+                className="flex min-h-14 w-full items-center gap-4 border-b border-[#e5e5ea] px-4 text-left active:bg-[#f2f2f7] transition-colors"
                 onClick={handleSelectFaceTime}
               >
-                <MobileCalendarFaceTimeIcon className="h-[36px] w-[36px] shrink-0" />
-                <span className="text-[17px] tracking-[-0.03em] text-[#111]">FaceTime</span>
-                <ChevronRightIcon className="ml-auto h-[18px] w-[18px] shrink-0 text-[#c7c7cc]" />
+                <MobileCalendarFaceTimeIcon className="h-9 w-9 shrink-0" />
+                <span className="text-[17px] tracking-tight text-[#111]">FaceTime</span>
+                <ChevronRightIcon className="ml-auto h-4 w-4 shrink-0 text-[#c7c7cc]" />
               </button>
             </div>
           </section>

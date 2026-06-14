@@ -80,8 +80,8 @@ const CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_VIEW_MS = 0;
 const CARD_SET_VIEW_NATURAL_INDEX_COMMIT_DELAY_EDIT_MS = 0;
 const CARD_REORDER_DRAG_MIME_TYPE = "application/x-sivflow-card-reorder";
 const CARD_REORDER_HANDLE_LABEL = "カードを並び替え";
-const CARD_REORDER_HANDLE_CLASS_NAME = "absolute left-[-44px] top-4 z-20 flex h-9 w-7 items-center justify-center rounded-full border border-[rgba(0,0,0,0.06)] bg-[rgba(255,255,255,0.88)] text-[#8b96a3] opacity-0 shadow-[0_10px_30px_rgba(15,23,42,0.10)] backdrop-blur-xl transition-[opacity,background-color,color,transform] duration-150 ease-out cursor-grab active:cursor-grabbing group-hover/card-reorder:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#cfd6df] hover:bg-white hover:text-[#3f4853] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
-const CARD_REORDER_HANDLE_ICON_CLASS_NAME = "text-[18px] leading-none";
+const CARD_REORDER_HANDLE_CLASS_NAME = "absolute -left-11 top-4 z-20 flex h-9 w-7 items-center justify-center rounded-full border border-[rgba(0,0,0,0.06)] bg-[rgba(255,255,255,0.88)] text-[#8b96a3] opacity-0 shadow-[0_10px_30px_rgba(15,23,42,0.10)] backdrop-blur-xl transition-[opacity,background-color,color,transform] duration-150 ease-out cursor-grab active:cursor-grabbing group-hover/card-reorder:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#cfd6df] hover:bg-white hover:text-[#3f4853] active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100";
+const CARD_REORDER_HANDLE_ICON_CLASS_NAME = "text-lg leading-none";
 
 
 
@@ -176,10 +176,10 @@ const CardSetViewEmptyState = ({ cardSetName, currentDisplayMode, effectiveCardW
     <div className="h-full min-h-0 w-full overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]">
       <div className="flex min-w-0 flex-col items-center" style={{ paddingBlock: CARD_SET_VIEW_PAGER_PADDING_BLOCK, paddingInline: CARD_SET_VIEW_PAGER_PADDING_INLINE }}>
         <div className="card-active-chrome card-active-chrome--active card-pager-item w-full rounded-[40px]" style={shellStyle}>
-          <div className="flex min-h-[180px] w-full min-w-0 flex-col items-center justify-center rounded-[28px] border border-[#e7e5de] bg-white px-8 py-7 text-center shadow-[0_18px_70px_rgba(15,23,42,0.08)]">
-            <div className="mb-2 max-w-full truncate text-[15px] font-semibold tracking-[-0.02em] text-[#242424]">{cardSetName ?? "カードセット"}</div>
-            <p className="text-[13px] font-medium leading-6 text-[#7b7b7b]">このカードセットにはまだカードがありません。</p>
-            <button type="button" onClick={handleCreateCard} className="mt-5 rounded-full border border-[#d8d6cf] bg-[#f6f5f2] px-4 py-2 text-[12px] font-semibold text-[#2f343b] transition-colors hover:bg-[#eeeeea] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7c7]">
+          <div className="flex min-h-44 w-full min-w-0 flex-col items-center justify-center rounded-[28px] border border-[#e7e5de] bg-white px-8 py-7 text-center shadow-[0_18px_70px_rgba(15,23,42,0.08)]">
+            <div className="mb-2 max-w-full truncate text-sm font-semibold tracking-tight text-[#242424]">{cardSetName ?? "カードセット"}</div>
+            <p className="text-xs font-medium leading-6 text-[#7b7b7b]">このカードセットにはまだカードがありません。</p>
+            <button type="button" onClick={handleCreateCard} className="mt-5 rounded-full border border-[#d8d6cf] bg-[#f6f5f2] px-4 py-2 text-xs font-semibold text-[#2f343b] transition-colors hover:bg-[#eeeeea] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7c7]">
               カードを追加
             </button>
           </div>
@@ -222,7 +222,7 @@ const ReorderableCardSurface = ({
       ) : null}
 
       {isDropTarget ? (
-        <div aria-hidden className={`pointer-events-none absolute left-[-18px] right-[-18px] z-30 h-[3px] rounded-full bg-current text-[var(--app-sidebar-text-muted,#777)] opacity-35 ${dragState?.placement === "before" ? "top-[-10px]" : "bottom-[-10px]"}`} />
+        <div aria-hidden className={`pointer-events-none absolute -left-4 -right-4 z-30 h-0.5 rounded-full bg-current text-[var(--app-sidebar-text-muted,#777)] opacity-35 ${dragState?.placement === "before" ? "-top-2.5" : "-bottom-2.5"}`} />
       ) : null}
 
       <div className={isDragged ? "opacity-45" : undefined}>

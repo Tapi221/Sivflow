@@ -60,7 +60,7 @@ const CardSetViewScreen = ({ cardSetId: controlledCardSetId = null }: CardSetVie
   const toolbarBottom = isDesktopPresentation ? "1rem" : "max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem))";
   const overlayChildren = (
     <div className="pointer-events-auto absolute z-20 flex items-end gap-2" style={{ right: toolbarRight, bottom: toolbarBottom }}>
-      {layoutConstraintIndicatorLabel ? <div className={cn(overlayGlassPillClassName, "text-[11px] font-semibold text-slate-600")}>{layoutConstraintIndicatorLabel}</div> : null}
+      {layoutConstraintIndicatorLabel ? <div className={cn(overlayGlassPillClassName, "text-xs font-semibold text-slate-600")}>{layoutConstraintIndicatorLabel}</div> : null}
       {compactToolbar}
     </div>
   );

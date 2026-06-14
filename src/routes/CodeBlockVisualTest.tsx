@@ -24,7 +24,7 @@ const CodeBlockVisualTest = () => {
 
   return (
     <main className="min-h-screen p-8">
-      <div className="mx-auto flex w-full max-w-[900px] flex-col gap-8">
+      <div className="mx-auto flex w-full max-w-96 flex-col gap-8">
         <section className="rounded-2xl bg-white p-6 shadow-sm">
           <h1 className="mb-4 text-sm font-bold tracking-wide text-slate-600">
             Code Block Viewer

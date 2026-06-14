@@ -62,16 +62,16 @@ const isWeekdayMeasurementElement = (element: HTMLElement): boolean => element.c
 
 const createLayoutStyles = (element: Element) => ({
   fontFamily: "sans-serif",
-  fontSize: element.className.includes("text-[11px]") ? "11px" : "12px",
+  fontSize: element.className.includes("text-xs") ? "11px" : "12px",
   fontStyle: "normal",
   fontVariant: "normal",
   fontWeight: element.className.includes("font-semibold") ? "600" : "500",
   gap: element.className.includes("gap-[0.5px]") ? "0.5px" : "0px",
   lineHeight: element.className.includes("leading-[16px]") ? "16px" : element.className.includes("leading-[17px]") ? "17px" : "normal",
-  paddingBottom: element.className.includes("py-[2px]") ? "2px" : element.className.includes("py-[1px]") ? "1px" : "0px",
+  paddingBottom: element.className.includes("py-0.5") ? "2px" : element.className.includes("py-px") ? "1px" : "0px",
   paddingLeft: element.className.includes("pl-1") ? "4px" : "0px",
-  paddingRight: element.className.includes("pr-[1px]") ? "1px" : "0px",
-  paddingTop: element.className.includes("py-[2px]") ? "2px" : element.className.includes("py-[1px]") ? "1px" : "0px",
+  paddingRight: element.className.includes("pr-px") ? "1px" : "0px",
+  paddingTop: element.className.includes("py-0.5") ? "2px" : element.className.includes("py-px") ? "1px" : "0px",
   rowGap: element.className.includes("gap-[0.5px]") ? "0.5px" : "0px",
 } as CSSStyleDeclaration);
 
@@ -175,9 +175,9 @@ const stubWeekdayChipLayout = ({ chipHeight, chipWidth, titleHeight = 17, titleT
     return isWeekdayChipElement(this) || isWeekdayMeasurementElement(this) ? chipWidth : 0;
   });
   vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation((this: HTMLElement) => {
-    if (this.className.includes("text-[12px]") && this.textContent?.includes("~")) return titleWithTimeHeight;
-    if (this.className.includes("text-[12px]")) return titleHeight;
-    if (this.className.includes("text-[11px]")) return 16;
+    if (this.className.includes("text-xs") && this.textContent?.includes("~")) return titleWithTimeHeight;
+    if (this.className.includes("text-xs")) return titleHeight;
+    if (this.className.includes("text-xs")) return 16;
 
     return 0;
   });
@@ -217,13 +217,13 @@ describe("event chip title/time spacing", () => {
     expect(chipElement.className).not.toContain("gap-1");
   });
 
-  it("週表示の通常チップは上下 padding を py-[2px] にする", () => {
+  it("週表示の通常チップは上下 padding を py-0.5 にする", () => {
     render(<CalendarEventChipWeekday event={TIMED_EVENT} />);
 
     const chipElement = getWeekdayChipElement();
 
-    expect(chipElement.className).toContain("py-[2px]");
-    expect(chipElement.className).not.toContain("py-[1px]");
+    expect(chipElement.className).toContain("py-0.5");
+    expect(chipElement.className).not.toContain("py-px");
   });
 
   it("リスト表示のチップもタイトルと時刻の間隔を mt-[0.5px] にする", () => {
@@ -329,7 +329,7 @@ describe("weekday event chip inline time layout", () => {
     expect(inlineRowElement?.querySelector("span")?.className).toContain("whitespace-nowrap");
   });
 
-  it("横並び表示ではチップ本体の上下 padding を py-[1px] にする", () => {
+  it("横並び表示ではチップ本体の上下 padding を py-px にする", () => {
     stubWeekdayChipLayout({ chipHeight: 12, chipWidth: 70, titleText: SHORT_TITLE_EVENT.title, titleTextWidth: 8, timeTextWidth: 40 });
 
     render(<CalendarEventChipWeekday event={SHORT_TITLE_EVENT} />);
@@ -337,8 +337,8 @@ describe("weekday event chip inline time layout", () => {
     const chipElement = getWeekdayChipElement(SHORT_TITLE_EVENT.title);
 
     expect(getWeekdayInlineRowElement(SHORT_TITLE_EVENT.title)).not.toBeNull();
-    expect(chipElement.className).toContain("py-[1px]");
-    expect(chipElement.className).not.toContain("py-[2px]");
+    expect(chipElement.className).toContain("py-px");
+    expect(chipElement.className).not.toContain("py-0.5");
   });
 
   it("時刻単体が収まってもタイトルと時刻の合計幅が足りない場合は横並び表示にしない", () => {
@@ -374,7 +374,7 @@ describe("weekday event chip inline time layout", () => {
     observerCallbacks.forEach((callback) => callback([], {} as ResizeObserver));
 
     await waitFor(() => expect(getWeekdayInlineRowElement(SHORT_TITLE_EVENT.title)).not.toBeNull());
-    expect(getWeekdayChipElement(SHORT_TITLE_EVENT.title).className).toContain("py-[1px]");
+    expect(getWeekdayChipElement(SHORT_TITLE_EVENT.title).className).toContain("py-px");
     expect(getWeekdayChipElement(SHORT_TITLE_EVENT.title).textContent).toContain("~");
   });
 });

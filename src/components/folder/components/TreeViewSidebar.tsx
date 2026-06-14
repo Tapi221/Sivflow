@@ -102,7 +102,7 @@ const TreeViewSidebar = ({ sidebarRef, contentScrollRef, isSidebarOpen, rendered
           integratedChrome
             ? "bg-[rgba(255,255,255,0.92)]"
             : [
-              "md:rounded-[14px] md:border md:border-[#dddcd5]",
+              "md:rounded-2xl md:border md:border-stone-300",
               "md:bg-[rgba(255,255,255,0.92)]",
               "md:shadow-[0_16px_36px_rgba(15,23,42,0.06),0_4px_12px_rgba(15,23,42,0.04)]",
             ],
@@ -122,7 +122,7 @@ const TreeViewSidebar = ({ sidebarRef, contentScrollRef, isSidebarOpen, rendered
       {isSidebarOpen ? (
         <div
           className={cn(
-            "absolute top-0 right-[-3px] z-50 hidden h-full w-[6px] select-none bg-transparent outline-none md:block",
+            "absolute top-0 -right-0.5 z-50 hidden h-full w-1.5 select-none bg-transparent outline-none md:block",
           )}
           onPointerDown={onStartResizing}
           role="separator"

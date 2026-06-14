@@ -17,7 +17,7 @@ const FaceSwitchBadge = ({
   onShowBack,
 }: FaceSwitchBadgeProps) => {
   const itemClassName =
-    "inline-flex h-6 min-w-6 items-center justify-center rounded-full px-2 text-[10px] font-semibold leading-none transition";
+    "inline-flex h-6 min-w-6 items-center justify-center rounded-full px-2 text-xs font-semibold leading-none transition";
 
   return (
     <div

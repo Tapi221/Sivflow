@@ -52,7 +52,7 @@ const ModeToolbarButton = (props: DropdownMenuProps) => {
           <span className="hidden lg:inline">{modeItems[value].label}</span>
         </ToolbarButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="min-w-[180px]">
+      <DropdownMenuContent align="start" className="min-w-44">
         <DropdownMenuRadioGroup
           onValueChange={(newValue) => {
             if (newValue === "viewing") {

@@ -116,7 +116,7 @@ const RatingCountTiles = ({ counts, compact = false, className = "", disableHove
                 <span className="ds-rating-tile__count text-convex text-base font-bold tabular-nums">
                   {counts[key] ?? 0}
                 </span>
-                <span className="ds-rating-tile__label text-[10px] font-semibold">
+                <span className="ds-rating-tile__label text-xs font-semibold">
                   {design.label}
                 </span>
               </>

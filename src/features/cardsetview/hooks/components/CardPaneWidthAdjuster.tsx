@@ -75,7 +75,7 @@ const CardPaneWidthAdjuster = ({ modeLabel, value, min, max, defaultValue, step 
       </div>
 
       {formattedValue ? (
-        <div className="min-w-[3.1rem] text-center text-[11px] font-semibold tabular-nums text-slate-500">
+        <div className="min-w-[3.1rem] text-center text-xs font-semibold tabular-nums text-slate-500">
           {formattedValue}
         </div>
       ) : null}

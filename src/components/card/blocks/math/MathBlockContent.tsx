@@ -92,7 +92,7 @@ const MathRendererComponent: React.FC<MathRendererProps> = ({
         )}
         title={error ?? "Rendering Error"}
       >
-        <span className="opacity-70 mr-2 text-[10px] uppercase font-bold">
+        <span className="opacity-70 mr-2 text-xs uppercase font-bold">
           LaTeX Error:
         </span>
         {normalizedLatex}

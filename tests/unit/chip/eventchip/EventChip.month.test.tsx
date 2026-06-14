@@ -39,8 +39,8 @@ describe("CalendarEventChipMonth vertical spacing", () => {
 
     const chipElement = getMonthChipElement();
 
-    expect(chipElement.className).toContain("pt-[2px]");
-    expect(chipElement.className).toContain("pb-[2px]");
+    expect(chipElement.className).toContain("pt-0.5");
+    expect(chipElement.className).toContain("pb-0.5");
     expect(chipElement.className).not.toContain("pb-1");
   });
 

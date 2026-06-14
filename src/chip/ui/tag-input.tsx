@@ -188,7 +188,7 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
               className="ds-input h-6 focus:ring-0"
             />
           </div>
-          <CommandList className="max-h-[350px]">
+          <CommandList className="max-h-80">
             {inputValue &&
               !uniqueTags.some(
                 (tag) => tag.toLowerCase() === inputValue.toLowerCase(),
@@ -232,7 +232,7 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
 
             <CommandGroup
               heading={
-                <span className="ds-command__group-title px-2 text-[10px] font-bold uppercase tracking-widest">
+                <span className="ds-command__group-title px-2 text-xs font-bold uppercase tracking-widest">
                   既存のタグ
                 </span>
               }
@@ -240,7 +240,7 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
               {filteredTags.length === 0 && !inputValue && (
                 <div className="py-6 text-center">
                   <TagIcon className="w-8 h-8 text-[var(--surface-placeholder-text)] opacity-35 mx-auto mb-2" />
-                  <p className="text-[10px] font-bold text-[var(--surface-placeholder-text)] uppercase tracking-widest">
+                  <p className="text-xs font-bold text-[var(--surface-placeholder-text)] uppercase tracking-widest">
                     タグがありません
                   </p>
                 </div>
@@ -261,7 +261,7 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
                       <TagBadge
                         label={tag}
                         colorKey={resolveTagColorKey(tag)}
-                        className="max-w-[220px]"
+                        className="max-w-56"
                       />
                       {isSelected && (
                         <Check className="w-3.5 h-3.5 text-[var(--ds-semantic-color-action-primary)]" />

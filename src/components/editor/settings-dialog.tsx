@@ -209,7 +209,7 @@ const SettingsDialog = () => {
       >
         <span className="inline-flex bg-background px-2">{label}</span>
       </label>
-      <Button asChild size="icon" variant="ghost" className="absolute top-0 right-[28px] h-full">
+      <Button asChild size="icon" variant="ghost" className="absolute top-0 right-7 h-full">
         <a
           className="flex items-center"
           href={service === "aiGatewayApiKey" ? "https://vercel.com/docs/ai-gateway" : "https://uploadthing.com/dashboard"}

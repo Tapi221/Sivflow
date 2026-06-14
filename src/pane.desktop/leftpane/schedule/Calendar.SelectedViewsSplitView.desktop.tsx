@@ -40,7 +40,7 @@ type CalendarSelectedViewPanelProps = CalendarSelectedViewsSplitViewProps & {
 
 
 
-const SELECTED_VIEW_PANEL_CLASS_NAME = "calendar-selected-view-panel flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-r border-[#eee] last:border-r-0";
+const SELECTED_VIEW_PANEL_CLASS_NAME = "calendar-selected-view-panel flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-r border-slate-200 last:border-r-0";
 const WEEKDAY_SURFACE_CLASS_NAME = "flex h-full min-h-0 flex-col overflow-hidden bg-white";
 
 

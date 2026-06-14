@@ -54,7 +54,7 @@ const CalendarEventChip = memo(({ entry }: CalendarEventChipProperties) => {
         {title}
       </div>
       {entry.columnCount && entry.columnCount > 1 ? (
-        <div className="mt-0.5 text-[10px] text-white/50">
+        <div className="mt-0.5 text-xs text-white/50">
           col {entry.columnIndex ?? 0}/{entry.columnCount}
         </div>
       ) : null}

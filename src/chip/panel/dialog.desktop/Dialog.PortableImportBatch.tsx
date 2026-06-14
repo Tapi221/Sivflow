@@ -204,7 +204,7 @@ const PortableImportBatchDialog = ({ open, onOpenChange, folderId, folderName, f
                       </div>
                       <span
                         className={cn(
-                          "rounded-full px-2 py-0.5 text-[11px] font-bold",
+                          "rounded-full px-2 py-0.5 text-xs font-bold",
                           STATUS_CLASS_NAMES[item.status],
                         )}
                       >

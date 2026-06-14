@@ -70,7 +70,7 @@ const ExportMfCardButton = ({
       disabled={disabled || isExporting || !card}
       title={label}
       aria-label={isExporting ? "MFCardを書き出し中" : label}
-      className="min-w-0 max-w-[150px] overflow-hidden rounded-full bg-white/85 shadow-sm backdrop-blur"
+      className="min-w-0 max-w-36 overflow-hidden rounded-full bg-white/85 shadow-sm backdrop-blur"
     >
       {isExporting ? (
         <LoadingSpinner iconClassName="h-4 w-4" label="MFCardを書き出し中" />

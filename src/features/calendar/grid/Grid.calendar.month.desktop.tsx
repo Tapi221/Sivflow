@@ -348,7 +348,7 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, weekStartDay, visibleEv
     <>
       <div className={cn("sticky top-0 z-30 grid grid-cols-7 overflow-hidden border-b bg-white shadow-none", GD.MONTH_GRID_WEEKDAY_HEADER_HEIGHT_CLASS)} style={MONTH_GRID_BORDER_STYLE}>
         {weekdayLabels.map((label: string, index: number) => (
-          <div key={`${label}-${index}`} className="calendar-month-weekday-cell flex items-center justify-center text-[11px] leading-none font-semibold tracking-[0.03em] text-[#8e8e93]">
+          <div key={`${label}-${index}`} className="calendar-month-weekday-cell flex items-center justify-center text-xs leading-none font-semibold tracking-[0.03em] text-zinc-500">
             {label}
           </div>
         ))}
@@ -383,7 +383,7 @@ const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScroll
           </CalendarDayNumberCircle>
 
           {monthAnnotation && (
-            <span className="shrink-0 text-[12px] font-semibold text-[#8e8e93]">
+            <span className="shrink-0 text-xs font-semibold text-zinc-500">
               {monthAnnotation}
             </span>
           )}
@@ -403,7 +403,7 @@ const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScroll
             })}
 
             {overflowCount > 0 && (
-              <div className={cn("shrink-0 font-medium text-[#8f929c]", GD.MONTH_GRID_OVERFLOW_TEXT_CLASS)}>
+              <div className={cn("shrink-0 font-medium text-slate-500", GD.MONTH_GRID_OVERFLOW_TEXT_CLASS)}>
                 +{overflowCount}件
               </div>
             )}

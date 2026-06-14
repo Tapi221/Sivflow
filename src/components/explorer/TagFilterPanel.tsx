@@ -302,7 +302,7 @@ const TagFilterPanel = ({ allTags, isOpen = false, className }: TagFilterPanelPr
       onSearchChange={setSearchQuery}
       searchInputRef={inputRef}
       className={className}
-      bodyClassName="min-h-[150px]"
+      bodyClassName="min-h-36"
       headerAction={
         isFilterActive ? (
           <SurfaceButton
@@ -317,7 +317,7 @@ const TagFilterPanel = ({ allTags, isOpen = false, className }: TagFilterPanelPr
       }
       sections={
         <>
-          <div className="ds-filter-section ds-floating-panel__section ds-floating-panel__section--dense flex items-center gap-2 bg-transparent text-[11px]">
+          <div className="ds-filter-section ds-floating-panel__section ds-floating-panel__section--dense flex items-center gap-2 bg-transparent text-xs">
             <span className="ds-filter-section__label ds-floating-panel__label">
               条件:
             </span>
@@ -328,7 +328,7 @@ const TagFilterPanel = ({ allTags, isOpen = false, className }: TagFilterPanelPr
             />
           </div>
           <div className="ds-filter-section ds-floating-panel__section ds-floating-panel__section--dense space-y-2 bg-transparent">
-            <div className="flex items-center justify-between gap-2 text-[11px]">
+            <div className="flex items-center justify-between gap-2 text-xs">
               <span className="ds-filter-section__label ds-floating-panel__label">
                 表示:
               </span>
@@ -353,7 +353,7 @@ const TagFilterPanel = ({ allTags, isOpen = false, className }: TagFilterPanelPr
             {toggleableRows.map((item) => (
               <div
                 key={item.label}
-                className="flex items-center justify-between gap-2 text-[11px]"
+                className="flex items-center justify-between gap-2 text-xs"
               >
                 <span className="ds-filter-section__label ds-floating-panel__label">
                   {item.label}:

@@ -53,7 +53,7 @@ const TablePicker = () => {
       }}
       role="button"
     >
-      <div className="grid size-[130px] grid-cols-8 gap-0.5 p-1">
+      <div className="grid size-32 grid-cols-8 gap-0.5 p-1">
         {tablePicker.grid.map((rows, rowIndex) =>
           rows.map((value, columIndex) => (
             <div
@@ -91,7 +91,7 @@ const TableToolbarButton = (props: DropdownMenuProps) => {
         </ToolbarButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="flex w-[180px] min-w-0 flex-col"
+        className="flex w-44 min-w-0 flex-col"
         align="start"
       >
         <DropdownMenuGroup>
@@ -114,7 +114,7 @@ const TableToolbarButton = (props: DropdownMenuProps) => {
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
               <DropdownMenuItem
-                className="min-w-[180px]"
+                className="min-w-44"
                 disabled={!mergeState.canMerge}
                 onSelect={() => {
                   tf.table.merge();
@@ -125,7 +125,7 @@ const TableToolbarButton = (props: DropdownMenuProps) => {
                 Merge cells
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="min-w-[180px]"
+                className="min-w-44"
                 disabled={!mergeState.canSplit}
                 onSelect={() => {
                   tf.table.split();
@@ -147,7 +147,7 @@ const TableToolbarButton = (props: DropdownMenuProps) => {
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
               <DropdownMenuItem
-                className="min-w-[180px]"
+                className="min-w-44"
                 disabled={!tableSelected}
                 onSelect={() => {
                   tf.insert.tableRow({ before: true });
@@ -158,7 +158,7 @@ const TableToolbarButton = (props: DropdownMenuProps) => {
                 Insert row before
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="min-w-[180px]"
+                className="min-w-44"
                 disabled={!tableSelected}
                 onSelect={() => {
                   tf.insert.tableRow();
@@ -169,7 +169,7 @@ const TableToolbarButton = (props: DropdownMenuProps) => {
                 Insert row after
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="min-w-[180px]"
+                className="min-w-44"
                 disabled={!tableSelected}
                 onSelect={() => {
                   tf.remove.tableRow();
@@ -191,7 +191,7 @@ const TableToolbarButton = (props: DropdownMenuProps) => {
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
               <DropdownMenuItem
-                className="min-w-[180px]"
+                className="min-w-44"
                 disabled={!tableSelected}
                 onSelect={() => {
                   tf.insert.tableColumn({ before: true });
@@ -202,7 +202,7 @@ const TableToolbarButton = (props: DropdownMenuProps) => {
                 Insert column before
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="min-w-[180px]"
+                className="min-w-44"
                 disabled={!tableSelected}
                 onSelect={() => {
                   tf.insert.tableColumn();
@@ -213,7 +213,7 @@ const TableToolbarButton = (props: DropdownMenuProps) => {
                 Insert column after
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="min-w-[180px]"
+                className="min-w-44"
                 disabled={!tableSelected}
                 onSelect={() => {
                   tf.remove.tableColumn();
@@ -226,7 +226,7 @@ const TableToolbarButton = (props: DropdownMenuProps) => {
             </DropdownMenuSubContent>
           </DropdownMenuSub>
           <DropdownMenuItem
-            className="min-w-[180px]"
+            className="min-w-44"
             disabled={!tableSelected}
             onSelect={() => {
               tf.remove.table();

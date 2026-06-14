@@ -122,7 +122,7 @@ const SearchDialog = () => {
               <button type="button" className="gs-searchbar__clear" onClick={() => {
                 setQuery(""); inputRef.current?.focus(); }} aria-label="検索語をクリア"
               >
-                <X className="h-[18px] w-[18px]" />
+                <X className="h-4 w-4" />
               </button>
             ) : null}
           </div>

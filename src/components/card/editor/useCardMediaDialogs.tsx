@@ -109,7 +109,7 @@ const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: UseCard
       const imageCount = getImageCount(side);
       const audioCount = getAudioCount(side);
       const linkCount = getLinkCount(side);
-      const base = cn("inline-flex shrink-0 items-center justify-center gap-0.5 rounded-full h-7 min-h-0 min-w-0 px-1.5 text-[10px] font-semibold leading-none whitespace-nowrap", CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_IDLE_CLASS);
+      const base = cn("inline-flex shrink-0 items-center justify-center gap-0.5 rounded-full h-7 min-h-0 min-w-0 px-1.5 text-xs font-semibold leading-none whitespace-nowrap", CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_IDLE_CLASS);
       const iconClassName = cn(CARD_ACTION_ICON_CLASS, "h-4 w-4 shrink-0");
 
       const openLinkDialog = () => {

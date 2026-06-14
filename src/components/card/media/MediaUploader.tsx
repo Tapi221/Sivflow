@@ -260,7 +260,7 @@ const ImageItem = ({
 
         {item.url && !loadFailed && (
           <div className="pointer-events-none absolute inset-x-3 bottom-0 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="pointer-events-auto ml-auto w-full max-w-[300px] rounded-lg border border-slate-200/70 bg-white/75 px-2 py-1 shadow-sm backdrop-blur">
+            <div className="pointer-events-auto ml-auto w-full max-w-72 rounded-lg border border-slate-200/70 bg-white/75 px-2 py-1 shadow-sm backdrop-blur">
               <Slider
                 min={20}
                 max={100}
@@ -676,7 +676,7 @@ const MediaUploader = (props: MediaUploaderProps) => {
 
   const renderUploadDropzone = (withInput: boolean) => (
     <div
-      className={`border-2 border-dashed rounded-[24px] p-5 text-center transition-all duration-300 cursor-pointer ${dragOver ? "border-indigo-400 bg-indigo-50/50" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/30"}`}
+      className={`border-2 border-dashed rounded-3xl p-5 text-center transition-all duration-300 cursor-pointer ${dragOver ? "border-indigo-400 bg-indigo-50/50" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/30"}`}
       onDrop={(e) => {
         e.preventDefault();
         setDragOver(false);
@@ -703,7 +703,7 @@ const MediaUploader = (props: MediaUploaderProps) => {
       ) : null}
       <div className="text-slate-400 transition-colors select-none">
         <Upload className="w-6 h-6 mx-auto mb-2 opacity-60" />
-        <p className="text-[10px] font-bold tracking-widest uppercase">
+        <p className="text-xs font-bold tracking-widest uppercase">
           ドラッグ＆ドロップ、クリック、または Ctrl+V で
           {type === "image" ? "画像を" : "音声を"}アップロード
         </p>

@@ -45,14 +45,14 @@ const TurnIntoToolbarButton = (props: DropdownMenuProps) => {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
-        <ToolbarButton className="min-w-[125px]" pressed={open} tooltip="Turn into" isDropdown>
+        <ToolbarButton className="min-w-32" pressed={open} tooltip="Turn into" isDropdown>
           {selectedItem.label}
         </ToolbarButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="min-w-0" align="start">
         <ToolbarMenuGroup label="Turn into">
           {turnIntoItems.map(({ icon, label, value: itemValue }) => (
-            <DropdownMenuItem key={itemValue} className="min-w-[180px]" onSelect={() => setBlockType(editor, itemValue)}>
+            <DropdownMenuItem key={itemValue} className="min-w-44" onSelect={() => setBlockType(editor, itemValue)}>
               {icon}
               {label}
             </DropdownMenuItem>

@@ -346,7 +346,7 @@ const XlsxImportDialog = ({
                           {card.frontBlocks.map((block) => (
                             <span
                               key={`${card.cardId}-front-${block.order}-${block.type}`}
-                              className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-700"
+                              className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
                             >
                               F{block.order}. {block.type}
                             </span>
@@ -354,7 +354,7 @@ const XlsxImportDialog = ({
                           {card.backBlocks.map((block) => (
                             <span
                               key={`${card.cardId}-back-${block.order}-${block.type}`}
-                              className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-700"
+                              className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
                             >
                               B{block.order}. {block.type}
                             </span>

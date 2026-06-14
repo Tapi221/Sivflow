@@ -16,7 +16,7 @@ const NewCardIdleState = ({
   onCancel,
 }: NewCardIdleStateProps) => {
   return (
-    <div className="flex h-full min-h-[400px] items-center justify-center text-slate-400">
+    <div className="flex h-full min-h-96 items-center justify-center text-slate-400">
       <div className="text-center">
         <p className="text-sm font-bold">新規カードを作成します</p>
         <p className="mt-2 text-xs opacity-70">
@@ -45,7 +45,7 @@ const NewCardIdleState = ({
   );
 };
 const CardEditorLoadingState = () => {
-  return <LoadingSpinner className="h-full min-h-[400px] text-slate-400" label="カードを読み込み中" />;
+  return <LoadingSpinner className="h-full min-h-96 text-slate-400" label="カードを読み込み中" />;
 };
 
 
