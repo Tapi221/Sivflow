@@ -103,11 +103,11 @@ const colorToYearEventTone = (color: string): CalendarYearEventTone => {
   const red = Number.parseInt(value.slice(0, 2), 16);
   const green = Number.parseInt(value.slice(2, 4), 16);
   const blue = Number.parseInt(value.slice(4, 6), 16);
-  if (red >= green + 24 && red >= blue + 24) return red >= 220 && green >= 120 ? "rose" : "rose";
+  if (red >= 180 && green >= 120 && blue < 140) return "amber";
   if (green >= red + 24 && green >= blue + 8) return "emerald";
   if (blue >= red + 24 && blue >= green + 8) return "blue";
-  if (red >= 180 && green >= 120 && blue < 140) return "amber";
   if (red >= 120 && blue >= 120) return "violet";
+  if (red >= green + 24 && red >= blue + 24) return "rose";
   return "zinc";
 };
 const resolveDefaultYearEventDisplay: CalendarYearEventDisplayResolver = () => DEFAULT_YEAR_EVENT_DISPLAY;
