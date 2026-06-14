@@ -13,7 +13,7 @@
   font-family: var(--app-font-family-sidebar) !important;
   font-size: 12px !important;
   font-weight: 500 !important;
-  letter-spacing: -0.012em !important;
+  letter-spacing: 0 !important;
   pointer-events: auto !important;
   -webkit-app-region: no-drag;
   --app-layered-directory-content-inset: 16px;
@@ -96,7 +96,7 @@
   font: inherit;
   font-size: 13px;
   font-weight: 650;
-  letter-spacing: -0.018em;
+  letter-spacing: 0;
   line-height: 18px;
   text-align: left;
   outline: none;
@@ -219,7 +219,7 @@
   color: #111;
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: -0.018em;
+  letter-spacing: 0;
   line-height: 16px;
 }
 
@@ -236,7 +236,7 @@
   font: inherit;
   font-size: 13px;
   font-weight: 700;
-  letter-spacing: -0.018em;
+  letter-spacing: 0;
   line-height: 16px;
   text-align: left;
 }
@@ -290,7 +290,7 @@
   color: var(--app-layered-directory-muted-text);
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   line-height: 15px;
 }
 
@@ -311,9 +311,11 @@
   border-radius: 7px !important;
   color: var(--app-layered-directory-muted-text) !important;
   font-family: var(--app-font-family-sidebar) !important;
-  font-size: 12px !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.02em !important;
+  font-kerning: normal !important;
+  font-size: 13px !important;
+  font-variant-east-asian: normal !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
   line-height: 28px !important;
 }
 
@@ -328,10 +330,10 @@
 
 .app-layered-directory [aria-label="Project list explorer"] [role="treeitem"] > button:last-child > span,
 .app-layered-directory [aria-label="Library hierarchy explorer"] [role="treeitem"] > button:last-child > span {
-  font-size: 12px !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.02em !important;
-  line-height: 15px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  line-height: 16px !important;
 }
 
 .app-layered-directory .library-tree-marker {
@@ -369,7 +371,7 @@
   color: #111 !important;
   font-size: 13px !important;
   font-weight: 700 !important;
-  letter-spacing: -0.018em !important;
+  letter-spacing: 0 !important;
   line-height: 16px !important;
 }
 
