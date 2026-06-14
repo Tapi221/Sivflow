@@ -16,7 +16,7 @@ const items = [
   { icon: AlignJustifyIcon, value: "justify" },
 ];
 
-const AlignToolbarButton = (props: DropdownMenuProps) => {
+const ButtonClickPanelNoteAlign = (props: DropdownMenuProps) => {
   const { editor, tf } = useEditorPlugin(TextAlignPlugin);
   const value = useSelectionFragmentProp({
     defaultValue: "start",
@@ -54,4 +54,4 @@ const AlignToolbarButton = (props: DropdownMenuProps) => {
   );
 };
 
-export { AlignToolbarButton };
+export { ButtonClickPanelNoteAlign };

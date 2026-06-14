@@ -17,7 +17,7 @@ import { ToolbarButton } from "./toolbar";
 
 const siteUrl = "https://platejs.org";
 
-const ExportToolbarButton = (props: DropdownMenuProps) => {
+const ButtonClickPanelNoteExport = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
   const getCanvas = async () => {
@@ -125,4 +125,4 @@ const ExportToolbarButton = (props: DropdownMenuProps) => {
   );
 };
 
-export { ExportToolbarButton };
+export { ButtonClickPanelNoteExport };

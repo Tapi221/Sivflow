@@ -3,9 +3,9 @@
 import * as React from "react";
 import { useToggleToolbarButton, useToggleToolbarButtonState } from "@platejs/toggle/react";
 import { ListCollapseIcon } from "lucide-react";
-import { ToolbarButton } from "./toolbar";
+import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
-const ToggleToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => {
+const ButtonNoteToggle = (props: React.ComponentProps<typeof ToolbarButton>) => {
   const state = useToggleToolbarButtonState();
   const { props: buttonProps } = useToggleToolbarButton(state);
   return (
@@ -15,4 +15,4 @@ const ToggleToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) 
   );
 };
 
-export { ToggleToolbarButton };
+export { ButtonNoteToggle };

@@ -11,7 +11,7 @@ import { AppleIcon, ClockIcon, CompassIcon, FlagIcon, LeafIcon, LightbulbIcon, M
 import { Button } from "@/chip/ui/button/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { ToolbarButton } from "./toolbar";
+import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
 const emojiCategoryIcons: Record<
   EmojiCategoryList,
@@ -336,7 +336,7 @@ const EmojiPicker = ({ clearSearch, emoji, emojiLibrary, focusedCategory, hasFou
     </div>
   );
 };
-const EmojiToolbarButton = ({ options, ...props }: { options?: EmojiDropdownMenuOptions;
+const ButtonClickPanelNoteEmoji = ({ options, ...props }: { options?: EmojiDropdownMenuOptions;
 } & React.ComponentPropsWithoutRef<typeof ToolbarButton>) => {
   const { emojiPickerState, isOpen, setIsOpen } =
     useEmojiDropdownMenuState(options);
@@ -551,4 +551,4 @@ const RowOfButtons = React.memo(({
     </div>
   );
 });
-export { EmojiToolbarButton, EmojiPopover, EmojiPicker };
+export { ButtonClickPanelNoteEmoji, EmojiPopover, EmojiPicker };

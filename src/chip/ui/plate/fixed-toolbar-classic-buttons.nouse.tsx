@@ -6,21 +6,21 @@ import { useEditorReadOnly } from "platejs/react";
 import { InsertToolbarButton } from "@/chip/ui/plate/insert-toolbar-classic-button";
 import { IndentToolbarButton, ListToolbarButton } from "@/chip/ui/plate/list-classic-toolbar-button";
 import { TurnIntoToolbarButton } from "@/chip/ui/plate/turn-into-toolbar-classic-button";
-import { AIToolbarButton } from "./ai-toolbar-button";
-import { AlignToolbarButton } from "./align-toolbar-button";
-import { CommentToolbarButton } from "./comment-toolbar-button";
-import { EmojiToolbarButton } from "./emoji-toolbar-button";
-import { FontColorToolbarButton } from "./font-color-toolbar-button";
-import { RedoToolbarButton, UndoToolbarButton } from "./history-toolbar-button";
-import { LineHeightToolbarButton } from "./line-height-toolbar-button";
-import { LinkToolbarButton } from "./link-toolbar-button";
-import { MarkToolbarButton } from "./mark-toolbar-button";
-import { MediaToolbarButton } from "./media-toolbar-button";
-import { ModeToolbarButton } from "./mode-toolbar-button";
-import { MoreToolbarButton } from "./more-toolbar-button";
-import { TableToolbarButton } from "./table-toolbar-button";
-import { ToggleToolbarButton } from "./toggle-toolbar-button";
-import { ToolbarGroup } from "./toolbar";
+import { ButtonClickPanelNoteAi } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Ai";
+import { AlignToolbarButton } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Align";
+import { CommentToolbarButton } from "@/chip/ui/plate/comment-toolbar-button";
+import { ButtonClickPanelNoteEmoji } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Emoji";
+import { ButtonClickPanelNoteFontColor } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.FontColor";
+import { RedoToolbarButton, UndoToolbarButton } from "@/chip/ui/plate/history-toolbar-button";
+import { LineHeightToolbarButton } from "@/chip/ui/plate/line-height-toolbar-button";
+import { LinkToolbarButton } from "@/chip/ui/plate/link-toolbar-button";
+import { MarkToolbarButton } from "@/chip/ui/plate/mark-toolbar-button";
+import { MediaToolbarButton } from "@/chip/button/Button.Note.Media";
+import { ModeToolbarButton } from "@/chip/ui/plate/mode-toolbar-button";
+import { MoreToolbarButton } from "@/chip/ui/plate/more-toolbar-button";
+import { TableToolbarButton } from "@/chip/ui/plate/table-toolbar-button";
+import { ToggleToolbarButton } from "@/chip/button/Button.Note.Toggle";
+import { ToolbarGroup } from "@/chip/ui/plate/toolbar";
 
 const FixedToolbarButtons = () => {
   const readOnly = useEditorReadOnly();
@@ -33,9 +33,9 @@ const FixedToolbarButtons = () => {
             <RedoToolbarButton />
           </ToolbarGroup>
           <ToolbarGroup>
-            <AIToolbarButton tooltip="AI commands">
+            <ButtonClickPanelNoteAi tooltip="AI commands">
               <WandSparklesIcon />
-            </AIToolbarButton>
+            </ButtonClickPanelNoteAi>
           </ToolbarGroup>
           <ToolbarGroup>
             <InsertToolbarButton />
@@ -57,12 +57,12 @@ const FixedToolbarButtons = () => {
             <MarkToolbarButton nodeType={KEYS.code} tooltip="Code">
               <Code2Icon />
             </MarkToolbarButton>
-            <FontColorToolbarButton nodeType={KEYS.color} tooltip="Text color">
+            <ButtonClickPanelNoteFontColor nodeType={KEYS.color} tooltip="Text color">
               <BaselineIcon />
-            </FontColorToolbarButton>
-            <FontColorToolbarButton nodeType={KEYS.backgroundColor} tooltip="Background color">
+            </ButtonClickPanelNoteFontColor>
+            <ButtonClickPanelNoteFontColor nodeType={KEYS.backgroundColor} tooltip="Background color">
               <PaintBucketIcon />
-            </FontColorToolbarButton>
+            </ButtonClickPanelNoteFontColor>
           </ToolbarGroup>
           <ToolbarGroup>
             <AlignToolbarButton />
@@ -74,7 +74,7 @@ const FixedToolbarButtons = () => {
           <ToolbarGroup>
             <LinkToolbarButton />
             <TableToolbarButton />
-            <EmojiToolbarButton />
+            <ButtonClickPanelNoteEmoji />
           </ToolbarGroup>
           <ToolbarGroup>
             <MediaToolbarButton nodeType={KEYS.img} />

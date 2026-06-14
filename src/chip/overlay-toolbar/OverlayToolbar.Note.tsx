@@ -5,26 +5,26 @@ import { KEYS } from "platejs";
 import { useEditorReadOnly } from "platejs/react";
 import { ButtonClickPanelNoteAi } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Ai";
 import { ButtonClickPanelNoteInsert } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Insert";
-import { AlignToolbarButton } from "../ui/plate/align-toolbar-button";
-import { CommentToolbarButton } from "../ui/plate/comment-toolbar-button";
-import { EmojiToolbarButton } from "../ui/plate/emoji-toolbar-button";
-import { ExportToolbarButton } from "../ui/plate/export-toolbar-button";
-import { FontColorToolbarButton } from "../ui/plate/font-color-toolbar-button";
-import { FontSizeToolbarButton } from "../ui/plate/font-size-toolbar-button";
-import { RedoToolbarButton, UndoToolbarButton } from "../ui/plate/history-toolbar-button";
-import { ImportToolbarButton } from "../ui/plate/import-toolbar-button";
-import { IndentToolbarButton, OutdentToolbarButton } from "../ui/plate/indent-toolbar-button";
-import { LineHeightToolbarButton } from "../ui/plate/line-height-toolbar-button";
-import { LinkToolbarButton } from "../ui/plate/link-toolbar-button";
-import { BulletedListToolbarButton, NumberedListToolbarButton, TodoListToolbarButton } from "../ui/plate/list-toolbar-button";
-import { MarkToolbarButton } from "../ui/plate/mark-toolbar-button";
-import { MediaToolbarButton } from "../ui/plate/media-toolbar-button";
-import { ModeToolbarButton } from "../ui/plate/mode-toolbar-button";
-import { MoreToolbarButton } from "../ui/plate/more-toolbar-button";
-import { TableToolbarButton } from "../ui/plate/table-toolbar-button";
-import { ToggleToolbarButton } from "../ui/plate/toggle-toolbar-button";
-import { ToolbarGroup } from "../ui/plate/toolbar";
-import { TurnIntoToolbarButton } from "../ui/plate/turn-into-toolbar-button";
+import { ButtonClickPanelNoteAlign } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Align";
+import { CommentToolbarButton } from "@/chip/ui/plate/comment-toolbar-button";
+import { ButtonClickPanelNoteEmoji } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Emoji";
+import { ButtonClickPanelNoteExport } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Export";
+import { ButtonClickPanelNoteFontColor } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.FontColor";
+import { FontSizeToolbarButton } from "@/chip/ui/plate/font-size-toolbar-button";
+import { RedoToolbarButton, UndoToolbarButton } from "@/chip/ui/plate/history-toolbar-button";
+import { ImportToolbarButton } from "@/chip/ui/plate/import-toolbar-button";
+import { IndentToolbarButton, OutdentToolbarButton } from "@/chip/ui/plate/indent-toolbar-button";
+import { LineHeightToolbarButton } from "@/chip/ui/plate/line-height-toolbar-button";
+import { LinkToolbarButton } from "@/chip/ui/plate/link-toolbar-button";
+import { ButtonClickPanelNoteBulletedList, ButtonClickPanelNoteNumberedList, ButtonClickPanelNoteTodoList } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.List";
+import { MarkToolbarButton } from "@/chip/ui/plate/mark-toolbar-button";
+import { MediaToolbarButton } from "@/chip/button/Button.Note.Media";
+import { ModeToolbarButton } from "@/chip/ui/plate/mode-toolbar-button";
+import { MoreToolbarButton } from "@/chip/ui/plate/more-toolbar-button";
+import { TableToolbarButton } from "@/chip/ui/plate/table-toolbar-button";
+import { ToggleToolbarButton } from "@/chip/button/Button.Note.Toggle";
+import { ToolbarGroup } from "@/chip/ui/plate/toolbar";
+import { TurnIntoToolbarButton } from "@/chip/ui/plate/turn-into-toolbar-button";
 
 const ToolbarNote = () => {
   const readOnly = useEditorReadOnly();
@@ -42,9 +42,9 @@ const ToolbarNote = () => {
             </ButtonClickPanelNoteAi>
           </ToolbarGroup>
           <ToolbarGroup>
-            <ExportToolbarButton>
+            <ButtonClickPanelNoteExport>
               <ArrowUpToLineIcon />
-            </ExportToolbarButton>
+            </ButtonClickPanelNoteExport>
             <ImportToolbarButton />
           </ToolbarGroup>
           <ToolbarGroup>
@@ -68,24 +68,24 @@ const ToolbarNote = () => {
             <MarkToolbarButton nodeType={KEYS.code} tooltip="Code (⌘+E)">
               <Code2Icon />
             </MarkToolbarButton>
-            <FontColorToolbarButton nodeType={KEYS.color} tooltip="Text color">
+            <ButtonClickPanelNoteFontColor nodeType={KEYS.color} tooltip="Text color">
               <BaselineIcon />
-            </FontColorToolbarButton>
-            <FontColorToolbarButton nodeType={KEYS.backgroundColor} tooltip="Background color">
+            </ButtonClickPanelNoteFontColor>
+            <ButtonClickPanelNoteFontColor nodeType={KEYS.backgroundColor} tooltip="Background color">
               <PaintBucketIcon />
-            </FontColorToolbarButton>
+            </ButtonClickPanelNoteFontColor>
           </ToolbarGroup>
           <ToolbarGroup>
-            <AlignToolbarButton />
-            <NumberedListToolbarButton />
-            <BulletedListToolbarButton />
-            <TodoListToolbarButton />
+            <ButtonClickPanelNoteAlign />
+            <ButtonClickPanelNoteNumberedList />
+            <ButtonClickPanelNoteBulletedList />
+            <ButtonClickPanelNoteTodoList />
             <ToggleToolbarButton />
           </ToolbarGroup>
           <ToolbarGroup>
             <LinkToolbarButton />
             <TableToolbarButton />
-            <EmojiToolbarButton />
+            <ButtonClickPanelNoteEmoji />
           </ToolbarGroup>
           <ToolbarGroup>
             <MediaToolbarButton nodeType={KEYS.img} />
