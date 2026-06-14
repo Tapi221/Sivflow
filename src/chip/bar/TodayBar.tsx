@@ -2,7 +2,7 @@ import { useDateFnsLocale, useT } from "@shared/i18n/useT";
 import { format } from "date-fns";
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, ChevronRight } from "@/ui/icons";
+import { ChevronLeft, ChevronRight } from "@/chip/icons";
 
 type Props = {
   onPrevious: () => void;

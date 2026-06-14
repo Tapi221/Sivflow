@@ -11,7 +11,7 @@ import { getTagColorKey, getTagColorSwatchStyle } from "@/chip/budge/tag/tagColo
 import { getTagColorKey, getTagColorSwatchStyle } from "@/chip/budge/tag/tagColor";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
-import { Check, Palette, Plus, Tag as TagIcon } from "@/ui/icons";
+import { Check, Palette, Plus, Tag as TagIcon } from "@/chip/icons";
 import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "./command";
 import { PlaceholderText } from "./placeholder-text";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";

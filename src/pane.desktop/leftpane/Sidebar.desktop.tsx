@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import type { FolderTagMode } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
 import { useFolderTagModeStore } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import { LogOut, Tag } from "@/ui/icons";
+import { LogOut, Tag } from "@/chip/icons";
 
 type SidebarTranslationKey =
   | "sidebarHome"

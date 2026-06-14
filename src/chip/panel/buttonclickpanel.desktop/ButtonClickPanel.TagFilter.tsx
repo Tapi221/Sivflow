@@ -4,7 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
 import { TagFilterPanel } from "@/components/explorer/TagFilterPanel";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
-import { Filter } from "@/ui/icons";
+import { Filter } from "@/chip/icons";
 
 interface TagFilterPopoverProps {
   allTags: string[];

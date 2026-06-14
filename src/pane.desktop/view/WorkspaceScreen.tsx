@@ -23,7 +23,7 @@ import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.Layered
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceExplorerTab, WorkspaceNoteTab, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 import type { DocumentItem, Folder, Note, SelectedExplorerItem } from "@/types";
-import { Search } from "@/ui/icons";
+import { Search } from "@/chip/icons";
 import { MobileCalendarSidebar, MobileCalendarSidebarOpenButton } from "./MobileCalendarSidebar";
 import { ScheduleScreen as CalendarScheduleScreen } from "./Screen.Schedule.desktop";
 import { WorkspaceActionToolbar } from "./WorkspaceActionToolbar";

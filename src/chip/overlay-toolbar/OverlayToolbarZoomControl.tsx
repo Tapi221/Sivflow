@@ -1,7 +1,7 @@
 import React from "react";
 import { ScrollBar } from "@/chip/bar/ScrollBar";
 import { cn } from "@/lib/utils";
-import { Minus, Plus } from "@/ui/icons";
+import { Minus, Plus } from "@/chip/icons";
 import { OverlayToolbarButton } from "./OverlayToolbarButton";
 
 type OverlayToolbarZoomControlBaseProps = {

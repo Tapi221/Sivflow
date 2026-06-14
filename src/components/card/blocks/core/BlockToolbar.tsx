@@ -6,8 +6,8 @@ import type { EditorBlockIconName, EditorBlockType } from "@/lib/editorBlockSett
 import { getEditorBlockDefinition, parseEditorBlockSettings } from "@/lib/editorBlockSettings";
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
-import type { IconProps } from "@/ui/icons";
-import { Plus } from "@/ui/icons";
+import type { IconProps } from "@/chip/icons";
+import { Plus } from "@/chip/icons";
 
 interface BlockToolbarProps {
   label: string;

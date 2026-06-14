@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/chip/ui/button/button";
-import { ArrowLeft, Construction } from "@/ui/icons";
+import { ArrowLeft, Construction } from "@/chip/icons";
 
 const NotImplementedPlaceholder = () => {
   const navigate = useNavigate();

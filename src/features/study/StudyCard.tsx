@@ -4,7 +4,7 @@ import { Badge } from "@/chip/ui/badge";
 import { Button } from "@/chip/ui/button/button";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import type { Card } from "@/types";
-import { Volume2 } from "@/ui/icons";
+import { Volume2 } from "@/chip/icons";
 import { toIsoStringOrNull } from "@/utils/toMillis";
 
 type FlashcardCardLike = ComponentProps<typeof Flashcard>["card"];

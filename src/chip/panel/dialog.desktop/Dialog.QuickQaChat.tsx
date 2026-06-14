@@ -7,7 +7,7 @@ import { useCardCommands } from "@/components/card/hooks/useCardCommands";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import { MessageSquare, Plus, Sparkles } from "@/ui/icons";
+import { MessageSquare, Plus, Sparkles } from "@/chip/icons";
 
 type QuickQaChatDialogProps = {
   open: boolean;

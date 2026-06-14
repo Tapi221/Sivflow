@@ -3,7 +3,7 @@ import type { InkDocument, InkEditTool, InkPoint, InkSide, InkStroke } from "@co
 import { cloneInkDocument, createEmptyInkDocument, INK_DOCUMENT_VERSION, INK_PAPER_H, INK_PAPER_W, normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
 import { Button } from "@/chip/ui/button/button";
 import { cn } from "@/lib/utils";
-import { Eraser, PenLine, Redo2, Trash2, Undo2 } from "@/ui/icons";
+import { Eraser, PenLine, Redo2, Trash2, Undo2 } from "@/chip/icons";
 import type { RectLike } from "@/utils/inkCoords";
 import { clientPointToPaperPoint, paperPointToCanvasPoint, squaredDistance } from "@/utils/inkCoords";
 import type { InkHistoryState, InkLayerHandle } from "./inkLayer.types";

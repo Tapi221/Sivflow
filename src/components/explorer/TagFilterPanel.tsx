@@ -11,7 +11,7 @@ import { SegmentedControlGroup } from "@/components/panel/SegmentedControlGroup"
 import { useTags } from "@/features/settings/hooks/useTags";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
-import { Tag } from "@/ui/icons";
+import { Tag } from "@/chip/icons";
 
 type ContentTypeFilter = "card" | "pdf";
 type ToggleableFlag = "any" | "on" | "off";

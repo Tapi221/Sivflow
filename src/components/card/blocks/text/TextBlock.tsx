@@ -1,7 +1,7 @@
 import React from "react";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { cn } from "@/lib/utils";
-import { Type } from "@/ui/icons";
+import { Type } from "@/chip/icons";
 import { TextBlockContent } from "./TextBlockContent";
 
 interface TextBlockProps {

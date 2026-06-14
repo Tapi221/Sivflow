@@ -1,6 +1,6 @@
 import type { SVGProps } from "react";
 import { cn } from "@/lib/utils";
-import { X } from "@/ui/icons";
+import { X } from "@/chip/icons";
 import type { TagColorKey } from "./tagColor";
 import { getTagColorStyle } from "./tagColor";
 

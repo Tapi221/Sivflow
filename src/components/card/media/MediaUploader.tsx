@@ -11,7 +11,7 @@ import { deleteImageBlob, getImageBlob, putImageBlob } from "@/services/imageFil
 import { getLocalDb } from "@/services/localdb";
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
 import type { AssetRecord, UploadedImage } from "@/types";
-import { Check, RotateCcw, Upload, X } from "@/ui/icons";
+import { Check, RotateCcw, Upload, X } from "@/chip/icons";
 import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize.utils";
 
 type ResolvedEditableImageStatus = "pending" | "uploading" | "ready" | "failed";

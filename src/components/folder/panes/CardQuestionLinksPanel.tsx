@@ -11,7 +11,7 @@ import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/us
 import { getLocalDb } from "@/services/localdb";
 import type { Card, CardBlock } from "@/types/domain/card";
 import type { CardSet } from "@/types/domain/cardSet";
-import { Link, Plus } from "@/ui/icons";
+import { Link, Plus } from "@/chip/icons";
 
 type CardQuestionLinksPanelProps = {
   selectedCardId: string | null;

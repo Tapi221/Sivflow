@@ -9,7 +9,7 @@ import type { StoredGoogleAccount } from "@/integration/googlecalendar-integrati
 import { readStoredAccounts } from "@/integration/googlecalendar-integration/gcal.multi-storage";
 import { cn } from "@/lib/utils";
 import type { UserSettings } from "@/types";
-import { Brain, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/ui/icons";
+import { Brain, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/chip/icons";
 
 type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "ai" | "hotkey";
 type SettingsLanguage = UserSettings["language"];
