@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@shared/i18n/useT";
-import type { ChangeEvent, CSSProperties, FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent, ReactNode } from "react";
+import type { ChangeEvent, FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import { GoogleIcon } from "@/chip/icons/icons.schedule";
 import type { CalendarListMenuAction } from "@/chip/panel/rightclickpanel.desktop/CalendarListMenu.desktop";
 import { CALENDAR_LIST_MENU_HEIGHT, CALENDAR_LIST_MENU_PANEL_ID, CALENDAR_LIST_MENU_WIDTH, CalendarListMenu } from "@/chip/panel/rightclickpanel.desktop/CalendarListMenu.desktop";
@@ -92,6 +92,7 @@ const ADD_GOOGLE_CALENDAR_LABEL = "Googleカレンダーを追加";
 const ADD_PROJECT_EMPTY_MESSAGE = "プロジェクト名を入力してください";
 const ADD_PROJECT_LABEL = "プロジェクトを追加";
 const CALENDAR_CONTEXT_MENU_DIMENSIONS = { width: CALENDAR_LIST_MENU_WIDTH, height: CALENDAR_LIST_MENU_HEIGHT };
+const CALENDAR_SIDEBAR_COLOR_INPUT_CLASS_NAME = "pointer-events-none fixed left-0 top-0 h-px w-px -translate-x-full opacity-0";
 const CALENDAR_SIDEBAR_CONTENT_CLASS_NAME = "pt-2";
 const CALENDAR_SIDEBAR_GOOGLE_LIST_CLASS_NAME = "min-h-0 flex-1 overflow-y-auto px-4 pt-1";
 const CALENDAR_SIDEBAR_HEADING_ROW_CLASS_NAME = "group flex min-h-6 items-center gap-1 px-4";
@@ -99,7 +100,6 @@ const CALENDAR_SIDEBAR_ADD_BUTTON_CLASS_NAME = "flex h-5 w-5 shrink-0 items-cent
 const CALENDAR_SIDEBAR_HEADING_CLASS_NAME = "m-0 min-w-0 flex-1 truncate text-sm font-bold leading-5 text-neutral-950";
 const CALENDAR_SIDEBAR_PROJECT_LIST_CLASS_NAME = "max-h-80 shrink-0 overflow-y-auto px-4 pb-1";
 const CALENDAR_SIDEBAR_ROW_CONTENT_CLASS_NAME = "pl-0";
-const COLOR_INPUT_STYLE: CSSProperties = { position: "fixed", left: -9999, top: -9999, width: 1, height: 1, opacity: 0, pointerEvents: "none" };
 const CONNECTING_GOOGLE_CALENDAR_LABEL = "接続中...";
 const DEFAULT_CALENDAR_COLOR = "#64748b";
 const GOOGLE_CALENDAR_SECTION_LABEL = "Google Calendar";
@@ -373,9 +373,9 @@ const CalendarSidebarContent = ({ appProjects, projectCalendarLinks, googleCalen
           <div className={CALENDAR_SIDEBAR_GOOGLE_LIST_CLASS_NAME}><GoogleAccountsSection accounts={googleAccounts} isConnecting={isAnyCalendarConnecting} projectCalendarLinks={projectCalendarLinks} googleCalendarColorOverrides={googleCalendarColorOverrides} onAddCalendar={handleAddGoogleCalendar} onToggleCalendar={onToggleCalendar} onOpenCalendarContextMenu={handleOpenCalendarContextMenu} onReconnectAccount={onReconnectAccount} /></div>
         </div>
       </nav>
-      <input ref={colorInputRef} type="color" aria-label="カレンダー色" style={COLOR_INPUT_STYLE} onChange={handleChangeCalendarColor} />
+      <input ref={colorInputRef} type="color" aria-label="カレンダー色" className={CALENDAR_SIDEBAR_COLOR_INPUT_CLASS_NAME} onChange={handleChangeCalendarColor} />
       {calendarContextMenu ? createPortal(<CalendarListMenu x={calendarContextMenu.x} y={calendarContextMenu.y} actions={calendarMenuActions} menuRef={calendarContextMenuRef} noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} />, document.body) : null}
-      {projectLinksContextMenu ? createPortal(<ProjectCalendarLinksMenu x={projectLinksContextMenu.x} y={projectLinksContextMenu.y} actions={projectLinksMenuActions} menuRef={projectLinksContextMenuRef} noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} />, document.body) : null}
+      {projectLinksContextMenu ? createPortal(<ProjectCalendarLinksMenu x={projectLinksContextMenu.x} y={projectLinksMenuActions} actions={projectLinksMenuActions} menuRef={projectLinksContextMenuRef} noDragStyle={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} />, document.body) : null}
     </div>
   );
 };
