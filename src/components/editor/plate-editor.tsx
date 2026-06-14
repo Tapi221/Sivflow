@@ -16,7 +16,7 @@ const PlateEditor = ({ initialValue, onChange }: PlateEditorProps) => {
     value: initialValue,
   });
   return (
-    <Plate editor={editor} onChange={onChange}>
+    <Plate editor={editor} onValueChange={onChange}>
       <EditorContainer>
         <Editor variant="demo" />
       </EditorContainer>
