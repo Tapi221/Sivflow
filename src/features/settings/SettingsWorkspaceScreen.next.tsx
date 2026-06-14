@@ -1,11 +1,18 @@
-import { SettingsThemeColorControl } from "@/features/settings/SettingsThemeColorControl";
+import { DialogDesktopPanel } from "@/chip/panel/dialog.desktop/dialog";
 
-const SettingsWorkspaceScreenNext = () => {
+type Props = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+const TestDialog = ({ open, onOpenChange }: Props) => {
+  const handleClose = () => onOpenChange(false);
+  if (!open) return null;
   return (
-    <div className="flex flex-col">
-      <SettingsThemeColorControl />
-    </div>
+    <DialogDesktopPanel surfaceClassName="settings-workspace-dialog" ariaLabel="Settings" onClose={handleClose}>
+      <div />
+    </DialogDesktopPanel>
   );
 };
 
-export { SettingsWorkspaceScreenNext };
+export { TestDialog };
