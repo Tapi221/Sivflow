@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
+import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
 import { getLocalDb } from "@/services/localdb";
 import type { Note, NoteBlockContent } from "@/types";
 
@@ -41,7 +42,7 @@ const getErrorMessage = (error: unknown): string => {
 };
 const useNotes = (folderId?: string | null, options?: UseNotesOptions) => {
   const { currentUser } = useAuthSession();
-  const userId = currentUser?.uid ?? null;
+  const userId = useEffectiveLocalUserId();
   const enabled = options?.enabled ?? true;
 
   const notes = useLiveQuery(async () => {
