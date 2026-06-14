@@ -1,7 +1,7 @@
 import { useState } from "react";
+import type { CSSProperties } from "react";
 import authBackgroundSrc from "@shared/assets/backgrounds/sivflow-flow-background.svg";
 import appIconSrc from "@shared/assets/icons/app-icon.svg";
-import type { CSSProperties } from "react";
 import { signInWithGoogle } from "@/services/auth/googleSignIn";
 
 type MobileLoginPageStyles = {
@@ -39,7 +39,7 @@ const styles: MobileLoginPageStyles = {
     backgroundPosition: "center",
     backgroundRepeat: "no-repeat",
     backgroundSize: "cover",
-    fontFamily: "var(--app-font-family-ui), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    fontFamily: "var(--app-font-family-ui)",
   },
   backgroundOverlay: {
     position: "fixed",
