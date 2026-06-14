@@ -1,12 +1,9 @@
-import { useLayoutEffect, useRef, useState } from "react";
 import { format } from "date-fns";
+import { useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { HoverEventTooltip } from "@/chip/toolchip/HoverEventTooltip";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { eventChipDesign } from "./eventChipDesign.generated";
-
-
 
 type CalendarEventChipWeekdayProps = {
   event: GoogleCalendarEvent;
@@ -25,20 +22,18 @@ type CalendarEventChipWeekdayStyle = CSSProperties & {
   printColorAdjust: "exact";
 };
 
-
-
 const CHIP_ROOT_CLASS = "relative isolate h-full min-h-0 w-full";
 const CHIP_LINE_MASK_CLASS = "pointer-events-none absolute inset-0 rounded-md bg-white";
-const CHIP_BASE_CLASS = "relative z-10 flex h-full min-h-0 w-full overflow-hidden rounded-md text-left";
-const CHIP_NORMAL_CLASS = "flex-col gap-[0.5px] py-[2px] pl-1 pr-[1px]";
-const CHIP_INLINE_CLASS = "flex-col py-[1px] pl-1 pr-[1px]";
-const CHIP_TITLE_CLASS = "overflow-hidden whitespace-normal break-words text-[12px] font-medium leading-[17px]";
+const CHIP_BASE_CLASS = "relative z-10 flex h-full min-h-0 w-full overflow-hidden rounded-md border-l-4 text-left";
+const CHIP_NORMAL_CLASS = "flex-col gap-px py-0.5 pl-1 pr-px";
+const CHIP_INLINE_CLASS = "flex-col py-px pl-1 pr-px";
+const CHIP_TITLE_CLASS = "overflow-hidden whitespace-normal break-words text-xs font-medium leading-4";
 const CHIP_TITLE_WITH_TIME_CLASS = `${CHIP_TITLE_CLASS} tabular-nums`;
-const CHIP_TIME_CLASS = "overflow-hidden whitespace-normal break-words text-[11px] font-semibold leading-[16px] tabular-nums opacity-80";
-const CHIP_LAST_LINE_TIME_CLASS = "ml-1 inline-block whitespace-nowrap text-[11px] font-semibold leading-[16px] tabular-nums opacity-80";
+const CHIP_TIME_CLASS = "overflow-hidden whitespace-normal break-words text-xs font-semibold leading-4 tabular-nums opacity-80";
+const CHIP_LAST_LINE_TIME_CLASS = "ml-1 inline-block whitespace-nowrap text-xs font-semibold leading-4 tabular-nums opacity-80";
 const CHIP_INLINE_ROW_CLASS = "flex min-w-0 items-baseline gap-1 overflow-hidden";
-const CHIP_INLINE_TITLE_CLASS = "min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-[12px] font-medium leading-[17px]";
-const CHIP_INLINE_TIME_CLASS = "shrink-0 overflow-hidden whitespace-nowrap text-[11px] font-semibold leading-[16px] tabular-nums opacity-80";
+const CHIP_INLINE_TITLE_CLASS = "min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-medium leading-4";
+const CHIP_INLINE_TIME_CLASS = "shrink-0 overflow-hidden whitespace-nowrap text-xs font-semibold leading-4 tabular-nums opacity-80";
 const CHIP_MEASUREMENT_BASE_CLASS = "pointer-events-none invisible absolute inset-0 flex min-h-0 w-full flex-col overflow-hidden rounded-md text-left";
 const CHIP_MEASUREMENT_TOLERANCE_PX = 1;
 const INLINE_TIME_GAP_PX = 4;
@@ -51,21 +46,15 @@ const DEFAULT_CHIP_LAYOUT_STATE: ChipLayoutState = {
   useLastLineTimeLayout: false,
 };
 
-
-
 const getPixelValue = (value: string) => {
   const parsedValue = Number.parseFloat(value);
-
   return Number.isFinite(parsedValue) ? parsedValue : 0;
 };
 const getElementLineHeight = (element: HTMLElement) => {
   const styles = window.getComputedStyle(element);
   const parsedLineHeight = Number.parseFloat(styles.lineHeight);
-
   if (Number.isFinite(parsedLineHeight)) return parsedLineHeight;
-
   const parsedFontSize = Number.parseFloat(styles.fontSize);
-
   return Number.isFinite(parsedFontSize) ? parsedFontSize * 1.2 : 16;
 };
 const getElementTextWidth = (element: HTMLElement) => {
@@ -73,17 +62,13 @@ const getElementTextWidth = (element: HTMLElement) => {
   const styles = window.getComputedStyle(element);
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
-
   if (!context) return element.scrollWidth;
-
   context.font = [styles.fontStyle, styles.fontVariant, styles.fontWeight, styles.fontSize, styles.fontFamily].filter(Boolean).join(" ");
-
   return context.measureText(text).width;
 };
 const calculateTitleLineClamp = (availableHeight: number, fullTitleHeight: number, titleLineHeight: number) => {
   const visibleLineCount = Math.floor((availableHeight + CHIP_MEASUREMENT_TOLERANCE_PX) / titleLineHeight);
   const fullTitleLineCount = Math.ceil(fullTitleHeight / titleLineHeight);
-
   return Math.max(DEFAULT_TITLE_LINE_CLAMP, Math.min(fullTitleLineCount, visibleLineCount));
 };
 const calculateChipLayout = (layoutMeasurement: HTMLDivElement, titleMeasurement: HTMLSpanElement, timeMeasurement: HTMLSpanElement, titleWithTimeMeasurement: HTMLSpanElement): ChipLayoutState => {
@@ -94,14 +79,13 @@ const calculateChipLayout = (layoutMeasurement: HTMLDivElement, titleMeasurement
   const fullTitleHeight = titleMeasurement.scrollHeight;
   const timeHeight = timeMeasurement.scrollHeight;
   const titleWithTimeHeight = titleWithTimeMeasurement.scrollHeight;
-  const rowGap = getPixelValue(layoutStyles.rowGap || layoutStyles.gap);
+  const rowGap = getPixelValue(layoutStyles.rowGap === "" ? layoutStyles.gap : layoutStyles.rowGap);
   const canShowTimeLabel = fullTitleHeight + rowGap + timeHeight <= contentHeight + CHIP_MEASUREMENT_TOLERANCE_PX;
   const titleAvailableHeight = canShowTimeLabel ? contentHeight - rowGap - timeHeight : contentHeight;
   const inlineContentWidth = getElementTextWidth(titleMeasurement) + INLINE_TIME_GAP_PX + getElementTextWidth(timeMeasurement);
   const canUseInlineTimeLayout = !canShowTimeLabel && inlineContentWidth <= contentWidth + CHIP_MEASUREMENT_TOLERANCE_PX;
   const canUseLastLineTimeLayout = !canShowTimeLabel && !canUseInlineTimeLayout && titleWithTimeHeight <= contentHeight + CHIP_MEASUREMENT_TOLERANCE_PX;
   const titleLineClampSourceHeight = canUseLastLineTimeLayout ? titleWithTimeHeight : fullTitleHeight;
-
   return {
     showTimeLabel: canShowTimeLabel,
     titleLineClamp: calculateTitleLineClamp(titleAvailableHeight, titleLineClampSourceHeight, titleLineHeight),
@@ -117,81 +101,40 @@ const createTitleClampStyle = (lineClamp: number): CSSProperties => {
       whiteSpace: "nowrap",
     };
   }
-
   return {
     display: "-webkit-box",
     WebkitBoxOrient: "vertical",
     WebkitLineClamp: lineClamp,
   };
 };
-const createCalendarEventChipWeekdayStyle = (backgroundColor: string, accentColor: string, textColor: string, useInlineTimeLayout: boolean): CalendarEventChipWeekdayStyle => ({
+const createCalendarEventChipWeekdayStyle = (backgroundColor: string, accentColor: string, textColor: string): CalendarEventChipWeekdayStyle => ({
   "--calendar-event-chip-accent": accentColor,
   "--calendar-event-chip-bg": backgroundColor,
   WebkitPrintColorAdjust: "exact",
   printColorAdjust: "exact",
   background: backgroundColor,
-  borderLeft: `${eventChipDesign.weekday.borderWidthPx}px solid ${accentColor}`,
-  borderRadius: eventChipDesign.weekday.radiusPx,
+  borderLeftColor: accentColor,
   color: textColor,
-  gap: useInlineTimeLayout ? undefined : eventChipDesign.weekday.gapPx,
-  paddingBottom: useInlineTimeLayout ? eventChipDesign.weekday.inlinePaddingYPx : eventChipDesign.weekday.paddingYPx,
-  paddingLeft: eventChipDesign.weekday.paddingLeftPx,
-  paddingRight: eventChipDesign.weekday.paddingRightPx,
-  paddingTop: useInlineTimeLayout ? eventChipDesign.weekday.inlinePaddingYPx : eventChipDesign.weekday.paddingYPx,
 });
-const createLineMaskStyle = (): CSSProperties => ({
-  borderRadius: eventChipDesign.weekday.radiusPx,
-});
-const createMeasurementStyle = (): CSSProperties => ({
-  borderRadius: eventChipDesign.weekday.radiusPx,
-  gap: eventChipDesign.weekday.gapPx,
-  paddingBottom: eventChipDesign.weekday.paddingYPx,
-  paddingLeft: eventChipDesign.weekday.paddingLeftPx,
-  paddingRight: eventChipDesign.weekday.paddingRightPx,
-  paddingTop: eventChipDesign.weekday.paddingYPx,
-});
-const createTitleStyle = (lineClamp: number): CSSProperties => ({
-  ...createTitleClampStyle(lineClamp),
-  fontSize: eventChipDesign.weekday.titleFontSizePx,
-  lineHeight: `${eventChipDesign.weekday.titleLineHeightPx}px`,
-});
-const createTitleMeasurementStyle = (): CSSProperties => ({
-  fontSize: eventChipDesign.weekday.titleFontSizePx,
-  lineHeight: `${eventChipDesign.weekday.titleLineHeightPx}px`,
-});
-const createTimeStyle = (): CSSProperties => ({
-  fontSize: eventChipDesign.weekday.timeFontSizePx,
-  lineHeight: `${eventChipDesign.weekday.timeLineHeightPx}px`,
-});
-const createLastLineTimeStyle = (): CSSProperties => ({
-  fontSize: eventChipDesign.weekday.timeFontSizePx,
-  lineHeight: `${eventChipDesign.weekday.timeLineHeightPx}px`,
-});
+const createTitleStyle = (lineClamp: number): CSSProperties => createTitleClampStyle(lineClamp);
 const encodeBase64Url = (value: string): string | null => {
   if (typeof window === "undefined") return null;
-
   const bytes = new TextEncoder().encode(value);
   let binaryValue = "";
-
   for (const byte of bytes) {
     binaryValue += String.fromCharCode(byte);
   }
-
   return window.btoa(binaryValue).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 };
 const createGoogleCalendarEventEditUrl = (event: GoogleCalendarEvent): string | null => {
   const eventId = event.externalId ?? event.id;
   if (!eventId || !event.calendarId) return null;
-
   const encodedEventPayload = encodeBase64Url(`${eventId} ${event.calendarId}`);
   if (!encodedEventPayload) return null;
-
   return `${GOOGLE_CALENDAR_EVENT_EDIT_URL}?eid=${encodedEventPayload}`;
 };
 const getChipClassName = (useInlineTimeLayout: boolean): string => [CHIP_BASE_CLASS, useInlineTimeLayout ? CHIP_INLINE_CLASS : CHIP_NORMAL_CLASS].join(" ");
 const getMeasurementClassName = (): string => [CHIP_MEASUREMENT_BASE_CLASS, CHIP_NORMAL_CLASS].join(" ");
-
-
 
 const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEventChipWeekdayProps) => {
   const layoutMeasurementRef = useRef<HTMLDivElement>(null);
@@ -204,91 +147,80 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
   const endsAt = event.endsAt instanceof Date ? event.endsAt : new Date(event.endsAt ?? event.startsAt);
   const timeLabel = event.isAllDay ? "終日" : `${format(startsAt, "H:mm")} ~ ${format(endsAt, "H:mm")}`;
   const titleLabel = event.title ?? "Untitled";
-  const chipStyle = createCalendarEventChipWeekdayStyle(tokens.bg, tokens.border, tokens.text, chipLayout.useInlineTimeLayout);
+  const chipStyle = createCalendarEventChipWeekdayStyle(tokens.bg, tokens.border, tokens.text);
   const editUrl = createGoogleCalendarEventEditUrl(event);
-  const handleEdit = editUrl ? () => {
-    window.open(editUrl, "_blank", "noopener,noreferrer"); } : undefined;
-
+  const handleEdit = editUrl
+    ? () => {
+      window.open(editUrl, "_blank", "noopener,noreferrer");
+    }
+    : undefined;
   useLayoutEffect(() => {
     const layoutMeasurement = layoutMeasurementRef.current;
     const titleMeasurement = titleMeasurementRef.current;
     const timeMeasurement = timeMeasurementRef.current;
     const titleWithTimeMeasurement = titleWithTimeMeasurementRef.current;
-
     if (!layoutMeasurement || !titleMeasurement || !timeMeasurement || !titleWithTimeMeasurement) return;
-
     let frameId = 0;
-
     const updateChipLayout = () => {
       window.cancelAnimationFrame(frameId);
       frameId = window.requestAnimationFrame(() => {
         const nextLayout = calculateChipLayout(layoutMeasurement, titleMeasurement, timeMeasurement, titleWithTimeMeasurement);
-
         setChipLayout((previousLayout) => {
           if (previousLayout.showTimeLabel === nextLayout.showTimeLabel && previousLayout.titleLineClamp === nextLayout.titleLineClamp && previousLayout.useInlineTimeLayout === nextLayout.useInlineTimeLayout && previousLayout.useLastLineTimeLayout === nextLayout.useLastLineTimeLayout) {
             return previousLayout;
           }
-
           return nextLayout;
         });
       });
     };
-
     updateChipLayout();
-
     if (typeof ResizeObserver === "undefined") {
       window.addEventListener("resize", updateChipLayout);
-
       return () => {
         window.cancelAnimationFrame(frameId);
         window.removeEventListener("resize", updateChipLayout);
       };
     }
-
     const resizeObserver = new ResizeObserver(updateChipLayout);
     resizeObserver.observe(layoutMeasurement);
-
     return () => {
       window.cancelAnimationFrame(frameId);
       resizeObserver.disconnect();
     };
   }, [timeLabel, titleLabel]);
-
   return (
     <HoverEventTooltip title={titleLabel} subtitle={timeLabel} accentColor={tokens.border} className="h-full min-h-0 w-full" disabled={tooltipDisabled} onEdit={handleEdit}>
       <div className={CHIP_ROOT_CLASS}>
-        <div aria-hidden="true" className={CHIP_LINE_MASK_CLASS} style={createLineMaskStyle()} />
+        <div aria-hidden="true" className={CHIP_LINE_MASK_CLASS} />
         <div data-calendar-event-chip="weekday" className={getChipClassName(chipLayout.useInlineTimeLayout)} style={chipStyle}>
           {chipLayout.useInlineTimeLayout ? (
             <div className={CHIP_INLINE_ROW_CLASS}>
-              <span className={CHIP_INLINE_TITLE_CLASS} style={createTitleMeasurementStyle()}>{titleLabel}</span>
-              <span className={CHIP_INLINE_TIME_CLASS} style={createTimeStyle()}>{timeLabel}</span>
+              <span className={CHIP_INLINE_TITLE_CLASS}>{titleLabel}</span>
+              <span className={CHIP_INLINE_TIME_CLASS}>{timeLabel}</span>
             </div>
           ) : chipLayout.useLastLineTimeLayout ? (
             <span className={CHIP_TITLE_WITH_TIME_CLASS} style={createTitleStyle(chipLayout.titleLineClamp)}>
               {titleLabel}
-              <span className={CHIP_LAST_LINE_TIME_CLASS} style={createLastLineTimeStyle()}>{timeLabel}</span>
+              <span className={CHIP_LAST_LINE_TIME_CLASS}>{timeLabel}</span>
             </span>
           ) : (
             <>
               <span className={CHIP_TITLE_CLASS} style={createTitleStyle(chipLayout.titleLineClamp)}>
                 {titleLabel}
               </span>
-
-              {chipLayout.showTimeLabel ? <span className={CHIP_TIME_CLASS} style={createTimeStyle()}>{timeLabel}</span> : null}
+              {chipLayout.showTimeLabel ? <span className={CHIP_TIME_CLASS}>{timeLabel}</span> : null}
             </>
           )}
-
-          <div ref={layoutMeasurementRef} aria-hidden="true" className={getMeasurementClassName()} style={createMeasurementStyle()}>
-            <span ref={titleMeasurementRef} className={CHIP_TITLE_CLASS} style={createTitleMeasurementStyle()}>
+          <div ref={layoutMeasurementRef} aria-hidden="true" className={getMeasurementClassName()}>
+            <span ref={titleMeasurementRef} className={CHIP_TITLE_CLASS}>
               {titleLabel}
             </span>
-            <span ref={timeMeasurementRef} className={CHIP_TIME_CLASS} style={createTimeStyle()}>
+            <span ref={timeMeasurementRef} className={CHIP_TIME_CLASS}>
               {timeLabel}
             </span>
-            <span ref={titleWithTimeMeasurementRef} className={CHIP_TITLE_WITH_TIME_CLASS} style={createTitleMeasurementStyle()}>
+            <span ref={titleWithTimeMeasurementRef} className={CHIP_TITLE_WITH_TIME_CLASS}>
               {titleLabel}
-              <span className={CHIP_LAST_LINE_TIME_CLASS} style={createLastLineTimeStyle()}>{timeLabel}</span>
+              <span className={CHIP_LAST_LINE_TIME_CLASS}>{timeLabel}</span>
             </span>
           </div>
         </div>
@@ -296,9 +228,5 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
     </HoverEventTooltip>
   );
 };
-
-
-
 CalendarEventChipWeekday.displayName = "CalendarEventChipWeekday";
-
 export { CalendarEventChipWeekday };
