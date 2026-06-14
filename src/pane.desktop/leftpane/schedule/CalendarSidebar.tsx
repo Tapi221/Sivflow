@@ -223,7 +223,7 @@ const AppProjectsSection = ({ projects, isAdding, onAddProject, onToggleProject,
     <div className="mt-0.5 flex flex-col gap-0.5">
       {projects.map((project) => <div key={project.id} onContextMenu={(event) => onOpenProjectLinksContextMenu(event, project)}><ProjectSourceRow project={project} onToggleProject={onToggleProject} /></div>)}
       {isAdding ? (
-        <div className="mx-2 ml-2 mt-1 flex flex-col gap-1">
+        <div className="ml-2 mt-1 flex flex-col gap-1">
           <form className="flex h-7 items-center gap-1.5" onSubmit={handleSubmit}>
             <input ref={inputRef} value={projectName} onChange={(event) => {
               setProjectName(event.target.value);
