@@ -1,7 +1,7 @@
 import * as React from "react";
+import { ToggleSwitch } from "@/chip/toggle/Toggle.switch";
 import type { SurfaceButtonProps } from "@/chip/ui/button/surface-button";
 import { SurfaceButton } from "@/chip/ui/button/surface-button";
-import { Switch } from "@/chip/ui/switch";
 import { cn } from "@/lib/utils";
 
 type MetaPanelActionRowAlign = "start" | "between" | "end";
@@ -60,6 +60,7 @@ const META_PANEL_ACTION_ROW_ALIGN_CLASS: Record<MetaPanelActionRowAlign, string>
   between: "ds-editor-pane__action-row--between",
   end: "ds-editor-pane__action-row--end",
 };
+const noopToggleSwitchChange = () => undefined;
 
 const MetaPanelActionRow = ({
   children,
@@ -164,10 +165,9 @@ const MetaPanelSwitchRow = ({
   switchAriaLabel,
 }: MetaPanelSwitchRowProps) => {
   const accessibleLabel = typeof label === "string" ? label : switchAriaLabel;
-
   return (
     <MetaPanelActionRow className={className}>
-      <Switch checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} aria-label={accessibleLabel} />
+      <ToggleSwitch checked={checked} onChange={onCheckedChange ?? noopToggleSwitchChange} disabled={disabled} aria-label={accessibleLabel} />
       <span className={cn("ds-editor-pane__inline-label", labelClassName)}>
         {label}
       </span>
@@ -209,10 +209,9 @@ const MetaPanelSwitch = ({
   switchAriaLabel,
 }: MetaPanelSwitchProps) => {
   const accessibleLabel = typeof label === "string" ? label : switchAriaLabel;
-
   return (
     <MetaPanelActionRow className={cn("justify-start gap-2", className)}>
-      <Switch checked={checked} onCheckedChange={onCheckedChange} disabled={disabled} aria-label={accessibleLabel} />
+      <ToggleSwitch checked={checked} onChange={onCheckedChange ?? noopToggleSwitchChange} disabled={disabled} aria-label={accessibleLabel} />
       <span className={cn("ds-editor-pane__inline-label", labelClassName)}>
         {label}
       </span>
