@@ -17,7 +17,7 @@ const MoreToolbarButton = (props: DropdownMenuProps) => {
           <MoreHorizontalIcon />
         </ToolbarButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="ignore-click-outside/toolbar flex max-h-[500px] min-w-[180px] flex-col overflow-y-auto" align="start">
+      <DropdownMenuContent className="ignore-click-outside/toolbar flex max-h-96 min-w-44 flex-col overflow-y-auto" align="start">
         <DropdownMenuGroup>
           <DropdownMenuItem
             onSelect={() => {
