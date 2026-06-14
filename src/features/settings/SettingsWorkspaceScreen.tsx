@@ -515,7 +515,7 @@ const SettingsWorkspaceScreen = () => {
     setPendingLanguage(null);
   }, [pendingLanguage, persistedLanguage]);
   return (
-    <div className="flex h-full min-h-0 w-full min-w-0 overflow-hidden bg-white font-sidebar text-neutral-800" aria-label={copy.ariaLabel}>
+    <div className="flex h-full min-h-0 w-full min-w-0 overflow-hidden bg-white text-neutral-800" aria-label={copy.ariaLabel}>
       <aside className="flex h-full w-60 min-w-56 shrink-0 flex-col gap-4 overflow-y-auto bg-stone-100 pl-3 pt-5 max-md:h-auto max-md:max-h-48 max-md:w-full max-md:min-w-0 max-md:px-3 max-md:py-3" aria-label={copy.navAriaLabel}>
         <nav className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto pr-3 max-md:flex-row max-md:overflow-x-auto max-md:overflow-y-hidden">
           {sections.map((section) => {
