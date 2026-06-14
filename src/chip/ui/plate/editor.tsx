@@ -64,11 +64,27 @@ const editorVariants = cva(
     },
   },
 );
+const plateContentDomBlockedPropNames = [
+  "decorate",
+  "renderChunk",
+  "renderElement",
+  "renderLeaf",
+  "renderText",
+] as const;
+
+const omitPlateContentDomBlockedProps = (props: PlateContentProps): PlateContentProps => {
+  const nextProps = { ...props } as Record<string, unknown>;
+  plateContentDomBlockedPropNames.forEach((propName) => {
+    delete nextProps[propName];
+  });
+  return nextProps as PlateContentProps;
+};
 
 const EditorContainer = ({ className, variant, ...props }: React.ComponentProps<"div"> & VariantProps<typeof editorContainerVariants>) => {
   return <PlateContainer className={cn("ignore-click-outside/toolbar", editorContainerVariants({ variant }), className)} {...props} />;
 };
 const Editor = ({ className, disabled, focused, variant, ref, ...props }: EditorProps & { ref?: React.RefObject<HTMLDivElement | null> }) => {
+  const contentProps = omitPlateContentDomBlockedProps(props);
   return (
     <PlateContent
       ref={ref}
@@ -81,8 +97,7 @@ const Editor = ({ className, disabled, focused, variant, ref, ...props }: Editor
         className,
       )}
       disabled={disabled}
-      disableDefaultStyles
-      {...props}
+      {...contentProps}
     />
   );
 };
