@@ -30,12 +30,10 @@ type UseUploadFileProps = {
   headers?: HeadersInit | (() => HeadersInit | Promise<HeadersInit>);
   onUploadComplete?: (file: UploadedFile) => void;
   onUploadError?: (error: unknown) => void;
-  skipPolling?: boolean;
 };
 
 const UNKNOWN_ERROR_MESSAGE = "Something went wrong, please try again later.";
 const { uploadFiles, useUploadThing: useUploadThingBase } = generateReactHelpers();
-
 const getProgressValue = (progress: UploadProgressValue) => {
   if (typeof progress === "number") {
     return progress;
