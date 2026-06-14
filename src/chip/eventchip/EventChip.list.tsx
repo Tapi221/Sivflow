@@ -16,8 +16,7 @@ const LIST_EVENT_ROW_CLASS_NAME = "grid grid-cols-[54px_26px_minmax(0,1fr)] item
 const LIST_EVENT_START_TIME_CLASS_NAME = "justify-self-end bg-white px-1 pt-2.5 text-right text-[11px] font-medium tabular-nums text-[var(--calendar-time-label-color)]";
 const LIST_EVENT_LINE_CLASS_NAME = "absolute top-0 -bottom-1.5 left-1/2 w-px -translate-x-1/2 bg-[#eceff3]";
 const LIST_EVENT_DOT_CLASS_NAME = "relative mt-2 h-2 w-2 rounded-full border-2 bg-white shadow-[0_1px_4px_rgba(15,23,42,0.08)]";
-const LIST_EVENT_CHIP_CLASS_NAME = "relative w-full overflow-hidden py-0.5 pl-3 pr-2 text-left";
-const LIST_EVENT_ACCENT_CLASS_NAME = "pointer-events-none absolute bottom-2 left-1.5 top-2 w-1 rounded-full";
+const LIST_EVENT_CHIP_CLASS_NAME = "w-full overflow-hidden py-0.5 pl-1.5 pr-2 text-left";
 const LIST_ALL_DAY_EVENT_CHIP_CLASS_NAME = "flex items-center py-0 pl-1.5 pr-2";
 const LIST_EVENT_TIME_CLASS_NAME = "overflow-hidden whitespace-nowrap font-semibold tabular-nums opacity-80";
 const LIST_EVENT_TITLE_CLASS_NAME = "line-clamp-2 overflow-hidden whitespace-normal break-words font-semibold leading-snug tracking-[-0.01em]";
@@ -56,9 +55,6 @@ const createEventChipStyle = (tokens: ReturnType<typeof generateColorTokens>, is
   borderRadius: eventChipDesign.list.radiusPx,
   color: tokens.text,
 });
-const createEventAccentStyle = (tokens: ReturnType<typeof generateColorTokens>): CSSProperties => ({
-  background: tokens.border,
-});
 const createEventTimeStyle = (): CSSProperties => ({
   fontSize: eventChipDesign.list.timeFontSizePx,
 });
@@ -82,7 +78,6 @@ const CalendarEventChipListComponent = ({ event }: CalendarEventChipListProps) =
         <span className={LIST_EVENT_DOT_CLASS_NAME} style={{ borderColor: tokens.border, boxShadow: `0 0 0 3px ${tokens.bg}` }} aria-hidden="true" />
       </div>
       <div className={cn(LIST_EVENT_CHIP_CLASS_NAME, event.isAllDay && LIST_ALL_DAY_EVENT_CHIP_CLASS_NAME)} style={chipStyle}>
-        {event.isAllDay ? null : <span className={LIST_EVENT_ACCENT_CLASS_NAME} style={createEventAccentStyle(tokens)} aria-hidden="true" />}
         {timeRangeLabel ? <div className={LIST_EVENT_TIME_CLASS_NAME} style={createEventTimeStyle()}>{timeRangeLabel}</div> : null}
         <div className={cn(LIST_EVENT_TITLE_CLASS_NAME, event.isAllDay && LIST_ALL_DAY_EVENT_TITLE_CLASS_NAME)} style={createEventTitleStyle()}>{title}</div>
       </div>
