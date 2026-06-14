@@ -6,6 +6,7 @@ import { SlateElement } from "platejs/static";
 import { cn } from "@/lib/utils";
 import { inlineSuggestionVariants } from "./suggestion";
 
+const EQUATION_FONT_FAMILY = "var(--equation-font-family)";
 const EQUATION_RENDER_OPTIONS = {
   displayMode: true,
   errorColor: "#c00",
@@ -86,7 +87,7 @@ const EquationElementDocx = (props: SlateElementProps<TEquationElement>) => {
     <SlateElement {...props}>
       <p
         style={{
-          fontFamily: "Cambria Math, Consolas, monospace",
+          fontFamily: EQUATION_FONT_FAMILY,
           fontSize: "12pt",
           margin: "8pt 0",
           textAlign: "center",
@@ -110,7 +111,7 @@ const InlineEquationElementDocx = (props: SlateElementProps<TEquationElement>) =
   }
   return (
     <SlateElement as="span" {...props}>
-      <span style={{ fontFamily: "Cambria Math, Consolas, monospace" }}>
+      <span style={{ fontFamily: EQUATION_FONT_FAMILY }}>
         {element.texExpression}
       </span>
       {props.children}
