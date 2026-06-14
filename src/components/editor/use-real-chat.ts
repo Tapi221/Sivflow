@@ -1,5 +1,4 @@
 "use client";
-
 import * as React from "react";
 import type { UseChatHelpers } from "@ai-sdk/react";
 import { useChat as useBaseChat } from "@ai-sdk/react";
@@ -13,24 +12,24 @@ import { DefaultChatTransport } from "ai";
 import type { TNode } from "platejs";
 import { KEYS, nanoid, NodeApi, TextApi } from "platejs";
 import type { PlateEditor } from "platejs/react";
-import { useEditorRef, usePluginOption } from "platejs/react";
+import { useEditorRef } from "platejs/react";
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 
 type ToolName = "comment" | "edit" | "generate";
 type TComment = {
-  comment: {
+  comment?: {
     blockId: string;
     comment: string;
     content: string;
   } | null;
-  status: "finished" | "streaming";
+  status?: "finished" | "streaming";
 };
 type TTableCellUpdate = {
-  cellUpdate: {
+  cellUpdate?: {
     content: string;
     id: string;
   } | null;
-  status: "finished" | "streaming";
+  status?: "finished" | "streaming";
 };
 type MessageDataPart = {
   toolName: ToolName;
@@ -39,11 +38,12 @@ type MessageDataPart = {
 };
 type ChatMessage = UIMessage<object, MessageDataPart>;
 type Chat = UseChatHelpers<ChatMessage>;
-
 type ChatOptions = {
   api?: string;
   body?: Record<string, unknown>;
 };
+type AIChatOptionReader = (plugin: typeof AIChatPlugin, key: string) => unknown;
+type AIChatOptionWriter = (plugin: typeof AIChatPlugin, key: string, value: unknown) => void;
 
 const DEFAULT_CHAT_API = "/api/ai/command";
 const EMPTY_BODY: Record<string, unknown> = {};
@@ -59,6 +59,14 @@ const createChatTransport = ({
     api,
     body,
   });
+};
+const getAIChatOptions = (editor: PlateEditor) => {
+  const getOption = editor.getOption as AIChatOptionReader;
+  return (getOption(AIChatPlugin, "chatOptions") ?? {}) as ChatOptions;
+};
+const setAIChat = (editor: PlateEditor, chat: Chat) => {
+  const setOption = editor.setOption as AIChatOptionWriter;
+  setOption(AIChatPlugin, "chat", chat);
 };
 const applyTableUpdate = (editor: PlateEditor, tableData: TTableCellUpdate) => {
   if (tableData.status === "finished") {
@@ -120,7 +128,7 @@ const applyCommentUpdate = (editor: PlateEditor, commentData: TComment) => {
 };
 const useRealChat = () => {
   const editor = useEditorRef();
-  const options = (usePluginOption(AIChatPlugin, "chatOptions") ?? {}) as ChatOptions;
+  const options = getAIChatOptions(editor);
   const api = options.api ?? DEFAULT_CHAT_API;
   const body = React.useMemo(() => options.body ?? EMPTY_BODY, [options.body]);
   const transport = React.useMemo(
@@ -148,8 +156,8 @@ const useRealChat = () => {
     ...options,
   });
   React.useEffect(() => {
-    editor.setOption(AIChatPlugin, "chat", chat as Chat);
-  }, [editor, chat.status, chat.messages, chat.error]);
+    setAIChat(editor, chat as Chat);
+  }, [editor, chat, chat.error, chat.messages, chat.status]);
   return chat;
 };
 
