@@ -36,8 +36,8 @@ const IGNORE_DIR_NAMES = new Set([
   "node_modules",
 ]);
 const LEGACY_ANDROID_PATHS = [
-  "apps/mobile",
-  "packages/mobile-renderer",
+  "apps/android",
+  "packages/android-renderer",
 ];
 const LEGACY_IOS_PATH_PATTERNS = [
   /(^|\/)ios($|\/)/,
@@ -48,36 +48,36 @@ const LEGACY_IOS_PATH_PATTERNS = [
 ];
 const MOVE_DIRECTORIES = [
   {
-    from: "apps/mobile",
+    from: "apps/android",
     to: "apps/android",
   },
   {
-    from: "packages/mobile-renderer",
+    from: "packages/android-renderer",
     to: "packages/android-renderer",
   },
 ];
 const REPLACEMENTS = [
-  ["apps/mobile", "apps/android"],
-  ["packages/mobile-renderer", "packages/android-renderer"],
-  ["@mobile-renderer/", "@android-renderer/"],
-  ["@mobile-renderer/*", "@android-renderer/*"],
-  ["@mobile-renderer", "@android-renderer"],
-  ["@mobile/", "@android/"],
-  ["@mobile/*", "@android/*"],
-  ["@mobile", "@android"],
-  ["sivflow-mobile", "sivflow-android"],
-  ["mobile-renderer", "android-renderer"],
+  ["apps/android", "apps/android"],
+  ["packages/android-renderer", "packages/android-renderer"],
+  ["@android-renderer/", "@android-renderer/"],
+  ["@android-renderer/*", "@android-renderer/*"],
+  ["@android-renderer", "@android-renderer"],
+  ["@android/", "@android/"],
+  ["@android/*", "@android/*"],
+  ["@android", "@android"],
+  ["sivflow-android", "sivflow-android"],
+  ["android-renderer", "android-renderer"],
   ["dev:mobile", "dev:android"],
   ["mobile:android", "android"],
   ["mobile:ios", "ios"],
 ];
 const FORBIDDEN_CONTENT_PATTERNS = [
-  "apps/mobile",
-  "packages/mobile-renderer",
-  "@mobile-renderer",
-  "@mobile/",
-  "@mobile/*",
-  "sivflow-mobile",
+  "apps/android",
+  "packages/android-renderer",
+  "@android-renderer",
+  "@android/",
+  "@android/*",
+  "sivflow-android",
   "mobile:android",
   "mobile:ios",
   "dev:mobile",

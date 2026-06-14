@@ -9,8 +9,6 @@ import type { ResolvableImageRef } from "@/types/domain/assets";
 import { Copy, Download, Image as ImageIcon, Pause, Play, Volume2 } from "@/ui/icons";
 import type { ImageGalleryItem } from "./media.types";
 
-
-
 interface AudioPlayerProps {
   urls: string[];
 }
@@ -42,8 +40,6 @@ type FailedImagesState = {
   indices: Set<number>;
 };
 
-
-
 const IMAGE_BLOCK_INSET_PX = 4;
 const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
   CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
@@ -51,8 +47,6 @@ const EMPTY_FAILED_IMAGE_INDICES = new Set<number>();
 const IMAGE_ACTION_BAR_CLASS_NAME = "absolute top-1 right-1 z-[999] pointer-events-auto flex items-center gap-0.5 rounded bg-white/80 p-px opacity-0 shadow-sm backdrop-blur-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100";
 const IMAGE_ACTION_BUTTON_CLASS_NAME = "flex h-4 w-4 items-center justify-center rounded text-zinc-400 transition-colors hover:bg-zinc-900/5 hover:text-zinc-600 focus:outline-none";
 const IMAGE_ACTION_ICON_CLASS_NAME = "h-2.5 w-2.5";
-
-
 
 const hasDisplayImageUrl = (url: string | null): url is string =>
   typeof url === "string" && url.trim().length > 0;
@@ -108,8 +102,6 @@ const getNormalizedItemsKey = (items: NormalizedDisplayImage[]) =>
       ]),
     )
     .join("\n");
-
-
 
 const AudioPlayer = ({ urls }: AudioPlayerProps) => {
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
@@ -364,7 +356,5 @@ const ImageGallery = ({ items, displayMode = "fixed", zoom = 1 }: ImageGalleryPr
     </div>
   );
 };
-
-
 
 export { AudioPlayer, ImageGallery };

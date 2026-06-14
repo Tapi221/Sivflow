@@ -120,7 +120,6 @@ const AIMenuItems = ({ input, setInput, setValue }: AIMenuItemsProps) => {
     </>
   );
 };
-
 const AIMenu = () => {
   const { api } = useEditorPlugin(AIChatPlugin);
   const open = usePluginOption(AIChatPlugin, "open");

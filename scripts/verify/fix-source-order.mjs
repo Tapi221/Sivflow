@@ -5,13 +5,13 @@ import ts from "typescript";
 
 const ROOT_DIR = process.cwd();
 const HAS_CUSTOM_SOURCE_TARGETS = Boolean(process.env.SOURCE_CONVENTION_TARGETS);
-const SOURCE_DIRECTORY_PATTERNS = process.env.SOURCE_CONVENTION_TARGETS?.split(path.delimiter).filter(Boolean) ?? ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src"];
+const SOURCE_DIRECTORY_PATTERNS = process.env.SOURCE_CONVENTION_TARGETS?.split(path.delimiter).filter(Boolean) ?? ["src", "apps/web/src", "apps/android/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/android-renderer/src", "shared", "functions/src"];
 const SOURCE_DIRECTORIES = SOURCE_DIRECTORY_PATTERNS.map((directory) => path.resolve(ROOT_DIR, directory));
 const ESLINT_BIN_PATH = path.resolve(ROOT_DIR, "node_modules/eslint/bin/eslint.js");
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 const ORDER_EXCLUDED_PATH_PARTS = ["/tests/", "/scripts/", "/src/sandbox/"];
 const ORDER_EXCLUDED_FILE_SUFFIXES = [".d.ts"];
-const ESLINT_LAYOUT_FIX_TARGETS = ["src/**/*.{ts,tsx}", "apps/web/src/**/*.{ts,tsx}", "apps/mobile/src/**/*.{ts,tsx}", "packages/core/src/**/*.{ts,tsx}", "packages/platform/src/**/*.{ts,tsx}", "packages/web-renderer/src/**/*.{ts,tsx}", "packages/mobile-renderer/src/**/*.{ts,tsx}"];
+const ESLINT_LAYOUT_FIX_TARGETS = ["src/**/*.{ts,tsx}", "apps/web/src/**/*.{ts,tsx}", "apps/android/src/**/*.{ts,tsx}", "packages/core/src/**/*.{ts,tsx}", "packages/platform/src/**/*.{ts,tsx}", "packages/web-renderer/src/**/*.{ts,tsx}", "packages/android-renderer/src/**/*.{ts,tsx}"];
 const ORDER_RANKS = {
   import: 1,
   type: 2,

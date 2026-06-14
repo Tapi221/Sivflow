@@ -17,7 +17,6 @@ const COPILOT_SYSTEM_PROMPT = `You are an advanced AI writing assistant, similar
   - CRITICAL: Always end with a punctuation mark.
   - CRITICAL: Avoid starting a new block. Do not use block formatting like >, #, 1., 2., -, etc. The suggestion should continue in the same block as the context.
   - If no context is provided or you can't generate a continuation, return "0" without explanation.`;
-
 const CopilotKit = [
   ...MarkdownKit,
   CopilotPlugin.configure(({ api }) => ({

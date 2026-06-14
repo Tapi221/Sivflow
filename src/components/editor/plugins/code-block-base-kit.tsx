@@ -2,8 +2,6 @@ import { BaseCodeBlockPlugin, BaseCodeLinePlugin, BaseCodeSyntaxPlugin } from "@
 import { all, createLowlight } from "lowlight";
 import { CodeBlockElementStatic, CodeLineElementStatic, CodeSyntaxLeafStatic } from "@/chip/ui/plate/code-block-node-static";
 
-
-
 const lowlight = createLowlight(all);
 const BaseCodeBlockKit = [
   BaseCodeBlockPlugin.configure({
@@ -13,7 +11,5 @@ const BaseCodeBlockKit = [
   BaseCodeLinePlugin.withComponent(CodeLineElementStatic),
   BaseCodeSyntaxPlugin.withComponent(CodeSyntaxLeafStatic),
 ];
-
-
 
 export { BaseCodeBlockKit };

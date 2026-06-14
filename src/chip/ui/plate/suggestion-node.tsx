@@ -82,6 +82,7 @@ const createLineBreakBadgeProps = (setOption: (key: "activeId", value: string | 
     event.preventDefault();
   },
 });
+
 const VoidRemoveSuggestionOverlay = ({ editor, element }: VoidRemoveSuggestionOverlayProps) => {
   const active = editor.api.isVoid(element) && !editor.api.isInline(element) && isVoidRemoveSuggestion(editor, element);
   if (!active) {

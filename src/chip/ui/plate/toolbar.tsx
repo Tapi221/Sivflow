@@ -93,6 +93,7 @@ const withTooltip = <T extends React.ElementType,>(Component: T) => {
   };
   return ExtendComponent;
 };
+
 const Toolbar = ({ className, ...props }: React.ComponentProps<typeof ToolbarPrimitive.Root>) => {
   return <ToolbarPrimitive.Root className={cn("relative flex select-none items-center", className)} {...props} />;
 };

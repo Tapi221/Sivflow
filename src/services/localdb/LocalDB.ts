@@ -17,8 +17,6 @@ import { defineSchema } from "./schema";
 import { CURRENT_TAG_STORE } from "./tagStoreNames";
 import type { LocalDBTableMap, SyncableEntityTable, TagRecord } from "./types";
 
-
-
 declare global {
   interface GlobalThis {
     __ALLOW_LOCAL_DB_CONSTRUCTION?: boolean;
@@ -31,8 +29,6 @@ type SyncDirection = "upload" | "download";
 type CrudPayload = Record<string, unknown>;
 type SyncableTableName = "cards" | "folders" | "cardSets" | "documents" | typeof CURRENT_TAG_STORE | "userSettings" | "images" | "projectMaps";
 
-
-
 const syncableTables: readonly SyncableTableName[] = ["cards", "folders", "cardSets", "documents", CURRENT_TAG_STORE, "userSettings", "images", "projectMaps"];
 const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
   cards: "card",
@@ -44,8 +40,6 @@ const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
   images: "asset",
   projectMaps: "projectMap",
 };
-
-
 
 const isSyncableTableName = (tableName: string): tableName is SyncableTableName => (syncableTables as readonly string[]).includes(tableName);
 const getLocalDbGlobal = (): LocalDbGlobal => globalThis as LocalDbGlobal;
@@ -410,9 +404,5 @@ class LocalDB extends Dexie {
   }
 }
 
-
-
 export { getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout, LocalDB };
-
-
 export type { CardRelation, LocalDBInstance, LocalDBLike, LocalDBTableMap, ProjectMap, SyncableEntityTable, TagRecord } from "./types";

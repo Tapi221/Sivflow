@@ -1,8 +1,6 @@
 import type { SlateLeafProps } from "platejs/static";
 import { SlateLeaf } from "platejs/static";
 
-
-
 const CodeLeafStatic = (props: SlateLeafProps) => (
   <SlateLeaf
     {...props}
@@ -12,7 +10,5 @@ const CodeLeafStatic = (props: SlateLeafProps) => (
     {props.children}
   </SlateLeaf>
 );
-
-
 
 export { CodeLeafStatic };

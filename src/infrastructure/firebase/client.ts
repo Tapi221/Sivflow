@@ -160,19 +160,9 @@ const storage = firebaseClientState.storage as FirebaseStorage;
 const functionsClient = firebaseClientState.functionsClient as Functions;
 const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
 const db: Firestore | null = firebaseClientState.firestoreDb;
+
 if (import.meta.env.DEV) {
   debugFirebase();
 }
 
-export {
-  missingFirebaseEnvVars,
-  isFirebaseClientAvailable,
-  firebaseApp,
-  auth,
-  storage,
-  functionsClient,
-  firestoreDb,
-  db,
-  requireFirebaseClient,
-  requireFirestoreDb,
-};
+export { missingFirebaseEnvVars, isFirebaseClientAvailable, firebaseApp, auth, storage, functionsClient, firestoreDb, db, requireFirebaseClient, requireFirestoreDb };

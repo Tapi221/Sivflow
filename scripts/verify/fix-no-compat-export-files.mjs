@@ -3,18 +3,18 @@ import path from "node:path";
 import ts from "typescript";
 
 const ROOT_DIR = process.cwd();
-const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src", "tests", "scripts/dev", "scripts/verify"].map((directory) => path.join(ROOT_DIR, directory));
+const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/android/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/android-renderer/src", "shared", "functions/src", "tests", "scripts/dev", "scripts/verify"].map((directory) => path.join(ROOT_DIR, directory));
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 const RESOLVABLE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".json", ".css", ".scss", ".sass", ".less"];
 const INDEX_FILE_NAMES = new Set(["index.ts", "index.tsx", "index.js", "index.jsx", "index.mjs"]);
 const EXCLUDED_FILE_SUFFIXES = [".d.ts"];
 const ALIAS_ROOTS = [
   { directory: path.join(ROOT_DIR, "src"), prefix: "@" },
-  { directory: path.join(ROOT_DIR, "apps/mobile/src"), prefix: "@mobile" },
+  { directory: path.join(ROOT_DIR, "apps/android/src"), prefix: "@android" },
   { directory: path.join(ROOT_DIR, "packages/core/src"), prefix: "@core" },
   { directory: path.join(ROOT_DIR, "packages/platform/src"), prefix: "@platform" },
   { directory: path.join(ROOT_DIR, "packages/web-renderer/src"), prefix: "@web-renderer" },
-  { directory: path.join(ROOT_DIR, "packages/mobile-renderer/src"), prefix: "@mobile-renderer" },
+  { directory: path.join(ROOT_DIR, "packages/android-renderer/src"), prefix: "@android-renderer" },
   { directory: path.join(ROOT_DIR, "shared"), prefix: "@shared" },
 ];
 

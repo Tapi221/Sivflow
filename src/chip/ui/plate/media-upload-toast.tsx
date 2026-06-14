@@ -11,6 +11,7 @@ type MediaUploadToastProps = React.ComponentPropsWithoutRef<"div"> & {
 };
 
 const getProgress = (progress: MediaUploadToastProps["progress"]) => Math.max(0, Math.min(100, progress ?? 0));
+
 const MediaUploadToast = ({ id, name, progress, status = "loading", ...props }: MediaUploadToastProps) => {
   const resolvedProgress = getProgress(progress);
   return (

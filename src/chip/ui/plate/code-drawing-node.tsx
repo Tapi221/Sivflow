@@ -1,16 +1,10 @@
 "use client";
 
 import * as React from "react";
-
 import type { TCodeDrawingElement } from "@platejs/code-drawing";
-
 import { DEFAULT_MIN_HEIGHT } from "@platejs/code-drawing";
-
 import type { PlateElementProps } from "platejs/react";
-
 import { PlateElement } from "platejs/react";
-
-
 
 const CodeDrawingElement = (props: PlateElementProps<TCodeDrawingElement>) => {
   const code = props.element.data?.code ?? "";
@@ -23,7 +17,5 @@ const CodeDrawingElement = (props: PlateElementProps<TCodeDrawingElement>) => {
     </PlateElement>
   );
 };
-
-
 
 export { CodeDrawingElement };

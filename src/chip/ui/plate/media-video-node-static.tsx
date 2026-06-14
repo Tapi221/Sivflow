@@ -3,11 +3,7 @@ import type { SlateElementProps } from "platejs/static";
 import { SlateElement } from "platejs/static";
 import { cn } from "@/lib/utils";
 
-
-
 type MediaVideoNodeStaticProps = SlateElementProps<TMediaElement>;
-
-
 
 const MediaVideoNodeStatic = ({ children, className, element, ...props }: MediaVideoNodeStaticProps) => (
   <SlateElement className={cn("my-4", className)} element={element} {...props}>
@@ -21,13 +17,7 @@ const MediaVideoNodeStatic = ({ children, className, element, ...props }: MediaV
   </SlateElement>
 );
 
-
-
 const VideoElementStatic = MediaVideoNodeStatic;
 
-
-
 export { MediaVideoNodeStatic, VideoElementStatic };
-
-
 export type { MediaVideoNodeStaticProps };

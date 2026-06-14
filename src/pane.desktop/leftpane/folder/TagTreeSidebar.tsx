@@ -15,8 +15,6 @@ import type { LayeredTreeDragState } from "./layeredTreeDnd.types";
 import { getLayeredTreeDropIndicatorLeft, isLayeredTreeAppendDropTarget } from "./layeredTreeDnd.utils";
 import { useLayeredTreeDragDrop } from "./useLayeredTreeDragDrop";
 
-
-
 type TagTreeNode = {
   id: string;
   name: string;
@@ -52,12 +50,8 @@ type TagMovePatch = {
   orderIndex: number;
 };
 
-
-
 const LIBRARY_TITLE = "Library";
 const EMPTY_TAG_MESSAGE = "タグがありません";
-
-
 
 const getTagName = (tag: TagRecord): string => {
   const name = tag.name.trim();
@@ -127,8 +121,6 @@ const flattenVisibleTagTree = (nodes: TagTreeNode[], expandedTagIds: Set<string>
   if (!hasChildren || !isExpanded) return [item];
   return [item, ...flattenVisibleTagTree(node.children, expandedTagIds, level + 1, nextVisitedTagIds)];
 });
-
-
 
 const IconChevronRight = ({ className }: { className?: string; }) => (
   <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
@@ -270,7 +262,5 @@ const TagTreeSidebar = () => {
     </aside>
   );
 };
-
-
 
 export { TagTreeSidebar };

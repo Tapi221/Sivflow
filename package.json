@@ -74,7 +74,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e:codeblock": "playwright test tests/e2e/codeblock_visual.spec.ts",
-    "test:e2e:card-layout": "playwright test tests/e2e/card_layout_consistency.spec.ts"
+    "test:e2e:card-layout": "playwright test tests/e2e/card_layout_consistency.spec.ts",
+    "fix:android-migration": "node scripts/fix-android-migration.mjs",
+    "verify:android-migration": "node scripts/fix-android-migration.mjs --check"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^1.0.0",

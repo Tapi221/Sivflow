@@ -1,8 +1,6 @@
 import type { AppSnapshot } from "@/types/domain/snapshot";
 import { CURRENT_SCHEMA_VERSION } from "@/types/domain/snapshot";
 
-
-
 const parseSnapshotFile = async (file: File): Promise<AppSnapshot> => {
   const text = await file.text();
   const parsed = JSON.parse(text);
@@ -35,7 +33,5 @@ const parseSnapshotFile = async (file: File): Promise<AppSnapshot> => {
 
   return parsed as AppSnapshot;
 };
-
-
 
 export { parseSnapshotFile };

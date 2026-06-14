@@ -29,6 +29,7 @@ type SelectEditorInputProps = React.HTMLAttributes<HTMLDivElement> & {
 };
 
 const SelectEditorContext = React.createContext<SelectEditorContextValue | undefined>(undefined);
+
 const useSelectEditorContext = () => {
   const context = React.useContext(SelectEditorContext);
   if (context === undefined) {

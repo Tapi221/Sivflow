@@ -42,12 +42,14 @@ const TodoLi = (props: ListItemProps) => {
     </li>
   );
 };
+
 const LIST_CONFIG: ListConfig = {
   todo: {
     Li: TodoLi,
     Marker: TodoMarker,
   },
 };
+
 const List = (props: ListItemProps) => {
   const { listStart, listStyleType } = props.element as TListElement;
   const { Li, Marker } = LIST_CONFIG[listStyleType] ?? {};

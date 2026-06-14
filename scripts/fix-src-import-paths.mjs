@@ -6,19 +6,19 @@ const ROOT_DIR = process.cwd();
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx"]);
 const RESOLVABLE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".json", ".css", ".scss", ".sass", ".less"];
 const IMPORT_PATTERNS = [
-  /(\bfrom\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+)(["'])/g,
-  /(\bimport\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+)(["'])/g,
-  /(\bimport\s*\(\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+)(["']\s*\))/g,
-  /(\bexport\s+[^;]*?\s+from\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+)(["'])/g,
+  /(\bfrom\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@android-renderer\/[^"']+|@android\/[^"']+|@shared\/[^"']+)(["'])/g,
+  /(\bimport\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@android-renderer\/[^"']+|@android\/[^"']+|@shared\/[^"']+)(["'])/g,
+  /(\bimport\s*\(\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@android-renderer\/[^"']+|@android\/[^"']+|@shared\/[^"']+)(["']\s*\))/g,
+  /(\bexport\s+[^;]*?\s+from\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@android-renderer\/[^"']+|@android\/[^"']+|@shared\/[^"']+)(["'])/g,
 ];
 const MULTILINE_IMPORT_EXPORT_PATTERN = /(^|\n)((?:import|export)\s[\s\S]*?;)/g;
 const ALIAS_ROOTS = [
   { directory: path.join(ROOT_DIR, "src"), prefix: "@" },
-  { directory: path.join(ROOT_DIR, "apps/mobile/src"), prefix: "@mobile" },
+  { directory: path.join(ROOT_DIR, "apps/android/src"), prefix: "@android" },
   { directory: path.join(ROOT_DIR, "packages/core/src"), prefix: "@core" },
   { directory: path.join(ROOT_DIR, "packages/platform/src"), prefix: "@platform" },
   { directory: path.join(ROOT_DIR, "packages/web-renderer/src"), prefix: "@web-renderer" },
-  { directory: path.join(ROOT_DIR, "packages/mobile-renderer/src"), prefix: "@mobile-renderer" },
+  { directory: path.join(ROOT_DIR, "packages/android-renderer/src"), prefix: "@android-renderer" },
   { directory: path.join(ROOT_DIR, "shared"), prefix: "@shared" },
 ];
 const EXTRA_SOURCE_DIRECTORIES = ["apps/web/src", "functions/src", "tests", "scripts/dev", "scripts/verify"].map((directory) => path.join(ROOT_DIR, directory));
@@ -542,7 +542,7 @@ const applyTargetedLintFixes = (filePath, source) => {
     nextSource = `/* eslint-disable react-refresh/only-export-components */\n${nextSource}`;
   }
 
-  if (relativePath === "apps/mobile/src/integration/ioscalendar/useIosCalendarIntegration.ts") {
+  if (relativePath === "apps/android/src/integration/ioscalendar/useIosCalendarIntegration.ts") {
     nextSource = nextSource
       .replace("  }, [supported]);", "  }, [setError, setEvents, setIsLoadingEvents, setLastSyncedAt, supported]);")
       .replace("  }, []);\n\n  const syncCurrentRange", "  }, [setCalendars, setSelectedCalendarIds]);\n\n  const syncCurrentRange")

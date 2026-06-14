@@ -17,7 +17,7 @@ const SHOULD_RUN_ONCE = CLI_ARGS.has("--once");
 const VERIFY_COMMAND = ["npm", "run", "verify:source-conventions"];
 const FIX_IMPORTS_COMMAND = ["npm", "run", "lint:imports"];
 const TYPECHECK_COMMAND = ["npm", "run", "typecheck"];
-const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/mobile-renderer/src", "shared", "functions/src", "tests", "scripts/dev", "scripts/verify"].map((directory) => join(ROOT_DIR, directory));
+const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/android/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/android-renderer/src", "shared", "functions/src", "tests", "scripts/dev", "scripts/verify"].map((directory) => join(ROOT_DIR, directory));
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 const VIOLATION_PATTERN = /^- (?<path>[^:]+):(?<line>\d+) (?<message>.+)$/;
 const FIXED_FILE_START = "<<<SIVFLOW_FIXED_FILE_START>>>";

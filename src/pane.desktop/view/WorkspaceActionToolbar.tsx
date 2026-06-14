@@ -22,4 +22,5 @@ const WorkspaceActionToolbar = ({ className, style }: Props) => {
     </>
   );
 };
+
 export { WorkspaceActionToolbar };

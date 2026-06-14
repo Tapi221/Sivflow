@@ -1,14 +1,9 @@
 "use client";
 
 import { LinkRules } from "@platejs/link";
-
 import { LinkPlugin } from "@platejs/link/react";
-
 import { LinkElement } from "@/chip/ui/plate/link-node";
-
 import { LinkFloatingToolbar } from "@/chip/ui/plate/link-toolbar";
-
-
 
 const LinkKit = [
   LinkPlugin.configure({
@@ -24,7 +19,5 @@ const LinkKit = [
     },
   }),
 ];
-
-
 
 export { LinkKit };

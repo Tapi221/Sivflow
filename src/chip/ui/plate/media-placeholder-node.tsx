@@ -35,6 +35,7 @@ const formatBytes = (
       : (sizes[index] ?? "Bytes")
   }`;
 };
+
 const CONTENT: Record<
   string,
   {
@@ -64,7 +65,6 @@ const CONTENT: Record<
     icon: <Film />,
   },
 };
-
 const ImageProgress = ({ className, file, imageRef, progress = 0 }: ImageProgressProps) => {
   const [objectUrl, setObjectUrl] = React.useState<string | null>(null);
   React.useEffect(() => {
