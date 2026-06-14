@@ -1,14 +1,18 @@
 import type { ChangeEvent } from "react";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { DEFAULT_THEME_ACCENT_COLOR, normalizeThemeAccentColor } from "@/features/settings/themeAccent";
+import { cn } from "@/lib/utils";
 import type { UserSettings } from "@/types";
 
+type SettingsThemeColorControlProps = {
+  className?: string;
+  labelClassName?: string;
+};
 type ThemeColorControlCopy = {
   label: string;
   resetLabel: string;
   pickerAriaLabel: string;
 };
-
 type SettingsLanguage = UserSettings["language"];
 
 const THEME_COLOR_CONTROL_COPY: Record<SettingsLanguage, ThemeColorControlCopy> = {
@@ -29,7 +33,7 @@ const THEME_COLOR_CONTROL_COPY: Record<SettingsLanguage, ThemeColorControlCopy> 
   },
 };
 
-const SettingsThemeColorControl = () => {
+const SettingsThemeColorControl = ({ className, labelClassName }: SettingsThemeColorControlProps) => {
   const { settings, updateSettings } = useUserSettings();
   const language = settings?.language ?? "ja";
   const copy = THEME_COLOR_CONTROL_COPY[language];
@@ -41,16 +45,19 @@ const SettingsThemeColorControl = () => {
     void updateSettings({ accentColor: DEFAULT_THEME_ACCENT_COLOR });
   };
   return (
-    <div className="absolute right-4 top-4 z-10 flex h-9 items-center gap-2 rounded-full border border-stone-200 bg-white/95 px-3 text-xs font-semibold leading-4 tracking-tight text-neutral-700 shadow-sm backdrop-blur">
-      <span>{copy.label}</span>
-      <label className="relative h-6 w-6 cursor-pointer overflow-hidden rounded-full border border-stone-200 shadow-sm" style={{ backgroundColor: accentColor }}>
-        <input className="absolute inset-0 h-full w-full cursor-pointer opacity-0" type="color" value={accentColor} aria-label={copy.pickerAriaLabel} onChange={handleColorChange} />
-      </label>
-      <button type="button" className="rounded-full border-0 bg-stone-100 px-2 py-1 text-xs font-semibold leading-4 text-neutral-600 outline-none hover:bg-stone-200 focus-visible:bg-stone-200" onClick={handleReset}>
-        {copy.resetLabel}
-      </button>
+    <div className={cn("flex min-h-14 items-center justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0", className)}>
+      <span className={cn("text-sm font-medium leading-5 tracking-tight text-neutral-800", labelClassName)}>{copy.label}</span>
+      <div className="flex shrink-0 items-center gap-2">
+        <label className="relative h-7 w-7 cursor-pointer overflow-hidden rounded-full border border-stone-200 shadow-sm" style={{ backgroundColor: accentColor }}>
+          <input className="absolute inset-0 h-full w-full cursor-pointer opacity-0" type="color" value={accentColor} aria-label={copy.pickerAriaLabel} onChange={handleColorChange} />
+        </label>
+        <button type="button" className="h-8 rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm font-medium tracking-tight text-neutral-800 outline-none hover:bg-stone-100 focus-visible:bg-stone-100" onClick={handleReset}>
+          {copy.resetLabel}
+        </button>
+      </div>
     </div>
   );
 };
 
 export { SettingsThemeColorControl };
+export type { SettingsThemeColorControlProps };
