@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 type CodeBlockNodeStaticProps = SlateElementProps<TCodeBlockElement>;
 
 const CODE_BLOCK_CLASS_NAME = "my-4 overflow-x-auto rounded-md border bg-muted px-4 py-3 font-mono text-sm";
+const CODE_DOCX_FONT_FAMILY = "var(--docx-code-font-family)";
 const syntaxColors: Record<string, string> = {
   "hljs-addition": "#22863a",
   "hljs-attr": "#005cc5",
@@ -50,7 +51,7 @@ const getCodeSyntaxDocxStyle = (tokenClassName: string | undefined) => {
     fontStyle?: string;
     fontWeight?: string;
   } = {
-    fontFamily: "'Courier New', Consolas, monospace",
+    fontFamily: CODE_DOCX_FONT_FAMILY,
     fontSize: "10pt",
   };
   if (!tokenClassName) {
@@ -107,7 +108,7 @@ const CodeLineElementDocx = (props: SlateElementProps) => (
     {...props}
     as="p"
     style={{
-      fontFamily: "'Courier New', Consolas, monospace",
+      fontFamily: CODE_DOCX_FONT_FAMILY,
       fontSize: "10pt",
       margin: 0,
       padding: 0,
