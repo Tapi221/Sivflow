@@ -521,7 +521,7 @@ const SettingsWorkspaceScreen = () => {
           {sections.map((section) => {
             const isActive = section.id === activeSectionId;
             return (
-              <button key={section.id} type="button" className={cn("flex h-7 w-full shrink-0 items-center rounded-lg border-0 bg-transparent px-2 py-1 text-left text-sm leading-5 text-neutral-800 outline-none transition-colors duration-100 ease-out hover:bg-stone-200 focus-visible:bg-stone-200 max-md:w-auto max-md:min-w-36", isActive ? "bg-stone-200 text-neutral-900" : "")} onClick={() => setActiveSectionId(section.id)} aria-current={isActive ? "page" : undefined}>
+              <button key={section.id} type="button" className={cn("flex h-7 w-full shrink-0 items-center rounded-lg border-0 bg-transparent px-2 py-1 text-left text-sm leading-5 text-neutral-800 outline-none transition-colors duration-100 ease-out hover:bg-stone-200 focus-visible:bg-stone-200 max-md:w-auto max-md:min-w-32", isActive ? "bg-stone-200 text-neutral-900" : "")} onClick={() => setActiveSectionId(section.id)} aria-current={isActive ? "page" : undefined}>
                 <span className="mr-3 inline-flex h-4 w-4 min-w-4 items-center justify-center text-neutral-600">{getSectionIcon(section.id)}</span>
                 <span className="block min-w-0 flex-1"><span className="block min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-sm font-medium leading-5 tracking-tight text-inherit">{section.label}</span></span>
               </button>
