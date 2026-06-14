@@ -51,7 +51,58 @@ type EventChipDesign = {
   };
 };
 
-const eventChipDesign: EventChipDesign = { backgroundAlpha: 0.16, month: { heightPx: 18.3, radiusPx: 4, borderWidthPx: 3, paddingLeftPx: 3, paddingRightPx: 2, paddingYWithTimePx: 1, paddingYCompactPx: 2, titleFontSizePx: 11, timeFontSizePx: 9, gapPx: 3, allDayOffsetPx: 1 }, weekday: { radiusPx: 6, borderWidthPx: 3, paddingLeftPx: 4, paddingRightPx: 1, paddingYPx: 2, inlinePaddingYPx: 1, gapPx: 0.5, titleFontSizePx: 12, titleLineHeightPx: 17, timeFontSizePx: 11, timeLineHeightPx: 16 }, weekdayGrid: { timedOuterInsetPx: 1, timedOverlapGapPx: 2, timedVerticalTrimPx: 0.5, timedMinHeightPx: 22, allDayColumnInsetPx: 0.5, allDayEventGapPx: 1 }, list: { rowHeightPx: 52, chipHeightPx: 46, allDayRowHeightPx: 34, allDayChipHeightPx: 28, radiusPx: 16, borderWidthPx: 3, titleFontSizePx: 11, timeFontSizePx: 11, titleGapPx: 0.5 }, tooltip: { monthRadiusPx: 10, weekdayRadiusPx: 14 } };
+const eventChipDesign: EventChipDesign = {
+  backgroundAlpha: 0.16,
+  month: {
+    heightPx: 20,
+    radiusPx: 4,
+    borderWidthPx: 4,
+    paddingLeftPx: 4,
+    paddingRightPx: 4,
+    paddingYWithTimePx: 2,
+    paddingYCompactPx: 2,
+    titleFontSizePx: 12,
+    timeFontSizePx: 12,
+    gapPx: 4,
+    allDayOffsetPx: 1,
+  },
+  weekday: {
+    radiusPx: 6,
+    borderWidthPx: 4,
+    paddingLeftPx: 4,
+    paddingRightPx: 1,
+    paddingYPx: 2,
+    inlinePaddingYPx: 1,
+    gapPx: 1,
+    titleFontSizePx: 12,
+    titleLineHeightPx: 16,
+    timeFontSizePx: 12,
+    timeLineHeightPx: 16,
+  },
+  weekdayGrid: {
+    timedOuterInsetPx: 1,
+    timedOverlapGapPx: 2,
+    timedVerticalTrimPx: 0,
+    timedMinHeightPx: 24,
+    allDayColumnInsetPx: 0,
+    allDayEventGapPx: 1,
+  },
+  list: {
+    rowHeightPx: 48,
+    chipHeightPx: 44,
+    allDayRowHeightPx: 32,
+    allDayChipHeightPx: 28,
+    radiusPx: 16,
+    borderWidthPx: 4,
+    titleFontSizePx: 12,
+    timeFontSizePx: 12,
+    titleGapPx: 2,
+  },
+  tooltip: {
+    monthRadiusPx: 8,
+    weekdayRadiusPx: 12,
+  },
+};
 
 export { eventChipDesign };
 export type { EventChipDesign };
