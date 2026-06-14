@@ -1,133 +1,19 @@
-```text
-apps/
-  web/
-    index.html
-    public/
-    src/
-      main.tsx
-      App.tsx
+# Directory structure
 
-  desktop/
-    src-tauri/
-      Cargo.toml
-      tauri.conf.json
-      src/
-        main.rs
-        handwriting_session.rs
+Web: `apps/web`
 
-  mobile/
-    app.json
-    src/
-      App.tsx
-      navigation/
-      screens/
-    ios/
-      Sivflow/
-        NativeModules/
-          InkDocumentExporter.swift
-          InkSessionBridge.swift
-        NativeViews/
-          InkCanvasView.swift
-          InkCanvasViewManager.swift
-        Assets.xcassets/
-    android/
+Desktop: `apps/desktop`
 
-functions/
-  package.json
-  tsconfig.json
-  src/
-    index.ts
-  functions.yaml
+Android: `apps/android`
 
-scripts/
-  dev/
-    watch-source-conventions.mjs
-  functions/
-    generateManifest.cjs
-  predeploy/
-    firebase-predeploy.cjs
-  verify/
-    fix-const-arrow-functions.mjs
-    fix-import-spacing.mjs
-    fix-type-only-imports.mjs
-    verify-const-arrow-functions.mjs
-    verify-import-spacing.mjs
-    verify-no-symbols.mjs
-    verify-repeated-blank-lines.mjs
-    verify-source-conventions.mjs
+Android renderer: `packages/android-renderer`
 
-packages/
-  web-renderer/
-    src/
-      AppShell.tsx
-      routes/
-      features/
-        card/
-          ink/
-            FlashcardInkOverlay.tsx
-            useFlashcardInk.ts
-            useRemoteInkSession.ts
-      components/
-        ink/
-          InkLayer.tsx
-          InkToolbar.tsx
-          inkLayer.types.ts
+iOS: `apps/ios`
 
-  android-renderer/
-    src/
-      AppShell.tsx
-      screens/
-        ipad/
-          handwriting/
-            HandwritingModeScreen.tsx
-            HandwritingSessionListScreen.tsx
-      components/
-        ipad/
-          ink/
-            IpadInkCanvasHost.tsx
-            IpadInkToolbar.tsx
+iOS app code uses Swift / SwiftUI under `apps/ios/Sivflow`.
 
-  core/
-    src/
-      domain/
-        card/
-          ink/
-            inkDocument.ts
-            inkDocument.test.ts
-      usecases/
-      models/
-      validation/
+Web and Tauri shared React UI belongs in `packages/web-renderer`.
 
-  platform/
-    src/
-      auth/
-      storage/
-      calendar/
-      files/
-      shell/
-      handwriting/
-        handwritingSession.types.ts
-        handwritingSessionClient.ts
-        handwritingSessionDesktopAdapter.ts
-        handwritingSessionMobileAdapter.ts
+Shared pure logic belongs in `packages/core`.
 
-shared/
-  assets/
-    icons/
-      app-icon.svg
-
-  schemas/
-    card.schema.json
-    deck.schema.json
-    ink.schema.json
-    handwriting-session.schema.json
-
-  design-tokens/
-    colors.json
-    spacing.json
-    typography.json
-
-tools/
-  firebase/
-    sync-firebase-emulators.ts
-```
+Platform adapters belong in `packages/platform`.
