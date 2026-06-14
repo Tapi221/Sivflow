@@ -1,21 +1,18 @@
 import type { SVGProps } from "react";
 import { cn } from "@/lib/utils";
 
-
-
 type ExplorerChromeFolderIconProps = SVGProps<SVGSVGElement> & {
   size?: number;
 };
 
+const FOLDER_OUTLINE_PATH = "M3.5 7.25C3.5 6.01 4.51 5 5.75 5H9.35C10.03 5 10.67 5.31 11.1 5.84L12.05 7H18.25C19.49 7 20.5 8.01 20.5 9.25V17.25C20.5 18.49 19.49 19.5 18.25 19.5H5.75C4.51 19.5 3.5 18.49 3.5 17.25V7.25Z";
+const FOLDER_LIP_PATH = "M3.75 9.25H20.25";
 
-
-const FOLDER_TAB_PATH = "M3.1 5.2C3.1 4.1 4 3.2 5.1 3.2H8.1C8.7 3.2 9.2 3.5 9.6 4L10.6 5.3H15C16.1 5.3 17 6.2 17 7.3V7.8H3.1V5.2Z";
-const FOLDER_BODY_PATH = "M3 7.1H17.1C17.8 7.1 18.3 7.7 18.2 8.4L16.9 15.2C16.7 16.2 15.9 16.8 14.9 16.8H5.1C4.1 16.8 3.3 16.2 3.1 15.2L1.9 8.4C1.7 7.7 2.2 7.1 3 7.1Z";
-
-
-
-const ExplorerChromeFolderIcon = ({ size = 15, className, ...props }: ExplorerChromeFolderIconProps) => (<svg width={size} height={size} viewBox="0 0 20 20" fill="none" aria-hidden="true" className={cn("shrink-0", className)} {...props} > <path d={FOLDER_TAB_PATH} fill="var(--explorer-chrome-folder-fill, transparent)" stroke="var(--explorer-chrome-folder-stroke, currentColor)" strokeWidth="1.45" strokeLinejoin="round" /> <path d={FOLDER_BODY_PATH} fill="var(--explorer-chrome-folder-fill, transparent)" stroke="var(--explorer-chrome-folder-stroke, currentColor)" strokeWidth="1.45" strokeLinejoin="round" /> <path d="M4.7 10.1H14.2" stroke="var(--explorer-chrome-folder-highlight, transparent)" strokeWidth="1.45" strokeLinecap="round" opacity="0.88" /> <path d="M4.7 12.8H11.8" stroke="var(--explorer-chrome-folder-highlight, transparent)" strokeWidth="1.45" strokeLinecap="round" opacity="0.72" /> </svg>);
-
-
+const ExplorerChromeFolderIcon = ({ size = 20, className, strokeWidth = 1.75, ...props }: ExplorerChromeFolderIconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true" className={cn("shrink-0", className)} {...props}>
+    <path d={FOLDER_OUTLINE_PATH} stroke="var(--explorer-chrome-folder-stroke, currentColor)" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+    <path d={FOLDER_LIP_PATH} stroke="var(--explorer-chrome-folder-stroke, currentColor)" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+  </svg>
+);
 
 export { ExplorerChromeFolderIcon };
