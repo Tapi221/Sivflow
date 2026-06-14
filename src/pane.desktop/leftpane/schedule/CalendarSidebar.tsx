@@ -104,9 +104,6 @@ const CONNECTING_GOOGLE_CALENDAR_LABEL = "接続中...";
 const DEFAULT_CALENDAR_COLOR = "#64748b";
 const GOOGLE_CALENDAR_SECTION_LABEL = "Google Calendar";
 const PROJECT_LINKED_GOOGLE_CALENDARS_LABEL = "プロジェクトに追加したカレンダー";
-const PROJECT_SOURCE_ROW_CLASS_NAME = "flex h-7 w-full cursor-default items-center gap-2 overflow-hidden rounded-lg border-0 bg-transparent px-0 text-left transition-all duration-150 hover:bg-neutral-100 active:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-300";
-const PROJECT_SOURCE_ROW_ICON_CLASS_NAME = "h-4 w-4 shrink-0 text-stone-500";
-const PROJECT_SOURCE_ROW_LABEL_CLASS_NAME = "truncate text-sm font-semibold leading-5 text-stone-500";
 
 const createGoogleCalendarColorOverrideKey = (accountId: string, calendarId: string): string => `${accountId}:${calendarId}`;
 const normalizeProjectCalendarName = (value: string): string => value.trim().toLowerCase();
@@ -149,24 +146,13 @@ const createGoogleCalendarActionLabel = (account: GoogleAccountDisplay, accountC
 
 const IconChevronRight = ({ className }: IconProps) => <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 const IconPlus = ({ className }: IconProps) => <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>;
-const IconProjectFolder = ({ className }: IconProps) => <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M2.75 5.25H13.25V12.25H2.75V5.25Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" /><path d="M4.25 5.25V3.75H7.25L8.25 5.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 const CalendarSidebarHeading = ({ heading, addLabel, onAdd, disabled = false, headingAriaLabel }: CalendarSidebarHeadingProps) => (
   <div className={CALENDAR_SIDEBAR_HEADING_ROW_CLASS_NAME}>
     <h2 className={CALENDAR_SIDEBAR_HEADING_CLASS_NAME} aria-label={headingAriaLabel}>{heading}</h2>
     <button type="button" className={CALENDAR_SIDEBAR_ADD_BUTTON_CLASS_NAME} onClick={onAdd} disabled={disabled} aria-label={addLabel} title={addLabel}><IconPlus className="h-4 w-4" /></button>
   </div>
 );
-const ProjectSourceRow = ({ project, onToggleProject }: ProjectSourceRowProps) => {
-  const handleToggle = () => {
-    onToggleProject(project.id);
-  };
-  return (
-    <button type="button" className={cn(PROJECT_SOURCE_ROW_CLASS_NAME, project.checked && "bg-neutral-100")} onClick={handleToggle} aria-pressed={project.checked} title={project.label}>
-      <IconProjectFolder className={PROJECT_SOURCE_ROW_ICON_CLASS_NAME} />
-      <span className={cn(PROJECT_SOURCE_ROW_LABEL_CLASS_NAME, !project.checked && "opacity-70")}>{project.label}</span>
-    </button>
-  );
-};
+const ProjectSourceRow = ({ project, onToggleProject }: ProjectSourceRowProps) => <SelectableGoogleSourceRow id={project.id} label={project.label} checked={project.checked} color={project.color} className={CALENDAR_SIDEBAR_ROW_CONTENT_CLASS_NAME} onToggle={onToggleProject} />;
 const GoogleCalendarSourceRow = ({ account, calendar, color, onToggleCalendar, onOpenCalendarContextMenu }: GoogleCalendarSourceRowProps) => (
   <div onContextMenu={(event) => onOpenCalendarContextMenu(event, account, calendar)}>
     <SelectableGoogleSourceRow id={calendar.id} label={calendar.summary} checked={account.selectedCalendarIds.has(calendar.id)} color={color} className={CALENDAR_SIDEBAR_ROW_CONTENT_CLASS_NAME} onToggle={onToggleCalendar} />
