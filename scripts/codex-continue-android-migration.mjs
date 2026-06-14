@@ -20,8 +20,8 @@ const REQUIRED_PATHS = [
   "packages/android-renderer/src/App.tsx",
 ];
 const FORBIDDEN_PATHS = [
-  "apps/mobile",
-  "packages/mobile-renderer",
+  "apps/android",
+  "packages/android-renderer",
   "apps/android/ios",
   "apps/android/src/integration/ioscalendar",
   "packages/android-renderer/src/screens/ipad",
