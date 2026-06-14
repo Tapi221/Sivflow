@@ -420,7 +420,7 @@ const SettingToggle = ({ label, description, checked, onChange }: SettingToggleP
     <div className="flex min-h-14 items-center gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="text-sm font-medium leading-5 tracking-tight text-neutral-800">{label}</span>
-        {description ? <span className="text-xs font-normal leading-5 text-stone-500">{description}</span> : null}
+        {description ? <span className="text-sm font-normal leading-5 text-stone-500">{description}</span> : null}
       </div>
       <button type="button" className={cn("relative h-6 w-10 min-w-10 rounded-full border-0 p-0 outline-none transition-colors duration-100 ease-out", checked ? "bg-stone-500" : "bg-stone-300")} role="switch" aria-checked={checked} onClick={() => onChange(!checked)}>
         <span className={cn("absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-100 ease-out", checked ? "translate-x-4" : "translate-x-0")} />
@@ -436,7 +436,7 @@ const SettingChoiceRow = <T extends string | number,>({ label, value, options, o
         {options.map((option) => {
           const isSelected = option.value === value;
           return (
-            <button key={String(option.value)} type="button" className={cn("inline-flex flex-none items-center justify-center rounded-full border-0 px-3 py-2 text-center text-xs font-semibold leading-4 outline-none transition-colors duration-100 ease-out", isSelected ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-500")} onClick={() => onChange(option.value)}>
+            <button key={String(option.value)} type="button" className={cn("inline-flex flex-none items-center justify-center rounded-full border-0 px-3 py-2 text-center text-sm font-semibold leading-4 outline-none transition-colors duration-100 ease-out", isSelected ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-500")} onClick={() => onChange(option.value)}>
               {option.label}
             </button>
           );
@@ -450,7 +450,7 @@ const SettingTextInputRow = ({ label, description, value, placeholder, onChange 
     <div className="flex min-h-14 items-start justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="text-sm font-medium leading-5 tracking-tight text-neutral-800">{label}</span>
-        {description ? <span className="text-xs font-normal leading-5 text-stone-500">{description}</span> : null}
+        {description ? <span className="text-sm font-normal leading-5 text-stone-500">{description}</span> : null}
       </div>
       <input className="h-9 w-64 rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm font-medium leading-5 tracking-tight text-neutral-800 outline-none placeholder:text-stone-400 focus:border-stone-300 focus:bg-white" value={value} placeholder={placeholder} onChange={(event) => onChange(event.target.value)} />
     </div>
@@ -536,7 +536,7 @@ const SettingsWorkspaceScreen = () => {
               <SettingsSectionBlock title={copy.accountProfileTitle} description={copy.accountProfileDescription}>
                 <div className="flex min-h-20 items-center gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
                   <div className="relative flex h-9 min-w-9 items-center justify-center overflow-hidden rounded-lg bg-stone-100 text-base font-semibold tracking-tight text-stone-700" aria-hidden="true">{accountProfile.photoUrl ? <img className="absolute inset-0 h-full w-full object-cover" src={accountProfile.photoUrl} alt="" /> : <span className="absolute inset-0 flex items-center justify-center">{accountInitial}</span>}</div>
-                  <div className="flex min-w-0 flex-1 flex-col gap-1"><strong className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-5 tracking-tight text-neutral-800">{accountName}</strong><span className="overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal leading-5 text-stone-500">{accountProfile.email ?? copy.emailUnset}</span></div>
+                  <div className="flex min-w-0 flex-1 flex-col gap-1"><strong className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-5 tracking-tight text-neutral-800">{accountName}</strong><span className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-normal leading-5 text-stone-500">{accountProfile.email ?? copy.emailUnset}</span></div>
                   <button type="button" className="h-8 rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm font-medium tracking-tight text-neutral-800 outline-none hover:bg-stone-100 focus-visible:bg-stone-100 disabled:opacity-50" onClick={handleLogout} disabled={loading || !currentUser}>{copy.logout}</button>
                 </div>
                 <SettingKeyValue label={copy.statusLabel} value={currentUser ? copy.signedIn : copy.guest} />
