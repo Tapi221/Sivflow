@@ -11,6 +11,8 @@ import { useImmediateVirtualScrollRange } from "@/features/scroll/schedule/hooks
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 
+
+
 type CalendarListViewProps = {
   days: Date[];
   virtualRail?: ScheduleVirtualRail;
@@ -66,6 +68,8 @@ type CalendarListItemRowProps = {
   onSelectDate?: (date: Date) => void;
 };
 
+
+
 const EMPTY_DAY_LABEL = "予定なし";
 const SELECTED_OFFSET = 8;
 const ANCHOR_OFFSET = 160;
@@ -95,6 +99,8 @@ const EMPTY_DAY_DOT_CLASS_NAME =
   "relative mt-2 h-2 w-2 rounded-full border-2 border-slate-300 bg-white shadow-sm";
 const EMPTY_DAY_CHIP_CLASS_NAME =
   "flex h-8 min-w-0 flex-1 items-center rounded-2xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-400";
+
+
 
 const createRail = (selectedDate: Date): ScheduleVirtualRail => ({
   startDate: subDays(startOfMonth(selectedDate), LOCAL_DAYS),
@@ -355,6 +361,8 @@ const getDayDateNumberClassName = (day: CalendarListDay): string =>
         : "text-slate-950",
   );
 
+
+
 const EmptyDayCard = () => (
   <div className={EMPTY_DAY_ROW_CLASS_NAME}>
     <div className={EMPTY_DAY_TIME_CLASS_NAME}>
@@ -579,6 +587,8 @@ const CalendarListViewComponent = ({
     </div>
   );
 };
+
+
 
 const CalendarListView = memo(CalendarListViewComponent);
 CalendarListView.displayName = "CalendarListView";

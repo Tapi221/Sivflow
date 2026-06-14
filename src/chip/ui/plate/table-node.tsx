@@ -1,25 +1,43 @@
 "use client";
+
 import * as React from "react";
+
 import { useBlockSelected } from "@platejs/selection/react";
+
 import { getTableColumnCount } from "@platejs/table";
+
 import { TablePlugin, TableProvider, useTableColSizes } from "@platejs/table/react";
+
 import type { TTableCellElement, TTableElement, TTableRowElement } from "platejs";
+
 import type { PlateElementProps } from "platejs/react";
+
 import { PlateElement, useEditorRef } from "platejs/react";
-import { blockSelectionVariants } from "@/chip/ui/plate/block-selection";
+
 import { cn } from "@/lib/utils";
+
+import { blockSelectionVariants } from "./block-selection";
+
+
 
 type TableCellElementProps = PlateElementProps<TTableCellElement> & {
   isHeader?: boolean;
 };
 
+
+
 const TABLE_DEFAULT_COLUMN_WIDTH = 120;
+
 const EMPTY_ELEMENT_PATH: number[] = [];
+
+
 
 const getElementPath = (props: { path?: number[] }): number[] => {
   const path = props.path;
   return Array.isArray(path) ? path : EMPTY_ELEMENT_PATH;
 };
+
+
 
 const TableElementContent = ({ children, ...props }: PlateElementProps<TTableElement>) => {
   const { element } = props;
@@ -47,6 +65,7 @@ const TableElementContent = ({ children, ...props }: PlateElementProps<TTableEle
     </PlateElement>
   );
 };
+
 const TableElement = (props: PlateElementProps<TTableElement>) => {
   return (
     <TableProvider>
@@ -54,6 +73,7 @@ const TableElement = (props: PlateElementProps<TTableElement>) => {
     </TableProvider>
   );
 };
+
 const TableRowElement = (props: PlateElementProps<TTableRowElement>) => {
   return (
     <PlateElement {...props} as="tr" className="h-full">
@@ -61,6 +81,7 @@ const TableRowElement = (props: PlateElementProps<TTableRowElement>) => {
     </PlateElement>
   );
 };
+
 const TableCellElement = (props: TableCellElementProps) => {
   const { isHeader } = props;
   const editor = useEditorRef();
@@ -110,9 +131,15 @@ const TableCellElement = (props: TableCellElementProps) => {
     </PlateElement>
   );
 };
+
 const TableCellHeaderElement = (props: PlateElementProps<TTableCellElement>) => {
   return <TableCellElement {...props} isHeader />;
 };
 
+
+
 export { TableElement, TableRowElement, TableCellElement, TableCellHeaderElement };
+
+
+
 export type { TableCellElementProps };

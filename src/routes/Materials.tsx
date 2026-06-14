@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 
+
+
 type MaterialKind = "textbook" | "pdf" | "video" | "link" | "other";
 type MaterialItem = {
   id: string;
@@ -21,6 +23,8 @@ type MaterialCardProps = {
   onDelete: (id: string) => void;
 };
 
+
+
 const MATERIALS_STORAGE_KEY = "sivflow:materials";
 const INITIAL_FORM_STATE: MaterialFormState = { title: "", kind: "textbook", description: "", source: "" };
 const MATERIAL_KIND_OPTIONS: Array<{ label: string; value: MaterialKind; }> = [
@@ -31,6 +35,8 @@ const MATERIAL_KIND_OPTIONS: Array<{ label: string; value: MaterialKind; }> = [
   { label: "その他", value: "other" },
 ];
 const MATERIAL_KIND_LABELS: Record<MaterialKind, string> = MATERIAL_KIND_OPTIONS.reduce((labels, option) => ({ ...labels, [option.value]: option.label }), {} as Record<MaterialKind, string>);
+
+
 
 const createMaterialId = (): string => {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
@@ -57,6 +63,8 @@ const persistMaterials = (materials: MaterialItem[]) => {
 const sortMaterials = (materials: MaterialItem[]): MaterialItem[] => {
   return [...materials].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 };
+
+
 
 const MaterialCard = ({ material, onDelete }: MaterialCardProps) => {
   return (
@@ -146,5 +154,7 @@ const Materials = () => {
     </main>
   );
 };
+
+
 
 export default Materials;

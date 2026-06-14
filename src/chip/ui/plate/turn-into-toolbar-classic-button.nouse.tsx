@@ -1,14 +1,24 @@
 "use client";
 
 import * as React from "react";
+
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
+
 import { FileCodeIcon, Heading1Icon, Heading2Icon, Heading3Icon, ListIcon, ListOrderedIcon, PilcrowIcon, QuoteIcon, SquareIcon } from "lucide-react";
+
 import type { TElement } from "platejs";
+
 import { KEYS } from "platejs";
+
 import { useEditorRef, useSelectionFragmentProp } from "platejs/react";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
+
 import { getBlockType, setBlockType } from "@/components/editor/transforms";
+
 import { ToolbarButton, ToolbarMenuGroup } from "./toolbar";
+
+
 
 const turnIntoItems = [
   { icon: <PilcrowIcon />, label: "Text", value: KEYS.p },
@@ -21,6 +31,8 @@ const turnIntoItems = [
   { icon: <FileCodeIcon />, label: "Code", value: KEYS.codeBlock },
   { icon: <QuoteIcon />, label: "Quote", value: KEYS.blockquote },
 ];
+
+
 
 const TurnIntoToolbarButton = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
@@ -53,5 +65,7 @@ const TurnIntoToolbarButton = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
+
+
 
 export { TurnIntoToolbarButton, turnIntoItems };

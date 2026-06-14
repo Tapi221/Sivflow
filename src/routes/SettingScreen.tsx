@@ -7,6 +7,8 @@ import { readStoredAccounts } from "@/integration/googlecalendar-integration/gca
 import type { UserSettings } from "@/types";
 import { ChevronRight, Globe, Keyboard, Shield, Trophy, Type, Volume2 } from "@/ui/icons";
 
+
+
 type SettingsSectionId = "account" | "general" | "study" | "editor" | "audio" | "hotkey";
 type SettingsLanguage = UserSettings["language"];
 type AuthSessionUser = ReturnType<typeof useAuthSession>["currentUser"];
@@ -96,6 +98,8 @@ type AccountProfile = {
   photoUrl: string | null;
   providerId: string | null;
 };
+
+
 
 const SETTINGS_CARD_CLASS_NAME = "rounded-2xl bg-white shadow-sm ring-1 ring-black/5";
 const SETTINGS_ROW_CLASS_NAME = "flex min-h-14 w-full items-center gap-4 px-4 text-left transition active:opacity-80";
@@ -261,6 +265,8 @@ const MARKDOWN_TAB_OPTIONS: readonly SettingChoiceOption<NonNullable<UserSetting
   { value: 8, label: "8" },
 ];
 
+
+
 const normalizeAccountEmail = (email: string | null | undefined): string | null => {
   const normalizedEmail = email?.trim().toLowerCase();
   return normalizedEmail ? normalizedEmail : null;
@@ -291,6 +297,8 @@ const getAccountInitial = (displayName: string): string => {
   const initial = displayName.trim().charAt(0);
   return initial ? initial.toUpperCase() : "M";
 };
+
+
 
 const SettingsRouteRow = ({ active, description, icon, label, onClick }: SettingsRouteRowProps) => (
   <button type="button" className={`${SETTINGS_ROW_CLASS_NAME}${active ? " bg-neutral-50" : ""}`} onClick={onClick} aria-current={active ? "page" : undefined}>
@@ -447,5 +455,7 @@ const SettingScreen = () => {
     </main>
   );
 };
+
+
 
 export { SettingScreen };

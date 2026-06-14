@@ -2,6 +2,8 @@ type FilterChipProps = {
   onClick?: () => void;
 };
 
+
+
 const FilterChip = ({ onClick }: FilterChipProps) => {
   return (
     <button
@@ -18,5 +20,7 @@ const FilterChip = ({ onClick }: FilterChipProps) => {
     </button>
   );
 };
+
+
 
 export { FilterChip };

@@ -1,33 +1,51 @@
 "use client";
 
 import { useState } from "react";
+
 import { SuggestionPlugin } from "@platejs/suggestion/react";
+
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
+
 import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
+
 import { CheckIcon, EyeIcon, PencilLineIcon, PenIcon } from "lucide-react";
+
 import { useEditorReadOnly, useEditorRef, usePluginOption } from "platejs/react";
+
 import type { ReactNode } from "react";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-import { ToolbarButton } from "@/chip/ui/plate/toolbar";
+
+import { ToolbarButton } from "./toolbar";
+
+
 
 type ModeValue = "editing" | "suggestion" | "viewing";
+
 type ModeItem = {
   icon: ReactNode;
   label: string;
 };
 
+
+
 const MODE_MENU_ITEM_CLASS_NAME = "dropdown-menu__radio-item--check-end";
+
 const modeItems: Record<ModeValue, ModeItem> = {
   editing: { icon: <PenIcon />, label: "Editing" },
   suggestion: { icon: <PencilLineIcon />, label: "Suggestion" },
   viewing: { icon: <EyeIcon />, label: "Viewing" },
 };
 
+
+
 const getModeValue = (readOnly: boolean, isSuggesting: boolean): ModeValue => {
   if (readOnly) return "viewing";
   if (isSuggesting) return "suggestion";
   return "editing";
 };
+
+
 
 const ModeIndicator = () => {
   return (
@@ -38,6 +56,7 @@ const ModeIndicator = () => {
     </span>
   );
 };
+
 const ModeToolbarButton = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
   const readOnly = useEditorReadOnly();
@@ -91,5 +110,7 @@ const ModeToolbarButton = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
+
+
 
 export { ModeToolbarButton };

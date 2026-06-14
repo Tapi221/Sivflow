@@ -5,6 +5,8 @@ import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 
+
+
 type CalendarEventChipMonthProps = {
   event: GoogleCalendarEvent;
   showTimeLabel?: boolean;
@@ -17,10 +19,14 @@ type CalendarEventChipMonthStyle = CSSProperties & {
   printColorAdjust: "exact";
 };
 
+
+
 const CHIP_BASE_CLASS_NAME = "flex h-5 w-full min-w-0 items-center overflow-hidden rounded border-l-4 px-1 py-0.5 text-left shadow-none";
 const CHIP_COMPACT_ALL_DAY_CLASS_NAME = "translate-y-px";
 const CHIP_TITLE_CLASS_NAME = "min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-semibold leading-none tracking-tight";
 const CHIP_TIME_CLASS_NAME = "ml-1 shrink-0 overflow-hidden whitespace-nowrap text-xs font-semibold leading-none tabular-nums opacity-80";
+
+
 
 const createCalendarEventChipMonthStyle = (backgroundColor: string, accentColor: string, textColor: string): CalendarEventChipMonthStyle => ({
   "--calendar-event-chip-accent": accentColor,
@@ -41,6 +47,8 @@ const getTimeLabel = (event: GoogleCalendarEvent): string => {
   return `${format(event.startsAt, "H:mm")} ~ ${format(event.endsAt, "H:mm")}`;
 };
 
+
+
 const CalendarEventChipMonth = ({ event, showTimeLabel = true, tooltipDisabled = false }: CalendarEventChipMonthProps) => {
   const tokens = generateColorTokens(event.accentColor);
   const titleLabel = event.title ?? "Untitled";
@@ -55,6 +63,8 @@ const CalendarEventChipMonth = ({ event, showTimeLabel = true, tooltipDisabled =
     </HoverMonthEventTooltip>
   );
 };
+
+
 
 CalendarEventChipMonth.displayName = "CalendarEventChipMonth";
 

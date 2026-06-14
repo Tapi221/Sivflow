@@ -18,8 +18,12 @@ type PdfPageWindowKeepSet = {
   (fallbackPageNumber: number, pageCount: number, overscanPageCount?: number): Set<number>;
 };
 
+
+
 const DEFAULT_PDF_PAGE = 1;
 const DEFAULT_PDF_PAGE_WINDOW_OVERSCAN = 1;
+
+
 
 const getSafePdfPageNumber = (pageNumber: number | null | undefined, pageCount?: number | null): number => {
   const normalizedPageNumber = Math.floor(pageNumber ?? DEFAULT_PDF_PAGE);
@@ -114,5 +118,9 @@ const getPdfPageWindowKeepSet: PdfPageWindowKeepSet = (first: PdfPageWindowMetri
   return idsToKeep;
 };
 
+
+
 export { getPdfPageWindowKeepSet, getSafePdfPageNumber };
+
+
 export type { PdfPageWindowMetric, PdfPageWindowOptions };
