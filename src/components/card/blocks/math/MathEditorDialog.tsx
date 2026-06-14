@@ -39,7 +39,7 @@ const MathEditorDialog: React.FC<MathEditorDialogProps> = ({ open, onOpenChange,
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[min(92vw,780px)] max-w-96 p-0 overflow-hidden">
         <DialogHeader className="border-b border-slate-100 px-4 py-3">
-          <DialogTitle className="font-serif text-xs font-medium tracking-[0.12em] uppercase text-slate-500">
+          <DialogTitle className="font-serif text-xs font-medium tracking-widest uppercase text-slate-500">
             Math Editor
           </DialogTitle>
           <DialogDescription className="sr-only">

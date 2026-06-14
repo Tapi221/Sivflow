@@ -114,7 +114,7 @@ const TagBadge = ({
 
   const content = (
     <>
-      <TagHashIcon className="h-[0.82em] w-[0.82em] shrink-0 opacity-70" />
+      <TagHashIcon className="h-3 w-3 shrink-0 opacity-70" />
       <span
         ref={textRef}
         className={cn("min-w-0 overflow-hidden whitespace-nowrap opacity-70", textClassName)}

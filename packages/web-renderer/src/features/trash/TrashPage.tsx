@@ -130,7 +130,7 @@ const TrashPage = () => {
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
         <header className="flex flex-col gap-3 border-b border-slate-200 pb-5 md:flex-row md:items-end md:justify-between">
           <>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Trash</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Trash</p>
             <h1 className="mt-2 text-2xl font-semibold text-slate-950">ゴミ箱</h1>
             <p className="mt-2 text-sm text-slate-600">削除済みのフォルダ、カードセット、カード、ドキュメントを復元、または完全に削除します。</p>
           </>
@@ -170,7 +170,7 @@ const TrashPage = () => {
 
         {currentUser && hasItems ? (
           <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <div className="grid grid-cols-[1fr_auto] gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+            <div className="grid grid-cols-[1fr_auto] gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-widest text-slate-500">
               <span>Item</span>
               <span>Actions</span>
             </div>

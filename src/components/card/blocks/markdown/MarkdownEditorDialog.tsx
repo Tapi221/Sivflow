@@ -36,7 +36,7 @@ const MarkdownEditorDialog: React.FC<MarkdownEditorDialogProps> = ({ open, onOpe
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[min(92vw,780px)] max-w-96 p-0 overflow-hidden">
         <DialogHeader className="border-b border-slate-100 px-4 py-3">
-          <DialogTitle className="font-serif text-xs font-medium tracking-[0.12em] uppercase text-slate-500">
+          <DialogTitle className="font-serif text-xs font-medium tracking-widest uppercase text-slate-500">
             Markdown Editor
           </DialogTitle>
           <DialogDescription className="sr-only">
@@ -58,7 +58,7 @@ const MarkdownEditorDialog: React.FC<MarkdownEditorDialogProps> = ({ open, onOpe
             autoFocus
             textareaClassName="font-serif"
             className={cn(
-              "markdownBlockEditorTextarea w-full font-serif text-base font-medium leading-[24px] text-slate-700 placeholder:text-slate-300",
+              "markdownBlockEditorTextarea w-full font-serif text-base font-medium leading-6 text-slate-700 placeholder:text-slate-300",
               "border border-slate-200 rounded-xl px-3 py-2 transition-all duration-300",
               "focus-visible:ring-2 focus-visible:ring-offset-0 bg-white focus:border-slate-300",
               "shadow-inner focus:shadow-sm resize-none whitespace-pre-wrap",

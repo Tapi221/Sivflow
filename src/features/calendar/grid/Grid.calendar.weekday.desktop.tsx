@@ -65,7 +65,7 @@ const getCurrentTimeTopStyle = (now: Date): CSSProperties => ({ top: `calc(${(no
 const getCurrentTimeGridLineStyle = (now: Date): CSSProperties => ({ ...getCurrentTimeTopStyle(now), left: `${C.TIME_COLUMN_WIDTH}px`, right: 0 });
 const getCurrentTimeTodayLineStyle = (todayIndex: number, dayCount: number): CSSProperties => ({ left: `calc((100% / ${dayCount}) * ${todayIndex})`, width: `calc(100% / ${dayCount})` });
 const getHourLabelClassName = (hour: number): string => cn("absolute right-2 top-0 z-10 bg-white px-1", isUnshiftedHourLabel(hour) ? null : "-translate-y-1/2", WEEKDAY_TIME_LABEL_CLASS_NAME);
-const getHeaderDateNumberClassName = (isSelected: boolean, isToday: boolean): string => cn(WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME, isSelected ? "border-0 bg-[var(--ds-color-tag-sky-bg)] text-[var(--ds-color-tag-sky-fg)] shadow-none ring-0" : isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]");
+const getHeaderDateNumberClassName = (isSelected: boolean, isToday: boolean): string => cn(WEEKDAY_HEADER_DATE_NUMBER_CLASS_NAME, isSelected ? "border-0 bg-[var(--ds-color-tag-sky-bg)] text-[var(--ds-color-tag-sky-fg)] shadow-none ring-0" : isToday ? "text-[#0a84ff]" : "text-zinc-900");
 const getViewportGridTemplateColumns = (dayCount: number): string => `${C.TIME_COLUMN_WIDTH}px repeat(${dayCount}, minmax(0, 1fr))`;
 const getWeekdayTimelineRangeEnd = (day: Date): Date => addMinutes(addDays(startOfDay(day), 1), NEXT_DAY_PREVIEW_MINUTES);
 const snapMinutes = (minutes: number): number => Math.round(minutes / WEEKDAY_TIMED_EVENT_DRAG_SNAP_MINUTES) * WEEKDAY_TIMED_EVENT_DRAG_SNAP_MINUTES;

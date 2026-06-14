@@ -650,7 +650,7 @@ const TreeViewLayout = ({
 
       {isImportDragActive ? (
         <div className="pointer-events-none absolute inset-0 z-[80] flex items-center justify-center bg-slate-900/10 backdrop-blur-[1px]">
-          <div className="rounded-[28px] border border-slate-200 bg-white/95 px-6 py-5 text-center shadow-[0_18px_60px_rgba(15,23,42,0.18)]">
+          <div className="rounded-3xl border border-slate-200 bg-white/95 px-6 py-5 text-center shadow-[0_18px_60px_rgba(15,23,42,0.18)]">
             <p className="text-sm font-bold text-slate-800">
               ファイルをドロップしてインポート
             </p>

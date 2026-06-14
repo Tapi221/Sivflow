@@ -62,7 +62,7 @@ const CardSetViewMobileEmptyState = ({ cardSetName, onCreateCard }: CardSetViewM
 
   return (
     <div className="flex h-full min-h-0 w-full items-center justify-center px-6 py-8">
-      <div className="flex max-w-96 flex-col items-center rounded-[26px] border border-[#e7e5de] bg-white px-7 py-7 text-center shadow-[0_18px_70px_rgba(15,23,42,0.08)]">
+      <div className="flex max-w-96 flex-col items-center rounded-3xl border border-[#e7e5de] bg-white px-7 py-7 text-center shadow-[0_18px_70px_rgba(15,23,42,0.08)]">
         <div className="mb-2 max-w-full truncate text-sm font-semibold tracking-tight text-[#242424]">{cardSetName ?? "カードセット"}</div>
         <p className="text-xs font-medium leading-6 text-[#7b7b7b]">このカードセットにはまだカードがありません。</p>
         <button type="button" onClick={handleCreateCard} className="mt-5 rounded-full border border-[#d8d6cf] bg-[#f6f5f2] px-4 py-2 text-xs font-semibold text-[#2f343b] transition-colors hover:bg-[#eeeeea] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7c7]">

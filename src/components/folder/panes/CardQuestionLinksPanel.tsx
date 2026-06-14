@@ -182,7 +182,7 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
         {isOpen ? (
           <div className="border-t border-[#eceae4] px-3 pb-3 pt-2">
             <div className="space-y-2">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.08em] text-[#9a9690]">この回答から作る</p>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#9a9690]">この回答から作る</p>
               <div className="flex flex-wrap gap-1.5">
                 {candidateTerms.length > 0 ? candidateTerms.map((term) => (
                   <button key={term} type="button" className="inline-flex h-7 max-w-44 items-center gap-1 rounded-lg border border-stone-300 bg-[#f7f6f2] px-2 text-xs font-medium text-[#5f5f5f] transition hover:bg-slate-100 disabled:opacity-60" onClick={() => void handleCreateLinkedQuestion(term)} disabled={creatingTerm !== null} title={`${term} から疑問を作る`}>
@@ -199,7 +199,7 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
               </div>
             </div>
             <div className="mt-3 border-t border-[#eceae4] pt-2">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.08em] text-[#9a9690]">つながっている疑問</p>
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-[#9a9690]">つながっている疑問</p>
               {snapshot.linkedCards.length > 0 ? (
                 <div className="flex max-h-28 flex-col gap-1 overflow-y-auto pr-1">
                   {snapshot.linkedCards.map((linkedCard) => (

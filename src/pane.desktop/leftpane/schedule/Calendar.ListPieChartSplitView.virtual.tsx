@@ -292,7 +292,7 @@ const buildConicGradient = (segments: PieSegment[]) => {
   if (cursor < total) stops.push(`${GAP_COLOR} ${(cursor / total) * 360}deg 360deg`);
   return `conic-gradient(${stops.join(", ")})`;
 };
-const getSplitDayDateNumberClassName = (day: SplitDay): string => cn(DAY_DATE_NUMBER_CLASS_NAME, day.isSelected ? "bg-[#3a77b2] text-white ring-1 ring-[#3a77b2]" : day.isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]");
+const getSplitDayDateNumberClassName = (day: SplitDay): string => cn(DAY_DATE_NUMBER_CLASS_NAME, day.isSelected ? "bg-[#3a77b2] text-white ring-1 ring-[#3a77b2]" : day.isToday ? "text-[#0a84ff]" : "text-zinc-900");
 
 
 
@@ -330,7 +330,7 @@ const SplitDaySectionComponent = ({ day, onSelectDate }: SplitDaySectionProps) =
             {day.segments.length === 0 ? <div className="text-xs font-semibold text-zinc-500">時間指定なし</div> : null}
           </div>
           <div className="mx-auto flex aspect-square w-full max-w-44 items-center justify-center rounded-full border border-slate-200" style={{ background: buildConicGradient(day.segments) }}>
-            <div className="flex h-[44%] w-[44%] items-center justify-center rounded-full bg-white text-xs font-semibold text-slate-700 shadow-sm">{hours}h</div>
+            <div className="flex h-7/12 w-7/12 items-center justify-center rounded-full bg-white text-xs font-semibold text-slate-700 shadow-sm">{hours}h</div>
           </div>
         </div>
       </div>

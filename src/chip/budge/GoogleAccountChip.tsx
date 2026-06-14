@@ -16,7 +16,7 @@ const GoogleAccountChip = ({ name, photoUrl }: GoogleAccountChipProps) => {
 
   return (
     <div
-      className={`${GOOGLE_ACCOUNT_CHIP_SIZE_CLASS_NAME} flex shrink-0 items-center justify-center rounded-full bg-[#f1f3f4] text-[8px] font-semibold leading-none text-[#5f6368]`}
+      className={`${GOOGLE_ACCOUNT_CHIP_SIZE_CLASS_NAME} flex shrink-0 items-center justify-center rounded-full bg-[#f1f3f4] text-xs font-semibold leading-none text-[#5f6368]`}
     >
       {name.charAt(0).toUpperCase()}
     </div>
