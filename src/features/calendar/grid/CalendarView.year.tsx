@@ -456,7 +456,7 @@ const CalendarYearViewComponent = ({
             style={{ marginBottom: YEAR_SECTION_GAP_PX }}
             aria-label={year.label}
           >
-            <h2 className="mb-4 px-1 text-[17px] font-semibold leading-none tracking-tight text-[#1c1c1e]">
+            <h2 className="mb-4 px-1 text-base font-semibold leading-none tracking-tight text-zinc-900">
               {year.label}
             </h2>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -466,7 +466,7 @@ const CalendarYearViewComponent = ({
                   className="min-w-0 bg-white px-4 pb-3 pt-3"
                   aria-label={month.label}
                 >
-                  <h3 className="mb-3 text-sm font-semibold leading-none tracking-tight text-[#1c1c1e]">
+                  <h3 className="mb-3 text-sm font-semibold leading-none tracking-tight text-zinc-900">
                     {month.label}
                   </h3>
                   <div className="grid grid-cols-7 gap-y-1 text-center text-xs font-semibold leading-none text-zinc-500">

@@ -81,7 +81,7 @@ const CalendarTimeGridSandboxPage = () => {
     <div className="min-h-screen bg-slate-950 px-6 py-8 text-slate-100">
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
         <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-black/20">
-          <p className="text-sm font-semibold uppercase tracking-[0.28em] text-sky-300">
+          <p className="text-sm font-semibold uppercase tracking-widest text-sky-300">
             Calendar Time Grid Sandbox
           </p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-white">

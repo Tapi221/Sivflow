@@ -201,7 +201,7 @@ const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions
           isSegmented ? (
             renderSegmentedTabs(tabs, `${WORKSPACE_TAB_INDICATOR_ID}-primary`)
           ) : (
-            <div className="flex h-7 shrink-0 items-start gap-[6px]">
+            <div className="flex h-7 shrink-0 items-start gap-1.5">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeValue === tab.value;
@@ -211,7 +211,7 @@ const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions
                     <button
                       type="button"
                       className={cn(
-                        "flex h-7 items-center gap-[6px] rounded py-0.5 pl-0 pr-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        "flex h-7 items-center gap-1.5 rounded py-0.5 pl-0 pr-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                         isActive ? "text-[#25272d]" : "text-slate-500",
                       )}
                       aria-pressed={isActive}
@@ -251,7 +251,7 @@ const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions
                     <button
                       type="button"
                       className={cn(
-                        "flex h-7 items-center gap-[6px] rounded px-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        "flex h-7 items-center gap-1.5 rounded px-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                         isActive ? "text-[#25272d]" : "text-slate-500",
                       )}
                       aria-pressed={isActive}

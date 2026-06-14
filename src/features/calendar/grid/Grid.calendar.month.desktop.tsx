@@ -348,7 +348,7 @@ const GridCalendarMonthDesktop = ({ today, selectedDate, weekStartDay, visibleEv
     <>
       <div className={cn("sticky top-0 z-30 grid grid-cols-7 overflow-hidden border-b bg-white shadow-none", GD.MONTH_GRID_WEEKDAY_HEADER_HEIGHT_CLASS)} style={MONTH_GRID_BORDER_STYLE}>
         {weekdayLabels.map((label: string, index: number) => (
-          <div key={`${label}-${index}`} className="calendar-month-weekday-cell flex items-center justify-center text-xs leading-none font-semibold tracking-[0.03em] text-zinc-500">
+          <div key={`${label}-${index}`} className="calendar-month-weekday-cell flex items-center justify-center text-xs leading-none font-semibold tracking-wide text-zinc-500">
             {label}
           </div>
         ))}
@@ -375,7 +375,7 @@ const CalendarMonthDayCell = memo(({ day, dayEvents, isToday, selected, isScroll
   const overflowCount = totalCount - visibleEvents.length;
 
   return (
-    <div ref={setDayCellRef(day.key)} data-calendar-month-day-key={day.key} className={cn("calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible bg-white text-left", hasLeadingBorder && "border-l", isToday && "bg-[#f7fbff]", selected && !isToday && "bg-[#f7f7f8]", !selected && !isToday && "calendar-month-day-cell-hoverable", isScrollHovered && !selected && !isToday && "calendar-month-day-cell-scroll-hovered bg-[#fafafa]")} style={MONTH_GRID_BORDER_STYLE}>
+    <div ref={setDayCellRef(day.key)} data-calendar-month-day-key={day.key} className={cn("calendar-month-day-cell group relative h-[var(--calendar-month-row-height)] min-h-[var(--calendar-month-row-height)] overflow-visible bg-white text-left", hasLeadingBorder && "border-l", isToday && "bg-[#f7fbff]", selected && !isToday && "bg-zinc-50", !selected && !isToday && "calendar-month-day-cell-hoverable", isScrollHovered && !selected && !isToday && "calendar-month-day-cell-scroll-hovered bg-[#fafafa]")} style={MONTH_GRID_BORDER_STYLE}>
       <button type="button" aria-label={getDayAriaLabel(day.date)} aria-pressed={selected} className="relative h-full w-full overflow-hidden text-left outline-none focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#c7c7cc]" onClick={() => onSelectDate(day.date)}>
         <span className={cn("absolute flex items-center gap-0.5 whitespace-nowrap", GD.MONTH_GRID_DAY_HEADER_POSITION_CLASS)}>
           <CalendarDayNumberCircle isToday={isToday} isSelected={selected} isCurrentMonth={day.isCurrentMonth}>

@@ -57,9 +57,9 @@ const PdfLibraryContinueSection = ({ cardClassName, continueRows, formatDateTime
               <div className="truncate text-xs font-semibold leading-5 text-[#29343b]">
                 {row.title}
               </div>
-              <div className="mt-2 h-1.5 overflow-hidden rounded-[999px] bg-[#e5e7eb]">
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#e5e7eb]">
                 <div
-                  className="h-full rounded-[999px] bg-[#4b5563]"
+                  className="h-full rounded-full bg-[#4b5563]"
                   style={{ width: `${row.progressPercent ?? 0}%` }}
                 />
               </div>

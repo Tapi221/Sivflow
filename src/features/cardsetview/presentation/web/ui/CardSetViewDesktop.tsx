@@ -175,8 +175,8 @@ const CardSetViewEmptyState = ({ cardSetName, currentDisplayMode, effectiveCardW
   return (
     <div className="h-full min-h-0 w-full overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]">
       <div className="flex min-w-0 flex-col items-center" style={{ paddingBlock: CARD_SET_VIEW_PAGER_PADDING_BLOCK, paddingInline: CARD_SET_VIEW_PAGER_PADDING_INLINE }}>
-        <div className="card-active-chrome card-active-chrome--active card-pager-item w-full rounded-[40px]" style={shellStyle}>
-          <div className="flex min-h-44 w-full min-w-0 flex-col items-center justify-center rounded-[28px] border border-[#e7e5de] bg-white px-8 py-7 text-center shadow-[0_18px_70px_rgba(15,23,42,0.08)]">
+        <div className="card-active-chrome card-active-chrome--active card-pager-item w-full rounded-3xl" style={shellStyle}>
+          <div className="flex min-h-44 w-full min-w-0 flex-col items-center justify-center rounded-3xl border border-[#e7e5de] bg-white px-8 py-7 text-center shadow-[0_18px_70px_rgba(15,23,42,0.08)]">
             <div className="mb-2 max-w-full truncate text-sm font-semibold tracking-tight text-[#242424]">{cardSetName ?? "カードセット"}</div>
             <p className="text-xs font-medium leading-6 text-[#7b7b7b]">このカードセットにはまだカードがありません。</p>
             <button type="button" onClick={handleCreateCard} className="mt-5 rounded-full border border-[#d8d6cf] bg-[#f6f5f2] px-4 py-2 text-xs font-semibold text-[#2f343b] transition-colors hover:bg-[#eeeeea] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c7c7c7]">

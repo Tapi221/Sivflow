@@ -104,9 +104,9 @@ const restoreEventTime = (targetEvent: GoogleCalendarEvent, snapshot: CalendarEv
   return cloneEvent(snapshot.event);
 };
 
-const getViewModeButtonClassName = (isSelected: boolean): string => cn("h-8 rounded-full px-3 text-xs font-semibold transition-colors", isSelected ? "bg-[#1c1c1e] text-white" : "text-[rgba(60,60,67,0.72)] hover:bg-[#f5f5f7] hover:text-[#1c1c1e]");
+const getViewModeButtonClassName = (isSelected: boolean): string => cn("h-8 rounded-full px-3 text-xs font-semibold transition-colors", isSelected ? "bg-[#1c1c1e] text-white" : "text-[rgba(60,60,67,0.72)] hover:bg-[#f5f5f7] hover:text-zinc-900");
 
-const getWeekPageButtonClassName = (): string => "h-8 shrink-0 rounded-full border border-[#d1d1d6] bg-white px-3 text-xs font-semibold text-[#1c1c1e] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset] transition-colors hover:bg-[#f5f5f7]";
+const getWeekPageButtonClassName = (): string => "h-8 shrink-0 rounded-full border border-[#d1d1d6] bg-white px-3 text-xs font-semibold text-zinc-900 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset] transition-colors hover:bg-[#f5f5f7]";
 
 const CalendarDndSandboxPage = () => {
   const headerScrollRef = useRef<HTMLDivElement | null>(null);
@@ -259,14 +259,14 @@ const CalendarDndSandboxPage = () => {
   }, [stopWeekDragPaging]);
 
   return (
-    <div className="flex h-screen min-h-0 w-full min-w-0 flex-col bg-white text-[#1c1c1e]">
+    <div className="flex h-screen min-h-0 w-full min-w-0 flex-col bg-white text-zinc-900">
       <CarvePanelShell>
         <CarvePanel>
           <div className="mb-2 flex shrink-0 items-start justify-between gap-4 px-5 pt-4">
             <div className="min-w-0">
               <div className="flex min-w-0 items-center gap-3">
-                <h1 className="truncate text-[17px] font-semibold tracking-tight text-[#1c1c1e]">カレンダー DnD 操作確認</h1>
-                <span className="shrink-0 rounded-full border border-[#e5e5ea] bg-[#f5f5f7] px-2.5 py-1 text-xs font-semibold leading-none text-[rgba(60,60,67,0.58)]">Sandbox</span>
+                <h1 className="truncate text-base font-semibold tracking-tight text-zinc-900">カレンダー DnD 操作確認</h1>
+                <span className="shrink-0 rounded-full border border-zinc-200 bg-[#f5f5f7] px-2.5 py-1 text-xs font-semibold leading-none text-[rgba(60,60,67,0.58)]">Sandbox</span>
               </div>
               <p className="mt-1 max-w-3xl text-xs leading-5 text-[rgba(60,60,67,0.58)]">{SANDBOX_HEADER_DESCRIPTION}</p>
             </div>
@@ -277,14 +277,14 @@ const CalendarDndSandboxPage = () => {
                   <button type="button" className={getWeekPageButtonClassName()} onClick={() => handleMoveWeekPage("next")}>次週</button>
                 </div>
               ) : null}
-              <div className="flex items-center rounded-full border border-[#e5e5ea] bg-white p-0.5 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]">
+              <div className="flex items-center rounded-full border border-zinc-200 bg-white p-0.5 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset]">
                 {VIEW_MODE_OPTIONS.map((option) => (
                   <button key={option.value} type="button" className={getViewModeButtonClassName(viewMode === option.value)} onClick={() => setViewMode(option.value)}>
                     {option.label}
                   </button>
                 ))}
               </div>
-              <button type="button" className="h-8 shrink-0 rounded-full border border-[#d1d1d6] bg-white px-3 text-xs font-semibold text-[#1c1c1e] shadow-[0_1px_0_rgba(255,255,255,0.9)_inset] transition-colors hover:bg-[#f5f5f7]" onClick={handleReset}>Reset</button>
+              <button type="button" className="h-8 shrink-0 rounded-full border border-[#d1d1d6] bg-white px-3 text-xs font-semibold text-zinc-900 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset] transition-colors hover:bg-[#f5f5f7]" onClick={handleReset}>Reset</button>
             </div>
           </div>
 

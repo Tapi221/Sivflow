@@ -37,7 +37,7 @@ const StudyComplete = ({ ratingTiles, ratingCounts, isPracticeFeatureEnabled, re
           <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-[#e0f2f1] opacity-80"></div>
           <div className="relative z-10">
             <h2
-              className={`font-bold mb-2 text-[#1e293b] ${compact ? "text-[30px] leading-none md:text-3xl" : "text-2xl"}`}
+              className={`font-bold mb-2 text-[#1e293b] ${compact ? "text-3xl leading-none md:text-3xl" : "text-2xl"}`}
             >
               Complete!
             </h2>
@@ -85,7 +85,7 @@ const StudyComplete = ({ ratingTiles, ratingCounts, isPracticeFeatureEnabled, re
                       {count}
                     </span>
                     <span
-                      className={`text-[9px] text-[#94a3b8] font-medium uppercase tracking-wider ${design.labelHover}`}
+                      className={`text-xs text-[#94a3b8] font-medium uppercase tracking-wider ${design.labelHover}`}
                     >
                       {ratingLabels[rating]}
                     </span>

@@ -48,7 +48,7 @@ const getCardSetInitial = (title: string): string => {
 const CardSetMetric = ({ label, value }: CardSetMetricProps) => {
   return (
     <span className="flex min-w-0 flex-col gap-1 rounded-xl bg-[#f5f4ef] px-3 py-2">
-      <span className="text-xs font-semibold leading-none tracking-[0.08em] text-[#8b8780] uppercase">
+      <span className="text-xs font-semibold leading-none tracking-wider text-[#8b8780] uppercase">
         {label}
       </span>
       <span className="truncate text-xs font-bold leading-none text-[#35312b]">
@@ -72,17 +72,17 @@ const CardSetLibraryCard = ({ row, onOpenCardSet }: CardSetLibraryCardProps) => 
           {getCardSetInitial(row.title)}
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-1">
-          <span className="truncate text-sm font-bold leading-[1.35] tracking-tight text-stone-900">
+          <span className="truncate text-sm font-bold leading-5 tracking-tight text-stone-900">
             {row.title}
           </span>
-          <span className="truncate text-xs font-medium leading-[1.35] text-stone-500">
+          <span className="truncate text-xs font-medium leading-5 text-stone-500">
             {row.folderPathLabel}
           </span>
         </span>
       </div>
 
       {row.description ? (
-        <p className="mt-3 line-clamp-2 text-xs font-medium leading-[1.6] text-[#66615a]">
+        <p className="mt-3 line-clamp-2 text-xs font-medium leading-6 text-[#66615a]">
           {row.description}
         </p>
       ) : null}

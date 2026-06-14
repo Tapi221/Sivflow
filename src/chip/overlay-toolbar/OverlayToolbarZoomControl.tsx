@@ -96,7 +96,7 @@ const OverlayToolbarZoomControl = (props: OverlayToolbarZoomControlProps) => {
       />
       <div
         className={cn(
-          "min-w-[2.25rem] text-center text-xs font-semibold tabular-nums text-[#74798B]",
+          "min-w-9 text-center text-xs font-semibold tabular-nums text-[#74798B]",
           valueClassName,
         )}
       >

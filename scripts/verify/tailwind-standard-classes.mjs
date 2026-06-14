@@ -108,18 +108,90 @@ const TEXT_SIZE_REPLACEMENTS = new Map([
   [14, "text-sm"],
   [15, "text-sm"],
   [16, "text-base"],
-  [17, "text-lg"],
+  [17, "text-base"],
   [18, "text-lg"],
+  [19, "text-lg"],
   [20, "text-xl"],
+  [21, "text-xl"],
   [22, "text-2xl"],
+  [23, "text-2xl"],
   [24, "text-2xl"],
+  [28, "text-3xl"],
+  [30, "text-3xl"],
+  [32, "text-4xl"],
 ]);
-const SPACING_PREFIXES = ["min-w", "max-w", "min-h", "max-h", "inset-x", "inset-y", "size", "w", "h", "p", "px", "py", "pt", "pr", "pb", "pl", "m", "mx", "my", "mt", "mr", "mb", "ml", "top", "right", "bottom", "left"];
+const SPACING_PREFIXES = ["min-w", "max-w", "min-h", "max-h", "inset-x", "inset-y", "size", "w", "h", "p", "px", "py", "pt", "pr", "pb", "pl", "m", "mx", "my", "mt", "mr", "mb", "ml", "top", "right", "bottom", "left", "gap", "gap-x", "gap-y", "space-x", "space-y"];
 const SPACING_SCALE = [[1, "px"], [2, "0.5"], [4, "1"], [6, "1.5"], [8, "2"], [10, "2.5"], [12, "3"], [14, "3.5"], [16, "4"], [20, "5"], [24, "6"], [28, "7"], [32, "8"], [36, "9"], [40, "10"], [44, "11"], [48, "12"], [56, "14"], [64, "16"], [80, "20"], [96, "24"], [112, "28"], [128, "32"], [144, "36"], [160, "40"], [176, "44"], [192, "48"], [208, "52"], [224, "56"], [240, "60"], [256, "64"], [288, "72"], [320, "80"], [384, "96"]];
 const SPACING_PATTERN = new RegExp(`(?<![\\w-])(${SPACING_PREFIXES.join("|")})-\\[(-?\\d+)px\\]`, "g");
+const REM_SPACING_PATTERN = new RegExp(`(?<![\\w-])(${SPACING_PREFIXES.join("|")})-\\[(\\d+(?:\\.\\d+)?)rem\\]`, "g");
+const EM_SPACING_PATTERN = new RegExp(`(?<![\\w-])(${SPACING_PREFIXES.join("|")})-\\[(\\d+(?:\\.\\d+)?)em\\]`, "g");
+const WIDTH_PERCENT_PATTERN = /(?<![\w-])(w|min-w|max-w|h|min-h|max-h)-\[(\d+)%\]/g;
 const TEXT_SIZE_PATTERN = /(?<![\w-])text-\[(\d+)px\]/g;
+const ROUNDED_PATTERN = /(?<![\w-])rounded-\[(\d+)px\]/g;
+const TRACKING_PATTERN = /(?<![\w-])tracking-\[(-?\d+(?:\.\d+)?)em\]/g;
+const LEADING_RATIO_PATTERN = /(?<![\w-])leading-\[(\d+(?:\.\d+)?)\]/g;
+const LEADING_PX_PATTERN = /(?<![\w-])leading-\[(\d+)px\]/g;
 const CLASS_TOKEN_PATTERN = /[^\s"'`{}<>]+/gu;
 const ARBITRARY_VALUE_SEGMENT_PATTERN = /^!?-?[a-z][a-z0-9-]*-\[[^\]]+\]$/iu;
+const ROUNDED_REPLACEMENTS = new Map([
+  [5, "rounded"],
+  [7, "rounded-md"],
+  [15, "rounded-2xl"],
+  [16, "rounded-2xl"],
+  [20, "rounded-3xl"],
+  [26, "rounded-3xl"],
+  [28, "rounded-3xl"],
+  [32, "rounded-3xl"],
+  [40, "rounded-3xl"],
+]);
+const TRACKING_REPLACEMENTS = new Map([
+  ["-0.04", "tracking-tighter"],
+  ["-0.03", "tracking-tight"],
+  ["-0.025", "tracking-tight"],
+  ["-0.02", "tracking-tight"],
+  ["-0.018", "tracking-tight"],
+  ["-0.012", "tracking-tight"],
+  ["-0.01", "tracking-tight"],
+  ["-0.005", "tracking-normal"],
+  ["0.03", "tracking-wide"],
+  ["0.04", "tracking-wide"],
+  ["0.08", "tracking-wider"],
+  ["0.1", "tracking-widest"],
+  ["0.12", "tracking-widest"],
+  ["0.16", "tracking-widest"],
+  ["0.18", "tracking-widest"],
+  ["0.22", "tracking-widest"],
+  ["0.24", "tracking-widest"],
+  ["0.28", "tracking-widest"],
+]);
+const LEADING_RATIO_REPLACEMENTS = new Map([
+  ["1.3", "leading-5"],
+  ["1.35", "leading-5"],
+  ["1.6", "leading-6"],
+  ["1.7", "leading-7"],
+]);
+const LEADING_PX_REPLACEMENTS = new Map([
+  [18, "leading-none"],
+  [22, "leading-6"],
+  [24, "leading-6"],
+  [28, "leading-7"],
+  [32, "leading-8"],
+]);
+const WIDTH_PERCENT_REPLACEMENTS = new Map([
+  [44, "7/12"],
+  [50, "1/2"],
+  [56, "7/12"],
+  [60, "3/5"],
+  [67, "2/3"],
+  [70, "2/3"],
+  [75, "3/4"],
+  [80, "4/5"],
+  [82, "5/6"],
+  [84, "5/6"],
+  [90, "11/12"],
+  [92, "11/12"],
+  [100, "full"],
+]);
 
 const toPosix = (value) => value.split(path.sep).join("/");
 const getRelativePath = (filePath) => toPosix(path.relative(ROOT_DIR, filePath));
@@ -156,14 +228,38 @@ const normalizeArbitrarySpacingClass = (_match, prefix, rawValue) => {
   const token = findNearestSpacingToken(Math.abs(pxValue));
   return pxValue < 0 ? `-${prefix}-${token}` : `${prefix}-${token}`;
 };
+const normalizeRelativeSpacingClass = (_match, prefix, rawValue) => {
+  const pxValue = Math.round(Number(rawValue) * 16);
+  const token = findNearestSpacingToken(pxValue);
+  return `${prefix}-${token}`;
+};
 const normalizeArbitraryTextSizeClass = (match, rawValue) => TEXT_SIZE_REPLACEMENTS.get(Number(rawValue)) ?? match;
+const normalizeRoundedClass = (match, rawValue) => {
+  const pxValue = Number(rawValue);
+  if (pxValue >= 999) return "rounded-full";
+  return ROUNDED_REPLACEMENTS.get(pxValue) ?? match;
+};
+const normalizeTrackingClass = (match, rawValue) => TRACKING_REPLACEMENTS.get(String(Number(rawValue))) ?? match;
+const normalizeLeadingRatioClass = (match, rawValue) => LEADING_RATIO_REPLACEMENTS.get(String(Number(rawValue))) ?? match;
+const normalizeLeadingPxClass = (match, rawValue) => LEADING_PX_REPLACEMENTS.get(Number(rawValue)) ?? match;
+const normalizeWidthPercentClass = (match, prefix, rawValue) => {
+  const replacement = WIDTH_PERCENT_REPLACEMENTS.get(Number(rawValue));
+  return replacement ? `${prefix}-${replacement}` : match;
+};
 const normalizeTailwindStandardClasses = (source) => {
   let nextSource = source;
   for (const [fromClassName, toClassName] of EXACT_CLASS_REPLACEMENTS) {
     nextSource = nextSource.split(fromClassName).join(toClassName);
   }
   nextSource = nextSource.replace(SPACING_PATTERN, normalizeArbitrarySpacingClass);
+  nextSource = nextSource.replace(REM_SPACING_PATTERN, normalizeRelativeSpacingClass);
+  nextSource = nextSource.replace(EM_SPACING_PATTERN, normalizeRelativeSpacingClass);
+  nextSource = nextSource.replace(WIDTH_PERCENT_PATTERN, normalizeWidthPercentClass);
   nextSource = nextSource.replace(TEXT_SIZE_PATTERN, normalizeArbitraryTextSizeClass);
+  nextSource = nextSource.replace(ROUNDED_PATTERN, normalizeRoundedClass);
+  nextSource = nextSource.replace(TRACKING_PATTERN, normalizeTrackingClass);
+  nextSource = nextSource.replace(LEADING_PX_PATTERN, normalizeLeadingPxClass);
+  nextSource = nextSource.replace(LEADING_RATIO_PATTERN, normalizeLeadingRatioClass);
   return nextSource;
 };
 const splitClassSegments = (className) => {

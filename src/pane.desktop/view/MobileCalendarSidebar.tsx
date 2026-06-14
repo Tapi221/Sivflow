@@ -20,7 +20,7 @@ type MobileCalendarSidebarOpenButtonProps = {
 const MOBILE_CALENDAR_SIDEBAR_ID = "mobile-calendar-sidebar";
 const MOBILE_CALENDAR_SIDEBAR_OPEN_ICON_CLASS_NAME = "h-5 w-5 shrink-0 [transform:scaleX(-1)]";
 const MOBILE_CALENDAR_SIDEBAR_DRAWER_CONTENT_CLASS_NAME = "h-full min-h-0 w-full [&_.app-layered-directory]:!min-w-0 [&_.app-layered-directory]:!w-full";
-const DEFAULT_MOBILE_CALENDAR_SIDEBAR_OPEN_BUTTON_CLASS_NAME = "flex h-10 w-10 shrink-0 items-center justify-center bg-transparent text-[#111] transition hover:text-[#111] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]";
+const DEFAULT_MOBILE_CALENDAR_SIDEBAR_OPEN_BUTTON_CLASS_NAME = "flex h-10 w-10 shrink-0 items-center justify-center bg-transparent text-neutral-950 transition hover:text-neutral-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]";
 
 
 

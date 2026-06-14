@@ -123,7 +123,7 @@ const SelectionCaptureSandboxPage = () => {
     <div className="min-h-screen bg-slate-950 px-6 py-8 text-slate-100">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
         <section className="rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-black/20">
-          <p className="text-sm font-semibold uppercase tracking-[0.28em] text-cyan-300">
+          <p className="text-sm font-semibold uppercase tracking-widest text-cyan-300">
             Selection Capture Sandbox
           </p>
           <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
@@ -159,7 +159,7 @@ const SelectionCaptureSandboxPage = () => {
               </div>
               <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
                 <div className="rounded-3xl border border-white/10 bg-white/10 p-5 shadow-2xl shadow-black/20 backdrop-blur">
-                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">Workspace</p>
+                  <p className="text-xs font-semibold uppercase tracking-widest text-cyan-200">Workspace</p>
                   <h2 className="mt-4 text-2xl font-bold text-white">カード編集プレビュー</h2>
                   <p className="mt-3 text-sm leading-7 text-slate-200">
                     ボタンを押してから、この枠の中をドラッグしてください。選択した範囲だけが PNG として生成されます。

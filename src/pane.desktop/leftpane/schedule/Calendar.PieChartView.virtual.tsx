@@ -94,7 +94,7 @@ const buildSummaries = (dates: Date[], events: GoogleCalendarEvent[], selectedDa
     return { date, key, minutes, count: dayEvents.length, isSelected: isSameDay(date, selectedDate), isToday: isSameDay(date, today) };
   });
 };
-const getDayDateNumberClassName = (day: DaySummary): string => cn(DAY_DATE_NUMBER_CLASS_NAME, day.isSelected ? SELECTED_DAY_DATE_NUMBER_CLASS_NAME : day.isToday ? "text-[#0a84ff]" : "text-[#1c1c1e]");
+const getDayDateNumberClassName = (day: DaySummary): string => cn(DAY_DATE_NUMBER_CLASS_NAME, day.isSelected ? SELECTED_DAY_DATE_NUMBER_CLASS_NAME : day.isToday ? "text-[#0a84ff]" : "text-zinc-900");
 
 
 
@@ -150,7 +150,7 @@ const DayRow = memo(({ day, onSelectDate }: { day: DaySummary; onSelectDate?: (d
   const used = Math.min(1, day.minutes / 1440);
   const unused = 1 - used;
   const background = `conic-gradient(#0a84ff 0turn ${used}turn, #f2f2f7 ${used}turn ${used + unused}turn)`;
-  return <section className="grid h-full grid-cols-[58px_minmax(0,1fr)] gap-2" aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}><DayDateButton day={day} onSelectDate={onSelectDate} /><div className="grid min-h-0 grid-cols-[minmax(0,1fr)_180px] items-center gap-4"><div className="min-w-0"><div className="text-xs font-semibold text-slate-700">{day.count > 0 ? `${day.count}件 / ${Math.round(day.minutes / 60 * 10) / 10}h` : "時間指定なし"}</div><div className="mt-2 h-2 rounded-full bg-[#f2f2f7]"><div className="h-full rounded-full bg-[#0a84ff]" style={{ width: `${used * 100}%` }} /></div></div><div className="mx-auto flex aspect-square w-full max-w-44 items-center justify-center rounded-full border border-slate-200" style={{ background }}><div className="flex h-[44%] w-[44%] items-center justify-center rounded-full bg-white text-xs font-semibold text-slate-700 shadow-sm">{Math.round(day.minutes / 60 * 10) / 10}h</div></div></div></section>;
+  return <section className="grid h-full grid-cols-[58px_minmax(0,1fr)] gap-2" aria-label={format(day.date, "yyyy年M月d日 EEEE", { locale: ja })}><DayDateButton day={day} onSelectDate={onSelectDate} /><div className="grid min-h-0 grid-cols-[minmax(0,1fr)_180px] items-center gap-4"><div className="min-w-0"><div className="text-xs font-semibold text-slate-700">{day.count > 0 ? `${day.count}件 / ${Math.round(day.minutes / 60 * 10) / 10}h` : "時間指定なし"}</div><div className="mt-2 h-2 rounded-full bg-[#f2f2f7]"><div className="h-full rounded-full bg-[#0a84ff]" style={{ width: `${used * 100}%` }} /></div></div><div className="mx-auto flex aspect-square w-full max-w-44 items-center justify-center rounded-full border border-slate-200" style={{ background }}><div className="flex h-7/12 w-7/12 items-center justify-center rounded-full bg-white text-xs font-semibold text-slate-700 shadow-sm">{Math.round(day.minutes / 60 * 10) / 10}h</div></div></div></section>;
 });
 DayRow.displayName = "DayRow";
 const CalendarPieChartView = memo(CalendarPieChartViewComponent);

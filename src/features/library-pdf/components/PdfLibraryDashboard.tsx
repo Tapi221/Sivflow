@@ -53,7 +53,7 @@ const IconBadge = ({ label, tone = "slate" }: IconBadgeProps) => {
     return <span className="inline-flex h-6 min-w-8 items-center justify-center rounded-md border border-[#f1c7c7] bg-[#fff8f8] px-1.5 text-xs font-semibold text-[#E72A2A]" aria-label="PDF">PDF</span>;
   }
 
-  return <span className={cn("inline-flex h-8 w-8 items-center justify-center rounded-[999px] text-xs font-semibold", getIconBadgeToneClassName(tone))}>{label}</span>;
+  return <span className={cn("inline-flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold", getIconBadgeToneClassName(tone))}>{label}</span>;
 };
 const PdfLibraryDashboard = ({ documents, folders, onOpenDocument, showToolbar = true }: PdfLibraryDashboardProps) => {
   const { tagById } = useTags();

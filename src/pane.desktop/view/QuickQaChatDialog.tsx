@@ -205,7 +205,7 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
           <div className="flex flex-col gap-2.5">
             {messages.map((message) => (
               <div key={message.id} className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}>
-                <div className={cn("max-w-[84%] rounded-2xl px-3 py-2 text-xs leading-relaxed shadow-sm", message.role === "user" ? "bg-[#343434] text-white" : "border border-[#eceae4] bg-white text-[#4b4b4b]")}>{message.text}</div>
+                <div className={cn("max-w-5/6 rounded-2xl px-3 py-2 text-xs leading-relaxed shadow-sm", message.role === "user" ? "bg-[#343434] text-white" : "border border-[#eceae4] bg-white text-[#4b4b4b]")}>{message.text}</div>
               </div>
             ))}
             {isCreating || isGeneratingAiAnswer ? <LoadingStatusPill label={isGeneratingAiAnswer ? "AI回答案を作成中" : "カード作成中"} /> : null}

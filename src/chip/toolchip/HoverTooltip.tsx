@@ -255,7 +255,7 @@ const HoverTooltip = ({ label, children, side = "top", align = "center", offset 
               zIndex: 9999,
               pointerEvents: "none",
             }}
-            className="animate-in fade-in-0 zoom-in-[0.98] overflow-visible duration-150 ease-out"
+            className="animate-in fade-in-0 zoom-in-95 overflow-visible duration-150 ease-out"
           >
             <div
               className={cn(

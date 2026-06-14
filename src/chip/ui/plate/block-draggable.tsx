@@ -264,7 +264,7 @@ const Draggable = (props: PlateElementProps) => {
           <div
             className={cn(
               "slate-blockToolbarWrapper",
-              "flex h-[1.5em]",
+              "flex h-6",
               isInColumn && "h-4",
             )}
           >

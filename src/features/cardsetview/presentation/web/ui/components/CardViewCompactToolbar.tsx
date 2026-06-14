@@ -47,14 +47,14 @@ type ModeButtonProps = {
 
 
 
-const CARD_VIEW_COMPACT_TOOLBAR_CLASS_NAME = "gap-1.5 rounded-[16px] border border-[#e6e4e1] bg-[#f7f7f6] px-1.5 py-1 text-[#85827e] shadow-none backdrop-blur-0";
+const CARD_VIEW_COMPACT_TOOLBAR_CLASS_NAME = "gap-1.5 rounded-2xl border border-[#e6e4e1] bg-[#f7f7f6] px-1.5 py-1 text-[#85827e] shadow-none backdrop-blur-0";
 const CARD_VIEW_COMPACT_MODE_BUTTON_CLASS_NAME = "h-7 w-7 border-0 bg-transparent text-[#85827e] shadow-none transition-colors hover:bg-slate-100 hover:text-[#2f343b] disabled:bg-transparent disabled:text-[#b7b7b7] disabled:opacity-50";
 const CARD_VIEW_COMPACT_MODE_BUTTON_ACTIVE_CLASS_NAME = "bg-slate-100 text-[#2f343b]";
 const CARD_VIEW_COMPACT_DIVIDER_CLASS_NAME = "bg-[#dedbd7]";
 const CARD_VIEW_COMPACT_INDEX_CLASS_NAME = "text-[#85827e]";
-const CARD_VIEW_COMPACT_INDEX_INPUT_CLASS_NAME = "h-7 rounded-[7px] border-0 bg-transparent text-[#2f343b] shadow-none hover:bg-slate-100 focus:border-transparent focus:bg-slate-100";
+const CARD_VIEW_COMPACT_INDEX_INPUT_CLASS_NAME = "h-7 rounded-md border-0 bg-transparent text-[#2f343b] shadow-none hover:bg-slate-100 focus:border-transparent focus:bg-slate-100";
 const CARD_VIEW_COMPACT_INDEX_TOTAL_CLASS_NAME = "text-[#85827e]";
-const CARD_VIEW_COMPACT_ZOOM_SLIDER_WRAPPER_CLASS_NAME = "w-16 px-1 sm:w-[4.5rem]";
+const CARD_VIEW_COMPACT_ZOOM_SLIDER_WRAPPER_CLASS_NAME = "w-16 px-1 sm:w-16";
 const CARD_VIEW_COMPACT_ZOOM_TRACK_CLASS_NAME = "bg-[#dedbd7]";
 const CARD_VIEW_COMPACT_ZOOM_RANGE_CLASS_NAME = "bg-[#8c8c8c]";
 const CARD_VIEW_COMPACT_ZOOM_THUMB_CLASS_NAME = "[&::-webkit-slider-thumb]:border-[#c7c2bc] [&::-webkit-slider-thumb]:bg-[#f7f7f6] [&::-webkit-slider-thumb]:shadow-none [&::-moz-range-thumb]:border-[#c7c2bc] [&::-moz-range-thumb]:bg-[#f7f7f6] [&::-moz-range-thumb]:shadow-none";
