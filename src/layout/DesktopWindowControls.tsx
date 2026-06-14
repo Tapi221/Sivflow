@@ -1,8 +1,8 @@
-import "./DesktopWindowControls.css";
+import "@/layout/DesktopWindowControls.css";
 import { useEffect, useState } from "react";
 import type { CSSProperties, MouseEvent } from "react";
 import { windowControls } from "@/platform/capabilities/windowControls";
-import { hasDesktopBridge } from "@/platform/runtime";
+import { hasDesktopBridge } from "@platform/runtime";
 
 type AppRegionStyle = CSSProperties & {
   WebkitAppRegion?: "no-drag";
