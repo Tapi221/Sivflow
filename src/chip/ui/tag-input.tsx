@@ -3,7 +3,7 @@ import type { DropResult } from "@hello-pangea/dnd";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import type { TagColorKey } from "@/chip/budge/tag/tagColor";
 import { getTagColorKey, getTagColorSwatchStyle } from "@/chip/budge/tag/tagColor";
-import { TagBadge } from "@/components/tag/TagBadge";
+import { TagBadge } from "@/components/tag/Badge.Tag";
 import { TagChip } from "@/components/tag/TagChip";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
