@@ -50,7 +50,7 @@ const SelectableGoogleSourceRow = ({ id, label, checked, color, className, onTog
   return (
     <div role="button" tabIndex={0} className={cn(GOOGLE_SOURCE_ROW_CLASS_NAME, "cursor-default transition-all duration-150 hover:bg-neutral-100 active:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-300", className)} onClick={handleToggle} onKeyDown={handleRowKeyDown} aria-pressed={checked}>
       <SelectableGoogleSourceSwitch label={label} checked={checked} color={color} onToggle={handleToggle} />
-      <span className={cn("truncate text-xs font-medium", checked ? SOURCE_ROW_CHECKED_TEXT_CLASS_NAME : SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME)}>{label}</span>
+      <span className={cn("truncate text-sm font-semibold leading-5", checked ? SOURCE_ROW_CHECKED_TEXT_CLASS_NAME : SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME)}>{label}</span>
     </div>
   );
 };
