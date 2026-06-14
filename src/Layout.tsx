@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo } from "react";
 import { UI_TYPO } from "@shared/design-tokens/typography";
 import { useLocation, useNavigate } from "react-router-dom";
+import { SearchDialog } from "@/chip/panel/dialog.desktop/Dialog.Search";
 import { useKatexLoader } from "@/components/card/blocks/math/useKatexLoader";
 import { LocalDBStatusBanner } from "@/components/security/LocalDBStatusBanner";
 import { SecurityAlertBanner } from "@/components/security/SecurityAlertBanner";
-import { SearchDialog } from "@/features/search/components/SearchDialog";
 import type { SearchItem } from "@/features/search/model/search.types";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { AppLayout } from "@/layout/AppLayout";
