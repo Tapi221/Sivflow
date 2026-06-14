@@ -1,4 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CardEditorPaneMediaDialogs } from "@/chip/panel/dialog.desktop/Dialog.CardEditorPaneMedia";
 import { BlockEditModeContext } from "@/components/card/blocks/core/BlockEditModeContext";
 import { CardFaceWithAttachments } from "@/components/card/common/CardFaceWithAttachments";
 import { CardEditorLoadingState, NewCardIdleState } from "@/components/card/editor/CardEditorPaneStates";
@@ -12,6 +13,9 @@ import type { CardSyncStatus } from "@/components/card/shell/cardSyncStatus";
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { MetaPanelToggleIcon } from "@/components/card/shell/MetaPanelToggleIcon";
 import { useCardSyncStatusReporter } from "@/components/card/shell/useCardSyncStatusReporter";
+import { CardEditorPaneReadonlySurface } from "@/components/folder/panes/CardEditorPaneReadonlySurface";
+import { useCardEditorPaneController } from "@/components/folder/panes/useCardEditorPaneController";
+import { CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX, CARD_PANE_WIDTH_STEP_PX, useCardEditorPaneWidth } from "@/components/folder/panes/useCardEditorPaneWidth";
 import { CANONICAL_CARD_WIDTH, CARD_ROW_PX, layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
@@ -23,10 +27,6 @@ import type { Card, CardBlock, CardFaceAttachments } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { X } from "@/ui/icons";
 import { toMillisOrNull } from "@/utils/toMillis";
-import { CardEditorPaneMediaDialogs } from "./CardEditorPaneMediaDialogs";
-import { CardEditorPaneReadonlySurface } from "./CardEditorPaneReadonlySurface";
-import { useCardEditorPaneController } from "./useCardEditorPaneController";
-import { CARD_PANE_WIDTH_CONTROL_CLEARANCE_PX, CARD_PANE_WIDTH_STEP_PX, useCardEditorPaneWidth } from "./useCardEditorPaneWidth";
 
 type CardEditorPaneSettings = {
   accentColor?: string;
@@ -116,20 +116,16 @@ const toAudioDialogUrl = (value: unknown): string | null => {
   if (typeof value === "string") {
     return value.trim() === "" ? null : value;
   }
-
   if (!isRecord(value)) return null;
-
   const candidates = [value.url, value.remoteUrl, value.localUrl];
   const resolved = candidates.find(
     (candidate): candidate is string =>
       typeof candidate === "string" && candidate.trim() !== "",
   );
-
   return resolved ?? null;
 };
 const _OverlayTopRight = ({ children }: _OverlayTopRightProps) => {
   if (!children) return null;
-
   return (
     <div className="pointer-events-none absolute right-2 top-2 z-30">
       <div
@@ -214,12 +210,9 @@ const EditorSidePaneInner = ({
     displayMode === "fluid" &&
     "rounded-none border-none bg-transparent shadow-none",
   );
-
   const [internalToolbarMount, _setInternalToolbarMount] =
     useState<HTMLDivElement | null>(null);
-
   const resolvedToolbarMount = toolbarMount ?? internalToolbarMount;
-
   const topAttachment = shouldDockToolbarToCardTop ? (
     <div className="pointer-events-none relative h-0 w-full overflow-visible">
       <div
@@ -241,7 +234,6 @@ const EditorSidePaneInner = ({
       />
     </div>
   ) : undefined;
-
   const faceNode = (
     <div
       className={cn(
@@ -288,7 +280,6 @@ const EditorSidePaneInner = ({
       />
     </div>
   );
-
   return (
     <div
       className={cn(
@@ -299,7 +290,6 @@ const EditorSidePaneInner = ({
       {shouldShowInlineToolbarMount && (
         <div ref={setInlineToolbarMount} className="w-full" />
       )}
-
       <div className="w-full text-center">
         <CardFaceWithAttachments
           faceNode={faceNode}
@@ -312,10 +302,8 @@ const EditorSidePaneInner = ({
 };
 const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx = null, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, hideMetaPanel = false, dockToolbarsToTop = false, hideBlockToolbars = false, externalToolbarMountQ = null, externalToolbarMountA = null, settingsOverride = null, embeddedInPager = false, pairGapClassName = "gap-0", presentationContext, showResizeHandle: showResizeHandleProp = true, onSyncStatusChange, overlayTopInsetPx = 0, displayMode = "fixed", cardLayoutMode = "split", zoom = 1 }: CardEditorPaneProps) => {
   const controller = useCardEditorPaneController({ selectedCardId, folderId, cardSetId, cardsOverride, autoEdit, onCardUpdated, onSelectCardId, settingsOverride });
-
   const { settings, isMetaOpen, session, layout, content, actions } =
     controller;
-
   const {
     draft,
     normalizedSelectedCardId,
@@ -333,25 +321,20 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
     handleToggleUncertainty,
     panelCard,
   } = session;
-
   const [isRetryingSync, setIsRetryingSync] = useState(false);
   const [showRetryErrorState, setShowRetryErrorState] = useState(false);
-
   useEffect(() => {
     if (saveError) {
       setShowRetryErrorState(true);
       return;
     }
-
     if (!isRetryingSync) {
       setShowRetryErrorState(false);
     }
   }, [isRetryingSync, saveError]);
-
   const cardPresentationContext = useMemo<CardPresentationContext>(() => {
     const isCurrentCard =
       presentationContext?.isCurrentCard ?? !embeddedInPager;
-
     return {
       inPager: embeddedInPager,
       isCurrentCard,
@@ -366,21 +349,17 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
     presentationContext?.isCurrentCard,
     presentationContext?.isStandaloneEditor,
   ]);
-
   const cardPresentationState = useMemo(
     () => resolveCardPresentationState(cardPresentationContext),
     [cardPresentationContext],
   );
-
   const isFluidEditor = displayMode === "fluid";
-
   const {
     setManualResizeInProgress,
     scheduleLayoutRowsFromHeight,
     handleQuestionMinHeightChange,
     handleAnswerMinHeightChange,
   } = layout;
-
   const {
     setSideBlocks,
     imageDialogSide,
@@ -397,38 +376,31 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
     getReferenceItems,
     setReferenceItems,
   } = content;
-
   const { metaPanel } = actions;
-
   const [toolbarMountQInternal, setToolbarMountQInternal] =
     useState<HTMLDivElement | null>(null);
   const [toolbarMountAInternal, setToolbarMountAInternal] =
     useState<HTMLDivElement | null>(null);
-
   const toolbarMountQ = externalToolbarMountQ ?? toolbarMountQInternal;
   const toolbarMountA = externalToolbarMountA ?? toolbarMountAInternal;
   const usesExternalToolbarMount =
     Boolean(externalToolbarMountQ) && Boolean(externalToolbarMountA);
-
   const handleQuestionBlocksChange = useCallback(
     (blocks: CardBlock[]) => {
       setSideBlocks("question", blocks);
     },
     [setSideBlocks],
   );
-
   const handleAnswerBlocksChange = useCallback(
     (blocks: CardBlock[]) => {
       setSideBlocks("answer", blocks);
     },
     [setSideBlocks],
   );
-
   const frontBlocks = draft?.frontBlocks ?? EMPTY_BLOCKS;
   const backBlocks = draft?.backBlocks ?? EMPTY_BLOCKS;
   const frontAttachments = draft?.frontAttachments;
   const backAttachments = draft?.backAttachments;
-
   const editorCardHeightPx = useMemo(
     () =>
       isFluidEditor
@@ -436,22 +408,18 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
         : layoutRowsToCardHeightPx(normalizeLayoutRows(draft?.layoutRows)),
     [draft?.layoutRows, isFluidEditor],
   );
-
   const handleEditorHeightChange = useCallback(
     (heightPx: number) => {
       scheduleLayoutRowsFromHeight(heightPx);
     },
     [scheduleLayoutRowsFromHeight],
   );
-
   const handleResizeStart = useCallback(() => {
     setManualResizeInProgress(true);
   }, [setManualResizeInProgress]);
-
   const handleResizeEnd = useCallback(() => {
     setManualResizeInProgress(false);
   }, [setManualResizeInProgress]);
-
   const {
     contentViewportRef,
     showWidthControl,
@@ -485,7 +453,6 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
     cardSetId,
     cardLayoutMode,
   });
-
   const editorMetrics = useMemo(
     () =>
       buildCardSurfaceMetrics({
@@ -498,19 +465,14 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
       }),
     [cardLayoutMode, displayMode, editorCardFitScale, zoom],
   );
-
   const activePaneModeValue: "edit" | "view" =
     activePaneMode === "edit" ? "edit" : "view";
-
   const shouldKeepDockedToolbarInsideCard =
     shouldDockToolbarToCardTop && isMetaOpen && !embeddedInPager;
-
   const selectedCardEntity = isCardEntity(selectedCard) ? selectedCard : null;
   const panelCardEntity = isCardEntity(panelCard) ? panelCard : null;
-
   const editorAccentColor = getSettingsAccentColor(settings);
   const editorDuplicateToOpposite = getSettingsDuplicateToOpposite(settings);
-
   const getDialogAudioUrls = useCallback(
     (side: "question" | "answer") =>
       getDialogAudios(side)
@@ -518,7 +480,6 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
         .filter((item): item is string => item !== null),
     [getDialogAudios],
   );
-
   const fallbackLastSyncedAtMs = useMemo(() => {
     return (
       lastSavedAt?.getTime() ??
@@ -531,17 +492,14 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
       null
     );
   }, [lastSavedAt, selectedCardEntity]);
-
   const handleRetrySync = useCallback(async () => {
     if (!showRetryErrorState) return;
-
     setIsRetryingSync(true);
     try {
       const saved = await flushDraft({
         reason: "autosave",
         showSuccessToast: false,
       });
-
       if (saved) {
         setShowRetryErrorState(false);
       }
@@ -549,7 +507,6 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
       setIsRetryingSync(false);
     }
   }, [flushDraft, showRetryErrorState]);
-
   const syncStatus = useMemo<CardSyncStatus>(
     () => ({
       lastSyncedAtMs: fallbackLastSyncedAtMs,
@@ -564,12 +521,10 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
       showRetryErrorState,
     ],
   );
-
   useCardSyncStatusReporter({
     status: syncStatus,
     onSyncStatusChange,
   });
-
   const previousIsCurrentCardRef = useRef(
     cardPresentationContext.isCurrentCard,
   );
@@ -577,11 +532,9 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
     const wasCurrentCard = previousIsCurrentCardRef.current;
     const isCurrentCard = cardPresentationContext.isCurrentCard;
     previousIsCurrentCardRef.current = isCurrentCard;
-
     if (!embeddedInPager) return;
     if (!wasCurrentCard || isCurrentCard) return;
     if (!isEditing || !draft) return;
-
     void flushDraft({
       reason: "switch",
       showSuccessToast: false,
@@ -593,7 +546,6 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
     flushDraft,
     isEditing,
   ]);
-
   const sideEditorActionsTopLeft = useMemo(
     () =>
       selectedCardEntity ? (
@@ -612,7 +564,6 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
       selectedCardEntity,
     ],
   );
-
   const baseEditorActionsTopLeft = useMemo(
     () =>
       selectedCardEntity ? (
@@ -631,23 +582,19 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
       selectedCardEntity,
     ],
   );
-
   const questionBlocksForToolbar = draft?.frontBlocks;
   const questionActionsTopRight = useMemo(() => {
     void questionBlocksForToolbar;
     return renderMediaDialogButtons("question");
   }, [questionBlocksForToolbar, renderMediaDialogButtons]);
-
   const answerBlocksForToolbar = draft?.backBlocks;
   const answerActionsTopRight = useMemo(() => {
     void answerBlocksForToolbar;
     return renderMediaDialogButtons("answer");
   }, [answerBlocksForToolbar, renderMediaDialogButtons]);
-
   if (!normalizedSelectedCardId && !isEditing) {
     return null;
   }
-
   if (isNew && !isEditing) {
     return (
       <NewCardIdleState
@@ -656,15 +603,12 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
       />
     );
   }
-
   if (!isNew && normalizedSelectedCardId && !selectedCard && !isEditing) {
     return <CardEditorLoadingState />;
   }
-
   if (isEditing && !draft) {
     return <CardEditorLoadingState />;
   }
-
   const widthControlProps = showWidthControl
     ? {
       modeLabel: isEditing ? "編集幅" : "閲覧幅",
@@ -682,7 +626,6 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
       onReset: resetActivePaneWidth,
     }
     : null;
-
   const metaPanelNode = hideMetaPanel ? null : (
     <CardMetaPanel
       isVisible={isMetaOpen}
@@ -729,7 +672,6 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
       }}
     />
   );
-
   const questionEditorPane = (
     <EditorSidePane
       side="question"
@@ -763,7 +705,6 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
       actionsTopRight={questionActionsTopRight}
     />
   );
-
   const answerEditorPane = (
     <EditorSidePane
       side="answer"
@@ -797,7 +738,6 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
       actionsTopRight={answerActionsTopRight}
     />
   );
-
   const activeFlipSide: "question" | "answer" = isFlipped
     ? "answer"
     : "question";
@@ -816,7 +756,6 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
     activeFlipSide === "question"
       ? handleQuestionMinHeightChange
       : handleAnswerMinHeightChange;
-
   const flipEditorPane = (
     <EditorSidePane
       side={activeFlipSide}
@@ -876,7 +815,6 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
       }
     />
   );
-
   const editorPanelsNode = (
     <CardSurfaceLayout
       cardLayoutMode={
@@ -892,7 +830,6 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
       className={pairGapClassName}
     />
   );
-
   const readonlyEditButton = (
     <button
       type="button"
@@ -902,7 +839,6 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
       編集
     </button>
   );
-
   const metaToggleButton =
     hideMetaPanel || !actions.toggleMetaOpen ? null : (
       <button
@@ -922,7 +858,6 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
         )}
       </button>
     );
-
   const readonlyTopRightControls =
     selectedCardEntity && !isEditing ? (
       <div className="flex items-center gap-2">
@@ -932,7 +867,6 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
     ) : (
       metaToggleButton
     );
-
   return (
     <BlockEditModeContext.Provider value={true}>
       <>
