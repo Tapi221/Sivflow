@@ -1,8 +1,4 @@
 @layer components {
-  .card-editor-right-pane-font {
-    --font-serif: var(--app-font-family-content);
-  }
-
   .card-active-chrome:not(.card-active-chrome--active):not(:focus-within):not(.card-active-chrome--plain),
   .card-pager-item:not([data-card-active="true"]):not(:focus-within):not(.card-pager-item--plain) {
     border: 1px solid var(--card-border-default, rgba(15, 23, 42, 0.08));
