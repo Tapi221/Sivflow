@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 const EQUATION_RENDER_OPTIONS = {
   displayMode: true,
-  errorColor: "#cc0000",
+  errorColor: "#c00",
   fleqn: false,
   leqno: false,
   macros: { "\\f": "#1f(#2)" },
@@ -77,7 +77,7 @@ const EquationElementDocx = (props: SlateElementProps<TEquationElement>) => {
   if (!element.texExpression || element.texExpression.length === 0) {
     return (
       <SlateElement {...props}>
-        <p style={{ color: "#888888", fontStyle: "italic" }}>[Empty equation]</p>
+        <p style={{ color: "#888", fontStyle: "italic" }}>[Empty equation]</p>
         {props.children}
       </SlateElement>
     );
@@ -103,7 +103,7 @@ const InlineEquationElementDocx = (props: SlateElementProps<TEquationElement>) =
   if (!element.texExpression || element.texExpression.length === 0) {
     return (
       <SlateElement as="span" {...props}>
-        <span style={{ color: "#888888", fontStyle: "italic" }}>[equation]</span>
+        <span style={{ color: "#888", fontStyle: "italic" }}>[equation]</span>
         {props.children}
       </SlateElement>
     );

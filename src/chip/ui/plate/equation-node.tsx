@@ -24,7 +24,7 @@ type EquationElementWithBadgeProps = PlateElementProps<TEquationElement> & {
 
 const EQUATION_RENDER_OPTIONS = {
   displayMode: true,
-  errorColor: "#cc0000",
+  errorColor: "#c00",
   fleqn: false,
   leqno: false,
   macros: { "\\f": "#1f(#2)" },
