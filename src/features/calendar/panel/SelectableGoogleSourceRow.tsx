@@ -1,4 +1,5 @@
-import type { CSSProperties, KeyboardEvent, MouseEvent } from "react";
+import type { KeyboardEvent, MouseEvent } from "react";
+import { AnimatedCheckboxBase } from "@/chip/checkbox/AnimatedCheckboxBase";
 import { cn } from "@/lib/utils";
 
 type SelectableGoogleSourceRowProps = {
@@ -15,33 +16,21 @@ type SelectableGoogleSourceSwitchProps = {
   color: string;
   onToggle: () => void;
 };
-type SourceRowSwitchStyle = CSSProperties & {
-  "--calendar-source-switch-color": string;
-};
 
 const GOOGLE_SOURCE_ROW_CLASS_NAME = "flex h-7 w-full items-center gap-2 overflow-hidden rounded-[10px] px-2 pl-2 text-left";
 const SOURCE_ROW_CHECKED_TEXT_CLASS_NAME = "text-[#85827e]";
 const SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME = "text-[#85827e] opacity-70";
 const SOURCE_ROW_SWITCH_CLASS_NAME = "mr-0";
-const SOURCE_ROW_SWITCH_ICON_CLASS_NAME = "h-[13px] w-[13px] text-white";
+const SOURCE_ROW_SWITCH_SIZE_CLASS_NAME = "h-5 w-5";
 
-const createSourceRowSwitchStyle = (color: string): SourceRowSwitchStyle => ({
-  "--calendar-source-switch-color": color,
-} as SourceRowSwitchStyle);
-
-const SourceRowCheckIcon = () => (
-  <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" className={SOURCE_ROW_SWITCH_ICON_CLASS_NAME}>
-    <path d="M5 10.2L8.3 13.4L15 6.6" stroke="currentColor" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
 const SelectableGoogleSourceSwitch = ({ label, checked, color, onToggle }: SelectableGoogleSourceSwitchProps) => {
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     onToggle();
   };
   return (
-    <button type="button" role="switch" aria-checked={checked} aria-label={`${label} を${checked ? "非表示" : "表示"}`} onClick={handleClick} style={createSourceRowSwitchStyle(color)} className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d7d7d7]", checked ? "border-transparent bg-[color:var(--calendar-source-switch-color)]" : "border-[#d7d7d7] bg-white", SOURCE_ROW_SWITCH_CLASS_NAME)}>
-      {checked ? <SourceRowCheckIcon /> : null}
+    <button type="button" role="switch" aria-checked={checked} aria-label={`${label} を${checked ? "非表示" : "表示"}`} onClick={handleClick} className={cn("flex shrink-0 items-center justify-center rounded-full transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d7d7d7]", SOURCE_ROW_SWITCH_SIZE_CLASS_NAME, SOURCE_ROW_SWITCH_CLASS_NAME)}>
+      {checked ? <AnimatedCheckboxBase checked={checked} color={color} className={SOURCE_ROW_SWITCH_SIZE_CLASS_NAME} /> : <span className={cn("rounded-full border-2 border-[#d7d7d7] bg-white", SOURCE_ROW_SWITCH_SIZE_CLASS_NAME)} aria-hidden="true" />}
     </button>
   );
 };
