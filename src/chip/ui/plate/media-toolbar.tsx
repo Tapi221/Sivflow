@@ -1,39 +1,23 @@
 "use client";
-
 import * as React from "react";
-
 import { FloatingMedia as FloatingMediaPrimitive, FloatingMediaStore, useFloatingMediaValue, useImagePreviewValue } from "@platejs/media/react";
-
 import { cva } from "class-variance-authority";
-
 import { Link, Trash2Icon } from "lucide-react";
-
 import type { WithRequiredKey } from "platejs";
-
 import { useEditorRef, useEditorSelector, useElement, useFocusedLast, useReadOnly, useRemoveNodeButton, useSelected } from "platejs/react";
-
 import { Button, buttonVariants } from "@/chip/ui/button/button";
-
+import { CaptionButton } from "@/chip/ui/plate/caption";
 import { Popover, PopoverAnchor, PopoverContent } from "@/chip/ui/popover";
-
 import { Separator } from "@/chip/ui/separator";
-
-import { CaptionButton } from "./caption";
-
-
 
 type MediaToolbarProps = {
   children: React.ReactNode;
   plugin: WithRequiredKey;
 };
 
-
-
 const inputVariants = cva(
-  "flex h-[28px] w-full rounded-md border-none bg-transparent px-1.5 py-1 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-transparent md:text-sm",
+  "flex h-7 w-full rounded-md border-none bg-transparent px-1.5 py-1 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-transparent md:text-sm",
 );
-
-
 
 const MediaToolbar = ({ children, plugin }: MediaToolbarProps) => {
   const editor = useEditorRef();
@@ -64,10 +48,10 @@ const MediaToolbar = ({ children, plugin }: MediaToolbarProps) => {
       <PopoverAnchor>{children}</PopoverAnchor>
       <PopoverContent
         className="w-auto p-1"
-        onOpenAutoFocus={(e) => e.preventDefault()}
+        onOpenAutoFocus={(event) => event.preventDefault()}
       >
         {isEditing ? (
-          <div className="flex w-[330px] flex-col">
+          <div className="flex w-80 flex-col">
             <div className="flex items-center">
               <div className="flex items-center pr-1 pl-2 text-muted-foreground">
                 <Link className="size-4" />
@@ -100,10 +84,5 @@ const MediaToolbar = ({ children, plugin }: MediaToolbarProps) => {
   );
 };
 
-
-
 export { MediaToolbar };
-
-
-
 export type { MediaToolbarProps };
