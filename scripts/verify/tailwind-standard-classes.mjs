@@ -6,6 +6,7 @@ const SOURCE_DIRECTORIES = ["src", "apps/web/src", "apps/mobile/src", "packages/
 const ROOT_TEXT_FILES = ["tailwind.config.js", "postcss.config.js", "eslint.config.js", "vite.config.ts"].map((fileName) => path.join(ROOT_DIR, fileName));
 const TEXT_EXTENSIONS = new Set([".cjs", ".css", ".html", ".js", ".jsx", ".json", ".md", ".mjs", ".scss", ".svg", ".ts", ".tsx", ".webmanifest", ".xml"]);
 const EXCLUDED_PATH_PARTS = ["/node_modules/", "/dist/", "/build/", "/coverage/", "/.git/", "/.turbo/", "/target/"];
+const EXCLUDED_RELATIVE_PATHS = new Set(["scripts/verify/tailwind-standard-classes.mjs"]);
 const EXACT_CLASS_REPLACEMENTS = [
   ["max-w-[80vw]", "max-w-full"],
   ["rounded-[4px]", "rounded"],
@@ -126,6 +127,7 @@ const isExcludedPath = (filePath) => {
   const relativePath = `/${getRelativePath(filePath)}`;
   return EXCLUDED_PATH_PARTS.some((part) => relativePath.includes(part));
 };
+const shouldCheckFile = (filePath) => !EXCLUDED_RELATIVE_PATHS.has(getRelativePath(filePath));
 const isTextFile = (filePath) => TEXT_EXTENSIONS.has(path.extname(filePath));
 const walkTextFiles = (directory) => {
   if (!existsSync(directory)) return [];
@@ -136,10 +138,11 @@ const walkTextFiles = (directory) => {
     if (stat.isDirectory()) return walkTextFiles(entryPath);
     if (!stat.isFile()) return [];
     if (!isTextFile(entryPath)) return [];
+    if (!shouldCheckFile(entryPath)) return [];
     return [entryPath];
   });
 };
-const getExistingRootTextFiles = () => ROOT_TEXT_FILES.filter((filePath) => existsSync(filePath) && statSync(filePath).isFile() && isTextFile(filePath));
+const getExistingRootTextFiles = () => ROOT_TEXT_FILES.filter((filePath) => existsSync(filePath) && statSync(filePath).isFile() && isTextFile(filePath) && shouldCheckFile(filePath));
 const getTextFiles = () => [...new Set([...SOURCE_DIRECTORIES.flatMap(walkTextFiles), ...getExistingRootTextFiles()])];
 const findNearestSpacingToken = (pxValue) => {
   let nearest = SPACING_SCALE[0];
