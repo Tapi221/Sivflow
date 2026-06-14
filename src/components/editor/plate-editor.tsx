@@ -4,7 +4,6 @@ import type { Value } from "platejs";
 import { Plate, usePlateEditor } from "platejs/react";
 import { Editor, EditorContainer } from "@/chip/ui/plate/editor";
 import { EditorKit } from "./editor-kit";
-import { SettingsDialog } from "./settings-dialog";
 
 type PlateEditorProps = {
   initialValue: Value;
@@ -21,7 +20,6 @@ const PlateEditor = ({ initialValue, onChange }: PlateEditorProps) => {
       <EditorContainer>
         <Editor variant="demo" />
       </EditorContainer>
-      <SettingsDialog />
     </Plate>
   );
 };
