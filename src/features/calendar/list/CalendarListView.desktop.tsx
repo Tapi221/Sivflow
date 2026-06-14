@@ -86,7 +86,7 @@ const SELECTED_DAY_DATE_NUMBER_CLASS_NAME =
 const EMPTY_DAY_ROW_CLASS_NAME =
   "flex h-full min-h-10 items-stretch";
 const EMPTY_DAY_TIME_CLASS_NAME =
-  "w-12 shrink-0 px-1 pt-2.5 text-right text-xs font-medium leading-none text-slate-400";
+  "w-12 shrink-0 px-1 pt-2.5 text-right text-xs font-medium leading-none text-[#b3b3b3]";
 const EMPTY_DAY_RAIL_CLASS_NAME =
   "relative flex w-8 shrink-0 justify-center";
 const EMPTY_DAY_LINE_CLASS_NAME =
