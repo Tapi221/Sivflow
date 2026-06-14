@@ -67,7 +67,7 @@ const EquationPopoverContent = ({ className, isInline, open, setOpen, ...props }
     >
       <EquationInput
         autoFocus
-        className={cn("max-h-[50vh] grow resize-none p-2 text-sm", className)}
+        className={cn("max-h-96 grow resize-none p-2 text-sm", className)}
         state={{ isInline, onClose, open }}
         {...props}
       />
@@ -151,7 +151,7 @@ const InlineEquationElement = (props: PlateElementProps<TEquationElement>) => {
         <PopoverTrigger asChild>
           <div
             className={cn(
-              'after:-top-0.5 after:-left-1 after:absolute after:inset-0 after:z-1 after:h-[calc(100%)+4px] after:w-[calc(100%+8px)] after:rounded-sm after:content-[""]',
+              'after:-inset-x-1 after:-inset-y-0.5 after:absolute after:z-1 after:rounded-sm after:content-[""]',
               "h-6",
               inlineSuggestionVariants(),
               ((element.texExpression.length > 0 && open) || selected) && "after:bg-muted-foreground/15",
@@ -165,7 +165,7 @@ const InlineEquationElement = (props: PlateElementProps<TEquationElement>) => {
             />
             {element.texExpression.length === 0 ? (
               <span>
-                <RadicalIcon className="mr-1 inline-block h-[19px] w-4 py-[1.5px] align-text-bottom" />
+                <RadicalIcon className="mr-1 inline-block size-4 align-text-bottom" />
                 New equation
               </span>
             ) : null}
