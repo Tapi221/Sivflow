@@ -1,17 +1,16 @@
 "use client";
-
-import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
+import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
 import { CheckIcon, ChevronRightIcon, Code2, Columns3Icon, FileCodeIcon, Heading1Icon, Heading2Icon, Heading3Icon, Heading4Icon, Heading5Icon, Heading6Icon, ListIcon, ListOrderedIcon, PilcrowIcon, QuoteIcon, SquareIcon } from "lucide-react";
-import { KEYS } from "platejs";
 import type { TElement } from "platejs";
+import { KEYS } from "platejs";
 import { useEditorRef, useSelectionFragmentProp } from "platejs/react";
 import { useMemo, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-import { getBlockType, setBlockType } from "@/components/editor/transforms";
 import { ToolbarButton, ToolbarMenuGroup } from "@/chip/ui/plate/toolbar";
+import { getBlockType, setBlockType } from "@/components/editor/transforms";
 
-const TURN_INTO_MENU_ITEM_CLASS_NAME = "dropdown-menu__radio-item--check-end min-w-[180px]";
+const TURN_INTO_MENU_ITEM_CLASS_NAME = "dropdown-menu__radio-item--check-end min-w-44";
 const turnIntoItems = [
   { icon: <PilcrowIcon />, keywords: ["paragraph"], label: "Text", value: KEYS.p },
   { icon: <Heading1Icon />, keywords: ["title", "h1"], label: "Heading 1", value: "h1" },
@@ -44,14 +43,14 @@ const TurnIntoToolbarButton = (props: DropdownMenuProps) => {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
-        <ToolbarButton className="min-w-[125px]" pressed={open} tooltip="Turn into" isDropdown>
+        <ToolbarButton className="min-w-32" pressed={open} tooltip="Turn into" isDropdown>
           {selectedItem.label}
         </ToolbarButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         className="ignore-click-outside/toolbar min-w-0"
-        onCloseAutoFocus={(e) => {
-          e.preventDefault();
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
           editor.tf.focus();
         }}
         align="start"
