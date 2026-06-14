@@ -446,6 +446,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     persistViewerState({ currentPage: previousPage, page: previousPage, history: nextHistoryBackPages, historyBackPages: nextHistoryBackPages }, { persistence: "immediate" });
     globalThis.requestAnimationFrame(() => scrollToPage(previousPage));
   }, [bookmarkPages, persistViewerState, scrollToPage]);
+  const isReady = !isLoading && !errorMessage && toolbarState.pageCount > 0;
   useEffect(() => {
     if (!source) {
       setActiveDocument(null);
@@ -626,7 +627,6 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
       globalThis.removeEventListener("keydown", handleKeyDown);
     };
   }, [applyPageWidth, goBackInHistory, goToNextPage, goToPreviousPage, persistViewerState, toolbarState.currentPage, toggleBookmark, zoomIn, zoomOut]);
-  const isReady = !isLoading && !errorMessage && toolbarState.pageCount > 0;
   const shouldUseCompactWidth = containerRef.current ? containerRef.current.clientWidth <= PDF_COMPACT_VIEWPORT_MAX_WIDTH : false;
   return (
     <section className={cn("pdf-pane", className)} aria-label="PDFビューア">
