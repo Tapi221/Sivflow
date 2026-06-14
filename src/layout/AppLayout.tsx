@@ -2,7 +2,7 @@ import "@/styles/backpane.css";
 import "@/layout/AppLayout.css";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import { SettingsWorkspaceDialog } from "@/features/settings/SettingsWorkspaceDialog";
+import { SettingsWorkspaceRootPanel } from "@/features/settings/SettingsWorkspaceRootPanel";
 import { useThemeAccentColor } from "@/features/settings/hooks/useThemeAccentColor";
 import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
@@ -225,7 +225,7 @@ const AppLayout = () => {
           <Suspense fallback={null}>
             <Outlet context={outletContext} />
           </Suspense>
-          <SettingsWorkspaceDialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen} />
+          <SettingsWorkspaceRootPanel open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen} />
         </WorkspaceShell>
       </WorkspaceLayoutRevisionProvider>
     </div>
