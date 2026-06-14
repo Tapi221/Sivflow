@@ -25,7 +25,7 @@ import type { WorkspaceExplorerTab, WorkspaceNoteTab, WorkspaceTab } from "@/pan
 import type { DocumentItem, Folder, Note, SelectedExplorerItem } from "@/types";
 import { Search } from "@/ui/icons";
 import { MobileCalendarSidebar, MobileCalendarSidebarOpenButton } from "./MobileCalendarSidebar";
-import { ScheduleScreen as CalendarScheduleScreen } from "./ScheduleScreen.desktop";
+import { ScheduleScreen as CalendarScheduleScreen } from "./Screen.Schedule.desktop";
 import { WorkspaceActionToolbar } from "./WorkspaceActionToolbar";
 
 type ExplorerWorkspaceContentProps = {

@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { hasDesktopRuntime } from "@platform/runtime";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import { ScheduleScreen as DesktopScheduleScreen } from "@/pane.desktop/view/ScheduleScreen.desktop";
+import { ScheduleScreen as DesktopScheduleScreen } from "@/pane.desktop/view/Screen.Schedule.desktop";
 import { WorkspaceScreen } from "@/pane.desktop/view/WorkspaceScreen";
 
 const MOBILE_SCHEDULE_MEDIA_QUERY = "(max-width: 767px)";
