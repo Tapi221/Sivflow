@@ -1,18 +1,13 @@
 "use client";
 
 import * as React from "react";
-
 import { PlusIcon } from "lucide-react";
-
 import { cn } from "@/lib/utils";
-
-
 
 type SelectItem = {
   value: string;
   isNew?: boolean;
 };
-
 type SelectEditorContextValue = {
   items: SelectItem[];
   open: boolean;
@@ -22,7 +17,6 @@ type SelectEditorContextValue = {
   setValue: (items: SelectItem[]) => void;
   value: SelectItem[];
 };
-
 type SelectEditorProps = {
   children: React.ReactNode;
   className?: string;
@@ -31,16 +25,11 @@ type SelectEditorProps = {
   value?: SelectItem[];
   onValueChange?: (items: SelectItem[]) => void;
 };
-
 type SelectEditorInputProps = React.HTMLAttributes<HTMLDivElement> & {
   ref?: React.Ref<HTMLDivElement>;
 };
 
-
-
 const SelectEditorContext = React.createContext<SelectEditorContextValue | undefined>(undefined);
-
-
 
 const useSelectEditorContext = () => {
   const context = React.useContext(SelectEditorContext);
@@ -49,7 +38,6 @@ const useSelectEditorContext = () => {
   }
   return context;
 };
-
 const getSelectableItems = (items: SelectItem[], search: string) => {
   const trimmedSearch = search.trim();
   const normalizedSearch = trimmedSearch.toLowerCase();
@@ -60,18 +48,14 @@ const getSelectableItems = (items: SelectItem[], search: string) => {
   if (trimmedSearch.length === 0 || hasExactItem) return filteredItems;
   return [...filteredItems, { value: trimmedSearch, isNew: true }];
 };
-
 const getNextValue = (value: SelectItem[], item: SelectItem) => {
   if (value.some((selectedItem) => selectedItem.value === item.value)) return value;
   return [...value, { value: item.value }];
 };
-
 const selectItem = (context: SelectEditorContextValue, item: SelectItem) => {
   context.setValue(getNextValue(context.value, item));
   context.setSearch("");
 };
-
-
 
 const SelectEditor = ({ children, className, defaultValue, items = [], value, onValueChange }: SelectEditorProps) => {
   const [open, setOpen] = React.useState(false);
@@ -95,11 +79,9 @@ const SelectEditor = ({ children, className, defaultValue, items = [], value, on
     </SelectEditorContext.Provider>
   );
 };
-
 const SelectEditorContent = ({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement> & { children: React.ReactNode }) => {
   return <div className={cn("relative", className)} {...props}>{children}</div>;
 };
-
 const SelectEditorInput = ({ ref, className, onBlur, onFocus, onInput, onKeyDown, tabIndex, ...props }: SelectEditorInputProps) => {
   const context = useSelectEditorContext();
   return (
@@ -141,7 +123,6 @@ const SelectEditorInput = ({ ref, className, onBlur, onFocus, onInput, onKeyDown
     />
   );
 };
-
 const SelectEditorCombobox = () => {
   const context = useSelectEditorContext();
   const selectableItems = React.useMemo(() => getSelectableItems(context.items, context.search), [context.items, context.search]);
@@ -157,10 +138,5 @@ const SelectEditorCombobox = () => {
   );
 };
 
-
-
 export { SelectEditor, SelectEditorContent, SelectEditorInput, SelectEditorCombobox };
-
-
-
 export type { SelectItem };

@@ -1,30 +1,17 @@
 "use client";
 
 import * as React from "react";
-
 import { PlaceholderPlugin } from "@platejs/media/react";
-
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
-
 import { AudioLinesIcon, FileUpIcon, FilmIcon, ImageIcon, LinkIcon } from "lucide-react";
-
 import { isUrl, KEYS } from "platejs";
-
 import { useEditorRef } from "platejs/react";
-
 import { toast } from "sonner";
-
 import { useFilePicker } from "use-file-picker";
-
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/chip/ui/dialog/alert-dialog";
-
 import { Input } from "@/chip/ui/input";
-
 import { ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary } from "./toolbar";
-
-
 
 type MediaConfig = {
   accept: string[];
@@ -32,18 +19,14 @@ type MediaConfig = {
   title: string;
   tooltip: string;
 };
-
 type MediaUrlDialogContentProps = {
   currentConfig: MediaConfig;
   nodeType: string;
   setOpen: (value: boolean) => void;
 };
-
 type MediaToolbarButtonProps = DropdownMenuProps & {
   nodeType: string;
 };
-
-
 
 const MEDIA_CONFIG: Record<string, MediaConfig> = {
   [KEYS.audio]: { accept: ["audio/*"], icon: <AudioLinesIcon className="size-4" />, title: "Insert Audio", tooltip: "Audio" },
@@ -51,8 +34,6 @@ const MEDIA_CONFIG: Record<string, MediaConfig> = {
   [KEYS.img]: { accept: ["image/*"], icon: <ImageIcon className="size-4" />, title: "Insert Image", tooltip: "Image" },
   [KEYS.video]: { accept: ["video/*"], icon: <FilmIcon className="size-4" />, title: "Insert Video", tooltip: "Video" },
 };
-
-
 
 const MediaUrlDialogContent = ({ currentConfig, nodeType, setOpen }: MediaUrlDialogContentProps) => {
   const editor = useEditorRef();
@@ -106,7 +87,6 @@ const MediaUrlDialogContent = ({ currentConfig, nodeType, setOpen }: MediaUrlDia
     </>
   );
 };
-
 const MediaToolbarButton = ({ nodeType, ...props }: MediaToolbarButtonProps) => {
   const currentConfig = MEDIA_CONFIG[nodeType];
   const editor = useEditorRef();
@@ -161,10 +141,5 @@ const MediaToolbarButton = ({ nodeType, ...props }: MediaToolbarButtonProps) => 
   );
 };
 
-
-
 export { MediaToolbarButton };
-
-
-
 export type { MediaConfig, MediaToolbarButtonProps };

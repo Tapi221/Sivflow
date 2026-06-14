@@ -17,11 +17,7 @@ const TOOLTIP_SIZE_CLASS_NAMES = {
   },
 } as const;
 
-
-
 type TooltipSize = keyof typeof TOOLTIP_SIZE_CLASS_NAMES;
-
-
 
 const TOOLTIP_PRESET_CLASS_NAMES = {
   default: {
@@ -38,13 +34,7 @@ const TOOLTIP_PRESET_CLASS_NAMES = {
   },
 } as const;
 
-
-
 type TooltipPreset = keyof typeof TOOLTIP_PRESET_CLASS_NAMES;
 
-
-
 export { TOOLTIP_SIZE_CLASS_NAMES, TOOLTIP_PRESET_CLASS_NAMES };
-
-
 export type { TooltipSize, TooltipPreset };

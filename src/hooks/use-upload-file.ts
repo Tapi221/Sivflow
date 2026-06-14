@@ -1,14 +1,9 @@
 "use client";
 
 import * as React from "react";
-
 import { generateReactHelpers } from "@uploadthing/react";
-
 import { toast } from "sonner";
-
 import { z } from "zod";
-
-
 
 type UploadThingResponseFile<T = unknown> = {
   appUrl?: string;
@@ -20,7 +15,6 @@ type UploadThingResponseFile<T = unknown> = {
   ufsUrl?: string;
   url?: string;
 };
-
 type UploadedFile<T = unknown> = {
   appUrl?: string;
   key: string;
@@ -30,24 +24,17 @@ type UploadedFile<T = unknown> = {
   type: string;
   url: string;
 };
-
 type UploadProgressValue = number | {
   progress?: number;
 };
-
 type UseUploadFileProps = {
   headers?: HeadersInit | (() => HeadersInit | Promise<HeadersInit>);
   onUploadComplete?: (file: UploadedFile) => void;
   onUploadError?: (error: unknown) => void;
 };
 
-
-
 const UNKNOWN_ERROR_MESSAGE = "Something went wrong, please try again later.";
-
 const { uploadFiles, useUploadThing: useUploadThingBase } = generateReactHelpers();
-
-
 
 const getProgressValue = (progress: UploadProgressValue) => {
   if (typeof progress === "number") {
@@ -55,7 +42,6 @@ const getProgressValue = (progress: UploadProgressValue) => {
   }
   return progress.progress ?? 0;
 };
-
 const normalizeUploadedFile = <T,>(file: UploadThingResponseFile<T>): UploadedFile<T> => {
   const url = file.url ?? file.ufsUrl ?? file.appUrl ?? "";
   return {
@@ -64,7 +50,6 @@ const normalizeUploadedFile = <T,>(file: UploadThingResponseFile<T>): UploadedFi
     url,
   };
 };
-
 const getErrorMessage = (err: unknown) => {
   if (err instanceof z.ZodError) {
     const errors = err.issues.map((issue) => issue.message);
@@ -75,9 +60,7 @@ const getErrorMessage = (err: unknown) => {
   }
   return UNKNOWN_ERROR_MESSAGE;
 };
-
 const useUploadThing = () => useUploadThingBase("editorUploader");
-
 const useUploadFile = ({ onUploadComplete, onUploadError, ...props }: UseUploadFileProps = {}) => {
   const [uploadedFile, setUploadedFile] = React.useState<UploadedFile>();
   const [uploadingFile, setUploadingFile] = React.useState<File>();
@@ -149,16 +132,10 @@ const useUploadFile = ({ onUploadComplete, onUploadError, ...props }: UseUploadF
     uploadingFile,
   };
 };
-
 const showErrorToast = (err: unknown) => {
   const errorMessage = getErrorMessage(err);
   return toast.error(errorMessage);
 };
 
-
-
 export { uploadFiles, useUploadThing, useUploadFile, getErrorMessage, showErrorToast };
-
-
-
 export type { UploadedFile };

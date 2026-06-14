@@ -3,11 +3,7 @@ import { LinkIcon } from "lucide-react";
 import type { ToolbarButtonProps } from "./toolbar";
 import { ToolbarButton } from "./toolbar";
 
-
-
 type LinkToolbarButtonProps = ToolbarButtonProps;
-
-
 
 const LinkToolbarButton = ({ children, ...props }: LinkToolbarButtonProps) => {
   const state = useLinkToolbarButtonState();
@@ -19,9 +15,5 @@ const LinkToolbarButton = ({ children, ...props }: LinkToolbarButtonProps) => {
   );
 };
 
-
-
 export { LinkToolbarButton };
-
-
 export type { LinkToolbarButtonProps };

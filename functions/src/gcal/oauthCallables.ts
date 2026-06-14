@@ -6,8 +6,6 @@ import { cacheGoogleProfileImageUrl } from "#src/gcal/profileImageCache.js";
 import { classifyGoogleTokenEndpointFailure } from "#src/gcal/tokenErrors.js";
 import type { GoogleOAuthServerErrorReason } from "#src/gcal/tokenErrors.js";
 
-
-
 type StoredGoogleCalendarAccount = {
   email: string;
   name: string | null;
@@ -21,8 +19,6 @@ type GoogleOAuthProfile = {
   accountName: string | null;
   accountPhotoUrl: string | null;
 };
-
-
 
 const GOOGLE_OAUTH_CLIENT_ID = defineSecret("GOOGLE_OAUTH_CLIENT_ID");
 const GOOGLE_OAUTH_CLIENT_SECRET = defineSecret("GOOGLE_OAUTH_CLIENT_SECRET");
@@ -78,8 +74,6 @@ const refreshGoogleCalendarAccessToken = onCall({ region: REGION, secrets: [GOOG
 });
 const exchangeGoogleCalendarCode = connectGoogleCalendarAccount;
 const getGoogleCalendarAccessToken = refreshGoogleCalendarAccessToken;
-
-
 
 const requireUid = (request: { auth?: { uid?: string; }; }) => {
   const uid = request.auth?.uid;
@@ -212,8 +206,6 @@ const getStoredAccessToken = async (uid: string, accountId: string) => {
   await verifyGoogleScopes(accessToken);
   return toAccessResponse(accessToken, account, getTokenNumber(data, "expires_in"));
 };
-
-
 
 export { googleCalendarWebhook } from "#src/gcal/googleCalendarWebhook.js";
 export { renewExpiredWatchChannels } from "#src/gcal/renewWatchChannels.js";

@@ -1,27 +1,18 @@
 "use client";
 
 import * as React from "react";
-
 import { AIChatPlugin, AIPlugin } from "@platejs/ai/react";
-
 import { CheckIcon, CornerUpLeftIcon, Loader2Icon, PauseIcon, PenLineIcon, SendIcon, SmileIcon, WandSparklesIcon, XIcon } from "lucide-react";
-
 import { useEditorPlugin, usePluginOption } from "platejs/react";
-
 import { Button } from "@/chip/ui/button/button";
-
 import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "@/chip/ui/command";
-
 import { cn } from "@/lib/utils";
-
-
 
 type AIMenuItemsProps = {
   input: string;
   setInput: (value: string) => void;
   setValue: (value: string) => void;
 };
-
 type AIAction = {
   icon: React.ReactNode;
   label: string;
@@ -29,14 +20,11 @@ type AIAction = {
   prompt?: string;
   toolName?: "edit" | "generate" | "comment";
 };
-
 type AIChatApi = {
   aiChat: {
     submit: (value: string, options?: Pick<AIAction, "prompt" | "toolName">) => unknown;
   };
 };
-
-
 
 const aiActions: AIAction[] = [
   {
@@ -69,16 +57,12 @@ const aiActions: AIAction[] = [
   },
 ];
 
-
-
 const submitPrompt = (input: string, action: AIAction, api: AIChatApi) => {
   void api.aiChat.submit(input, {
     prompt: action.prompt,
     toolName: action.toolName,
   });
 };
-
-
 
 const AIMenuItems = ({ input, setInput, setValue }: AIMenuItemsProps) => {
   const { api, editor } = useEditorPlugin(AIChatPlugin);
@@ -136,7 +120,6 @@ const AIMenuItems = ({ input, setInput, setValue }: AIMenuItemsProps) => {
     </>
   );
 };
-
 const AIMenu = () => {
   const { api } = useEditorPlugin(AIChatPlugin);
   const open = usePluginOption(AIChatPlugin, "open");
@@ -202,7 +185,6 @@ const AIMenu = () => {
     </div>
   );
 };
-
 const AILoadingBar = () => {
   const { api } = useEditorPlugin(AIChatPlugin);
   const chat = usePluginOption(AIChatPlugin, "chat");
@@ -220,10 +202,5 @@ const AILoadingBar = () => {
   );
 };
 
-
-
 export { AILoadingBar, AIMenu, AIMenuItems, aiActions };
-
-
-
 export type { AIAction, AIMenuItemsProps };

@@ -5,6 +5,4 @@ const overlayGlassActionButtonActiveClassName = "border-[#c9d3de] bg-[#e8f1fd] t
 const overlayGlassActionButtonDisabledClassName = "border-transparent bg-transparent text-[#aeb8c5] hover:bg-transparent hover:text-[#aeb8c5]";
 const overlayGlassActionButtonClassName = "grid h-7 w-7 place-items-center rounded-xl border border-transparent bg-transparent text-[#66758a] shadow-none transition-[background-color,border-color,color,box-shadow,transform] duration-150 hover:border-[#d9e0e8] hover:bg-[#f5f9fe] hover:text-[#1f2937] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45";
 
-
-
 export { overlayGlassToolbarClassName, overlayGlassPillClassName, overlayGlassIconButtonClassName, overlayGlassActionButtonActiveClassName, overlayGlassActionButtonDisabledClassName, overlayGlassActionButtonClassName };

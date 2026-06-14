@@ -1,14 +1,10 @@
 import type { ReactNode, RefObject } from "react";
 
-
-
 type WorkspaceShellProps = {
   children: ReactNode;
   isScrollLocked: boolean;
   mainRef: RefObject<HTMLElement | null>;
 };
-
-
 
 const WorkspaceShell = ({ children, isScrollLocked, mainRef }: WorkspaceShellProps) => {
   return (
@@ -19,7 +15,5 @@ const WorkspaceShell = ({ children, isScrollLocked, mainRef }: WorkspaceShellPro
     </div>
   );
 };
-
-
 
 export { WorkspaceShell };

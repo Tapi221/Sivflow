@@ -4,8 +4,6 @@ import { X } from "@/ui/icons";
 import type { TagColorKey } from "./tagColor";
 import { getTagColorStyle } from "./tagColor";
 
-
-
 type TagBadgeProps = {
   label: string;
   colorKey?: TagColorKey;
@@ -17,8 +15,6 @@ type TagBadgeProps = {
   removeAriaLabel?: string;
 };
 
-
-
 const LONG_DOT_SEQUENCE_PATTERN = /[.。．]{4,}/g;
 const TAG_BADGE_ROOT_CLASS_NAME = "inline-flex min-w-0 max-w-full items-center gap-1 rounded-full border px-2 py-0.5 align-middle text-xs font-semibold leading-4 tracking-normal shadow-none transition-[opacity,transform] duration-150";
 const TAG_BADGE_INTERACTIVE_CLASS_NAME = "cursor-pointer appearance-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30";
@@ -27,13 +23,9 @@ const TAG_BADGE_TEXT_CLASS_NAME = "min-w-0 truncate opacity-70";
 const TAG_BADGE_REMOVE_CLASS_NAME = "grid h-4 w-4 place-items-center rounded-full text-current opacity-60 transition-[background-color,opacity] duration-150 hover:bg-current/10 hover:opacity-100";
 const TAG_BADGE_REMOVE_ICON_CLASS_NAME = "h-3 w-3";
 
-
-
 const normalizeTagText = (value: string): string => {
   return value.replace(LONG_DOT_SEQUENCE_PATTERN, "...");
 };
-
-
 
 const TagHashIcon = ({ className }: SVGProps<SVGSVGElement>) => (
   <svg
@@ -114,9 +106,5 @@ const TagBadge = ({
   );
 };
 
-
-
 export { TagBadge };
-
-
 export type { TagBadgeProps };

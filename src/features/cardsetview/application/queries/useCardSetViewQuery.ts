@@ -5,8 +5,6 @@ import { useFolderLineage } from "@/features/folder/hooks/useFolderLineage";
 import type { Card, Folder } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 
-
-
 type ReorderCardsInCardSet = (cardSetId: string, cardIds: string[]) => Promise<void>;
 interface UseCardSetViewQueryOptions {
   cardSetId: string | null;
@@ -33,8 +31,6 @@ interface UseCardSetViewQueryResult {
   reorderCardsInCardSet: ReorderCardsInCardSet;
   isLoading: boolean;
 }
-
-
 
 const useCardSetViewQuery = ({ cardSetId }: UseCardSetViewQueryOptions): UseCardSetViewQueryResult => {
   const { cardSet: selectedCardSet, loading: cardSetLoading, updateCardSet } = useCardSetById(cardSetId);
@@ -102,7 +98,5 @@ const useCardSetViewQuery = ({ cardSetId }: UseCardSetViewQueryOptions): UseCard
     isLoading: cardSetLoading || cardsLoading,
   };
 };
-
-
 
 export { useCardSetViewQuery };

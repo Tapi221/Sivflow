@@ -3,11 +3,7 @@ import type { SlateElementProps, SlateLeafProps } from "platejs/static";
 import { SlateElement, SlateLeaf } from "platejs/static";
 import { cn } from "@/lib/utils";
 
-
-
 type CodeBlockNodeStaticProps = SlateElementProps<TCodeBlockElement>;
-
-
 
 const CODE_BLOCK_CLASS_NAME = "my-4 overflow-x-auto rounded-md border bg-muted px-4 py-3 font-mono text-sm";
 const syntaxColors: Record<string, string> = {
@@ -45,8 +41,6 @@ const syntaxColors: Record<string, string> = {
   "hljs-variable": "#005cc5",
 };
 
-
-
 const preserveSpaces = (text: string) => text.replace(/ /g, "\u00A0");
 const getCodeSyntaxDocxStyle = (tokenClassName: string | undefined) => {
   const style: {
@@ -75,8 +69,6 @@ const getCodeSyntaxDocxStyle = (tokenClassName: string | undefined) => {
   });
   return style;
 };
-
-
 
 const CodeBlockNodeStatic = ({ className, children, ...props }: CodeBlockNodeStaticProps) => (
   <SlateElement
@@ -132,15 +124,9 @@ const CodeSyntaxLeafDocx = (props: SlateLeafProps) => {
   );
 };
 
-
-
 const CodeBlockElementStatic = CodeBlockNodeStatic;
 const CodeLineElementStatic = CodeLineNodeStatic;
 const CodeSyntaxLeaf = CodeSyntaxLeafStatic;
 
-
-
 export { CodeBlockElementDocx, CodeBlockElementStatic, CodeBlockNodeStatic, CodeLineElementDocx, CodeLineElementStatic, CodeLineNodeStatic, CodeSyntaxLeaf, CodeSyntaxLeafDocx, CodeSyntaxLeafStatic };
-
-
 export type { CodeBlockNodeStaticProps };

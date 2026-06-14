@@ -14,8 +14,6 @@ import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model
 import { cn } from "@/lib/utils";
 import { useCalendarTimetable } from "./useCalendarTimetable";
 
-
-
 type TimetableSlot = {
   dayIndex: CalendarTimetableWeekdayIndex;
   periodId: string;
@@ -31,8 +29,6 @@ type CalendarTimetableViewProps = {
 type CalendarTimetableGridStyle = CSSProperties & { "--calendar-timetable-day-count": CalendarTimetableVisibleDayCount; };
 type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
-
-
 const STRATIS_ICON_COMPONENTS = stratisIcons as unknown as Record<string, StratisIconComponent | undefined>;
 const STRATIS_PLUS_ICON_NAMES = ["StratisPlus01Icon", "StratisPlusIcon"] as const;
 const STRATIS_SETTINGS_ICON_NAMES = ["StratisSettingsIcon", "StratisSettings01Icon", "StratisWrenchIcon"] as const;
@@ -41,8 +37,6 @@ const StratisSettingsIcon = STRATIS_SETTINGS_ICON_NAMES.map((name) => STRATIS_IC
 const TIMETABLE_GRID_TEMPLATE_COLUMNS = "56px repeat(var(--calendar-timetable-day-count), 112px)";
 const TIMETABLE_COMPACT_GRID_TEMPLATE_COLUMNS = "34px repeat(var(--calendar-timetable-day-count), minmax(0, 1fr))";
 const DEFAULT_TIMETABLE_ADD_REQUEST_TOKEN = 0;
-
-
 
 const createTimetableSlotKey = ({ dayIndex, periodId }: TimetableSlot): string => `${dayIndex}:${periodId}`;
 const buildTimetableWeekDays = (weekDate: Date, weekStartDay: CalendarWeekStartDay, visibleDayCount: CalendarTimetableVisibleDayCount): Date[] => Array.from({ length: visibleDayCount }, (_, index) => addDays(startOfWeek(weekDate, { weekStartsOn: getCalendarWeekStartsOn(weekStartDay) }), index));
@@ -57,8 +51,6 @@ const getTimetableEntryStyle = (colorKey: CalendarTimetableColorKey) => getTagCo
 const getTimetableGridTemplateColumns = (density: CalendarTimetableDensity): string => density === "compact" ? TIMETABLE_COMPACT_GRID_TEMPLATE_COLUMNS : TIMETABLE_GRID_TEMPLATE_COLUMNS;
 const createTimetableGridStyle = (density: CalendarTimetableDensity, visibleDayCount: CalendarTimetableVisibleDayCount): CalendarTimetableGridStyle => ({ gridTemplateColumns: getTimetableGridTemplateColumns(density), "--calendar-timetable-day-count": visibleDayCount });
 const getTimetableCourseSecondaryText = (course: CalendarTimetableCourse): string => course.room.trim() === "" ? course.teacher : course.room;
-
-
 
 const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALENDAR_MONTH_WEEK_START_DAY, density = "default", className, addRequestToken = DEFAULT_TIMETABLE_ADD_REQUEST_TOKEN }: CalendarTimetableViewProps) => {
   const today = new Date();
@@ -154,8 +146,6 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
     </div>
   );
 };
-
-
 
 const CalendarTimetableView = memo(CalendarTimetableViewComponent);
 CalendarTimetableView.displayName = "CalendarTimetableView";

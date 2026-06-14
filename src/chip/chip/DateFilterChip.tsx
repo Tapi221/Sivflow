@@ -1,13 +1,9 @@
 import { CalendarIcon } from "@/chip/icons/icons.sidebar";
 
-
-
 type DateFilterChipProps = {
   label: string;
   onClear: () => void;
 };
-
-
 
 const DateFilterChip = ({ label, onClear }: DateFilterChipProps) => {
   return (
@@ -27,7 +23,5 @@ const DateFilterChip = ({ label, onClear }: DateFilterChipProps) => {
     </span>
   );
 };
-
-
 
 export { DateFilterChip };

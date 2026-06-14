@@ -6,8 +6,6 @@ import { TAG_COLOR_KEYS } from "@/chip/budge/tag/tag.constants";
 import { getTagColorStyle } from "@/chip/budge/tag/tag.style";
 import { cn } from "@/lib/utils";
 
-
-
 type CalendarTimetableCourseEditorDialogProps = {
   course: CalendarTimetableCourse | null;
   semesterId: string;
@@ -20,8 +18,6 @@ type CalendarTimetableCourseEditorDialogProps = {
 };
 type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
-
-
 const STRATIS_ICON_COMPONENTS = stratisIcons as unknown as Record<string, StratisIconComponent | undefined>;
 const STRATIS_CHECK_ICON_NAMES = ["StratisCheckIcon", "StratisCheck01Icon", "StratisCheckCircleContainedIcon"] as const;
 const StratisCheckIcon = STRATIS_CHECK_ICON_NAMES.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
@@ -29,13 +25,9 @@ const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] a
 const DEFAULT_COURSE_COLOR_KEY: CalendarTimetableColorKey = "blue";
 const EMPTY_SLOT_LIST: CalendarTimetableSlot[] = [];
 
-
-
 const isSameTimetableSlot = (left: CalendarTimetableSlot, right: CalendarTimetableSlot): boolean => left.dayIndex === right.dayIndex && left.periodId === right.periodId;
 const createEditorSlots = (course: CalendarTimetableCourse | null, initialSlot: CalendarTimetableSlot | null): CalendarTimetableSlot[] => course?.slots ?? (initialSlot ? [initialSlot] : EMPTY_SLOT_LIST);
 const getTimetableEntryStyle = (colorKey: CalendarTimetableColorKey) => getTagColorStyle(colorKey);
-
-
 
 const CalendarTimetableCourseEditorDialog = ({ course, semesterId, initialSlot, periods, visibleDayCount, onSave, onDelete, onClose }: CalendarTimetableCourseEditorDialogProps) => {
   const [title, setTitle] = useState(course?.title ?? "");
@@ -106,7 +98,5 @@ const CalendarTimetableCourseEditorDialog = ({ course, semesterId, initialSlot, 
     </div>
   );
 };
-
-
 
 export { CalendarTimetableCourseEditorDialog };

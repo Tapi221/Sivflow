@@ -3,8 +3,6 @@ import { normalizeVisibleDayCount } from "@/features/calendar/timetable/calendar
 import { cn } from "@/lib/utils";
 import { DialogDesktopPanel } from "./dialog";
 
-
-
 type CalendarTimetableSettingsDialogProps = {
   periods: CalendarTimetablePeriod[];
   visibleDayCount: CalendarTimetableVisibleDayCount;
@@ -15,11 +13,7 @@ type CalendarTimetableSettingsDialogProps = {
   onClose: () => void;
 };
 
-
-
 const VISIBLE_DAY_COUNT_OPTIONS = [5, 6, 7] as const;
-
-
 
 const CalendarTimetableSettingsDialog = ({ periods, visibleDayCount, onChangeVisibleDayCount, onAddPeriod, onUpdatePeriod, onDeletePeriod, onClose }: CalendarTimetableSettingsDialogProps) => {
   return (
@@ -74,7 +68,5 @@ const CalendarTimetableSettingsDialog = ({ periods, visibleDayCount, onChangeVis
     </DialogDesktopPanel>
   );
 };
-
-
 
 export { CalendarTimetableSettingsDialog };

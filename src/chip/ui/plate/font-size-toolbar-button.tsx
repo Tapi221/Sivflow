@@ -1,34 +1,19 @@
 "use client";
 
 import * as React from "react";
-
 import { toUnitLess } from "@platejs/basic-styles";
-
 import { FontSizePlugin } from "@platejs/basic-styles/react";
-
 import { Minus, Plus } from "lucide-react";
-
 import type { TElement } from "platejs";
-
 import { KEYS } from "platejs";
-
 import { useEditorPlugin, useEditorSelector } from "platejs/react";
-
 import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
-
 import { cn } from "@/lib/utils";
-
 import { ToolbarButton } from "./toolbar";
 
-
-
 const DEFAULT_FONT_SIZE = "16";
-
 const FONT_SIZE_MAP = { h1: "36", h2: "24", h3: "20" } as const;
-
 const FONT_SIZES = ["8", "9", "10", "12", "14", "16", "18", "24", "30", "36", "48", "60", "72", "96"] as const;
-
-
 
 const FontSizeToolbarButton = () => {
   const [inputValue, setInputValue] = React.useState(DEFAULT_FONT_SIZE);
@@ -110,7 +95,5 @@ const FontSizeToolbarButton = () => {
     </div>
   );
 };
-
-
 
 export { FontSizeToolbarButton };

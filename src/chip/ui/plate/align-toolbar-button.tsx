@@ -1,33 +1,21 @@
 "use client";
 
 import { useState } from "react";
-
 import type { Alignment } from "@platejs/basic-styles";
-
 import { TextAlignPlugin } from "@platejs/basic-styles/react";
-
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
-
 import { AlignCenterIcon, AlignJustifyIcon, AlignLeftIcon, AlignRightIcon } from "lucide-react";
-
 import { useEditorPlugin, useSelectionFragmentProp } from "platejs/react";
-
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-
 import { ToolbarButton } from "./toolbar";
 
-
-
 const ALIGN_MENU_ITEM_CLASS_NAME = "dropdown-menu__radio-item--icon-only";
-
 const items = [
   { icon: AlignLeftIcon, value: "left" },
   { icon: AlignCenterIcon, value: "center" },
   { icon: AlignRightIcon, value: "right" },
   { icon: AlignJustifyIcon, value: "justify" },
 ];
-
-
 
 const AlignToolbarButton = (props: DropdownMenuProps) => {
   const { editor, tf } = useEditorPlugin(TextAlignPlugin);
@@ -62,7 +50,5 @@ const AlignToolbarButton = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
-
-
 
 export { AlignToolbarButton };

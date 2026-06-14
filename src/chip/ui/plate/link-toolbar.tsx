@@ -1,38 +1,21 @@
 "use client";
 
 import * as React from "react";
-
 import type { UseVirtualFloatingOptions } from "@platejs/floating";
-
 import { flip, offset } from "@platejs/floating";
-
 import { getLinkAttributes } from "@platejs/link";
-
 import type { LinkFloatingToolbarState } from "@platejs/link/react";
-
 import { FloatingLinkUrlInput, useFloatingLinkEdit, useFloatingLinkEditState, useFloatingLinkInsert, useFloatingLinkInsertState } from "@platejs/link/react";
-
 import { cva } from "class-variance-authority";
-
 import { ExternalLink, Link, Text, Unlink } from "lucide-react";
-
 import type { TLinkElement } from "platejs";
-
 import { KEYS } from "platejs";
-
 import { useEditorRef, useEditorSelection, useFormInputProps, usePluginOption } from "platejs/react";
-
 import { buttonVariants } from "@/chip/ui/button/button";
-
 import { Separator } from "@/chip/ui/separator";
 
-
-
 const popoverVariants = cva("z-50 w-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md outline-hidden");
-
 const inputVariants = cva("flex h-7 w-full rounded-md border-none bg-transparent px-1.5 py-1 text-base placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-transparent md:text-sm");
-
-
 
 const LinkOpenButton = () => {
   const editor = useEditorRef();
@@ -61,7 +44,6 @@ const LinkOpenButton = () => {
     </a>
   );
 };
-
 const LinkFloatingToolbar = ({ state }: { state?: LinkFloatingToolbarState }) => {
   const activeCommentId = usePluginOption({ key: KEYS.comment }, "activeId");
   const activeSuggestionId = usePluginOption({ key: KEYS.suggestion }, "activeId");
@@ -150,7 +132,5 @@ const LinkFloatingToolbar = ({ state }: { state?: LinkFloatingToolbarState }) =>
     </>
   );
 };
-
-
 
 export { LinkFloatingToolbar };

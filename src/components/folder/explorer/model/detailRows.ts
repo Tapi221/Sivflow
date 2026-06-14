@@ -3,8 +3,6 @@ import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem, SyncEnt
 import type { FolderTreeNode } from "./utils";
 import { getEntityTime, getFolderId, getParentFolderId, normalizeFolderId } from "./utils";
 
-
-
 type ExplorerDetailRowKind = "folder" | "cardSet" | "card" | "document";
 type ExplorerDetailLocalSyncState = | "pending" | "synced" | "error" | "conflict";
 type ExplorerDetailRow = {
@@ -48,11 +46,7 @@ type LegacyEntityFields = {
   card_set_id?: string | null;
 };
 
-
-
 const EXPLORER_ROOT_PATH_SEGMENTS = ["ホーム", "エクスプローラー"];
-
-
 
 const withLegacy = <TEntity extends object>(
   entity: TEntity,
@@ -397,9 +391,5 @@ const buildExplorerDetailRows = ({ folders, cards, cardSets, documents, currentF
   return groupRows([...folderRows, ...cardSetRows, ...documentRows]);
 };
 
-
-
 export { buildExplorerDetailRows };
-
-
 export type { ExplorerDetailRowKind, ExplorerDetailLocalSyncState, ExplorerDetailRow };

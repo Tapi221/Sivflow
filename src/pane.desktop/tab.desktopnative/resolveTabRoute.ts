@@ -1,10 +1,6 @@
 import type { WorkspaceTab } from "./Tab";
 
-
-
 const encodeRouteSegment = encodeURIComponent;
-
-
 
 const resolveWorkspaceTabRoute = (tab: WorkspaceTab): string => {
   switch (tab.kind) {
@@ -24,7 +20,5 @@ const resolveWorkspaceTabRoute = (tab: WorkspaceTab): string => {
       return `/library/notes/${encodeRouteSegment(tab.noteId)}`;
   }
 };
-
-
 
 export { resolveWorkspaceTabRoute };
