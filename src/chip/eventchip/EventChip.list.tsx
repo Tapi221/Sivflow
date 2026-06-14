@@ -1,8 +1,6 @@
 import { format } from "date-fns";
 import { memo, useMemo } from "react";
 import type { CSSProperties } from "react";
-import { LIST_ALL_DAY_EVENT_CHIP_HEIGHT_PX, LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX, LIST_EVENT_CHIP_HEIGHT_PX, LIST_EVENT_ROW_HEIGHT_PX } from "@/chip/eventchip/EventChip.list.placement";
-import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
@@ -12,14 +10,19 @@ type CalendarEventChipListProps = {
 };
 
 const ALL_DAY_LABEL = "終日";
-const LIST_EVENT_ROW_CLASS_NAME = "grid grid-cols-[54px_26px_minmax(0,1fr)] items-stretch";
-const LIST_EVENT_START_TIME_CLASS_NAME = "justify-self-end bg-white px-1 pt-2.5 text-right text-[11px] font-medium tabular-nums text-[var(--calendar-time-label-color)]";
-const LIST_EVENT_LINE_CLASS_NAME = "absolute top-0 -bottom-1.5 left-1/2 w-px -translate-x-1/2 bg-[#eceff3]";
-const LIST_EVENT_DOT_CLASS_NAME = "relative mt-2 h-2 w-2 rounded-full border-2 bg-white shadow-[0_1px_4px_rgba(15,23,42,0.08)]";
-const LIST_EVENT_CHIP_CLASS_NAME = "ml-2 overflow-hidden px-3 py-0.5 text-left";
-const LIST_ALL_DAY_EVENT_CHIP_CLASS_NAME = "flex items-center px-3 py-0";
-const LIST_EVENT_TIME_CLASS_NAME = "overflow-hidden whitespace-nowrap font-semibold tabular-nums opacity-80";
-const LIST_EVENT_TITLE_CLASS_NAME = "line-clamp-2 overflow-hidden whitespace-normal break-words font-semibold leading-snug tracking-[-0.01em]";
+const LIST_EVENT_ROW_BASE_CLASS_NAME = "flex items-stretch";
+const LIST_EVENT_TIMED_ROW_CLASS_NAME = "h-12";
+const LIST_EVENT_ALL_DAY_ROW_CLASS_NAME = "h-8";
+const LIST_EVENT_START_TIME_CLASS_NAME = "w-12 shrink-0 bg-white px-1 pt-2.5 text-right text-xs font-medium tabular-nums text-slate-500";
+const LIST_EVENT_RAIL_CLASS_NAME = "relative flex w-8 shrink-0 justify-center";
+const LIST_EVENT_LINE_CLASS_NAME = "absolute -bottom-2 left-1/2 top-0 w-px -translate-x-1/2 bg-slate-200";
+const LIST_EVENT_DOT_CLASS_NAME = "relative mt-2 h-2 w-2 rounded-full border-2 bg-white shadow-sm";
+const LIST_EVENT_CHIP_BASE_CLASS_NAME = "ml-2 min-w-0 flex-1 overflow-hidden rounded-2xl px-3 text-left";
+const LIST_EVENT_TIMED_CHIP_CLASS_NAME = "h-11 py-1";
+const LIST_ALL_DAY_EVENT_CHIP_CLASS_NAME = "flex h-7 items-center py-0";
+const LIST_EVENT_TIME_CLASS_NAME = "overflow-hidden whitespace-nowrap text-xs font-semibold tabular-nums opacity-80";
+const LIST_EVENT_TITLE_CLASS_NAME = "line-clamp-2 overflow-hidden whitespace-normal break-words text-xs font-semibold leading-snug tracking-tight";
+const LIST_TIMED_EVENT_TITLE_CLASS_NAME = "mt-0.5";
 const LIST_ALL_DAY_EVENT_TITLE_CLASS_NAME = "mt-0 line-clamp-1 whitespace-nowrap leading-none";
 const MINUTE_IN_MS = 60_000;
 
@@ -46,40 +49,42 @@ const getEventTimeRangeLabel = (event: GoogleCalendarEvent): string | null => {
   const durationLabel = getEventDurationLabel(startsAt, endsAt);
   return `${format(startsAt, "H:mm")} - ${format(endsAt, "H:mm")}（${durationLabel}）`;
 };
-const createEventRowStyle = (isAllDay: boolean): CSSProperties => ({
-  height: isAllDay ? LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX : LIST_EVENT_ROW_HEIGHT_PX,
-});
-const createEventChipStyle = (tokens: ReturnType<typeof generateColorTokens>, isAllDay: boolean): CSSProperties => ({
-  height: isAllDay ? LIST_ALL_DAY_EVENT_CHIP_HEIGHT_PX : LIST_EVENT_CHIP_HEIGHT_PX,
+const createEventChipStyle = (tokens: ReturnType<typeof generateColorTokens>): CSSProperties => ({
   background: tokens.bg,
-  borderRadius: eventChipDesign.list.radiusPx,
   color: tokens.text,
 });
-const createEventTimeStyle = (): CSSProperties => ({
-  fontSize: eventChipDesign.list.timeFontSizePx,
-});
-const createEventTitleStyle = (): CSSProperties => ({
-  fontSize: eventChipDesign.list.titleFontSizePx,
-  marginTop: eventChipDesign.list.titleGapPx,
-});
+const getEventRowClassName = (isAllDay: boolean): string =>
+  cn(
+    LIST_EVENT_ROW_BASE_CLASS_NAME,
+    isAllDay ? LIST_EVENT_ALL_DAY_ROW_CLASS_NAME : LIST_EVENT_TIMED_ROW_CLASS_NAME,
+  );
+const getEventChipClassName = (isAllDay: boolean): string =>
+  cn(
+    LIST_EVENT_CHIP_BASE_CLASS_NAME,
+    isAllDay ? LIST_ALL_DAY_EVENT_CHIP_CLASS_NAME : LIST_EVENT_TIMED_CHIP_CLASS_NAME,
+  );
+const getEventTitleClassName = (isAllDay: boolean): string =>
+  cn(
+    LIST_EVENT_TITLE_CLASS_NAME,
+    isAllDay ? LIST_ALL_DAY_EVENT_TITLE_CLASS_NAME : LIST_TIMED_EVENT_TITLE_CLASS_NAME,
+  );
 
 const CalendarEventChipListComponent = ({ event }: CalendarEventChipListProps) => {
   const tokens = useMemo(() => generateColorTokens(event.accentColor), [event.accentColor]);
   const title = getEventTitle(event);
   const startLabel = getEventStartTimeLabel(event);
   const timeRangeLabel = getEventTimeRangeLabel(event);
-  const rowStyle = useMemo(() => createEventRowStyle(event.isAllDay), [event.isAllDay]);
-  const chipStyle = useMemo(() => createEventChipStyle(tokens, event.isAllDay), [event.isAllDay, tokens]);
+  const chipStyle = useMemo(() => createEventChipStyle(tokens), [tokens]);
   return (
-    <div className={LIST_EVENT_ROW_CLASS_NAME} style={rowStyle}>
+    <div className={getEventRowClassName(event.isAllDay)}>
       <div className={LIST_EVENT_START_TIME_CLASS_NAME}>{startLabel}</div>
-      <div className="relative flex justify-center">
+      <div className={LIST_EVENT_RAIL_CLASS_NAME}>
         <span className={LIST_EVENT_LINE_CLASS_NAME} aria-hidden="true" />
-        <span className={LIST_EVENT_DOT_CLASS_NAME} style={{ borderColor: tokens.border, boxShadow: `0 0 0 3px ${tokens.bg}` }} aria-hidden="true" />
+        <span className={LIST_EVENT_DOT_CLASS_NAME} style={{ borderColor: tokens.border, boxShadow: `0 0 0 2px ${tokens.bg}` }} aria-hidden="true" />
       </div>
-      <div className={cn(LIST_EVENT_CHIP_CLASS_NAME, event.isAllDay && LIST_ALL_DAY_EVENT_CHIP_CLASS_NAME)} style={chipStyle}>
-        {timeRangeLabel ? <div className={LIST_EVENT_TIME_CLASS_NAME} style={createEventTimeStyle()}>{timeRangeLabel}</div> : null}
-        <div className={cn(LIST_EVENT_TITLE_CLASS_NAME, event.isAllDay && LIST_ALL_DAY_EVENT_TITLE_CLASS_NAME)} style={createEventTitleStyle()}>{title}</div>
+      <div className={getEventChipClassName(event.isAllDay)} style={chipStyle}>
+        {timeRangeLabel ? <div className={LIST_EVENT_TIME_CLASS_NAME}>{timeRangeLabel}</div> : null}
+        <div className={getEventTitleClassName(event.isAllDay)}>{title}</div>
       </div>
     </div>
   );
