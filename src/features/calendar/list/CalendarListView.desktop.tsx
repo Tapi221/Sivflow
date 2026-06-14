@@ -80,7 +80,7 @@ const LIST_GLOBAL_RAIL_CLASS_NAME =
 const DAY_DATE_NUMBER_CLASS_NAME =
   "flex h-8 w-8 items-center justify-center rounded-full text-base font-bold leading-none tracking-tight tabular-nums transition-all duration-150";
 const DAY_WEEKDAY_CLASS_NAME =
-  "text-xs font-semibold leading-none text-slate-500";
+  "text-xs font-semibold leading-none text-[rgba(60,60,67,0.58)]";
 const SELECTED_DAY_DATE_NUMBER_CLASS_NAME =
   "border-0 bg-sky-100 text-sky-600 shadow-none ring-0";
 const EMPTY_DAY_ROW_CLASS_NAME =
