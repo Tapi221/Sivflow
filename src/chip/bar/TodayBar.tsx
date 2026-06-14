@@ -12,9 +12,9 @@ type Props = {
 };
 
 const TODAY_NAV_BUTTON_CLASS_NAME =
-  "relative z-10 flex h-7 min-h-0 w-6 min-w-0 shrink-0 items-center justify-center rounded-none p-0 appearance-none select-none text-[#c7c7c7] outline-none ring-0 transition-[color,transform] duration-150 ease-out hover:bg-transparent hover:text-[#2f343b] active:scale-[0.94] focus:outline-none focus:ring-0 focus-visible:bg-transparent focus-visible:text-[#2f343b] focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100";
+  "relative z-10 flex h-6 min-h-0 w-6 min-w-0 shrink-0 items-center justify-center rounded-md p-0 appearance-none select-none text-[#85827e] outline-none ring-0 transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eee] hover:text-[#2f343b] active:scale-[0.94] focus:outline-none focus:ring-0 focus-visible:bg-[#eee] focus-visible:text-[#2f343b] focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100";
 const TODAY_BUTTON_CLASS_NAME =
-  "relative z-10 flex h-7 min-h-0 min-w-12 max-w-20 items-center justify-center overflow-hidden rounded-none border-0 bg-transparent px-1 text-sm font-semibold leading-none tracking-tight text-[#85827e] shadow-none outline-none ring-0 transition-[color,transform] duration-150 ease-out hover:bg-transparent hover:text-[#2f343b] active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-transparent focus-visible:text-[#2f343b] focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100";
+  "relative z-10 flex h-6 min-h-0 min-w-12 max-w-20 items-center justify-center overflow-hidden rounded-md border-0 bg-transparent px-2 text-xs font-semibold leading-none tracking-tight text-[#85827e] shadow-none outline-none ring-0 transition-[background-color,color,transform] duration-150 ease-out hover:bg-[#eee] hover:text-[#2f343b] active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-[#eee] focus-visible:text-[#2f343b] focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100";
 
 const TodayBar = ({ onPrevious, onNext, onToday, className }: Props) => {
   const t = useT();
@@ -23,7 +23,7 @@ const TodayBar = ({ onPrevious, onNext, onToday, className }: Props) => {
     locale: dateFnsLocale,
   });
   return (
-    <div className={cn("relative inline-grid h-7 w-max grid-flow-col items-center gap-1.5 rounded-none bg-transparent p-0", className)}>
+    <div className={cn("relative inline-grid h-6 w-max grid-flow-col items-center gap-1 rounded-none bg-transparent p-0", className)}>
       <button
         type="button"
         onClick={onPrevious}
@@ -31,7 +31,7 @@ const TodayBar = ({ onPrevious, onNext, onToday, className }: Props) => {
         aria-label={t.previousLabel}
         title={t.previousLabel}
       >
-        <ChevronLeft className="h-4 w-4" />
+        <ChevronLeft className="h-3 w-3" />
       </button>
       <HoverTooltip label={todayTooltipLabel} side="bottom">
         <button
@@ -50,7 +50,7 @@ const TodayBar = ({ onPrevious, onNext, onToday, className }: Props) => {
         aria-label={t.nextLabel}
         title={t.nextLabel}
       >
-        <ChevronRight className="h-4 w-4" />
+        <ChevronRight className="h-3 w-3" />
       </button>
     </div>
   );
