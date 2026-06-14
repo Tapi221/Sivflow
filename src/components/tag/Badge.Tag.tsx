@@ -5,8 +5,6 @@ import { getTagColorStyle } from "@/chip/budge/tag/tagColor";
 import { cn } from "@/lib/utils";
 import { X } from "@/ui/icons";
 
-
-
 interface TagBadgeProps {
   label: string;
   colorKey?: TagColorKey;
