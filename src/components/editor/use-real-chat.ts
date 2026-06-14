@@ -61,11 +61,11 @@ const createChatTransport = ({
   });
 };
 const getAIChatOptions = (editor: PlateEditor) => {
-  const getOption = editor.getOption as AIChatOptionReader;
+  const getOption = editor.getOption.bind(editor) as AIChatOptionReader;
   return (getOption(AIChatPlugin, "chatOptions") ?? {}) as ChatOptions;
 };
 const setAIChat = (editor: PlateEditor, chat: Chat) => {
-  const setOption = editor.setOption as AIChatOptionWriter;
+  const setOption = editor.setOption.bind(editor) as AIChatOptionWriter;
   setOption(AIChatPlugin, "chat", chat);
 };
 const applyTableUpdate = (editor: PlateEditor, tableData: TTableCellUpdate) => {
