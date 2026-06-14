@@ -219,25 +219,13 @@ const AppProjectsSection = ({ projects, isAdding, onAddProject, onToggleProject,
   );
 };
 const GoogleAccountSection = ({ account, projectCalendarLinks, googleCalendarColorOverrides, onToggleCalendar, onOpenCalendarContextMenu, onReconnect }: GoogleAccountSectionProps) => {
-  const [isOpen, setIsOpen] = useState(true);
-  const accountName = getGoogleAccountLabel(account);
   const projectLinkedCalendars = useMemo(() => account.calendars.filter((calendar) => isLinkedGoogleCalendar(account.accountId, calendar.id, projectCalendarLinks)), [account.accountId, account.calendars, projectCalendarLinks]);
   const regularCalendars = useMemo(() => account.calendars.filter((calendar) => !isLinkedGoogleCalendar(account.accountId, calendar.id, projectCalendarLinks)), [account.accountId, account.calendars, projectCalendarLinks]);
   return (
-    <div className="mt-1">
-      <div className="mb-1 flex h-6 shrink-0 items-center gap-1.5 px-2">
-        <button type="button" className="group flex min-w-0 flex-1 items-center gap-1.5 rounded-lg text-left transition-all duration-150 hover:text-slate-600" onClick={() => setIsOpen((value) => !value)} aria-expanded={isOpen}>
-          <span className={cn("flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full text-zinc-400 transition-all duration-200 group-hover:bg-white group-hover:text-zinc-500", !isOpen && "-rotate-90")}><IconChevronRight className="h-3 w-3" /></span>
-          <span className="min-w-0 flex-1 truncate text-xs font-bold uppercase tracking-wide text-zinc-400">{accountName}</span>
-        </button>
-      </div>
-      {isOpen ? (
-        <div className="mt-0.5 flex flex-col gap-0.5">
-          {regularCalendars.map((calendar) => <GoogleCalendarSourceRow key={calendar.id} account={account} calendar={calendar} color={resolveCalendarColor(account.accountId, calendar, googleCalendarColorOverrides)} onToggleCalendar={onToggleCalendar} onOpenCalendarContextMenu={onOpenCalendarContextMenu} />)}
-          <ProjectLinkedGoogleCalendarsSection account={account} calendars={projectLinkedCalendars} googleCalendarColorOverrides={googleCalendarColorOverrides} />
-          {account.error ? <div className="px-5 py-1 text-xs text-red-500"><p>Google カレンダーを取得できませんでした。</p><p className="mt-0.5 text-zinc-400">{account.error}</p><button type="button" className="mt-1 rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-slate-500 transition hover:bg-neutral-200 active:scale-95" onClick={onReconnect}>再連携</button></div> : null}
-        </div>
-      ) : null}
+    <div className="mt-0.5 flex flex-col gap-0.5">
+      {regularCalendars.map((calendar) => <GoogleCalendarSourceRow key={calendar.id} account={account} calendar={calendar} color={resolveCalendarColor(account.accountId, calendar, googleCalendarColorOverrides)} onToggleCalendar={onToggleCalendar} onOpenCalendarContextMenu={onOpenCalendarContextMenu} />)}
+      <ProjectLinkedGoogleCalendarsSection account={account} calendars={projectLinkedCalendars} googleCalendarColorOverrides={googleCalendarColorOverrides} />
+      {account.error ? <div className="px-5 py-1 text-xs text-red-500"><p>Google カレンダーを取得できませんでした。</p><p className="mt-0.5 text-zinc-400">{account.error}</p><button type="button" className="mt-1 rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-slate-500 transition hover:bg-neutral-200 active:scale-95" onClick={onReconnect}>再連携</button></div> : null}
     </div>
   );
 };
