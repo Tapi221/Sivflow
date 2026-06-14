@@ -3,11 +3,12 @@ import type { Locale } from "@shared/i18n/locale.store";
 import { useLocaleStore } from "@shared/i18n/locale.store";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-import { DEFAULT_THEME_ACCENT_COLOR, normalizeThemeAccentColor } from "@/features/settings/themeAccent";
 import { createDefaultEditorBlockSettings, parseEditorBlockSettings } from "@/lib/editorBlockSettings";
 import { getLocalDb } from "@/services/localdb";
 import type { UserSettings } from "@/types";
 
+const DEFAULT_THEME_ACCENT_COLOR = "#1e96eb";
+const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
 const LEGACY_SETTING_KEYS = [
   "displayName",
   "profileImage",
@@ -15,6 +16,10 @@ const LEGACY_SETTING_KEYS = [
 ] as const;
 const DEFAULT_SETTINGS: Partial<UserSettings> = { language: "ja", weekStartDay: "monday", notificationsEnabled: false, soundEnabled: true, showReviewHard: true, showReviewEasy: true, autoCarryOver: true, delayBonusEnabled: false, reviewStartNextDay: true, defaultPreviewEnabled: false, autoDraftEnabled: true, autoSaveEnabled: true, autoVoiceQuestion: false, autoVoiceAnswer: false, cardEditorHeightPx: null, questionDisplayMode: "tap_to_reveal" as const, markdownTabSize: 2, accentColor: DEFAULT_THEME_ACCENT_COLOR, editorBlockSettings: createDefaultEditorBlockSettings() };
 
+const normalizeThemeAccentColor = (color: string | null | undefined): string => {
+  const normalizedColor = color?.trim().toLowerCase();
+  return normalizedColor && HEX_COLOR_PATTERN.test(normalizedColor) ? normalizedColor : DEFAULT_THEME_ACCENT_COLOR;
+};
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 const toRecord = (value: unknown): Record<string, unknown> | undefined =>
@@ -208,4 +213,4 @@ const useUserSettings = () => {
   };
 };
 
-export { DEFAULT_SETTINGS, useUserSettings };
+export { DEFAULT_SETTINGS, DEFAULT_THEME_ACCENT_COLOR, normalizeThemeAccentColor, useUserSettings };
