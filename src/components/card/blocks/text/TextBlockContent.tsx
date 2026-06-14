@@ -1,4 +1,4 @@
-import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/typography";
+import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/Typography";
 import AutoResizeTextarea from "@/chip/ui/AutoResizeTextarea";
 import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
 import { buildRuledTextareaStyle } from "@/components/card/blocks/core/ruledTextareaStyle";

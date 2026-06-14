@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from "react";
-import { UI_TYPO } from "@shared/design-tokens/typography";
+import { UI_TYPO } from "@shared/design-tokens/Typography";
 import { useLocation, useNavigate } from "react-router-dom";
 import { SearchDialog } from "@/chip/panel/dialog.desktop/Dialog.Search";
 import { useKatexLoader } from "@/components/card/blocks/math/useKatexLoader";

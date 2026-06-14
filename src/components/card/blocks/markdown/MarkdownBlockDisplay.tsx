@@ -1,4 +1,4 @@
-import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/typography";
+import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/Typography";
 import type { CSSProperties, KeyboardEventHandler, MouseEventHandler } from "react";
 import { TEXT_BLOCK_CONTENT_CLASS } from "@/components/card/blocks/text/textBlockStyles";
 import { buildTypographyStyle, mergeStyles } from "@/components/card/common/cardSetViewZoom";
