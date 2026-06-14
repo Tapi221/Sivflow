@@ -1,5 +1,4 @@
 import { addDays, getDaysInMonth, isSameDay, startOfMonth } from "date-fns";
-import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
@@ -25,14 +24,14 @@ type BuildListPlacementDaysParams = {
   selectedDate: Date;
 };
 
-const LIST_DAY_SECTION_MIN_HEIGHT_PX = 430;
+const LIST_DAY_SECTION_MIN_HEIGHT_PX = 432;
 const LIST_DAY_GAP_PX = 8;
-const LIST_EMPTY_DAY_HEIGHT_PX = 38;
-const LIST_EVENT_ROW_HEIGHT_PX = eventChipDesign.list.rowHeightPx;
-const LIST_EVENT_CHIP_HEIGHT_PX = eventChipDesign.list.chipHeightPx;
-const LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX = eventChipDesign.list.allDayRowHeightPx;
-const LIST_ALL_DAY_EVENT_CHIP_HEIGHT_PX = eventChipDesign.list.allDayChipHeightPx;
-const LIST_EVENT_ROW_GAP_PX = 6;
+const LIST_EMPTY_DAY_HEIGHT_PX = 40;
+const LIST_EVENT_ROW_HEIGHT_PX = 48;
+const LIST_EVENT_CHIP_HEIGHT_PX = 44;
+const LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX = 32;
+const LIST_ALL_DAY_EVENT_CHIP_HEIGHT_PX = 28;
+const LIST_EVENT_ROW_GAP_PX = 4;
 const LIST_VIRTUAL_OVERSCAN_PX = 6000;
 
 const buildMonthDays = (date: Date): Date[] => {
