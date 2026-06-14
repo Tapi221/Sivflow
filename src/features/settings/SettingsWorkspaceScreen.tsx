@@ -515,7 +515,7 @@ const SettingsWorkspaceScreen = () => {
     setPendingLanguage(null);
   }, [pendingLanguage, persistedLanguage]);
   return (
-    <div className="flex h-full min-h-0 w-full min-w-0 overflow-hidden bg-white text-neutral-800 [font-family:var(--app-font-family-sidebar,Inter,system-ui,sans-serif)]" aria-label={copy.ariaLabel}>
+    <div className="flex h-full min-h-0 w-full min-w-0 overflow-hidden bg-white font-sans text-neutral-800" aria-label={copy.ariaLabel}>
       <aside className="flex h-full w-60 min-w-56 shrink-0 flex-col gap-4 overflow-y-auto bg-stone-100 pl-3 pt-5 max-md:h-auto max-md:max-h-48 max-md:w-full max-md:min-w-0 max-md:px-3 max-md:py-3" aria-label={copy.navAriaLabel}>
         <nav className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto pr-3 max-md:flex-row max-md:overflow-x-auto max-md:overflow-y-hidden">
           {sections.map((section) => {
@@ -592,7 +592,7 @@ const SettingsWorkspaceScreen = () => {
             ) : null}
             {activeSectionId === "hotkey" ? (
               <SettingsSectionBlock title={copy.sections.hotkey.label} description={copy.hotkeyDescription}>
-                {copy.hotkeys.map((hotkey) => <SettingKeyValue key={hotkey.keys} label={hotkey.label} value={<code className="font-inherit">{hotkey.keys}</code>} />)}
+                {copy.hotkeys.map((hotkey) => <SettingKeyValue key={hotkey.keys} label={hotkey.label} value={<code>{hotkey.keys}</code>} />)}
               </SettingsSectionBlock>
             ) : null}
           </div>
