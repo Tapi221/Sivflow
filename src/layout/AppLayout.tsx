@@ -1,12 +1,13 @@
 import "@/styles/backpane.css";
-import "./AppLayout.css";
+import "@/layout/AppLayout.css";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { SettingsWorkspaceDialog } from "@/features/settings/SettingsWorkspaceDialog";
+import { useThemeAccentColor } from "@/features/settings/hooks/useThemeAccentColor";
 import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
-import { WorkspaceLayoutRevisionProvider } from "./WorkspaceLayoutRevisionContext";
-import { WorkspaceShell } from "./WorkspaceShell";
+import { WorkspaceLayoutRevisionProvider } from "@/layout/WorkspaceLayoutRevisionContext";
+import { WorkspaceShell } from "@/layout/WorkspaceShell";
 
 type AppLayoutOutletContext = {
   isLeftPanelCollapsed: boolean;
@@ -104,6 +105,7 @@ const useIsMobileSettingsRouteViewport = (): boolean => {
 };
 
 const AppLayout = () => {
+  useThemeAccentColor();
   const { pathname, isScrollLocked } = useLayoutRouteStateDesktop();
   const navigate = useNavigate();
   const isMobileSettingsRouteViewport = useIsMobileSettingsRouteViewport();
