@@ -31,6 +31,7 @@ const NODE_SCRIPT_PATHS = {
   verifyShortHexColors: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-short-hex-colors.mjs"),
   verifySourceConventions: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-source-conventions.mjs"),
   verifyStrictEquality: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-strict-equality.mjs"),
+  verifyTailwindStandardClasses: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-tailwind-standard-classes.mjs"),
   verifyTypeOnlyImports: path.resolve(REPOSITORY_ROOT, "scripts/verify/verify-type-only-imports.mjs"),
 };
 const isFixersOnly = process.argv.includes(FIXERS_ONLY_ARGUMENT);
@@ -75,6 +76,7 @@ const runSourceConventionVerification = () => {
     runNodeScript(NODE_SCRIPT_PATHS.verifyTypeOnlyImports),
     runNodeScript(NODE_SCRIPT_PATHS.verifyImportSpacing),
     runNodeScript(NODE_SCRIPT_PATHS.verifyBlankLines),
+    runNodeScript(NODE_SCRIPT_PATHS.verifyTailwindStandardClasses),
     runNodeScript(NODE_SCRIPT_PATHS.verifyShortHexColors),
     runNodeScript(NODE_SCRIPT_PATHS.verifyNullishFallback),
     runNodeScript(NODE_SCRIPT_PATHS.verifyStrictEquality),
