@@ -1,10 +1,10 @@
 import React, { useCallback, useState } from "react";
+import { MathEditorDialog } from "@/chip/panel/dialog.desktop/Dialog.MathEditor";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
+import { MathBlockPreviewPane } from "@/components/card/blocks/math/MathBlockPreviewPane";
 import { cn } from "@/lib/utils";
 import type { MathBlockData } from "@/types";
 import { Sigma } from "@/ui/icons";
-import { MathBlockPreviewPane } from "./MathBlockPreviewPane";
-import { MathEditorDialog } from "./MathEditorDialog";
 
 interface MathBlockProps {
   data: MathBlockData;
