@@ -12,6 +12,7 @@ type AnimatedCheckboxBaseProps = {
   indeterminate?: boolean;
   strokeWidth?: number;
   borderWidth?: number;
+  inactiveBorderColor?: string;
 };
 
 const DEFAULT_CHECKBOX_STROKE_WIDTH = 1.4;
@@ -27,8 +28,10 @@ const AnimatedCheckboxBase = ({
   indeterminate = false,
   strokeWidth = DEFAULT_CHECKBOX_STROKE_WIDTH,
   borderWidth,
+  inactiveBorderColor,
 }: AnimatedCheckboxBaseProps) => {
   const active = checked || indeterminate;
+  const borderColor = active ? color : inactiveBorderColor ?? color;
   let radiusClass = "rounded-full";
   if (shape === "square") radiusClass = "rounded-[4px]";
   let strokeColor = color;
@@ -49,7 +52,7 @@ const AnimatedCheckboxBase = ({
           active && variant === "filled" && "scale-75 opacity-0",
           (!active || variant !== "filled") && "scale-100 opacity-100",
         )}
-        style={{ borderColor: color, borderWidth }}
+        style={{ borderColor, borderWidth }}
       />
       <span
         className={cn(
