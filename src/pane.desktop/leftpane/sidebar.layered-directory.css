@@ -345,38 +345,3 @@
 .app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child [role="button"][aria-pressed]:focus-visible {
   background: #f5f5f4 !important;
 }
-.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child [role="button"][aria-pressed] > button:first-child {
-  position: relative !important;
-  width: 1rem !important;
-  min-width: 1rem !important;
-  height: 1rem !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
-  color: var(--app-layered-directory-muted-text) !important;
-  opacity: 1 !important;
-}
-.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child [role="button"][aria-pressed] > button:first-child::before {
-  content: "";
-  position: absolute;
-  left: 0.125rem;
-  top: 0.375rem;
-  width: 0.75rem;
-  height: 0.5rem;
-  border: 0.125rem solid currentColor;
-  border-radius: 0.125rem;
-}
-.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child [role="button"][aria-pressed] > button:first-child::after {
-  content: "";
-  position: absolute;
-  left: 0.25rem;
-  top: 0.125rem;
-  width: 0.5rem;
-  height: 0.375rem;
-  border: 0.125rem solid currentColor;
-  border-bottom: 0;
-  border-radius: 0.125rem 0.125rem 0 0;
-}
-.app-layered-directory nav[aria-label="カレンダー一覧"] > div:nth-child(2) > div:first-child [role="button"][aria-pressed] > button:first-child > span {
-  display: none !important;
-}
