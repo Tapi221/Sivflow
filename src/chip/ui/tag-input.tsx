@@ -1,10 +1,10 @@
 import * as React from "react";
 import type { DropResult } from "@hello-pangea/dnd";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import type { TagColorKey } from "@/chip/budge/tag/tagColor";
-import { getTagColorKey, getTagColorSwatchStyle } from "@/chip/budge/tag/tagColor";
 import { TagBadge } from "@/chip/budge/tag/tag/Badge.Tag";
 import { TagChip } from "@/chip/budge/tag/tag/TagChip";
+import type { TagColorKey } from "@/chip/budge/tag/tagColor";
+import { getTagColorKey, getTagColorSwatchStyle } from "@/chip/budge/tag/tagColor";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
 import { Check, Palette, Plus, Tag as TagIcon } from "@/ui/icons";

@@ -1,9 +1,9 @@
 "use client";
-import type * as React from "react";
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
 import type { PlateContentProps, PlateViewProps } from "platejs/react";
 import { PlateContainer, PlateContent, PlateView } from "platejs/react";
+import type * as React from "react";
 import { cn } from "@/lib/utils";
 
 type EditorProps = PlateContentProps & VariantProps<typeof editorVariants>;

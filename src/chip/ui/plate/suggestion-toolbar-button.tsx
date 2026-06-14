@@ -2,9 +2,9 @@
 import { SuggestionPlugin } from "@platejs/suggestion/react";
 import { PencilLineIcon } from "lucide-react";
 import { useEditorPlugin, usePluginOption } from "platejs/react";
-import { cn } from "@/lib/utils";
 import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
 import { ToolbarButton } from "@/chip/ui/plate/toolbar";
+import { cn } from "@/lib/utils";
 
 const SuggestionToolbarButton = (props: ToolbarButtonProps) => {
   const { setOption } = useEditorPlugin(SuggestionPlugin);

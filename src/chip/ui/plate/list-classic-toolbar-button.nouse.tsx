@@ -2,8 +2,8 @@
 import { IndentIcon, ListIcon, ListOrderedIcon, OutdentIcon } from "lucide-react";
 import { KEYS } from "platejs";
 import { useEditorRef } from "platejs/react";
-import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
+import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
 type ListToolbarButtonProps = ToolbarButtonProps & {
   nodeType: string;
