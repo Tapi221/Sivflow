@@ -2,7 +2,7 @@ import "@/styles/backpane.css";
 import "@/layout/AppLayout.css";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import { SettingsWorkspaceRootPanel } from "@/features/settings/SettingsWorkspaceRootPanel";
+import { SettingsWorkspaceRootPanel } from "@/chip/panel/dialog.desktop/Dialog.SettingsWorkspaceRoot";
 import { useThemeAccentColor } from "@/features/settings/hooks/useThemeAccentColor";
 import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
