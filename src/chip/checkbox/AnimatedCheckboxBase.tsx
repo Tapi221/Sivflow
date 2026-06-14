@@ -12,10 +12,11 @@ type AnimatedCheckboxBaseProps = {
   indeterminate?: boolean;
   strokeWidth?: number;
   borderWidth?: number;
-  animate?: boolean;
 };
 
 const DEFAULT_CHECKBOX_STROKE_WIDTH = 1.4;
+const CHECKBOX_STROKE_TRANSITION = "stroke-dashoffset 120ms ease-out";
+const CHECKBOX_INDETERMINATE_STROKE_TRANSITION = "stroke-dashoffset 120ms ease-out";
 
 const AnimatedCheckboxBase = ({
   checked,
@@ -26,13 +27,8 @@ const AnimatedCheckboxBase = ({
   indeterminate = false,
   strokeWidth = DEFAULT_CHECKBOX_STROKE_WIDTH,
   borderWidth,
-  animate = true,
 }: AnimatedCheckboxBaseProps) => {
   const active = checked || indeterminate;
-  const motionClassName = animate ? "transition-all duration-200 ease-out" : "";
-  const fillMotionClassName = animate ? "transition-all duration-200" : "";
-  const strokeTransition = animate ? "stroke-dashoffset 180ms ease-out 90ms" : "none";
-  const indeterminateStrokeTransition = animate ? "stroke-dashoffset 160ms ease-out 80ms" : "none";
   let radiusClass = "rounded-full";
   if (shape === "square") radiusClass = "rounded-[4px]";
   let strokeColor = color;
@@ -48,8 +44,7 @@ const AnimatedCheckboxBase = ({
     <span className={cn("relative inline-flex h-3.5 w-3.5 shrink-0", className)} style={rootStyle}>
       <span
         className={cn(
-          "absolute inset-0 border",
-          motionClassName,
+          "absolute inset-0 border transition-all duration-200 ease-out",
           radiusClass,
           active && variant === "filled" && "scale-75 opacity-0",
           (!active || variant !== "filled") && "scale-100 opacity-100",
@@ -58,22 +53,20 @@ const AnimatedCheckboxBase = ({
       />
       <span
         className={cn(
-          "absolute inset-0",
-          fillMotionClassName,
+          "absolute inset-0 transition-all duration-200",
           radiusClass,
           showFill && "scale-100 opacity-100",
           !showFill && "scale-0 opacity-0",
         )}
         style={{
           backgroundColor: fillColor,
-          transitionTimingFunction: animate ? "cubic-bezier(.2,.9,.3,1.25)" : undefined,
+          transitionTimingFunction: "cubic-bezier(.2,.9,.3,1.25)",
         }}
       />
       {variant === "radio" && (
         <span
           className={cn(
-            "absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full",
-            motionClassName,
+            "absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-200",
             checked && "scale-100 opacity-100",
             !checked && "scale-0 opacity-0",
           )}
@@ -84,8 +77,7 @@ const AnimatedCheckboxBase = ({
         <svg
           viewBox="0 0 20 20"
           className={cn(
-            "absolute inset-0 h-full w-full",
-            motionClassName,
+            "absolute inset-0 h-full w-full transition-all duration-100 ease-out",
             active && "scale-100 opacity-100",
             !active && "scale-50 opacity-0",
           )}
@@ -101,7 +93,7 @@ const AnimatedCheckboxBase = ({
               style={{
                 strokeDasharray: 10,
                 strokeDashoffset: active ? 0 : 10,
-                transition: indeterminateStrokeTransition,
+                transition: CHECKBOX_INDETERMINATE_STROKE_TRANSITION,
               }}
             />
           ) : (
@@ -115,7 +107,7 @@ const AnimatedCheckboxBase = ({
               style={{
                 strokeDasharray: 16,
                 strokeDashoffset,
-                transition: strokeTransition,
+                transition: CHECKBOX_STROKE_TRANSITION,
               }}
             />
           )}
