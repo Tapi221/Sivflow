@@ -41,6 +41,7 @@ vi.mock("@/pane.desktop/tab.desktopnative/hooks/useTabsStore", () => ({ useWorks
 
 const FOLDER_SOURCE_PATH = resolve(process.cwd(), "src/pane.desktop/leftpane/folder/LayeredDirectorySidebar.tsx");
 const SIDEBAR_SOURCE_PATH = resolve(process.cwd(), "src/pane.desktop/leftpane/Sidebar.LayeredDirectory.tsx");
+const DOCUMENTS_READ_SOURCE_PATH = resolve(process.cwd(), "src/features/document/hooks/useDocumentsRead.ts");
 const originalRequestAnimationFrame = window.requestAnimationFrame;
 
 const getFunctionSource = (source: string, functionName: string): string => {
@@ -168,6 +169,17 @@ describe("LayeredDirectorySidebar project list", () => {
       expect(screen.getByText("Project Alpha")).toBeInTheDocument();
       expect(screen.queryByText("Javascript")).not.toBeInTheDocument();
     });
+  });
+});
+
+describe("useDocumentsRead", () => {
+  it("does not depend on the active workspace card set selection", () => {
+    const source = readFileSync(DOCUMENTS_READ_SOURCE_PATH, "utf8");
+    const hookSource = getFunctionSource(source, "useDocumentsRead");
+
+    expect(hookSource).not.toContain("useWorkspaceTabsStore");
+    expect(hookSource).not.toContain("isActiveWorkspaceCardSetSelected");
+    expect(hookSource).toContain("const enabled = options?.enabled ?? true;");
   });
 });
 

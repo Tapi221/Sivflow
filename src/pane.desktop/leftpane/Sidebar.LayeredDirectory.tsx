@@ -272,8 +272,13 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
   const handleCreateSelectedFolderCardSet = useCallback(() => {
     if (!selectedNavigationFolderId) return;
     closeProjectAddMenu();
-    void createCardSet(DEFAULT_NEW_CARD_SET_NAME, selectedNavigationFolderId);
-  }, [closeProjectAddMenu, createCardSet, selectedNavigationFolderId]);
+    void (async () => {
+      const cardSet = await createCardSet(DEFAULT_NEW_CARD_SET_NAME, selectedNavigationFolderId);
+      navigate("/schedule");
+      setFolderTagMode("folder");
+      openExplorerTab({ title: "Library", explorerState: { isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: selectedNavigationFolderId, selectedItem: { type: "cardSet", id: cardSet.id } } });
+    })();
+  }, [closeProjectAddMenu, createCardSet, navigate, openExplorerTab, selectedNavigationFolderId, setFolderTagMode]);
   const handleCreateSelectedFolderChild = useCallback(() => {
     if (!selectedNavigationFolderId) return;
     closeProjectAddMenu();
