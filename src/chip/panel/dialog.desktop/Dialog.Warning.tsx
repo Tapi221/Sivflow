@@ -8,8 +8,6 @@ interface WarningDialogProps {
   onDismiss: () => void;
 }
 
-
-
 const WarningDialog = ({ notification, onDismiss }: WarningDialogProps) => {
   const [showDetails, setShowDetails] = useState(false);
   const handleBackdropMouseDown = (event: ReactMouseEvent<HTMLDivElement>) => {
@@ -79,7 +77,5 @@ const WarningDialog = ({ notification, onDismiss }: WarningDialogProps) => {
     </div>
   );
 };
-
-
 
 export { WarningDialog };

@@ -7,8 +7,6 @@ import { AUTOSAVE_DELAY_MS, buildCardPatchForToggle, buildDraftFromCard, buildSa
 import type { EditorDraft } from "./cardEditorUtils";
 import { makeNewDraft, normalizeSelectedCardId, shouldAutoOpenEditorForCard } from "./cardEditorUtils";
 
-
-
 type CreateCardPayload = CardPatch & {
   folderId: string;
   cardSetId?: string;
@@ -43,8 +41,6 @@ type FlushDraftOptions = {
   exitEditing?: boolean;
   showSuccessToast?: boolean;
 };
-
-
 
 const useCardEditorSession = ({ selectedCardId, selectedCardSnapshot = null, resolveCardFromEntity = true, folderId, cardSetId, autoEdit, updateCard, createCard, addTag, tagById, toastSuccess, toastError, onCardUpdated, onSelectCardId, resetDialogs }: UseCardEditorSessionParams) => {
   const [localSelectedCardId, setLocalSelectedCardId] = useState<string | null>(null);
@@ -713,7 +709,5 @@ const useCardEditorSession = ({ selectedCardId, selectedCardSnapshot = null, res
     panelCard,
   };
 };
-
-
 
 export { useCardEditorSession };

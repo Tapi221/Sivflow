@@ -14,8 +14,6 @@ import type { AssetRecord, UploadedImage } from "@/types";
 import { Check, RotateCcw, Upload, X } from "@/ui/icons";
 import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize.utils";
 
-
-
 type ResolvedEditableImageStatus = "pending" | "uploading" | "ready" | "failed";
 type ImageRecordLike =
   | {
@@ -75,15 +73,11 @@ type AudioMediaUploaderProps = {
 };
 type MediaUploaderProps = ImageMediaUploaderProps | AudioMediaUploaderProps;
 
-
-
 const IMAGE_BLOCK_INSET_PX = 4;
 const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
   CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
 const EMPTY_IMAGE_URLS: UploadedImage[] = [];
 const EMPTY_AUDIO_URLS: string[] = [];
-
-
 
 const clamp = (v: number, min: number, max: number) =>
   Math.min(max, Math.max(min, v));
@@ -164,8 +158,6 @@ const getRetryFileName = (assetId: string, mime: string): string => {
 
   return `${assetId}.jpg`;
 };
-
-
 
 const ImageItem = ({
   item,
@@ -750,7 +742,5 @@ const MediaUploader = (props: MediaUploaderProps) => {
     </div>
   );
 };
-
-
 
 export default MediaUploader;

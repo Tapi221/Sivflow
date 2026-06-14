@@ -9,7 +9,7 @@ iOS: Swift / SwiftUI
 
 この構成では、**iOS は Swift 専用 app として作ります**。React Native / Expo 側は Android app として扱います。
 
-`apps/mobile` は過去の mobile という名前が残っている既存 path ですが、責務としては Android app です。新規の iOS 実装は `apps/ios` に置き、`apps/mobile/ios` を iOS 本体の置き場として使いません。
+`apps/android` は過去の mobile という名前が残っている既存 path ですが、責務としては Android app です。新規の iOS 実装は `apps/ios` に置き、`apps/android/ios` を iOS 本体の置き場として使いません。
 
 ```text
 apps/web
@@ -21,7 +21,7 @@ apps/desktop
   Rust command、window 操作、file dialog、OAuth loopback、bundle 設定。
   UI は持たない。Web renderer を WebView で表示するだけ。
 
-apps/mobile
+apps/android
   Android app。
   既存 Expo / React Native app の path。
   iOS 実装はここに増やさない。
@@ -46,7 +46,7 @@ packages/web-renderer
   Web と Tauri が共有する React UI 本体。
   DOM 前提の component はここ。
 
-packages/mobile-renderer
+packages/android-renderer
   Android の React Native UI 本体。
   View/Text/Pressable/navigation など RN 前提の UI はここ。
   iOS Swift app の UI 本体はここに置かない。
@@ -116,7 +116,7 @@ NG: node functions/scripts/generateManifest.mjs
 
 ```text
 Android app
-  apps/mobile
+  apps/android
   npm run dev:android
   npm run android
   npm run android:dev
@@ -129,7 +129,7 @@ iOS app
 
 root script では、Android は `android:*`、iOS は `ios:*` に分ける。`mobile:ios`、`mobile:android` のような横断名は使わない。
 
-`apps/mobile` の物理 path は既存互換として残っているが、責務名は Android app とする。新規 code、doc、issue、commit message では原則として Android app と呼ぶ。例外として、既存 path、alias、package 名に含まれる `mobile` は段階的に解消する。
+`apps/android` の物理 path は既存互換として残っているが、責務名は Android app とする。新規 code、doc、issue、commit message では原則として Android app と呼ぶ。例外として、既存 path、alias、package 名に含まれる `mobile` は段階的に解消する。
 
 ## constants フォルダを作らない
 
@@ -160,9 +160,9 @@ root script では、Android は `android:*`、iOS は `ios:*` に分ける。`m
   packages/web-renderer/src/features/<feature>/<feature>.constants.ts
 
 複数ファイルで使う Android RN UI の表示値
-  packages/mobile-renderer/src/components/<component>/<component>.constants.ts
-  packages/mobile-renderer/src/features/<feature>/<feature>.constants.ts
-  packages/mobile-renderer/src/screens/<screen>/<screen>.constants.ts
+  packages/android-renderer/src/components/<component>/<component>.constants.ts
+  packages/android-renderer/src/features/<feature>/<feature>.constants.ts
+  packages/android-renderer/src/screens/<screen>/<screen>.constants.ts
 
 複数ファイルで使う platform adapter の設定値
   packages/platform/src/<capability>/<capability>.constants.ts
@@ -174,7 +174,7 @@ Tauri shell だけの設定値
   apps/desktop/src-tauri/src/<責務名>.constants.ts
 
 Android app 起動口だけの設定値
-  apps/mobile/src/<責務名>.constants.ts
+  apps/android/src/<責務名>.constants.ts
 
 iOS app 起動口だけの設定値
   apps/ios/<責務名>.swift

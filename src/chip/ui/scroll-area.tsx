@@ -43,7 +43,8 @@ const ScrollArea = React.forwardRef<
   return (
     <ScrollAreaPrimitive.Root
       ref={ref}
-      type={type}
+      type={
+        type}
       scrollHideDelay={scrollHideDelay}
       className={cn("relative overflow-hidden", className)}
       {...props}

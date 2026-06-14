@@ -73,7 +73,7 @@ packages/
           InkToolbar.tsx
           inkLayer.types.ts
 
-  mobile-renderer/
+  android-renderer/
     src/
       AppShell.tsx
       screens/

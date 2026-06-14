@@ -4,8 +4,6 @@ import type { CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTim
 import { liveQuery } from "dexie";
 import { addCalendarTimetableCourseFromSyllabus, addCalendarTimetablePeriod, deleteCalendarTimetableCourse, deleteCalendarTimetablePeriod, ensureCalendarTimetableSeedData, getCalendarTimetableSettings, listCalendarTimetableCourses, listCalendarTimetableDepartments, listCalendarTimetableInstitutions, listCalendarTimetablePeriods, saveCalendarTimetableCourse, saveCalendarTimetableSyllabusCourse, searchCalendarTimetableSyllabusCourses, updateCalendarTimetablePeriod, updateCalendarTimetableVisibleDayCount } from "./calendarTimetable.storage";
 
-
-
 type UseCalendarTimetableState = {
   courses: CalendarTimetableCourse[];
   departments: CalendarTimetableDepartment[];
@@ -27,12 +25,8 @@ type UseCalendarTimetableReturn = UseCalendarTimetableState & {
   searchSyllabusCourses: (query: string, institutionId?: string | null, departmentId?: string | null) => Promise<CalendarTimetableSyllabusCourseDisplay[]>;
 };
 
-
-
 const DEFAULT_SETTINGS: CalendarTimetableSettings = { id: "default", activeSemesterId: "default-semester", visibleDayCount: 5, updatedAt: "" };
 const DEFAULT_PERIODS = createDefaultCalendarTimetablePeriods();
-
-
 
 const createInitialState = (): UseCalendarTimetableState => ({ courses: [], departments: [], institutions: [], periods: DEFAULT_PERIODS, settings: DEFAULT_SETTINGS, syllabusCourses: [], isLoading: true });
 const loadCalendarTimetableState = async (): Promise<UseCalendarTimetableState> => {
@@ -96,7 +90,5 @@ const useCalendarTimetable = (): UseCalendarTimetableReturn => {
 
   return { ...state, saveCourse, deleteCourse, updateVisibleDayCount, addPeriod, updatePeriod, deletePeriod, saveSyllabusCourse, addCourseFromSyllabus, searchSyllabusCourses };
 };
-
-
 
 export { useCalendarTimetable };

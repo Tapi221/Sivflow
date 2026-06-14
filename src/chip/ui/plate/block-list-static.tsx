@@ -43,12 +43,14 @@ const TodoLiStatic = (props: SlateRenderElementProps) => {
     </li>
   );
 };
+
 const LIST_CONFIG: ListConfig = {
   todo: {
     Li: TodoLiStatic,
     Marker: TodoMarkerStatic,
   },
 };
+
 const List = (props: SlateRenderElementProps) => {
   const { indent, listStart, listStyleType } = props.element as TListElement & {
     indent?: number;

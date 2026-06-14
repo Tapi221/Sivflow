@@ -5,18 +5,18 @@ const ROOT_DIR = process.cwd();
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx"]);
 const RESOLVABLE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".json", ".css", ".scss", ".sass", ".less"];
 const IMPORT_PATTERNS = [
-  /(\bfrom\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@web\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+|#src\/[^"']+)(["'])/g,
-  /(\bimport\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@web\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+|#src\/[^"']+)(["'])/g,
-  /(\bimport\s*\(\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@web\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+|#src\/[^"']+)(["']\s*\))/g,
-  /(\bexport\s+[^;]*?\s+from\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@web\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@mobile-renderer\/[^"']+|@mobile\/[^"']+|@shared\/[^"']+|#src\/[^"']+)(["'])/g,
+  /(\bfrom\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@web\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@android-renderer\/[^"']+|@android\/[^"']+|@shared\/[^"']+|#src\/[^"']+)(["'])/g,
+  /(\bimport\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@web\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@android-renderer\/[^"']+|@android\/[^"']+|@shared\/[^"']+|#src\/[^"']+)(["'])/g,
+  /(\bimport\s*\(\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@web\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@android-renderer\/[^"']+|@android\/[^"']+|@shared\/[^"']+|#src\/[^"']+)(["']\s*\))/g,
+  /(\bexport\s+[^;]*?\s+from\s*["'])(\.{1,2}\/[^"']+|@\/[^"']+|@web\/[^"']+|@core\/[^"']+|@platform\/[^"']+|@web-renderer\/[^"']+|@android-renderer\/[^"']+|@android\/[^"']+|@shared\/[^"']+|#src\/[^"']+)(["'])/g,
 ];
 const ALIAS_ROOTS = [
   { directory: path.join(ROOT_DIR, "apps/web/src"), prefix: "@web" },
-  { directory: path.join(ROOT_DIR, "apps/mobile/src"), prefix: "@mobile" },
+  { directory: path.join(ROOT_DIR, "apps/android/src"), prefix: "@android" },
   { directory: path.join(ROOT_DIR, "packages/core/src"), prefix: "@core" },
   { directory: path.join(ROOT_DIR, "packages/platform/src"), prefix: "@platform" },
   { directory: path.join(ROOT_DIR, "packages/web-renderer/src"), prefix: "@web-renderer" },
-  { directory: path.join(ROOT_DIR, "packages/mobile-renderer/src"), prefix: "@mobile-renderer" },
+  { directory: path.join(ROOT_DIR, "packages/android-renderer/src"), prefix: "@android-renderer" },
   { directory: path.join(ROOT_DIR, "shared"), prefix: "@shared" },
   { directory: path.join(ROOT_DIR, "functions/src"), prefix: "#src" },
   { directory: path.join(ROOT_DIR, "src"), prefix: "@" },

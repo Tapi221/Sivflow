@@ -4,7 +4,7 @@
 
 import パスがズレている時、互換パスを追加することは禁止する。互換用の再 export や別名入口を増やさず、呼び出し元の import パスを正しい責務の module へ修正する。
 
-project 内の import/export-from は alias に統一し、`./` と `../` で始まる相対パスは禁止する。利用する alias は tsconfig、Vite、または package imports に定義された `@/`、`@web/`、`@mobile/`、`@core/`、`@platform/`、`@web-renderer/`、`@mobile-renderer/`、`@shared/`、`#src/` を使う。
+project 内の import/export-from は alias に統一し、`./` と `../` で始まる相対パスは禁止する。利用する alias は tsconfig、Vite、または package imports に定義された `@/`、`@web/`、`@android/`、`@core/`、`@platform/`、`@web-renderer/`、`@android-renderer/`、`@shared/`、`#src/` を使う。
 
 named import 内に `type` 修飾子を書くことは禁止する。型だけを import する場合は `import type` を使う。値 import と型 import が同じ module から混在する場合は、値 import と `import type` を分ける。
 

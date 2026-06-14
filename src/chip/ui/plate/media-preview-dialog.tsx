@@ -1,21 +1,13 @@
 "use client";
 
 import { PreviewImage, useImagePreview, useImagePreviewValue, useScaleInput } from "@platejs/media/react";
-
 import { cva } from "class-variance-authority";
-
 import { ArrowLeft, ArrowRight, Minus, Plus, X } from "lucide-react";
-
 import { useEditorRef } from "platejs/react";
-
 import type { ComponentProps } from "react";
-
 import { cn } from "@/lib/utils";
 
-
-
 const SCROLL_SPEED = 4;
-
 const buttonVariants = cva("rounded bg-[rgba(0,0,0,0.5)] px-1", {
   defaultVariants: {
     variant: "default",
@@ -28,13 +20,10 @@ const buttonVariants = cva("rounded bg-[rgba(0,0,0,0.5)] px-1", {
   },
 });
 
-
-
 const ScaleInput = (props: ComponentProps<"input">) => {
   const { props: scaleInputProps, ref } = useScaleInput();
   return <input {...scaleInputProps} {...props} ref={ref} />;
 };
-
 const MediaPreviewDialog = () => {
   const editor = useEditorRef();
   const isOpen = useImagePreviewValue("isOpen", editor.id);
@@ -145,7 +134,5 @@ const MediaPreviewDialog = () => {
     </div>
   );
 };
-
-
 
 export { MediaPreviewDialog };

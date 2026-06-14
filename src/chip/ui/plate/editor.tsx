@@ -79,7 +79,6 @@ const omitPlateContentDomBlockedProps = (props: PlateContentProps): PlateContent
   });
   return nextProps as PlateContentProps;
 };
-
 const omitPlateDomBlockedProps = <TProps extends Record<string, unknown>>(props: TProps): TProps => {
   const nextProps = { ...props };
   plateContentDomBlockedPropNames.forEach((propName) => {

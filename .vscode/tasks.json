@@ -25,7 +25,7 @@
     {
       "label": "TypeScript: check mobile",
       "type": "shell",
-      "command": "npm --prefix apps/mobile run typecheck",
+      "command": "npm --prefix apps/android run typecheck",
       "group": "build",
       "problemMatcher": "$tsc"
     },
