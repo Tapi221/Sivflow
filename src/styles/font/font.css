@@ -18,6 +18,8 @@
   --app-font-family-content:
     "Yu Mincho", "Hiragino Mincho ProN", "Hiragino Mincho Pro",
     "Noto Serif JP", "MS PMincho", serif;
+  --app-font-family-markdown:
+    ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --app-font-family-numeric:
     -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
     "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", system-ui,
@@ -25,6 +27,11 @@
   --app-font-family-code:
     "Fira Code", "Fira Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
     Consolas, monospace;
+  --app-font-family-code-docx: "Courier New", Consolas, monospace;
+  --app-font-family-equation: "Cambria Math", Consolas, monospace;
+  --app-font-family-emoji:
+    "Apple Color Emoji", "Segoe UI Emoji", NotoColorEmoji,
+    "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", EmojiSymbols;
   --app-font-family-explorer:
     "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", system-ui,
     -apple-system, BlinkMacSystemFont, "Noto Sans JP", "Yu Gothic UI",
@@ -44,6 +51,10 @@
   --ds-typography-font-family-code: var(--app-font-family-code);
   --explorer-chrome-font-family: var(--app-font-family-explorer);
   --code-font-family: var(--app-font-family-code);
+  --markdown-font-family: var(--app-font-family-markdown);
+  --emoji-font-family: var(--app-font-family-emoji);
+  --docx-code-font-family: var(--app-font-family-code-docx);
+  --equation-font-family: var(--app-font-family-equation);
   --font-sans: var(--app-font-family-ui);
   --font-serif: var(--app-font-family-content);
   --font-mono: var(--app-font-family-code);

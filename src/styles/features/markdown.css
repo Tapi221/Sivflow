@@ -12,7 +12,7 @@
     --task-checkbox-offset-y: calc((var(--card-row-px, 24px) - 16px) / 2);
     --markdown-blank-line-height: var(--card-row-px, 24px);
     color: var(--markdown-text-color);
-    font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+    font-family: var(--markdown-font-family);
     font-size: var(--ds-typography-font-size-md);
     font-weight: 500;
     line-height: var(--card-row-px, 24px);
