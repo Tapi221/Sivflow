@@ -452,7 +452,7 @@ const SettingTextInputRow = ({ label, description, value, placeholder, onChange 
         <span className="text-sm font-medium leading-5 tracking-tight text-neutral-800">{label}</span>
         {description ? <span className="text-xs font-normal leading-5 text-stone-500">{description}</span> : null}
       </div>
-      <input className="h-9 w-64 min-w-48 rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm font-medium leading-5 tracking-tight text-neutral-800 outline-none placeholder:text-stone-400 focus:border-stone-300 focus:bg-white" value={value} placeholder={placeholder} onChange={(event) => onChange(event.target.value)} />
+      <input className="h-9 w-64 rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm font-medium leading-5 tracking-tight text-neutral-800 outline-none placeholder:text-stone-400 focus:border-stone-300 focus:bg-white" value={value} placeholder={placeholder} onChange={(event) => onChange(event.target.value)} />
     </div>
   );
 };
