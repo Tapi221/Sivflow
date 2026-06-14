@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
 import { cn } from "@/lib/utils";
-import { ChevronRight } from "@/ui/icons";
+import { ChevronRight } from "@/chip/icons";
 
 type WorkspaceBreadcrumbsProps = {
   className?: string;

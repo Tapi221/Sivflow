@@ -1,5 +1,5 @@
 import type { ReactNode, SVGProps } from "react";
-import type { IconProps } from "@/ui/icons";
+import type { IconProps } from "@/chip/icons";
 
 type SidebarIconProps = SVGProps<SVGSVGElement>;
 type IconShellProps = SidebarIconProps & {

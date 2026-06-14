@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
 import type { Notification } from "@/types/notification";
-import { AlertCircle, ChevronDown } from "@/ui/icons";
+import { AlertCircle, ChevronDown } from "@/chip/icons";
 
 interface ErrorDialogProps {
   notification: Notification;

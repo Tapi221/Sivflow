@@ -10,7 +10,7 @@ import { CARD_LAYOUT_MODE_LABELS } from "@/features/cardsetview/domain/cardLayou
 import { CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT } from "@/features/cardsetview/domain/cardSetView.constants";
 import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { Edit } from "@/ui/icons";
+import { Edit } from "@/chip/icons";
 
 type ZoomControlProps = {
   value: number;

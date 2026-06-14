@@ -21,7 +21,7 @@ import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web
 import { cn } from "@/lib/utils";
 import type { Card, CardBlock, CardFaceAttachments } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { X } from "@/ui/icons";
+import { X } from "@/chip/icons";
 import { toMillisOrNull } from "@/utils/toMillis";
 import { CardEditorPaneMediaDialogs } from "./CardEditorPaneMediaDialogs";
 import { CardEditorPaneReadonlySurface } from "./CardEditorPaneReadonlySurface";

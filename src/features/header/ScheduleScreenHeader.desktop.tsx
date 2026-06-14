@@ -9,7 +9,7 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarPrintRangeMode, CalendarPrintRangeState } from "@/features/calendar/print/calendarPrint.types";
 import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/calendar/scheduleScreen.types";
 import { cn } from "@/lib/utils";
-import { Check, ChevronDown, Download, Minus, Plus } from "@/ui/icons";
+import { Check, ChevronDown, Download, Minus, Plus } from "@/chip/icons";
 
 type ScheduleScreenHeaderViewOption = {
   value: CalendarViewMode;

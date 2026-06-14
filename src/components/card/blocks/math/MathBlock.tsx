@@ -4,7 +4,7 @@ import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { MathBlockPreviewPane } from "@/components/card/blocks/math/MathBlockPreviewPane";
 import { cn } from "@/lib/utils";
 import type { MathBlockData } from "@/types";
-import { Sigma } from "@/ui/icons";
+import { Sigma } from "@/chip/icons";
 
 interface MathBlockProps {
   data: MathBlockData;

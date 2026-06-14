@@ -2,8 +2,8 @@ import { Button } from "@/chip/ui/button/button";
 import { Input } from "@/chip/ui/input";
 import { cn } from "@/lib/utils";
 import type { ReferenceBlockData } from "@/types";
-import { Plus } from "@/ui/icons";
-import { Link } from "@/ui/icons";
+import { Plus } from "@/chip/icons";
+import { Link } from "@/chip/icons";
 
 type LinkEditorProps = {
   items: ReferenceBlockData[];

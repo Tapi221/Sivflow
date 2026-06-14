@@ -4,7 +4,7 @@ import { ReferencePopup } from "@/chip/panel/dialog.desktop/Dialog.ReferencePopu
 import { AudioPlayer, ImageGallery } from "@/components/card/media/CardMedia";
 import type { FlashcardMediaLike } from "@/components/card/frame/flashcard.types";
 import type { ReferenceBlockData } from "@/types";
-import { Volume2, X } from "@/ui/icons";
+import { Volume2, X } from "@/chip/icons";
 
 interface FlashcardMediaDialogsProps {
   isImagePopupOpen: boolean;

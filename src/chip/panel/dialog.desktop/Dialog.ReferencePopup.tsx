@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/chip/ui/dialog/dialog";
 import type { ReferenceBlockData } from "@/types";
-import { ExternalLink, Globe, Link as LinkIcon } from "@/ui/icons";
+import { ExternalLink, Globe, Link as LinkIcon } from "@/chip/icons";
 
 interface ReferencePopupProps {
   isOpen: boolean;

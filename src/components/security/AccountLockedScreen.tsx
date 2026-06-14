@@ -2,7 +2,7 @@ import React from "react";
 // IDE Check: Shield icon
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useSecurity } from "@/contexts/security/SecurityContext";
-import { Shield } from "@/ui/icons";
+import { Shield } from "@/chip/icons";
 
 // CSSはApp.tsx等でグローバル定義するか、インラインでシンプルに実装
 const AccountLockedScreen: React.FC = () => {

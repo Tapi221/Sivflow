@@ -19,7 +19,7 @@ import type { CodeBlockData } from "@/types/core/code-block";
 import type { UploadedImage } from "@/types/domain/assets";
 import type { MathBlockData, ReferenceBlockData } from "@/types/domain/base";
 import type { CardBlock } from "@/types/domain/card";
-import { Code, HelpCircle, Link, NotebookPen, Sigma, Type, Volume2 } from "@/ui/icons";
+import { Code, HelpCircle, Link, NotebookPen, Sigma, Type, Volume2 } from "@/chip/icons";
 
 type CardBlockLayoutReplaceBlock = MarkdownReplaceBlock;
 type ViewerProps = Readonly<{ questionDisplayMode: "always" | "tap_to_reveal";

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { FlashCardIcon, PDFIcon } from "@/chip/icons/icons.library";
 import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
 import { cn } from "@/lib/utils";
-import type { IconProps } from "@/ui/icons";
+import type { IconProps } from "@/chip/icons";
 
 type PdfLibraryWorkspaceSection = "flashcard" | "pdf";
 type PdfLibraryWorkspaceToolbarProps = {

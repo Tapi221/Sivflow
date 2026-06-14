@@ -1,7 +1,7 @@
 import { forwardRef } from "react";
 import type { ForwardRefExoticComponent, RefAttributes, SVGProps } from "react";
 import * as stratisIcons from "stratis-ui-icons";
-import { UiIcon } from "./UiIcon";
+import { UiIcon } from "../ui/UiIcon";
 
 type IconProps = SVGProps<SVGSVGElement> & {
   size?: number;

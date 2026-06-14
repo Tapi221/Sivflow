@@ -1,4 +1,4 @@
-import type { IconProps } from "@/ui/icons";
+import type { IconProps } from "@/chip/icons";
 
 //Vuesax-Icons
 const FolderIcon = ({ className, label: _label, size: _size, title: _title, ...props }: IconProps) => (<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden="true" {...props} > <path d="M3 11.5V7.25C3 4.25 4.25 3 7.25 3H8.53C9.74 3 10.12 3.39 10.6 4.03L11.88 5.73C12.2 6.15 12.28 6.25 12.95 6.25H16.75C19.75 6.25 21 7.5 21 10.5V11.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> <path d="M5.31 11.5H18.69C19.8 11.5 20.85 11.99 21.56 12.84L21.73 13.07C22.27 13.81 22.51 14.71 22.42 15.62L22.02 20.61C21.87 22.13 21.69 24 18.29 24H5.71C2.31 24 2.13 22.13 1.98 20.62L1.58 15.61C1.49 14.64 1.77 13.67 2.39 12.89C3.13 11.99 4.18 11.5 5.31 11.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" transform="translate(0 -1.25)" /> <path d="M9.43 17H14.57" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> </svg>);

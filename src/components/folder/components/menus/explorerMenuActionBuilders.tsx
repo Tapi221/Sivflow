@@ -1,4 +1,4 @@
-import { Pencil, Tag, Trash2 } from "@/ui/icons";
+import { Pencil, Tag, Trash2 } from "@/chip/icons";
 import { AddDocumentIcon, BulkImportIcon, CreateCardIcon, CreateCardSetIcon, CreateFolderIcon, FolderContextCardSetIcon, FolderContextFolderIcon, FolderContextRenameIcon, FolderContextTrashIcon } from "./explorerMenuActionIcons";
 import { beginInlineRename } from "./explorerMenuStateHelpers";
 import type { MenuAction } from "./menuActions";

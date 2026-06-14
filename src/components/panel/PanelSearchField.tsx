@@ -1,7 +1,7 @@
 import type { Ref } from "react";
 import { Input } from "@/chip/ui/input";
 import { cn } from "@/lib/utils";
-import { Search } from "@/ui/icons";
+import { Search } from "@/chip/icons";
 
 interface PanelSearchFieldProps {
   value: string;
