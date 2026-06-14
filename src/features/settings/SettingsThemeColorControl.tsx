@@ -1,8 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import { SettingsWorkspaceRootScreen } from "@/features/settings/SettingsWorkspaceRootScreen";
-import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
-import { DEFAULT_THEME_ACCENT_COLOR, normalizeThemeAccentColor } from "@/features/settings/themeAccent";
+import { DEFAULT_THEME_ACCENT_COLOR, normalizeThemeAccentColor, useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { cn } from "@/lib/utils";
 import type { UserSettings } from "@/types";
 
