@@ -7,8 +7,8 @@ import { KEYS } from "platejs";
 import type { PlateEditor } from "platejs/react";
 import { useEditorRef } from "platejs/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
+import { ToolbarButton, ToolbarMenuGroup } from "@/chip/ui/plate/toolbar";
 import { insertBlock, insertInlineElement } from "@/components/editor/transforms";
-import { ToolbarButton, ToolbarMenuGroup } from "./toolbar";
 
 type Item = {
   focusEditor?: boolean;
@@ -89,7 +89,7 @@ const groups: Group[] = [
   },
 ];
 
-const InsertToolbarButton = (props: DropdownMenuProps) => {
+const ButtonClickPanelNoteInsert = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
   return (
@@ -122,4 +122,4 @@ const InsertToolbarButton = (props: DropdownMenuProps) => {
   );
 };
 
-export { InsertToolbarButton };
+export { ButtonClickPanelNoteInsert };
