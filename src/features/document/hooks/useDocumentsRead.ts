@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { getLocalDb } from "@/services/localdb";
 import type { DocumentItem } from "@/types";
 
@@ -12,16 +11,15 @@ type UseDocumentsReadOptions = {
   enabled?: boolean;
 };
 
+const getDocumentOrderIndex = (document: DocumentItem): number => {
+  const orderIndex = Number(document.orderIndex);
+  return Number.isFinite(orderIndex) ? orderIndex : 0;
+};
 const useDocumentsRead = (folderId?: string, options?: UseDocumentsReadOptions) => {
   const { currentUser } = useAuthSession();
   const userId = currentUser?.uid ?? null;
   const [error, setError] = useState<string | null>(null);
-  const isActiveWorkspaceCardSetSelected = useWorkspaceTabsStore((state) => {
-    const activeTab = state.tabs.find((tab) => tab.id === state.activeTabId);
-    return activeTab?.kind === "explorer" && activeTab.explorerState.selectedItem?.type === "cardSet";
-  });
-  const isUnscopedRead = !folderId;
-  const enabled = (options?.enabled ?? true) && !(isUnscopedRead && isActiveWorkspaceCardSetSelected);
+  const enabled = options?.enabled ?? true;
 
   const rawDocuments = useLiveQuery(async () => {
     try {
@@ -51,8 +49,7 @@ const useDocumentsRead = (folderId?: string, options?: UseDocumentsReadOptions) 
     }
 
     return filtered.sort(
-      (left, right) =>
-        (Number(left.orderIndex) || 0) - (Number(right.orderIndex) || 0),
+      (left, right) => getDocumentOrderIndex(left) - getDocumentOrderIndex(right),
     );
   }, [rawDocuments, folderId]);
 
