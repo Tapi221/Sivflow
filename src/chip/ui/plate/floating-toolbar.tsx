@@ -1,22 +1,12 @@
 "use client";
-
 import * as React from "react";
-
 import type { FloatingToolbarState } from "@platejs/floating";
-
 import { flip, offset, useFloatingToolbar, useFloatingToolbarState } from "@platejs/floating";
-
 import { useComposedRef } from "@udecode/cn";
-
 import { KEYS } from "platejs";
-
 import { useEditorId, useEventEditorValue, usePluginOption } from "platejs/react";
-
+import { Toolbar } from "@/chip/ui/plate/toolbar";
 import { cn } from "@/lib/utils";
-
-import { Toolbar } from "./toolbar";
-
-
 
 const FloatingToolbar = ({ children, className, state, ...props }: React.ComponentProps<typeof Toolbar> & { state?: FloatingToolbarState; }) => {
   const editorId = useEditorId();
@@ -50,8 +40,7 @@ const FloatingToolbar = ({ children, className, state, ...props }: React.Compone
         {...rootProps}
         ref={ref}
         className={cn(
-          "scrollbar-hide absolute z-50 overflow-x-auto whitespace-nowrap rounded-md border bg-popover p-1 opacity-100 shadow-md print:hidden",
-          "max-w-[80vw]",
+          "scrollbar-hide absolute z-50 max-w-full overflow-x-auto whitespace-nowrap rounded-md border bg-popover p-1 opacity-100 shadow-md print:hidden",
           className,
         )}
       >
@@ -60,7 +49,5 @@ const FloatingToolbar = ({ children, className, state, ...props }: React.Compone
     </div>
   );
 };
-
-
 
 export { FloatingToolbar };
