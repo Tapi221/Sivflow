@@ -6,6 +6,8 @@ import type { PlateContentProps, PlateViewProps } from "platejs/react";
 import { PlateContainer, PlateContent, PlateView } from "platejs/react";
 import { cn } from "@/lib/utils";
 
+type EditorProps = PlateContentProps & VariantProps<typeof editorVariants>;
+
 const editorContainerVariants = cva(
   "relative w-full cursor-text select-text overflow-y-auto caret-foreground selection:bg-muted-foreground/20 focus-visible:outline-none [&_.slate-selection-area]:z-50 [&_.slate-selection-area]:border [&_.slate-selection-area]:border-ring/30 [&_.slate-selection-area]:bg-muted-foreground/15",
   {
@@ -16,12 +18,12 @@ const editorContainerVariants = cva(
       variant: {
         comment: cn(
           "flex flex-wrap justify-between gap-1 px-1 py-0.5 text-sm",
-          "rounded-md border-[1.5px] border-transparent bg-transparent",
+          "rounded-md border border-transparent bg-transparent",
           "has-[[data-slate-editor]:focus]:border-ring/50 has-[[data-slate-editor]:focus]:ring-2 has-[[data-slate-editor]:focus]:ring-ring/30",
           "has-aria-disabled:border-input has-aria-disabled:bg-muted",
         ),
         default: "h-full",
-        demo: "h-[650px]",
+        demo: "h-dvh max-h-screen",
         select: cn(
           "group rounded-md border border-input ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2",
           "has-data-readonly:w-fit has-data-readonly:cursor-default has-data-readonly:border-transparent has-data-readonly:focus-within:[box-shadow:none]",
@@ -51,19 +53,17 @@ const editorVariants = cva(
       },
       variant: {
         ai: "w-full px-0 text-base md:text-sm",
-        aiChat: "max-h-[min(70vh,320px)] w-full overflow-y-auto px-3 py-2 text-base md:text-sm",
+        aiChat: "max-h-80 w-full overflow-y-auto px-3 py-2 text-base md:text-sm",
         comment: cn("rounded-none border-none bg-transparent text-sm"),
-        default: "size-full px-16 pt-4 pb-72 text-base sm:px-[max(64px,calc(50%-350px))]",
-        demo: "size-full px-16 pt-4 pb-72 text-base sm:px-[max(64px,calc(50%-350px))]",
-        fullWidth: "size-full px-16 pt-4 pb-72 text-base sm:px-24",
+        default: "mx-auto size-full max-w-3xl px-6 pt-4 pb-72 text-base sm:px-16",
+        demo: "mx-auto size-full max-w-3xl px-6 pt-4 pb-72 text-base sm:px-16",
+        fullWidth: "size-full px-6 pt-4 pb-72 text-base sm:px-24",
         none: "",
         select: "px-3 py-2 text-base data-readonly:w-fit",
       },
     },
   },
 );
-
-type EditorProps = PlateContentProps & VariantProps<typeof editorVariants>;
 
 const EditorContainer = ({ className, variant, ...props }: React.ComponentProps<"div"> & VariantProps<typeof editorContainerVariants>) => {
   return <PlateContainer className={cn("ignore-click-outside/toolbar", editorContainerVariants({ variant }), className)} {...props} />;
