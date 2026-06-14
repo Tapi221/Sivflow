@@ -101,7 +101,7 @@ const BlockCommentContent = ({ children, element }: PlateElementProps) => {
         <div className="w-full">{children}</div>
         {anchorElement ? <PopoverAnchor asChild className="w-full" virtualRef={{ current: anchorElement }} /> : null}
         <PopoverContent
-          className="max-h-[min(50dvh,calc(-24px+var(--radix-popper-available-height)))] w-[380px] min-w-[130px] max-w-[calc(100vw-24px)] overflow-y-auto p-0 data-[state=closed]:opacity-0"
+          className="max-h-96 w-96 min-w-32 max-w-full overflow-y-auto p-0 data-[state=closed]:opacity-0"
           onCloseAutoFocus={(event) => event.preventDefault()}
           onOpenAutoFocus={(event) => event.preventDefault()}
           align="center"
