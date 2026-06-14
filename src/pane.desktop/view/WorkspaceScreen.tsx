@@ -1,4 +1,5 @@
 import "@/pane.desktop/leftpane/sidebar.layered-directory.css";
+import { Command as CommandIcon } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
@@ -21,13 +22,11 @@ import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceExplorerTab, WorkspaceNoteTab, WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
+import { MobileCalendarSidebar, MobileCalendarSidebarOpenButton } from "@/pane.desktop/view/MobileCalendarSidebar";
+import { ScheduleScreen as CalendarScheduleScreen } from "@/pane.desktop/view/ScheduleScreen.desktop";
+import { WorkspaceActionToolbar } from "@/pane.desktop/view/WorkspaceActionToolbar";
 import type { DocumentItem, Folder, Note, SelectedExplorerItem } from "@/types";
 import { Search } from "@/ui/icons";
-import { MobileCalendarSidebar, MobileCalendarSidebarOpenButton } from "./MobileCalendarSidebar";
-import { ScheduleScreen as CalendarScheduleScreen } from "./ScheduleScreen.desktop";
-import { WorkspaceActionToolbar } from "./WorkspaceActionToolbar";
-
-
 
 type ExplorerWorkspaceContentProps = {
   explorerState: ExplorerRouteState;
@@ -58,47 +57,40 @@ type SettingsDialogHostProps = {
   onOpenChange: (open: boolean) => void;
 };
 
-
-
 const MOBILE_WORKSPACE_MEDIA_QUERY = "(max-width: 767px)";
 const MOBILE_WORKSPACE_SIDEBAR_OPEN_BUTTON_CLASS_NAME = "pointer-events-auto absolute left-3 top-3 z-[90] flex h-10 w-10 items-center justify-center bg-transparent p-0 text-neutral-950 outline-none transition hover:text-neutral-950 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#d1d1d6]";
 const MOBILE_WORKSPACE_MAIN_PANEL_CLASS_NAME = "!rounded-none !border-0 !shadow-none";
 const COLLAPSED_SIDEBAR_TOGGLE_CLASS_NAME = "pointer-events-auto absolute left-3 top-3 z-[90] flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(0,0,0,0.05)] bg-[rgba(255,255,255,0.82)] p-0 text-[#8c8c8c] shadow-[0_1px_2px_rgba(15,23,42,0.08)] outline-none backdrop-blur-xl transition-[background-color,color,transform] duration-150 ease-out hover:bg-slate-100 hover:text-[#2f343b] active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-slate-100 focus-visible:text-[#2f343b] motion-reduce:transition-none motion-reduce:active:scale-100";
 const COLLAPSED_SIDEBAR_TOGGLE_ICON_CLASS_NAME = "h-5 w-5 shrink-0 [transform:scaleX(-1)]";
 const FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME = "absolute right-4 top-3 z-30 flex h-8 w-56 shrink-0 items-center gap-1.5 rounded-lg border border-[rgba(0,0,0,0.04)] bg-[#efeeee]/95 px-2.5 text-left text-xs font-medium leading-none tracking-tight text-[#85827e] shadow-none outline-none ring-0 backdrop-blur-xl transition-[background-color,border-color,color,transform] duration-150 ease-out hover:border-[rgba(0,0,0,0.04)] hover:bg-slate-100 hover:text-[#2f343b] active:scale-[0.99] focus:outline-none focus:ring-0 focus-visible:bg-slate-100 focus-visible:text-[#2f343b] motion-reduce:transition-none motion-reduce:active:scale-100";
-const FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-5 min-w-8 items-center justify-center rounded border border-[rgba(0,0,0,0.04)] bg-slate-100 px-1.5 text-xs font-semibold leading-none tracking-tight text-[#85827e]";
+const FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-5 min-w-8 items-center justify-center gap-0.5 rounded border border-[rgba(0,0,0,0.04)] bg-slate-100 px-1.5 text-xs font-semibold leading-none tracking-tight text-[#85827e]";
+const FOLDER_TAB_SEARCH_SHORTCUT_ICON_CLASS_NAME = "h-3 w-3 shrink-0";
+const FOLDER_TAB_SEARCH_SHORTCUT_KEY_CLASS_NAME = "leading-none";
 const WORKSPACE_ACTION_TOOLBAR_CLASS_NAME = "absolute z-30";
 const WORKSPACE_ACTION_TOOLBAR_STYLE = { right: "252px", top: "12px" };
 const WORKSPACE_DOCUMENT_BREADCRUMBS_CLASS_NAME = "max-w-[calc(100%-96px)]";
 const WORKSPACE_MAIN_PANEL_CLASS_NAME = "relative z-0 isolate min-w-0";
 const SIDEBAR_INTERACTION_REGION_STYLE: SidebarInteractionRegionStyle = { WebkitAppRegion: "no-drag" };
 
-
-
 const getDocumentBreadcrumbLabel = (document: DocumentItem): string => (document.title.trim() || document.fileName.trim()) ?? "PDF";
 const getNoteBreadcrumbLabel = (note: Note): string => note.title.trim() ?? "ノート";
 const buildWorkspaceBreadcrumbCrumbs = (context: ExplorerBreadcrumbContext, folders: Folder[], selectedDocument: DocumentItem | null): BreadcrumbCrumb[] => {
   const folderById = new Map(folders.map((folder) => [folder.id, folder]));
   const crumbs = buildFolderPathCrumbs({ folderId: context.folderId, folderById });
-
   if (context.cardSet) {
     crumbs.push({ label: context.cardSet.label });
   }
-
   if (selectedDocument) {
     crumbs.push({ label: getDocumentBreadcrumbLabel(selectedDocument) });
   }
-
   return crumbs;
 };
 const buildNoteBreadcrumbCrumbs = (folders: Folder[], note: Note | null): BreadcrumbCrumb[] => {
   const folderById = new Map(folders.map((folder) => [folder.id, folder]));
   const crumbs = buildFolderPathCrumbs({ folderId: note?.folderId ?? null, folderById });
-
   if (note) {
     crumbs.push({ label: getNoteBreadcrumbLabel(note) });
   }
-
   return crumbs;
 };
 const createFolderRouteState = (folderId: string | null): ExplorerRouteState => ({ isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: folderId, selectedItem: null });
@@ -128,26 +120,27 @@ const readIsMobileWorkspaceViewport = (): boolean => {
 const joinClassNames = (...classNames: Array<string | false | null | undefined>): string => classNames.filter(Boolean).join(" ");
 const useIsMobileWorkspaceViewport = (): boolean => {
   const [isMobileWorkspaceViewport, setIsMobileWorkspaceViewport] = useState(readIsMobileWorkspaceViewport);
-
   useEffect(() => {
     if (typeof window === "undefined") return;
-
     const mediaQueryList = window.matchMedia(MOBILE_WORKSPACE_MEDIA_QUERY);
     const handleChange = () => setIsMobileWorkspaceViewport(mediaQueryList.matches);
-
     handleChange();
     mediaQueryList.addEventListener("change", handleChange);
-
     return () => {
       mediaQueryList.removeEventListener("change", handleChange);
     };
   }, []);
-
   return isMobileWorkspaceViewport;
 };
 
-
-
+const FolderTabSearchShortcut = () => {
+  return (
+    <kbd className={FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME} aria-label="Command K">
+      <CommandIcon className={FOLDER_TAB_SEARCH_SHORTCUT_ICON_CLASS_NAME} aria-hidden="true" strokeWidth={1.75} />
+      <span className={FOLDER_TAB_SEARCH_SHORTCUT_KEY_CLASS_NAME}>K</span>
+    </kbd>
+  );
+};
 const SidebarInteractionRegion = ({ children }: SidebarInteractionRegionProps) => {
   return (
     <div className="pointer-events-auto relative z-[80] flex h-full min-h-0 shrink-0" style={SIDEBAR_INTERACTION_REGION_STYLE}>
@@ -157,7 +150,6 @@ const SidebarInteractionRegion = ({ children }: SidebarInteractionRegionProps) =
 };
 const CollapsedSidebarToggle = ({ isVisible, onToggleLeftPanel }: CollapsedSidebarToggleProps) => {
   if (!isVisible) return null;
-
   return (
     <button type="button" className={COLLAPSED_SIDEBAR_TOGGLE_CLASS_NAME} onClick={onToggleLeftPanel} aria-label="サイドバーを開く" title="サイドバーを開く">
       <SidebarOpenIcon className={COLLAPSED_SIDEBAR_TOGGLE_ICON_CLASS_NAME} />
@@ -188,57 +180,44 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
   const [explorerBreadcrumbContext, setExplorerBreadcrumbContext] = useState<ExplorerBreadcrumbContext>(EMPTY_EXPLORER_BREADCRUMB_CONTEXT);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const extraCrumbs = useMemo(() => buildWorkspaceBreadcrumbCrumbs(explorerBreadcrumbContext, folders, selectedDocument), [explorerBreadcrumbContext, folders, selectedDocument]);
-
   const handleOpenSearch = useCallback(() => {
     openSearch();
   }, [openSearch]);
-
   const handleOpenMobileSidebar = useCallback(() => {
     setIsMobileSidebarOpen(true);
   }, []);
-
   const handleCloseMobileSidebar = useCallback(() => {
     setIsMobileSidebarOpen(false);
   }, []);
-
   const updateLibraryExplorerState = useCallback((nextExplorerState: ExplorerRouteState) => {
     if (explorerTabId) {
       updateExplorerTabState(explorerTabId, nextExplorerState);
       return;
     }
-
     openExplorerTab({ explorerState: nextExplorerState });
   }, [explorerTabId, openExplorerTab, updateExplorerTabState]);
-
   const handleFolderSelect = useCallback((folderId: string | null) => {
     updateLibraryExplorerState(createFolderRouteState(folderId));
   }, [updateLibraryExplorerState]);
-
   const handleItemSelect = useCallback((item: SelectedExplorerItem) => {
     updateLibraryExplorerState(createItemRouteState(explorerState, item));
   }, [explorerState, updateLibraryExplorerState]);
-
   const handleBreadcrumbContextChange = useCallback((context: ExplorerBreadcrumbContext) => {
     setExplorerBreadcrumbContext((currentContext) => areExplorerBreadcrumbContextsEqual(currentContext, context) ? currentContext : context);
   }, []);
-
   useLayoutEffect(() => {
     setExtraCrumbs(extraCrumbs);
   }, [extraCrumbs, setExtraCrumbs]);
-
   useLayoutEffect(() => {
     return () => {
       setExtraCrumbs([]);
     };
   }, [setExtraCrumbs]);
-
   useEffect(() => {
     if (isMobileWorkspace) return;
     setIsMobileSidebarOpen(false);
   }, [isMobileWorkspace]);
-
   const mainPanelClassName = joinClassNames(WORKSPACE_MAIN_PANEL_CLASS_NAME, isMobileWorkspace && MOBILE_WORKSPACE_MAIN_PANEL_CLASS_NAME);
-
   return (
     <div className="relative isolate flex h-full min-h-0 w-full overflow-hidden bg-transparent">
       {isMobileWorkspace ? (
@@ -264,7 +243,7 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
           <button type="button" className={FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME} aria-label="検索を開く" aria-keyshortcuts="Meta+K Control+K" title="検索を開く" onClick={handleOpenSearch}>
             <Search className="h-3.5 w-3.5 shrink-0 text-[#85827e]" />
             <span className="min-w-0 truncate">Search in Workspace...</span>
-            <kbd className={FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME}>⌘K</kbd>
+            <FolderTabSearchShortcut />
           </button>
         ) : null}
       </CarvePanel>
@@ -282,39 +261,31 @@ const NoteWorkspaceContent = ({ noteTab, isLeftPanelCollapsed, onOpenSettings, o
   const extraCrumbs = useMemo(() => buildNoteBreadcrumbCrumbs(folders, note), [folders, note]);
   const mainPanelClassName = joinClassNames(WORKSPACE_MAIN_PANEL_CLASS_NAME, isMobileWorkspace && MOBILE_WORKSPACE_MAIN_PANEL_CLASS_NAME);
   const isLoading = foldersLoading || notesLoading;
-
   const handleOpenMobileSidebar = useCallback(() => {
     setIsMobileSidebarOpen(true);
   }, []);
-
   const handleCloseMobileSidebar = useCallback(() => {
     setIsMobileSidebarOpen(false);
   }, []);
-
   const handleNoteChange = useCallback((changes: Pick<Note, "content" | "contentText" | "contentVersion" | "editor">) => {
     void updateNote(noteTab.noteId, changes);
   }, [noteTab.noteId, updateNote]);
-
   useLayoutEffect(() => {
     setExtraCrumbs(extraCrumbs);
   }, [extraCrumbs, setExtraCrumbs]);
-
   useLayoutEffect(() => {
     return () => {
       setExtraCrumbs([]);
     };
   }, [setExtraCrumbs]);
-
   useEffect(() => {
     if (!note) return;
     updateTabTitle(noteTab.id, getNoteBreadcrumbLabel(note));
   }, [note, noteTab.id, updateTabTitle]);
-
   useEffect(() => {
     if (isMobileWorkspace) return;
     setIsMobileSidebarOpen(false);
   }, [isMobileWorkspace]);
-
   return (
     <div className="relative isolate flex h-full min-h-0 w-full overflow-hidden bg-transparent">
       {isMobileWorkspace ? (
@@ -356,14 +327,10 @@ const WorkspaceScreen = () => {
       navigate("/settings");
       return;
     }
-
     setIsSettingsDialogOpen(true);
   }, [isMobileWorkspace, navigate]);
-
   if (noteTab) return <SettingsDialogHost open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}><NoteWorkspaceContent noteTab={noteTab} isLeftPanelCollapsed={isLeftPanelCollapsed} onOpenSettings={handleOpenSettings} onToggleLeftPanel={onToggleLeftPanel} /></SettingsDialogHost>;
-
   if (libraryExplorerState) return <SettingsDialogHost open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}><ExplorerWorkspaceContent explorerState={libraryExplorerState} explorerTabId={explorerTabId} isLeftPanelCollapsed={isLeftPanelCollapsed} onOpenSettings={handleOpenSettings} onToggleLeftPanel={onToggleLeftPanel} /></SettingsDialogHost>;
-
   return (
     <SettingsDialogHost open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
       <div className="relative h-full min-h-0 w-full overflow-hidden">
@@ -373,7 +340,5 @@ const WorkspaceScreen = () => {
     </SettingsDialogHost>
   );
 };
-
-
 
 export { WorkspaceScreen };
