@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import { ToggleSwitch } from "@/chip/toggle/Toggle.switch";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
@@ -311,9 +312,9 @@ const SettingsDetailCard = ({ title, children }: SettingsDetailCardProps) => (
 const SettingSwitchRow = ({ checked, label, onChange }: SettingSwitchRowProps) => (
   <div className={SETTINGS_DETAIL_ROW_CLASS_NAME}>
     <span className="min-w-0 truncate text-sm font-medium tracking-tight text-neutral-900">{label}</span>
-    <button type="button" className={`relative flex h-7 w-12 shrink-0 items-center rounded-full p-0.5 transition-colors ${checked ? "bg-green-500" : "bg-neutral-300"}`} role="switch" aria-checked={checked} onClick={() => onChange(!checked)}>
-      <span className={`h-6 w-6 rounded-full bg-white shadow-sm transition-transform ${checked ? "translate-x-5" : "translate-x-0"}`} />
-    </button>
+    <ToggleSwitch checked={checked} onChange={onChange}>
+      <span className="sr-only">{label}</span>
+    </ToggleSwitch>
   </div>
 );
 const SettingChoiceRow = <T extends string | number,>({ label, options, value, onChange }: SettingChoiceRowProps<T>) => (
