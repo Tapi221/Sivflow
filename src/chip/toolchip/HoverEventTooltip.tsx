@@ -292,5 +292,4 @@ const HoverEventTooltip = ({
 };
 
 HoverEventTooltip.displayName = "HoverEventTooltip";
-
 export { HoverEventTooltip };

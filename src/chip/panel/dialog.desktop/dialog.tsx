@@ -27,6 +27,5 @@ const DialogDesktopPanelBase = ({ className, surfaceClassName, ariaLabel, childr
 
 const DialogDesktopPanel = memo(DialogDesktopPanelBase);
 DialogDesktopPanel.displayName = "DialogDesktopPanel";
-
 export { DialogDesktopPanel };
 export type { DialogDesktopPanelProps };

@@ -102,5 +102,4 @@ const MarkdownBlock = React.memo(
   areMarkdownBlockPropsEqual,
 );
 MarkdownBlock.displayName = "MarkdownBlock";
-
 export { MarkdownBlock };

@@ -96,5 +96,4 @@ const MathRendererComponent: React.FC<MathRendererProps> = ({
 
 const MathRenderer = React.memo(MathRendererComponent);
 MathRenderer.displayName = "MathRenderer";
-
 export { MathRenderer };

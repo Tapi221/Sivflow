@@ -25,6 +25,5 @@ const PanelBase = ({ id, panelRef, style, className, role, ariaLabel, onContextM
 
 const Panel = memo(PanelBase);
 Panel.displayName = "Panel";
-
 export { Panel };
 export type { PanelProps };

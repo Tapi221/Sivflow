@@ -582,5 +582,4 @@ const CalendarListViewComponent = ({
 
 const CalendarListView = memo(CalendarListViewComponent);
 CalendarListView.displayName = "CalendarListView";
-
 export { CalendarListView };

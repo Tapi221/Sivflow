@@ -553,5 +553,4 @@ const RowOfButtons = React.memo(({
     </div>
   );
 });
-
 export { EmojiToolbarButton, EmojiPopover, EmojiPicker };

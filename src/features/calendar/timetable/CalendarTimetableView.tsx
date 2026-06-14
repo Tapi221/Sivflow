@@ -149,5 +149,4 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
 
 const CalendarTimetableView = memo(CalendarTimetableViewComponent);
 CalendarTimetableView.displayName = "CalendarTimetableView";
-
 export { CalendarTimetableView };

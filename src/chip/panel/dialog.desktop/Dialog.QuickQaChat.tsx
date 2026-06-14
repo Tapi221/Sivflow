@@ -221,6 +221,5 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
 
 const QuickQaChatDialog = memo(QuickQaChatDialogComponent);
 QuickQaChatDialog.displayName = "QuickQaChatDialog";
-
 export { QuickQaChatDialog };
 export type { QuickQaChatDialogProps };

@@ -58,6 +58,5 @@ const SharedCardContent = React.memo(SharedCardContentInner);
 SharedCardContentRoot.displayName = "SharedCardContentRoot";
 SharedCardContentScene.displayName = "SharedCardContentScene";
 SharedCardContent.displayName = "SharedCardContent";
-
 export { SharedCardContent };
 export type { SharedCardContentProps };
