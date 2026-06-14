@@ -1,8 +1,8 @@
 import "@/pane.desktop/leftpane/sidebar.layered-directory.css";
-import { Command as CommandIcon } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
+import { HotkeyBadge } from "@/chip/budge/Budge.hotkey";
 import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { NoteDocumentEditor } from "@/components/note/NoteDocumentEditor";
@@ -63,9 +63,6 @@ const MOBILE_WORKSPACE_MAIN_PANEL_CLASS_NAME = "!rounded-none !border-0 !shadow-
 const COLLAPSED_SIDEBAR_TOGGLE_CLASS_NAME = "pointer-events-auto absolute left-3 top-3 z-[90] flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(0,0,0,0.05)] bg-[rgba(255,255,255,0.82)] p-0 text-[#8c8c8c] shadow-[0_1px_2px_rgba(15,23,42,0.08)] outline-none backdrop-blur-xl transition-[background-color,color,transform] duration-150 ease-out hover:bg-slate-100 hover:text-[#2f343b] active:scale-[0.97] focus:outline-none focus:ring-0 focus-visible:bg-slate-100 focus-visible:text-[#2f343b] motion-reduce:transition-none motion-reduce:active:scale-100";
 const COLLAPSED_SIDEBAR_TOGGLE_ICON_CLASS_NAME = "h-5 w-5 shrink-0 [transform:scaleX(-1)]";
 const FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME = "absolute right-4 top-3 z-30 flex h-8 w-56 shrink-0 items-center gap-1.5 rounded-lg border border-[rgba(0,0,0,0.04)] bg-[#efeeee]/95 px-2.5 text-left text-xs font-medium leading-none tracking-tight text-[#85827e] shadow-none outline-none ring-0 backdrop-blur-xl transition-[background-color,border-color,color,transform] duration-150 ease-out hover:border-[rgba(0,0,0,0.04)] hover:bg-slate-100 hover:text-[#2f343b] active:scale-[0.99] focus:outline-none focus:ring-0 focus-visible:bg-slate-100 focus-visible:text-[#2f343b] motion-reduce:transition-none motion-reduce:active:scale-100";
-const FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME = "ml-auto flex h-5 min-w-8 items-center justify-center gap-0.5 rounded border border-[rgba(0,0,0,0.04)] bg-slate-100 px-1.5 text-xs font-semibold leading-none tracking-tight text-[#85827e]";
-const FOLDER_TAB_SEARCH_SHORTCUT_ICON_CLASS_NAME = "h-3 w-3 shrink-0";
-const FOLDER_TAB_SEARCH_SHORTCUT_KEY_CLASS_NAME = "leading-none";
 const WORKSPACE_ACTION_TOOLBAR_CLASS_NAME = "absolute z-30";
 const WORKSPACE_ACTION_TOOLBAR_STYLE = { right: "252px", top: "12px" };
 const WORKSPACE_DOCUMENT_BREADCRUMBS_CLASS_NAME = "max-w-[calc(100%-96px)]";
@@ -133,14 +130,6 @@ const useIsMobileWorkspaceViewport = (): boolean => {
   return isMobileWorkspaceViewport;
 };
 
-const FolderTabSearchShortcut = () => {
-  return (
-    <kbd className={FOLDER_TAB_SEARCH_SHORTCUT_CLASS_NAME} aria-label="Command K">
-      <CommandIcon className={FOLDER_TAB_SEARCH_SHORTCUT_ICON_CLASS_NAME} aria-hidden="true" strokeWidth={1.75} />
-      <span className={FOLDER_TAB_SEARCH_SHORTCUT_KEY_CLASS_NAME}>K</span>
-    </kbd>
-  );
-};
 const SidebarInteractionRegion = ({ children }: SidebarInteractionRegionProps) => {
   return (
     <div className="pointer-events-auto relative z-[80] flex h-full min-h-0 shrink-0" style={SIDEBAR_INTERACTION_REGION_STYLE}>
@@ -243,7 +232,7 @@ const ExplorerWorkspaceContent = ({ explorerState, explorerTabId, isLeftPanelCol
           <button type="button" className={FOLDER_TAB_SEARCH_TRIGGER_CLASS_NAME} aria-label="検索を開く" aria-keyshortcuts="Meta+K Control+K" title="検索を開く" onClick={handleOpenSearch}>
             <Search className="h-3.5 w-3.5 shrink-0 text-[#85827e]" />
             <span className="min-w-0 truncate">Search in Workspace...</span>
-            <FolderTabSearchShortcut />
+            <HotkeyBadge />
           </button>
         ) : null}
       </CarvePanel>
