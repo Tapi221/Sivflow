@@ -11,5 +11,4 @@ const App = () => <View style={styles.root} />;
 
 const MemoizedApp = memo(App);
 MemoizedApp.displayName = "App";
-
 export { MemoizedApp as App };

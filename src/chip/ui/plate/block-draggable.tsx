@@ -405,5 +405,4 @@ const DropLine = React.memo(({
     />
   );
 });
-
 export { BlockDraggable };

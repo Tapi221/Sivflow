@@ -120,5 +120,4 @@ const QuestionBlock = React.memo(
   areQuestionBlockPropsEqual,
 );
 QuestionBlock.displayName = "QuestionBlock";
-
 export { QuestionBlock };

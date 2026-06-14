@@ -114,5 +114,4 @@ AlertDialogDescription.displayName =
   AlertDialogPrimitive.Description.displayName;
 AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName;
 AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName;
-
 export { AlertDialog, AlertDialogPortal, AlertDialogOverlay, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel };

@@ -64,6 +64,5 @@ const CardBlocksSceneInner = ({
 
 const CardBlocksScene = React.memo(CardBlocksSceneInner);
 CardBlocksScene.displayName = "CardBlocksScene";
-
 export { CardBlocksScene };
 export type { CardBlocksSceneProps, CardBlocksSceneResolvedProps };

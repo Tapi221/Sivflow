@@ -79,5 +79,4 @@ const CalendarTimeGrid = memo(({ events, rangeStart, rangeEnd, layoutMode = "no-
   );
 });
 CalendarTimeGrid.displayName = "CalendarTimeGrid";
-
 export { CalendarTimeGrid };

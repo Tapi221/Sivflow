@@ -330,6 +330,5 @@ const FontColorToolbarButton = ({ children, nodeType, tooltip, ...props }: FontC
 };
 
 const ColorPicker = React.memo(PureColorPicker, (prev, next) => prev.color === next.color && prev.colors === next.colors && prev.colorsQueue === next.colorsQueue && prev.customColors === next.customColors && prev.updatedColor === next.updatedColor);
-
 export { DEFAULT_COLORS, FontColorToolbarButton, ColorDropdownMenuItems };
 export type { TColor };

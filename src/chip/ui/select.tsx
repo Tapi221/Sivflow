@@ -134,5 +134,4 @@ SelectContent.displayName = SelectPrimitive.Content.displayName;
 SelectLabel.displayName = SelectPrimitive.Label.displayName;
 SelectItem.displayName = SelectPrimitive.Item.displayName;
 SelectSeparator.displayName = SelectPrimitive.Separator.displayName;
-
 export { Select, SelectGroup, SelectValue, SelectTrigger, SelectContent, SelectLabel, SelectItem, SelectSeparator, SelectScrollUpButton, SelectScrollDownButton };

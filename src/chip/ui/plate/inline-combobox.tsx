@@ -237,5 +237,4 @@ const InlineComboboxGroupLabel = ({ className, ...props }: React.ComponentProps<
 };
 
 InlineComboboxInput.displayName = "InlineComboboxInput";
-
 export { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxGroupLabel, InlineComboboxInput, InlineComboboxItem, InlineComboboxRow };

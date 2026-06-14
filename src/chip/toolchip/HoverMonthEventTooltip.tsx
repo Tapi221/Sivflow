@@ -246,5 +246,4 @@ const HoverMonthEventTooltip = ({
 };
 
 HoverMonthEventTooltip.displayName = "HoverMonthEventTooltip";
-
 export { HoverMonthEventTooltip };
