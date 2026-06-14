@@ -7,8 +7,6 @@ import { readStoredAccounts } from "@/integration/googlecalendar-integration/gca
 import type { UserSettings } from "@/types";
 import { ChevronRight, Globe, Keyboard, Shield, Trophy, Type, Volume2 } from "@/ui/icons";
 
-
-
 type SettingsSectionId = "account" | "general" | "study" | "editor" | "audio" | "hotkey";
 type SettingsLanguage = UserSettings["language"];
 type AuthSessionUser = ReturnType<typeof useAuthSession>["currentUser"];
@@ -17,7 +15,10 @@ type SettingsSectionDefinition = {
   id: SettingsSectionId;
   label: string;
   description: string;
-  Icon: (props: { className?: string; size?: number; }) => ReactNode;
+  Icon: (props: {
+    className?: string;
+    size?: number;
+  }) => ReactNode;
 };
 type SettingRouteCopy = {
   title: string;
@@ -96,12 +97,10 @@ type AccountProfile = {
   providerId: string | null;
 };
 
-
-
-const SETTINGS_CARD_CLASS_NAME = "rounded-[18px] bg-white shadow-[0_8px_24px_rgba(16,24,40,0.06)] ring-1 ring-black/[0.03]";
-const SETTINGS_ROW_CLASS_NAME = "flex min-h-[57px] w-full items-center gap-4 px-4 text-left transition active:scale-[0.995]";
-const SETTINGS_ICON_CLASS_NAME = "flex h-8 w-8 shrink-0 items-center justify-center text-[#8b8b91]";
-const SETTINGS_DETAIL_ROW_CLASS_NAME = "flex min-h-[54px] items-center justify-between gap-4 border-b border-[#ececf0] px-4 py-3 last:border-b-0";
+const SETTINGS_CARD_CLASS_NAME = "rounded-2xl bg-white shadow-sm ring-1 ring-black/5";
+const SETTINGS_ROW_CLASS_NAME = "flex min-h-14 w-full items-center gap-4 px-4 text-left transition active:opacity-80";
+const SETTINGS_ICON_CLASS_NAME = "flex h-8 w-8 shrink-0 items-center justify-center text-neutral-400";
+const SETTINGS_DETAIL_ROW_CLASS_NAME = "flex min-h-14 items-center justify-between gap-4 border-b border-neutral-200 px-4 py-3 last:border-b-0";
 const GOOGLE_PROVIDER_ID = "google.com";
 const SETTINGS_COPY: Record<SettingsLanguage, SettingRouteCopy> = {
   ja: {
@@ -262,8 +261,6 @@ const MARKDOWN_TAB_OPTIONS: readonly SettingChoiceOption<NonNullable<UserSetting
   { value: 8, label: "8" },
 ];
 
-
-
 const normalizeAccountEmail = (email: string | null | undefined): string | null => {
   const normalizedEmail = email?.trim().toLowerCase();
   return normalizedEmail ? normalizedEmail : null;
@@ -271,13 +268,11 @@ const normalizeAccountEmail = (email: string | null | undefined): string | null 
 const getStoredSignedInGoogleAccount = (currentUser: AuthSessionUser, storedAccounts: readonly StoredGoogleAccount[]): StoredGoogleAccount | null => {
   const userEmail = normalizeAccountEmail(currentUser?.email);
   if (!userEmail) return storedAccounts[0] ?? null;
-
   return storedAccounts.find((account) => normalizeAccountEmail(account.email) === userEmail) ?? null;
 };
 const getAccountProfile = (currentUser: AuthSessionUser, storedAccounts: readonly StoredGoogleAccount[]): AccountProfile => {
   const providerProfile = currentUser?.providerData.find((profile) => profile.providerId === GOOGLE_PROVIDER_ID) ?? currentUser?.providerData.at(0) ?? null;
   const storedAccount = getStoredSignedInGoogleAccount(currentUser, storedAccounts);
-
   return {
     displayName: storedAccount?.name ?? providerProfile?.displayName ?? currentUser?.displayName ?? null,
     email: storedAccount?.email ?? currentUser?.email ?? providerProfile?.email ?? null,
@@ -288,10 +283,8 @@ const getAccountProfile = (currentUser: AuthSessionUser, storedAccounts: readonl
 const getAccountDisplayName = (displayName: string | null | undefined, email: string | null | undefined, fallbackLabel: string): string => {
   const trimmedDisplayName = displayName?.trim();
   if (trimmedDisplayName) return trimmedDisplayName;
-
   const emailLocalPart = email?.split("@")[0]?.trim();
   if (emailLocalPart) return emailLocalPart;
-
   return fallbackLabel;
 };
 const getAccountInitial = (displayName: string): string => {
@@ -299,40 +292,38 @@ const getAccountInitial = (displayName: string): string => {
   return initial ? initial.toUpperCase() : "M";
 };
 
-
-
 const SettingsRouteRow = ({ active, description, icon, label, onClick }: SettingsRouteRowProps) => (
-  <button type="button" className={`${SETTINGS_ROW_CLASS_NAME}${active ? " bg-[#fafafa]" : ""}`} onClick={onClick} aria-current={active ? "page" : undefined}>
+  <button type="button" className={`${SETTINGS_ROW_CLASS_NAME}${active ? " bg-neutral-50" : ""}`} onClick={onClick} aria-current={active ? "page" : undefined}>
     <span className={SETTINGS_ICON_CLASS_NAME} aria-hidden="true">{icon}</span>
     <span className="min-w-0 flex-1">
-      <span className="block truncate text-[17px] font-medium tracking-[-0.02em] text-[#1c1c1e]">{label}</span>
-      <span className="mt-0.5 block truncate text-[11px] font-medium text-[#a6a6ad]">{description}</span>
+      <span className="block truncate text-base font-medium tracking-tight text-neutral-900">{label}</span>
+      <span className="mt-0.5 block truncate text-xs font-medium text-neutral-400">{description}</span>
     </span>
-    <ChevronRight className="shrink-0 text-[#a7a7ad]" size={19} />
+    <ChevronRight className="shrink-0 text-neutral-400" size={20} />
   </button>
 );
 const SettingsDetailCard = ({ title, children }: SettingsDetailCardProps) => (
   <section className={`${SETTINGS_CARD_CLASS_NAME} overflow-hidden`} aria-label={title}>
-    <h2 className="border-b border-[#ececf0] px-4 py-3 text-[13px] font-semibold tracking-[-0.01em] text-[#8c8c92]">{title}</h2>
+    <h2 className="border-b border-neutral-200 px-4 py-3 text-sm font-semibold tracking-tight text-neutral-500">{title}</h2>
     {children}
   </section>
 );
 const SettingSwitchRow = ({ checked, label, onChange }: SettingSwitchRowProps) => (
   <div className={SETTINGS_DETAIL_ROW_CLASS_NAME}>
-    <span className="min-w-0 truncate text-[15px] font-medium tracking-[-0.02em] text-[#1c1c1e]">{label}</span>
-    <button type="button" className={`relative h-7 w-[48px] rounded-full transition ${checked ? "bg-[#34c759]" : "bg-[#d9d9df]"}`} role="switch" aria-checked={checked} onClick={() => onChange(!checked)}>
-      <span className={`absolute top-[3px] h-[22px] w-[22px] rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition ${checked ? "left-[23px]" : "left-[3px]"}`} />
+    <span className="min-w-0 truncate text-sm font-medium tracking-tight text-neutral-900">{label}</span>
+    <button type="button" className={`relative flex h-7 w-12 shrink-0 items-center rounded-full p-0.5 transition-colors ${checked ? "bg-green-500" : "bg-neutral-300"}`} role="switch" aria-checked={checked} onClick={() => onChange(!checked)}>
+      <span className={`h-6 w-6 rounded-full bg-white shadow-sm transition-transform ${checked ? "translate-x-5" : "translate-x-0"}`} />
     </button>
   </div>
 );
 const SettingChoiceRow = <T extends string | number,>({ label, options, value, onChange }: SettingChoiceRowProps<T>) => (
   <div className={`${SETTINGS_DETAIL_ROW_CLASS_NAME} items-start`}>
-    <span className="pt-1 text-[15px] font-medium tracking-[-0.02em] text-[#1c1c1e]">{label}</span>
-    <div className="flex max-w-[58%] flex-wrap justify-end gap-1.5">
+    <span className="pt-1 text-sm font-medium tracking-tight text-neutral-900">{label}</span>
+    <div className="flex max-w-sm flex-wrap justify-end gap-1.5">
       {options.map((option) => {
         const isSelected = option.value === value;
         return (
-          <button key={String(option.value)} type="button" className={`rounded-full px-3 py-1.5 text-[12px] font-semibold transition ${isSelected ? "bg-[#1c1c1e] text-white" : "bg-[#f0f0f4] text-[#6e6e73]"}`} onClick={() => onChange(option.value)}>
+          <button key={String(option.value)} type="button" className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${isSelected ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-500"}`} onClick={() => onChange(option.value)}>
             {option.label}
           </button>
         );
@@ -342,8 +333,8 @@ const SettingChoiceRow = <T extends string | number,>({ label, options, value, o
 );
 const SettingValueRow = ({ label, value }: SettingValueRowProps) => (
   <div className={SETTINGS_DETAIL_ROW_CLASS_NAME}>
-    <span className="text-[15px] font-medium tracking-[-0.02em] text-[#1c1c1e]">{label}</span>
-    <span className="min-w-0 max-w-[58%] truncate text-right text-[13px] font-semibold text-[#8c8c92]">{value}</span>
+    <span className="text-sm font-medium tracking-tight text-neutral-900">{label}</span>
+    <span className="min-w-0 max-w-sm truncate text-right text-sm font-semibold text-neutral-500">{value}</span>
   </div>
 );
 const SettingScreen = () => {
@@ -362,44 +353,40 @@ const SettingScreen = () => {
   const languageOptions = useMemo(() => LANGUAGE_OPTIONS.map((option) => ({ ...option, label: copy.languageOptions[option.value] })), [copy]);
   const weekStartOptions = useMemo(() => WEEK_START_OPTIONS.map((option) => ({ ...option, label: copy.weekStartOptions[option.value] })), [copy]);
   const questionDisplayOptions = useMemo(() => QUESTION_DISPLAY_OPTIONS.map((option) => ({ ...option, label: option.value === "tap_to_reveal" ? copy.questionDisplayTapToReveal : copy.questionDisplayAlways })), [copy]);
-
   const updateBooleanSetting = (key: BooleanSettingsKey, checked: boolean) => {
     void updateSettings({ [key]: checked } as Partial<UserSettings>);
   };
-
   const handleLanguageChange = (nextLanguage: SettingsLanguage) => {
     void updateSettings({ language: nextLanguage });
   };
-
   const handleLogout = () => {
     void logout();
   };
-
   return (
-    <main className="h-full min-h-0 w-full overflow-y-auto text-[#1c1c1e]" style={{ paddingTop: "max(18px, env(safe-area-inset-top))", paddingBottom: "max(96px, calc(env(safe-area-inset-bottom) + 76px))", background: "var(--backpane-bg)" }} aria-label={copy.title}>
-      <div className="mx-auto flex min-h-full w-full max-w-[520px] flex-col gap-5 px-5 pb-7 pt-3">
-        <h1 className="pb-2 pt-2 text-center text-[18px] font-bold tracking-[-0.03em] text-[#111]">{copy.title}</h1>
-        <button type="button" className={`${SETTINGS_CARD_CLASS_NAME} flex min-h-[108px] items-center gap-4 p-4 text-left`} onClick={() => setActiveSectionId("account")}>
-          <span className="relative flex h-[76px] w-[76px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#f0f0f3] text-[28px] font-semibold text-[#c2c2c8]">
+    <main className="h-full min-h-0 w-full overflow-y-auto bg-background-light pb-24 pt-5 text-neutral-900" aria-label={copy.title}>
+      <div className="mx-auto flex min-h-full w-full max-w-lg flex-col gap-5 px-5 pb-7 pt-3">
+        <h1 className="pb-2 pt-2 text-center text-lg font-bold tracking-tighter text-neutral-950">{copy.title}</h1>
+        <button type="button" className={`${SETTINGS_CARD_CLASS_NAME} flex min-h-28 items-center gap-4 p-4 text-left`} onClick={() => setActiveSectionId("account")}>
+          <span className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full bg-neutral-100 text-3xl font-semibold text-neutral-300">
             {accountProfile.photoUrl ? <img src={accountProfile.photoUrl} alt="" className="h-full w-full object-cover" /> : <span>{accountInitial}</span>}
-            <span className="absolute right-0 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-white text-[#a3a3aa] shadow-[0_2px_8px_rgba(0,0,0,0.10)]"><Trophy size={15} /></span>
+            <span className="absolute right-0 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-white text-neutral-400 shadow-sm"><Trophy size={16} /></span>
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[18px] font-semibold tracking-[-0.03em] text-[#1c1c1e]">{accountProfile.email ?? accountName}</span>
+            <span className="block truncate text-lg font-semibold tracking-tighter text-neutral-900">{accountProfile.email ?? accountName}</span>
           </span>
-          <ChevronRight className="shrink-0 text-[#a7a7ad]" size={22} />
+          <ChevronRight className="shrink-0 text-neutral-400" size={24} />
         </button>
-        <section className={`${SETTINGS_CARD_CLASS_NAME} flex min-h-[78px] items-center gap-4 px-4 py-3`} aria-label={copy.premiumTitle}>
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#f4c400] text-white shadow-[0_4px_12px_rgba(244,196,0,0.32)]"><Trophy size={22} /></span>
+        <section className={`${SETTINGS_CARD_CLASS_NAME} flex min-h-20 items-center gap-4 px-4 py-3`} aria-label={copy.premiumTitle}>
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-yellow-400 text-white shadow-sm"><Trophy size={24} /></span>
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-[16px] font-bold tracking-[-0.03em] text-[#111]">{copy.premiumTitle}</span>
-            <span className="mt-1 block truncate text-[11px] font-medium text-[#a4a4aa]">{copy.premiumDescription}</span>
+            <span className="block truncate text-base font-bold tracking-tighter text-neutral-950">{copy.premiumTitle}</span>
+            <span className="mt-1 block truncate text-xs font-medium text-neutral-400">{copy.premiumDescription}</span>
           </span>
-          <span className="shrink-0 rounded-full border border-[#e6c600] px-3 py-2 text-[12px] font-semibold text-[#d9b800]">{copy.premiumAction}</span>
+          <span className="shrink-0 rounded-full border border-yellow-400 px-3 py-2 text-xs font-semibold text-yellow-600">{copy.premiumAction}</span>
         </section>
         <section className={`${SETTINGS_CARD_CLASS_NAME} overflow-hidden`} aria-label={copy.title}>
           {copy.sections.map((section, index) => (
-            <div key={section.id} className={index === 0 ? "" : "border-t border-[#ececf0]"}>
+            <div key={section.id} className={index === 0 ? "" : "border-t border-neutral-200"}>
               <SettingsRouteRow active={activeSectionId === section.id} description={section.description} icon={<section.Icon size={24} />} label={section.label} onClick={() => setActiveSectionId(section.id)} />
             </div>
           ))}
@@ -411,8 +398,8 @@ const SettingScreen = () => {
               <SettingValueRow label={copy.providerLabel} value={accountProfile.providerId ?? "-"} />
               <SettingValueRow label={copy.emailUnset} value={accountProfile.email ?? "-"} />
               <div className={SETTINGS_DETAIL_ROW_CLASS_NAME}>
-                <span className="text-[15px] font-medium tracking-[-0.02em] text-[#1c1c1e]">{copy.logout}</span>
-                <button type="button" className="rounded-full bg-[#f0f0f4] px-4 py-2 text-[13px] font-semibold text-[#6e6e73] disabled:opacity-50" disabled={loading || !currentUser} onClick={handleLogout}>{copy.logout}</button>
+                <span className="text-sm font-medium tracking-tight text-neutral-900">{copy.logout}</span>
+                <button type="button" className="rounded-full bg-neutral-100 px-4 py-2 text-sm font-semibold text-neutral-500 disabled:opacity-50" disabled={loading || !currentUser} onClick={handleLogout}>{copy.logout}</button>
               </div>
             </>
           ) : null}
@@ -461,6 +448,4 @@ const SettingScreen = () => {
   );
 };
 
-
-
-export default SettingScreen;
+export { SettingScreen };
