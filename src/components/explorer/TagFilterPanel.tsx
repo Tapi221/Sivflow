@@ -7,7 +7,7 @@ import { FilterPanelShell } from "@/components/panel/FilterPanelShell";
 import { PanelEmptyState } from "@/components/panel/PanelEmptyState";
 import type { SegmentedOption } from "@/components/panel/SegmentedControlGroup";
 import { SegmentedControlGroup } from "@/components/panel/SegmentedControlGroup";
-import { TagBadge } from "@/chip/budge/tag/tag/Badge.Tag";
+import { TagBadge } from "@/chip/budge/tag/Badge.Tag";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
 import { cn } from "@/lib/utils";
