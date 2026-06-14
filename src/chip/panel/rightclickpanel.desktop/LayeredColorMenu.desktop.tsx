@@ -4,8 +4,8 @@ import type { CSSProperties, RefObject } from "react";
 import { RightClickPanel } from "@/chip/panel/rightclickpanel";
 import type { RightClickPanelId } from "@/chip/panel/rightClickPanel.utils";
 import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING } from "@/chip/panel/rightClickPanel.utils";
-import type { TagColorKey } from "@/chip/tag/tagColor";
-import { getTagColorSwatchStyle, TAG_COLOR_KEYS } from "@/chip/tag/tagColor";
+import type { TagColorKey } from "@/chip/budge/tag/tagColor";
+import { getTagColorSwatchStyle, TAG_COLOR_KEYS } from "@/chip/budge/tag/tagColor";
 
 
 
