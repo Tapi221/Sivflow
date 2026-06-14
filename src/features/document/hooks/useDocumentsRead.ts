@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
+import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
 import { getLocalDb } from "@/services/localdb";
 import type { DocumentItem } from "@/types";
 
@@ -16,8 +17,7 @@ const getDocumentOrderIndex = (document: DocumentItem): number => {
   return Number.isFinite(orderIndex) ? orderIndex : 0;
 };
 const useDocumentsRead = (folderId?: string, options?: UseDocumentsReadOptions) => {
-  const { currentUser } = useAuthSession();
-  const userId = currentUser?.uid ?? null;
+  const userId = useEffectiveLocalUserId();
   const [error, setError] = useState<string | null>(null);
   const enabled = options?.enabled ?? true;
 
