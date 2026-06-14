@@ -13,14 +13,14 @@ import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/cal
 import { cn } from "@/lib/utils";
 import { ChevronDown, Download, Minus, Plus } from "@/chip/icons";
 
-type ScheduleScreenHeaderViewOption = {
+type HeaderScheduleViewOption = {
   value: CalendarViewMode;
   label: string;
 };
-type ScheduleScreenHeaderDesktopProps = {
+type HeaderScheduleDesktopProps = {
   titleLabel: string;
   selectedViewMode: CalendarViewModeSelection;
-  viewOptions: readonly ScheduleScreenHeaderViewOption[];
+  viewOptions: readonly HeaderScheduleViewOption[];
   planResultModes: readonly PlanResultMode[];
   showPlanResultToggle: boolean;
   showMonthEventCountControl: boolean;
@@ -79,7 +79,7 @@ const ToolbarActionButton = ({ children, label, title = label, isActive = false,
     {children}
   </button>
 );
-const ScheduleScreenHeaderDesktop = ({
+const HeaderScheduleDesktop = ({
   titleLabel,
   selectedViewMode,
   viewOptions,
@@ -98,7 +98,7 @@ const ScheduleScreenHeaderDesktop = ({
   onNext,
   onToday,
   className,
-}: ScheduleScreenHeaderDesktopProps) => {
+}: HeaderScheduleDesktopProps) => {
   const t = useT();
   const printButtonRef = useRef<HTMLButtonElement | null>(null);
   const printPopoverRef = useRef<HTMLDivElement | null>(null);
@@ -224,4 +224,4 @@ const ScheduleScreenHeaderDesktop = ({
   );
 };
 
-export { ScheduleScreenHeaderDesktop };
+export { HeaderScheduleDesktop };
