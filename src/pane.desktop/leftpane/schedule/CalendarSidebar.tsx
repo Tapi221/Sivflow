@@ -104,7 +104,7 @@ const CONNECTING_GOOGLE_CALENDAR_LABEL = "接続中...";
 const DEFAULT_CALENDAR_COLOR = "#64748b";
 const GOOGLE_CALENDAR_SECTION_LABEL = "Google Calendar";
 const PROJECT_LINKED_GOOGLE_CALENDARS_LABEL = "プロジェクトに追加したカレンダー";
-const PROJECT_SOURCE_ROW_CLASS_NAME = "flex h-7 w-full cursor-default items-center gap-2 overflow-hidden rounded-lg pl-0 pr-2 text-left transition-all duration-150 hover:bg-neutral-100 active:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-300";
+const PROJECT_SOURCE_ROW_CLASS_NAME = "flex h-7 w-full cursor-default items-center gap-2 overflow-hidden rounded-lg border-0 bg-transparent pl-0 pr-2 text-left transition-all duration-150 hover:bg-neutral-100 active:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-300";
 const PROJECT_SOURCE_ROW_ICON_CLASS_NAME = "h-4 w-4 shrink-0 text-stone-500";
 const PROJECT_SOURCE_ROW_LABEL_CLASS_NAME = "truncate text-sm font-semibold leading-5 text-stone-500";
 
@@ -160,17 +160,11 @@ const ProjectSourceRow = ({ project, onToggleProject }: ProjectSourceRowProps) =
   const handleToggle = () => {
     onToggleProject(project.id);
   };
-  const handleRowKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.target !== event.currentTarget) return;
-    if (event.key !== "Enter" && event.key !== " ") return;
-    event.preventDefault();
-    handleToggle();
-  };
   return (
-    <div role="button" tabIndex={0} className={cn(PROJECT_SOURCE_ROW_CLASS_NAME, project.checked && "bg-neutral-100")} onClick={handleToggle} onKeyDown={handleRowKeyDown} aria-pressed={project.checked} title={project.label}>
+    <button type="button" className={cn(PROJECT_SOURCE_ROW_CLASS_NAME, project.checked && "bg-neutral-100")} onClick={handleToggle} aria-pressed={project.checked} title={project.label}>
       <IconProjectFolder className={PROJECT_SOURCE_ROW_ICON_CLASS_NAME} />
       <span className={cn(PROJECT_SOURCE_ROW_LABEL_CLASS_NAME, !project.checked && "opacity-70")}>{project.label}</span>
-    </div>
+    </button>
   );
 };
 const GoogleCalendarSourceRow = ({ account, calendar, color, onToggleCalendar, onOpenCalendarContextMenu }: GoogleCalendarSourceRowProps) => (
