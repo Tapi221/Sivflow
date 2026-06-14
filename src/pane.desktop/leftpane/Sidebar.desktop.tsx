@@ -1,5 +1,4 @@
-import "./sidebar.desktop.css";
-import "./sidebar.layered-directory.css";
+import "@/pane.desktop/leftpane/sidebar.desktop.css";
 import { useT } from "@shared/i18n/useT";
 import type { MouseEvent, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
@@ -13,8 +12,6 @@ import type { FolderTagMode } from "@/pane.desktop/leftpane/folder/useFolderTagM
 import { useFolderTagModeStore } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { LogOut, Tag } from "@/ui/icons";
-
-
 
 type SidebarTranslationKey =
   | "sidebarHome"
@@ -37,8 +34,6 @@ type SidebarProps = {
   onToggleLeftPanel?: () => void;
   onOpenSettings?: () => void;
 };
-
-
 
 const LIBRARY_EXPLORER_STATE = { isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null };
 const mainNavItems: SidebarNavItem[] = [
@@ -75,8 +70,6 @@ const mainNavItems: SidebarNavItem[] = [
   },
 ];
 
-
-
 const SidebarNavLink = ({ item, disabled }: { item: SidebarNavItem; disabled?: boolean; }) => {
   const t = useT();
   const folderTagMode = useFolderTagModeStore((state) => state.folderTagMode);
@@ -92,29 +85,22 @@ const SidebarNavLink = ({ item, disabled }: { item: SidebarNavItem; disabled?: b
   const isActive = item.folderTagMode !== undefined
     ? activeTab?.sectionKey === "library" && folderTagMode === item.folderTagMode
     : item.sectionKey !== undefined && activeTab?.sectionKey === item.sectionKey;
-
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-
     if (isDisabled) return;
-
     item.onClick?.();
-
     if (item.id === "settings") return;
-
     if (item.folderTagMode) {
       navigate("/schedule");
       setFolderTagMode(item.folderTagMode);
       openExplorerTab({ title: "Library", explorerState: LIBRARY_EXPLORER_STATE });
       return;
     }
-
     if (item.sectionKey) {
       navigate("/schedule");
       openSectionTab(item.sectionKey);
     }
   };
-
   return (
     <HoverTooltip label={label} side="right" offset={0} className="w-8 min-w-8" arrowClassName="hidden">
       <button type="button" onClick={handleClick} disabled={isDisabled} className={cn("app-sidebar__nav-link", isActive && "is-active", isDisabled && "app-sidebar__nav-link--disabled")} aria-current={isActive ? "page" : undefined} aria-label={label}>
@@ -131,11 +117,9 @@ const Sidebar = ({ isLeftPanelCollapsed = false, onToggleLeftPanel, onOpenSettin
     ...item,
     onClick: () => {
       item.onClick?.();
-
       if (item.id === "calendar" && isLeftPanelCollapsed) {
         onToggleLeftPanel?.();
       }
-
       if (item.id === "explore") {
         openSearch();
       }
@@ -149,7 +133,6 @@ const Sidebar = ({ isLeftPanelCollapsed = false, onToggleLeftPanel, onOpenSettin
       onClick: onOpenSettings,
     },
   ];
-
   const handleLogoutClick = async () => {
     try {
       await logout();
@@ -157,7 +140,6 @@ const Sidebar = ({ isLeftPanelCollapsed = false, onToggleLeftPanel, onOpenSettin
       console.error("[Sidebar] Logout failed:", error);
     }
   };
-
   return (
     <aside className="app-sidebar" aria-label={t.sidebarAriaLabel}>
       <div className="app-sidebar__top">
@@ -189,7 +171,5 @@ const Sidebar = ({ isLeftPanelCollapsed = false, onToggleLeftPanel, onOpenSettin
     </aside>
   );
 };
-
-
 
 export { Sidebar };
