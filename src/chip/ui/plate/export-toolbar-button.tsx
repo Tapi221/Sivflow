@@ -30,7 +30,7 @@ const ExportToolbarButton = (props: DropdownMenuProps) => {
         if (editorElement) {
           Array.from(editorElement.querySelectorAll("*")).forEach((element) => {
             const existingStyle = element.getAttribute("style") ?? "";
-            element.setAttribute("style", `${existingStyle}; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important`);
+            element.setAttribute("style", `${existingStyle}; font-family: var(--app-font-family-ui) !important`);
           });
         }
       },
@@ -79,17 +79,8 @@ const ExportToolbarButton = (props: DropdownMenuProps) => {
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="color-scheme" content="light dark" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&family=JetBrains+Mono:wght@400..700&display=swap" rel="stylesheet" />
         ${tailwindCss}
         ${katexCss}
-        <style>
-          :root {
-            --font-sans: 'Inter', 'Inter Fallback';
-            --font-mono: 'JetBrains Mono', 'JetBrains Mono Fallback';
-          }
-        </style>
       </head>
       <body>
         ${editorHtml}
