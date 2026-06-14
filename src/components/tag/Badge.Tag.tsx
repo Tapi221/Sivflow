@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { CSSProperties, SVGProps } from "react";
-import type { TagColorKey } from "@/chip/budge/tag/tagColor";
-import { getTagColorStyle } from "@/chip/budge/tag/tagColor";
+import type { SVGProps } from "react";
+import type { TagColorKey } from "@/chip/tag/tagColor";
+import { getTagColorStyle } from "@/chip/tag/tagColor";
 import { cn } from "@/lib/utils";
 import { X } from "@/ui/icons";
 
-interface TagBadgeProps {
+type TagBadgeProps = {
   label: string;
   colorKey?: TagColorKey;
   selected?: boolean;
@@ -14,61 +13,18 @@ interface TagBadgeProps {
   onClick?: () => void;
   onRemove?: () => void;
   removeAriaLabel?: string;
-}
+};
 
-const TAG_TEXT_FADE_STYLE: CSSProperties = {
-  WebkitMaskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%)",
-  maskImage: "linear-gradient(to right, #000 0%, #000 calc(100% - 14px), transparent 100%)",
-};
-const TAG_TEXT_STYLE: CSSProperties = {
-  fontFamily: "Arial, Helvetica, sans-serif",
-};
-const OVERFLOW_THRESHOLD = 1;
 const LONG_DOT_SEQUENCE_PATTERN = /[.。．]{4,}/g;
+const TAG_BADGE_ROOT_CLASS_NAME = "inline-flex min-w-0 max-w-full items-center gap-1 rounded-full border px-2 py-0.5 align-middle text-xs font-semibold leading-4 tracking-normal shadow-none transition-[opacity,transform] duration-150";
+const TAG_BADGE_INTERACTIVE_CLASS_NAME = "cursor-pointer appearance-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30";
+const TAG_BADGE_SELECTED_CLASS_NAME = "ring-2 ring-primary-500/20";
+const TAG_BADGE_TEXT_CLASS_NAME = "min-w-0 truncate opacity-70";
+const TAG_BADGE_REMOVE_CLASS_NAME = "grid h-4 w-4 place-items-center rounded-full text-current opacity-60 transition-[background-color,opacity] duration-150 hover:bg-current/10 hover:opacity-100";
+const TAG_BADGE_REMOVE_ICON_CLASS_NAME = "h-3 w-3";
 
-const isElementTextOverflowing = (element: HTMLElement | null) => {
-  return Boolean(element && element.scrollWidth > element.clientWidth + OVERFLOW_THRESHOLD);
-};
 const normalizeTagText = (value: string): string => {
   return value.replace(LONG_DOT_SEQUENCE_PATTERN, "...");
-};
-const getTagTextStyle = (isOverflowing: boolean): CSSProperties => {
-  return isOverflowing ? { ...TAG_TEXT_STYLE, ...TAG_TEXT_FADE_STYLE } : TAG_TEXT_STYLE;
-};
-const useTextOverflow = (value: string) => {
-  const textRef = useRef<HTMLSpanElement>(null);
-  const [isOverflowing, setIsOverflowing] = useState(false);
-
-  const updateIsOverflowing = useCallback(() => {
-    setIsOverflowing(isElementTextOverflowing(textRef.current));
-  }, []);
-
-  useEffect(() => {
-    const element = textRef.current;
-
-    updateIsOverflowing();
-
-    if (!element) {
-      return undefined;
-    }
-
-    if (typeof ResizeObserver === "undefined") {
-      window.addEventListener("resize", updateIsOverflowing);
-
-      return () => {
-        window.removeEventListener("resize", updateIsOverflowing);
-      };
-    }
-
-    const resizeObserver = new ResizeObserver(updateIsOverflowing);
-    resizeObserver.observe(element);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [updateIsOverflowing, value]);
-
-  return { isOverflowing, textRef };
 };
 
 const TagHashIcon = ({ className }: SVGProps<SVGSVGElement>) => (
@@ -98,23 +54,14 @@ const TagBadge = ({
   removeAriaLabel,
 }: TagBadgeProps) => {
   const resolvedColorStyle = getTagColorStyle(colorKey);
-
   const rawTextLabel = label.startsWith("#") ? label.slice(1) : label;
   const textLabel = normalizeTagText(rawTextLabel);
   const displayLabel = `#${textLabel}`;
-  const { isOverflowing, textRef } = useTextOverflow(textLabel);
-
   const content = (
     <>
       <TagHashIcon className="h-3 w-3 shrink-0 opacity-70" />
-      <span
-        ref={textRef}
-        className={cn("min-w-0 overflow-hidden whitespace-nowrap opacity-70", textClassName)}
-        style={getTagTextStyle(isOverflowing)}
-      >
-        {textLabel}
-      </span>
-      {onRemove && (
+      <span className={cn(TAG_BADGE_TEXT_CLASS_NAME, textClassName)}>{textLabel}</span>
+      {onRemove ? (
         <button
           type="button"
           aria-label={removeAriaLabel ?? `${displayLabel}を削除`}
@@ -122,21 +69,19 @@ const TagBadge = ({
             event.stopPropagation();
             onRemove();
           }}
-          className="ds-tag-badge__remove grid h-[var(--ds-semantic-tag-remove-button-size)] w-[var(--ds-semantic-tag-remove-button-size)] place-items-center rounded-full"
+          className={TAG_BADGE_REMOVE_CLASS_NAME}
         >
-          <X className="h-[var(--ds-semantic-tag-remove-icon-size)] w-[var(--ds-semantic-tag-remove-icon-size)]" />
+          <X className={TAG_BADGE_REMOVE_ICON_CLASS_NAME} />
         </button>
-      )}
+      ) : null}
     </>
   );
-
   const rootClassName = cn(
-    "ds-tag-badge inline-flex min-w-0 max-w-full items-center align-middle",
-    onClick &&
-    "cursor-pointer focus-visible:outline-none focus-visible:ring-[var(--ds-semantic-tag-focus-ring-width)] focus-visible:ring-primary-500/40",
+    TAG_BADGE_ROOT_CLASS_NAME,
+    onClick && TAG_BADGE_INTERACTIVE_CLASS_NAME,
+    selected && TAG_BADGE_SELECTED_CLASS_NAME,
     className,
   );
-
   if (onClick) {
     return (
       <button
@@ -150,7 +95,6 @@ const TagBadge = ({
       </button>
     );
   }
-
   return (
     <span
       className={rootClassName}
