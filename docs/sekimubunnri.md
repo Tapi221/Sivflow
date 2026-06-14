@@ -4,7 +4,7 @@
 Web: React
 Desktop: Tauri + React renderer
 Android: React Native / Expo
- iOS: Swift / SwiftUI
+iOS: Swift / SwiftUI
 ```
 
 この構成では、**iOS は Swift 専用 app として作ります**。React Native / Expo 側は Android app として扱います。
