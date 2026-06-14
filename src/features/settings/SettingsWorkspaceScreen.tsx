@@ -409,7 +409,7 @@ const SettingsSectionBlock = ({ title, description, children }: SettingsSectionB
     <section className="w-full overflow-visible border-0 bg-white" aria-label={title}>
       <div className="border-b border-stone-100 px-6 pb-4 pt-5">
         <h3 className="m-0 text-base font-semibold leading-6 tracking-tight text-neutral-900">{title}</h3>
-        {description ? <p className="mt-0.5 text-sm font-medium leading-5 text-stone-500">{description}</p> : null}
+        {description ? <p className="mt-1 text-sm font-medium leading-5 text-stone-500">{description}</p> : null}
       </div>
       <div className="flex flex-col">{children}</div>
     </section>
@@ -422,8 +422,8 @@ const SettingToggle = ({ label, description, checked, onChange }: SettingToggleP
         <span className="text-sm font-medium leading-5 tracking-tight text-neutral-800">{label}</span>
         {description ? <span className="text-xs font-normal leading-5 text-stone-500">{description}</span> : null}
       </div>
-      <button type="button" className={cn("relative h-5 w-9 min-w-9 rounded-full border-0 p-0 outline-none transition-colors duration-100 ease-out", checked ? "bg-stone-500" : "bg-stone-300")} role="switch" aria-checked={checked} onClick={() => onChange(!checked)}>
-        <span className={cn("absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-100 ease-out", checked ? "translate-x-4" : "translate-x-0")} />
+      <button type="button" className={cn("relative h-6 w-10 min-w-10 rounded-full border-0 p-0 outline-none transition-colors duration-100 ease-out", checked ? "bg-stone-500" : "bg-stone-300")} role="switch" aria-checked={checked} onClick={() => onChange(!checked)}>
+        <span className={cn("absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-100 ease-out", checked ? "translate-x-4" : "translate-x-0")} />
       </button>
     </div>
   );
