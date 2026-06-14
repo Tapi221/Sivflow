@@ -86,52 +86,6 @@
     color: var(--ds-semantic-color-text-strong);
   }
 
-  .ds-tag-badge {
-    gap: var(--ds-semantic-tag-gap);
-    padding-inline: var(--ds-semantic-tag-padding-inline);
-    padding-block: var(--ds-semantic-tag-padding-block);
-    border-style: solid;
-    border-width: var(--ds-semantic-tag-border-width);
-    border-radius: var(--ds-semantic-tag-radius);
-    font-family: var(--ds-semantic-typography-ui);
-    font-size: var(--ds-semantic-tag-font-size);
-    font-weight: var(--ds-semantic-tag-font-weight);
-    line-height: var(--ds-semantic-tag-line-height);
-    letter-spacing: 0.005em;
-    box-shadow: none;
-    transition:
-      opacity var(--ds-semantic-motion-interactive),
-      transform var(--ds-semantic-motion-interactive);
-  }
-
-  .ds-tag-badge > svg,
-  .ds-tag-badge > span {
-    transform: translateY(0.08em);
-  }
-
-  .ds-tag-badge[data-selected="true"] {
-    box-shadow: 0 0 0 2px
-      color-mix(
-        in srgb,
-        var(--ds-semantic-color-action-primary) 22%,
-        transparent
-      );
-  }
-
-  .ds-tag-badge__remove {
-    color: inherit;
-    opacity: 0.64;
-    transition:
-      background-color var(--ds-semantic-motion-interactive),
-      color var(--ds-semantic-motion-interactive),
-      opacity var(--ds-semantic-motion-interactive);
-  }
-
-  .ds-tag-badge__remove:hover {
-    background: color-mix(in srgb, currentColor 8%, transparent);
-    opacity: 1;
-  }
-
   .ds-tag-chip {
     max-width: 100%;
   }
@@ -218,28 +172,23 @@
   }
 
   .ds-rating-tile__icon {
+    background: var(--ds-semantic-color-background-app);
+  }
+
+  .ds-rating-tile--convex .ds-rating-tile__icon {
     box-shadow: var(--ds-semantic-elevation-control-raised);
-    transition: transform var(--ds-semantic-motion-interactive);
   }
 
-  .group:hover .ds-rating-tile__icon {
-    transform: scale(1.08);
+  .ds-rating-tile--concave .ds-rating-tile__icon {
+    box-shadow: var(--ds-semantic-elevation-control-inset);
   }
 
-  .ds-rating-tile__count {
-    color: var(--ds-semantic-color-text-strong);
-  }
-
-  .ds-rating-tile__label {
-    color: color-mix(
+  .ds-rating-tile--active {
+    border-color: color-mix(
       in srgb,
-      var(--ds-semantic-color-text-secondary) 70%,
-      white 30%
+      var(--ds-semantic-color-action-primary) 35%,
+      var(--ds-semantic-color-border-default) 65%
     );
-    transition: color var(--ds-semantic-motion-interactive);
-  }
-
-  .group:hover .ds-rating-tile__label {
-    color: var(--ds-semantic-color-text-primary);
+    color: var(--ds-semantic-color-action-primary);
   }
 }
