@@ -4,8 +4,6 @@ import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { getLocalDb } from "@/services/localdb";
 import type { Card, CardSet, Document, Folder } from "@/types";
 
-
-
 const generateFolderId = () => {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
@@ -62,7 +60,5 @@ softDeleteDocument: async (userId, documentId) => {
   await db.softDelete("documents", documentId);
 },
 });
-
-
 
 export { createWebFolderRepository };

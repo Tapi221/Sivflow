@@ -1,20 +1,14 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-
-
 type Locale = "ja" | "en" | "zh";
 type LocaleState = {
   locale: Locale;
   setLocale: (locale: Locale) => void;
 };
 
-
-
 const SIVFLOW_LOCALE_STORAGE_KEY = "sivflow.locale";
 const LEGACY_LOCALE_STORAGE_KEY = "flashcard-master.locale";
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 const isLocale = (value: unknown): value is Locale => value === "ja" || value === "en" || value === "zh";
@@ -58,8 +52,6 @@ const migrateLegacyLocaleStorage = (): void => {
 };
 migrateLegacyLocaleStorage();
 
-
-
 const useLocaleStore = create<LocaleState>()(
   persist(
     (set) => ({
@@ -72,9 +64,5 @@ const useLocaleStore = create<LocaleState>()(
   ),
 );
 
-
-
 export { readStoredLocale, useLocaleStore };
-
-
 export type { Locale };

@@ -6,8 +6,6 @@ import { rebuildIndexedDb } from "./indexedDbRebuildCoordinator";
 import { ensureLegacyCardsBackfilled } from "./legacyCardSetMigrationBackfill";
 import { warnOncePerSession } from "./localDBRuntimeState";
 
-
-
 // NOTE: 初期化時のユーザー向け INFO 通知は UI 上で邪魔になるため表示しない。
 
 /**
@@ -179,7 +177,5 @@ class AppInitializer {
 
   // NOTE: backfill 実処理は src/services/legacyCardSetMigrationBackfill.ts へ抽出
 }
-
-
 
 export { AppInitializer };

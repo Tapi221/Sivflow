@@ -10,8 +10,6 @@ import { getLocalDb } from "@/services/localdb";
 import type { Card } from "@/types";
 import { toMillis } from "@/utils/toMillis";
 
-
-
 type UseCardsReadOptions = {
   enabled?: boolean;
 };
@@ -21,8 +19,6 @@ type CardsReadSnapshot = {
   key: string;
   rawCards: unknown[];
 };
-
-
 
 const buildCardsReadKey = ({ enabled, userId, folderId, cardSetId }: { enabled: boolean; userId: string | null; folderId?: string; cardSetId?: string; }) => {
   return JSON.stringify([enabled, userId, folderId ?? null, cardSetId ?? null]);
@@ -253,9 +249,5 @@ const useCardsRead = (folderId?: string, cardSetId?: string, options?: UseCardsR
   };
 };
 
-
-
 export { useCardsRead };
-
-
 export type { UseCardsReadOptions };

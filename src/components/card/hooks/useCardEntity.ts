@@ -6,11 +6,7 @@ import { getLocalDb } from "@/services/localdb";
 import type { Card } from "@/types";
 import { useCards } from "./useCards";
 
-
-
 const DRAFT_KEY_PREFIX = "card-editor-draft-";
-
-
 
 const makeDraftKey = (cardId: string) => `${DRAFT_KEY_PREFIX}${cardId}`;
 const toRecord = (value: unknown): Record<string, unknown> | null => {
@@ -184,7 +180,5 @@ const useCardEntity = (cardId?: string | null) => {
     flushDraft,
   };
 };
-
-
 
 export { useCardEntity };

@@ -4,8 +4,6 @@ import { DayButton, DayPicker, getDefaultClassNames } from "react-day-picker";
 import { Button, buttonVariants } from "@/chip/ui/button/button";
 import { cn } from "@/lib/utils";
 
-
-
 const CalendarDayButton = ({
   className,
   day,
@@ -202,7 +200,5 @@ const Calendar = ({
     />
   );
 };
-
-
 
 export { Calendar, CalendarDayButton };

@@ -1,48 +1,26 @@
 "use client";
 
 import { BaselineIcon, BoldIcon, Code2Icon, HighlighterIcon, ItalicIcon, PaintBucketIcon, StrikethroughIcon, UnderlineIcon, WandSparklesIcon } from "lucide-react";
-
 import { KEYS } from "platejs";
-
 import { useEditorReadOnly } from "platejs/react";
-
 import { InsertToolbarButton } from "@/chip/ui/plate/insert-toolbar-classic-button";
-
 import { IndentToolbarButton, ListToolbarButton } from "@/chip/ui/plate/list-classic-toolbar-button";
-
 import { TurnIntoToolbarButton } from "@/chip/ui/plate/turn-into-toolbar-classic-button";
-
 import { AIToolbarButton } from "./ai-toolbar-button";
-
 import { AlignToolbarButton } from "./align-toolbar-button";
-
 import { CommentToolbarButton } from "./comment-toolbar-button";
-
 import { EmojiToolbarButton } from "./emoji-toolbar-button";
-
 import { FontColorToolbarButton } from "./font-color-toolbar-button";
-
 import { RedoToolbarButton, UndoToolbarButton } from "./history-toolbar-button";
-
 import { LineHeightToolbarButton } from "./line-height-toolbar-button";
-
 import { LinkToolbarButton } from "./link-toolbar-button";
-
 import { MarkToolbarButton } from "./mark-toolbar-button";
-
 import { MediaToolbarButton } from "./media-toolbar-button";
-
 import { ModeToolbarButton } from "./mode-toolbar-button";
-
 import { MoreToolbarButton } from "./more-toolbar-button";
-
 import { TableToolbarButton } from "./table-toolbar-button";
-
 import { ToggleToolbarButton } from "./toggle-toolbar-button";
-
 import { ToolbarGroup } from "./toolbar";
-
-
 
 const FixedToolbarButtons = () => {
   const readOnly = useEditorReadOnly();
@@ -127,7 +105,5 @@ const FixedToolbarButtons = () => {
     </div>
   );
 };
-
-
 
 export { FixedToolbarButtons };

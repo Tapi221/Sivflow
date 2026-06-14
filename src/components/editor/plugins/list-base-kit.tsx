@@ -3,8 +3,6 @@ import { KEYS } from "platejs";
 import { BlockListStatic } from "@/chip/ui/plate/block-list-static";
 import { BaseIndentKit } from "./indent-base-kit";
 
-
-
 const BaseListKit = [
   ...BaseIndentKit,
   BaseListPlugin.configure({
@@ -37,7 +35,5 @@ const BaseListKit = [
     },
   }),
 ];
-
-
 
 export { BaseListKit };

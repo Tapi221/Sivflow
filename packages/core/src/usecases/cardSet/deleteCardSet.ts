@@ -7,8 +7,6 @@ type CardSetDeleteRepository<TCard extends CardSetDeleteCard = CardSetDeleteCard
   softDeleteCardSet: (userId: string, cardSetId: string) => Promise<void>;
 };
 
-
-
 const deleteCardSetWithCards = async <TCard extends CardSetDeleteCard>({ userId, cardSetId, repository }: { userId: string;
   cardSetId: string;
   repository: CardSetDeleteRepository<TCard>;
@@ -24,9 +22,5 @@ const deleteCardSetWithCards = async <TCard extends CardSetDeleteCard>({ userId,
   await repository.softDeleteCardSet(userId, cardSetId);
 };
 
-
-
 export { deleteCardSetWithCards };
-
-
 export type { CardSetDeleteCard, CardSetDeleteRepository };

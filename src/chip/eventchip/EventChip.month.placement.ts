@@ -3,8 +3,6 @@ import { compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/f
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { eventChipDesign } from "./eventChipDesign.generated";
 
-
-
 type CalendarMonthDayEvents = {
   visibleEvents: GoogleCalendarEvent[];
   totalCount: number;
@@ -22,16 +20,12 @@ type CalendarMonthAllowedDayRange = {
   endExclusive: Date;
 };
 
-
-
 const MONTH_EVENT_CHIP_HEIGHT_PX = eventChipDesign.month.heightPx;
 const MONTH_EVENT_CHIP_GAP_PX = eventChipDesign.month.gapPx;
 const MONTH_EVENT_OVERFLOW_TEXT_HEIGHT_PX = 11;
 const MONTH_EVENT_BOTTOM_PADDING_PX = 0;
 const MONTH_EVENT_CONTENT_TOP_PX = 32;
 const EMPTY_MONTH_DAY_EVENTS: CalendarMonthDayEvents = { visibleEvents: [], totalCount: 0, color: null };
-
-
 
 const toValidDateOrNull = (value: Date): Date | null => {
   const date = value instanceof Date ? value : new Date(value);
@@ -264,9 +258,5 @@ const computeMonthEventsByDay = ({ visibleEvents, eventIndex, monthWeeks, monthR
   return groupedEvents;
 };
 
-
-
 export { EMPTY_MONTH_DAY_EVENTS, createMonthEventIndex, getVisibleMonthEventChipCount, computeMonthEventsByDay };
-
-
 export type { CalendarMonthDayEvents, CalendarMonthPlacementDay, CalendarMonthPlacementWeek, CalendarMonthEventIndex };
