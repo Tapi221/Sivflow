@@ -3,30 +3,30 @@
 import { ArrowUpToLineIcon, BaselineIcon, BoldIcon, Code2Icon, HighlighterIcon, ItalicIcon, PaintBucketIcon, StrikethroughIcon, UnderlineIcon, WandSparklesIcon } from "lucide-react";
 import { KEYS } from "platejs";
 import { useEditorReadOnly } from "platejs/react";
-import { AIToolbarButton } from "./ai-toolbar-button";
-import { AlignToolbarButton } from "./align-toolbar-button";
-import { CommentToolbarButton } from "./comment-toolbar-button";
-import { EmojiToolbarButton } from "./emoji-toolbar-button";
-import { ExportToolbarButton } from "./export-toolbar-button";
-import { FontColorToolbarButton } from "./font-color-toolbar-button";
-import { FontSizeToolbarButton } from "./font-size-toolbar-button";
-import { RedoToolbarButton, UndoToolbarButton } from "./history-toolbar-button";
-import { ImportToolbarButton } from "./import-toolbar-button";
-import { IndentToolbarButton, OutdentToolbarButton } from "./indent-toolbar-button";
-import { InsertToolbarButton } from "./insert-toolbar-button";
-import { LineHeightToolbarButton } from "./line-height-toolbar-button";
-import { LinkToolbarButton } from "./link-toolbar-button";
-import { BulletedListToolbarButton, NumberedListToolbarButton, TodoListToolbarButton } from "./list-toolbar-button";
-import { MarkToolbarButton } from "./mark-toolbar-button";
-import { MediaToolbarButton } from "./media-toolbar-button";
-import { ModeToolbarButton } from "./mode-toolbar-button";
-import { MoreToolbarButton } from "./more-toolbar-button";
-import { TableToolbarButton } from "./table-toolbar-button";
-import { ToggleToolbarButton } from "./toggle-toolbar-button";
-import { ToolbarGroup } from "./toolbar";
-import { TurnIntoToolbarButton } from "./turn-into-toolbar-button";
+import { ButtonClickPanelNoteAi } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Ai";
+import { ButtonClickPanelNoteInsert } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Insert";
+import { AlignToolbarButton } from "../ui/plate/align-toolbar-button";
+import { CommentToolbarButton } from "../ui/plate/comment-toolbar-button";
+import { EmojiToolbarButton } from "../ui/plate/emoji-toolbar-button";
+import { ExportToolbarButton } from "../ui/plate/export-toolbar-button";
+import { FontColorToolbarButton } from "../ui/plate/font-color-toolbar-button";
+import { FontSizeToolbarButton } from "../ui/plate/font-size-toolbar-button";
+import { RedoToolbarButton, UndoToolbarButton } from "../ui/plate/history-toolbar-button";
+import { ImportToolbarButton } from "../ui/plate/import-toolbar-button";
+import { IndentToolbarButton, OutdentToolbarButton } from "../ui/plate/indent-toolbar-button";
+import { LineHeightToolbarButton } from "../ui/plate/line-height-toolbar-button";
+import { LinkToolbarButton } from "../ui/plate/link-toolbar-button";
+import { BulletedListToolbarButton, NumberedListToolbarButton, TodoListToolbarButton } from "../ui/plate/list-toolbar-button";
+import { MarkToolbarButton } from "../ui/plate/mark-toolbar-button";
+import { MediaToolbarButton } from "../ui/plate/media-toolbar-button";
+import { ModeToolbarButton } from "../ui/plate/mode-toolbar-button";
+import { MoreToolbarButton } from "../ui/plate/more-toolbar-button";
+import { TableToolbarButton } from "../ui/plate/table-toolbar-button";
+import { ToggleToolbarButton } from "../ui/plate/toggle-toolbar-button";
+import { ToolbarGroup } from "../ui/plate/toolbar";
+import { TurnIntoToolbarButton } from "../ui/plate/turn-into-toolbar-button";
 
-const FixedToolbarButtons = () => {
+const ToolbarNote = () => {
   const readOnly = useEditorReadOnly();
   return (
     <div className="flex w-full">
@@ -37,9 +37,9 @@ const FixedToolbarButtons = () => {
             <RedoToolbarButton />
           </ToolbarGroup>
           <ToolbarGroup>
-            <AIToolbarButton tooltip="AI commands">
+            <ButtonClickPanelNoteAi tooltip="AI commands">
               <WandSparklesIcon />
-            </AIToolbarButton>
+            </ButtonClickPanelNoteAi>
           </ToolbarGroup>
           <ToolbarGroup>
             <ExportToolbarButton>
@@ -48,7 +48,7 @@ const FixedToolbarButtons = () => {
             <ImportToolbarButton />
           </ToolbarGroup>
           <ToolbarGroup>
-            <InsertToolbarButton />
+            <ButtonClickPanelNoteInsert />
             <TurnIntoToolbarButton />
             <FontSizeToolbarButton />
           </ToolbarGroup>
@@ -117,4 +117,4 @@ const FixedToolbarButtons = () => {
   );
 };
 
-export { FixedToolbarButtons };
+export { ToolbarNote };

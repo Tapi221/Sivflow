@@ -2,7 +2,7 @@
 
 import { createPlatePlugin } from "platejs/react";
 import { FixedToolbar } from "@/chip/ui/plate/fixed-toolbar";
-import { FixedToolbarButtons } from "@/chip/ui/plate/Toolbar.Note";
+import { ToolbarNote } from "@/chip/overlay-toolbar/OverlayToolbar.Note";
 
 const FixedToolbarKit = [
   createPlatePlugin({
@@ -10,7 +10,7 @@ const FixedToolbarKit = [
     render: {
       beforeEditable: () => (
         <FixedToolbar>
-          <FixedToolbarButtons />
+          <ToolbarNote />
         </FixedToolbar>
       ),
     },
