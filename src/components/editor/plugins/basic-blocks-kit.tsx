@@ -1,23 +1,16 @@
 "use client";
-
 import { BlockquoteRules, HeadingRules, HorizontalRuleRules } from "@platejs/basic-nodes";
-
 import { BlockquotePlugin, H1Plugin, H2Plugin, H3Plugin, H4Plugin, H5Plugin, H6Plugin, HorizontalRulePlugin } from "@platejs/basic-nodes/react";
-
 import { ParagraphPlugin } from "platejs/react";
-
 import { BlockquoteElement } from "@/chip/ui/plate/blockquote-node";
-
 import { H1Element, H2Element, H3Element, H4Element, H5Element, H6Element } from "@/chip/ui/plate/heading-node";
-
 import { HrElement } from "@/chip/ui/plate/hr-node";
-
 import { ParagraphElement } from "@/chip/ui/plate/paragraph-node";
 
-
-
 const BasicBlocksKit = [
-  ParagraphPlugin.withComponent(ParagraphElement),
+  ParagraphPlugin.configure({
+    node: { component: ParagraphElement },
+  }),
   H1Plugin.configure({
     inputRules: [HeadingRules.markdown()],
     node: { component: H1Element },
@@ -67,7 +60,5 @@ const BasicBlocksKit = [
     node: { component: HrElement },
   }),
 ];
-
-
 
 export { BasicBlocksKit };
