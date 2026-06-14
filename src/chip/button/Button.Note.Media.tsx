@@ -23,7 +23,7 @@ const MEDIA_CONFIG: Record<string, MediaConfig> = {
   [KEYS.video]: { accept: ["video/*"], icon: <FilmIcon className="size-4" />, title: "Insert Video", tooltip: "Video" },
 };
 
-const MediaToolbarButton = ({ nodeType, ...props }: MediaToolbarButtonProps) => {
+const ButtonNoteMedia = ({ nodeType, ...props }: MediaToolbarButtonProps) => {
   const currentConfig = MEDIA_CONFIG[nodeType];
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
@@ -73,5 +73,5 @@ const MediaToolbarButton = ({ nodeType, ...props }: MediaToolbarButtonProps) => 
   );
 };
 
-export { MediaToolbarButton };
+export { ButtonNoteMedia };
 export type { MediaToolbarButtonProps };

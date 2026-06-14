@@ -8,25 +8,25 @@ import { Button } from "@/chip/ui/button/button";
 import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "@/chip/ui/command";
 import { cn } from "@/lib/utils";
 
-type AIMenuItemsProps = {
+type ButtonClickPanelNoteAiDialogItemsProps = {
   input: string;
   setInput: (value: string) => void;
   setValue: (value: string) => void;
 };
-type AIAction = {
+type ButtonClickPanelNoteAiAction = {
   icon: React.ReactNode;
   label: string;
   value: string;
   prompt?: string;
   toolName?: "edit" | "generate" | "comment";
 };
-type AIChatApi = {
+type ButtonClickPanelNoteAiChatApi = {
   aiChat: {
-    submit: (value: string, options?: Pick<AIAction, "prompt" | "toolName">) => unknown;
+    submit: (value: string, options?: Pick<ButtonClickPanelNoteAiAction, "prompt" | "toolName">) => unknown;
   };
 };
 
-const aiActions: AIAction[] = [
+const buttonClickPanelNoteAiActions: ButtonClickPanelNoteAiAction[] = [
   {
     icon: <WandSparklesIcon />,
     label: "Improve writing",
@@ -57,14 +57,14 @@ const aiActions: AIAction[] = [
   },
 ];
 
-const submitPrompt = (input: string, action: AIAction, api: AIChatApi) => {
+const submitPrompt = (input: string, action: ButtonClickPanelNoteAiAction, api: ButtonClickPanelNoteAiChatApi) => {
   void api.aiChat.submit(input, {
     prompt: action.prompt,
     toolName: action.toolName,
   });
 };
 
-const AIMenuItems = ({ input, setInput, setValue }: AIMenuItemsProps) => {
+const ButtonClickPanelNoteAiDialogItems = ({ input, setInput, setValue }: ButtonClickPanelNoteAiDialogItemsProps) => {
   const { api, editor } = useEditorPlugin(AIChatPlugin);
   const submitInput = () => {
     if (input.trim().length === 0) return;
@@ -81,7 +81,7 @@ const AIMenuItems = ({ input, setInput, setValue }: AIMenuItemsProps) => {
         </CommandItem>
       </CommandGroup>
       <CommandGroup heading="Edit or generate">
-        {aiActions.map((action) => (
+        {buttonClickPanelNoteAiActions.map((action) => (
           <CommandItem
             key={action.value}
             value={action.value}
@@ -120,7 +120,7 @@ const AIMenuItems = ({ input, setInput, setValue }: AIMenuItemsProps) => {
     </>
   );
 };
-const AIMenu = () => {
+const ButtonClickPanelNoteAiDialog = () => {
   const { api } = useEditorPlugin(AIChatPlugin);
   const open = usePluginOption(AIChatPlugin, "open");
   const chat = usePluginOption(AIChatPlugin, "chat");
@@ -165,7 +165,7 @@ const AIMenu = () => {
         )}
         {!isLoading ? (
           <CommandList>
-            <AIMenuItems input={input} setInput={setInput} setValue={setValue} />
+            <ButtonClickPanelNoteAiDialogItems input={input} setInput={setInput} setValue={setValue} />
           </CommandList>
         ) : null}
         <div className="flex items-center justify-end gap-2 border-t px-2 py-1.5">
@@ -185,7 +185,7 @@ const AIMenu = () => {
     </div>
   );
 };
-const AILoadingBar = () => {
+const ButtonClickPanelNoteAiLoadingBar = () => {
   const { api } = useEditorPlugin(AIChatPlugin);
   const chat = usePluginOption(AIChatPlugin, "chat");
   const isLoading = chat.status === "streaming" || chat.status === "submitted";
@@ -202,5 +202,5 @@ const AILoadingBar = () => {
   );
 };
 
-export { AILoadingBar, AIMenu, AIMenuItems, aiActions };
-export type { AIAction, AIMenuItemsProps };
+export { ButtonClickPanelNoteAiDialog, ButtonClickPanelNoteAiDialogItems, ButtonClickPanelNoteAiLoadingBar, buttonClickPanelNoteAiActions };
+export type { ButtonClickPanelNoteAiAction, ButtonClickPanelNoteAiDialogItemsProps };

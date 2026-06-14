@@ -9,13 +9,13 @@ import { KEYS } from "platejs";
 import { useEditorPlugin, useEditorSelector } from "platejs/react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
 import { cn } from "@/lib/utils";
-import { ToolbarButton } from "./toolbar";
+import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
 const DEFAULT_FONT_SIZE = "16";
 const FONT_SIZE_MAP = { h1: "36", h2: "24", h3: "20" } as const;
 const FONT_SIZES = ["8", "9", "10", "12", "14", "16", "18", "24", "30", "36", "48", "60", "72", "96"] as const;
 
-const FontSizeToolbarButton = () => {
+const ButtonNoteFontSize = () => {
   const [inputValue, setInputValue] = React.useState(DEFAULT_FONT_SIZE);
   const [isFocused, setIsFocused] = React.useState(false);
   const { editor, tf } = useEditorPlugin(FontSizePlugin);
@@ -96,4 +96,4 @@ const FontSizeToolbarButton = () => {
   );
 };
 
-export { FontSizeToolbarButton };
+export { ButtonNoteFontSize };

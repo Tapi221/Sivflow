@@ -48,7 +48,7 @@ type PureColorPickerProps = {
   updateCustomColor: (color: string) => void;
   updatedColor?: string;
 } & React.ComponentProps<"div">;
-type FontColorToolbarButtonProps = {
+type ButtonClickPanelNoteFontColorProps = {
   nodeType: string;
   tooltip?: string;
 } & DropdownMenuProps;
@@ -215,7 +215,7 @@ const PureColorPicker = ({ className, clearColor, color, colors, colorsQueue, cu
     </div>
   );
 };
-const FontColorToolbarButton = ({ children, nodeType, tooltip, ...props }: FontColorToolbarButtonProps) => {
+const ButtonClickPanelNoteFontColor = ({ children, nodeType, tooltip, ...props }: ButtonClickPanelNoteFontColorProps) => {
   const editor = useEditorRef();
   const selectionDefined = useEditorSelector((nextEditor) => Boolean(nextEditor.selection), []);
   const color = useEditorSelector((nextEditor) => nextEditor.api.mark(nodeType) as string, [nodeType]);
@@ -298,5 +298,5 @@ const FontColorToolbarButton = ({ children, nodeType, tooltip, ...props }: FontC
 };
 
 const ColorPicker = React.memo(PureColorPicker, (prev, next) => prev.color === next.color && prev.colors === next.colors && prev.colorsQueue === next.colorsQueue && prev.customColors === next.customColors && prev.updatedColor === next.updatedColor);
-export { DEFAULT_COLORS, FontColorToolbarButton, ColorDropdownMenuItems };
+export { DEFAULT_COLORS, ButtonClickPanelNoteFontColor, ColorDropdownMenuItems };
 export type { TColor };

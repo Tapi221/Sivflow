@@ -5,7 +5,7 @@ import { AIChatPlugin, AIPlugin, applyAISuggestions, getInsertPreviewStart, stre
 import cloneDeep from "lodash/cloneDeep.js";
 import { ElementApi, getPluginType, KEYS, PathApi } from "platejs";
 import { usePluginOption } from "platejs/react";
-import { AILoadingBar, AIMenu } from "@/chip/ui/plate/ai-menu";
+import { ButtonClickPanelNoteAiDialog, ButtonClickPanelNoteAiLoadingBar } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.AiDialog";
 import { AIAnchorElement, AILeaf } from "@/chip/ui/plate/ai-node";
 import { useChat } from "@/components/editor/use-chat";
 import { CursorOverlayKit } from "./cursor-overlay-kit";
@@ -19,8 +19,8 @@ const aiChatPlugin = AIChatPlugin.extend({
     },
   },
   render: {
-    afterContainer: AILoadingBar,
-    afterEditable: AIMenu,
+    afterContainer: ButtonClickPanelNoteAiLoadingBar,
+    afterEditable: ButtonClickPanelNoteAiDialog,
     node: AIAnchorElement,
   },
   shortcuts: {

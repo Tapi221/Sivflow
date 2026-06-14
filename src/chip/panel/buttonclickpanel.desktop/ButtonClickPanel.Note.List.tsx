@@ -8,7 +8,7 @@ import { useEditorRef, useEditorSelector } from "platejs/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { ToolbarButton, ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary } from "./toolbar";
 
-const BulletedListToolbarButton = () => {
+const ButtonClickPanelNoteBulletedList = () => {
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
   const pressed = useEditorSelector(
@@ -81,7 +81,7 @@ const BulletedListToolbarButton = () => {
     </ToolbarSplitButton>
   );
 };
-const NumberedListToolbarButton = () => {
+const ButtonClickPanelNoteNumberedList = () => {
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
   const pressed = useEditorSelector(
@@ -165,7 +165,7 @@ const NumberedListToolbarButton = () => {
     </ToolbarSplitButton>
   );
 };
-const TodoListToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>) => {
+const ButtonClickPanelNoteTodoList = (props: React.ComponentProps<typeof ToolbarButton>) => {
   const state = useIndentTodoToolBarButtonState({ nodeType: "todo" });
   const { props: buttonProps } = useIndentTodoToolBarButton(state);
   return (
@@ -175,4 +175,4 @@ const TodoListToolbarButton = (props: React.ComponentProps<typeof ToolbarButton>
   );
 };
 
-export { BulletedListToolbarButton, NumberedListToolbarButton, TodoListToolbarButton };
+export { ButtonClickPanelNoteBulletedList, ButtonClickPanelNoteNumberedList, ButtonClickPanelNoteTodoList };
