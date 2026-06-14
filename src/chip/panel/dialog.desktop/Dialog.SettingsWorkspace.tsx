@@ -1,7 +1,7 @@
-import "./SettingsWorkspaceDialog.css";
+import "@/features/settings/SettingsWorkspaceDialog.css";
 import { DialogDesktopPanel } from "@/chip/panel/dialog.desktop/dialog";
 import { SettingsThemeColorControl } from "@/features/settings/SettingsThemeColorControl";
-import { SettingsWorkspaceScreen } from "./SettingsWorkspaceScreen";
+import { SettingsWorkspaceScreen } from "@/features/settings/SettingsWorkspaceScreen";
 
 type SettingsWorkspaceDialogProps = {
   open: boolean;
@@ -10,9 +10,7 @@ type SettingsWorkspaceDialogProps = {
 
 const SettingsWorkspaceDialog = ({ open, onOpenChange }: SettingsWorkspaceDialogProps) => {
   const handleClose = () => onOpenChange(false);
-
   if (!open) return null;
-
   return (
     <DialogDesktopPanel surfaceClassName="settings-workspace-dialog" ariaLabel="Settings" onClose={handleClose}>
       <SettingsThemeColorControl />
@@ -22,3 +20,4 @@ const SettingsWorkspaceDialog = ({ open, onOpenChange }: SettingsWorkspaceDialog
 };
 
 export { SettingsWorkspaceDialog };
+export type { SettingsWorkspaceDialogProps };
