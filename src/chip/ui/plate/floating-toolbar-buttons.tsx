@@ -3,7 +3,7 @@
 import { BoldIcon, Code2Icon, ItalicIcon, StrikethroughIcon, UnderlineIcon, WandSparklesIcon } from "lucide-react";
 import { KEYS } from "platejs";
 import { useEditorReadOnly } from "platejs/react";
-import { AIToolbarButton } from "./ai-toolbar-button";
+import { ButtonClickPanelNoteAi } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Ai";
 import { CommentToolbarButton } from "./comment-toolbar-button";
 import { InlineEquationToolbarButton } from "./equation-toolbar-button";
 import { LinkToolbarButton } from "./link-toolbar-button";
@@ -20,10 +20,10 @@ const FloatingToolbarButtons = () => {
       {!readOnly && (
         <>
           <ToolbarGroup>
-            <AIToolbarButton tooltip="AI commands">
+            <ButtonClickPanelNoteAi tooltip="AI commands">
               <WandSparklesIcon />
               Ask AI
-            </AIToolbarButton>
+            </ButtonClickPanelNoteAi>
           </ToolbarGroup>
           <ToolbarGroup>
             <TurnIntoToolbarButton />
