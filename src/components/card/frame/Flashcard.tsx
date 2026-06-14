@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { InkDocument } from "@core/domain/card/ink/inkDocument";
+import { FlashcardMediaDialogs } from "@/chip/panel/dialog.desktop/Dialog.FlashcardMedia";
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import { CANONICAL_CARD_WIDTH, CARD_DISPLAY_SCALE, layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
 import { cn } from "@/lib/utils";
@@ -9,7 +10,6 @@ import { CARD_SHELL_COMMON_CLASS_NAME } from "./cardShellClassNames";
 import type { FlashcardCardLike } from "./flashcard.types";
 import { useFlashcardCornerControls } from "./FlashcardCornerControls";
 import { FlashcardInkOverlay } from "./FlashcardInkOverlay";
-import { FlashcardMediaDialogs } from "./FlashcardMediaDialogs";
 import { FlashcardNavigation } from "./FlashcardNavigation";
 import { useCardFlipBehavior } from "./useCardFlipBehavior";
 import { useFlashcardDerived } from "./useFlashcardDerived";
@@ -55,9 +55,7 @@ interface FlashcardProps {
 const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
   if (prev.card !== next.card) return false;
   if (prev.previewMode !== next.previewMode) return false;
-
   const previewOnly = Boolean(prev.previewMode && next.previewMode);
-
   if (previewOnly) {
     return (
       prev.isFlipped === next.isFlipped &&
@@ -76,7 +74,6 @@ const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
       prev.headerIconVisualScale === next.headerIconVisualScale
     );
   }
-
   return (
     prev.isFlipped === next.isFlipped &&
     prev.onFlip === next.onFlip &&
@@ -143,7 +140,6 @@ const FlashcardInner = ({
 }: FlashcardProps) => {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const [previewFlipped, setPreviewFlipped] = useState(false);
-
   const enableDrawMode = drawMode ?? false;
   const isFixedDisplay = displayMode !== "fluid";
   const allowInkEditing = Boolean(inkEditingEnabled && enableDrawMode);
@@ -154,14 +150,11 @@ const FlashcardInner = ({
     : "question";
   const shouldShowInkLayer = Boolean(showInkLayer && isFixedDisplay);
   const shouldEnableInkEditing = Boolean(allowInkEditing && isFixedDisplay);
-
   useEffect(() => {
     if (!previewMode) return;
     queueMicrotask(() => setPreviewFlipped(false));
   }, [previewMode, card?.id]);
-
   const derived = useFlashcardDerived(card, effectiveIsFlipped);
-
   const ink = useFlashcardInk({
     cardId: derived.cardId,
     effectiveIsFlipped,
@@ -171,11 +164,8 @@ const FlashcardInner = ({
     contentRef,
     onInkDocumentChange,
   });
-
   const media = useFlashcardMediaState();
-
   const isInkEditingActive = Boolean(allowInkEditing && ink.previewInkTool);
-
   const {
     handleFlip,
     handleKeyDown,
@@ -195,7 +185,6 @@ const FlashcardInner = ({
     isModalBlockingFlip: media.isModalBlockingFlip,
     isInkEditingActive,
   });
-
   const { actionsTopLeft, actionsTopRight } = useFlashcardCornerControls({
     card: card ?? ({} as FlashcardCardLike),
     hasUncertainty: derived.hasUncertainty,
@@ -211,11 +200,9 @@ const FlashcardInner = ({
     onOpenReferencePopup: () => media.setIsReferencePopupOpen(true),
     headerIconVisualScale,
   });
-
   if (!card) {
     return <div className="py-12 text-center text-gray-500">No Card Data</div>;
   }
-
   const fixedHeightPx = layoutRowsToCardHeightPx(derived.layoutRows);
   const isCardClickable = !previewMode;
   const resolvedContentZoom =
@@ -224,7 +211,6 @@ const FlashcardInner = ({
       contentZoom > 0
       ? contentZoom
       : 1;
-
   const contentNode = (
     <div
       ref={contentRef}
@@ -242,7 +228,6 @@ const FlashcardInner = ({
       />
     </div>
   );
-
   return (
     <div
       className={cn(
@@ -323,7 +308,6 @@ const FlashcardInner = ({
         activeAudioUrls={derived.activeAudioUrls}
         activeReferences={derived.activeReferences}
       />
-
       {!previewMode && (
         <FlashcardNavigation
           onNext={onNext}
