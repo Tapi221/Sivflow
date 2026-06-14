@@ -1,3 +1,5 @@
-// Dialog implementation moved to @/chip/panel/dialog.desktop/Dialog.MfCardImport.
-// This compatibility path is intentionally empty and must not be imported.
-export {};
+import { MfCardImportDialog } from "@/chip/panel/dialog.desktop/Dialog.MfCardImport";
+import type { MfCardImportCompletedPayload, MfCardImportDialogProps } from "@/chip/panel/dialog.desktop/Dialog.MfCardImport";
+
+export { MfCardImportDialog };
+export type { MfCardImportCompletedPayload, MfCardImportDialogProps };
