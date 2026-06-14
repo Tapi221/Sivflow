@@ -47,9 +47,8 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../
 const distOutputPath = "dist";
 const pdfjsAssetRoute = "/pdfjs/";
 const pdfjsAssetDirectories = ["cmaps", "standard_fonts", "wasm"];
-const eventChipDesignRoute = "/__sivflow/eventchip-design";
-const eventChipDesignOutputPath = "src/chip/eventchip/eventChipDesign.generated.ts";
 const browserExternalizedWarningText = "has been externalized for browser compatibility";
+const nodePathBrowserShimPath = "packages/platform/src/browser/nodePathBrowserShim.cjs";
 
 let hasCleanedDistOutput = false;
 
@@ -109,275 +108,83 @@ const writeWebResponse = async (response: ServerResponse, webResponse: Response)
   }
   response.end();
 };
-const getFiniteNumber = (payload: Record<string, unknown>, key: string, fallback: number): number => {
-  const value = payload[key];
-  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
-};
-const createEventChipDesignSource = (payload: Record<string, unknown>): string => {
-  const values = {
-    backgroundAlpha: getFiniteNumber(payload, "backgroundAlpha", 0.16),
-    monthHeight: getFiniteNumber(payload, "monthHeight", 18.3),
-    monthRadius: getFiniteNumber(payload, "monthRadius", 4),
-    monthBorderWidth: getFiniteNumber(payload, "monthBorderWidth", 3),
-    monthPaddingLeft: getFiniteNumber(payload, "monthPaddingLeft", 3),
-    monthPaddingRight: getFiniteNumber(payload, "monthPaddingRight", 2),
-    monthPaddingYWithTime: getFiniteNumber(payload, "monthPaddingYWithTime", 1),
-    monthPaddingYCompact: getFiniteNumber(payload, "monthPaddingYCompact", 2),
-    monthTitleFontSize: getFiniteNumber(payload, "monthTitleFontSize", 11),
-    monthTimeFontSize: getFiniteNumber(payload, "monthTimeFontSize", 9),
-    monthGap: getFiniteNumber(payload, "monthGap", 3),
-    monthAllDayOffset: getFiniteNumber(payload, "monthAllDayOffset", 1),
-    weekdayRadius: getFiniteNumber(payload, "weekdayRadius", 6),
-    weekdayBorderWidth: getFiniteNumber(payload, "weekdayBorderWidth", 3),
-    weekdayPaddingLeft: getFiniteNumber(payload, "weekdayPaddingLeft", 4),
-    weekdayPaddingRight: getFiniteNumber(payload, "weekdayPaddingRight", 1),
-    weekdayPaddingY: getFiniteNumber(payload, "weekdayPaddingY", 2),
-    weekdayInlinePaddingY: getFiniteNumber(payload, "weekdayInlinePaddingY", 1),
-    weekdayGap: getFiniteNumber(payload, "weekdayGap", 0.5),
-    weekdayTitleFontSize: getFiniteNumber(payload, "weekdayTitleFontSize", 12),
-    weekdayTitleLineHeight: getFiniteNumber(payload, "weekdayTitleLineHeight", 17),
-    weekdayTimeFontSize: getFiniteNumber(payload, "weekdayTimeFontSize", 11),
-    weekdayTimeLineHeight: getFiniteNumber(payload, "weekdayTimeLineHeight", 16),
-    weekdayTimedOuterInset: getFiniteNumber(payload, "weekdayTimedOuterInset", 1),
-    weekdayTimedOverlapGap: getFiniteNumber(payload, "weekdayTimedOverlapGap", 2),
-    weekdayTimedVerticalTrim: getFiniteNumber(payload, "weekdayTimedVerticalTrim", 0.5),
-    weekdayTimedMinHeight: getFiniteNumber(payload, "weekdayTimedMinHeight", 22),
-    weekdayAllDayColumnInset: getFiniteNumber(payload, "weekdayAllDayColumnInset", 0.5),
-    weekdayAllDayEventGap: getFiniteNumber(payload, "weekdayAllDayEventGap", 1),
-    listRowHeight: getFiniteNumber(payload, "listRowHeight", 52),
-    listChipHeight: getFiniteNumber(payload, "listChipHeight", 46),
-    listAllDayRowHeight: getFiniteNumber(payload, "listAllDayRowHeight", 34),
-    listAllDayChipHeight: getFiniteNumber(payload, "listAllDayChipHeight", 28),
-    listRadius: getFiniteNumber(payload, "listRadius", 6),
-    listBorderWidth: getFiniteNumber(payload, "listBorderWidth", 3),
-    listTitleFontSize: getFiniteNumber(payload, "listTitleFontSize", 11),
-    listTimeFontSize: getFiniteNumber(payload, "listTimeFontSize", 11),
-    listTitleGap: getFiniteNumber(payload, "listTitleGap", 0.5),
-    tooltipMonthRadius: getFiniteNumber(payload, "tooltipMonthRadius", 10),
-    tooltipWeekdayRadius: getFiniteNumber(payload, "tooltipWeekdayRadius", 14),
-  };
-  return `export type EventChipDesign = {
-  backgroundAlpha: number;
-  month: {
-    heightPx: number;
-    radiusPx: number;
-    borderWidthPx: number;
-    paddingLeftPx: number;
-    paddingRightPx: number;
-    paddingYWithTimePx: number;
-    paddingYCompactPx: number;
-    titleFontSizePx: number;
-    timeFontSizePx: number;
-    gapPx: number;
-    allDayOffsetPx: number;
-  };
-  weekday: {
-    radiusPx: number;
-    borderWidthPx: number;
-    paddingLeftPx: number;
-    paddingRightPx: number;
-    paddingYPx: number;
-    inlinePaddingYPx: number;
-    gapPx: number;
-    titleFontSizePx: number;
-    titleLineHeightPx: number;
-    timeFontSizePx: number;
-    timeLineHeightPx: number;
-  };
-  weekdayGrid: {
-    timedOuterInsetPx: number;
-    timedOverlapGapPx: number;
-    timedVerticalTrimPx: number;
-    timedMinHeightPx: number;
-    allDayColumnInsetPx: number;
-    allDayEventGapPx: number;
-  };
-  list: {
-    rowHeightPx: number;
-    chipHeightPx: number;
-    allDayRowHeightPx: number;
-    allDayChipHeightPx: number;
-    radiusPx: number;
-    borderWidthPx: number;
-    titleFontSizePx: number;
-    timeFontSizePx: number;
-    titleGapPx: number;
-  };
-  tooltip: {
-    monthRadiusPx: number;
-    weekdayRadiusPx: number;
-  };
-};
-
-export const eventChipDesign: EventChipDesign = {
-  backgroundAlpha: ${values.backgroundAlpha},
-  month: {
-    heightPx: ${values.monthHeight},
-    radiusPx: ${values.monthRadius},
-    borderWidthPx: ${values.monthBorderWidth},
-    paddingLeftPx: ${values.monthPaddingLeft},
-    paddingRightPx: ${values.monthPaddingRight},
-    paddingYWithTimePx: ${values.monthPaddingYWithTime},
-    paddingYCompactPx: ${values.monthPaddingYCompact},
-    titleFontSizePx: ${values.monthTitleFontSize},
-    timeFontSizePx: ${values.monthTimeFontSize},
-    gapPx: ${values.monthGap},
-    allDayOffsetPx: ${values.monthAllDayOffset},
-  },
-  weekday: {
-    radiusPx: ${values.weekdayRadius},
-    borderWidthPx: ${values.weekdayBorderWidth},
-    paddingLeftPx: ${values.weekdayPaddingLeft},
-    paddingRightPx: ${values.weekdayPaddingRight},
-    paddingYPx: ${values.weekdayPaddingY},
-    inlinePaddingYPx: ${values.weekdayInlinePaddingY},
-    gapPx: ${values.weekdayGap},
-    titleFontSizePx: ${values.weekdayTitleFontSize},
-    titleLineHeightPx: ${values.weekdayTitleLineHeight},
-    timeFontSizePx: ${values.weekdayTimeFontSize},
-    timeLineHeightPx: ${values.weekdayTimeLineHeight},
-  },
-  weekdayGrid: {
-    timedOuterInsetPx: ${values.weekdayTimedOuterInset},
-    timedOverlapGapPx: ${values.weekdayTimedOverlapGap},
-    timedVerticalTrimPx: ${values.weekdayTimedVerticalTrim},
-    timedMinHeightPx: ${values.weekdayTimedMinHeight},
-    allDayColumnInsetPx: ${values.weekdayAllDayColumnInset},
-    allDayEventGapPx: ${values.weekdayAllDayEventGap},
-  },
-  list: {
-    rowHeightPx: ${values.listRowHeight},
-    chipHeightPx: ${values.listChipHeight},
-    allDayRowHeightPx: ${values.listAllDayRowHeight},
-    allDayChipHeightPx: ${values.listAllDayChipHeight},
-    radiusPx: ${values.listRadius},
-    borderWidthPx: ${values.listBorderWidth},
-    titleFontSizePx: ${values.listTitleFontSize},
-    timeFontSizePx: ${values.listTimeFontSize},
-    titleGapPx: ${values.listTitleGap},
-  },
-  tooltip: {
-    monthRadiusPx: ${values.tooltipMonthRadius},
-    weekdayRadiusPx: ${values.tooltipWeekdayRadius},
-  },
-};
-`;
-};
-const createApiRoutesPlugin = (): Plugin => {
-  return {
-    name: "serve-app-api-routes",
-    apply: "serve",
-    configureServer(server) {
-      server.middlewares.use(async (request, response, next) => {
-        const requestPath = request.url?.split("?")[0] ?? "";
-        const modulePath = apiRouteModulePaths[requestPath as keyof typeof apiRouteModulePaths];
-        if (!modulePath) {
-          next();
-          return;
-        }
-        try {
-          const routeModule = await server.ssrLoadModule(`/@fs/${resolveFromRoot(modulePath)}`) as ApiRouteModule;
-          const routeMethod = request.method as keyof ApiRouteModule;
-          const routeHandler = routeModule[routeMethod];
-          if (!routeHandler) {
-            writeJsonResponse(response, 405, { ok: false, error: "Method not allowed" });
-            return;
-          }
-          const body = request.method === "GET" || request.method === "HEAD" ? undefined : await readRequestBody(request);
-          const webRequest = new Request(`http://localhost${request.url ?? requestPath}`, {
-            body,
-            headers: createRequestHeaders(request),
-            method: request.method,
-          });
-          const webResponse = await routeHandler(webRequest);
-          await writeWebResponse(response, webResponse);
-        } catch (error) {
-          writeJsonResponse(response, 500, { ok: false, error: error instanceof Error ? error.message : "Invalid request" });
-        }
-      });
-    },
-  };
-};
-const createDistCleanerPlugin = (): Plugin => {
-  return {
-    name: "clean-dist-before-build",
-    apply: "build",
-    enforce: "pre",
-    async buildStart() {
-      if (hasCleanedDistOutput) {
+const createApiRoutesPlugin = (): Plugin => ({
+  name: "serve-app-api-routes",
+  apply: "serve",
+  configureServer(server) {
+    server.middlewares.use(async (request, response, next) => {
+      const requestPath = request.url?.split("?")[0] ?? "";
+      const modulePath = apiRouteModulePaths[requestPath as keyof typeof apiRouteModulePaths];
+      if (!modulePath) {
+        next();
         return;
       }
-      hasCleanedDistOutput = true;
-      await fs.rm(resolveFromRoot(distOutputPath), { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
-    },
-  };
-};
-const createPdfjsAssetsPlugin = (): Plugin => {
-  return {
-    name: "serve-pdfjs-assets",
-    configureServer(server) {
-      server.middlewares.use(async (request, response, next) => {
-        const requestUrl = request.url ?? "";
-        if (!requestUrl.startsWith(pdfjsAssetRoute)) {
-          next();
-          return;
-        }
-        try {
-          const rawRelativePath = decodeURIComponent(requestUrl.slice(pdfjsAssetRoute.length).split("?")[0] ?? "");
-          const assetFilePath = resolvePdfjsDistPath(rawRelativePath);
-          const assetRootPath = resolvePdfjsDistPath("");
-          if (!assetFilePath.startsWith(assetRootPath)) {
-            response.statusCode = 403;
-            response.end();
-            return;
-          }
-          const file = await fs.readFile(assetFilePath);
-          response.setHeader("Content-Type", getPdfjsAssetContentType(assetFilePath));
-          response.setHeader("Cache-Control", "public, max-age=31536000, immutable");
-          response.end(file);
-        } catch {
-          response.statusCode = 404;
-          response.end();
-        }
-      });
-    },
-    async writeBundle() {
-      const outputRoot = resolveFromRoot(path.join(distOutputPath, "pdfjs"));
-      await fs.mkdir(outputRoot, { recursive: true });
-      await Promise.all(pdfjsAssetDirectories.map((directory) => fs.cp(resolvePdfjsDistPath(directory), path.join(outputRoot, directory), { recursive: true })));
-    },
-  };
-};
-const createEventChipDesignWriterPlugin = (): Plugin => {
-  return {
-    name: "event-chip-design-writer",
-    apply: "serve",
-    configureServer(server) {
-      server.middlewares.use(async (request, response, next) => {
-        const requestUrl = request.url?.split("?")[0] ?? "";
-        if (requestUrl !== eventChipDesignRoute) {
-          next();
-          return;
-        }
-        if (request.method !== "PUT") {
+      try {
+        const routeModule = await server.ssrLoadModule(`/@fs/${resolveFromRoot(modulePath)}`) as ApiRouteModule;
+        const routeMethod = request.method as keyof ApiRouteModule;
+        const routeHandler = routeModule[routeMethod];
+        if (!routeHandler) {
           writeJsonResponse(response, 405, { ok: false, error: "Method not allowed" });
           return;
         }
-        try {
-          const body = await readRequestBody(request);
-          const payload = JSON.parse(body) as Record<string, unknown>;
-          const source = createEventChipDesignSource(payload);
-          const outputPath = resolveFromRoot(eventChipDesignOutputPath);
-          await fs.writeFile(outputPath, source, "utf8");
-          server.watcher.emit("change", outputPath);
-          writeJsonResponse(response, 200, { ok: true, path: eventChipDesignOutputPath });
-        } catch (error) {
-          writeJsonResponse(response, 400, { ok: false, error: error instanceof Error ? error.message : "Invalid request" });
+        const body = request.method === "GET" || request.method === "HEAD" ? undefined : await readRequestBody(request);
+        const webRequest = new Request(`http://localhost${request.url ?? requestPath}`, {
+          body,
+          headers: createRequestHeaders(request),
+          method: request.method,
+        });
+        const webResponse = await routeHandler(webRequest);
+        await writeWebResponse(response, webResponse);
+      } catch (error) {
+        writeJsonResponse(response, 500, { ok: false, error: error instanceof Error ? error.message : "Invalid request" });
+      }
+    });
+  },
+});
+const createDistCleanerPlugin = (): Plugin => ({
+  name: "clean-dist-before-build",
+  apply: "build",
+  enforce: "pre",
+  async buildStart() {
+    if (hasCleanedDistOutput) return;
+    hasCleanedDistOutput = true;
+    await fs.rm(resolveFromRoot(distOutputPath), { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  },
+});
+const createPdfjsAssetsPlugin = (): Plugin => ({
+  name: "serve-pdfjs-assets",
+  configureServer(server) {
+    server.middlewares.use(async (request, response, next) => {
+      const requestUrl = request.url ?? "";
+      if (!requestUrl.startsWith(pdfjsAssetRoute)) {
+        next();
+        return;
+      }
+      try {
+        const rawRelativePath = decodeURIComponent(requestUrl.slice(pdfjsAssetRoute.length).split("?")[0] ?? "");
+        const assetFilePath = resolvePdfjsDistPath(rawRelativePath);
+        const assetRootPath = resolvePdfjsDistPath("");
+        if (!assetFilePath.startsWith(assetRootPath)) {
+          response.statusCode = 403;
+          response.end();
+          return;
         }
-      });
-    },
-  };
-};
+        const file = await fs.readFile(assetFilePath);
+        response.setHeader("Content-Type", getPdfjsAssetContentType(assetFilePath));
+        response.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        response.end(file);
+      } catch {
+        response.statusCode = 404;
+        response.end();
+      }
+    });
+  },
+  async writeBundle() {
+    const outputRoot = resolveFromRoot(path.join(distOutputPath, "pdfjs"));
+    await fs.mkdir(outputRoot, { recursive: true });
+    await Promise.all(pdfjsAssetDirectories.map((directory) => fs.cp(resolvePdfjsDistPath(directory), path.join(outputRoot, directory), { recursive: true })));
+  },
+});
 
 export default defineConfig(({ command }) => ({
   root: resolveFromRoot("apps/web"),
@@ -388,7 +195,6 @@ export default defineConfig(({ command }) => ({
     tailwindcss(),
     react(),
     createPdfjsAssetsPlugin(),
-    createEventChipDesignWriterPlugin(),
     createApiRoutesPlugin(),
     VitePWA({
       strategies: "injectManifest",
@@ -430,10 +236,8 @@ export default defineConfig(({ command }) => ({
       "react-dom",
     ],
     alias: [
-      ...command === "build" ? [
-        { find: /^node:path$/, replacement: resolveFromRoot("packages/platform/src/browser/nodePathBrowserShim.cjs") },
-        { find: /^path$/, replacement: resolveFromRoot("packages/platform/src/browser/nodePathBrowserShim.cjs") },
-      ] : [],
+      { find: /^node:path$/, replacement: resolveFromRoot(nodePathBrowserShimPath) },
+      { find: /^path$/, replacement: resolveFromRoot(nodePathBrowserShimPath) },
       { find: /^@\/services\/localDB$/, replacement: resolveFromRoot("src/services/localdb/index.ts") },
       { find: /^@\/services\/firebase$/, replacement: resolveFromRoot("src/infrastructure/firebase/client.ts") },
       { find: /^@\/features\/tab\/Tab$/, replacement: resolveFromRoot("src/pane.desktop/tab.desktopnative/Tab.ts") },
