@@ -8,6 +8,7 @@ const FIXERS_ONLY_ARGUMENT = "--fixers-only";
 const FIXER_SCRIPT_PATHS = [
   path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-type-only-imports.mjs"),
   path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-const-arrow-functions.mjs"),
+  path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-tailwind-standard-classes.mjs"),
   path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-short-hex-colors.mjs"),
   path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-nullish-fallback.mjs"),
   path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-strict-equality.mjs"),
@@ -41,19 +42,15 @@ const runNodeScript = (scriptPath, args = []) => {
     cwd: REPOSITORY_ROOT,
     stdio: "inherit",
   });
-
   if (result.error) {
     console.error(`script failed: ${result.error.message}`);
     return 1;
   }
-
   return result.status ?? 0;
 };
-
 const runImportedScript = async (scriptPath) => {
   const previousExitCode = process.exitCode;
   process.exitCode = 0;
-
   try {
     await import(pathToFileURL(scriptPath).href);
   } catch (error) {
@@ -61,22 +58,17 @@ const runImportedScript = async (scriptPath) => {
     process.exitCode = previousExitCode;
     return 1;
   }
-
   const status = process.exitCode ?? 0;
   process.exitCode = previousExitCode;
   return status;
 };
-
 const runSourceConventionFixes = async () => {
   const statuses = [];
-
   for (const fixerScriptPath of FIXER_SCRIPT_PATHS) {
     statuses.push(await runImportedScript(fixerScriptPath));
   }
-
   return statuses.find((status) => status !== 0) ?? 0;
 };
-
 const runSourceConventionVerification = () => {
   const statuses = [
     runNodeScript(NODE_SCRIPT_PATHS.verifyNoSymbols),
@@ -92,12 +84,10 @@ const runSourceConventionVerification = () => {
     runNodeScript(NODE_SCRIPT_PATHS.verifyPdfZoomConstants),
     runNodeScript(NODE_SCRIPT_PATHS.verifyModuleConstantNames),
   ];
-
   return statuses.find((status) => status !== 0) ?? 0;
 };
 
 const fixStatus = await runSourceConventionFixes();
-
 if (isFixersOnly) {
   process.exitCode = fixStatus;
 } else {
