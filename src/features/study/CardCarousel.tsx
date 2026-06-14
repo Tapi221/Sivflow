@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CardCarousel3D } from "@/features/review/presentation/web/ui/components/CardCarousel3D";
+import { CardCarousel3D } from "@/features/review/presentation/web/ui/components/CardCarousel3D.nouse";
 import type { Card } from "@/types";
 import StudyCard from "./StudyCard";
 
