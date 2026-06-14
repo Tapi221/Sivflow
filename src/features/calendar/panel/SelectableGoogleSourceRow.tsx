@@ -17,7 +17,7 @@ type SelectableGoogleSourceSwitchProps = {
   onToggle: () => void;
 };
 
-const GOOGLE_SOURCE_ROW_CLASS_NAME = "flex h-7 w-full items-center gap-2 overflow-hidden rounded-lg px-2 text-left";
+const GOOGLE_SOURCE_ROW_CLASS_NAME = "flex h-7 w-full items-center gap-2 overflow-hidden rounded-lg px-0 text-left";
 const SOURCE_ROW_CHECKED_TEXT_CLASS_NAME = "text-stone-500";
 const SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME = "text-stone-500 opacity-70";
 const SOURCE_ROW_SWITCH_CLASS_NAME = "mr-0";
