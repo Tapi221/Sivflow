@@ -13,7 +13,7 @@ type ListConfig = Record<
   }
 >;
 
-const TODO_CHECKBOX_CLASSNAME = "peer pointer-events-none absolute top-1 -left-6 size-4 shrink-0 rounded-sm border border-primary bg-background ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground";
+const TODO_CHECKBOX_CLASSNAME = "peer pointer-events-none absolute top-1 -left-6 size-4 shrink-0 rounded-[4px] border border-input bg-background shadow-xs ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[state=checked]:border-[oklch(0.205_0_0)] data-[state=checked]:bg-[oklch(0.205_0_0)] data-[state=checked]:text-[oklch(0.985_0_0)] dark:bg-input/30 dark:data-[state=checked]:border-[oklch(0.922_0_0)] dark:data-[state=checked]:bg-[oklch(0.922_0_0)] dark:data-[state=checked]:text-[oklch(0.205_0_0)]";
 
 const TodoMarkerStatic = (props: SlateRenderElementProps) => {
   const checked = props.element.checked as boolean;
