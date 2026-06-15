@@ -7,10 +7,10 @@ import debounce from "lodash/debounce.js";
 import { CheckIcon, EraserIcon, PlusIcon } from "lucide-react";
 import type { PlateEditor } from "platejs/react";
 import { useEditorRef, useEditorSelector } from "platejs/react";
+import { PALETTE_NOTE_FONT_COLORS, PALETTE_NOTE_FONT_CUSTOM_COLORS } from "@shared/design-tokens/color/Palette.Note.Font";
+import type { PaletteNoteFontColorToken } from "@shared/design-tokens/color/Palette.Note.Font";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { buttonVariants } from "@/chip/ui/button/button";
-import { DEFAULT_COLORS, DEFAULT_CUSTOM_COLORS } from "@/chip/ui/plate/font-color-palette";
-import type { TColor } from "@/chip/ui/plate/font-color-palette";
 import { ToolbarButton, ToolbarMenuGroup } from "@/chip/ui/plate/toolbar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/ui/tooltip";
 import { cn } from "@/lib/utils";
@@ -24,14 +24,14 @@ type ColorDropdownMenuItemProps = {
 } & DropdownMenuItemProps;
 type ColorDropdownMenuItemsProps = {
   color?: string;
-  colors: TColor[];
+  colors: PaletteNoteFontColorToken[];
   updateColor: (color: string) => void;
 } & React.ComponentProps<"div">;
 type ColorCustomProps = {
   color?: string;
-  colors: TColor[];
+  colors: PaletteNoteFontColorToken[];
   colorsQueue: string[];
-  customColors: TColor[];
+  customColors: PaletteNoteFontColorToken[];
   recordColorUsage: (color: string) => void;
   updateColor: (color: string) => void;
   updateCustomColor: (color: string) => void;
@@ -40,9 +40,9 @@ type ColorCustomProps = {
 type PureColorPickerProps = {
   clearColor: () => void;
   color?: string;
-  colors: TColor[];
+  colors: PaletteNoteFontColorToken[];
   colorsQueue: string[];
-  customColors: TColor[];
+  customColors: PaletteNoteFontColorToken[];
   recordColorUsage: (color: string) => void;
   updateColor: (color: string) => void;
   updateCustomColor: (color: string) => void;
@@ -59,7 +59,7 @@ const HEX_COLOR_RE = /^#[\da-f]{6}$/i;
 
 const normalizeColor = (color: string): string => color.toLowerCase();
 const isValidHexColor = (color: string): boolean => HEX_COLOR_RE.test(color);
-const isDefaultColor = (color: string): boolean => DEFAULT_COLORS.some((defaultColor) => normalizeColor(defaultColor.value) === color);
+const isDefaultColor = (color: string): boolean => PALETTE_NOTE_FONT_COLORS.some((defaultColor) => normalizeColor(defaultColor.value) === color);
 const computeIsBrightColor = (hex: string): boolean => {
   if (!isValidHexColor(hex)) return false;
   const r = Number.parseInt(hex.slice(1, 3), 16);
@@ -134,8 +134,8 @@ const ColorCustom = ({ className, color, colors, colorsQueue, customColors, reco
   const fullCustomColors = React.useMemo(
     () => colorsQueue
       .filter((queuedColor) => normalizeColor(queuedColor) !== normalizeColor(updatedColor ?? ""))
-      .filter((queuedColor) => !DEFAULT_COLORS.some((defaultColor) => normalizeColor(defaultColor.value) === normalizeColor(queuedColor)))
-      .filter((queuedColor) => !DEFAULT_CUSTOM_COLORS.some((defaultColor) => normalizeColor(defaultColor.value) === normalizeColor(queuedColor)))
+      .filter((queuedColor) => !PALETTE_NOTE_FONT_COLORS.some((defaultColor) => normalizeColor(defaultColor.value) === normalizeColor(queuedColor)))
+      .filter((queuedColor) => !PALETTE_NOTE_FONT_CUSTOM_COLORS.some((defaultColor) => normalizeColor(defaultColor.value) === normalizeColor(queuedColor)))
       .map((queuedColor) => ({ isBrightColor: computeIsBrightColor(queuedColor), name: queuedColor, value: queuedColor }))
       .slice(0, MAX_CUSTOM_COLORS - customColors.length - (updatedColor ? 1 : 0)),
     [colorsQueue, customColors.length, updatedColor],
@@ -284,9 +284,9 @@ const ButtonClickPanelNoteFontColor = ({ children, nodeType, tooltip, ...props }
         <ColorPicker
           clearColor={clearColor}
           color={selectedColor ?? color}
-          colors={DEFAULT_COLORS}
+          colors={PALETTE_NOTE_FONT_COLORS}
           colorsQueue={colorsQueue}
-          customColors={DEFAULT_CUSTOM_COLORS}
+          customColors={PALETTE_NOTE_FONT_CUSTOM_COLORS}
           recordColorUsage={recordColorUsage}
           updateColor={updateColorAndClose}
           updateCustomColor={updateColor}
@@ -298,5 +298,5 @@ const ButtonClickPanelNoteFontColor = ({ children, nodeType, tooltip, ...props }
 };
 
 const ColorPicker = React.memo(PureColorPicker, (prev, next) => prev.color === next.color && prev.colors === next.colors && prev.colorsQueue === next.colorsQueue && prev.customColors === next.customColors && prev.updatedColor === next.updatedColor);
-export { DEFAULT_COLORS, ButtonClickPanelNoteFontColor, ColorDropdownMenuItems };
-export type { TColor };
+
+export { ButtonClickPanelNoteFontColor, ColorDropdownMenuItems };
