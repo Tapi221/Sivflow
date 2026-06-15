@@ -4,6 +4,10 @@
   height: min(920px, 85dvh);
 }
 
+.settings-language-dropdown-content {
+  z-index: 120;
+}
+
 .settings-workspace-dialog .settings-workspace {
   height: 100%;
   flex: 1;
