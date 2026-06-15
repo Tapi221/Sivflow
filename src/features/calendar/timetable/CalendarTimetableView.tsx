@@ -4,7 +4,7 @@ import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { ja } from "date-fns/locale";
 import type { ComponentType, CSSProperties, SVGProps } from "react";
 import * as stratisIcons from "stratis-ui-icons";
-import { getTagColorStyle } from "@/chip/budge/tag/tag.style";
+import { getTagColorStyle } from "@/chip/budge/tag/tagColor";
 import { CalendarTimetableCourseEditorDialog } from "@/chip/panel/dialog.desktop/Dialog.CalendarTimetableCourseEditor";
 import { CalendarTimetableSettingsDialog } from "@/chip/panel/dialog.desktop/Dialog.CalendarTimetableSettings";
 import { CalendarTimetableSyllabusCatalogDialog } from "@/chip/panel/dialog.desktop/Dialog.CalendarTimetableSyllabusCatalog";

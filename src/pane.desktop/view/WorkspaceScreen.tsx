@@ -18,7 +18,7 @@ import { useDocumentsRead } from "@/features/document/hooks/useDocumentsRead";
 import type { ExplorerRouteState } from "@/features/explorer/contracts/explorerRouteState";
 import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
-import { useNotes } from "@/hooks/note/useNotes";
+import { useNotes } from "@/features/note/hooks/useNotes";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";

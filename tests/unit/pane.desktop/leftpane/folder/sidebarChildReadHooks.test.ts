@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const CARD_SETS_SOURCE_PATH = resolve(process.cwd(), "src/components/card/hooks/useCardSets.ts");
-const NOTES_SOURCE_PATH = resolve(process.cwd(), "src/hooks/note/useNotes.ts");
+const NOTES_SOURCE_PATH = resolve(process.cwd(), "src/features/note/hooks/useNotes.ts");
 const DOCUMENTS_SOURCE_PATH = resolve(process.cwd(), "src/features/document/hooks/useDocumentsRead.ts");
 
 const readSource = (path: string): string => readFileSync(path, "utf8");

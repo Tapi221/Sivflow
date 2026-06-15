@@ -20,7 +20,7 @@ import { useDocumentCommands } from "@/features/document/hooks/useDocumentComman
 import { useDocumentsRead } from "@/features/document/hooks/useDocumentsRead";
 import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
 import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
-import { useNotes } from "@/hooks/note/useNotes";
+import { useNotes } from "@/features/note/hooks/useNotes";
 import { cn } from "@/lib/utils";
 import { LayeredTreeDropIndicator } from "@/pane.desktop/leftpane/folder/layeredTreeDnd";
 import { LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX, LAYERED_TREE_ROOT_LEVEL } from "@/pane.desktop/leftpane/folder/layeredTreeDnd.constants";
