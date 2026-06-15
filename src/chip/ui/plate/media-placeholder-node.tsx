@@ -8,7 +8,7 @@ import { KEYS } from "platejs";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement, useEditorPlugin, withHOC } from "platejs/react";
 import { useFilePicker } from "use-file-picker";
-import { useUploadFile } from "@/hooks/use-upload-file";
+import { useUploadFile } from "@/chip/ui/plate/hooks/useUploadFile";
 import { cn } from "@/lib/utils";
 
 type ImageProgressProps = {
