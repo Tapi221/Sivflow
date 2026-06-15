@@ -13,7 +13,9 @@
   position: relative;
   display: inline-flex;
   color: var(--cm-fg);
-  font: 13px/20px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--zed-ui-font-family, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  font-size: var(--zed-ui-font-size, 13px);
+  line-height: 20px;
 }
 .cm-menu {
   position: relative;
@@ -40,6 +42,7 @@
 .cm-child,
 .cm-submenu-trigger {
   position: relative;
+  width: 100%;
   padding: 0 4px;
 }
 .cm-item {
@@ -47,7 +50,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 4px;
   padding: 0 6px;
   border-radius: 4px;
   color: var(--cm-fg);
@@ -82,10 +85,12 @@
   min-width: 0;
 }
 .cm-main {
+  flex: 1 1 0;
   gap: 6px;
   overflow: hidden;
 }
 .cm-end {
+  flex: 0 1 auto;
   gap: 8px;
   margin-left: 16px;
   overflow: hidden;
