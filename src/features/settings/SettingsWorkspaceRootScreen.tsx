@@ -3,12 +3,13 @@ import type { LocalAiSettings } from "@platform/ai/localAiSettings";
 import { getLocalAiSettings, setLocalAiSettings } from "@platform/ai/localAiSettings";
 import { testOllamaConnection } from "@platform/ai/ollamaClient";
 import type { ReactNode } from "react";
-import { Brain, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/chip/icons";
+import { Brain, ChevronDown, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/chip/icons";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { SettingsThemeColorControl } from "./SettingsThemeColorControl";
 import type { StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
 import { readStoredAccounts } from "@/integration/googlecalendar-integration/gcal.multi-storage";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { cn } from "@/lib/utils";
 import type { UserSettings } from "@/types";
 
@@ -246,6 +247,27 @@ const SettingChoiceRow = <T extends string | number,>({ label, value, options, o
     <div className="flex max-w-sm shrink-0 flex-wrap justify-end gap-2">{options.map((option) => <button key={String(option.value)} type="button" className={cn("inline-flex flex-none items-center justify-center rounded-full border-0 px-3 py-2 text-center text-sm font-semibold leading-4 outline-none transition-colors duration-100 ease-out", option.value === value ? "bg-[var(--primary-color)] text-white" : "bg-neutral-100 text-neutral-500")} onClick={() => onChange(option.value)}>{option.label}</button>)}</div>
   </div>
 );
+const SettingDropdownChoiceRow = <T extends string | number,>({ label, value, options, onChange }: SettingChoiceRowProps<T>) => {
+  const [open, setOpen] = useState(false);
+  return (
+  <div className="flex min-h-14 items-start justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
+    <span className="pt-1 text-sm font-medium leading-5 tracking-tight text-neutral-900">{label}</span>
+    <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
+      <DropdownMenuTrigger asChild>
+        <button type="button" className={cn("inline-flex min-w-36 items-center justify-between gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-sm font-semibold leading-4 text-neutral-800 outline-none transition-colors duration-100 ease-out hover:bg-stone-50 focus-visible:bg-stone-50")} onClick={() => setOpen((nextOpen) => !nextOpen)}>
+          <span className="truncate">{options.find((option) => option.value === value)?.label ?? String(value)}</span>
+          <ChevronDown className="h-4 w-4 shrink-0 text-stone-500" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-40" onCloseAutoFocus={(event) => event.preventDefault()}>
+        <DropdownMenuRadioGroup value={String(value)} onValueChange={(nextValue) => onChange(nextValue as T)}>
+          {options.map((option) => <DropdownMenuRadioItem key={String(option.value)} value={String(option.value)} onSelect={() => setOpen(false)}>{option.label}</DropdownMenuRadioItem>)}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  </div>
+  );
+};
 const SettingTextInputRow = ({ label, description, value, placeholder, onChange }: SettingTextInputRowProps) => (
   <div className="flex min-h-14 items-start justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
     <div className="flex min-w-0 flex-1 flex-col gap-1"><span className="text-sm font-medium leading-5 tracking-tight text-neutral-800">{label}</span>{description ? <span className="text-sm font-normal leading-5 text-stone-500">{description}</span> : null}</div>
@@ -292,7 +314,7 @@ const SettingsWorkspaceRootScreen = () => {
       <main className="flex min-h-0 min-w-0 flex-1 flex-col bg-white max-md:h-full">
         <div className="flex min-h-0 min-w-0 flex-1 overflow-y-auto px-4 pb-5 pt-10"><div className="mx-auto w-full max-w-xl">
           {activeSectionId === "account" ? <Section title={copy.title.account} description={copy.description.account}><div className="flex min-h-20 items-center gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0"><div className="relative flex h-9 min-w-9 items-center justify-center overflow-hidden rounded-lg bg-stone-100 text-base font-semibold tracking-tight text-stone-700" aria-hidden="true">{accountProfile.photoUrl ? <img className="absolute inset-0 h-full w-full object-cover" src={accountProfile.photoUrl} alt="" /> : <span>{accountName.trim().charAt(0).toUpperCase() ?? "M"}</span>}</div><div className="flex min-w-0 flex-1 flex-col gap-1"><strong className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold leading-5 tracking-tight text-neutral-800">{accountName}</strong><span className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-normal leading-5 text-stone-500">{accountProfile.email ?? copy.emailUnset}</span></div><button type="button" className="h-8 rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm font-medium tracking-tight text-neutral-800 outline-none hover:bg-stone-100 focus-visible:bg-stone-100 disabled:opacity-50" onClick={() => void logout()} disabled={loading || !currentUser}>{copy.logout}</button></div><SettingKeyValue label={copy.status} value={currentUser ? copy.signedIn : copy.guest} /><SettingKeyValue label={copy.provider} value={accountProfile.providerId ?? "-"} /></Section> : null}
-          {activeSectionId === "preferences" ? <Section title={copy.title.preferences} description={copy.description.preferences}><SettingsThemeColorControl /><SettingChoiceRow label={copy.language} value={language} options={toOptions<SettingsLanguage>(["ja", "en", "zh"], copy.languageOptions)} onChange={(value) => void updateSettings({ language: value })} /><SettingChoiceRow label={copy.weekStart} value={weekStartDay} options={toOptions<UserSettings["weekStartDay"]>(["monday", "sunday"], copy.weekStartOptions)} onChange={(value) => void updateSettings({ weekStartDay: value })} /><SettingToggle label={copy.notifications} checked={settings?.notificationsEnabled ?? false} onChange={(checked) => updateBooleanSetting("notificationsEnabled", checked)} /></Section> : null}
+          {activeSectionId === "preferences" ? <Section title={copy.title.preferences} description={copy.description.preferences}><SettingsThemeColorControl /><SettingDropdownChoiceRow label={copy.language} value={language} options={toOptions<SettingsLanguage>(["ja", "en", "zh"], copy.languageOptions)} onChange={(value) => void updateSettings({ language: value })} /><SettingChoiceRow label={copy.weekStart} value={weekStartDay} options={toOptions<UserSettings["weekStartDay"]>(["monday", "sunday"], copy.weekStartOptions)} onChange={(value) => void updateSettings({ weekStartDay: value })} /><SettingToggle label={copy.notifications} checked={settings?.notificationsEnabled ?? false} onChange={(checked) => updateBooleanSetting("notificationsEnabled", checked)} /></Section> : null}
           {activeSectionId === "study" ? <Section title={copy.title.study} description={copy.description.study}><SettingToggle label={copy.showHard} checked={settings?.showReviewHard ?? true} onChange={(checked) => updateBooleanSetting("showReviewHard", checked)} /><SettingToggle label={copy.showEasy} checked={settings?.showReviewEasy ?? true} onChange={(checked) => updateBooleanSetting("showReviewEasy", checked)} /><SettingToggle label={copy.autoCarryOver} checked={settings?.autoCarryOver ?? true} onChange={(checked) => updateBooleanSetting("autoCarryOver", checked)} /><SettingToggle label={copy.delayBonus} checked={settings?.delayBonusEnabled ?? false} onChange={(checked) => updateBooleanSetting("delayBonusEnabled", checked)} /><SettingToggle label={copy.reviewStartNextDay} checked={settings?.reviewStartNextDay ?? true} onChange={(checked) => updateBooleanSetting("reviewStartNextDay", checked)} /></Section> : null}
           {activeSectionId === "editor" ? <Section title={copy.title.editor} description={copy.description.editor}><SettingChoiceRow label={copy.questionDisplay} value={questionDisplayMode} options={toOptions<QuestionDisplayMode>(["tap_to_reveal", "always"], copy.questionDisplayOptions)} onChange={(value) => void updateSettings({ questionDisplayMode: value })} /><SettingChoiceRow label={copy.markdownTab} value={markdownTabSize} options={toOptions<MarkdownTabSize>([2, 4, 8], { 2: "2", 4: "4", 8: "8" })} onChange={(value) => void updateSettings({ markdownTabSize: value })} /><SettingToggle label={copy.previewDefault} checked={settings?.defaultPreviewEnabled ?? false} onChange={(checked) => updateBooleanSetting("defaultPreviewEnabled", checked)} /><SettingToggle label={copy.autoDraft} checked={settings?.autoDraftEnabled ?? true} onChange={(checked) => updateBooleanSetting("autoDraftEnabled", checked)} /><SettingToggle label={copy.autoSave} checked={settings?.autoSaveEnabled ?? true} onChange={(checked) => updateBooleanSetting("autoSaveEnabled", checked)} /></Section> : null}
           {activeSectionId === "audio" ? <Section title={copy.title.audio} description={copy.description.audio}><SettingToggle label={copy.soundEffects} checked={settings?.soundEnabled ?? true} onChange={(checked) => updateBooleanSetting("soundEnabled", checked)} /><SettingToggle label={copy.questionVoice} checked={settings?.autoVoiceQuestion ?? false} onChange={(checked) => updateBooleanSetting("autoVoiceQuestion", checked)} /><SettingToggle label={copy.answerVoice} checked={settings?.autoVoiceAnswer ?? false} onChange={(checked) => updateBooleanSetting("autoVoiceAnswer", checked)} /></Section> : null}
