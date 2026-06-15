@@ -1,1 +1,1 @@
-// removed tag palette compatibility module
+// removed tag palette file
