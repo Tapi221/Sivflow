@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { isUrl, KEYS } from "platejs";
 import { useEditorRef } from "platejs/react";
 import { toast } from "sonner";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/chip/ui/dialog/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/chip/panel/dialog.desktop/dialog/alert-dialog";
 import { Input } from "@/chip/ui/input";
 
 type MediaConfig = {

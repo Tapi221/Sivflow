@@ -1,6 +1,6 @@
 import { memo } from "react";
 import type { ReactNode } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/chip/ui/dialog/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/chip/panel/dialog.desktop/dialog/dialog";
 import { LinkEditor } from "@/components/card/editor/LinkEditor";
 import MediaUploader from "@/components/card/media/MediaUploader";
 import type { UploadedImage } from "@/types";

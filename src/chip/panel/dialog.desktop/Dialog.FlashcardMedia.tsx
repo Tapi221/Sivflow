@@ -1,5 +1,5 @@
 import { Button } from "@/chip/ui/button/button";
-import { Dialog, DialogContent } from "@/chip/ui/dialog/dialog";
+import { Dialog, DialogContent } from "@/chip/panel/dialog.desktop/dialog/dialog";
 import { ReferencePopup } from "@/chip/panel/dialog.desktop/Dialog.ReferencePopup";
 import { AudioPlayer, ImageGallery } from "@/components/card/media/CardMedia";
 import type { FlashcardMediaLike } from "@/components/card/frame/flashcard.types";

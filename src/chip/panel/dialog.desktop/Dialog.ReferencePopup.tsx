@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/chip/ui/dialog/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/chip/panel/dialog.desktop/dialog/dialog";
 import type { ReferenceBlockData } from "@/types";
 import { ExternalLink, Globe, Link as LinkIcon } from "@/chip/icons";
 
