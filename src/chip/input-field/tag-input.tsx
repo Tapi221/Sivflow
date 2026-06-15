@@ -6,13 +6,11 @@ import { TagBadge } from "@/chip/budge/tag/Badge.Tag";
 import { TagChip } from "@/chip/budge/tag/TagChip";
 import { getTagColorKey, getTagColorSwatchStyle } from "@/chip/budge/tag/tagColor";
 import { Check, Palette, Plus, Tag as TagIcon } from "@/chip/icons";
-import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
-import { PlaceholderText } from "../ui/placeholder-text";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "@/chip/ui/command";
+import { PlaceholderText } from "@/chip/ui/placeholder-text";
+import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
-
-
 
 type TagInputProps = {
   tags: string[];
@@ -21,8 +19,6 @@ type TagInputProps = {
   className?: string;
   quietHover?: boolean;
 };
-
-
 
 const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", className, quietHover = false }: TagInputProps) => {
   const [open, setOpen] = React.useState(false);
@@ -39,7 +35,10 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
     return map;
   }, [allTags]);
   const uniqueTags = React.useMemo(() => (allTags ?? []).map((tag) => tag.name).sort(), [allTags]);
+  const trimmedInputValue = inputValue.trim();
+  const hasInputValue = trimmedInputValue.length > 0;
   const filteredTags = uniqueTags.filter((tag) => tag.toLowerCase().includes(inputValue.toLowerCase()));
+  const canCreateInputTag = hasInputValue && !uniqueTags.some((tag) => tag.toLowerCase() === trimmedInputValue.toLowerCase());
   const resolveTagColorKey = React.useCallback((tagName: string): TagColorKey => colorKeyByName.get(tagName) ?? colorKeyByName.get(tagName.toLowerCase()) ?? availableColors[0] ?? getTagColorKey(), [availableColors, colorKeyByName]);
   const removeTag = (tagToRemove: string) => onChange(tags.filter((tag) => tag !== tagToRemove));
   const toggleTag = (tag: string) => onChange(tags.includes(tag) ? tags.filter((item) => item !== tag) : [...tags, tag]);
@@ -100,7 +99,7 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
             <CommandInput placeholder="タグを検索・作成..." value={inputValue} onValueChange={setInputValue} className="ds-input h-6 focus:ring-0" />
           </div>
           <CommandList className="max-h-80">
-            {inputValue && !uniqueTags.some((tag) => tag.toLowerCase() === inputValue.toLowerCase()) ? (
+            {canCreateInputTag && (
               <div className="p-3 space-y-3">
                 <div className="ds-tag-input__create flex items-center gap-2 p-2 cursor-pointer text-xs font-bold" onClick={createTag}>
                   <Plus className="w-4 h-4" />「{inputValue}」を新しく作成
@@ -118,18 +117,18 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
                   </div>
                 </div>
               </div>
-            ) : null}
+            )}
             <CommandGroup heading={<span className="ds-command__group-title px-2 text-xs font-bold uppercase tracking-widest">既存のタグ</span>}>
-              {filteredTags.length === 0 && !inputValue ? (
+              {filteredTags.length === 0 && !hasInputValue && (
                 <div className="py-6 text-center"><TagIcon className="w-8 h-8 text-[var(--surface-placeholder-text)] opacity-35 mx-auto mb-2" /><p className="text-xs font-bold text-[var(--surface-placeholder-text)] uppercase tracking-widest">タグがありません</p></div>
-              ) : null}
+              )}
               <div className="grid grid-cols-1 gap-1 p-1">
                 {filteredTags.map((tag) => {
                   const isSelected = tags.includes(tag);
                   return (
                     <CommandItem key={tag} value={tag} onSelect={() => toggleTag(tag)} className={cn("flex items-center justify-between", isSelected && "ds-command__item--selected")}>
                       <TagBadge label={tag} colorKey={resolveTagColorKey(tag)} className="max-w-56" />
-                      {isSelected ? <Check className="w-3.5 h-3.5 text-[var(--ds-semantic-color-action-primary)]" /> : null}
+                      {isSelected && <Check className="w-3.5 h-3.5 text-[var(--ds-semantic-color-action-primary)]" />}
                     </CommandItem>
                   );
                 })}
@@ -142,9 +141,5 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
   );
 };
 
-
-
 export { TagInput };
-
-
 export type { TagInputProps };
