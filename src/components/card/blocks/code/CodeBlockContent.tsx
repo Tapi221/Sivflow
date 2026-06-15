@@ -7,7 +7,7 @@ import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
 import { cn } from "@/lib/utils";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
-import { Check, Copy } from "@/chip/icons";
+import { Check, Copy } from "@/chip/icons/icons";
 import { CodeBlockFrame } from "./CodeBlockFrame";
 import { getViewerLanguageLabels, normalizeEditorLanguage, normalizeViewerLanguage } from "./codeBlockLanguage";
 import { Prism } from "./prismSetup";
