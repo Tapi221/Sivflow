@@ -33,7 +33,7 @@ const CommentMoreDropdown = ({
   const selectedEditCommentRef = React.useRef<boolean>(false);
   const onDeleteComment = React.useCallback(() => {
     if (!comment.id) {
-      window.alert("Please try again later.");
+      window.alert("You are operating too quickly, please try again later.");
       return;
     }
     const updatedDiscussions = editor
@@ -62,7 +62,7 @@ const CommentMoreDropdown = ({
   const onEditComment = React.useCallback(() => {
     selectedEditCommentRef.current = true;
     if (!comment.id) {
-      window.alert("Please try again later.");
+      window.alert("You are operating too quickly, please try again later.");
       return;
     }
     setEditingId(comment.id);
