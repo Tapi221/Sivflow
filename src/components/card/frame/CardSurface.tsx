@@ -49,6 +49,7 @@ const CardSurface = ({ children, className, style, overlay, ruled = true, ruledO
   }, [bottomPx, rowPx, ruled, ruledOpacity, style, topPx]);
 
   const opacity = clamp01(ruledOpacity);
+  const hasOverlay = overlay !== null && overlay !== undefined;
 
   return (
     <div
@@ -61,7 +62,7 @@ const CardSurface = ({ children, className, style, overlay, ruled = true, ruledO
         paddingRight: "var(--card-padding-x)",
       }}
     >
-      {ruled ? (
+      {ruled && (
         <div
           aria-hidden
           className="pointer-events-none absolute z-10"
@@ -74,7 +75,7 @@ const CardSurface = ({ children, className, style, overlay, ruled = true, ruledO
             opacity,
           }}
         />
-      ) : null}
+      )}
 
       <div
         className="relative z-10 flex min-h-0 flex-1 flex-col"
@@ -83,11 +84,11 @@ const CardSurface = ({ children, className, style, overlay, ruled = true, ruledO
         {children}
       </div>
 
-      {overlay ? (
+      {hasOverlay && (
         <div className="pointer-events-none absolute inset-0 z-20 overflow-hidden">
           {overlay}
         </div>
-      ) : null}
+      )}
     </div>
   );
 };
