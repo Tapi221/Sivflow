@@ -21,6 +21,6 @@
       "@shared/*": ["shared/*"]
     }
   },
-  "include": ["apps/web/src", "packages/web-renderer/src", "packages/core/src", "packages/platform/src", "src", "shared"],
+  "include": ["apps/web/src", "packages/web-renderer/src", "packages/core/src", "packages/platform/src", "src", "shared", "nouse/chip"],
   "exclude": ["src/app/api/**", "src/**/*.test.ts", "src/**/*.test.tsx", "tests/**"]
 }
