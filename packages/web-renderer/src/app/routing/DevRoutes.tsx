@@ -71,6 +71,13 @@ const EventChipEditorSandboxPage = DEV_MODE
     })),
   )
   : null;
+const ContextMenuSandboxPage = DEV_MODE
+  ? lazy(() =>
+    import("@/sandbox/context-menu/ContextMenuSandboxPage").then(({ ContextMenuSandboxPage }) => ({
+      default: ContextMenuSandboxPage,
+    })),
+  )
+  : null;
 
 const withDevRouteFallback = (element: ReactNode) => {
   return <Suspense fallback={null}>{element}</Suspense>;
@@ -103,6 +110,7 @@ const getDevRouteElements = () => {
       {CalendarTimeGridSandboxPage && <Route path="sandbox/calendar-time-grid/*" element={withDevRouteFallback(<CalendarTimeGridSandboxPage />)} />}
       {CalendarDndSandboxPage && <Route path="sandbox/calendar-dnd/*" element={withDevRouteFallback(<CalendarDndSandboxPage />)} />}
       {EventChipEditorSandboxPage && <Route path="sandbox/eventchip-editor/*" element={withDevRouteFallback(<EventChipEditorSandboxPage />)} />}
+      {ContextMenuSandboxPage && <Route path="sandbox/context-menu/*" element={withDevRouteFallback(<ContextMenuSandboxPage />)} />}
     </>
   );
 };
