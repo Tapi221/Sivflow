@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { hasDesktopRuntime } from "@platform/runtime";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { ScheduleScreen as DesktopScheduleScreen } from "@/pane.desktop/view/Screen.Schedule.desktop";
@@ -47,6 +47,7 @@ const useIsMobileSchedule = () => {
 const ScheduleRoute = () => {
   const isMobile = useIsMobileSchedule();
   const { search } = useLocation();
+  const navigate = useNavigate();
   const activeSectionKey = useWorkspaceTabsStore((state) => state.tabs.find((tab) => tab.id === state.activeTabId)?.sectionKey ?? null);
   const openExplorerTab = useWorkspaceTabsStore((state) => state.openExplorerTab);
   const cardSetNavigationTarget = useMemo(() => parseCardSetNavigationTarget(search), [search]);
@@ -66,7 +67,8 @@ const ScheduleRoute = () => {
         selectedItem: { type: "cardSet", id: cardSetNavigationTarget.cardSetId },
       },
     });
-  }, [cardSetNavigationTarget, openExplorerTab]);
+    navigate("/schedule", { replace: true });
+  }, [cardSetNavigationTarget, navigate, openExplorerTab]);
 
   if (activeSectionKey === "library") return <WorkspaceScreen />;
 
