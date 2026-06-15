@@ -171,6 +171,16 @@ const title = inputTitle.trim() === "" ? "Untitled" : inputTitle;
 
 `npm run verify:nullish-fallback` は、`||` の右辺が string / number / boolean / object / array literal で、値を返す文脈にあるものだけを検出する。boolean 合成の `isReady || isLoading` のような式は対象にしない。`npm run fix:nullish-fallback` は同じ対象を `??` へ自動修正する。`npm run fix:source-conventions` と `npm run verify:source-conventions` はこの検査を含めて実行する。
 
+## 条件付きレンダー
+
+「表示する / しない」だけなら `&&` を使う。ただし左辺は必ず boolean にする。`items.length &&` は使わず、`items.length > 0 &&` にする。
+
+「A / B の2択」なら `? :` を使う。
+
+「3択以上」または「条件が複雑」なら、JSX 内に書かず、`return` の前で `if` / `switch` に分離する。
+
+ネストした三項演算子は禁止する。
+
 ## export
 
 実装ファイルでは、原則として宣言時 export を使わない。値・型はローカルに定義し、ファイル末尾でまとめて export する。
