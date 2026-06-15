@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 type EditorProps = PlateContentProps & VariantProps<typeof editorVariants>;
 
 const editorContainerVariants = cva(
-  "relative w-full cursor-text select-text overflow-y-auto caret-foreground selection:bg-muted-foreground/20 focus-visible:outline-none [&_.slate-selection-area]:z-50 [&_.slate-selection-area]:border [&_.slate-selection-area]:border-ring/30 [&_.slate-selection-area]:bg-muted-foreground/15",
+  "relative w-full cursor-text select-text overflow-y-auto caret-foreground focus-visible:outline-none [&_.slate-selection-area]:z-50 [&_.slate-selection-area]:border [&_.slate-selection-area]:border-ring/30 [&_.slate-selection-area]:bg-muted-foreground/15",
   {
     defaultVariants: {
       variant: "default",
