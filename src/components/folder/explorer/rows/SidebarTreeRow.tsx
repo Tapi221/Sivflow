@@ -5,8 +5,6 @@ import type { MenuAction } from "@/components/folder/components/menus/menuAction
 import { useContextMenuAnchor } from "@/components/folder/components/menus/useContextMenuAnchor";
 import { cn } from "@/lib/utils";
 
-
-
 interface SidebarTreeRowProps {
   menuOpen: boolean;
   onMenuOpenChange: (open: boolean) => void;
@@ -22,17 +20,12 @@ interface SidebarTreeRowProps {
   children: React.ReactNode;
 }
 
-
-
 const SidebarTreeRow = ({ menuOpen, onMenuOpenChange, menuActions = [], hasContextMenu = false, contextMenuVariant = "default", isEditing = false, isDimmed = false, isDraggingOver = false, style, className, onContextMenuSelect, children }: SidebarTreeRowProps) => {
   const { anchorPoint, handleContextMenu, resetAnchor } = useContextMenuAnchor();
-
   const suppressNextClickRef = React.useRef(false);
   const suppressNextClickTimeoutRef = React.useRef<number | null>(null);
-
   const clearSuppressedClick = React.useCallback(() => {
     suppressNextClickRef.current = false;
-
     if (
       typeof window !== "undefined" &&
       suppressNextClickTimeoutRef.current !== null
@@ -41,20 +34,16 @@ const SidebarTreeRow = ({ menuOpen, onMenuOpenChange, menuActions = [], hasConte
       suppressNextClickTimeoutRef.current = null;
     }
   }, []);
-
   const scheduleSuppressedClickClear = React.useCallback(() => {
     if (typeof window === "undefined") return;
-
     if (suppressNextClickTimeoutRef.current !== null) {
       window.clearTimeout(suppressNextClickTimeoutRef.current);
     }
-
     suppressNextClickTimeoutRef.current = window.setTimeout(() => {
       suppressNextClickRef.current = false;
       suppressNextClickTimeoutRef.current = null;
     }, 0);
   }, []);
-
   React.useEffect(() => {
     return () => {
       if (
@@ -65,10 +54,7 @@ const SidebarTreeRow = ({ menuOpen, onMenuOpenChange, menuActions = [], hasConte
       }
     };
   }, []);
-
-  const canOpenContextMenu =
-    hasContextMenu && !isEditing && menuActions.length > 0;
-
+  const canOpenContextMenu = hasContextMenu && !isEditing && menuActions.length > 0;
   return (
     <div
       style={style}
@@ -137,7 +123,5 @@ const SidebarTreeRow = ({ menuOpen, onMenuOpenChange, menuActions = [], hasConte
     </div>
   );
 };
-
-
 
 export { SidebarTreeRow };
