@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { SuggestionPlugin } from "@platejs/suggestion/react";
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
-import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
-import { CheckIcon, EyeIcon, PencilLineIcon, PenIcon } from "lucide-react";
+import { EyeIcon, PencilLineIcon, PenIcon } from "lucide-react";
 import { useEditorReadOnly, useEditorRef, usePluginOption } from "platejs/react";
 import type { ReactNode } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
@@ -16,7 +15,6 @@ type ModeItem = {
   label: string;
 };
 
-const MODE_MENU_ITEM_CLASS_NAME = "dropdown-menu__radio-item--check-end";
 const modeItems: Record<ModeValue, ModeItem> = {
   editing: { icon: <PenIcon />, label: "Editing" },
   suggestion: { icon: <PencilLineIcon />, label: "Suggestion" },
@@ -27,16 +25,6 @@ const getModeValue = (readOnly: boolean, isSuggesting: boolean): ModeValue => {
   if (readOnly) return "viewing";
   if (isSuggesting) return "suggestion";
   return "editing";
-};
-
-const ModeIndicator = () => {
-  return (
-    <span className="dropdown-menu__check-indicator">
-      <DropdownMenuItemIndicator>
-        <CheckIcon />
-      </DropdownMenuItemIndicator>
-    </span>
-  );
 };
 const ButtonClickPanelNoteMode = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
@@ -71,18 +59,15 @@ const ButtonClickPanelNoteMode = (props: DropdownMenuProps) => {
           }}
           value={value}
         >
-          <DropdownMenuRadioItem className={MODE_MENU_ITEM_CLASS_NAME} value="editing">
-            <ModeIndicator />
+          <DropdownMenuRadioItem value="editing">
             {modeItems.editing.icon}
             {modeItems.editing.label}
           </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem className={MODE_MENU_ITEM_CLASS_NAME} value="viewing">
-            <ModeIndicator />
+          <DropdownMenuRadioItem value="viewing">
             {modeItems.viewing.icon}
             {modeItems.viewing.label}
           </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem className={MODE_MENU_ITEM_CLASS_NAME} value="suggestion">
-            <ModeIndicator />
+          <DropdownMenuRadioItem value="suggestion">
             {modeItems.suggestion.icon}
             {modeItems.suggestion.label}
           </DropdownMenuRadioItem>
