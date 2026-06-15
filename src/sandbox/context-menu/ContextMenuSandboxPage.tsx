@@ -11,7 +11,7 @@ type DemoLog = {
   id: string;
   label: string;
 };
-type MenuTheme = "dark" | "light";
+type MenuTheme = "dark" | "light" | "glass";
 type MenuCssProperties = CSSProperties & {
   "--menu-bg": string;
   "--menu-fg": string;
@@ -46,6 +46,24 @@ const MENU_THEME_STYLES: Record<MenuTheme, MenuCssProperties> = {
     "--menu-separator": "#edf0f3",
     "--menu-accent": "#2563eb",
   },
+  glass: {
+    "--menu-bg": "color-mix(in srgb, var(--ds-semantic-color-background-floating, #ffffff) 72%, transparent)",
+    "--menu-fg": "var(--ds-semantic-color-text-strong, #202124)",
+    "--menu-muted": "var(--ds-semantic-color-text-secondary, #6b7280)",
+    "--menu-border": "var(--ds-semantic-color-border-floating, rgba(148, 163, 184, 0.38))",
+    "--menu-selected-bg": "var(--interactive-accent-hover-bg, rgba(37, 99, 235, 0.1))",
+    "--menu-selected-fg": "var(--ds-semantic-color-text-strong, #202124)",
+    "--menu-separator": "color-mix(in srgb, var(--ds-semantic-color-border-floating, #e5e7eb) 72%, transparent)",
+    "--menu-accent": "var(--theme-accent-primary-600, #2563eb)",
+    backdropFilter: "blur(var(--ds-elevation-blur-floating, 18px))",
+    boxShadow: "var(--ds-semantic-elevation-floating, 0 18px 48px rgba(15, 23, 42, 0.16)), inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(148, 163, 184, 0.18)",
+    WebkitBackdropFilter: "blur(var(--ds-elevation-blur-floating, 18px))",
+  },
+};
+const MENU_THEME_LABEL: Record<MenuTheme, string> = {
+  dark: "Dark",
+  glass: "Glass",
+  light: "Light",
 };
 const createDemoLogId = (): string => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 const clampMenuPosition = (x: number, y: number): MenuPosition => ({
@@ -79,7 +97,7 @@ const ContextMenuSandboxPage = () => {
     () =>
       ContextMenuBuilder.build((menu) =>
         menu
-          .header(`${menuTheme === "light" ? "Light" : "Dark"} context menu demo`)
+          .header(`${MENU_THEME_LABEL[menuTheme]} context menu demo`)
           .entry("Open", { id: "open", shortcut: "Enter", run: () => pushLog("Open") })
           .entry("Rename", { id: "rename", shortcut: "F2", run: () => pushLog("Rename") })
           .actionCheckedWithDisabled(
@@ -129,7 +147,7 @@ const ContextMenuSandboxPage = () => {
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">nouse/context-menu</p>
           <h1 className="mt-2 text-2xl font-semibold">ContextMenu trial</h1>
-          <p className="mt-2 text-sm text-slate-600">白い領域を右クリック。Dark / Light のボタンで両方の menu を比較できます。</p>
+          <p className="mt-2 text-sm text-slate-600">白い領域を右クリック。Dark / Light / Glass のボタンで menu の質感を比較できます。</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <button className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white" type="button" onClick={(event) => openMenuFromButton(event, "dark")}>
@@ -137,6 +155,9 @@ const ContextMenuSandboxPage = () => {
           </button>
           <button className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm" type="button" onClick={(event) => openMenuFromButton(event, "light")}>
             Open light menu
+          </button>
+          <button className="rounded-lg border border-white/70 bg-white/70 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm backdrop-blur-md" type="button" onClick={(event) => openMenuFromButton(event, "glass")}>
+            Open glass menu
           </button>
           <span className="text-sm text-slate-600">theme: {menuTheme}</span>
           <span className="text-sm text-slate-600">menu: {menuPosition ? `open (${Math.round(menuPosition.x)}, ${Math.round(menuPosition.y)})` : "closed"}</span>
