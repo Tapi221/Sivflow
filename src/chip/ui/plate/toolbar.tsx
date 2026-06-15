@@ -221,7 +221,7 @@ const ToolbarMenuGroup = ({ children, className, label, ...props }: React.Compon
     <>
       <DropdownMenuSeparator className={cn("hidden", "mb-0 shrink-0 peer-has-[[role=menuitem]]/menu-group:block peer-has-[[role=menuitemradio]]/menu-group:block peer-has-[[role=option]]/menu-group:block")} />
       <DropdownMenuRadioGroup {...props} className={cn("hidden peer/menu-group group/menu-group my-1.5 has-[[role=menuitem]]:block has-[[role=menuitemradio]]:block has-[[role=option]]:block", className)}>
-        {label ? <DropdownMenuLabel className="select-none font-semibold text-muted-foreground text-xs">{label}</DropdownMenuLabel> : null}
+        {label !== undefined && <DropdownMenuLabel className="select-none font-semibold text-muted-foreground text-xs">{label}</DropdownMenuLabel>}
         {children}
       </DropdownMenuRadioGroup>
     </>
