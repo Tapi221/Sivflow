@@ -171,7 +171,6 @@ const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => handleClose(false)}>閉じる</Button>
           <Button onClick={handleImport} disabled={isParsing || isImporting || !state.loaded || (destinationMode === "new" && newCardSetName.trim() === "") || (destinationMode === "existing" && !selectedExistingCardSet)}>{isImporting ? "インポート中..." : destinationMode === "existing" ? "既存セットへ追加する" : "インポートする"}</Button>
         </DialogFooter>
       </DialogContent>
