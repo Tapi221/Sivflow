@@ -1,30 +1,20 @@
 import { useMemo } from "react";
 import { PopoverMenu, usePopoverMenuHandle } from "@/nouse/popover-menu/PopoverMenu";
 
-const MENU_STYLE = {
-  minWidth: 200,
-  padding: 4,
-  border: "1px solid #363636",
-  borderRadius: 8,
-  background: "#202020",
-  color: "#dedede",
-  boxShadow: "0 12px 32px rgb(0 0 0 / 35%), 0 2px 8px rgb(0 0 0 / 25%)",
-};
-
 const PopoverMenuExample = () => {
   const handle = usePopoverMenuHandle();
   const menu = useMemo(
     () => () => (
-      <div role="menu" style={MENU_STYLE}>
-        <button type="button" role="menuitem" onClick={() => console.log("New File")}>
-          New File
+      <div className="pm-zed-menu" role="menu">
+        <button className="pm-zed-menu-item" type="button" role="menuitem" onClick={() => console.log("New File")}>
+          <span className="pm-zed-menu-item-label">New File</span>
         </button>
-        <button type="button" role="menuitem" onClick={() => console.log("Open File")}>
-          Open File
+        <button className="pm-zed-menu-item" type="button" role="menuitem" onClick={() => console.log("Open File")}>
+          <span className="pm-zed-menu-item-label">Open File</span>
         </button>
-        <hr />
-        <button type="button" role="menuitem" onClick={() => console.log("New Terminal")}>
-          New Terminal
+        <div className="pm-zed-menu-separator" />
+        <button className="pm-zed-menu-item" type="button" role="menuitem" onClick={() => console.log("New Terminal")}>
+          <span className="pm-zed-menu-item-label">New Terminal</span>
         </button>
       </div>
     ),
@@ -41,6 +31,7 @@ const PopoverMenuExample = () => {
       >
         {({ open, triggerProps }) => (
           <button
+            className="pm-zed-trigger"
             type="button"
             aria-pressed={open}
             title={open ? undefined : "New."}
@@ -50,7 +41,7 @@ const PopoverMenuExample = () => {
           </button>
         )}
       </PopoverMenu>
-      <button type="button" onClick={() => handle.toggle()} style={{ marginLeft: 12 }}>
+      <button className="pm-zed-trigger" type="button" onClick={() => handle.toggle()} style={{ marginLeft: 12 }}>
         Toggle from handle
       </button>
     </div>
