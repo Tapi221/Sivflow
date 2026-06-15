@@ -1,5 +1,6 @@
 "use client";
 
+import "@/chip/panel/Surface.Panel.css";
 import * as React from "react";
 import { exportToDocx } from "@platejs/docx-io";
 import { MarkdownPlugin } from "@platejs/markdown";
@@ -112,7 +113,7 @@ const ButtonClickPanelNoteExport = (props: DropdownMenuProps) => {
           <ArrowDownToLineIcon className="size-4" />
         </ToolbarButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="dropdown-menu__content--export-surface-texture">
+      <DropdownMenuContent align="start" className="surface-panel">
         <DropdownMenuGroup>
           <DropdownMenuItem onSelect={exportToHtml}>Export as HTML</DropdownMenuItem>
           <DropdownMenuItem onSelect={exportToPdf}>Export as PDF</DropdownMenuItem>
