@@ -193,7 +193,6 @@ const MfDeckImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => handleClose(false)}>閉じる</Button>
           <Button onClick={handleImport} disabled={isParsing || isImporting || !archive || issueSummary.errorCount > 0 || (destinationMode === "new" && newCardSetName.trim() === "")}>{isImporting ? "インポート中..." : destinationMode === "existing" ? "既存セットへ追加する" : "インポートする"}</Button>
         </DialogFooter>
       </DialogContent>
