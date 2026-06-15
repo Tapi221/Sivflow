@@ -60,19 +60,19 @@ const CardEditorPaneMediaDialogsInner = ({ imageDialogSide, setImageDialogSide, 
   return (
     <>
       <MediaDialog title="画像を追加" open={Boolean(imageDialogSide)} onClose={() => setImageDialogSide(null)} maxWidth="max-w-3xl">
-        {imageDialogSide ? (
+        {imageDialogSide !== null && (
           <MediaUploader type="image" urls={getDialogImages(imageDialogSide)} onChange={(next) => setDialogImages(imageDialogSide, next)} maxFiles={10} />
-        ) : null}
+        )}
       </MediaDialog>
       <MediaDialog title="音声を追加" open={Boolean(audioDialogSide)} onClose={() => setAudioDialogSide(null)}>
-        {audioDialogSide ? (
+        {audioDialogSide !== null && (
           <MediaUploader type="audio" urls={getDialogAudios(audioDialogSide).map(toAudioUrl)} onChange={(next) => setDialogAudios(audioDialogSide, next.map(toDialogAudio))} maxFiles={10} />
-        ) : null}
+        )}
       </MediaDialog>
       <MediaDialog title="リンクを追加" open={Boolean(linkDialogSide)} onClose={() => setLinkDialogSide(null)}>
-        {linkDialogSide ? (
+        {linkDialogSide !== null && (
           <LinkEditor items={getReferenceItems(linkDialogSide)} onChange={(next) => setReferenceItems(linkDialogSide, next)} />
-        ) : null}
+        )}
       </MediaDialog>
     </>
   );
