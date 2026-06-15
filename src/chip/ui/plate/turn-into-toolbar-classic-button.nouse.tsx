@@ -8,7 +8,7 @@ import { KEYS } from "platejs";
 import { useEditorRef, useSelectionFragmentProp } from "platejs/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { getBlockType, setBlockType } from "@/components/editor/transforms";
-import { ToolbarButton, ToolbarMenuGroup } from "./toolbar";
+import { ToolbarButton, ToolbarMenuGroup } from "@/chip/ui/plate/toolbar";
 
 const turnIntoItems = [
   { icon: <PilcrowIcon />, label: "Text", value: KEYS.p },
