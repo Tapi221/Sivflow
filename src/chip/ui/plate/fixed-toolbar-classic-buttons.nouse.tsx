@@ -17,8 +17,8 @@ import { LinkToolbarButton } from "@/chip/ui/plate/link-toolbar-button";
 import { MarkToolbarButton } from "@/chip/ui/plate/mark-toolbar-button";
 import { MediaToolbarButton } from "@/chip/button/Button.Note.Media";
 import { ButtonClickPanelNoteMode } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Mode";
-import { MoreToolbarButton } from "@/chip/ui/plate/more-toolbar-button";
-import { TableToolbarButton } from "@/chip/ui/plate/table-toolbar-button";
+import { MoreToolbarButton } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.More";
+import { ButtonClickPanelNoteTable } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Table";
 import { ToggleToolbarButton } from "@/chip/button/Button.Note.Toggle";
 import { ToolbarGroup } from "@/chip/ui/plate/toolbar";
 
@@ -73,7 +73,7 @@ const FixedToolbarButtons = () => {
           </ToolbarGroup>
           <ToolbarGroup>
             <LinkToolbarButton />
-            <TableToolbarButton />
+            <ButtonClickPanelNoteTable />
             <ButtonClickPanelNoteEmoji />
           </ToolbarGroup>
           <ToolbarGroup>

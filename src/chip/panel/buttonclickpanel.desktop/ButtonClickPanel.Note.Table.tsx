@@ -7,33 +7,27 @@ import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Combine, Grid3x3Icon, Table,
 import { KEYS } from "platejs";
 import { useEditorPlugin, useEditorSelector } from "platejs/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-import { ToolbarButton } from "@/chip/ui/toolbar";
 import { cn } from "@/lib/utils";
+import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
 const TablePicker = () => {
   const { editor, tf } = useEditorPlugin(TablePlugin);
-
   const [tablePicker, setTablePicker] = React.useState({
     grid: Array.from({ length: 8 }, () => Array.from({ length: 8 }).fill(0)),
     size: { colCount: 0, rowCount: 0 },
   });
-
   const onCellMove = (rowIndex: number, colIndex: number) => {
     const newGrid = [...tablePicker.grid];
-
     for (let i = 0; i < newGrid.length; i++) {
       for (let j = 0; j < newGrid[i].length; j++) {
-        newGrid[i][j] =
-          i >= 0 && i <= rowIndex && j >= 0 && j <= colIndex ? 1 : 0;
+        newGrid[i][j] = i >= 0 && i <= rowIndex && j >= 0 && j <= colIndex ? 1 : 0;
       }
     }
-
     setTablePicker({
       grid: newGrid,
       size: { colCount: colIndex + 1, rowCount: rowIndex + 1 },
     });
   };
-
   return (
     <div
       className="flex! m-0 flex-col p-0"
@@ -45,16 +39,11 @@ const TablePicker = () => {
     >
       <div className="grid size-32 grid-cols-8 gap-0.5 p-1">
         {tablePicker.grid.map((rows, rowIndex) =>
-          rows.map((value, columIndex) => (
+          rows.map((value, colIndex) => (
             <div
-              key={`(${rowIndex},${columIndex})`}
-              className={cn(
-                "col-span-1 size-3 border border-solid bg-secondary",
-                !!value && "border-current",
-              )}
-              onMouseMove={() => {
-                onCellMove(rowIndex, columIndex);
-              }}
+              key={`(${rowIndex},${colIndex})`}
+              className={cn("col-span-1 size-3 border border-solid bg-secondary", !!value && "border-current")}
+              onMouseMove={() => onCellMove(rowIndex, colIndex)}
             />
           )),
         )}
@@ -65,13 +54,11 @@ const TablePicker = () => {
     </div>
   );
 };
-const TableToolbarButton = (props: DropdownMenuProps) => {
+const ButtonClickPanelNoteTable = (props: DropdownMenuProps) => {
   const tableSelected = useEditorSelector((editor) => editor.api.some({ match: { type: KEYS.table } }), []);
-
   const { editor, tf } = useEditorPlugin(TablePlugin);
   const [open, setOpen] = React.useState(false);
   const mergeState = useTableMergeState();
-
   return (
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false} {...props}>
       <DropdownMenuTrigger asChild>
@@ -79,13 +66,12 @@ const TableToolbarButton = (props: DropdownMenuProps) => {
           <Table />
         </ToolbarButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="flex w-44 min-w-0 flex-col"
-        align="start"
-      >
+      <DropdownMenuContent className="flex w-44 min-w-0 flex-col" align="start">
         <DropdownMenuGroup>
           <DropdownMenuSub>
-            <DropdownMenuSubTrigger className="gap-2 data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
+            <DropdownMenuSubTrigger
+              className="gap-2 data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+            >
               <Grid3x3Icon className="size-4" />
               <span>Table</span>
             </DropdownMenuSubTrigger>
@@ -231,4 +217,4 @@ const TableToolbarButton = (props: DropdownMenuProps) => {
   );
 };
 
-export { TableToolbarButton };
+export { ButtonClickPanelNoteTable };
