@@ -51,6 +51,8 @@ const CardSetMetric = ({ label, value }: CardSetMetricProps) => {
 };
 const CardSetLibraryCard = ({ row, onOpenCardSet }: CardSetLibraryCardProps) => {
   const updatedAt = row.updatedAt ?? row.createdAt;
+  const shouldRenderDescription = row.description !== null && row.description !== undefined && row.description.length > 0;
+  const shouldRenderTags = row.tags.length > 0;
 
   return (
     <button
@@ -72,14 +74,12 @@ const CardSetLibraryCard = ({ row, onOpenCardSet }: CardSetLibraryCardProps) => 
           </span>
         </span>
       </div>
-
-      {row.description ? (
+      {shouldRenderDescription && (
         <p className="mt-3 line-clamp-2 text-xs font-medium leading-6 text-[#66615a]">
           {row.description}
         </p>
-      ) : null}
-
-      {row.tags.length > 0 ? (
+      )}
+      {shouldRenderTags && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {row.tags.map((tag) => (
             <span
@@ -90,8 +90,7 @@ const CardSetLibraryCard = ({ row, onOpenCardSet }: CardSetLibraryCardProps) => 
             </span>
           ))}
         </div>
-      ) : null}
-
+      )}
       <div className="mt-4 grid grid-cols-2 gap-2">
         <CardSetMetric label="Cards" value={formatCardCount(row.cardCount)} />
         <CardSetMetric label="Updated" value={formatDate(updatedAt)} />
@@ -114,13 +113,12 @@ const CardSetLibraryDashboard = ({
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-[#fff]">
-      {showToolbar ? (
+      {showToolbar && (
         <PdfLibraryWorkspaceToolbar
           activeSection="flashcard"
           onSelectSection={() => undefined}
         />
-      ) : null}
-
+      )}
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-4 sm:px-6">
         {rows.length > 0 ? (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -147,5 +145,5 @@ const CardSetLibraryDashboard = ({
   );
 };
 
-export default CardSetLibraryDashboard;
 export { CardSetLibraryDashboard };
+export type { CardSetLibraryDashboardProps };
