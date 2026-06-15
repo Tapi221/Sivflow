@@ -1,1 +1,1 @@
-// tag palette moved to @shared/design-tokens/color/Color.Tag
+// moved to @shared/design-tokens/color/Color.Tag
