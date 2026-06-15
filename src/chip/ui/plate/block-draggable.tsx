@@ -141,12 +141,12 @@ const Gutter = ({ children, className, ...props }: React.ComponentProps<"div">) 
       {...props}
       className={cn(
         "slate-gutterLeft",
-        "-translate-x-full absolute top-0 z-50 flex h-full cursor-text hover:opacity-100 sm:opacity-0",
+        "-translate-x-full absolute top-0 z-50 flex h-full cursor-text opacity-0 hover:opacity-100 sm:opacity-0",
         getPluginByType(editor, element.type)?.node.isContainer
           ? "group-hover/container:opacity-100"
           : "group-hover:opacity-100",
         isSelectionAreaVisible && "hidden",
-        !selected && "opacity-0",
+        selected && "opacity-100 sm:opacity-100",
         className,
       )}
       contentEditable={false}
@@ -292,7 +292,6 @@ const Draggable = (props: PlateElementProps) => {
     </div>
   );
 };
-
 const DragHandle = React.memo(({
   isDragging,
   previewRef,
