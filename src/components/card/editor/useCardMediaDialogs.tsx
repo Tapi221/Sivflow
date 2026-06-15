@@ -108,16 +108,16 @@ const useCardMediaDialogs = ({ getSideAttachments, setSideAttachments }: UseCard
       return (
         <div className="flex flex-nowrap items-center gap-1.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
           <button type="button" className={base} onClick={() => setImageDialogSide(side)} aria-label="画像を追加">
-            {StratisImageIcon ? <StratisComponentIcon icon={StratisImageIcon} className={iconClassName} /> : null}
-            {imageCount > 0 ? <span>x{imageCount}</span> : null}
+            {StratisImageIcon !== null && <StratisComponentIcon icon={StratisImageIcon} className={iconClassName} />}
+            {imageCount > 0 && <span>x{imageCount}</span>}
           </button>
           <button type="button" className={base} onClick={() => setAudioDialogSide(side)} aria-label="音声を追加">
-            {StratisAudioIcon ? <StratisComponentIcon icon={StratisAudioIcon} className={iconClassName} /> : null}
-            {audioCount > 0 ? <span>x{audioCount}</span> : null}
+            {StratisAudioIcon !== null && <StratisComponentIcon icon={StratisAudioIcon} className={iconClassName} />}
+            {audioCount > 0 && <span>x{audioCount}</span>}
           </button>
           <button type="button" className={base} onClick={openLinkDialog} aria-label="リンクを追加">
-            {StratisLinkIcon ? <StratisComponentIcon icon={StratisLinkIcon} className={iconClassName} /> : null}
-            {linkCount > 0 ? <span>x{linkCount}</span> : null}
+            {StratisLinkIcon !== null && <StratisComponentIcon icon={StratisLinkIcon} className={iconClassName} />}
+            {linkCount > 0 && <span>x{linkCount}</span>}
           </button>
         </div>
       );
