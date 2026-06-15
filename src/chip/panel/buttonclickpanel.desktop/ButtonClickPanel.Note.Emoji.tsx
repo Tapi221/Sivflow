@@ -10,7 +10,7 @@ import * as Popover from "@radix-ui/react-popover";
 import { AppleIcon, ClockIcon, CompassIcon, FlagIcon, LeafIcon, LightbulbIcon, MusicIcon, SearchIcon, SmileIcon, StarIcon, XIcon } from "lucide-react";
 import { Button } from "@/chip/ui/button/button";
 import { ToolbarButton } from "@/chip/ui/plate/toolbar";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/toolchip/Tooltip.Editor";
 import { cn } from "@/lib/utils";
 
 type ButtonClickPanelNoteEmojiProps = {

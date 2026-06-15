@@ -11,7 +11,7 @@ import type { PlateEditor, PlateElementProps, RenderNodeWrapper } from "platejs/
 import { MemoizedChildren, useEditorRef, useElement, usePluginOption } from "platejs/react";
 import { useSelected } from "platejs/react";
 import { Button } from "@/chip/ui/button/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/chip/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/chip/toolchip/Tooltip.Editor";
 import { cn } from "@/lib/utils";
 
 const UNDRAGGABLE_KEYS = [KEYS.column, KEYS.tr, KEYS.td];

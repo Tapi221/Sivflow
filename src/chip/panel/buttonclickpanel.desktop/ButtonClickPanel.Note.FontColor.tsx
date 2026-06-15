@@ -12,7 +12,7 @@ import type { PaletteNoteFontColorToken } from "@shared/design-tokens/color/Pale
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { buttonVariants } from "@/chip/ui/button/button";
 import { ToolbarButton, ToolbarMenuGroup } from "@/chip/ui/plate/toolbar";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/toolchip/Tooltip.Editor";
 import { cn } from "@/lib/utils";
 
 type ColorDropdownMenuItemProps = {
