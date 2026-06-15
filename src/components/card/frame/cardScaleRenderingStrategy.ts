@@ -1,5 +1,5 @@
-import type { ResolveScaleRenderingStrategyArgs, ScaleRenderingMode, ScaleRenderingStrategy } from "@/shared/zoom/scaleRenderingStrategy";
-import { detectCssZoomSupport, resolveScaleRenderingStrategy } from "@/shared/zoom/scaleRenderingStrategy";
+import type { ResolveScaleRenderingStrategyArgs, ScaleRenderingMode, ScaleRenderingStrategy } from "@/utils/zoom/scaleRenderingStrategy";
+import { detectCssZoomSupport, resolveScaleRenderingStrategy } from "@/utils/zoom/scaleRenderingStrategy";
 
 
 
