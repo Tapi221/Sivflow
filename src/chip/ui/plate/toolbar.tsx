@@ -8,7 +8,7 @@ import { cva } from "class-variance-authority";
 import { ChevronDown } from "lucide-react";
 import { DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuSeparator } from "@/chip/panel/dropdown-menu";
 import { Separator } from "@/chip/ui/separator";
-import { Tooltip, TooltipTrigger } from "@/chip/ui/tooltip";
+import { Tooltip, TooltipTrigger } from "@/chip/toolchip/Tooltip.Editor";
 import { cn } from "@/lib/utils";
 
 type ToolbarTooltipProps = {
