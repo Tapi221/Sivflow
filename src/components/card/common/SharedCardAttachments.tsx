@@ -26,24 +26,23 @@ const SharedCardAttachments = ({ attachments, className }: SharedCardAttachments
     () => normalizeReferences(attachments),
     [attachments],
   );
-
-  if (audioUrls.length === 0 && references.length === 0) {
+  const shouldRenderAudio = audioUrls.length > 0;
+  const shouldRenderReferences = references.length > 0;
+  if (!shouldRenderAudio && !shouldRenderReferences) {
     return null;
   }
-
   return (
     <div
       className={cn("flex w-full flex-col gap-3 px-2 pt-3", className)}
       data-card-attachments="true"
       data-card-no-flip="true"
     >
-      {audioUrls.length > 0 ? (
+      {shouldRenderAudio && (
         <div className="rounded-xl border border-slate-200/80 bg-white/80 px-3 py-3 shadow-sm">
           <AudioPlayer urls={audioUrls} />
         </div>
-      ) : null}
-
-      {references.length > 0 ? (
+      )}
+      {shouldRenderReferences && (
         <section className="rounded-xl border border-slate-200/80 bg-white/80 px-3 py-3 shadow-sm">
           <div className="mb-2 text-xs font-semibold tracking-wide text-slate-500">
             References
@@ -52,7 +51,6 @@ const SharedCardAttachments = ({ attachments, className }: SharedCardAttachments
             {references.map((reference, index) => {
               const href = reference.url?.trim() ?? "";
               const label = reference.name?.trim() || href;
-
               return (
                 <li key={`${href}-${index}`} className="min-w-0">
                   {href ? (
@@ -74,7 +72,7 @@ const SharedCardAttachments = ({ attachments, className }: SharedCardAttachments
             })}
           </ul>
         </section>
-      ) : null}
+      )}
     </div>
   );
 };
