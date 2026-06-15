@@ -85,7 +85,7 @@ const PdfLibraryDashboard = ({ documents, folders, onOpenDocument, showToolbar =
 
   return (
     <div className="flex h-full min-h-0 w-full flex-col bg-[#fff]">
-      {showToolbar ? <PdfLibraryWorkspaceToolbar activeSection="pdf" onSelectSection={() => undefined} onAddPdf={handleToolbarAddDocument} /> : null}
+      {showToolbar && <PdfLibraryWorkspaceToolbar activeSection="pdf" onSelectSection={() => undefined} onAddPdf={handleToolbarAddDocument} />}
       <input ref={fileInputRef} type="file" accept={currentFileAccept} multiple className="hidden" onChange={handleToolbarFileInputChange} />
       <div className="grid min-h-0 w-full grid-cols-1 gap-4 pt-4">
         <div className="flex min-h-0 min-w-0 flex-col gap-4">
@@ -98,5 +98,5 @@ const PdfLibraryDashboard = ({ documents, folders, onOpenDocument, showToolbar =
   );
 };
 
-export default PdfLibraryDashboard;
 export { PdfLibraryDashboard };
+export type { PdfLibraryDashboardProps };
