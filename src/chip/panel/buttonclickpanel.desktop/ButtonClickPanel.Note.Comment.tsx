@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import type * as React from "react";
 import { ArrowUpIcon } from "lucide-react";
 import type { Value } from "platejs";
 import { Plate } from "platejs/react";
