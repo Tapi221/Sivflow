@@ -46,6 +46,10 @@ const AppContent = () => {
   useStartupTasks(currentUser?.uid);
 
   const isTestBypass = isTestBypassEnabled();
+  const devStandaloneRouteElement = getDevStandaloneRouteElement(isTestBypass);
+  if (devStandaloneRouteElement) {
+    return devStandaloneRouteElement;
+  }
 
   if (loading) {
     return <LoadingFallback />;
@@ -53,11 +57,6 @@ const AppContent = () => {
 
   if (!currentUser && !isTestBypass) {
     return isMobileLoginViewport ? <MobileLoginPage /> : <LoginPage />;
-  }
-
-  const devStandaloneRouteElement = getDevStandaloneRouteElement(isTestBypass);
-  if (devStandaloneRouteElement) {
-    return devStandaloneRouteElement;
   }
 
   return (
