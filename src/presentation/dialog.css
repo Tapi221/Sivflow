@@ -45,8 +45,18 @@
   }
 
   .app-modal-content-frame {
+    position: fixed;
+    inset: 0;
     z-index: 100;
+    display: flex;
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
     padding: 50px;
+    translate: none;
+    transform: none;
   }
 
   .app-modal-surface {
