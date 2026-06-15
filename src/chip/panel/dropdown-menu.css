@@ -86,9 +86,12 @@
   padding: 0.375rem 0.5rem;
 }
 
-.dropdown-menu__checkbox-item,
-.dropdown-menu__radio-item {
+.dropdown-menu__checkbox-item {
   padding: 0.375rem 0.5rem 0.375rem 2rem;
+}
+
+.dropdown-menu__radio-item {
+  padding: 0.375rem 2rem 0.375rem 0.5rem;
 }
 
 .dropdown-menu__checkbox-item.pl-2,
@@ -113,6 +116,11 @@
   align-items: center;
   justify-content: center;
   pointer-events: none;
+}
+
+.dropdown-menu__check-indicator-icon {
+  width: 1rem;
+  height: 1rem;
 }
 
 .dropdown-menu__item:focus,
@@ -193,12 +201,6 @@
 .dropdown-menu__indicator-icon {
   width: 1rem;
   height: 1rem;
-}
-
-.dropdown-menu__indicator-dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  fill: currentcolor;
 }
 
 .dropdown-menu__label {
