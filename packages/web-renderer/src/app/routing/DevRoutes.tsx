@@ -83,6 +83,9 @@ const withDevRouteFallback = (element: ReactNode) => {
   return <Suspense fallback={null}>{element}</Suspense>;
 };
 const getDevStandaloneRouteElement = (isTestBypass: boolean): ReactNode | null => {
+  if (ContextMenuSandboxPage && window.location.pathname === "/sandbox/context-menu") {
+    return withDevRouteFallback(<ContextMenuSandboxPage />);
+  }
   if (CodeBlockVisualTest && isTestBypass && window.location.pathname === "/codeblock-visual-test") {
     return withDevRouteFallback(<CodeBlockVisualTest />);
   }
