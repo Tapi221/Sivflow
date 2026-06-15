@@ -78,6 +78,13 @@ const ContextMenuSandboxPage = DEV_MODE
     })),
   )
   : null;
+const PopoverMenuSandboxPage = DEV_MODE
+  ? lazy(() =>
+    import("@/sandbox/popover-menu/PopoverMenuSandboxPage").then(({ PopoverMenuSandboxPage }) => ({
+      default: PopoverMenuSandboxPage,
+    })),
+  )
+  : null;
 
 const withDevRouteFallback = (element: ReactNode) => {
   return <Suspense fallback={null}>{element}</Suspense>;
@@ -85,6 +92,9 @@ const withDevRouteFallback = (element: ReactNode) => {
 const getDevStandaloneRouteElement = (isTestBypass: boolean): ReactNode | null => {
   if (ContextMenuSandboxPage && window.location.pathname === "/sandbox/context-menu") {
     return withDevRouteFallback(<ContextMenuSandboxPage />);
+  }
+  if (PopoverMenuSandboxPage && window.location.pathname === "/sandbox/popover-menu") {
+    return withDevRouteFallback(<PopoverMenuSandboxPage />);
   }
   if (CodeBlockVisualTest && isTestBypass && window.location.pathname === "/codeblock-visual-test") {
     return withDevRouteFallback(<CodeBlockVisualTest />);
@@ -114,6 +124,7 @@ const getDevRouteElements = () => {
       {CalendarDndSandboxPage && <Route path="sandbox/calendar-dnd/*" element={withDevRouteFallback(<CalendarDndSandboxPage />)} />}
       {EventChipEditorSandboxPage && <Route path="sandbox/eventchip-editor/*" element={withDevRouteFallback(<EventChipEditorSandboxPage />)} />}
       {ContextMenuSandboxPage && <Route path="sandbox/context-menu/*" element={withDevRouteFallback(<ContextMenuSandboxPage />)} />}
+      {PopoverMenuSandboxPage && <Route path="sandbox/popover-menu/*" element={withDevRouteFallback(<PopoverMenuSandboxPage />)} />}
     </>
   );
 };
