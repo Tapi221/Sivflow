@@ -154,13 +154,13 @@ const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
                 <SelectItem value="existing" disabled={cardSets.length === 0}>既存カードセットへ追加</SelectItem>
               </SelectContent>
             </Select>
-            {destinationMode === "new" ? <Input value={newCardSetName} onChange={(event) => setNewCardSetName(event.target.value)} placeholder="新規カードセット名" disabled={isParsing || isImporting} /> : null}
-            {destinationMode === "existing" ? (
+            {destinationMode === "new" && <Input value={newCardSetName} onChange={(event) => setNewCardSetName(event.target.value)} placeholder="新規カードセット名" disabled={isParsing || isImporting} />}
+            {destinationMode === "existing" && (
               <Select value={selectedCardSetId} onValueChange={setSelectedCardSetId} disabled={cardSets.length === 0}>
                 <SelectTrigger><SelectValue placeholder="追加先カードセットを選択" /></SelectTrigger>
                 <SelectContent>{cardSets.map((cardSet) => <SelectItem key={cardSet.id} value={cardSet.id}>{cardSet.name?.trim() ?? "無題のカードセット"}</SelectItem>)}</SelectContent>
               </Select>
-            ) : null}
+            )}
             <Input type="file" accept={`.mfcard,${MF_CARD_MIME_TYPE},application/json`} onChange={handleFileChange} disabled={isParsing || isImporting} />
             <p className="text-xs leading-relaxed text-slate-500">MFCard は単体カードの共有形式です。復習履歴や同期状態は取り込みません。</p>
           </div>
