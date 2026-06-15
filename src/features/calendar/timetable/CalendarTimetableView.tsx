@@ -7,7 +7,7 @@ import * as stratisIcons from "stratis-ui-icons";
 import { getTagColorStyle } from "@/chip/budge/tag/tagColor";
 import { CalendarTimetableCourseEditorDialog } from "@/chip/panel/dialog.desktop/Dialog.CalendarTimetableCourseEditor";
 import { CalendarTimetableSettingsDialog } from "@/chip/panel/dialog.desktop/Dialog.CalendarTimetableSettings";
-import { CalendarTimetableSyllabusCatalogDialog } from "@/chip/panel/dialog.desktop/Dialog.CalendarTimetableSyllabusCatalog";
+import { ScheduleSyllabusCatalogDialog } from "@/chip/panel/dialog.desktop/Dialog.Schedule.SyllabusCatalog";
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
 import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
@@ -100,10 +100,10 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
           <span className={cn("rounded-full border border-slate-200 bg-zinc-50 font-semibold tabular-nums text-zinc-500", isCompact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-xs")}>{weekRangeLabel}</span>
           <span className={cn("rounded-full border border-slate-200 bg-white font-semibold text-slate-500", isCompact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-xs")}>{visibleDayCount}日 / {periods.length}限</span>
           <span className={cn("rounded-full border border-slate-200 bg-white font-semibold text-slate-500", isCompact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-xs")}>{isLoading ? "読み込み中" : `${registeredCountLabel}登録済み`}</span>
-          <span className={cn("rounded-full border border-slate-200 bg-white font-semibold text-slate-500", isCompact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-xs")}>授業DB {syllabusCourses.length}件</span>
+          <span className={cn("rounded-full border border-slate-200 bg-white font-semibold text-slate-500", isCompact ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-xs")}>シラバス {syllabusCourses.length}件</span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <button type="button" className={cn("rounded-full border border-zinc-200 bg-white font-bold text-blue-500 shadow-sm hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500", isCompact ? "h-8 px-3 text-xs" : "h-9 px-4 text-xs")} onClick={handleOpenSyllabusCatalog}>授業DB</button>
+          <button type="button" className={cn("rounded-full border border-zinc-200 bg-white font-bold text-blue-500 shadow-sm hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500", isCompact ? "h-8 px-3 text-xs" : "h-9 px-4 text-xs")} onClick={handleOpenSyllabusCatalog}>シラバス</button>
           <button type="button" aria-label="時間割設定" className={cn("flex items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-500 shadow-sm hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500", isCompact ? "h-8 w-8" : "h-9 w-9")} onClick={handleOpenSettings}>{StratisSettingsIcon ? <StratisSettingsIcon className={cn(isCompact ? "h-3.5 w-3.5" : "h-4 w-4")} aria-hidden="true" focusable="false" /> : null}</button>
         </div>
       </div>
@@ -142,7 +142,7 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
       </div>
       {isCourseEditorOpen ? <CalendarTimetableCourseEditorDialog course={editingCourse} semesterId={activeSemesterId} initialSlot={editingSlot} periods={periods} visibleDayCount={visibleDayCount} onSave={saveCourse} onDelete={deleteCourse} onClose={handleCloseCourseEditor} /> : null}
       {isSettingsOpen ? <CalendarTimetableSettingsDialog periods={periods} visibleDayCount={visibleDayCount} onChangeVisibleDayCount={updateVisibleDayCount} onAddPeriod={addPeriod} onUpdatePeriod={updatePeriod} onDeletePeriod={deletePeriod} onClose={handleCloseSettings} /> : null}
-      {isSyllabusCatalogOpen ? <CalendarTimetableSyllabusCatalogDialog activeSemesterId={activeSemesterId} institutions={institutions} periods={periods} syllabusCourses={syllabusCourses} onSearch={searchSyllabusCourses} onSaveSyllabusCourse={saveSyllabusCourse} onAddCourseFromSyllabus={addCourseFromSyllabus} onClose={handleCloseSyllabusCatalog} /> : null}
+      {isSyllabusCatalogOpen ? <ScheduleSyllabusCatalogDialog activeSemesterId={activeSemesterId} institutions={institutions} periods={periods} syllabusCourses={syllabusCourses} onSearch={searchSyllabusCourses} onSaveSyllabusCourse={saveSyllabusCourse} onAddCourseFromSyllabus={addCourseFromSyllabus} onClose={handleCloseSyllabusCatalog} /> : null}
     </div>
   );
 };
