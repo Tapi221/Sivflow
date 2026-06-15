@@ -2,11 +2,9 @@ import React from "react";
 import { ExplorerChromePdfIcon } from "@/components/explorer/icons";
 import { buildRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
+import { SidebarEntityRow } from "@/components/folder/explorer/rows/SidebarEntityRow";
+import { EXPLORER_ROW_CONTENT_CLASS, EXPLORER_ROW_ICON_SLOT_CLASS, EXPLORER_ROW_INPUT_CLASS, EXPLORER_ROW_LEADING_SLOT_CLASS, EXPLORER_ROW_TITLE_SLOT_CLASS, FOLDER_ROW_ICON_SIZE_CLASS, FOLDER_ROW_TITLE_CLASS } from "@/components/folder/explorer/rows/shared";
 import { cn } from "@/lib/utils";
-import { EXPLORER_ROW_CONTENT_CLASS, EXPLORER_ROW_ICON_SLOT_CLASS, EXPLORER_ROW_INPUT_CLASS, EXPLORER_ROW_LEADING_SLOT_CLASS, EXPLORER_ROW_TITLE_SLOT_CLASS, FOLDER_ROW_ICON_SIZE_CLASS, FOLDER_ROW_TITLE_CLASS } from "./shared";
-import { SidebarEntityRow } from "./SidebarEntityRow";
-
-
 
 type ExplorerItemType = "folder" | "cardSet" | "card" | "document";
 interface RenameTarget {
@@ -17,8 +15,6 @@ type TreeNode = {
 };
 interface DocumentRowProps {
   treeNode: TreeNode & { kind: "document"; }; style: React.CSSProperties; depth: number; isSelected: boolean; editingId: string | null; editingName: string; renameCancelledRef: React.MutableRefObject<boolean>; editInputRef: React.MutableRefObject<HTMLInputElement | null>; setEditingId: React.Dispatch<React.SetStateAction<string | null>>; setEditingName: React.Dispatch<React.SetStateAction<string>>; openRowMenuId: string | null; setOpenRowMenuId: React.Dispatch<React.SetStateAction<string | null>>; onItemSelect: (item: { type: "card" | "cardSet" | "document"; id: string; }) => void; canRename: boolean; canDelete: boolean; handleDelete: (id: string, type: ExplorerItemType) => void; handleRenameConfirm: (target?: RenameTarget) => Promise<void>; setRowRef: (id: string, node: HTMLElement | null) => void; }
-
-
 
 const DocumentRow = ({ treeNode, style, depth, isSelected, editingId, editingName, renameCancelledRef, editInputRef, setEditingId, setEditingName, openRowMenuId, setOpenRowMenuId, onItemSelect, canRename, canDelete, handleDelete, handleRenameConfirm, setRowRef }: DocumentRowProps) => {
   const rowMenuId = `document:${treeNode.rawId}`;
@@ -32,7 +28,6 @@ const DocumentRow = ({ treeNode, style, depth, isSelected, editingId, editingNam
     editInputRef.current = node; if (!node || !isEditing) return; node.focus({ preventScroll: true }); node.select(); try {
       node.setSelectionRange(0, node.value.length); } catch {
       return; } }, [editInputRef, isEditing]);
-
   return (
     <SidebarEntityRow
       containerStyle={style}
@@ -69,7 +64,5 @@ const DocumentRow = ({ treeNode, style, depth, isSelected, editingId, editingNam
     />
   );
 };
-
-
 
 export { DocumentRow };
