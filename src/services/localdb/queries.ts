@@ -3,7 +3,7 @@ import { Dexie } from "dexie";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
 import { warnOncePerSession } from "@/services/localDBRuntimeState";
-import { normalizeDate } from "@/shared/codec/date";
+import { normalizeDate } from "@/utils/codec/date";
 import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
 
 
