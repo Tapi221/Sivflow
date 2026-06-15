@@ -5,8 +5,8 @@ import { AIChatPlugin } from "@platejs/ai/react";
 import { BLOCK_CONTEXT_MENU_ID, BlockMenuPlugin, BlockSelectionPlugin } from "@platejs/selection/react";
 import { KEYS } from "platejs";
 import { useEditorPlugin, useEditorReadOnly, usePluginOption } from "platejs/react";
-import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuItem, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from "@/chip/ui/menu/context-menu";
 import { useIsTouchDevice } from "@/chip/ui/hooks/useIsTouchDevice";
+import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuItem, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from "@/chip/ui/menu/context-menu";
 import { setBlockType } from "@/components/editor/transforms";
 
 type Value = "askAI" | null;
