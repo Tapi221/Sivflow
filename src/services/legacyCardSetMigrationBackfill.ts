@@ -295,4 +295,4 @@ const ensureLegacyCardsBackfilled = async (userId: string) => {
   await promise;
 };
 
-export { backfillLegacyCardsBackfilled, ensureLegacyCardsBackfilled };".replace("backfillLegacyCardsBackfilled
+export { backfillLegacyCardsToCardSets, ensureLegacyCardsBackfilled };
