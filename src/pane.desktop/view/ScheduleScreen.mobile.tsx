@@ -3,7 +3,7 @@ import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
 import { addDays, endOfDay, endOfMonth, format, startOfDay, startOfMonth, subDays } from "date-fns";
 import type { ComponentType, SVGProps } from "react";
 import * as stratisIcons from "stratis-ui-icons";
-import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
+import { CarvePanel } from "@/chip/panel/panel/CarvePanel.desktop";
 import { createCalendarYearEventDisplayResolver } from "@/features/calendar/calendarEventSourcePriority";
 import { attachCalendarEventDisplayMetadata, filterCalendarEventsBySourceVisibility } from "@/features/calendar/calendarEventVisibility";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";

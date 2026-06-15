@@ -8,7 +8,7 @@ import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { SettingsWorkspaceDialog } from "@/chip/panel/dialog.desktop/Dialog.SettingsWorkspace";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { NoteDocumentEditor } from "@/components/note/NoteDocumentEditor";
-import { CarvePanel } from "@/components/panel/CarvePanel.desktop";
+import { CarvePanel } from "@/chip/panel/panel/CarvePanel.desktop";
 import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";
 import type { BreadcrumbCrumb, ExplorerBreadcrumbContext } from "@/features/breadcrumbs/breadcrumbs.types";
 import { areExplorerBreadcrumbContextsEqual, EMPTY_EXPLORER_BREADCRUMB_CONTEXT } from "@/features/breadcrumbs/breadcrumbs.types";

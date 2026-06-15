@@ -6,7 +6,7 @@ import { BLOCK_CONTEXT_MENU_ID, BlockMenuPlugin, BlockSelectionPlugin } from "@p
 import { KEYS } from "platejs";
 import { useEditorPlugin, useEditorReadOnly, usePluginOption } from "platejs/react";
 import { useIsTouchDevice } from "@/chip/ui/hooks/useIsTouchDevice";
-import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuItem, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from "@/chip/ui/menu/context-menu";
+import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuItem, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.ContextMenu";
 import { setBlockType } from "@/components/editor/transforms";
 
 type Value = "askAI" | null;
