@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 
-
-
 type MaterialKind = "textbook" | "pdf" | "video" | "link" | "other";
 type MaterialItem = {
   id: string;
@@ -23,8 +21,6 @@ type MaterialCardProps = {
   onDelete: (id: string) => void;
 };
 
-
-
 const MATERIALS_STORAGE_KEY = "sivflow:materials";
 const INITIAL_FORM_STATE: MaterialFormState = { title: "", kind: "textbook", description: "", source: "" };
 const MATERIAL_KIND_OPTIONS: Array<{ label: string; value: MaterialKind; }> = [
@@ -35,8 +31,6 @@ const MATERIAL_KIND_OPTIONS: Array<{ label: string; value: MaterialKind; }> = [
   { label: "その他", value: "other" },
 ];
 const MATERIAL_KIND_LABELS: Record<MaterialKind, string> = MATERIAL_KIND_OPTIONS.reduce((labels, option) => ({ ...labels, [option.value]: option.label }), {} as Record<MaterialKind, string>);
-
-
 
 const createMaterialId = (): string => {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
@@ -64,9 +58,9 @@ const sortMaterials = (materials: MaterialItem[]): MaterialItem[] => {
   return [...materials].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 };
 
-
-
 const MaterialCard = ({ material, onDelete }: MaterialCardProps) => {
+  const shouldRenderDescription = material.description.trim().length > 0;
+  const shouldRenderSource = material.source.trim().length > 0;
   return (
     <article className="rounded-2xl border border-stone-300 bg-white p-4 shadow-lg">
       <div className="flex items-start justify-between gap-3">
@@ -78,8 +72,8 @@ const MaterialCard = ({ material, onDelete }: MaterialCardProps) => {
           削除
         </button>
       </div>
-      {material.description ? <p className="mt-3 whitespace-pre-wrap text-xs font-medium leading-7 text-stone-600">{material.description}</p> : null}
-      {material.source ? <p className="mt-3 truncate text-xs font-medium text-stone-500">参照元: {material.source}</p> : null}
+      {shouldRenderDescription && <p className="mt-3 whitespace-pre-wrap text-xs font-medium leading-7 text-stone-600">{material.description}</p>}
+      {shouldRenderSource && <p className="mt-3 truncate text-xs font-medium text-stone-500">参照元: {material.source}</p>}
     </article>
   );
 };
@@ -141,7 +135,7 @@ const Materials = () => {
               メモ
               <textarea className="min-h-24 rounded-xl border border-stone-300 bg-stone-50 px-3 py-2 text-sm font-medium text-stone-900 outline-none focus:border-stone-400" value={formState.description} onChange={handleDescriptionChange} />
             </label>
-            {error ? <p className="text-xs font-semibold text-red-700">{error}</p> : null}
+            {error !== null && <p className="text-xs font-semibold text-red-700">{error}</p>}
             <button type="submit" className="h-10 rounded-xl bg-stone-900 px-4 text-xs font-bold text-white hover:bg-stone-700">
               登録する
             </button>
@@ -155,6 +149,4 @@ const Materials = () => {
   );
 };
 
-
-
-export default Materials;
+export { Materials };
