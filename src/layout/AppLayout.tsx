@@ -24,7 +24,6 @@ type SidebarLongPressState = {
 
 const LEFT_PANEL_COLLAPSED_STORAGE_KEY = "sivflow:layout:left-panel-collapsed";
 const LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY = "flashcard-master:layout:left-panel-collapsed";
-const LEFT_PANEL_COLLAPSED_STORAGE_VALUE = "collapsed";
 const MOBILE_CALENDAR_SIDEBAR_SELECTOR = "#mobile-calendar-sidebar";
 const MOBILE_CALENDAR_SIDEBAR_TOGGLE_SELECTOR = ".app-layered-directory__workspace-toggle";
 const MOBILE_CALENDAR_SIDEBAR_CLOSE_BUTTON_SELECTOR = 'button[aria-label="サイドバーを閉じる"]';
@@ -33,42 +32,23 @@ const SIDEBAR_LONG_PRESS_CONTEXT_MENU_TARGET_SELECTOR = ".app-layered-directory 
 const SIDEBAR_LONG_PRESS_DELAY_MS = 520;
 const SIDEBAR_LONG_PRESS_MOVE_TOLERANCE_PX = 10;
 
-const readStoredLeftPanelCollapsed = (): boolean => {
-  if (typeof window === "undefined") return false;
-
-  try {
-    const stored = window.localStorage.getItem(LEFT_PANEL_COLLAPSED_STORAGE_KEY);
-    if (stored === LEFT_PANEL_COLLAPSED_STORAGE_VALUE) return true;
-
-    const legacyStored = window.localStorage.getItem(LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY);
-    if (legacyStored !== LEFT_PANEL_COLLAPSED_STORAGE_VALUE) return false;
-
-    window.localStorage.setItem(LEFT_PANEL_COLLAPSED_STORAGE_KEY, LEFT_PANEL_COLLAPSED_STORAGE_VALUE);
-    window.localStorage.removeItem(LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY);
-    return true;
-  } catch {
-    return false;
-  }
-};
-const readIsMobileSettingsRouteViewport = (): boolean => {
-  if (typeof window === "undefined") return false;
-  return window.matchMedia(MOBILE_SETTINGS_ROUTE_MEDIA_QUERY).matches;
-};
-const persistLeftPanelCollapsed = (isCollapsed: boolean) => {
+const clearStoredLeftPanelCollapsed = () => {
   if (typeof window === "undefined") return;
 
   try {
-    if (isCollapsed) {
-      window.localStorage.setItem(LEFT_PANEL_COLLAPSED_STORAGE_KEY, LEFT_PANEL_COLLAPSED_STORAGE_VALUE);
-      window.localStorage.removeItem(LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY);
-      return;
-    }
-
     window.localStorage.removeItem(LEFT_PANEL_COLLAPSED_STORAGE_KEY);
     window.localStorage.removeItem(LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY);
   } catch {
     // localStorage が使えない環境では React state の状態だけ維持する。
   }
+};
+const readStoredLeftPanelCollapsed = (): boolean => {
+  clearStoredLeftPanelCollapsed();
+  return false;
+};
+const readIsMobileSettingsRouteViewport = (): boolean => {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia(MOBILE_SETTINGS_ROUTE_MEDIA_QUERY).matches;
 };
 const getMobileCalendarSidebarCloseButton = (target: EventTarget | null): HTMLButtonElement | null => {
   if (!(target instanceof Element)) return null;
@@ -191,7 +171,7 @@ const AppLayout = () => {
   }, []);
 
   useEffect(() => {
-    persistLeftPanelCollapsed(isLeftPanelCollapsed);
+    clearStoredLeftPanelCollapsed();
   }, [isLeftPanelCollapsed]);
 
   useEffect(() => {
