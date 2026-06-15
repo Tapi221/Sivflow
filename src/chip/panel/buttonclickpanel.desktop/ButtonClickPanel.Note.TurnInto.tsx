@@ -8,8 +8,8 @@ import type { TElement } from "platejs";
 import { KEYS } from "platejs";
 import { useEditorRef, useSelectionFragmentProp } from "platejs/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
+import { ToolbarButton, ToolbarMenuGroup } from "@/chip/ui/plate/toolbar";
 import { getBlockType, setBlockType } from "@/components/editor/transforms";
-import { ToolbarButton, ToolbarMenuGroup } from "./toolbar";
 
 const TURN_INTO_MENU_ITEM_CLASS_NAME = "dropdown-menu__radio-item--check-end min-w-44";
 const turnIntoItems = [
