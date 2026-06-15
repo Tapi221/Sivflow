@@ -1,34 +1,19 @@
 "use client";
 
 import * as React from "react";
-
 import { acceptSuggestion, rejectSuggestion } from "@platejs/suggestion";
-
 import { SuggestionPlugin } from "@platejs/suggestion/react";
-
 import { CheckIcon, XIcon } from "lucide-react";
-
 import { useEditorPlugin, usePluginOption } from "platejs/react";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/chip/ui/avatar";
-
 import { Button } from "@/chip/button/button/button";
-
-import { Comment, CommentCreateForm, formatCommentDate } from "./comment";
-
+import { Avatar, AvatarFallback, AvatarImage } from "@/chip/ui/avatar";
+import { Comment, CommentCreateForm, formatCommentDate } from "@/chip/ui/plate/comment";
 import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
-
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
-
 import type { ResolvedSuggestion } from "@/lib/block-discussion-index";
-
 import { BLOCK_SUGGESTION_TOKEN } from "@/lib/block-discussion-index";
 
-
-
 const isResolvedSuggestion = (suggestion: ResolvedSuggestion | TDiscussion): suggestion is ResolvedSuggestion => "suggestionId" in suggestion;
-
-
 
 const BlockSuggestionCard = ({
   idx,
@@ -68,6 +53,62 @@ const BlockSuggestionCard = ({
     return items;
   };
   const [editingId, setEditingId] = React.useState<string | null>(null);
+  const suggestionSummaryContent = (() => {
+    switch (suggestion.type) {
+      case "remove":
+        return getRemoveSummaryItems(suggestion.text!).map((text, index) => (
+          <div key={index} className="flex items-center gap-2">
+            <span className="text-muted-foreground text-sm">Delete:</span>
+            <span className="text-sm">{text}</span>
+          </div>
+        ));
+      case "insert":
+        return suggestionText2Array(suggestion.newText!).map((text, index) => (
+          <div key={index} className="flex items-center gap-2">
+            <span className="text-muted-foreground text-sm">Add:</span>
+            <span className="text-sm">{text ?? "line breaks"}</span>
+          </div>
+        ));
+      case "replace":
+        return (
+          <div className="flex flex-col gap-2">
+            {suggestionText2Array(suggestion.newText!).map((text, index) => (
+              <div
+                key={index}
+                className="flex items-start gap-2 text-emerald-700"
+              >
+                <span className="text-sm">with:</span>
+                <span className="text-sm">{text ?? "line breaks"}</span>
+              </div>
+            ))}
+            {suggestionText2Array(suggestion.text!).map((text, index) => (
+              <div key={index} className="flex items-start gap-2">
+                <span className="text-muted-foreground text-sm">
+                  {index === 0 ? "Replace:" : "Delete:"}
+                </span>
+                <span className="text-sm">{text ?? "line breaks"}</span>
+              </div>
+            ))}
+          </div>
+        );
+      case "update":
+        return (
+          <div className="flex items-center gap-2">
+            <span className="text-muted-foreground text-sm">
+              {Object.keys(suggestion.properties).map((key) => (
+                <span key={key}>Un{key}</span>
+              ))}
+              {Object.keys(suggestion.newProperties).map((key) => (
+                <span key={key}>
+                  {key.charAt(0).toUpperCase() + key.slice(1)}
+                </span>
+              ))}
+            </span>
+            <span className="text-sm">{suggestion.newText}</span>
+          </div>
+        );
+    }
+  })();
   return (
     <div
       key={`${suggestion.suggestionId}-${idx}`}
@@ -90,58 +131,7 @@ const BlockSuggestionCard = ({
         </div>
         <div className="relative mt-1 mb-4 pl-8">
           <div className="flex flex-col gap-2">
-            {suggestion.type === "remove"
-              ? getRemoveSummaryItems(suggestion.text!).map((text, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <span className="text-muted-foreground text-sm">Delete:</span>
-                  <span className="text-sm">{text}</span>
-                </div>
-              ))
-              : null}
-            {suggestion.type === "insert"
-              ? suggestionText2Array(suggestion.newText!).map((text, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <span className="text-muted-foreground text-sm">Add:</span>
-                  <span className="text-sm">{text ?? "line breaks"}</span>
-                </div>
-              ))
-              : null}
-            {suggestion.type === "replace" ? (
-              <div className="flex flex-col gap-2">
-                {suggestionText2Array(suggestion.newText!).map((text, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start gap-2 text-emerald-700"
-                  >
-                    <span className="text-sm">with:</span>
-                    <span className="text-sm">{text ?? "line breaks"}</span>
-                  </div>
-                ))}
-                {suggestionText2Array(suggestion.text!).map((text, index) => (
-                  <div key={index} className="flex items-start gap-2">
-                    <span className="text-muted-foreground text-sm">
-                      {index === 0 ? "Replace:" : "Delete:"}
-                    </span>
-                    <span className="text-sm">{text ?? "line breaks"}</span>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-            {suggestion.type === "update" ? (
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground text-sm">
-                  {Object.keys(suggestion.properties).map((key) => (
-                    <span key={key}>Un{key}</span>
-                  ))}
-                  {Object.keys(suggestion.newProperties).map((key) => (
-                    <span key={key}>
-                      {key.charAt(0).toUpperCase() + key.slice(1)}
-                    </span>
-                  ))}
-                </span>
-                <span className="text-sm">{suggestion.newText}</span>
-              </div>
-            ) : null}
+            {suggestionSummaryContent}
           </div>
         </div>
         {suggestion.comments.map((comment, index) => (
@@ -155,7 +145,7 @@ const BlockSuggestionCard = ({
             setEditingId={setEditingId}
           />
         ))}
-        {hovering ? (
+        {hovering && (
           <div className="absolute top-4 right-4 flex gap-2">
             <Button
               variant="ghost"
@@ -172,14 +162,12 @@ const BlockSuggestionCard = ({
               <XIcon className="size-4" />
             </Button>
           </div>
-        ) : null}
+        )}
         <CommentCreateForm discussionId={suggestion.suggestionId} />
       </div>
       {!isLast && <div className="h-px w-full bg-muted" />}
     </div>
   );
 };
-
-
 
 export { BlockSuggestionCard, isResolvedSuggestion };
