@@ -1,14 +1,4 @@
-const BASE_ZOOM_INPUT_IGNORE_SELECTORS = [
-  "input",
-  "textarea",
-  "select",
-  "button",
-  "summary",
-  "a[href]",
-  "[role=button]",
-  "[role=slider]",
-  "[contenteditable]:not([contenteditable=false])",
-];
+const BASE_ZOOM_INPUT_IGNORE_SELECTORS = ["input", "textarea", "select", "button", "summary", "a[href]", "[role=button]", "[role=slider]", "[contenteditable]:not([contenteditable=false])"];
 const DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR = BASE_ZOOM_INPUT_IGNORE_SELECTORS.join(",");
 
 const resolveEventTargetElement = (target: EventTarget | null): Element | null => {
