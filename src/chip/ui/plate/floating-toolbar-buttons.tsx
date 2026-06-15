@@ -4,14 +4,14 @@ import { BoldIcon, Code2Icon, ItalicIcon, StrikethroughIcon, UnderlineIcon, Wand
 import { KEYS } from "platejs";
 import { useEditorReadOnly } from "platejs/react";
 import { ButtonClickPanelNoteAi } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Ai";
-import { CommentToolbarButton } from "./comment-toolbar-button";
-import { InlineEquationToolbarButton } from "./equation-toolbar-button";
-import { LinkToolbarButton } from "./link-toolbar-button";
-import { MarkToolbarButton } from "./mark-toolbar-button";
-import { MoreToolbarButton } from "./more-toolbar-button";
-import { SuggestionToolbarButton } from "./suggestion-toolbar-button";
-import { ToolbarGroup } from "./toolbar";
-import { TurnIntoToolbarButton } from "./turn-into-toolbar-button";
+import { ButtonClickPanelNoteTurnInto } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.TurnInto";
+import { CommentToolbarButton } from "@/chip/ui/plate/comment-toolbar-button";
+import { InlineEquationToolbarButton } from "@/chip/ui/plate/equation-toolbar-button";
+import { LinkToolbarButton } from "@/chip/ui/plate/link-toolbar-button";
+import { MarkToolbarButton } from "@/chip/ui/plate/mark-toolbar-button";
+import { MoreToolbarButton } from "@/chip/ui/plate/more-toolbar-button";
+import { SuggestionToolbarButton } from "@/chip/ui/plate/suggestion-toolbar-button";
+import { ToolbarGroup } from "@/chip/ui/plate/toolbar";
 
 const FloatingToolbarButtons = () => {
   const readOnly = useEditorReadOnly();
@@ -26,7 +26,7 @@ const FloatingToolbarButtons = () => {
             </ButtonClickPanelNoteAi>
           </ToolbarGroup>
           <ToolbarGroup>
-            <TurnIntoToolbarButton />
+            <ButtonClickPanelNoteTurnInto />
             <MarkToolbarButton nodeType={KEYS.bold} tooltip="Bold (⌘+B)">
               <BoldIcon />
             </MarkToolbarButton>
