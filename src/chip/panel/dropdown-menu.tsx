@@ -3,7 +3,7 @@
 import "@/chip/panel/Surface.Panel.css";
 import "@/chip/panel/dropdown-menu.css";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
-import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react";
+import { CheckIcon, ChevronRightIcon } from "lucide-react";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
 
@@ -69,12 +69,12 @@ const DropdownMenuRadioItem = ({ className, children, ...props }: React.Componen
       data-slot="dropdown-menu-radio-item"
       {...props}
     >
-      <span className="dropdown-menu__indicator">
+      {children}
+      <span className="dropdown-menu__check-indicator">
         <DropdownMenuPrimitive.ItemIndicator>
-          <CircleIcon className="dropdown-menu__indicator-dot" />
+          <CheckIcon className="dropdown-menu__check-indicator-icon" />
         </DropdownMenuPrimitive.ItemIndicator>
       </span>
-      {children}
     </DropdownMenuPrimitive.RadioItem>
   );
 };
