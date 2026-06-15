@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import type { TagColorKey } from "@/chip/budge/tag/tagColor";
-import { getTagColorKey as normalizeTagColorKey, TAG_COLOR_KEYS } from "@/chip/budge/tag/tagColor";
+import { TAG_COLOR_KEYS } from "@shared/design-tokens/color/Color.Tag";
+import type { TagColorKey } from "@shared/design-tokens/color/Color.Tag";
+import { getTagColorKey as normalizeTagColorKey } from "@/chip/budge/tag/tag.parser";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { getLocalDb } from "@/services/localdb";
 import type { TagRecord } from "@/services/localdb/types";
@@ -27,7 +28,6 @@ const genId = (): string => {
 };
 const useCardEditorTags = (): UseCardEditorTagsResult => {
   const { currentUser } = useAuthSession();
-
   const rawTags = useLiveQuery(
     async () => {
       if (!currentUser) return [] as Tag[];
@@ -37,23 +37,19 @@ const useCardEditorTags = (): UseCardEditorTagsResult => {
     [currentUser],
     [] as Tag[],
   );
-
   const tags = (rawTags ?? [])
     .filter((tag) => !tag.isDeleted)
     .map((tag) => ({
       ...tag,
       color: normalizeTagColorKey(tag.color),
     }));
-
   const tagById = useMemo(() => {
     const map = new Map<string, Tag>();
     for (const tag of tags) map.set(tag.id, tag);
     return map;
   }, [tags]);
-
   const addTag = async (name: string): Promise<Tag> => {
-    if (!currentUser) throw new Error("not authenticated");
-
+    if (!currentUser) throw new Error("login required");
     const db = (await getLocalDb(currentUser.uid)) as TagWriteCapableDb;
     const nameLower = name.toLowerCase();
     const existingCandidates = await db.tagRecords.where("[userId+nameLower]").equals([currentUser.uid, nameLower]).toArray();
@@ -63,7 +59,6 @@ const useCardEditorTags = (): UseCardEditorTagsResult => {
       }
       return new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime();
     })[0];
-
     if (existing) {
       if (existing.isDeleted) {
         const patch: Partial<Tag> = {
@@ -74,13 +69,11 @@ const useCardEditorTags = (): UseCardEditorTagsResult => {
         await db.updateItem("tagRecords", existing.id, patch as Record<string, unknown>);
         return { ...existing, ...patch, color: normalizeTagColorKey(existing.color) };
       }
-
       return {
         ...existing,
         color: normalizeTagColorKey(existing.color),
       };
     }
-
     const now = new Date();
     const newTag: Tag = {
       id: genId(),
@@ -93,11 +86,9 @@ const useCardEditorTags = (): UseCardEditorTagsResult => {
       isDeleted: false,
       deletedAt: null,
     };
-
     await db.addItem("tagRecords", newTag as unknown as Record<string, unknown>);
     return newTag;
   };
-
   return {
     tags,
     tagById,
