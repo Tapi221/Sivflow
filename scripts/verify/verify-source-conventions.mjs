@@ -5,9 +5,23 @@ import ts from "typescript";
 const ROOT_DIR = process.cwd();
 const SOURCE_DIRECTORY_PATTERNS = process.env.SOURCE_CONVENTION_TARGETS?.split(path.delimiter).filter(Boolean) ?? ["src", "apps/web/src", "apps/android/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/android-renderer/src", "shared", "functions/src", "tests", "scripts/dev", "scripts/verify"];
 const SOURCE_DIRECTORIES = SOURCE_DIRECTORY_PATTERNS.map((directory) => path.resolve(ROOT_DIR, directory));
+const SELECTION_COLOR_DIRECTORY_PATTERNS = ["src", "apps/web/src", "apps/android/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/android-renderer/src", "shared", "functions/src"];
+const SELECTION_COLOR_DIRECTORIES = SELECTION_COLOR_DIRECTORY_PATTERNS.map((directory) => path.resolve(ROOT_DIR, directory));
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx"]);
+const STYLE_EXTENSIONS = new Set([".css"]);
 const ORDER_EXCLUDED_PATH_PARTS = ["/tests/", "/scripts/", "/src/sandbox/"];
 const ORDER_EXCLUDED_FILE_SUFFIXES = [".d.ts"];
+const SHARED_SELECTION_COLOR_STYLE_PATH = path.resolve(ROOT_DIR, "src/styles/base/base.css");
+const ALLOWED_SHARED_SELECTION_SELECTOR_LINES = new Set([
+  "::sel\\65 ction {",
+  "::-moz-sel\\65 ction {",
+  "input::sel\\65 ction,",
+  "textarea::sel\\65 ction {",
+  "input::-moz-sel\\65 ction,",
+  "textarea::-moz-sel\\65 ction {",
+]);
+const FORBIDDEN_TAILWIND_SELECTION_COLOR_UTILITY_PATTERN = /(?:^|[\s"'`])(?:[A-Za-z0-9_!/[\].()-]+:)*selection:[^\s"'`<>]+/gu;
+const SELECTION_SELECTOR_PATTERN = /::(?:-moz-)?(?:sel\\65 ction|selection)/u;
 const ORDER_RANKS = {
   import: 1,
   type: 2,
@@ -26,24 +40,35 @@ const ORDER_LABELS = {
 };
 const INLINE_BLOCK_STATEMENT_MESSAGE = "ブロック開始直後の文は { と同じ行に置かず、次の行へ分けてください。";
 
-const walkSourceFiles = (directory) => {
+const walkFiles = (directory, extensions) => {
   if (!existsSync(directory)) return [];
 
   return readdirSync(directory).flatMap((entry) => {
     const entryPath = path.join(directory, entry);
     const stat = statSync(entryPath);
 
-    if (stat.isDirectory()) return walkSourceFiles(entryPath);
+    if (stat.isDirectory()) return walkFiles(entryPath, extensions);
     if (!stat.isFile()) return [];
-    if (!SOURCE_EXTENSIONS.has(path.extname(entryPath))) return [];
+    if (!extensions.has(path.extname(entryPath))) return [];
 
     return [entryPath];
   });
 };
 
+const walkSourceFiles = (directory) => walkFiles(directory, SOURCE_EXTENSIONS);
+
+const walkStyleFiles = (directory) => walkFiles(directory, STYLE_EXTENSIONS);
+
 const toPosix = (value) => value.split(path.sep).join("/");
 
 const getLineNumber = (sourceFile, position) => sourceFile.getLineAndCharacterOfPosition(position).line + 1;
+
+const getSourceLineNumber = (source, position) => source.slice(0, position).split("\n").length;
+
+const isUnderDirectory = (filePath, directory) => {
+  const relativePath = path.relative(directory, filePath);
+  return relativePath === "" || !relativePath.startsWith("..") && !path.isAbsolute(relativePath);
+};
 
 const shouldCheckStatementOrder = (filePath) => {
   const relativePath = `/${toPosix(path.relative(ROOT_DIR, filePath))}`;
@@ -51,6 +76,8 @@ const shouldCheckStatementOrder = (filePath) => {
 
   return !ORDER_EXCLUDED_PATH_PARTS.some((part) => relativePath.includes(part));
 };
+
+const shouldCheckSelectionColor = (filePath) => SELECTION_COLOR_DIRECTORIES.some((directory) => isUnderDirectory(filePath, directory));
 
 const hasExportModifier = (statement) => ts.canHaveModifiers(statement) && Boolean(ts.getModifiers(statement)?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword));
 
@@ -385,6 +412,37 @@ const checkInlineBlockStatementSpacing = (filePath, source, sourceFile) => {
   return violations;
 };
 
+const checkSelectionUtilityClasses = (filePath, source) => {
+  if (!shouldCheckSelectionColor(filePath)) return [];
+
+  const violations = [];
+  let match = FORBIDDEN_TAILWIND_SELECTION_COLOR_UTILITY_PATTERN.exec(source);
+
+  while (match) {
+    violations.push({ filePath, line: getSourceLineNumber(source, match.index), message: "文字選択色は src/styles/base/base.css の --app-highlight-bg / ::selection に集約してください。Tailwind の selection:* utility は使わないでください。" });
+    match = FORBIDDEN_TAILWIND_SELECTION_COLOR_UTILITY_PATTERN.exec(source);
+  }
+
+  FORBIDDEN_TAILWIND_SELECTION_COLOR_UTILITY_PATTERN.lastIndex = 0;
+  return violations;
+};
+
+const isAllowedSharedSelectionSelectorLine = (line) => {
+  const trimmedLine = line.trim();
+  return ALLOWED_SHARED_SELECTION_SELECTOR_LINES.has(trimmedLine) || trimmedLine.startsWith(".pdfViewer .textLayer");
+};
+
+const checkSelectionSelectors = (filePath, source) => {
+  if (!shouldCheckSelectionColor(filePath)) return [];
+
+  return source.split("\n").flatMap((line, index) => {
+    if (!SELECTION_SELECTOR_PATTERN.test(line)) return [];
+    if (filePath === SHARED_SELECTION_COLOR_STYLE_PATH && isAllowedSharedSelectionSelectorLine(line)) return [];
+
+    return [{ filePath, line: index + 1, message: "文字選択色の ::selection は src/styles/base/base.css の共通定義だけにしてください。局所的な選択色指定は追加しないでください。" }];
+  });
+};
+
 const checkSourceFile = (filePath) => {
   const source = readFileSync(filePath, "utf8");
   const scriptKind = path.extname(filePath).endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
@@ -397,13 +455,19 @@ const checkSourceFile = (filePath) => {
     return [...checkSingleLineImportExport(filePath, sourceFile, node), ...checkModuleSpecifier(filePath, sourceFile, node, specifier)];
   });
 
-  return [...importViolations, ...checkStatementOrder(filePath, source, sourceFile), ...checkBlockSpacing(filePath, source, sourceFile), ...checkInlineBlockStatementSpacing(filePath, source, sourceFile), ...checkJsxWrapperConventions(filePath, sourceFile)];
+  return [...importViolations, ...checkStatementOrder(filePath, source, sourceFile), ...checkBlockSpacing(filePath, source, sourceFile), ...checkInlineBlockStatementSpacing(filePath, source, sourceFile), ...checkJsxWrapperConventions(filePath, sourceFile), ...checkSelectionUtilityClasses(filePath, source)];
+};
+
+const checkStyleFile = (filePath) => {
+  const source = readFileSync(filePath, "utf8");
+  return checkSelectionSelectors(filePath, source);
 };
 
 const formatViolation = ({ filePath, line, message }) => `${toPosix(path.relative(ROOT_DIR, filePath))}:${line} ${message}`;
 
 const sourceFiles = SOURCE_DIRECTORIES.flatMap(walkSourceFiles);
-const violations = sourceFiles.flatMap(checkSourceFile);
+const styleFiles = SELECTION_COLOR_DIRECTORIES.flatMap(walkStyleFiles);
+const violations = [...sourceFiles.flatMap(checkSourceFile), ...styleFiles.flatMap(checkStyleFile)];
 
 if (violations.length > 0) {
   console.error("ソース規約違反:");
