@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveWheelZoomStepCount } from "@/shared/zoom/wheelZoomMath";
+import { resolveWheelZoomStepCount } from "@/utils/zoom/wheelZoomMath";
 
 describe("resolveWheelZoomStepCount", () => {
   it("少なくとも 1 ステップを返す", () => {
