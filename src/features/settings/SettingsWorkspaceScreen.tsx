@@ -3,9 +3,10 @@ import type { LocalAiSettings } from "@platform/ai/localAiSettings";
 import { getLocalAiSettings, setLocalAiSettings } from "@platform/ai/localAiSettings";
 import { testOllamaConnection } from "@platform/ai/ollamaClient";
 import type { ReactNode } from "react";
-import { Brain, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/chip/icons";
+import { Brain, ChevronDown, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/chip/icons";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import type { StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
 import { readStoredAccounts } from "@/integration/googlecalendar-integration/gcal.multi-storage";
 import { cn } from "@/lib/utils";
@@ -453,6 +454,27 @@ const SettingChoiceRow = <T extends string | number,>({ label, value, options, o
     </div>
   );
 };
+const SettingDropdownChoiceRow = <T extends string | number,>({ label, value, options, onChange }: SettingChoiceRowProps<T>) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="flex min-h-14 items-start justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
+      <span className="pt-1 text-sm font-medium leading-5 tracking-tight text-neutral-900">{label}</span>
+      <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
+        <DropdownMenuTrigger asChild>
+          <button type="button" className={cn("inline-flex min-w-36 items-center justify-between gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-sm font-semibold leading-4 text-neutral-800 outline-none transition-colors duration-100 ease-out hover:bg-stone-50 focus-visible:bg-stone-50")} onClick={() => setOpen((nextOpen) => !nextOpen)}>
+            <span className="truncate">{options.find((option) => option.value === value)?.label ?? String(value)}</span>
+            <ChevronDown className="h-4 w-4 shrink-0 text-stone-500" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-40" onCloseAutoFocus={(event) => event.preventDefault()}>
+          <DropdownMenuRadioGroup value={String(value)} onValueChange={(nextValue) => onChange(nextValue as T)}>
+            {options.map((option) => <DropdownMenuRadioItem key={String(option.value)} value={String(option.value)} onSelect={() => setOpen(false)}>{option.label}</DropdownMenuRadioItem>)}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+};
 const SettingTextInputRow = ({ label, description, value, placeholder, onChange }: SettingTextInputRowProps) => {
   return (
     <div className="flex min-h-14 items-start justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
@@ -553,7 +575,7 @@ const SettingsWorkspaceScreen = () => {
             ) : null}
             {activeSectionId === "preferences" ? (
               <SettingsSectionBlock title={copy.preferencesTitle} description={copy.preferencesDescription}>
-                <SettingChoiceRow label={copy.languageLabel} value={language} options={languageOptions} onChange={handleLanguageChange} />
+                <SettingDropdownChoiceRow label={copy.languageLabel} value={language} options={languageOptions} onChange={handleLanguageChange} />
                 <SettingChoiceRow label={copy.weekStartLabel} value={weekStartDay} options={weekStartOptions} onChange={(value) => void updateSettings({ weekStartDay: value })} />
                 <SettingToggle label={copy.notificationsLabel} description={copy.notificationsDescription} checked={settings?.notificationsEnabled ?? false} onChange={(checked) => updateBooleanSetting("notificationsEnabled", checked)} />
               </SettingsSectionBlock>
