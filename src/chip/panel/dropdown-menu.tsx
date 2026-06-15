@@ -1,6 +1,7 @@
 "use client";
 
-import "./dropdown-menu.css";
+import "@/chip/panel/Surface.Panel.css";
+import "@/chip/panel/dropdown-menu.css";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react";
 import type * as React from "react";
@@ -19,7 +20,7 @@ const DropdownMenuContent = ({ className, sideOffset = 4, ...props }: React.Comp
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
-        className={cn("dropdown-menu__content", className)}
+        className={cn("dropdown-menu__content", "surface-panel", className)}
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}
         {...props}
@@ -112,7 +113,7 @@ const DropdownMenuSubTrigger = ({ className, inset, children, ...props }: React.
 const DropdownMenuSubContent = ({ className, ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.SubContent>) => {
   return (
     <DropdownMenuPrimitive.SubContent
-      className={cn("dropdown-menu__sub-content", className)}
+      className={cn("dropdown-menu__sub-content", "surface-panel", className)}
       data-slot="dropdown-menu-sub-content"
       {...props}
     />
