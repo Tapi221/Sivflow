@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { WORKSPACE_TAB_COLOR } from "@shared/design-tokens/color/Color.WorkspaceChrome";
 import type { ComponentType, CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
 import { FileText, Layers, X } from "@/chip/icons";
 import { PlusLineIcon } from "@/chip/icons/icons.schedule";
@@ -21,6 +22,14 @@ type TabsBarProps = {
 type AppRegionStyle = CSSProperties & {
   WebkitAppRegion?: "drag" | "no-drag";
 };
+type WorkspaceTabColorVariables = CSSProperties & {
+  "--workspace-tab-active-icon": string;
+  "--workspace-tab-close-icon": string;
+  "--workspace-tab-close-icon-hover": string;
+  "--workspace-tab-close-icon-hover-bg": string;
+  "--workspace-tab-inactive-text": string;
+  "--workspace-tab-inactive-text-hover": string;
+};
 type TabIconComponent = ComponentType<{ className?: string; }>;
 type TabContextMenuState = {
   tabId: WorkspaceTab["id"];
@@ -40,7 +49,7 @@ const TABS_DRAG_SPACER_STYLE: AppRegionStyle = {
   marginRight: "var(--desktop-window-controls-width, 138px)",
 };
 const ACTIVE_TAB_SURFACE_STYLE: CSSProperties = {
-  background: "var(--app-active-tab-bg, #fff)",
+  background: `var(--app-active-tab-bg, ${WORKSPACE_TAB_COLOR.activeSurface})`,
 };
 const ACTIVE_TAB_JOIN_STYLE: CSSProperties = {};
 const ACTIVE_TAB_LEFT_CURVE_STYLE: CSSProperties = {
@@ -53,9 +62,17 @@ const ACTIVE_TAB_RIGHT_CURVE_STYLE: CSSProperties = {
   WebkitMask: "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16.5px)",
   mask: "radial-gradient(circle at 100% 0, transparent 0 16px, #000 16.5px)",
 };
-const INACTIVE_TAB_TEXT_CLASS_NAME = "text-[#b7b7b7] hover:text-[#8c8c8c]";
-const INACTIVE_TAB_ICON_CLASS_NAME = "text-[#b7b7b7] group-hover/tab:text-[#8c8c8c]";
-const INACTIVE_TAB_CLOSE_BUTTON_CLASS_NAME = "opacity-100 !text-[#b7b7b7] hover:!text-[#8c8c8c]";
+const WORKSPACE_TAB_COLOR_VARIABLES: WorkspaceTabColorVariables = {
+  "--workspace-tab-active-icon": WORKSPACE_TAB_COLOR.activeIcon,
+  "--workspace-tab-close-icon": WORKSPACE_TAB_COLOR.closeIcon,
+  "--workspace-tab-close-icon-hover": WORKSPACE_TAB_COLOR.closeIconHover,
+  "--workspace-tab-close-icon-hover-bg": WORKSPACE_TAB_COLOR.closeIconHoverBackground,
+  "--workspace-tab-inactive-text": WORKSPACE_TAB_COLOR.inactiveText,
+  "--workspace-tab-inactive-text-hover": WORKSPACE_TAB_COLOR.inactiveTextHover,
+};
+const INACTIVE_TAB_TEXT_CLASS_NAME = "text-[var(--workspace-tab-inactive-text)] hover:text-[var(--workspace-tab-inactive-text-hover)]";
+const INACTIVE_TAB_ICON_CLASS_NAME = "text-[var(--workspace-tab-inactive-text)] group-hover/tab:text-[var(--workspace-tab-inactive-text-hover)]";
+const INACTIVE_TAB_CLOSE_BUTTON_CLASS_NAME = "opacity-100 !text-[var(--workspace-tab-inactive-text)] hover:!text-[var(--workspace-tab-inactive-text-hover)]";
 const TAB_OPEN_ANIMATION_MS = 280;
 const TAB_OPEN_ANIMATION_STYLE = `
 @keyframes workspace-tab-open {
@@ -156,7 +173,6 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
   const closeTab = useWorkspaceTabsStore((state) => state.closeTab);
   const reorderTabs = useWorkspaceTabsStore((state) => state.reorderTabs);
   const createExplorerTab = useWorkspaceTabsStore((state) => state.createExplorerTab);
-
   const contextMenuRef = useRef<HTMLDivElement | null>(null);
   const [openingTabId, setOpeningTabId] = useState<WorkspaceTab["id"] | null>(lastOpenedTabId);
   const [contextMenu, setContextMenu] = useState<TabContextMenuState | null>(null);
@@ -275,6 +291,7 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
         style={{
           ...tabsSurfaceStyle,
           ...TABS_NO_DRAG_STYLE,
+          ...WORKSPACE_TAB_COLOR_VARIABLES,
         }}
         className={cn(
           "explorer-chrome-font explorer-tab-bar explorer-workspace-tabs-bar relative z-30 flex shrink-0 items-end gap-0 overflow-visible border-b-0",
@@ -287,15 +304,14 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
             const selected = tab.id === activeTabId;
             const isOpening = tab.id === openingTabId;
             const Icon = resolveTabIcon(tab);
-
             let tabStateClassName = cn("explorer-workspace-tab--inactive", INACTIVE_TAB_TEXT_CLASS_NAME);
             let iconStateClassName = INACTIVE_TAB_ICON_CLASS_NAME;
             let closeButtonStateClassName = INACTIVE_TAB_CLOSE_BUTTON_CLASS_NAME;
 
             if (selected) {
               tabStateClassName = "z-[3] text-[var(--app-titlebar-bg,var(--app-sidebar-bg))] shadow-none";
-              iconStateClassName = "text-[#8c8c8c]";
-              closeButtonStateClassName = "opacity-100 !text-[#6f7681] hover:!bg-black/5 hover:!text-[#2f3640]";
+              iconStateClassName = "text-[var(--workspace-tab-active-icon)]";
+              closeButtonStateClassName = "opacity-100 !text-[var(--workspace-tab-close-icon)] hover:!bg-[var(--workspace-tab-close-icon-hover-bg)] hover:!text-[var(--workspace-tab-close-icon-hover)]";
             }
 
             return (
@@ -410,7 +426,6 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
         </button>
         <div className="h-full min-w-0 flex-1" style={TABS_DRAG_SPACER_STYLE} aria-hidden="true" />
       </div>
-
       {contextMenuElement ? createPortal(contextMenuElement, document.body) : null}
     </>
   );
