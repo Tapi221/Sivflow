@@ -1,4 +1,4 @@
-import { resolveWheelZoomStepCount } from "@/shared/zoom/wheelZoomMath";
+import { resolveWheelZoomStepCount } from "@/utils/zoom/wheelZoomMath";
 
 
 
