@@ -1,4 +1,5 @@
-import "./panel.css";
+import "@/chip/panel/Surface.Panel.css";
+import "@/chip/panel/panel.css";
 import { memo } from "react";
 import type { AriaRole, CSSProperties, MouseEventHandler, ReactNode, RefObject } from "react";
 
@@ -13,7 +14,7 @@ type PanelProps = {
   children?: ReactNode;
 };
 
-const getPanelClassName = (className?: string): string => ["panel", className].filter(Boolean).join(" ");
+const getPanelClassName = (className?: string): string => ["panel", "surface-panel", className].filter(Boolean).join(" ");
 
 const PanelBase = ({ id, panelRef, style, className, role, ariaLabel, onContextMenu, children }: PanelProps) => {
   return (
