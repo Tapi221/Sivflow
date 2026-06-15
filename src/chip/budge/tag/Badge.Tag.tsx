@@ -1,8 +1,8 @@
 import type { SVGProps } from "react";
-import { cn } from "@/lib/utils";
+import type { TagColorKey } from "@shared/design-tokens/color/Color.Tag";
 import { X } from "@/chip/icons";
-import type { TagColorKey } from "./tagColor";
-import { getTagColorStyle } from "./tagColor";
+import { getTagColorStyle } from "@/chip/budge/tag/tag.style";
+import { cn } from "@/lib/utils";
 
 type TagBadgeProps = {
   label: string;
@@ -26,7 +26,6 @@ const TAG_BADGE_REMOVE_ICON_CLASS_NAME = "h-3 w-3";
 const normalizeTagText = (value: string): string => {
   return value.replace(LONG_DOT_SEQUENCE_PATTERN, "...");
 };
-
 const TagHashIcon = ({ className }: SVGProps<SVGSVGElement>) => (
   <svg
     aria-hidden="true"
