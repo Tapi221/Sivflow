@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
+import { useEffectiveLocalUserId } from "@/contexts/auth/useEffectiveLocalUserId";
 import { getLocalDb } from "@/services/localdb";
 import type { CardDisplayMode, CardSet } from "@/types/domain/cardSet";
 import { DEFAULT_CARD_DISPLAY_MODE, normalizeCardDisplayMode } from "@/types/domain/cardSet";
