@@ -1,15 +1,13 @@
 import React from "react";
 import type { InkDocument, InkEditTool, InkPoint, InkSide, InkStroke } from "@core/domain/card/ink/inkDocument";
 import { cloneInkDocument, createEmptyInkDocument, INK_DOCUMENT_VERSION, INK_PAPER_H, INK_PAPER_W, normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
-import { Eraser, PenLine, Redo2, Trash2, Undo2 } from "@/chip/icons";
 import { Button } from "@/chip/button/button/button";
+import { Eraser, PenLine, Redo2, Trash2, Undo2 } from "@/chip/icons";
+import type { InkHistoryState, InkLayerHandle } from "@/components/ink/inkLayer.types";
+import { saveInkToStorage } from "@/components/ink/inkStorage";
 import { cn } from "@/lib/utils";
 import type { RectLike } from "@/utils/inkCoords";
 import { clientPointToPaperPoint, paperPointToCanvasPoint, squaredDistance } from "@/utils/inkCoords";
-import type { InkHistoryState, InkLayerHandle } from "./inkLayer.types";
-import { saveInkToStorage } from "./inkStorage";
-
-
 
 interface InkLayerProps {
   cardId?: string | null;
@@ -40,8 +38,6 @@ interface InkToolbarProps {
   onClear: () => void;
 }
 
-
-
 const TOOL_STYLE: Record<
   Exclude<InkEditTool, "eraser">,
   { color: string; width: number; opacity: number; }
@@ -57,8 +53,6 @@ const TOOL_STYLE: Record<
     opacity: 0.35,
   },
 };
-
-
 
 const copyStrokes = (strokes: InkStroke[]): InkStroke[] =>
   strokes.map((stroke) => ({
@@ -85,8 +79,6 @@ const toDocSignature = (doc: InkDocument): string => {
     })),
   });
 };
-
-
 
 const InkLayer = React.memo(React.forwardRef<InkLayerHandle, InkLayerProps>(({ cardId, side, editable, tool, value, onChange, document, className, paperWidth = INK_PAPER_W, paperHeight = INK_PAPER_H, eraserRadius = 28, onDocumentChange, onHistoryChange }, ref) => {
   const containerRef = React.useRef<HTMLDivElement | null>(null);
@@ -658,5 +650,4 @@ const InkToolbar = React.memo(({ tool, canUndo, canRedo, className, onToolChange
   return (<div className={cn("pointer-events-auto inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white/90 p-1 shadow-sm backdrop-blur", className)} data-card-no-pan="true" > <Button type="button" size="icon" variant={tool === "pen" ? "default" : "ghost"} className="h-7 w-7" onClick={() => onToolChange(tool === "pen" ? null : "pen")} > <PenLine className="h-3.5 w-3.5" /> </Button> <Button type="button" size="icon" variant={tool === "eraser" ? "default" : "ghost"} className="h-7 w-7" onClick={() => onToolChange(tool === "eraser" ? null : "eraser")} > <Eraser className="h-3.5 w-3.5" /> </Button> <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={onUndo} disabled={!canUndo} > <Undo2 className="h-3.5 w-3.5" /> </Button> <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={onRedo} disabled={!canRedo} > <Redo2 className="h-3.5 w-3.5" /> </Button> <Button type="button" size="icon" variant="ghost" className="h-7 w-7 text-rose-500 hover:text-rose-600" onClick={onClear} disabled={!canUndo} > <Trash2 className="h-3.5 w-3.5" /> </Button> </div>);
 });
 InkToolbar.displayName = "InkToolbar";
-
 export { InkLayer, InkToolbar };

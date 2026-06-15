@@ -1,26 +1,15 @@
 "use client";
 
 import { useState } from "react";
-
 import { LineHeightPlugin } from "@platejs/basic-styles/react";
-
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
-
 import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
-
 import { CheckIcon, WrapText } from "lucide-react";
-
 import { useEditorRef, useSelectionFragmentProp } from "platejs/react";
-
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-
 import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
-
-
 const LINE_HEIGHT_MENU_ITEM_CLASS_NAME = "dropdown-menu__radio-item--check-end min-w-44";
-
-
 
 const ButtonClickPanelNoteLineHeight = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
@@ -57,7 +46,5 @@ const ButtonClickPanelNoteLineHeight = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
-
-
 
 export { ButtonClickPanelNoteLineHeight };

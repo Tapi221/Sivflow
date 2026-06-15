@@ -1,22 +1,13 @@
 "use client";
 
 import { useState } from "react";
-
 import type { Alignment } from "@platejs/basic-styles";
-
 import { TextAlignPlugin } from "@platejs/basic-styles/react";
-
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
-
 import { AlignCenterIcon, AlignJustifyIcon, AlignLeftIcon, AlignRightIcon } from "lucide-react";
-
 import { useEditorPlugin, useSelectionFragmentProp } from "platejs/react";
-
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-
 import { ToolbarButton } from "@/chip/ui/plate/toolbar";
-
-
 
 const items = [
   { icon: AlignLeftIcon, value: "left" },
@@ -24,8 +15,6 @@ const items = [
   { icon: AlignRightIcon, value: "right" },
   { icon: AlignJustifyIcon, value: "justify" },
 ];
-
-
 
 const ButtonClickPanelNoteAlign = (props: DropdownMenuProps) => {
   const { editor, tf } = useEditorPlugin(TextAlignPlugin);
@@ -64,7 +53,5 @@ const ButtonClickPanelNoteAlign = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
-
-
 
 export { ButtonClickPanelNoteAlign };

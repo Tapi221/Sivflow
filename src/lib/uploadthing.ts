@@ -1,8 +1,6 @@
 import type { FileRouter } from "uploadthing/server";
 import { createUploadthing } from "uploadthing/server";
 
-
-
 const f = createUploadthing();
 const ourFileRouter = {
   editorUploader: f({
@@ -21,13 +19,7 @@ const ourFileRouter = {
   })),
 } satisfies FileRouter;
 
-
-
 type OurFileRouter = typeof ourFileRouter;
 
-
-
 export { ourFileRouter };
-
-
 export type { OurFileRouter };

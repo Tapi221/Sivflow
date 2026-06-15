@@ -3,8 +3,6 @@ import type { CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTim
 import type { Table } from "dexie";
 import Dexie from "dexie";
 
-
-
 type CalendarTimetableDatabase = Dexie & {
   courses: Table<CalendarTimetableCourse, string>;
   departments: Table<CalendarTimetableDepartment, string>;
@@ -14,8 +12,6 @@ type CalendarTimetableDatabase = Dexie & {
   syllabusCourses: Table<CalendarTimetableSyllabusCourse, string>;
 };
 type CalendarTimetableSettingsRecord = Partial<CalendarTimetableSettings> | null | undefined;
-
-
 
 const TIMETABLE_SETTINGS_ID = "default";
 const DEFAULT_SEMESTER_ID = "default-semester";
@@ -47,8 +43,6 @@ const timetableDb = (() => {
   });
   return database;
 })();
-
-
 
 const createTimestamp = (): string => new Date().toISOString();
 const createCourseId = (): string => `course-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -215,7 +209,5 @@ const deleteCalendarTimetablePeriod = async (periodId: string): Promise<void> =>
     }));
   });
 };
-
-
 
 export { addCalendarTimetableCourseFromSyllabus, addCalendarTimetablePeriod, deleteCalendarTimetableCourse, deleteCalendarTimetablePeriod, ensureCalendarTimetableSeedData, getCalendarTimetableSettings, listCalendarTimetableCourses, listCalendarTimetableDepartments, listCalendarTimetableInstitutions, listCalendarTimetablePeriods, normalizeVisibleDayCount, saveCalendarTimetableCourse, saveCalendarTimetableSyllabusCourse, searchCalendarTimetableSyllabusCourses, updateCalendarTimetablePeriod, updateCalendarTimetableVisibleDayCount };

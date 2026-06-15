@@ -1,6 +1,6 @@
 import type { ReactNode, Ref } from "react";
-import { cn } from "@/lib/utils";
 import { PanelSearchField } from "@/chip/panel/panel/PanelSearchField";
+import { cn } from "@/lib/utils";
 
 interface FilterPanelShellProps {
   title?: string;

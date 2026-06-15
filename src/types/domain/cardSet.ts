@@ -1,6 +1,4 @@
-import type { BaseEntity } from "./base";
-
-
+import type { BaseEntity } from "@/types/domain/base";
 
 type CardDisplayMode = "fixed" | "fluid";
 /**
@@ -17,19 +15,11 @@ type CardSet = BaseEntity & { /** 所属する Folder の ID（null = ルート�
   tags?: string[];
 };
 
-
-
 const DEFAULT_CARD_DISPLAY_MODE: CardDisplayMode = "fixed";
-
-
 
 const normalizeCardDisplayMode = (value: unknown) => {
   return value === "fluid" ? "fluid" : "fixed";
 };
 
-
-
 export { DEFAULT_CARD_DISPLAY_MODE, normalizeCardDisplayMode };
-
-
 export type { CardDisplayMode, CardSet };

@@ -11,7 +11,5 @@ export * from "@/types/domain/note";
 export * from "@/types/domain/storageStats";
 export * from "@/types/domain/sync";
 export * from "@/types/domain/user";
-export * from "./style";
-
-
+export * from "@/types/style";
 export type { TagRecord } from "@/services/localdb/localdb.types";

@@ -1,6 +1,6 @@
 import type { Timestamp } from "firebase/firestore";
-import { normalizeDate as toDate } from "@/utils/codec/date";
 import type { ReviewLog } from "@/types/domain/base";
+import { normalizeDate as toDate } from "@/utils/codec/date";
 import { calculateResistanceScore } from "@/utils/reviewMetrics";
 import type { SubjectiveScore } from "@/utils/reviewUtils";
 import { toMillis } from "@/utils/toMillis";

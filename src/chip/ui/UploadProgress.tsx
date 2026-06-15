@@ -1,10 +1,8 @@
-import { CheckCircle2, FileText, X } from "@/chip/icons";
 import { Button } from "@/chip/button/button/button";
+import { CheckCircle2, FileText, X } from "@/chip/icons";
+import { Progress } from "@/chip/ui/progress";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
-import { Progress } from "./progress";
-
-
 
 interface UploadProgressProps {
   fileName: string;
@@ -15,8 +13,6 @@ interface UploadProgressProps {
   className?: string;
   showIcon?: boolean;
 }
-
-
 
 const UploadProgress = ({
   fileName,
@@ -115,9 +111,5 @@ const UploadProgress = ({
   );
 };
 
-
-
 export { UploadProgress };
-
-
 export type { UploadProgressProps };

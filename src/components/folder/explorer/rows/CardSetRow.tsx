@@ -2,8 +2,8 @@ import React from "react";
 import { ChevronDown, ChevronRight } from "@/chip/icons";
 import { ExplorerChromeCardSetIcon } from "@/components/explorer/icons";
 import { buildEntityRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
-import { SidebarEntityRow } from "@/components/folder/explorer/rows/SidebarEntityRow";
 import { EXPLORER_ROW_CONTENT_CLASS, EXPLORER_ROW_ICON_SLOT_CLASS, EXPLORER_ROW_INPUT_CLASS, EXPLORER_ROW_LEADING_SLOT_CLASS, EXPLORER_ROW_TITLE_SLOT_CLASS, FOLDER_ROW_ICON_ACTIVE_CLASS, FOLDER_ROW_ICON_MUTED_CLASS, FOLDER_ROW_ICON_SIZE_CLASS, FOLDER_ROW_TITLE_CLASS } from "@/components/folder/explorer/rows/shared";
+import { SidebarEntityRow } from "@/components/folder/explorer/rows/SidebarEntityRow";
 import { cn } from "@/lib/utils";
 
 type TreeNode = {

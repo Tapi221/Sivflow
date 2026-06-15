@@ -1,8 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-
-
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -63,13 +61,10 @@ const CardFooter = React.forwardRef<
   />
 ));
 
-
-
 Card.displayName = "Card";
 CardHeader.displayName = "CardHeader";
 CardTitle.displayName = "CardTitle";
 CardDescription.displayName = "CardDescription";
 CardContent.displayName = "CardContent";
 CardFooter.displayName = "CardFooter";
-
 export { Card, CardContent, CardDescription, CardHeader, CardTitle };

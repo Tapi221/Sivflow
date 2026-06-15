@@ -1,8 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-
-
 const Table = React.forwardRef<
   HTMLTableElement,
   React.TableHTMLAttributes<HTMLTableElement>
@@ -95,8 +93,6 @@ const TableCaption = React.forwardRef<
   />
 ));
 
-
-
 Table.displayName = "Table";
 TableHeader.displayName = "TableHeader";
 TableBody.displayName = "TableBody";
@@ -105,5 +101,4 @@ TableRow.displayName = "TableRow";
 TableHead.displayName = "TableHead";
 TableCell.displayName = "TableCell";
 TableCaption.displayName = "TableCaption";
-
 export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow };

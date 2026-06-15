@@ -6,8 +6,6 @@ const MIN_LAYOUT_ROWS = 3;
 const LEGACY_BASE_LAYOUT_ROWS = 18;
 const MAX_LAYOUT_ROWS = LEGACY_BASE_LAYOUT_ROWS + MAX_EXTRA_ROWS;
 
-
-
 const normalizeExtraRows = (value: unknown) => {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return 0;
@@ -18,7 +16,5 @@ const normalizeLayoutRows = (value: unknown) => {
   if (!Number.isFinite(parsed)) return DEFAULT_LAYOUT_ROWS;
   return Math.max(MIN_LAYOUT_ROWS, Math.round(parsed));
 };
-
-
 
 export { DEFAULT_LAYOUT_ROWS, LEGACY_BASE_LAYOUT_ROWS, MAX_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows };

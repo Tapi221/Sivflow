@@ -1,9 +1,7 @@
-import "./rightclickpanel.css";
+import "@/chip/panel/rightclickpanel.css";
 import { memo } from "react";
 import type { CSSProperties, MouseEvent as ReactMouseEvent, ReactNode, RefObject } from "react";
-import { Panel } from "./panel";
-
-
+import { Panel } from "@/chip/panel/panel";
 
 type RightClickPanelProps = {
   id?: string;
@@ -17,8 +15,6 @@ type RightClickPanelProps = {
   children?: ReactNode;
 };
 
-
-
 const getRightClickPanelClassName = (className?: string): string => ["right-click-panel", className].filter(Boolean).join(" ");
 const getRightClickPanelStyle = (style: CSSProperties | undefined, x: number, y: number, width: number | string): CSSProperties => ({
   ...style,
@@ -26,8 +22,6 @@ const getRightClickPanelStyle = (style: CSSProperties | undefined, x: number, y:
   top: y,
   width,
 });
-
-
 
 const RightClickPanelBase = ({ id, x, y, width, panelRef, style, className, ariaLabel, children }: RightClickPanelProps) => {
   const handleContextMenu = (event: ReactMouseEvent<HTMLDivElement>) => {
@@ -38,12 +32,7 @@ const RightClickPanelBase = ({ id, x, y, width, panelRef, style, className, aria
   return <Panel id={id} panelRef={panelRef} className={getRightClickPanelClassName(className)} role="menu" ariaLabel={ariaLabel} style={getRightClickPanelStyle(style, x, y, width)} onContextMenu={handleContextMenu}>{children}</Panel>;
 };
 
-
-
 const RightClickPanel = memo(RightClickPanelBase);
 RightClickPanel.displayName = "RightClickPanel";
-
 export { RightClickPanel };
-
-
 export type { RightClickPanelProps };

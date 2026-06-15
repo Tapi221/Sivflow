@@ -3,17 +3,15 @@ import type { KeyboardEvent, MouseEvent } from "react";
 import { TagBadge } from "@/chip/budge/tag/Badge.Tag";
 import type { TagColorKey } from "@/chip/budge/tag/tagColor";
 import { getTagColorKey } from "@/chip/budge/tag/tagColor";
+import { SurfaceButton } from "@/chip/button/button/surface-button";
 import { Tag } from "@/chip/icons";
 import { FilterPanelShell } from "@/chip/panel/panel/FilterPanelShell";
 import { PanelEmptyState } from "@/chip/panel/panel/PanelEmptyState";
 import type { SegmentedOption } from "@/chip/panel/panel/SegmentedControlGroup";
 import { SegmentedControlGroup } from "@/chip/panel/panel/SegmentedControlGroup";
-import { SurfaceButton } from "@/chip/button/button/surface-button";
 import { useExplorerStore } from "@/features/explorer/store/useExplorerStore";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
-
-
 
 type ContentTypeFilter = "card" | "pdf";
 type ToggleableFlag = "any" | "on" | "off";
@@ -49,8 +47,6 @@ type TagFilterSelectionSwitchProps = {
   onToggle: () => void;
 };
 
-
-
 const TAG_MATCH_MODE_OPTIONS = [
   { label: "いずれか (OR)", value: "any" },
   { label: "すべて (AND)", value: "all" },
@@ -67,8 +63,6 @@ const CONTENT_TYPE_OPTIONS = [
   label: string;
   value: ContentTypeFilter;
 }>;
-
-
 
 const normalizeTagParentId = (parentId: string | null | undefined): string | null => {
   return typeof parentId === "string" && parentId.trim().length > 0
@@ -195,8 +189,6 @@ const buildVisibleTagTreeItems = (
 
   return flattenTagTreeNodes(visibleNodes, 0);
 };
-
-
 
 const TagFilterSelectionSwitch = ({ label, checked, onToggle }: TagFilterSelectionSwitchProps) => {
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
@@ -411,7 +403,5 @@ const TagFilterPanel = ({ allTags, isOpen = false, className }: TagFilterPanelPr
     </FilterPanelShell>
   );
 };
-
-
 
 export { TagFilterPanel };

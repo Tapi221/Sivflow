@@ -4,16 +4,14 @@ import { getLocalAiSettings, setLocalAiSettings } from "@platform/ai/localAiSett
 import { testOllamaConnection } from "@platform/ai/ollamaClient";
 import type { ReactNode } from "react";
 import { Brain, ChevronDown, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/chip/icons";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
-import { SettingsThemeColorControl } from "./SettingsThemeColorControl";
+import { SettingsThemeColorControl } from "@/features/settings/SettingsThemeColorControl";
 import type { StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
 import { readStoredAccounts } from "@/integration/googlecalendar-integration/gcal.multi-storage";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { cn } from "@/lib/utils";
 import type { UserSettings } from "@/types";
-
-
 
 type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "ai" | "hotkey";
 type SettingsLanguage = UserSettings["language"];
@@ -71,8 +69,6 @@ type Copy = {
   weekStartOptions: Record<UserSettings["weekStartDay"], string>;
   questionDisplayOptions: Record<QuestionDisplayMode, string>;
 };
-
-
 
 const SETTINGS_SECTION_IDS: readonly SettingsSectionId[] = ["account", "preferences", "study", "editor", "audio", "ai", "hotkey"];
 const GOOGLE_PROVIDER_ID = "google.com";
@@ -194,8 +190,6 @@ const COPY: Record<SettingsLanguage, Copy> = {
   },
 };
 
-
-
 const toOptions = <T extends string | number,>(values: readonly T[], labels: Record<T, string>): SettingOption<T>[] => values.map((value) => ({ value, label: labels[value] }));
 const normalizeAccountEmail = (email: string | null | undefined): string | null => {
   const normalizedEmail = email?.trim().toLowerCase();
@@ -227,8 +221,6 @@ const getSectionIcon = (sectionId: SettingsSectionId): ReactNode => {
   return <Keyboard className={ICON_CLASS_NAME} size={16} />;
 };
 
-
-
 const Section = ({ title, description, children }: { title: string; description: string; children: ReactNode }) => (
   <section className="w-full overflow-visible border-0 bg-white" aria-label={title}>
     <div className="border-b border-stone-100 px-6 pb-4 pt-5"><h3 className="m-0 text-base font-semibold leading-6 tracking-tight text-neutral-900">{title}</h3><p className="mt-1 text-sm font-medium leading-5 text-stone-500">{description}</p></div>
@@ -250,22 +242,22 @@ const SettingChoiceRow = <T extends string | number,>({ label, value, options, o
 const SettingDropdownChoiceRow = <T extends string | number,>({ label, value, options, onChange }: SettingChoiceRowProps<T>) => {
   const [open, setOpen] = useState(false);
   return (
-  <div className="flex min-h-14 items-start justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
-    <span className="pt-1 text-sm font-medium leading-5 tracking-tight text-neutral-900">{label}</span>
-    <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
-      <DropdownMenuTrigger asChild>
-        <button type="button" className={cn("inline-flex min-w-36 items-center justify-between gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-sm font-semibold leading-4 text-neutral-800 outline-none transition-colors duration-100 ease-out hover:bg-stone-50 focus-visible:bg-stone-50")}>
-          <span className="truncate">{options.find((option) => option.value === value)?.label ?? String(value)}</span>
-          <ChevronDown className="h-4 w-4 shrink-0 text-stone-500" />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="settings-language-dropdown-content min-w-40" onCloseAutoFocus={(event) => event.preventDefault()}>
-        <DropdownMenuRadioGroup value={String(value)} onValueChange={(nextValue) => onChange(nextValue as T)}>
-          {options.map((option) => <DropdownMenuRadioItem key={String(option.value)} value={String(option.value)} onSelect={() => setOpen(false)}>{option.label}</DropdownMenuRadioItem>)}
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  </div>
+    <div className="flex min-h-14 items-start justify-between gap-4 border-b border-stone-100 px-6 py-3 last:border-b-0">
+      <span className="pt-1 text-sm font-medium leading-5 tracking-tight text-neutral-900">{label}</span>
+      <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
+        <DropdownMenuTrigger asChild>
+          <button type="button" className={cn("inline-flex min-w-36 items-center justify-between gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-sm font-semibold leading-4 text-neutral-800 outline-none transition-colors duration-100 ease-out hover:bg-stone-50 focus-visible:bg-stone-50")}>
+            <span className="truncate">{options.find((option) => option.value === value)?.label ?? String(value)}</span>
+            <ChevronDown className="h-4 w-4 shrink-0 text-stone-500" />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="settings-language-dropdown-content min-w-40" onCloseAutoFocus={(event) => event.preventDefault()}>
+          <DropdownMenuRadioGroup value={String(value)} onValueChange={(nextValue) => onChange(nextValue as T)}>
+            {options.map((option) => <DropdownMenuRadioItem key={String(option.value)} value={String(option.value)} onSelect={() => setOpen(false)}>{option.label}</DropdownMenuRadioItem>)}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };
 const SettingTextInputRow = ({ label, description, value, placeholder, onChange }: SettingTextInputRowProps) => (
@@ -325,7 +317,5 @@ const SettingsWorkspaceRootScreen = () => {
     </div>
   );
 };
-
-
 
 export { SettingsWorkspaceRootScreen };

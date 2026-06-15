@@ -1,8 +1,8 @@
 import React from "react";
 import { CONTENT_TYPO } from "@shared/design-tokens/Typography";
+import type { SharedCardContentProps } from "@/components/card/common/SharedCardContent.types";
 import { SharedCardEditScene } from "@/components/card/common/SharedCardEditScene";
 import { SharedCardViewScene } from "@/components/card/common/SharedCardViewScene";
-import type { SharedCardContentProps } from "@/components/card/common/SharedCardContent.types";
 import { CARD_CONTENT_TOP_PX } from "@/domain/card/cardGeometry.constants";
 import { cn } from "@/lib/utils";
 
@@ -58,6 +58,5 @@ const SharedCardContent = React.memo(SharedCardContentInner);
 SharedCardContentRoot.displayName = "SharedCardContentRoot";
 SharedCardContentScene.displayName = "SharedCardContentScene";
 SharedCardContent.displayName = "SharedCardContent";
-
 export { SharedCardContent };
 export type { SharedCardContentProps };

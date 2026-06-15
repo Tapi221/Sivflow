@@ -1,18 +1,11 @@
 "use client";
 
 import * as React from "react";
-
 import { useToggleButton, useToggleButtonState } from "@platejs/toggle/react";
-
 import { ChevronRight } from "lucide-react";
-
 import type { PlateElementProps } from "platejs/react";
-
 import { PlateElement } from "platejs/react";
-
 import { Button } from "@/chip/button/button/button";
-
-
 
 const ToggleElement = (props: PlateElementProps) => {
   const element = props.element;
@@ -35,7 +28,5 @@ const ToggleElement = (props: PlateElementProps) => {
     </PlateElement>
   );
 };
-
-
 
 export { ToggleElement };

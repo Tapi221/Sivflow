@@ -1,36 +1,20 @@
 "use client";
 
 import * as React from "react";
-
 import { useDraggable } from "@platejs/dnd";
-
 import { parseTwitterUrl, parseVideoUrl } from "@platejs/media";
-
 import { useMediaState } from "@platejs/media/react";
-
 import { ResizableProvider, useResizableValue } from "@platejs/resizable";
-
 import type { TResizableProps, TVideoElement } from "platejs";
-
 import type { PlateElementProps } from "platejs/react";
-
 import { PlateElement, useEditorMounted, withHOC } from "platejs/react";
-
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
-
 import ReactPlayer from "react-player";
-
+import { Caption, CaptionTextarea } from "@/chip/ui/plate/caption";
+import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "@/chip/ui/plate/resize-handle";
 import { cn } from "@/lib/utils";
 
-import { Caption, CaptionTextarea } from "./caption";
-
-import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "./resize-handle";
-
-
-
 const TWEET_PROVIDER = "twitter";
-
-
 
 const VideoElement = withHOC(ResizableProvider, (props: PlateElementProps<TVideoElement & TResizableProps>) => {
   const {
@@ -131,7 +115,5 @@ const VideoElement = withHOC(ResizableProvider, (props: PlateElementProps<TVideo
     </PlateElement>
   );
 });
-
-
 
 export { VideoElement };

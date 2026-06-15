@@ -2,8 +2,6 @@ import type { TAudioElement } from "platejs";
 import type { SlateElementProps } from "platejs/static";
 import { SlateElement } from "platejs/static";
 
-
-
 const AudioElementStatic = (props: SlateElementProps<TAudioElement>) => {
   const { element } = props;
   const caption = (element as any).caption?.[0]?.children?.[0]?.text;
@@ -17,7 +15,5 @@ const AudioElementStatic = (props: SlateElementProps<TAudioElement>) => {
     </SlateElement>
   );
 };
-
-
 
 export { AudioElementStatic };

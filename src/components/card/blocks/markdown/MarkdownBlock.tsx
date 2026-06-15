@@ -1,11 +1,9 @@
 import React from "react";
 import { NotebookPen } from "@/chip/icons";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
-import type { MarkdownReplaceBlock, MarkdownReplaceFocus } from "./MarkdownBlockContent";
-import { MarkdownBlockContent } from "./MarkdownBlockContent";
+import type { MarkdownReplaceBlock, MarkdownReplaceFocus } from "@/components/card/blocks/markdown/MarkdownBlockContent";
+import { MarkdownBlockContent } from "@/components/card/blocks/markdown/MarkdownBlockContent";
 import { cn } from "@/lib/utils";
-
-
 
 interface MarkdownBlockProps {
   markdown: string;
@@ -30,8 +28,6 @@ interface MarkdownBlockProps {
   zoom?: number;
 }
 
-
-
 const areMarkdownBlockPropsEqual = (
   prev: MarkdownBlockProps,
   next: MarkdownBlockProps,
@@ -44,8 +40,6 @@ const areMarkdownBlockPropsEqual = (
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&
   prev.zoom === next.zoom;
-
-
 
 const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
   markdown,
@@ -102,12 +96,9 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
   );
 };
 
-
-
 const MarkdownBlock = React.memo(
   MarkdownBlockInner,
   areMarkdownBlockPropsEqual,
 );
 MarkdownBlock.displayName = "MarkdownBlock";
-
 export { MarkdownBlock };

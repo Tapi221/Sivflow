@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useToast } from "@web-renderer/contexts/ToastContext";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/chip/panel/dialog.desktop/dialog/dialog";
 import { Button } from "@/chip/button/button/button";
 import { Input } from "@/chip/input-field/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/chip/panel/dialog.desktop/dialog/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/chip/ui/select";
 import type { CreateCard, CreateCardSet } from "@/features/import/application/xlsxImportUseCases";
 import { executeXlsxImport, loadXlsxImportFile } from "@/features/import/application/xlsxImportUseCases";
@@ -10,8 +10,6 @@ import type { ImportParseResult } from "@/features/import/domain/import.types";
 import { formatImportCellLabel, hasImportBlockingError } from "@/features/import/domain/import.types";
 import { downloadXlsxImportTemplate } from "@/features/import/xlsx/downloadXlsxImportTemplate";
 import type { CardSet } from "@/types";
-
-
 
 type XlsxImportCompletedPayload = {
   cardSetId: string;
@@ -30,14 +28,10 @@ type XlsxImportDialogProps = {
   createCard: CreateCard;
 };
 
-
-
 const emptyState = {
   file: null as File | null,
   result: null as ImportParseResult | null,
 };
-
-
 
 const XlsxImportDialog = ({
   open,
@@ -421,9 +415,5 @@ const XlsxImportDialog = ({
   );
 };
 
-
-
 export { XlsxImportDialog };
-
-
 export type { XlsxImportCompletedPayload };

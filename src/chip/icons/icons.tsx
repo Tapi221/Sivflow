@@ -1,9 +1,7 @@
 import { forwardRef } from "react";
 import type { ForwardRefExoticComponent, RefAttributes, SVGProps } from "react";
 import * as stratisIcons from "stratis-ui-icons";
-import { UiIcon } from "./UiIcon";
-
-
+import { UiIcon } from "@/chip/icons/UiIcon";
 
 type IconProps = SVGProps<SVGSVGElement> & {
   size?: number;
@@ -16,8 +14,6 @@ type StratisDataIcon = {
 };
 type StratisIconExport = StratisDataIcon | StratisIconComponent;
 type GlyphKind = "alert-circle" | "alert-triangle" | "arrow-left" | "arrow-right" | "arrow-up-down" | "calendar" | "check" | "chevron-down" | "chevron-left" | "chevron-right" | "chevron-up" | "circle" | "clock" | "code" | "copy" | "download" | "edit" | "external-link" | "file-edit" | "filter" | "globe" | "help" | "image" | "info" | "keyboard" | "link" | "logout" | "minus" | "pin" | "plus" | "refresh" | "search" | "settings" | "shield" | "star" | "tag" | "trash" | "type" | "user" | "volume" | "wrench" | "x" | "default";
-
-
 
 const stratisIconRegistry = stratisIcons as unknown as Record<string, StratisIconExport | undefined>;
 const svgTextEscapes: Record<string, string> = {
@@ -72,8 +68,6 @@ const glyphPaths: Record<GlyphKind, string[]> = {
   x: ["m6 6 12 12", "m18 6-12 12"],
   default: ["M6 6h12v12H6z"],
 };
-
-
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
@@ -139,8 +133,6 @@ const makeStratisIcon = (exportName: string, name: string) => {
   return makeIcon(name);
 };
 
-
-
 const MoreVertical = forwardRef<SVGSVGElement, IconProps>(({ size = 16, className, label, title, style, ...rest }, ref) => {
   const resolvedLabel = label ?? rest["aria-label"];
   const decorative = resolvedLabel === null || resolvedLabel === undefined;
@@ -193,8 +185,6 @@ const FolderOutlineIcon = forwardRef<SVGSVGElement, IconProps>(({ size = 16, ...
     </UiIcon>
   );
 });
-
-
 
 const BookOpen = makeIcon("BookOpen");
 const Brain = makeIcon("Brain");
@@ -331,16 +321,11 @@ const glyphByIconName: Record<string, GlyphKind> = {
   XCircle: "x",
 };
 
-
-
 MoreVertical.displayName = "MoreVertical";
 ChevronDown.displayName = "ChevronDown";
 ChevronRight.displayName = "ChevronRight";
 FileText.displayName = "FileText";
 Folder.displayName = "Folder";
 FolderOutlineIcon.displayName = "FolderOutlineIcon";
-
 export { AlertCircle, AlertTriangle, ArrowLeft, ArrowRight, ArrowUpDown, BookOpen, Brain, Calendar, Camera, Check, CheckCheck, CheckCircle, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Circle, Clock, Cloud, CloudOff, Construction, Copy, Database, Download, Edit, Eraser, ExternalLink, FileAudio, FileEdit, FileJson, FileText, FileWarning, FileX, Filter, Flame, Folder, Folder as FolderIcon, FolderInput, FolderOutlineIcon, FolderTree, GitMerge, Globe, GripVertical, HardDrive, HelpCircle, HelpCircle as CircleHelp, History, Image, Image as ImageIcon, Info, Keyboard, Layers, Link, List, Loader2, LogOut, Merge, MessageSquare, Minus, MoreVertical, Move, NotebookPenIcon as NotebookPen, Palette, Pause, PenLine, Pencil, Pin, Play, Plus, Redo2, RefreshCw, RotateCcw, Search, SearchX, Settings2, Shield, SigmaIcon as Sigma, Smartphone, Sparkles, Star, Tag, Trash2, Trophy, Type, Undo2, Upload, User, Volume2, X, XCircle, Zap, Code };
-
-
 export type { IconProps };

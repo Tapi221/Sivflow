@@ -1,7 +1,7 @@
 import type { TagColorKey } from "@shared/design-tokens/color/Color.Tag";
 import type { SVGProps } from "react";
-import { X } from "@/chip/icons/icons";
 import { getTagColorStyle } from "@/chip/budge/tag/tagColor";
+import { X } from "@/chip/icons/icons";
 import { cn } from "@/lib/utils";
 
 type TagBadgeProps = {

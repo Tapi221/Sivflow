@@ -1,8 +1,6 @@
-import type { Card } from "./card";
-import type { DocumentItem } from "./document";
-import type { Note } from "./note";
-
-
+import type { Card } from "@/types/domain/card";
+import type { DocumentItem } from "@/types/domain/document";
+import type { Note } from "@/types/domain/note";
 
 type ExplorerItem = | { type: "card"; data: Card; }
   | { type: "document"; data: DocumentItem; }

@@ -1,14 +1,9 @@
 "use client";
 
 import type { VariantProps } from "class-variance-authority";
-
 import { cva } from "class-variance-authority";
-
 import type { PlateElementProps } from "platejs/react";
-
 import { PlateElement } from "platejs/react";
-
-
 
 const headingVariants = cva(
   "relative mb-1 data-[nav-target=true]:rounded-md data-[nav-target=true]:bg-(--color-highlight)",
@@ -26,8 +21,6 @@ const headingVariants = cva(
   },
 );
 
-
-
 const HeadingElement = ({ variant = "h1", ...props }: PlateElementProps & VariantProps<typeof headingVariants>) => {
   return (
     <PlateElement as={variant!} className={headingVariants({ variant })} {...props}>
@@ -35,19 +28,11 @@ const HeadingElement = ({ variant = "h1", ...props }: PlateElementProps & Varian
     </PlateElement>
   );
 };
-
 const H1Element = (props: PlateElementProps) => <HeadingElement variant="h1" {...props} />;
-
 const H2Element = (props: PlateElementProps) => <HeadingElement variant="h2" {...props} />;
-
 const H3Element = (props: PlateElementProps) => <HeadingElement variant="h3" {...props} />;
-
 const H4Element = (props: PlateElementProps) => <HeadingElement variant="h4" {...props} />;
-
 const H5Element = (props: PlateElementProps) => <HeadingElement variant="h5" {...props} />;
-
 const H6Element = (props: PlateElementProps) => <HeadingElement variant="h6" {...props} />;
-
-
 
 export { HeadingElement, H1Element, H2Element, H3Element, H4Element, H5Element, H6Element };

@@ -1,8 +1,6 @@
 import type { SlateLeafProps } from "platejs/static";
 import { SlateLeaf } from "platejs/static";
 
-
-
 const HighlightLeafStatic = (props: SlateLeafProps) => {
   return (
     <SlateLeaf {...props} as="mark" className="bg-muted text-inherit">
@@ -10,7 +8,5 @@ const HighlightLeafStatic = (props: SlateLeafProps) => {
     </SlateLeaf>
   );
 };
-
-
 
 export { HighlightLeafStatic };

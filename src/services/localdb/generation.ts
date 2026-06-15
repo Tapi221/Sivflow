@@ -1,13 +1,9 @@
 import { Dexie } from "dexie";
+import { safeStringifyError } from "@/services/localdb/errors";
+import { LOCALDB_GENERATION_KEY_PREFIX, LOCALDB_GENERATION_MAX, LOCALDB_LEGACY_GENERATION_KEY_PREFIX, LOCALDB_LEGACY_NAME_PREFIX, LOCALDB_NAME_PREFIX, LOCALDB_SCHEMA_VERSION_FOR_NAME } from "@/services/localdb/localdb.constants";
 import { warnOncePerSession } from "@/services/localDBRuntimeState";
-import { safeStringifyError } from "./errors";
-import { LOCALDB_GENERATION_KEY_PREFIX, LOCALDB_GENERATION_MAX, LOCALDB_LEGACY_GENERATION_KEY_PREFIX, LOCALDB_LEGACY_NAME_PREFIX, LOCALDB_NAME_PREFIX, LOCALDB_SCHEMA_VERSION_FOR_NAME } from "./localdb.constants";
-
-
 
 const generationBumpedUsers = new Set<string>();
-
-
 
 const getLocalDbGenerationStorageKey = (userId: string): string => `${LOCALDB_GENERATION_KEY_PREFIX}${userId}`;
 const getLegacyLocalDbGenerationStorageKey = (userId: string): string => `${LOCALDB_LEGACY_GENERATION_KEY_PREFIX}${userId}`;
@@ -112,7 +108,5 @@ const deleteUserPersistentDatabases = async (userId: string) => {
 
   return failureReason;
 };
-
-
 
 export { isLocalDbGenerationStorageKey, isLocalDbPersistentDatabaseName, getKnownLocalDbNamesForUser, bumpGenerationForUser, getDatabaseNameForUser, getFallbackDatabaseNameForUser, deleteUserPersistentDatabases };

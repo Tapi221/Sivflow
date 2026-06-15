@@ -6,8 +6,6 @@ import type { RightClickPanelId } from "@/chip/panel/rightClickPanel.utils";
 import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING } from "@/chip/panel/rightClickPanel.utils";
 import { cn } from "@/lib/utils";
 
-
-
 type TagColorRightClickPanelProps = {
   x: number;
   y: number;
@@ -19,8 +17,6 @@ type TagColorRightClickPanelProps = {
   panelId?: RightClickPanelId;
   onSelectColor: (colorKey: TagColorKey) => void;
 };
-
-
 
 const TAG_COLOR_LABELS: Record<TagColorKey, string> = {
   gray: "グレー",
@@ -54,8 +50,6 @@ const TAG_COLOR_GRID_STYLE = `
   padding: ${TAG_COLOR_GRID_TOP_PADDING}px ${TAG_COLOR_GRID_HORIZONTAL_PADDING}px ${TAG_COLOR_GRID_BOTTOM_PADDING}px;
 }
 `;
-
-
 
 const TagColorRightClickPanel = ({ x, y, availableColors, currentColorKey, tagName, menuRef, noDragStyle, panelId, onSelectColor }: TagColorRightClickPanelProps) => {
   return (
@@ -94,7 +88,5 @@ const TagColorRightClickPanel = ({ x, y, availableColors, currentColorKey, tagNa
     </>
   );
 };
-
-
 
 export { TAG_COLOR_CONTEXT_MENU_WIDTH, TAG_COLOR_CONTEXT_MENU_HEIGHT, TAG_COLOR_CONTEXT_MENU_MARGIN, TagColorRightClickPanel };

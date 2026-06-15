@@ -8,14 +8,12 @@ import { CANONICAL_CARD_WIDTH, CARD_ROW_PX, layoutRowsToCardHeightPx } from "@/d
 import { normalizeLayoutRows } from "@/domain/card/extraRows";
 import { resolveEditorCardFitScale } from "@/domain/card/resolveEditorCardFitScale";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
+import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
+import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
+import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
 import type { Card, UserSettings } from "@/types";
 import type { CardBlock } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { CardFaceScene } from "./CardFaceScene";
-import { CardSurfaceLayout } from "./CardSurfaceLayout";
-import { buildCardSurfaceMetrics } from "./cardSurfacePresentation";
-
-
 
 type Side = "question" | "answer";
 type EditorSettings = Partial<UserSettings> | null | undefined;
@@ -56,8 +54,6 @@ type EmbeddedEditorFaceProps = Readonly<{
   onResizeEnd: () => void;
 }>;
 
-
-
 const isCardEntity = (value: unknown): value is Card =>
   typeof value === "object" &&
   value !== null &&
@@ -72,8 +68,6 @@ const measureSurfaceViewportWidth = (element: HTMLDivElement) =>
       Math.max(element.clientWidth, element.parentElement?.clientWidth ?? 0),
     ),
   );
-
-
 
 const EmbeddedEditorHeaderRight = ({
   mediaActions,
@@ -479,9 +473,5 @@ const DesktopEmbeddedCardEditorSurface = ({ selectedCardId, folderId, cardSetId,
   );
 };
 
-
-
 export { DesktopEmbeddedCardEditorSurface };
-
-
 export type { DesktopEmbeddedCardEditorSurfaceProps };

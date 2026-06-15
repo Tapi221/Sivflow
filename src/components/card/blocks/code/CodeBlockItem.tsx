@@ -1,11 +1,9 @@
 import React from "react";
 import { Code } from "@/chip/icons";
+import { CodeBlockEditor } from "@/components/card/blocks/code/CodeBlockEditor";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { cn } from "@/lib/utils";
 import type { CodeBlockData } from "@/types/core/code-block";
-import { CodeBlockEditor } from "./CodeBlockEditor";
-
-
 
 interface CodeBlockItemProps {
   data: CodeBlockData;
@@ -27,8 +25,6 @@ interface CodeBlockItemProps {
   zoom?: number;
 }
 
-
-
 const areCodeBlockItemPropsEqual = (
   prev: CodeBlockItemProps,
   next: CodeBlockItemProps,
@@ -42,8 +38,6 @@ const areCodeBlockItemPropsEqual = (
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&
   prev.zoom === next.zoom;
-
-
 
 const CodeBlockItemInner = ({
   data,
@@ -97,12 +91,9 @@ const CodeBlockItemInner = ({
   );
 };
 
-
-
 const CodeBlockItem = React.memo(
   CodeBlockItemInner,
   areCodeBlockItemPropsEqual,
 );
 CodeBlockItem.displayName = "CodeBlockItem";
-
 export { CodeBlockItem };

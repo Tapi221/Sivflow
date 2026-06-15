@@ -1,18 +1,11 @@
 "use client";
 
 import "@excalidraw/excalidraw/index.css";
-
 import type { TExcalidrawElement } from "@platejs/excalidraw";
-
 import { useExcalidrawElement } from "@platejs/excalidraw/react";
-
 import type { PlateElementProps } from "platejs/react";
-
 import { PlateElement } from "platejs/react";
-
 import { cn } from "@/lib/utils";
-
-
 
 const ExcalidrawElement = ({ children, className, element, ...props }: PlateElementProps<TExcalidrawElement>) => {
   const { Excalidraw, excalidrawProps } = useExcalidrawElement({ element });
@@ -25,7 +18,5 @@ const ExcalidrawElement = ({ children, className, element, ...props }: PlateElem
     </PlateElement>
   );
 };
-
-
 
 export { ExcalidrawElement };

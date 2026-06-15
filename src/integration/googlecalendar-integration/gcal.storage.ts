@@ -1,7 +1,5 @@
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
 
-
-
 const LOCAL_TOKEN_KEY = "sivflow.gcal.access_token";
 const LOCAL_TOKEN_EXPIRY_KEY = "sivflow.gcal.access_token_expiry";
 const LOCAL_REFRESH_TOKEN_KEY = "sivflow.gcal.refresh_token";
@@ -16,8 +14,6 @@ const LEGACY_PERSIST_CALENDAR_IDS_KEY = "flashcard-master.gcal.selected_calendar
 const LEGACY_PERSIST_WAS_CONNECTED_KEY = "flashcard-master.gcal.was_connected";
 const TOKEN_LIFETIME_MS = 55 * 60 * 1000;
 let cachedToken: string | null = null;
-
-
 
 const shouldStoreLocalRefreshToken = (): boolean => isDesktopLikeRuntime();
 const readMigratedStorageItem = (key: string, legacyKey: string): string | null => {
@@ -175,7 +171,5 @@ const writeWasConnected = (value: boolean): void => {
   // ignore
   }
 };
-
-
 
 export { readToken, writeToken, readTokenExpiry, clearToken, readRefreshToken, writeRefreshToken, readEmail, writeEmail, readCalendarIds, writeCalendarIds, readWasConnected, writeWasConnected };

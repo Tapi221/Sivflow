@@ -4,15 +4,13 @@ import type { RenderProps } from "prism-react-renderer";
 import { Highlight } from "prism-react-renderer";
 import type { ClipboardEvent as ReactClipboardEvent, FormEvent as ReactFormEvent, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { Check, Copy } from "@/chip/icons/icons";
+import { CodeBlockFrame } from "@/components/card/blocks/code/CodeBlockFrame";
+import { getViewerLanguageLabels, normalizeEditorLanguage, normalizeViewerLanguage } from "@/components/card/blocks/code/codeBlockLanguage";
+import { Prism } from "@/components/card/blocks/code/prismSetup";
 import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
 import { cn } from "@/lib/utils";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
-import { CodeBlockFrame } from "./CodeBlockFrame";
-import { getViewerLanguageLabels, normalizeEditorLanguage, normalizeViewerLanguage } from "./codeBlockLanguage";
-import { Prism } from "./prismSetup";
-
-
 
 type CodeBlockContentProps =
   | {
@@ -37,11 +35,7 @@ type EditorTextSelection = {
 };
 type PrismGrammar = Parameters<typeof Prism.highlight>[1];
 
-
-
 const CODE_EDITOR_TAB_TEXT = "  ";
-
-
 
 const clampTextOffset = (offset: number, textLength: number) => {
   return Math.max(0, Math.min(offset, textLength));
@@ -126,8 +120,6 @@ const setHighlightedEditorCode = (editor: HTMLElement, code: string, grammar: Pr
     editor.innerHTML = nextHtml;
   }
 };
-
-
 
 const CodeBlockContent = (props: CodeBlockContentProps) => {
   const [copied, setCopied] = useState(false);
@@ -405,7 +397,5 @@ const CodeBlockContent = (props: CodeBlockContentProps) => {
     </div>
   );
 };
-
-
 
 export { CodeBlockContent };

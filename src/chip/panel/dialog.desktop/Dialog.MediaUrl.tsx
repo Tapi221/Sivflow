@@ -3,10 +3,8 @@ import { isUrl, KEYS } from "platejs";
 import { useEditorRef } from "platejs/react";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/chip/panel/dialog.desktop/dialog/alert-dialog";
 import { Input } from "@/chip/input-field/input";
-
-
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/chip/panel/dialog.desktop/dialog/alert-dialog";
 
 type MediaConfig = {
   accept: string[];
@@ -25,8 +23,6 @@ interface MediaUrlDialogContentProps {
   nodeType: string;
   setOpen: (value: boolean) => void;
 }
-
-
 
 const MediaUrlDialogContent = ({ currentConfig, nodeType, setOpen }: MediaUrlDialogContentProps) => {
   const editor = useEditorRef();
@@ -81,9 +77,5 @@ const MediaUrlDialog = ({ open, onOpenChange, currentConfig, nodeType }: MediaUr
   );
 };
 
-
-
 export { MediaUrlDialog };
-
-
 export type { MediaConfig, MediaUrlDialogProps };

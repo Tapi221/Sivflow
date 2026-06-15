@@ -1,12 +1,10 @@
+import { notifyLocalDbFallbackMode, notifyRebuildLoopDetected, notifyStartupDegraded } from "@/services/appInitStartupNotifier";
+import { contextService } from "@/services/ContextService";
+import { IndexedDBMetadataService } from "@/services/IndexedDBMetadataService";
+import { rebuildIndexedDb } from "@/services/indexedDbRebuildCoordinator";
+import { ensureLegacyCardsBackfilled } from "@/services/legacyCardSetMigrationBackfill";
 import { getLocalDb, getLocalDBRuntimeStatus, LOCALDB_RECOVERY_GUIDE_URL } from "@/services/localdb";
-import { notifyLocalDbFallbackMode, notifyRebuildLoopDetected, notifyStartupDegraded } from "./appInitStartupNotifier";
-import { contextService } from "./ContextService";
-import { IndexedDBMetadataService } from "./IndexedDBMetadataService";
-import { rebuildIndexedDb } from "./indexedDbRebuildCoordinator";
-import { ensureLegacyCardsBackfilled } from "./legacyCardSetMigrationBackfill";
-import { warnOncePerSession } from "./localDBRuntimeState";
-
-
+import { warnOncePerSession } from "@/services/localDBRuntimeState";
 
 // NOTE: 初期化時のユーザー向け INFO 通知は UI 上で邪魔になるため表示しない。
 
@@ -115,7 +113,7 @@ class AppInitializer {
     // Phase 3: Snapshot 移行
     console.log(`[アプリ初期化:${userId}] フェーズ3: スナップショット移行を実行中...`);
     try {
-      const { snapshotService } = await import("./SnapshotService");
+      const { snapshotService } = await import("@/services/SnapshotService");
       await snapshotService.migrateFromLocalStorage(userId);
       console.log(`[アプリ初期化:${userId}] フェーズ3: スナップショット移行が完了しました`);
     } catch (error) {
@@ -144,7 +142,7 @@ class AppInitializer {
     // Phase 5: 履歴圧縮（バックグラウンド）
     console.log(`[アプリ初期化:${userId}] フェーズ5: 履歴圧縮を予約中...`);
     requestIdleCallback(() => {
-      import("./HistoryCompressionService").then(
+      import("@/services/HistoryCompressionService").then(
         ({ HistoryCompressionService }) => {
           console.log(
             `[アプリ初期化:${userId}] フェーズ5: 履歴圧縮を開始しました（バックグラウンド）`,
@@ -179,7 +177,5 @@ class AppInitializer {
 
   // NOTE: backfill 実処理は src/services/legacyCardSetMigrationBackfill.ts へ抽出
 }
-
-
 
 export { AppInitializer };

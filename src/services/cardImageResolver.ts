@@ -1,11 +1,9 @@
 import { getDownloadURL, ref as storageRef } from "firebase/storage";
 import { storage } from "@/infrastructure/firebase/client";
+import { getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
+import { getCachedRemoteUrl, setCachedRemoteUrl } from "@/services/imagePreloadCache";
 import { getLocalDb } from "@/services/localdb";
 import type { AssetRecord, ResolvableImageRef, UploadedImage } from "@/types";
-import { getOrCreateImageBlobUrl } from "./imageBlobUrlSessionCache";
-import { getCachedRemoteUrl, setCachedRemoteUrl } from "./imagePreloadCache";
-
-
 
 type ImageRecordLike =
   | {
@@ -26,8 +24,6 @@ type ResolvedCardImage = ResolvableImageRef & { url: string | null;
   source: "local_blob" | "cache" | "storage" | "none";
   status: "pending" | "uploading" | "ready" | "failed";
 };
-
-
 
 const isNonEmptyString = (value: unknown): value is string => typeof value === "string" && value.trim().length > 0;
 const getRemoteUrlFromRecord = (record: ImageRecordLike): string | null => {
@@ -204,9 +200,5 @@ const resolveCardImageUrl = async (image: ResolvableImageRef, userId?: string | 
   };
 };
 
-
-
 export { resolveCardImageUrl };
-
-
 export type { ResolvedCardImage };

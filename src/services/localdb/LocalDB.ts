@@ -4,20 +4,18 @@ import { createDeleteQueueItem, createUpsertQueueItem } from "@/application/usec
 import type { DeleteEntity, UpsertEntity } from "@/application/usecases/syncQueuePayloadGuards";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { normalizeFolderWithSilent } from "@/domain/folder/normalizers/normalizeFolder";
+import * as crud from "@/services/localdb/crud";
+import { getDatabaseNameForUser as _getDatabaseNameForUser } from "@/services/localdb/generation";
+import { attachHooks } from "@/services/localdb/hooks";
+import { clearInstance as clearInstanceImpl, getInstance as getInstanceImpl, getInstanceUserId as getInstanceUserIdImpl, getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout } from "@/services/localdb/instanceManager";
+import * as maintenance from "@/services/localdb/maintenance";
+import { defineNoteSchema } from "@/services/localdb/noteSchema";
+import { defineSchema } from "@/services/localdb/schema";
+import { CURRENT_TAG_STORE } from "@/services/localdb/tagStoreNames";
+import type { LocalDBTableMap, SyncableEntityTable, TagRecord } from "@/services/localdb/types";
 import type { AssetRecord, Card, CardSet, Document, Folder, Note, SyncConflict, SyncError, SyncHistory, SyncMetadata, SyncQueueItem, SyncSettings, UploadedImage, User, UserSettings, UserStats } from "@/types";
 import type { SyncPayloadByEntity, SyncPriority } from "@/types/domain/sync";
 import { getDeviceName, getOrCreateDeviceId } from "@/utils/device";
-import * as crud from "./crud";
-import { getDatabaseNameForUser as _getDatabaseNameForUser } from "./generation";
-import { attachHooks } from "./hooks";
-import { clearInstance as clearInstanceImpl, getInstance as getInstanceImpl, getInstanceUserId as getInstanceUserIdImpl, getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout } from "./instanceManager";
-import * as maintenance from "./maintenance";
-import { defineNoteSchema } from "./noteSchema";
-import { defineSchema } from "./schema";
-import { CURRENT_TAG_STORE } from "./tagStoreNames";
-import type { LocalDBTableMap, SyncableEntityTable, TagRecord } from "./types";
-
-
 
 declare global {
   interface GlobalThis {
@@ -31,8 +29,6 @@ type SyncDirection = "upload" | "download";
 type CrudPayload = Record<string, unknown>;
 type SyncableTableName = "cards" | "folders" | "cardSets" | "documents" | typeof CURRENT_TAG_STORE | "userSettings" | "images" | "projectMaps";
 
-
-
 const syncableTables: readonly SyncableTableName[] = ["cards", "folders", "cardSets", "documents", CURRENT_TAG_STORE, "userSettings", "images", "projectMaps"];
 const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
   cards: "card",
@@ -44,8 +40,6 @@ const entityNameMap: Record<SyncableTableName, SyncQueueItem["entity"]> = {
   images: "asset",
   projectMaps: "projectMap",
 };
-
-
 
 const isSyncableTableName = (tableName: string): tableName is SyncableTableName => (syncableTables as readonly string[]).includes(tableName);
 const getLocalDbGlobal = (): LocalDbGlobal => globalThis as LocalDbGlobal;
@@ -74,7 +68,7 @@ const toTimestamp = (value: unknown): number => {
 const compareSyncHistoryNewestFirst = (left: SyncHistory, right: SyncHistory): number => right.startedAt - left.startedAt;
 const compareSyncQueueOldestFirst = (left: SyncQueueItem, right: SyncQueueItem): number => left.createdAt - right.createdAt;
 if (import.meta.env.DEV && typeof window !== "undefined") {
-  import("./devtools")
+  import("@/services/localdb/devtools")
     .then((m) => m.installLocalDbDevtools?.())
     .catch(() => {});
 }
@@ -410,9 +404,5 @@ class LocalDB extends Dexie {
   }
 }
 
-
-
 export { getLocalDb, getLocalDbSync, initializeDB, resetLocalDBForLogout, LocalDB };
-
-
-export type { CardRelation, LocalDBInstance, LocalDBLike, LocalDBTableMap, ProjectMap, SyncableEntityTable, TagRecord } from "./types";
+export type { CardRelation, LocalDBInstance, LocalDBLike, LocalDBTableMap, ProjectMap, SyncableEntityTable, TagRecord } from "@/services/localdb/types";

@@ -1,10 +1,8 @@
 import React, { useCallback, useRef } from "react";
 import { HelpCircle } from "@/chip/icons";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
+import { QuestionBlockContent } from "@/components/card/blocks/question/QuestionBlockContent";
 import type { CardBlock } from "@/types/domain/card";
-import { QuestionBlockContent } from "./QuestionBlockContent";
-
-
 
 interface QuestionBlockProps {
   block: CardBlock;
@@ -27,8 +25,6 @@ interface QuestionBlockProps {
   zoom?: number;
 }
 
-
-
 const areQuestionBlockPropsEqual = (
   prev: QuestionBlockProps,
   next: QuestionBlockProps,
@@ -41,8 +37,6 @@ const areQuestionBlockPropsEqual = (
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&
   prev.zoom === next.zoom;
-
-
 
 const QuestionBlockInner: React.FC<QuestionBlockProps> = ({
   block,
@@ -121,12 +115,9 @@ const QuestionBlockInner: React.FC<QuestionBlockProps> = ({
   );
 };
 
-
-
 const QuestionBlock = React.memo(
   QuestionBlockInner,
   areQuestionBlockPropsEqual,
 );
 QuestionBlock.displayName = "QuestionBlock";
-
 export { QuestionBlock };

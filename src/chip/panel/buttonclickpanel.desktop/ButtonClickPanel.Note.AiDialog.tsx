@@ -1,27 +1,18 @@
 "use client";
 
 import * as React from "react";
-
 import { AIChatPlugin, AIPlugin } from "@platejs/ai/react";
-
 import { CheckIcon, CornerUpLeftIcon, Loader2Icon, PauseIcon, PenLineIcon, SendIcon, SmileIcon, WandSparklesIcon, XIcon } from "lucide-react";
-
 import { useEditorPlugin, usePluginOption } from "platejs/react";
-
 import { Button } from "@/chip/button/button/button";
-
 import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "@/chip/ui/command";
-
 import { cn } from "@/lib/utils";
-
-
 
 type ButtonClickPanelNoteAiDialogItemsProps = {
   input: string;
   setInput: (value: string) => void;
   setValue: (value: string) => void;
 };
-
 type ButtonClickPanelNoteAiAction = {
   icon: React.ReactNode;
   label: string;
@@ -29,14 +20,11 @@ type ButtonClickPanelNoteAiAction = {
   prompt?: string;
   toolName?: "edit" | "generate" | "comment";
 };
-
 type ButtonClickPanelNoteAiChatApi = {
   aiChat: {
     submit: (value: string, options?: Pick<ButtonClickPanelNoteAiAction, "prompt" | "toolName">) => unknown;
   };
 };
-
-
 
 const buttonClickPanelNoteAiActions: ButtonClickPanelNoteAiAction[] = [
   {
@@ -69,16 +57,12 @@ const buttonClickPanelNoteAiActions: ButtonClickPanelNoteAiAction[] = [
   },
 ];
 
-
-
 const submitPrompt = (input: string, action: ButtonClickPanelNoteAiAction, api: ButtonClickPanelNoteAiChatApi) => {
   void api.aiChat.submit(input, {
     prompt: action.prompt,
     toolName: action.toolName,
   });
 };
-
-
 
 const ButtonClickPanelNoteAiDialogItems = ({ input, setInput, setValue }: ButtonClickPanelNoteAiDialogItemsProps) => {
   const { api, editor } = useEditorPlugin(AIChatPlugin);
@@ -136,7 +120,6 @@ const ButtonClickPanelNoteAiDialogItems = ({ input, setInput, setValue }: Button
     </>
   );
 };
-
 const ButtonClickPanelNoteAiDialog = () => {
   const { api } = useEditorPlugin(AIChatPlugin);
   const open = usePluginOption(AIChatPlugin, "open");
@@ -202,7 +185,6 @@ const ButtonClickPanelNoteAiDialog = () => {
     </div>
   );
 };
-
 const ButtonClickPanelNoteAiLoadingBar = () => {
   const { api } = useEditorPlugin(AIChatPlugin);
   const chat = usePluginOption(AIChatPlugin, "chat");
@@ -220,10 +202,5 @@ const ButtonClickPanelNoteAiLoadingBar = () => {
   );
 };
 
-
-
 export { ButtonClickPanelNoteAiDialog, ButtonClickPanelNoteAiDialogItems, ButtonClickPanelNoteAiLoadingBar, buttonClickPanelNoteAiActions };
-
-
-
 export type { ButtonClickPanelNoteAiAction, ButtonClickPanelNoteAiDialogItemsProps };

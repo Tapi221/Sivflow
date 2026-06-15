@@ -2,14 +2,10 @@ import { useEffect } from "react";
 import { Info } from "@/chip/icons/icons";
 import type { Notification } from "@/types/notification";
 
-
-
 type InfoToastProps = {
   notification: Notification;
   onDismiss: () => void;
 };
-
-
 
 const InfoToast = ({ notification, onDismiss }: InfoToastProps) => {
   useEffect(() => {
@@ -78,7 +74,5 @@ const InfoToast = ({ notification, onDismiss }: InfoToastProps) => {
     </div>
   );
 };
-
-
 
 export { InfoToast };

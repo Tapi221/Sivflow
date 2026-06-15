@@ -1,7 +1,5 @@
 import type { User as FirebaseUser } from "firebase/auth";
-import { DEV_MODE, isLocalDevHost } from "./envGuards";
-
-
+import { DEV_MODE, isLocalDevHost } from "@/utils/envGuards";
 
 type DevPreviewUserJson = {
   displayName: string;
@@ -14,8 +12,6 @@ type DevPreviewUserJson = {
   uid: string;
 };
 
-
-
 const DEV_PREVIEW_DISABLE_PARAM = "real_auth";
 const DEV_PREVIEW_USER_ID = "dev-ipad-user";
 const DEV_PREVIEW_EMAIL = "dev-ipad-user@example.local";
@@ -23,8 +19,6 @@ const DEV_PREVIEW_DISPLAY_NAME = "Dev iPad User";
 const DEV_PREVIEW_PROVIDER_ID = "dev-preview";
 const DEV_PREVIEW_TOKEN = "dev-preview-token";
 const DEV_PREVIEW_TIME = "Thu, 01 Jan 2099 00:00:00 GMT";
-
-
 
 const getCurrentUrl = (): URL | null => {
   if (typeof window === "undefined") return null;
@@ -62,7 +56,5 @@ const disableDevPreviewSession = (): void => {
   window.history.replaceState(window.history.state, "", url.toString());
 };
 const createDevPreviewUser = (): FirebaseUser => ({ ...createDevPreviewUserJson(), metadata: { creationTime: DEV_PREVIEW_TIME, lastSignInTime: DEV_PREVIEW_TIME }, providerData: [], refreshToken: DEV_PREVIEW_TOKEN, tenantId: null, delete: async () => {}, getIdToken: async () => DEV_PREVIEW_TOKEN, getIdTokenResult: async () => ({ authTime: DEV_PREVIEW_TIME, claims: {}, expirationTime: DEV_PREVIEW_TIME, issuedAtTime: DEV_PREVIEW_TIME, signInProvider: DEV_PREVIEW_PROVIDER_ID, signInSecondFactor: null, token: DEV_PREVIEW_TOKEN }), reload: async () => {}, toJSON: createDevPreviewUserJson }) as unknown as FirebaseUser;
-
-
 
 export { isDevPreviewSessionEnabled, disableDevPreviewSession, createDevPreviewUser };

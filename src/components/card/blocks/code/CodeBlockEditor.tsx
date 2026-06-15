@@ -1,12 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@/chip/ui/select";
+import { CODE_BLOCK_MAX_RECENT_LANGUAGES, CODE_BLOCK_RECENT_LANGUAGE_STORAGE_KEY, CODE_BLOCK_SUPPORTED_LANGUAGE_VALUES, CODE_BLOCK_SUPPORTED_LANGUAGES } from "@/components/card/blocks/code/codeBlock.constants";
+import { CodeBlockContent } from "@/components/card/blocks/code/CodeBlockContent";
+import { normalizeEditorLanguage } from "@/components/card/blocks/code/codeBlockLanguage";
 import { cn } from "@/lib/utils";
 import type { CodeBlockData } from "@/types/core/code-block";
-import { CODE_BLOCK_MAX_RECENT_LANGUAGES, CODE_BLOCK_RECENT_LANGUAGE_STORAGE_KEY, CODE_BLOCK_SUPPORTED_LANGUAGE_VALUES, CODE_BLOCK_SUPPORTED_LANGUAGES } from "./codeBlock.constants";
-import { CodeBlockContent } from "./CodeBlockContent";
-import { normalizeEditorLanguage } from "./codeBlockLanguage";
-
-
 
 interface CodeBlockEditorProps {
   value?: CodeBlockData;
@@ -14,8 +12,6 @@ interface CodeBlockEditorProps {
   className?: string;
   zoom?: number;
 }
-
-
 
 const canUseLocalStorage = () => {
   try {
@@ -68,8 +64,6 @@ const pushRecentLang = (lang: string) => {
     // noop
   }
 };
-
-
 
 const CodeBlockEditor = ({ value, onChange, className, zoom }: CodeBlockEditorProps) => {
   const [recentLangs, setRecentLangs] = useState<string[]>(() => getRecentLangs());
@@ -186,7 +180,5 @@ const CodeBlockEditor = ({ value, onChange, className, zoom }: CodeBlockEditorPr
     />
   );
 };
-
-
 
 export { CodeBlockEditor };

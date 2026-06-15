@@ -1,9 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Construction } from "@/chip/icons";
 import { Button } from "@/chip/button/button/button";
-
-
+import { ArrowLeft, Construction } from "@/chip/icons";
 
 const NotImplementedPlaceholder = () => {
   const navigate = useNavigate();
@@ -31,7 +29,5 @@ const NotImplementedPlaceholder = () => {
     </div>
   );
 };
-
-
 
 export default NotImplementedPlaceholder;

@@ -9,8 +9,6 @@ type TagColorPalette = {
 };
 type TagColorPaletteMap = Record<TagColorKey, TagColorPalette>;
 
-
-
 const TAG_COLOR_KEYS = [
   "gray",
   "purple",
@@ -107,9 +105,5 @@ const TAG_COLOR_PALETTE = {
   },
 } as const satisfies TagColorPaletteMap;
 
-
-
 export { DEFAULT_TAG_COLOR_KEY, TAG_COLOR_KEYS, TAG_COLOR_PALETTE };
-
-
 export type { TagColorKey, TagColorPalette, TagColorPaletteMap };

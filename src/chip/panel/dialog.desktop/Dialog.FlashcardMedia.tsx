@@ -1,12 +1,10 @@
-import { Volume2, X } from "@/chip/icons";
-import { ReferencePopup } from "./Dialog.ReferencePopup";
-import { Dialog, DialogContent } from "@/chip/panel/dialog.desktop/dialog/dialog";
 import { Button } from "@/chip/button/button/button";
+import { Volume2, X } from "@/chip/icons";
+import { ReferencePopup } from "@/chip/panel/dialog.desktop/Dialog.ReferencePopup";
+import { Dialog, DialogContent } from "@/chip/panel/dialog.desktop/dialog/dialog";
 import type { FlashcardMediaLike } from "@/components/card/frame/flashcard.types";
 import { AudioPlayer, ImageGallery } from "@/components/card/media/CardMedia";
 import type { ReferenceBlockData } from "@/types";
-
-
 
 interface FlashcardMediaDialogsProps {
   isImagePopupOpen: boolean;
@@ -20,8 +18,6 @@ interface FlashcardMediaDialogsProps {
   activeAudioUrls: string[];
   activeReferences: ReferenceBlockData[];
 }
-
-
 
 const FlashcardMediaDialogs = ({ isImagePopupOpen, setIsImagePopupOpen, isAudioPopupOpen, setIsAudioPopupOpen, isReferencePopupOpen, setIsReferencePopupOpen, activeImageItems, activeImages, activeAudioUrls, activeReferences }: FlashcardMediaDialogsProps) => {
   return (
@@ -69,9 +65,5 @@ const FlashcardMediaDialogs = ({ isImagePopupOpen, setIsImagePopupOpen, isAudioP
   );
 };
 
-
-
 export { FlashcardMediaDialogs };
-
-
 export type { FlashcardMediaDialogsProps };

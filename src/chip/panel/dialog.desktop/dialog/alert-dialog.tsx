@@ -3,13 +3,9 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 import { buttonVariants } from "@/chip/button/button/button";
 import { cn } from "@/lib/utils";
 
-
-
 const AlertDialog = AlertDialogPrimitive.Root;
 const AlertDialogTrigger = AlertDialogPrimitive.Trigger;
 const AlertDialogPortal = AlertDialogPrimitive.Portal;
-
-
 
 const AlertDialogOverlay = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Overlay>,
@@ -109,8 +105,6 @@ const AlertDialogCancel = React.forwardRef<
   />
 ));
 
-
-
 AlertDialogOverlay.displayName = AlertDialogPrimitive.Overlay.displayName;
 AlertDialogContent.displayName = AlertDialogPrimitive.Content.displayName;
 AlertDialogHeader.displayName = "AlertDialogHeader";
@@ -120,5 +114,4 @@ AlertDialogDescription.displayName =
   AlertDialogPrimitive.Description.displayName;
 AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName;
 AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName;
-
 export { AlertDialog, AlertDialogPortal, AlertDialogOverlay, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel };

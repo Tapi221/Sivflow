@@ -8,6 +8,7 @@ type SettingsWorkspaceRootPanelProps = {
 };
 
 const SettingsWorkspaceRootContent = SettingsWorkspaceRootScreen;
+
 const SettingsWorkspaceRootPanel = ({ open, onOpenChange }: SettingsWorkspaceRootPanelProps) => {
   const handleClose = () => onOpenChange(false);
   if (!open) return null;

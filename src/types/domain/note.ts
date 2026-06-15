@@ -1,6 +1,4 @@
-import type { BaseEntity } from "./base";
-
-
+import type { BaseEntity } from "@/types/domain/base";
 
 type NoteEditor = "plate";
 type NoteContentVersion = 2;

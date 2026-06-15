@@ -4,15 +4,13 @@ import { getLocalAiSettings, setLocalAiSettings } from "@platform/ai/localAiSett
 import { testOllamaConnection } from "@platform/ai/ollamaClient";
 import type { ReactNode } from "react";
 import { Brain, ChevronDown, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/chip/icons";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import type { StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
 import { readStoredAccounts } from "@/integration/googlecalendar-integration/gcal.multi-storage";
 import { cn } from "@/lib/utils";
 import type { UserSettings } from "@/types";
-
-
 
 type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "ai" | "hotkey";
 type SettingsLanguage = UserSettings["language"];
@@ -135,8 +133,6 @@ type SettingsWorkspaceCopy = {
   localAiStatusFailed: string;
   hotkeyDescription: string;
 };
-
-
 
 const SETTINGS_SECTION_IDS: readonly SettingsSectionId[] = ["account", "preferences", "study", "editor", "audio", "ai", "hotkey"];
 const GOOGLE_PROVIDER_ID = "google.com";
@@ -360,8 +356,6 @@ const SETTINGS_WORKSPACE_COPY: Record<SettingsLanguage, SettingsWorkspaceCopy> =
 };
 const SETTINGS_NAV_ICON_CLASS_NAME = "h-4 w-4";
 
-
-
 const buildSettingsSections = (copy: SettingsWorkspaceCopy): SettingsSectionDefinition[] => SETTINGS_SECTION_IDS.map((id) => ({ id, label: copy.sections[id].label }));
 const normalizeAccountEmail = (email: string | null | undefined): string | null => {
   const normalizedEmail = email?.trim().toLowerCase();
@@ -410,8 +404,6 @@ const getSectionIcon = (sectionId: SettingsSectionId): ReactNode => {
   if (sectionId === "hotkey") return <Keyboard className={SETTINGS_NAV_ICON_CLASS_NAME} size={16} />;
   return null;
 };
-
-
 
 const SettingsSectionBlock = ({ title, description, children }: SettingsSectionBlockProps) => {
   return (
@@ -631,7 +623,5 @@ const SettingsWorkspaceScreen = () => {
     </div>
   );
 };
-
-
 
 export { SettingsWorkspaceScreen };
