@@ -81,6 +81,11 @@ const TrashPage = () => {
 
   const isBusy = status === "loading" || pendingActionId !== null;
   const hasItems = rows.length > 0;
+  const shouldRenderError = errorMessage !== null && errorMessage !== undefined && errorMessage.length > 0;
+  const shouldRenderLoginRequired = !currentUser && !loading;
+  const shouldRenderLoading = currentUser && status === "loading";
+  const shouldRenderEmpty = currentUser && status !== "loading" && !hasItems;
+  const shouldRenderRows = currentUser && hasItems;
 
   useEffect(() => {
     if (loading) return;
@@ -137,32 +142,27 @@ const TrashPage = () => {
             </Button>
           </div>
         </header>
-
-        {errorMessage ? (
+        {shouldRenderError && (
           <section className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {errorMessage}
           </section>
-        ) : null}
-
-        {!currentUser && !loading ? (
+        )}
+        {shouldRenderLoginRequired && (
           <section className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-600">
             ゴミ箱を表示するにはログインが必要です。
           </section>
-        ) : null}
-
-        {currentUser && status === "loading" ? (
+        )}
+        {shouldRenderLoading && (
           <section className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-10 text-slate-600">
             <LoadingSpinner label="ゴミ箱を読み込み中" />
           </section>
-        ) : null}
-
-        {currentUser && status !== "loading" && !hasItems ? (
+        )}
+        {shouldRenderEmpty && (
           <section className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-600">
             ゴミ箱は空です。
           </section>
-        ) : null}
-
-        {currentUser && hasItems ? (
+        )}
+        {shouldRenderRows && (
           <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             <div className="grid grid-cols-[1fr_auto] gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-widest text-slate-500">
               <span>Item</span>
@@ -187,10 +187,10 @@ const TrashPage = () => {
               ))}
             </div>
           </section>
-        ) : null}
+        )}
       </div>
     </main>
   );
 };
 
-export default TrashPage;
+export { TrashPage };
