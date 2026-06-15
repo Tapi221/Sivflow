@@ -2,7 +2,7 @@
 
 import { createPlatePlugin } from "platejs/react";
 import { FloatingToolbar } from "@/chip/ui/plate/floating-toolbar";
-import { FloatingToolbarButtons } from "@/chip/ui/plate/floating-toolbar-buttons";
+import { FloatingToolbarButtons } from "@/chip/overlay-toolbar/Toolbar.Note.Floating";
 
 const FloatingToolbarKit = [
   createPlatePlugin({
