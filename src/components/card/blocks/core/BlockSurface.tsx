@@ -57,7 +57,7 @@ const BlockSurface = ({ className, contentClassName, style, padTopRows = 0, padB
       )}
       style={{ ...cssVars, ...(background ? { background } : {}) }}
     >
-      {ruled ? (
+      {ruled && (
         <RuledLayer
           kind={ruledKind}
           ruledOpacity={ruledOpacity}
@@ -65,7 +65,7 @@ const BlockSurface = ({ className, contentClassName, style, padTopRows = 0, padB
           ruledOffsetPx={ruledOffsetPx}
           ruledBottomOffsetPx={ruledBottomOffsetPx}
         />
-      ) : null}
+      )}
       <div className={cn("blockSurfaceContent", contentClassName)}>
         {children}
       </div>
