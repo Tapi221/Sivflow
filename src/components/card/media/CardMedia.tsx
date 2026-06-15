@@ -6,7 +6,7 @@ import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
 import { resolveCardImageUrl } from "@/services/cardImageResolver";
 import type { ResolvableImageRef } from "@/types/domain/assets";
-import { Copy, Download, Image as ImageIcon, Pause, Play, Volume2 } from "@/chip/icons";
+import { Copy, Download, Image as ImageIcon, Pause, Play, Volume2 } from "@/chip/icons/icons";
 import type { ImageGalleryItem } from "./media.types";
 
 interface AudioPlayerProps {
