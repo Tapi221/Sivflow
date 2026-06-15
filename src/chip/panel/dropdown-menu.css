@@ -126,7 +126,7 @@
 .dropdown-menu__radio-item:focus,
 .dropdown-menu__sub-trigger:focus,
 .dropdown-menu__sub-trigger[data-state="open"] {
-  background: #eee;
+  background: var(--interactive-accent-hover-bg);
   color: #1f1f1f;
 }
 
