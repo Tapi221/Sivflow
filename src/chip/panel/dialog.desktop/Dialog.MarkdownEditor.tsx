@@ -1,5 +1,5 @@
 import AutoResizeTextarea from "@/chip/ui/AutoResizeTextarea";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/chip/ui/dialog/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/chip/panel/dialog.desktop/dialog/dialog";
 import { cn } from "@/lib/utils";
 import type { CSSProperties, ClipboardEvent, FC, KeyboardEvent } from "react";
 

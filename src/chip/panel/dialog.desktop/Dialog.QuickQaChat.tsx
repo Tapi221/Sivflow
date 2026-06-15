@@ -2,7 +2,7 @@ import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { generateOllamaAnswer } from "@platform/ai/ollamaClient";
 import { useToast } from "@web-renderer/contexts/ToastContext";
 import type { KeyboardEvent } from "react";
-import { Dialog, DialogContent } from "@/chip/ui/dialog/dialog";
+import { Dialog, DialogContent } from "@/chip/panel/dialog.desktop/dialog/dialog";
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
