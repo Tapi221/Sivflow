@@ -2,7 +2,7 @@
 
 import { Check } from "lucide-react";
 
-import { Button } from "@/chip/ui/button/button";
+import { Button } from "@/chip/button/button/button";
 
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/chip/ui/command";
 

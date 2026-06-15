@@ -12,7 +12,7 @@ import type { WithRequiredKey } from "platejs";
 
 import { useEditorRef, useEditorSelector, useElement, useFocusedLast, useReadOnly, useRemoveNodeButton, useSelected } from "platejs/react";
 
-import { Button, buttonVariants } from "@/chip/ui/button/button";
+import { Button, buttonVariants } from "@/chip/button/button/button";
 
 import { Popover, PopoverAnchor, PopoverContent } from "@/chip/ui/popover";
 

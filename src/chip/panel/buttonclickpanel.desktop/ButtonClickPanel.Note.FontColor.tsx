@@ -20,9 +20,9 @@ import { useEditorRef, useEditorSelector } from "platejs/react";
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/toolchip/Tooltip.Editor";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/panel/toolchip/Tooltip.Editor";
 
-import { buttonVariants } from "@/chip/ui/button/button";
+import { buttonVariants } from "@/chip/button/button/button";
 
 import { ToolbarButton, ToolbarMenuGroup } from "@/chip/ui/plate/toolbar";
 

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Check, RotateCcw, Upload, X } from "@/chip/icons";
-import { Button } from "@/chip/ui/button/button";
+import { Button } from "@/chip/button/button/button";
 import { Slider } from "@/chip/ui/slider";
 import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";

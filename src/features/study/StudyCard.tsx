@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { ComponentProps } from "react";
 import { Volume2 } from "@/chip/icons";
 import { Badge } from "@/chip/ui/badge";
-import { Button } from "@/chip/ui/button/button";
+import { Button } from "@/chip/button/button/button";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import type { Card } from "@/types";
 import { toIsoStringOrNull } from "@/utils/toMillis";

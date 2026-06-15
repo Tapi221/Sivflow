@@ -18,7 +18,7 @@ import type { ButtonClickPanelCodeLanguageItem } from "@/chip/panel/buttonclickp
 
 import { ButtonClickPanelCodeLanguage } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.CodeLanguage";
 
-import { Button } from "@/chip/ui/button/button";
+import { Button } from "@/chip/button/button/button";
 
 
 

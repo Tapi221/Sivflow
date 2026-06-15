@@ -22,7 +22,7 @@ import { KEYS } from "platejs";
 
 import { useEditorRef, useEditorSelection, useFormInputProps, usePluginOption } from "platejs/react";
 
-import { buttonVariants } from "@/chip/ui/button/button";
+import { buttonVariants } from "@/chip/button/button/button";
 
 import { Separator } from "@/chip/ui/separator";
 

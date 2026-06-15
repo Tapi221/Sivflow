@@ -5,7 +5,7 @@ import type { SlateEditor, TElement } from "platejs";
 import { NodeApi } from "platejs";
 import type { SlateElementProps } from "platejs/static";
 import { SlateElement } from "platejs/static";
-import { Button } from "@/chip/ui/button/button";
+import { Button } from "@/chip/button/button/button";
 
 
 

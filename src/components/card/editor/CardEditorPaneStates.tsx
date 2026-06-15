@@ -1,5 +1,5 @@
 import { Plus } from "@/chip/icons";
-import { Button } from "@/chip/ui/button/button";
+import { Button } from "@/chip/button/button/button";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 
 

@@ -10,7 +10,7 @@ import type * as React from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/chip/ui/avatar";
 
-import { Button } from "@/chip/ui/button/button";
+import { Button } from "@/chip/button/button/button";
 
 import { Editor, EditorContainer } from "@/chip/ui/plate/editor";
 

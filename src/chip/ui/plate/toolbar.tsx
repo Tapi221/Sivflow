@@ -14,7 +14,7 @@ import { ChevronDown } from "lucide-react";
 
 import { DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuSeparator } from "@/chip/panel/dropdown-menu";
 
-import { Tooltip, TooltipTrigger } from "@/chip/toolchip/Tooltip.Editor";
+import { Tooltip, TooltipTrigger } from "@/chip/panel/toolchip/Tooltip.Editor";
 
 import { Separator } from "@/chip/ui/separator";
 

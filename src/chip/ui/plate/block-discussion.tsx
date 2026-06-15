@@ -20,7 +20,7 @@ import type { PlateElementProps, RenderNodeWrapper } from "platejs/react";
 
 import { useEditorRef, usePluginOption } from "platejs/react";
 
-import { Button } from "@/chip/ui/button/button";
+import { Button } from "@/chip/button/button/button";
 
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
 

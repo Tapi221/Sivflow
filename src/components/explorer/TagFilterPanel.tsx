@@ -8,7 +8,7 @@ import { FilterPanelShell } from "@/chip/panel/panel/FilterPanelShell";
 import { PanelEmptyState } from "@/chip/panel/panel/PanelEmptyState";
 import type { SegmentedOption } from "@/chip/panel/panel/SegmentedControlGroup";
 import { SegmentedControlGroup } from "@/chip/panel/panel/SegmentedControlGroup";
-import { SurfaceButton } from "@/chip/ui/button/surface-button";
+import { SurfaceButton } from "@/chip/button/button/surface-button";
 import { useExplorerStore } from "@/features/explorer/store/useExplorerStore";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
