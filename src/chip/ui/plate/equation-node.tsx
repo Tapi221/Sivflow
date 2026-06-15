@@ -28,7 +28,7 @@ const EQUATION_RENDER_OPTIONS = {
   errorColor: "#c00",
   fleqn: false,
   leqno: false,
-  macros: { "\\f": "#1f(#2)" },
+  macros: { "\f": "#1f(#2)" },
   output: "htmlAndMathml" as const,
   strict: "warn" as const,
   throwOnError: false,
@@ -164,12 +164,12 @@ const InlineEquationElement = (props: PlateElementProps<TEquationElement>) => {
               ref={katexRef}
               className={cn(element.texExpression.length === 0 && "hidden", "font-mono leading-none")}
             />
-            {element.texExpression.length === 0 ? (
+            {element.texExpression.length === 0 && (
               <span>
                 <RadicalIcon className="mr-1 inline-block size-4 align-text-bottom" />
                 New equation
               </span>
-            ) : null}
+            )}
           </div>
         </PopoverTrigger>
         <EquationPopoverContent
