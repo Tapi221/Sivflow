@@ -1,15 +1,18 @@
-import { useMemo, useRef } from "react";
-import type { ReactNode } from "react";
-import { DropdownMenu, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-import type { ExplorerMenuPanelVariant } from "./ExplorerMenuPanel";
-import { ExplorerMenuPanel } from "./ExplorerMenuPanel";
-import type { MenuAction } from "./menuActions";
+import type { ComponentProps, ReactNode } from "react";
+import { Fragment, useMemo, useRef } from "react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
+import type { MenuAction } from "@/components/folder/components/menus/menuActions";
+import { cn } from "@/lib/utils";
 
-
-
+type ExplorerMenuPanelVariant = "default" | "compact" | "create" | "toolbar";
+type ContextMenuAnchorPoint = {
+  x: number;
+  y: number;
+};
+type DropdownMenuContentCloseAutoFocusEvent = Parameters<NonNullable<ComponentProps<typeof DropdownMenuContent>["onCloseAutoFocus"]>>[0];
 interface ContextMenuProps {
   children?: ReactNode;
-  anchorPoint?: { x: number; y: number; } | null;
+  anchorPoint?: ContextMenuAnchorPoint | null;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   actions: MenuAction[];
@@ -17,21 +20,22 @@ interface ContextMenuProps {
   variant?: ExplorerMenuPanelVariant;
 }
 
-
-
 const CONTEXT_MENU_COLLISION_PADDING_PX = 8;
+const EXPLORER_MENU_PANEL_VARIANT_CLASS_NAMES: Record<ExplorerMenuPanelVariant, string> = {
+  default: "min-w-[168px]",
+  compact: "min-w-[144px]",
+  create: "min-w-[190px]",
+  toolbar: "min-w-[168px]",
+};
 
+const isVisibleMenuAction = (action: MenuAction) => action.hidden !== true;
+const getExplorerMenuPanelVariantClassName = (variant: ExplorerMenuPanelVariant) => EXPLORER_MENU_PANEL_VARIANT_CLASS_NAMES[variant];
 
-
-/**
- * 右クリックなどで表示される汎用的なコンテキストメニューのコンテナ
- */
 const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions, className, variant = "default" }: ContextMenuProps) => {
   const suppressCloseAutoFocusRef = useRef(false);
-
+  const visibleActions = actions.filter(isVisibleMenuAction);
   const anchoredStyle = useMemo(() => {
-    if (!anchorPoint) return undefined;
-
+    if (anchorPoint === null || anchorPoint === undefined) return undefined;
     return {
       position: "fixed" as const,
       left: anchorPoint.x,
@@ -40,12 +44,20 @@ const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions, class
       height: 0,
     };
   }, [anchorPoint]);
-
   const closeMenu = () => {
     suppressCloseAutoFocusRef.current = true;
     onOpenChange?.(false);
   };
-
+  const handleCloseAutoFocus = (event: DropdownMenuContentCloseAutoFocusEvent) => {
+    if (!suppressCloseAutoFocusRef.current) return;
+    suppressCloseAutoFocusRef.current = false;
+    event.preventDefault();
+  };
+  const handleActionSelect = (action: MenuAction) => {
+    if (action.disabled === true) return;
+    closeMenu();
+    void action.onSelect?.();
+  };
   return (
     <DropdownMenu open={open} onOpenChange={onOpenChange} modal={false}>
       <DropdownMenuTrigger asChild>
@@ -59,25 +71,33 @@ const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions, class
           />
         )}
       </DropdownMenuTrigger>
-      <ExplorerMenuPanel
-        actions={actions}
-        closeMenu={closeMenu}
-        variant={variant}
+      <DropdownMenuContent
         side="right"
         align="start"
         sideOffset={0}
         collisionPadding={CONTEXT_MENU_COLLISION_PADDING_PX}
-        className={className}
-        onCloseAutoFocus={(e) => {
-          if (!suppressCloseAutoFocusRef.current) return;
-          suppressCloseAutoFocusRef.current = false;
-          e.preventDefault();
-        }}
-      />
+        className={cn(getExplorerMenuPanelVariantClassName(variant), className)}
+        onCloseAutoFocus={handleCloseAutoFocus}
+      >
+        {visibleActions.map((action) => (
+          <Fragment key={action.id}>
+            {action.separatorBefore === true ? <DropdownMenuSeparator /> : null}
+            <DropdownMenuItem
+              disabled={action.disabled}
+              variant={action.danger === true ? "destructive" : "default"}
+              onSelect={() => {
+                handleActionSelect(action);
+              }}
+            >
+              {action.icon}
+              <span>{action.label}</span>
+            </DropdownMenuItem>
+          </Fragment>
+        ))}
+      </DropdownMenuContent>
     </DropdownMenu>
   );
 };
 
-
-
 export { ContextMenu };
+export type { ExplorerMenuPanelVariant };
