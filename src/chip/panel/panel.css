@@ -45,7 +45,7 @@
 
 .panel__item:not(:disabled):hover,
 .panel__item:not(:disabled):focus-visible {
-  background: #eee;
+  background: var(--interactive-accent-hover-bg);
   outline: none;
 }
 
