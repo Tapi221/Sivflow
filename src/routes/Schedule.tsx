@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { hasDesktopRuntime } from "@platform/runtime";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
@@ -23,24 +24,31 @@ const parseCardSetNavigationTarget = (search: string): CardSetNavigationTarget |
     folderId: params.get("folderId"),
   };
 };
+const getActiveScheduleScreen = (shouldUseMobileScheduleScreen: boolean, shouldUseDesktopNativeScheduleScreen: boolean): ComponentType => {
+  if (shouldUseMobileScheduleScreen) return MobileScheduleScreen;
+  if (shouldUseDesktopNativeScheduleScreen) return DesktopNativeScheduleScreen;
+  return DesktopScheduleScreen;
+};
+const getSuspenseFallback = (shouldUseMobileScheduleScreen: boolean): ReactNode => {
+  if (shouldUseMobileScheduleScreen) {
+    return <div className="h-full min-h-0 w-full" data-testid="mobile-schedule-screen" />;
+  }
+  return null;
+};
 const useIsMobileSchedule = () => {
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.matchMedia(MOBILE_SCHEDULE_MEDIA_QUERY).matches;
   });
-
   useEffect(() => {
     const mediaQuery = window.matchMedia(MOBILE_SCHEDULE_MEDIA_QUERY);
     const handleChange = () => setIsMobile(mediaQuery.matches);
-
     handleChange();
     mediaQuery.addEventListener("change", handleChange);
-
     return () => {
       mediaQuery.removeEventListener("change", handleChange);
     };
   }, []);
-
   return isMobile;
 };
 
@@ -53,9 +61,8 @@ const ScheduleRoute = () => {
   const cardSetNavigationTarget = useMemo(() => parseCardSetNavigationTarget(search), [search]);
   const shouldUseMobileScheduleScreen = isMobile && activeSectionKey !== "library";
   const shouldUseDesktopNativeScheduleScreen = !shouldUseMobileScheduleScreen && hasDesktopRuntime();
-  const ActiveScheduleScreen = shouldUseMobileScheduleScreen ? MobileScheduleScreen : shouldUseDesktopNativeScheduleScreen ? DesktopNativeScheduleScreen : DesktopScheduleScreen;
-  const suspenseFallback = shouldUseMobileScheduleScreen ? <div className="h-full min-h-0 w-full" data-testid="mobile-schedule-screen" /> : null;
-
+  const ActiveScheduleScreen = getActiveScheduleScreen(shouldUseMobileScheduleScreen, shouldUseDesktopNativeScheduleScreen);
+  const suspenseFallback = getSuspenseFallback(shouldUseMobileScheduleScreen);
   useEffect(() => {
     if (!cardSetNavigationTarget) return;
     openExplorerTab({
@@ -69,9 +76,7 @@ const ScheduleRoute = () => {
     });
     navigate("/schedule", { replace: true });
   }, [cardSetNavigationTarget, navigate, openExplorerTab]);
-
   if (activeSectionKey === "library") return <WorkspaceScreen />;
-
   return (
     <div className="h-full min-h-0 w-full">
       <Suspense fallback={suspenseFallback}>
