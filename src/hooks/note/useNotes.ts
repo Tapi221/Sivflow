@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
+import { useEffectiveLocalUserId } from "@/contexts/auth/useEffectiveLocalUserId";
 import { getLocalDb } from "@/services/localdb";
 import type { Note, NoteBlockContent } from "@/types";
 
