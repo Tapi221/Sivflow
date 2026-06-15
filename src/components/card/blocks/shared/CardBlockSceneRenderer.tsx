@@ -19,7 +19,7 @@ import type { CodeBlockData } from "@/types/core/code-block";
 import type { UploadedImage } from "@/types/domain/assets";
 import type { MathBlockData, ReferenceBlockData } from "@/types/domain/base";
 import type { CardBlock } from "@/types/domain/card";
-import { Code, HelpCircle, Link, NotebookPen, Sigma, Type, Volume2 } from "@/chip/icons";
+import { Code, HelpCircle, Link, NotebookPen, Sigma, Type, Volume2 } from "@/chip/icons/icons";
 
 type CardBlockLayoutReplaceBlock = MarkdownReplaceBlock;
 type ViewerProps = Readonly<{ questionDisplayMode: "always" | "tap_to_reveal";
@@ -189,7 +189,7 @@ const MathBlockScene = ({ mode, block, meta, editorProps, viewerProps }: ScenePr
   const latex = mathData.latex ?? "";
   const handleMathChange = React.useCallback((next: MathBlockData) => {
     if (next.latex.length > MAX_MATH_LATEX_LENGTH) {
-      setError(`KaTeX文字列は最大 ${MAX_MATH_LATEX_LENGTH.toLocaleString()} 文字までです`); return; } setError(null); editorProps?.onUpdateBlock(block.id, { math: next }); }, [block.id, editorProps]);
+      setError("KaTeX文字列が上限を超えています"); return; } setError(null); editorProps?.onUpdateBlock(block.id, { math: next }); }, [block.id, editorProps]);
 
   return <SharedBlockShell mode={mode} className={cn(latex.trim().length > 0 && "border-transparent")} label="Math" icon={Sigma} {...renderEditorShellProps({ ...editorProps, isBlockSelected: Boolean(editorProps?.isBlockSelected || isEditorOpen) } as EditorProps | undefined)}><div className="w-full max-w-full overflow-visible space-y-1.5 px-2 py-0.5">{renderGridOffsetSpacer(meta?.gridOffsetPx ?? 0)}<MathBlockPreviewPane latex={latex} displayMode={mathData.displayMode ?? "block"} className="rounded-lg" interactive={mode === "edit"} onActivate={mode === "edit" ? () => setIsEditorOpen(true) : undefined} showPlaceholder={mode === "edit"} placeholder={mode === "edit" ? "数式を入力..." : undefined} zoom={mode === "edit" ? editorProps?.zoom : viewerProps?.zoom} />{mode === "edit" && editorProps ? <MathEditorDialog open={isEditorOpen} onOpenChange={setIsEditorOpen} data={mathData} onChange={handleMathChange} accentColor={editorProps.accentColor} error={error} /> : null}</div></SharedBlockShell>;
 };
