@@ -1,3 +1,95 @@
-const TAG_COLOR_PALETTE = { gray: { fg: "#64748b", fgRgb: [100, 116, 139], border: "rgba(100, 116, 139, 0.28)", swatch: "#64748b" }, purple: { fg: "#7c3aed", fgRgb: [124, 58, 237], border: "rgba(124, 58, 237, 0.28)", swatch: "#7c3aed" }, teal: { fg: "#0f766e", fgRgb: [15, 118, 110], border: "rgba(15, 118, 110, 0.28)", swatch: "#0f766e" }, pink: { fg: "#db2777", fgRgb: [219, 39, 119], border: "rgba(219, 39, 119, 0.28)", swatch: "#db2777" }, amber: { fg: "#d97706", fgRgb: [217, 119, 6], border: "rgba(217, 119, 6, 0.28)", swatch: "#d97706" }, blue: { fg: "#2563eb", fgRgb: [37, 99, 235], border: "rgba(37, 99, 235, 0.28)", swatch: "#2563eb" }, green: { fg: "#16a34a", fgRgb: [22, 163, 74], border: "rgba(22, 163, 74, 0.28)", swatch: "#16a34a" }, red: { fg: "#dc2626", fgRgb: [220, 38, 38], border: "rgba(220, 38, 38, 0.28)", swatch: "#dc2626" }, coral: { fg: "#f97316", fgRgb: [249, 115, 22], border: "rgba(249, 115, 22, 0.28)", swatch: "#f97316" }, sky: { fg: "#0284c7", fgRgb: [2, 132, 199], border: "rgba(2, 132, 199, 0.28)", swatch: "#0284c7" }, } as const;
+type TagColorPalette = {
+  bg: string;
+  bgRgb: readonly [number, number, number];
+  fg: string;
+  fgRgb: readonly [number, number, number];
+  border: string;
+  swatch: string;
+};
+type TagColorPaletteMap = Record<string, TagColorPalette>;
+
+const TAG_COLOR_PALETTE = {
+  gray: {
+    bg: "#F1EFE8",
+    bgRgb: [241, 239, 232],
+    fg: "#444441",
+    fgRgb: [68, 68, 65],
+    border: "transparent",
+    swatch: "#444441",
+  },
+  purple: {
+    bg: "#EEEDFE",
+    bgRgb: [238, 237, 254],
+    fg: "#3C3489",
+    fgRgb: [60, 52, 137],
+    border: "transparent",
+    swatch: "#3C3489",
+  },
+  teal: {
+    bg: "#E1F5EE",
+    bgRgb: [225, 245, 238],
+    fg: "#085041",
+    fgRgb: [8, 80, 65],
+    border: "transparent",
+    swatch: "#085041",
+  },
+  pink: {
+    bg: "#FBEAF0",
+    bgRgb: [251, 234, 240],
+    fg: "#72243E",
+    fgRgb: [114, 36, 62],
+    border: "transparent",
+    swatch: "#72243E",
+  },
+  amber: {
+    bg: "#FAEEDA",
+    bgRgb: [250, 238, 218],
+    fg: "#633806",
+    fgRgb: [99, 56, 6],
+    border: "transparent",
+    swatch: "#633806",
+  },
+  blue: {
+    bg: "#E6F1FB",
+    bgRgb: [230, 241, 251],
+    fg: "#0C447C",
+    fgRgb: [12, 68, 124],
+    border: "transparent",
+    swatch: "#0C447C",
+  },
+  green: {
+    bg: "#EAF3DE",
+    bgRgb: [234, 243, 222],
+    fg: "#27500A",
+    fgRgb: [39, 80, 10],
+    border: "transparent",
+    swatch: "#27500A",
+  },
+  red: {
+    bg: "#FCEBEB",
+    bgRgb: [252, 235, 235],
+    fg: "#791F1F",
+    fgRgb: [121, 31, 31],
+    border: "transparent",
+    swatch: "#791F1F",
+  },
+  coral: {
+    bg: "#FAECE7",
+    bgRgb: [250, 236, 231],
+    fg: "#712B13",
+    fgRgb: [113, 43, 19],
+    border: "transparent",
+    swatch: "#712B13",
+  },
+  sky: {
+    bg: "#E1F4FA",
+    bgRgb: [225, 244, 250],
+    fg: "#0C4A6E",
+    fgRgb: [12, 74, 110],
+    border: "transparent",
+    swatch: "#0C4A6E",
+  },
+} as const satisfies TagColorPaletteMap;
 
 export { TAG_COLOR_PALETTE };
+export type { TagColorPalette, TagColorPaletteMap };

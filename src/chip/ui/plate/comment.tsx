@@ -4,19 +4,19 @@ import * as React from "react";
 import { getCommentKey, getDraftCommentKey } from "@platejs/comment";
 import { CommentPlugin, useCommentId } from "@platejs/comment/react";
 import { differenceInDays, differenceInHours, differenceInMinutes, format } from "date-fns";
-import { ArrowUpIcon, CheckIcon, MoreHorizontalIcon, PencilIcon, TrashIcon, XIcon } from "lucide-react";
+import { CheckIcon, XIcon } from "lucide-react";
 import type { NodeEntry, TCommentText, Value } from "platejs";
 import { KEYS, nanoid, NodeApi } from "platejs";
 import type { CreatePlateEditorOptions } from "platejs/react";
 import { Plate, useEditorPlugin, useEditorRef, usePlateEditor, usePluginOption } from "platejs/react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
+import { ButtonClickPanelNoteComment } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Comment";
 import { Avatar, AvatarFallback, AvatarImage } from "@/chip/ui/avatar";
 import { Button } from "@/chip/ui/button/button";
+import { CommentMoreDropdown } from "@/chip/ui/plate/comment-more-dropdown";
+import { Editor, EditorContainer } from "@/chip/ui/plate/editor";
 import { BasicMarksKit } from "@/components/editor/plugins/basic-marks-kit";
 import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
-import { cn } from "@/lib/utils";
-import { Editor, EditorContainer } from "./editor";
 
 type TComment = {
   id: string;
@@ -25,6 +25,12 @@ type TComment = {
   discussionId: string;
   isEdited: boolean;
   userId: string;
+};
+type CommentCreateFormProps = {
+  autoFocus?: boolean;
+  className?: string;
+  discussionId?: string;
+  focusOnMount?: boolean;
 };
 
 const useCommentEditor = (
@@ -59,93 +65,6 @@ const formatCommentDate = (date: Date) => {
   return format(date, "MM/dd/yyyy");
 };
 
-const CommentMoreDropdown = (props: {
-  comment: TComment;
-  dropdownOpen: boolean;
-  setDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setEditingId: React.Dispatch<React.SetStateAction<string | null>>;
-  onCloseAutoFocus?: () => void;
-  onRemoveComment?: () => void;
-}) => {
-  const {
-    comment,
-    dropdownOpen,
-    setDropdownOpen,
-    setEditingId,
-    onCloseAutoFocus,
-    onRemoveComment,
-  } = props;
-  const editor = useEditorRef();
-  const selectedEditCommentRef = React.useRef<boolean>(false);
-  const onDeleteComment = React.useCallback(() => {
-    if (!comment.id) {
-      return alert("You are operating too quickly, please try again later.");
-    }
-    const updatedDiscussions = editor
-      .getOption(discussionPlugin, "discussions")
-      .map((discussion) => {
-        if (discussion.id !== comment.discussionId) {
-          return discussion;
-        }
-        const commentIndex = discussion.comments.findIndex(
-          (currentComment) => currentComment.id === comment.id,
-        );
-        if (commentIndex === -1) {
-          return discussion;
-        }
-        return {
-          ...discussion,
-          comments: [
-            ...discussion.comments.slice(0, commentIndex),
-            ...discussion.comments.slice(commentIndex + 1),
-          ],
-        };
-      });
-    editor.setOption(discussionPlugin, "discussions", updatedDiscussions);
-    onRemoveComment?.();
-  }, [comment.discussionId, comment.id, editor, onRemoveComment]);
-  const onEditComment = React.useCallback(() => {
-    selectedEditCommentRef.current = true;
-    if (!comment.id) {
-      return alert("You are operating too quickly, please try again later.");
-    }
-    setEditingId(comment.id);
-  }, [comment.id, setEditingId]);
-  return (
-    <DropdownMenu
-      open={dropdownOpen}
-      onOpenChange={setDropdownOpen}
-      modal={false}
-    >
-      <DropdownMenuTrigger asChild onClick={(event) => event.stopPropagation()}>
-        <Button variant="ghost" className={cn("h-6 p-1 text-muted-foreground")}>
-          <MoreHorizontalIcon className="size-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="w-48"
-        onCloseAutoFocus={(event) => {
-          if (selectedEditCommentRef.current) {
-            onCloseAutoFocus?.();
-            selectedEditCommentRef.current = false;
-          }
-          return event.preventDefault();
-        }}
-      >
-        <DropdownMenuGroup>
-          <DropdownMenuItem onClick={onEditComment}>
-            <PencilIcon className="size-4" />
-            Edit comment
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={onDeleteComment}>
-            <TrashIcon className="size-4" />
-            Delete comment
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
 const Comment = (props: {
   comment: TComment;
   discussionLength: number;
@@ -354,12 +273,7 @@ const Comment = (props: {
     </div>
   );
 };
-const CommentCreateForm = ({ autoFocus = false, className, discussionId: discussionIdProp, focusOnMount = false }: {
-  autoFocus?: boolean;
-  className?: string;
-  discussionId?: string;
-  focusOnMount?: boolean;
-}) => {
+const CommentCreateForm = ({ autoFocus = false, className, discussionId: discussionIdProp, focusOnMount = false }: CommentCreateFormProps) => {
   const discussions = usePluginOption(discussionPlugin, "discussions");
   const editor = useEditorRef();
   const commentId = useCommentId();
@@ -466,52 +380,15 @@ const CommentCreateForm = ({ autoFocus = false, className, discussionId: discuss
     });
   }, [commentValue, commentEditor.tf, discussionId, editor, discussions]);
   return (
-    <div className={cn("flex w-full", className)}>
-      <div className="mt-2 mr-1 shrink-0">
-        <Avatar className="size-5">
-          <AvatarImage alt={userInfo?.name} src={userInfo?.avatarUrl} />
-          <AvatarFallback>{userInfo?.name?.[0]}</AvatarFallback>
-        </Avatar>
-      </div>
-      <div className="relative flex grow gap-2">
-        <Plate
-          onChange={({ value }) => {
-            setCommentValue(value);
-          }}
-          editor={commentEditor}
-        >
-          <EditorContainer variant="comment">
-            <Editor
-              variant="comment"
-              className="min-h-6 grow pt-0.5 pr-8"
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && !event.shiftKey) {
-                  event.preventDefault();
-                  void onAddComment();
-                }
-              }}
-              placeholder="Reply..."
-              autoComplete="off"
-              autoFocus={autoFocus}
-            />
-            <Button
-              size="icon"
-              variant="ghost"
-              className="absolute right-0.5 bottom-0.5 ml-auto size-6 shrink-0"
-              disabled={commentContent.trim().length === 0}
-              onClick={(event) => {
-                event.stopPropagation();
-                void onAddComment();
-              }}
-            >
-              <div className="flex size-6 items-center justify-center rounded-full">
-                <ArrowUpIcon />
-              </div>
-            </Button>
-          </EditorContainer>
-        </Plate>
-      </div>
-    </div>
+    <ButtonClickPanelNoteComment
+      autoFocus={autoFocus}
+      className={className}
+      commentContent={commentContent}
+      commentEditor={commentEditor}
+      userInfo={userInfo}
+      onAddComment={onAddComment}
+      onCommentValueChange={setCommentValue}
+    />
   );
 };
 
