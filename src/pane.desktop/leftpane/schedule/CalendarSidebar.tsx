@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { SCHEDULE_SOURCE_COLOR } from "@shared/design-tokens/color/Color.Schedule";
 import { useT } from "@shared/i18n/useT";
-import type { ChangeEvent, FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent, ReactNode } from "react";
+import type { ChangeEvent, CSSProperties, FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import { GoogleIcon } from "@/chip/icons/icons.schedule";
 import type { CalendarListMenuAction } from "@/chip/panel/rightclickpanel.desktop/CalendarListMenu.desktop";
 import { CALENDAR_LIST_MENU_HEIGHT, CALENDAR_LIST_MENU_PANEL_ID, CALENDAR_LIST_MENU_WIDTH, CalendarListMenu } from "@/chip/panel/rightclickpanel.desktop/CalendarListMenu.desktop";
@@ -101,7 +102,7 @@ const CALENDAR_SIDEBAR_HEADING_CLASS_NAME = "m-0 min-w-0 flex-1 truncate text-sm
 const CALENDAR_SIDEBAR_PROJECT_LIST_CLASS_NAME = "max-h-80 shrink-0 overflow-y-auto px-4 pb-1";
 const CALENDAR_SIDEBAR_ROW_CONTENT_CLASS_NAME = "pl-0";
 const CONNECTING_GOOGLE_CALENDAR_LABEL = "接続中...";
-const DEFAULT_CALENDAR_COLOR = "#64748b";
+const DEFAULT_CALENDAR_COLOR = SCHEDULE_SOURCE_COLOR.calendarFallback;
 const GOOGLE_CALENDAR_SECTION_LABEL = "Google Calendar";
 const PROJECT_LINKED_GOOGLE_CALENDARS_LABEL = "プロジェクトに追加したカレンダー";
 
@@ -143,6 +144,11 @@ const findMatchingGoogleCalendarsForProject = (project: AppCalendarItem, account
 };
 const createGoogleProjectLinkActionLabel = (target: MatchingGoogleCalendarTarget, targetCount: number): string => targetCount <= 1 ? "既存Googleカレンダーにリンク" : `既存Googleカレンダーにリンク: ${getGoogleAccountLabel(target.account)}`;
 const createGoogleCalendarActionLabel = (account: GoogleAccountDisplay, accountCount: number): string => accountCount <= 1 ? "Googleカレンダーとして追加" : `Googleカレンダーとして追加: ${getGoogleAccountLabel(account)}`;
+const createProjectLinkedGoogleCalendarDotStyle = (color: string): CSSProperties => ({
+  backgroundColor: color,
+  borderColor: SCHEDULE_SOURCE_COLOR.linkedDotBorder,
+  boxShadow: `0 0 0 1px ${SCHEDULE_SOURCE_COLOR.linkedDotRing}`,
+});
 
 const IconChevronRight = ({ className }: IconProps) => <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 const IconPlus = ({ className }: IconProps) => <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>;
@@ -161,7 +167,7 @@ const GoogleCalendarSourceRow = ({ account, calendar, color, onToggleCalendar, o
 const ProjectLinkedGoogleCalendarRow = ({ accountId, calendar, color }: { accountId: string; calendar: GoogleCalendarListItem; color: string; }) => (
   <div className={cn(GOOGLE_SOURCE_ROW_CLASS_NAME, CALENDAR_SIDEBAR_ROW_CONTENT_CLASS_NAME, "text-slate-500")} title={getGoogleCalendarName(calendar)} data-calendar-account-id={accountId}>
     <span className="flex h-5 w-5 shrink-0 items-center justify-center" aria-hidden="true">
-      <span className="h-2.5 w-2.5 rounded-full border border-white ring-1 ring-black/10" style={{ backgroundColor: color }} />
+      <span className="h-2.5 w-2.5 rounded-full border" style={createProjectLinkedGoogleCalendarDotStyle(color)} />
     </span>
     <span className="truncate text-xs font-medium text-zinc-500">{calendar.summary}</span>
   </div>
