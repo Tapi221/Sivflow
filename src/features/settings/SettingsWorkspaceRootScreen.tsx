@@ -254,12 +254,12 @@ const SettingDropdownChoiceRow = <T extends string | number,>({ label, value, op
     <span className="pt-1 text-sm font-medium leading-5 tracking-tight text-neutral-900">{label}</span>
     <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
       <DropdownMenuTrigger asChild>
-        <button type="button" className={cn("inline-flex min-w-36 items-center justify-between gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-sm font-semibold leading-4 text-neutral-800 outline-none transition-colors duration-100 ease-out hover:bg-stone-50 focus-visible:bg-stone-50")} onClick={() => setOpen((nextOpen) => !nextOpen)}>
+        <button type="button" className={cn("inline-flex min-w-36 items-center justify-between gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-sm font-semibold leading-4 text-neutral-800 outline-none transition-colors duration-100 ease-out hover:bg-stone-50 focus-visible:bg-stone-50")}>
           <span className="truncate">{options.find((option) => option.value === value)?.label ?? String(value)}</span>
           <ChevronDown className="h-4 w-4 shrink-0 text-stone-500" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-40" onCloseAutoFocus={(event) => event.preventDefault()}>
+      <DropdownMenuContent align="end" className="settings-language-dropdown-content min-w-40" onCloseAutoFocus={(event) => event.preventDefault()}>
         <DropdownMenuRadioGroup value={String(value)} onValueChange={(nextValue) => onChange(nextValue as T)}>
           {options.map((option) => <DropdownMenuRadioItem key={String(option.value)} value={String(option.value)} onSelect={() => setOpen(false)}>{option.label}</DropdownMenuRadioItem>)}
         </DropdownMenuRadioGroup>
