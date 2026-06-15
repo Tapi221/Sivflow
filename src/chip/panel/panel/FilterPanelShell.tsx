@@ -1,8 +1,6 @@
 import type { ReactNode, Ref } from "react";
 import { cn } from "@/lib/utils";
-import { PanelSearchField } from "./PanelSearchField";
-
-
+import { PanelSearchField } from "@/chip/panel/panel/PanelSearchField";
 
 interface FilterPanelShellProps {
   title?: string;
@@ -18,40 +16,36 @@ interface FilterPanelShellProps {
   bodyRef?: Ref<HTMLDivElement>;
 }
 
-
-
 const FilterPanelShell = ({ title, searchValue, searchPlaceholder = "検索...", onSearchChange, searchInputRef, headerAction, sections, children, className, bodyClassName, bodyRef }: FilterPanelShellProps) => {
   const shouldRenderSearch = typeof onSearchChange === "function";
-  const shouldRenderHeader = Boolean(title) || Boolean(headerAction);
-
+  const shouldRenderTitle = Boolean(title);
+  const shouldRenderHeader = shouldRenderTitle || Boolean(headerAction);
+  const hasSections = sections !== null && sections !== undefined;
   return (
     <div
       className={cn("ds-filter-panel flex h-full min-h-0 flex-col", className)}
     >
       <div className="ds-filter-section ds-floating-panel__section ds-floating-panel__section--spacious">
-        {shouldRenderHeader ? (
+        {shouldRenderHeader && (
           <div className="ds-floating-panel__header mb-2">
-            {title ? (
+            {shouldRenderTitle && (
               <span className="ds-filter-section__title ds-floating-panel__title text-xs font-semibold">
                 {title}
               </span>
-            ) : null}
+            )}
             {headerAction}
           </div>
-        ) : null}
-
-        {shouldRenderSearch ? (
+        )}
+        {shouldRenderSearch && (
           <PanelSearchField
             value={searchValue ?? ""}
             placeholder={searchPlaceholder}
             onChange={onSearchChange}
             inputRef={searchInputRef}
           />
-        ) : null}
+        )}
       </div>
-
-      {sections ? sections : null}
-
+      {hasSections && sections}
       <div
         ref={bodyRef}
         className={cn(
@@ -65,9 +59,5 @@ const FilterPanelShell = ({ title, searchValue, searchPlaceholder = "検索...",
   );
 };
 
-
-
 export { FilterPanelShell };
-
-
 export type { FilterPanelShellProps };
