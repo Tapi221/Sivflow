@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DragEvent as ReactDragEvent, KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from "react";
 import type { TagColorKey } from "@shared/design-tokens/color/Color.Tag";
 import { TagBadge } from "@/chip/budge/tag/Badge.Tag";
-import { getTagColorKey } from "@/chip/budge/tag/tag.parser";
+import { getTagColorKey } from "@/chip/budge/tag/tagColor";
 import type { Tag as TagRecord } from "@/features/settings/hooks/useTags";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { useTagTreeCommands } from "@/features/settings/hooks/useTagTreeCommands";
