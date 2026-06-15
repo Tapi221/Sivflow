@@ -83,6 +83,7 @@ const createThemeAccentRuntimeVariables = (color: string): ThemeAccentRuntimeVar
     "--theme-accent-primary-600-rgb": rgbToCssValue(hexToRgbColor(primary600)),
     "--theme-accent-primary-700": primary700,
     "--theme-accent-primary-700-rgb": rgbToCssValue(hexToRgbColor(primary700)),
+    "--primary-color": color,
   };
 };
 
