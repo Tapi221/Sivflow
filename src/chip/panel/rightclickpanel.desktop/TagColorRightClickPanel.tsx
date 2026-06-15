@@ -1,6 +1,6 @@
 import type { CSSProperties, RefObject } from "react";
-import type { TagColorKey } from "@/chip/budge/tag/tagColor";
-import { getTagColorSwatchStyle } from "@/chip/budge/tag/tagColor";
+import type { TagColorKey } from "@shared/design-tokens/color/Color.Tag";
+import { getTagColorSwatchStyle } from "@/chip/budge/tag/tag.style";
 import { RightClickPanel } from "@/chip/panel/rightclickpanel";
 import type { RightClickPanelId } from "@/chip/panel/rightClickPanel.utils";
 import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING } from "@/chip/panel/rightClickPanel.utils";
@@ -61,7 +61,6 @@ const TagColorRightClickPanel = ({ x, y, availableColors, currentColorKey, tagNa
           {availableColors.map((colorKey) => {
             const isSelected = colorKey === currentColorKey;
             const colorLabel = TAG_COLOR_LABELS[colorKey] ?? colorKey;
-
             return (
               <button
                 key={colorKey}
