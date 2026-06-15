@@ -17,10 +17,11 @@
       "@platform/*": ["packages/platform/src/*"],
       "@web-renderer/*": ["packages/web-renderer/src/*"],
       "@web/*": ["apps/web/src/*"],
+      "@/nouse/*": ["nouse/*"],
       "@/*": ["src/*"],
       "@shared/*": ["shared/*"]
     }
   },
-  "include": ["apps/web/src", "packages/web-renderer/src", "packages/core/src", "packages/platform/src", "src", "shared", "nouse/chip"],
+  "include": ["apps/web/src", "packages/web-renderer/src", "packages/core/src", "packages/platform/src", "src", "shared", "nouse/chip", "nouse/popover-menu"],
   "exclude": ["src/app/api/**", "src/**/*.test.ts", "src/**/*.test.tsx", "tests/**"]
 }
