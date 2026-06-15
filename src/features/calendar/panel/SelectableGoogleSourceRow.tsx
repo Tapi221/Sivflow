@@ -1,6 +1,7 @@
 import type { KeyboardEvent, MouseEvent } from "react";
 import { AnimatedCheckboxBase } from "@/chip/checkbox/AnimatedCheckboxBase";
 import { cn } from "@/lib/utils";
+import { SIDEBAR_COLOR } from "@shared/design-tokens/color/Color.Sidebar";
 
 type SelectableGoogleSourceRowProps = {
   id: string;
@@ -24,7 +25,7 @@ const SOURCE_ROW_SWITCH_CLASS_NAME = "mr-0";
 const SOURCE_ROW_SWITCH_SIZE_CLASS_NAME = "h-3.5 w-3.5";
 const SOURCE_ROW_SWITCH_CHECK_STROKE_WIDTH = 2.5;
 const SOURCE_ROW_SWITCH_BORDER_WIDTH = 1.5;
-const SOURCE_ROW_SWITCH_INACTIVE_BORDER_COLOR = "#d4d4d4";
+const SOURCE_ROW_SWITCH_INACTIVE_BORDER_COLOR = SIDEBAR_COLOR.sourceSwitchInactiveBorder;
 
 const SelectableGoogleSourceSwitch = ({ label, checked, color, onToggle }: SelectableGoogleSourceSwitchProps) => {
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
