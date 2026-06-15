@@ -4,7 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import type { MenuAction } from "@/components/folder/components/menus/menuActions";
 import { cn } from "@/lib/utils";
 
-type ExplorerMenuPanelVariant = "default" | "compact" | "create" | "toolbar";
+type ContextMenuVariant = "default" | "compact" | "create" | "toolbar";
 type ContextMenuAnchorPoint = {
   x: number;
   y: number;
@@ -17,11 +17,11 @@ interface ContextMenuProps {
   onOpenChange?: (open: boolean) => void;
   actions: MenuAction[];
   className?: string;
-  variant?: ExplorerMenuPanelVariant;
+  variant?: ContextMenuVariant;
 }
 
 const CONTEXT_MENU_COLLISION_PADDING_PX = 8;
-const EXPLORER_MENU_PANEL_VARIANT_CLASS_NAMES: Record<ExplorerMenuPanelVariant, string> = {
+const CONTEXT_MENU_VARIANT_CLASS_NAMES: Record<ContextMenuVariant, string> = {
   default: "min-w-[168px]",
   compact: "min-w-[144px]",
   create: "min-w-[190px]",
@@ -29,7 +29,7 @@ const EXPLORER_MENU_PANEL_VARIANT_CLASS_NAMES: Record<ExplorerMenuPanelVariant, 
 };
 
 const isVisibleMenuAction = (action: MenuAction) => action.hidden !== true;
-const getExplorerMenuPanelVariantClassName = (variant: ExplorerMenuPanelVariant) => EXPLORER_MENU_PANEL_VARIANT_CLASS_NAMES[variant];
+const getContextMenuVariantClassName = (variant: ContextMenuVariant) => CONTEXT_MENU_VARIANT_CLASS_NAMES[variant];
 
 const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions, className, variant = "default" }: ContextMenuProps) => {
   const suppressCloseAutoFocusRef = useRef(false);
@@ -76,7 +76,7 @@ const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions, class
         align="start"
         sideOffset={0}
         collisionPadding={CONTEXT_MENU_COLLISION_PADDING_PX}
-        className={cn(getExplorerMenuPanelVariantClassName(variant), className)}
+        className={cn(getContextMenuVariantClassName(variant), className)}
         onCloseAutoFocus={handleCloseAutoFocus}
       >
         {visibleActions.map((action) => (
@@ -100,4 +100,4 @@ const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions, class
 };
 
 export { ContextMenu };
-export type { ExplorerMenuPanelVariant };
+export type { ContextMenuVariant };
