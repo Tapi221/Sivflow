@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import type { CSSProperties, MouseEvent } from "react";
 import { ContextMenu, ContextMenuBuilder } from "@/../nouse/context-menu/ContextMenu";
 
@@ -10,13 +11,33 @@ type DemoLog = {
   id: string;
   label: string;
 };
+type MenuCssProperties = CSSProperties & {
+  "--menu-bg": string;
+  "--menu-fg": string;
+  "--menu-muted": string;
+  "--menu-border": string;
+  "--menu-selected-bg": string;
+  "--menu-selected-fg": string;
+  "--menu-separator": string;
+  "--menu-accent": string;
+};
 
 const MENU_WIDTH = 260;
 const MENU_OFFSET = 8;
+const MENU_THEME_STYLE: MenuCssProperties = {
+  "--menu-bg": "#202020",
+  "--menu-fg": "#dedede",
+  "--menu-muted": "#9a9a9a",
+  "--menu-border": "#363636",
+  "--menu-selected-bg": "#2f5fdd",
+  "--menu-selected-fg": "#ffffff",
+  "--menu-separator": "#383838",
+  "--menu-accent": "#74a3ff",
+};
 const createDemoLogId = (): string => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-const clampMenuPosition = (event: MouseEvent<HTMLElement>): MenuPosition => ({
-  x: Math.min(Math.max(event.clientX, MENU_OFFSET), Math.max(MENU_OFFSET, window.innerWidth - MENU_WIDTH - MENU_OFFSET)),
-  y: Math.min(Math.max(event.clientY, MENU_OFFSET), Math.max(MENU_OFFSET, window.innerHeight - MENU_OFFSET)),
+const clampMenuPosition = (x: number, y: number): MenuPosition => ({
+  x: Math.min(Math.max(x, MENU_OFFSET), Math.max(MENU_OFFSET, window.innerWidth - MENU_WIDTH - MENU_OFFSET)),
+  y: Math.min(Math.max(y, MENU_OFFSET), Math.max(MENU_OFFSET, window.innerHeight - MENU_OFFSET)),
 });
 const ContextMenuSandboxPage = () => {
   const [menuPosition, setMenuPosition] = useState<MenuPosition | null>(null);
@@ -26,10 +47,19 @@ const ContextMenuSandboxPage = () => {
     setLogs((currentLogs) => [{ id: createDemoLogId(), label }, ...currentLogs.slice(0, 5)]);
   }, []);
   const closeMenu = useCallback(() => setMenuPosition(null), []);
-  const openMenu = useCallback((event: MouseEvent<HTMLDivElement>) => {
+  const openMenuAt = useCallback((x: number, y: number, label: string) => {
+    setMenuPosition(clampMenuPosition(x, y));
+    pushLog(label);
+  }, [pushLog]);
+  const openMenuFromContextMenu = useCallback((event: MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
-    setMenuPosition(clampMenuPosition(event));
-  }, []);
+    event.stopPropagation();
+    openMenuAt(event.clientX, event.clientY, "Right click captured");
+  }, [openMenuAt]);
+  const openMenuFromButton = useCallback((event: MouseEvent<HTMLButtonElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    openMenuAt(rect.left, rect.bottom + 8, "Button open captured");
+  }, [openMenuAt]);
   const items = useMemo(
     () =>
       ContextMenuBuilder.build((menu) =>
@@ -41,7 +71,7 @@ const ContextMenuSandboxPage = () => {
             "Checked option",
             {
               id: "checked-option",
-              shortcut: "⌘K",
+              shortcut: "Cmd K",
               run: () => {
                 setChecked((currentValue) => !currentValue);
                 pushLog("Toggle checked option");
@@ -67,17 +97,32 @@ const ContextMenuSandboxPage = () => {
     [checked, pushLog],
   );
   const menuStyle: CSSProperties | undefined = menuPosition
-    ? { left: menuPosition.x, position: "fixed", top: menuPosition.y, zIndex: 1000 }
+    ? {
+      ...MENU_THEME_STYLE,
+      left: menuPosition.x,
+      position: "fixed",
+      top: menuPosition.y,
+      zIndex: 2147483647,
+    }
     : undefined;
+  const menuElement = menuPosition && menuStyle
+    ? createPortal(<ContextMenu items={items} fixedWidth={MENU_WIDTH} onDismiss={closeMenu} style={menuStyle} />, document.body)
+    : null;
   return (
     <main className="min-h-screen bg-slate-100 p-8 text-slate-900">
       <div className="mx-auto flex max-w-4xl flex-col gap-5">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">nouse/context-menu</p>
           <h1 className="mt-2 text-2xl font-semibold">ContextMenu trial</h1>
-          <p className="mt-2 text-sm text-slate-600">下の白い領域を右クリックすると menu が出ます。</p>
+          <p className="mt-2 text-sm text-slate-600">白い領域を右クリック。出ない場合はボタンで同じ menu を開けます。</p>
         </div>
-        <div className="min-h-72 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" onContextMenu={openMenu}>
+        <div className="flex items-center gap-3">
+          <button className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white" type="button" onClick={openMenuFromButton}>
+            Open sample menu
+          </button>
+          <span className="text-sm text-slate-600">menu: {menuPosition ? `open (${Math.round(menuPosition.x)}, ${Math.round(menuPosition.y)})` : "closed"}</span>
+        </div>
+        <div className="min-h-72 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm" onContextMenu={openMenuFromContextMenu}>
           <div className="text-sm font-semibold">Right click target</div>
           <p className="mt-2 text-sm leading-6 text-slate-600">hover submenu、上下キー、Enter、Escape、左右キーを試せます。</p>
         </div>
@@ -94,7 +139,7 @@ const ContextMenuSandboxPage = () => {
           )}
         </section>
       </div>
-      {menuPosition && <ContextMenu items={items} fixedWidth={MENU_WIDTH} onDismiss={closeMenu} style={menuStyle} />}
+      {menuElement}
     </main>
   );
 };
