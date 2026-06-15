@@ -2,7 +2,7 @@ import { createCardSetUseCase, deleteCardSetWithCards, listCardSetsForFolder, mo
 import { createWebCardSetRepository } from "@platform/storage/cardSetRepository.web";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
+import { useEffectiveLocalUserId } from "@/contexts/auth/useEffectiveLocalUserId";
 import type { CardSet } from "@/types";
 import { DEFAULT_CARD_DISPLAY_MODE } from "@/types/domain/cardSet";
 
