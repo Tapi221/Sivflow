@@ -40,7 +40,7 @@ const optimizedDependencyIncludes = [
 ];
 const apiRouteModulePaths = {
   "/api/ai/command": "src/app/api/ai/command/route.ts",
-  "/api/ai/copilot": "src/app/api/ai/copilot/route.ts",
+  "/api/ai/copilot": "src/app/api/copilot/route.ts",
   "/api/uploadthing": "src/app/api/uploadthing/route.ts",
 };
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -241,6 +241,7 @@ export default defineConfig(({ command }) => ({
       { find: /^@\/services\/localDB$/, replacement: resolveFromRoot("src/services/localdb/index.ts") },
       { find: /^@\/services\/firebase$/, replacement: resolveFromRoot("src/infrastructure/firebase/client.ts") },
       { find: /^@\/features\/tab\/Tab$/, replacement: resolveFromRoot("src/pane.desktop/tab.desktopnative/Tab.ts") },
+      { find: "@/nouse", replacement: resolveFromRoot("nouse") },
       { find: "@core", replacement: resolveFromRoot("packages/core/src") },
       { find: "@platform", replacement: resolveFromRoot("packages/platform/src") },
       { find: "@web-renderer", replacement: resolveFromRoot("packages/web-renderer/src") },
