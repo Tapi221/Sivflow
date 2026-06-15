@@ -84,10 +84,7 @@ const WorkspaceBreadcrumbs = ({ className, isLeftPanelCollapsed = false }: Works
                   {label}
                 </span>
               )}
-
-              {!isLast ? (
-                <ChevronRight className={WORKSPACE_BREADCRUMB_SEPARATOR_CLASS_NAME} />
-              ) : null}
+              {!isLast && <ChevronRight className={WORKSPACE_BREADCRUMB_SEPARATOR_CLASS_NAME} />}
             </li>
           );
         })}
