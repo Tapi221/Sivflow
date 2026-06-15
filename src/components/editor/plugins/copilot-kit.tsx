@@ -1,11 +1,18 @@
 "use client";
 
 import { faker } from "@faker-js/faker";
+
 import { CopilotPlugin } from "@platejs/ai/react";
+
 import { serializeMd, stripMarkdown } from "@platejs/markdown";
+
 import type { TElement } from "platejs";
+
 import { GhostText } from "@/chip/ui/plate/ghost-text";
+
 import { MarkdownKit } from "./markdown-kit";
+
+
 
 const COPILOT_SYSTEM_PROMPT = `You are an advanced AI writing assistant, similar to VSCode Copilot but for general text. Your task is to predict and generate the next part of the text based on the given context.
   
@@ -18,6 +25,7 @@ const COPILOT_SYSTEM_PROMPT = `You are an advanced AI writing assistant, similar
   - CRITICAL: Always end with a punctuation mark.
   - CRITICAL: Avoid starting a new block. Do not use block formatting like >, #, 1., 2., -, etc. The suggestion should continue in the same block as the context.
   - If no context is provided or you can't generate a continuation, return "0" without explanation.`;
+
 const CopilotKit = [
   ...MarkdownKit,
   CopilotPlugin.configure(({ api }) => ({
@@ -69,5 +77,7 @@ const CopilotKit = [
     },
   })),
 ];
+
+
 
 export { CopilotKit };

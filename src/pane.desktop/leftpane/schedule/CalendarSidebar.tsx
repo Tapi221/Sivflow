@@ -14,6 +14,8 @@ import type { GoogleCalendarListItem } from "@/integration/googlecalendar-integr
 import { cn } from "@/lib/utils";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 
+
+
 type CalendarContextMenuState = {
   accountId: string;
   calendarId: string;
@@ -88,6 +90,8 @@ type IconProps = {
   className?: string;
 };
 
+
+
 const ADD_GOOGLE_CALENDAR_LABEL = "Googleカレンダーを追加";
 const ADD_PROJECT_EMPTY_MESSAGE = "プロジェクト名を入力してください";
 const ADD_PROJECT_LABEL = "プロジェクトを追加";
@@ -104,6 +108,8 @@ const CONNECTING_GOOGLE_CALENDAR_LABEL = "接続中...";
 const DEFAULT_CALENDAR_COLOR = "#64748b";
 const GOOGLE_CALENDAR_SECTION_LABEL = "Google Calendar";
 const PROJECT_LINKED_GOOGLE_CALENDARS_LABEL = "プロジェクトに追加したカレンダー";
+
+
 
 const createGoogleCalendarColorOverrideKey = (accountId: string, calendarId: string): string => `${accountId}:${calendarId}`;
 const normalizeProjectCalendarName = (value: string): string => value.trim().toLowerCase();
@@ -143,6 +149,8 @@ const findMatchingGoogleCalendarsForProject = (project: AppCalendarItem, account
 };
 const createGoogleProjectLinkActionLabel = (target: MatchingGoogleCalendarTarget, targetCount: number): string => targetCount <= 1 ? "既存Googleカレンダーにリンク" : `既存Googleカレンダーにリンク: ${getGoogleAccountLabel(target.account)}`;
 const createGoogleCalendarActionLabel = (account: GoogleAccountDisplay, accountCount: number): string => accountCount <= 1 ? "Googleカレンダーとして追加" : `Googleカレンダーとして追加: ${getGoogleAccountLabel(account)}`;
+
+
 
 const IconChevronRight = ({ className }: IconProps) => <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 const IconPlus = ({ className }: IconProps) => <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>;
@@ -366,5 +374,7 @@ const CalendarSidebarContent = ({ appProjects, projectCalendarLinks, googleCalen
   );
 };
 const CalendarSidebar = (props: CalendarSidebarProps) => <SidebarLayeredDirectory calendarContent={<CalendarSidebarContent {...props} className={CALENDAR_SIDEBAR_CONTENT_CLASS_NAME} />} />;
+
+
 
 export { CalendarSidebar, CalendarSidebarContent };

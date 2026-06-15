@@ -1,13 +1,22 @@
 "use client";
 
 import { AIChatPlugin } from "@platejs/ai/react";
+
 import { WandSparklesIcon } from "lucide-react";
+
 import { useEditorPlugin, usePluginOption } from "platejs/react";
+
 import type { MouseEvent } from "react";
+
 import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
+
 import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
+
+
 const AI_TOOLBAR_BUTTON_TOOLTIP = "AI commands";
+
+
 
 const ButtonClickPanelNoteAi = ({ onClick, onMouseDown, tooltip = AI_TOOLBAR_BUTTON_TOOLTIP, ...props }: ToolbarButtonProps) => {
   const { api } = useEditorPlugin(AIChatPlugin);
@@ -37,5 +46,7 @@ const ButtonClickPanelNoteAi = ({ onClick, onMouseDown, tooltip = AI_TOOLBAR_BUT
     </ToolbarButton>
   );
 };
+
+
 
 export { ButtonClickPanelNoteAi };

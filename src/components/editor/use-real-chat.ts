@@ -1,22 +1,39 @@
 "use client";
 
 import * as React from "react";
+
 import type { UseChatHelpers } from "@ai-sdk/react";
+
 import { useChat as useBaseChat } from "@ai-sdk/react";
+
 import { withAIBatch } from "@platejs/ai";
+
 import { AIChatPlugin, aiCommentToRange, applyTableCellSuggestion } from "@platejs/ai/react";
+
 import { getCommentKey, getTransientCommentKey } from "@platejs/comment";
+
 import { deserializeMd } from "@platejs/markdown";
+
 import { BlockSelectionPlugin } from "@platejs/selection/react";
+
 import type { UIMessage } from "ai";
+
 import { DefaultChatTransport } from "ai";
+
 import type { TNode } from "platejs";
+
 import { KEYS, nanoid, NodeApi, TextApi } from "platejs";
+
 import type { PlateEditor } from "platejs/react";
+
 import { useEditorRef } from "platejs/react";
+
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 
+
+
 type ToolName = "comment" | "edit" | "generate";
+
 type TComment = {
   comment?: {
     blockId: string;
@@ -25,6 +42,7 @@ type TComment = {
   } | null;
   status?: "finished" | "streaming";
 };
+
 type TTableCellUpdate = {
   cellUpdate?: {
     content: string;
@@ -32,22 +50,33 @@ type TTableCellUpdate = {
   } | null;
   status?: "finished" | "streaming";
 };
+
 type MessageDataPart = {
   toolName: ToolName;
   comment?: TComment;
   table?: TTableCellUpdate;
 };
+
 type ChatMessage = UIMessage<object, MessageDataPart>;
+
 type Chat = UseChatHelpers<ChatMessage>;
+
 type ChatOptions = {
   api?: string;
   body?: Record<string, unknown>;
 };
+
 type AIChatOptionReader = (plugin: typeof AIChatPlugin, key: string) => unknown;
+
 type AIChatOptionWriter = (plugin: typeof AIChatPlugin, key: string, value: unknown) => void;
 
+
+
 const DEFAULT_CHAT_API = "/api/ai/command";
+
 const EMPTY_BODY: Record<string, unknown> = {};
+
+
 
 const createChatTransport = ({
   api,
@@ -61,20 +90,24 @@ const createChatTransport = ({
     body,
   });
 };
+
 const getAIChatOptions = (editor: PlateEditor) => {
   const getOption = editor.getOption.bind(editor) as AIChatOptionReader;
   return (getOption(AIChatPlugin, "chatOptions") ?? {}) as ChatOptions;
 };
+
 const setAIChat = (editor: PlateEditor, chat: Chat) => {
   const setOption = editor.setOption.bind(editor) as AIChatOptionWriter;
   setOption(AIChatPlugin, "chat", chat);
 };
+
 const getMessageTextSignature = (message: ChatMessage | undefined): string => {
   if (!message) return "";
   return message.parts
     .map((part) => part.type === "text" ? part.text : `${part.type}:${JSON.stringify(part)}`)
     .join("|");
 };
+
 const getChatPublishKey = (chat: Chat): string => {
   const lastMessage = chat.messages.at(-1);
   return [
@@ -85,6 +118,7 @@ const getChatPublishKey = (chat: Chat): string => {
     getMessageTextSignature(lastMessage),
   ].join("\u001f");
 };
+
 const applyTableUpdate = (editor: PlateEditor, tableData: TTableCellUpdate) => {
   if (tableData.status === "finished") {
     const chatSelection = editor.getOption(AIChatPlugin, "chatSelection");
@@ -98,6 +132,7 @@ const applyTableUpdate = (editor: PlateEditor, tableData: TTableCellUpdate) => {
     applyTableCellSuggestion(editor, cellUpdate);
   });
 };
+
 const applyCommentUpdate = (editor: PlateEditor, commentData: TComment) => {
   if (commentData.status === "finished") {
     editor.getApi(BlockSelectionPlugin).blockSelection.deselect();
@@ -143,6 +178,7 @@ const applyCommentUpdate = (editor: PlateEditor, commentData: TComment) => {
     );
   });
 };
+
 const useRealChat = () => {
   const editor = useEditorRef();
   const options = getAIChatOptions(editor);
@@ -182,5 +218,10 @@ const useRealChat = () => {
   return chat;
 };
 
+
+
 export { useRealChat };
+
+
+
 export type { ToolName, TComment, TTableCellUpdate, MessageDataPart, Chat, ChatMessage };

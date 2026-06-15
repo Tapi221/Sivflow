@@ -7,6 +7,8 @@ import { FileElementStatic } from "@/chip/ui/plate/media-file-node-static";
 import { ImageElementStatic } from "@/chip/ui/plate/media-image-node-static";
 import { VideoElementStatic } from "@/chip/ui/plate/media-video-node-static";
 
+
+
 const BaseMediaKit = [
   BaseImagePlugin.withComponent(ImageElementStatic),
   BaseVideoPlugin.withComponent(VideoElementStatic),
@@ -22,5 +24,7 @@ const BaseMediaKit = [
   }),
   BasePlaceholderPlugin,
 ];
+
+
 
 export { BaseMediaKit };

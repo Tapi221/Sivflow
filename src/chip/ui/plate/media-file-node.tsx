@@ -1,14 +1,24 @@
 "use client";
 
 import * as React from "react";
+
 import { useMediaState } from "@platejs/media/react";
+
 import { ResizableProvider } from "@platejs/resizable";
+
 import { FileUp } from "lucide-react";
+
 import type { TFileElement } from "platejs";
+
 import type { PlateElementProps } from "platejs/react";
+
 import { PlateElement, useReadOnly, withHOC } from "platejs/react";
-import { Caption, CaptionTextarea } from "@/chip/ui/plate/caption";
+
+import { Caption, CaptionTextarea } from "./caption";
+
 import { cn } from "@/lib/utils";
+
+
 
 const FileElement = withHOC(ResizableProvider, (props: PlateElementProps<TFileElement>) => {
   const readOnly = useReadOnly();
@@ -40,5 +50,7 @@ const FileElement = withHOC(ResizableProvider, (props: PlateElementProps<TFileEl
     </PlateElement>
   );
 });
+
+
 
 export { FileElement };

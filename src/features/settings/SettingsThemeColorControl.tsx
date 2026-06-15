@@ -3,6 +3,8 @@ import { DEFAULT_THEME_ACCENT_COLOR, normalizeThemeAccentColor, useUserSettings 
 import { cn } from "@/lib/utils";
 import type { UserSettings } from "@/types";
 
+
+
 type SettingsThemeColorControlProps = {
   className?: string;
   labelClassName?: string;
@@ -13,6 +15,8 @@ type ThemeColorControlCopy = {
   pickerAriaLabel: string;
 };
 type SettingsLanguage = UserSettings["language"];
+
+
 
 const THEME_COLOR_CONTROL_COPY: Record<SettingsLanguage, ThemeColorControlCopy> = {
   ja: {
@@ -31,6 +35,8 @@ const THEME_COLOR_CONTROL_COPY: Record<SettingsLanguage, ThemeColorControlCopy> 
     pickerAriaLabel: "选择主题色",
   },
 };
+
+
 
 const SettingsThemeColorControl = ({ className, labelClassName }: SettingsThemeColorControlProps) => {
   const { settings, updateSettings } = useUserSettings();
@@ -58,5 +64,9 @@ const SettingsThemeColorControl = ({ className, labelClassName }: SettingsThemeC
   );
 };
 
+
+
 export { SettingsThemeColorControl };
+
+
 export type { SettingsThemeColorControlProps };

@@ -1,7 +1,10 @@
 "use client";
 
 import type { PlateLeafProps } from "platejs/react";
+
 import { PlateLeaf } from "platejs/react";
+
+
 
 const CodeLeaf = (props: PlateLeafProps) => (
   <PlateLeaf
@@ -12,5 +15,7 @@ const CodeLeaf = (props: PlateLeafProps) => (
     {props.children}
   </PlateLeaf>
 );
+
+
 
 export { CodeLeaf };

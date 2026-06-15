@@ -1,22 +1,40 @@
 "use client";
 
 import * as React from "react";
+
 import { getCommentKey, getDraftCommentKey } from "@platejs/comment";
+
 import { CommentPlugin, useCommentId } from "@platejs/comment/react";
+
 import { differenceInDays, differenceInHours, differenceInMinutes, format } from "date-fns";
+
 import { CheckIcon, XIcon } from "lucide-react";
+
 import type { NodeEntry, TCommentText, Value } from "platejs";
+
 import { KEYS, nanoid, NodeApi } from "platejs";
+
 import type { CreatePlateEditorOptions } from "platejs/react";
+
 import { Plate, useEditorPlugin, useEditorRef, usePlateEditor, usePluginOption } from "platejs/react";
+
 import { ButtonClickPanelNoteComment } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Comment";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/chip/ui/avatar";
+
 import { Button } from "@/chip/ui/button/button";
-import { CommentMoreDropdown } from "@/chip/ui/plate/comment-more-dropdown";
-import { Editor, EditorContainer } from "@/chip/ui/plate/editor";
+
+import { CommentMoreDropdown } from "./comment-more-dropdown";
+
+import { Editor, EditorContainer } from "./editor";
+
 import { BasicMarksKit } from "@/components/editor/plugins/basic-marks-kit";
+
 import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
+
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
+
+
 
 type TComment = {
   id: string;
@@ -26,12 +44,15 @@ type TComment = {
   isEdited: boolean;
   userId: string;
 };
+
 type CommentCreateFormProps = {
   autoFocus?: boolean;
   className?: string;
   discussionId?: string;
   focusOnMount?: boolean;
 };
+
+
 
 const useCommentEditor = (
   options: Omit<CreatePlateEditorOptions, "plugins"> = {},
@@ -48,6 +69,7 @@ const useCommentEditor = (
   );
   return commentEditor;
 };
+
 const formatCommentDate = (date: Date) => {
   const now = new Date();
   const diffMinutes = differenceInMinutes(now, date);
@@ -64,6 +86,8 @@ const formatCommentDate = (date: Date) => {
   }
   return format(date, "MM/dd/yyyy");
 };
+
+
 
 const Comment = (props: {
   comment: TComment;
@@ -273,6 +297,7 @@ const Comment = (props: {
     </div>
   );
 };
+
 const CommentCreateForm = ({ autoFocus = false, className, discussionId: discussionIdProp, focusOnMount = false }: CommentCreateFormProps) => {
   const discussions = usePluginOption(discussionPlugin, "discussions");
   const editor = useEditorRef();
@@ -392,5 +417,10 @@ const CommentCreateForm = ({ autoFocus = false, className, discussionId: discuss
   );
 };
 
+
+
 export { Comment, CommentCreateForm, formatCommentDate };
+
+
+
 export type { TComment };

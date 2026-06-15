@@ -3,10 +3,14 @@ import type { CSSProperties } from "react";
 import { MessageSquare } from "@/chip/icons";
 import { QuickQaChatDialog } from "@/chip/panel/dialog.desktop/Dialog.QuickQaChat";
 
+
+
 type Props = {
   className?: string;
   style?: CSSProperties;
 };
+
+
 
 const WorkspaceActionToolbar = ({ className, style }: Props) => {
   const [isQuickQaOpen, setIsQuickQaOpen] = useState(false);
@@ -22,5 +26,7 @@ const WorkspaceActionToolbar = ({ className, style }: Props) => {
     </>
   );
 };
+
+
 
 export { WorkspaceActionToolbar };

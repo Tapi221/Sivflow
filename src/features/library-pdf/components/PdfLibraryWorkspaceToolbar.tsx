@@ -7,6 +7,8 @@ import { FlashCardIcon, PDFIcon } from "@/chip/icons/icons.library";
 import { HoverTooltip } from "@/chip/panel/toolchip/HoverTooltip";
 import { cn } from "@/lib/utils";
 
+
+
 type PdfLibraryWorkspaceSection = "flashcard" | "pdf";
 type PdfLibraryWorkspaceToolbarProps = {
   activeSection: PdfLibraryWorkspaceSection;
@@ -19,6 +21,8 @@ type LibraryTypeToolbarTab = {
   icon: ComponentType<IconProps>;
 };
 
+
+
 const LIBRARY_TYPE_TABS = [
   { value: "flashcard", label: "Flashcard", icon: FlashCardIcon },
   { value: "pdf", label: "PDF", icon: PDFIcon },
@@ -30,9 +34,13 @@ const TAB_MOTION_TRANSITION: Transition = {
   ease: [0.22, 1, 0.36, 1],
 };
 
+
+
 const resolveLibrarySectionRoute = (section: PdfLibraryWorkspaceSection): string => {
   return section === "flashcard" ? "/library/flashcard" : "/library/pdf";
 };
+
+
 
 const PdfLibraryWorkspaceToolbar = ({ activeSection, onSelectSection, onAddPdf }: PdfLibraryWorkspaceToolbarProps) => {
   const navigate = useNavigate();
@@ -77,5 +85,9 @@ const PdfLibraryWorkspaceToolbar = ({ activeSection, onSelectSection, onAddPdf }
   );
 };
 
+
+
 export { PdfLibraryWorkspaceToolbar };
+
+
 export type { PdfLibraryWorkspaceSection };

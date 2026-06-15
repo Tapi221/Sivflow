@@ -5,6 +5,8 @@ import { TAG_COLOR_KEYS } from "@shared/design-tokens/color/Color.Tag";
 import { getTagColorStyle } from "@/chip/budge/tag/tagColor";
 import { cn } from "@/lib/utils";
 
+
+
 type CalendarTimetableSyllabusCatalogDialogProps = {
   activeSemesterId: string;
   institutions: CalendarTimetableInstitution[];
@@ -20,10 +22,14 @@ type SyllabusSlotDraft = {
   periodLabel: string;
 };
 
+
+
 const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] as const;
 const DEFAULT_COURSE_COLOR_KEY: CalendarTimetableColorKey = "blue";
 const DEFAULT_INSTITUTION_KIND: CalendarTimetableInstitutionKind = "university";
 const EMPTY_SLOT_DRAFTS: SyllabusSlotDraft[] = [];
+
+
 
 const createInitialSlotDraft = (periods: CalendarTimetablePeriod[]): SyllabusSlotDraft[] => periods[0] ? [{ dayIndex: 0, periodLabel: periods[0].label }] : EMPTY_SLOT_DRAFTS;
 const formatSyllabusCourseSlots = (course: CalendarTimetableSyllabusCourse): string => course.slots.map((slot) => `${TIMETABLE_DAY_LABELS[slot.dayIndex]}${slot.periodLabel}`).join(" / ");
@@ -31,6 +37,8 @@ const getSyllabusCourseSlotsLabel = (course: CalendarTimetableSyllabusCourse): s
   const slotsLabel = formatSyllabusCourseSlots(course);
   return slotsLabel.trim() === "" ? "時限未設定" : slotsLabel;
 };
+
+
 
 const CalendarTimetableSyllabusCatalogDialog = ({ activeSemesterId, institutions, periods, syllabusCourses, onSearch, onSaveSyllabusCourse, onAddCourseFromSyllabus, onClose }: CalendarTimetableSyllabusCatalogDialogProps) => {
   const [query, setQuery] = useState("");
@@ -110,5 +118,7 @@ const CalendarTimetableSyllabusCatalogDialog = ({ activeSemesterId, institutions
     </div>
   );
 };
+
+
 
 export { CalendarTimetableSyllabusCatalogDialog };
