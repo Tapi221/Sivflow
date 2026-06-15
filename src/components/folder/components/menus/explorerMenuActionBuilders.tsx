@@ -1,9 +1,7 @@
 import { Pencil, Tag, Trash2 } from "@/chip/icons";
-import { AddDocumentIcon, BulkImportIcon, CreateCardIcon, CreateCardSetIcon, CreateFolderIcon, FolderContextCardSetIcon, FolderContextFolderIcon, FolderContextRenameIcon, FolderContextTrashIcon } from "./explorerMenuActionIcons";
-import { beginInlineRename } from "./explorerMenuStateHelpers";
-import type { MenuAction } from "./menuActions";
-
-
+import { AddDocumentIcon, BulkImportIcon, CreateCardIcon, CreateCardSetIcon, CreateFolderIcon, FolderContextCardSetIcon, FolderContextFolderIcon, FolderContextRenameIcon, FolderContextTrashIcon } from "@/components/folder/components/menus/explorerMenuActionIcons";
+import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
+import type { MenuAction } from "@/components/folder/components/menus/menuActions";
 
 interface BuildFolderMenuActionsParams {
   onCreateSubfolder?: () => void;
@@ -43,11 +41,8 @@ interface BuildExplorerCreateMenuActionsParams {
   onBulkImport?: () => void | Promise<void>;
 }
 
-
-
 const buildRenameDeleteMenuActions = ({ renameLabel = "名前を変更", deleteLabel = "削除", onRename, onDelete }: BuildRenameDeleteMenuActionsParams): MenuAction[] => {
   const actions: MenuAction[] = [];
-
   if (onRename) {
     actions.push({
       id: "rename",
@@ -56,7 +51,6 @@ const buildRenameDeleteMenuActions = ({ renameLabel = "名前を変更", deleteL
       onSelect: onRename,
     });
   }
-
   if (onDelete) {
     actions.push({
       id: "delete",
@@ -66,7 +60,6 @@ const buildRenameDeleteMenuActions = ({ renameLabel = "名前を変更", deleteL
       onSelect: onDelete,
     });
   }
-
   return actions;
 };
 const buildEntityRenameDeleteMenuActions = ({ id, name, type, beforeRename, closeMenu, setEditingId, setEditingName, canRename = true, onDelete, renameLabel = "名前を変更", deleteLabel = "削除" }: BuildEntityRenameDeleteMenuActionsParams): MenuAction[] => buildRenameDeleteMenuActions({ renameLabel, deleteLabel, onRename: canRename ? () => {
@@ -79,12 +72,8 @@ onDelete: onDelete
   }
   : undefined,
 });
-/**
- * フォルダ用コンテキストメニューのアクション定義をビルド
- */
 const buildFolderMenuActions = ({ onCreateSubfolder, onCreateCardSet, onRename, onDelete, onBulkTag }: BuildFolderMenuActionsParams): MenuAction[] => {
   const actions: MenuAction[] = [];
-
   if (onCreateSubfolder) {
     actions.push({
       id: "create-subfolder",
@@ -93,7 +82,6 @@ const buildFolderMenuActions = ({ onCreateSubfolder, onCreateCardSet, onRename, 
       onSelect: onCreateSubfolder,
     });
   }
-
   if (onCreateCardSet) {
     actions.push({
       id: "create-card-set",
@@ -102,7 +90,6 @@ const buildFolderMenuActions = ({ onCreateSubfolder, onCreateCardSet, onRename, 
       onSelect: onCreateCardSet,
     });
   }
-
   if (onBulkTag) {
     actions.push({
       id: "bulk-tag",
@@ -111,7 +98,6 @@ const buildFolderMenuActions = ({ onCreateSubfolder, onCreateCardSet, onRename, 
       onSelect: onBulkTag,
     });
   }
-
   if (onRename) {
     actions.push({
       id: "rename",
@@ -120,7 +106,6 @@ const buildFolderMenuActions = ({ onCreateSubfolder, onCreateCardSet, onRename, 
       onSelect: onRename,
     });
   }
-
   if (onDelete) {
     actions.push({
       id: "delete",
@@ -130,19 +115,14 @@ const buildFolderMenuActions = ({ onCreateSubfolder, onCreateCardSet, onRename, 
       onSelect: onDelete,
     });
   }
-
   return actions;
 };
-/**
- * 追加ボタン（＋）メニューのアクション定義をビルド
- */
 const buildExplorerCreateMenuActions = ({ canCreateCardSet = false, canCreateCard = false, canAddDocuments = false, canBulkImport = false, onCreateRootFolder, onCreateCardSet, onCreateCard, onAddDocument, onBulkImport }: BuildExplorerCreateMenuActionsParams): MenuAction[] => {
   const actions: MenuAction[] = [{ id: "create-root-folder", label: "新規プロジェクト", icon: <CreateFolderIcon />, onSelect: () => {
     void onCreateRootFolder?.();
   },
   },
   ];
-
   if (canCreateCardSet) {
     actions.push({
       id: "create-card-set",
@@ -153,7 +133,6 @@ const buildExplorerCreateMenuActions = ({ canCreateCardSet = false, canCreateCar
       },
     });
   }
-
   if (canCreateCard) {
     actions.push({
       id: "create-card",
@@ -164,7 +143,6 @@ const buildExplorerCreateMenuActions = ({ canCreateCardSet = false, canCreateCar
       },
     });
   }
-
   if (canAddDocuments) {
     actions.push({
       id: "add-document",
@@ -175,7 +153,6 @@ const buildExplorerCreateMenuActions = ({ canCreateCardSet = false, canCreateCar
       },
     });
   }
-
   if (canBulkImport) {
     actions.push({
       id: "bulk-import",
@@ -187,10 +164,7 @@ const buildExplorerCreateMenuActions = ({ canCreateCardSet = false, canCreateCar
       },
     });
   }
-
   return actions;
 };
-
-
 
 export { buildRenameDeleteMenuActions, buildEntityRenameDeleteMenuActions, buildFolderMenuActions, buildExplorerCreateMenuActions };
