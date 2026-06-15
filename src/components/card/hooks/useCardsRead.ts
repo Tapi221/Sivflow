@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import { normalizeCardFolderId } from "@/domain/card/normalizers/cardShape";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { buildCardSetById, filterCardsByFolderId } from "@/domain/card/selectors/cardFolder";
-import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
+import { useEffectiveLocalUserId } from "@/contexts/auth/useEffectiveLocalUserId";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { getLocalDb } from "@/services/localdb";
 import type { Card } from "@/types";
