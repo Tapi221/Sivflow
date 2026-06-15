@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
-import { normalizeDate } from "@/shared/codec/date";
+import { normalizeDate } from "@/utils/codec/date";
 import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
 
