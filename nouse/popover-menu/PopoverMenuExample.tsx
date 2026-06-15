@@ -1,29 +1,21 @@
-import React, { useMemo } from "react";
-import { PopoverMenu, usePopoverMenuHandle } from "./PopoverMenu";
-import "./PopoverMenu.css";
+import { useMemo } from "react";
+import { PopoverMenu, usePopoverMenuHandle } from "@/nouse/popover-menu/PopoverMenu";
 
-/**
- * This example intentionally uses a plain menu body so PopoverMenu can be tested
- * without depending on ContextMenu.tsx. In your app, replace the <div role="menu">
- * content with <ContextMenu items={...} onDismiss={handle.hide} />.
- */
-export function PopoverMenuExample() {
+const MENU_STYLE = {
+  minWidth: 200,
+  padding: 4,
+  border: "1px solid #363636",
+  borderRadius: 8,
+  background: "#202020",
+  color: "#dedede",
+  boxShadow: "0 12px 32px rgb(0 0 0 / 35%), 0 2px 8px rgb(0 0 0 / 25%)",
+};
+
+const PopoverMenuExample = () => {
   const handle = usePopoverMenuHandle();
-
   const menu = useMemo(
     () => () => (
-      <div
-        role="menu"
-        style={{
-          minWidth: 200,
-          padding: 4,
-          border: "1px solid #363636",
-          borderRadius: 8,
-          background: "#202020",
-          color: "#dedede",
-          boxShadow: "0 12px 32px rgb(0 0 0 / 35%), 0 2px 8px rgb(0 0 0 / 25%)",
-        }}
-      >
+      <div role="menu" style={MENU_STYLE}>
         <button type="button" role="menuitem" onClick={() => console.log("New File")}>
           New File
         </button>
@@ -38,7 +30,6 @@ export function PopoverMenuExample() {
     ),
     [],
   );
-
   return (
     <div style={{ padding: 48 }}>
       <PopoverMenu
@@ -59,10 +50,11 @@ export function PopoverMenuExample() {
           </button>
         )}
       </PopoverMenu>
-
       <button type="button" onClick={() => handle.toggle()} style={{ marginLeft: 12 }}>
         Toggle from handle
       </button>
     </div>
   );
-}
+};
+
+export { PopoverMenuExample };
