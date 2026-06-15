@@ -1,7 +1,7 @@
 import { memo, useCallback, useMemo, useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
 import { generateOllamaAnswer } from "@platform/ai/ollamaClient";
 import { useToast } from "@web-renderer/contexts/ToastContext";
-import type { KeyboardEvent } from "react";
 import { MessageSquare, Plus, Sparkles } from "@/chip/icons";
 import { Dialog, DialogContent } from "@/chip/panel/dialog.desktop/dialog/dialog";
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
@@ -63,6 +63,8 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
   const inputMaxLength = step === "question" ? MAX_QUESTION_LENGTH : MAX_ANSWER_LENGTH;
   const canSend = inputValue.trim().length > 0 && !isCreating && !isGeneratingAiAnswer;
   const canGenerateAiAnswer = step === "answer" && pendingQuestion.trim().length > 0 && !isCreating && !isGeneratingAiAnswer;
+  const shouldRenderLoadingStatus = isCreating || isGeneratingAiAnswer;
+  const shouldRenderAnswerActions = step === "answer";
   const resetChat = useCallback(() => {
     setStep("question");
     setPendingQuestion("");
@@ -186,15 +188,15 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
                 <div className={cn("max-w-5/6 rounded-2xl px-3 py-2 text-xs leading-relaxed shadow-sm", message.role === "user" ? "bg-[#343434] text-white" : "border border-[#eceae4] bg-white text-[#4b4b4b]")}>{message.text}</div>
               </div>
             ))}
-            {isCreating || isGeneratingAiAnswer ? <LoadingStatusPill label={isGeneratingAiAnswer ? "AI回答案を作成中" : "カード作成中"} /> : null}
+            {shouldRenderLoadingStatus && <LoadingStatusPill label={isGeneratingAiAnswer ? "AI回答案を作成中" : "カード作成中"} />}
           </div>
         </div>
         <div className="border-t border-[#eceae4] bg-white/80 px-4 py-3">
-          {latestQuestionLabel ? (
+          {latestQuestionLabel !== null && (
             <div className="mb-2 rounded-xl border border-[#eceae4] bg-[#f7f6f2] px-2.5 py-1.5 text-xs text-[#77736d]">
               Q: {latestQuestionLabel}
             </div>
-          ) : null}
+          )}
           <div className="flex items-end gap-2">
             <textarea ref={inputRef} value={inputValue} onChange={(event) => setInputValue(event.target.value.slice(0, inputMaxLength))} onKeyDown={handleInputKeyDown} placeholder={placeholder} rows={step === "question" ? 2 : 4} className="max-h-40 min-h-10 min-w-0 flex-1 resize-none rounded-2xl border border-stone-300 bg-white px-3 py-2 text-xs leading-relaxed text-[#343434] outline-none transition placeholder:text-[#aaa49d] focus:border-[#c8c6bf]" />
             <button type="button" className="inline-flex h-10 shrink-0 items-center justify-center rounded-full border border-[#343434] bg-[#343434] px-4 text-xs font-semibold text-white transition hover:bg-[#1f1f1f] disabled:border-stone-300 disabled:bg-slate-100 disabled:text-[#aaa49d]" onClick={handleSend} disabled={!canSend}>
@@ -204,18 +206,18 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
           <div className="mt-2 flex items-center justify-between gap-2">
             <button type="button" className="text-xs font-medium text-[#8a857f] underline-offset-2 hover:text-[#343434] hover:underline disabled:opacity-60" onClick={resetChat} disabled={isCreating || isGeneratingAiAnswer}>リセット</button>
             <div className="flex items-center gap-3">
-              {step === "answer" ? (
+              {shouldRenderAnswerActions && (
                 <button type="button" className="inline-flex items-center gap-1 text-xs font-medium text-[#8a857f] underline-offset-2 hover:text-[#343434] hover:underline disabled:opacity-60" onClick={handleGenerateAiAnswer} disabled={!canGenerateAiAnswer}>
                   {isGeneratingAiAnswer ? <LoadingSpinner iconClassName="h-3 w-3" label="AI回答案を作成中" /> : <Sparkles className="h-3 w-3" />}
                   AIで回答案
                 </button>
-              ) : null}
-              {step === "answer" ? (
+              )}
+              {shouldRenderAnswerActions && (
                 <button type="button" className="inline-flex items-center gap-1 text-xs font-medium text-[#8a857f] underline-offset-2 hover:text-[#343434] hover:underline disabled:opacity-60" onClick={handleCreateDraftWithoutAnswer} disabled={isCreating || isGeneratingAiAnswer || !pendingQuestion}>
                   <Plus className="h-3 w-3" />
                   回答なしで下書き作成
                 </button>
-              ) : null}
+              )}
             </div>
           </div>
         </div>
