@@ -60,6 +60,7 @@ const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions
   const hasLeadingActions = Boolean(
     leadingActions && leadingActions.length > 0,
   );
+  const hasTrailingActions = Boolean(actions && actions.length > 0);
   const hasLeadingContentBeforeActions = hasTabs || hasSecondaryTabs;
   const isSegmented = variant === "segmented";
   const isFloating = variant === "floating";
@@ -159,19 +160,52 @@ const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions
       </div>
     );
   };
+  const renderUnderlineTabs = (toolbarTabs: readonly LibraryHeaderToolbarItem[], className = "flex h-7 shrink-0 items-start gap-1.5") => {
+    return (
+      <div className={className}>
+        {toolbarTabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeValue === tab.value;
+          return (
+            <div key={tab.value} className="flex flex-col items-start pb-2">
+              <button
+                type="button"
+                className={cn(
+                  "flex h-7 items-center gap-1.5 rounded py-0.5 pl-0 pr-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                  isActive ? "text-[#25272d]" : "text-slate-500",
+                )}
+                aria-pressed={isActive}
+                onClick={tab.onClick}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span
+                  className={cn(
+                    "flex h-7 items-center whitespace-nowrap",
+                    isActive && "border-b-2 border-[#74798b]",
+                  )}
+                >
+                  {tab.label}
+                </span>
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+  const primaryTabsContent = isSegmented ? renderSegmentedTabs(tabs, `${WORKSPACE_TAB_INDICATOR_ID}-primary`) : renderUnderlineTabs(tabs);
+  const secondaryTabsContent = isSegmented
+    ? renderSegmentedTabs(secondaryTabs ?? [], `${WORKSPACE_TAB_INDICATOR_ID}-secondary`)
+    : renderUnderlineTabs(secondaryTabs ?? [], "ml-3 flex h-7 shrink-0 items-start gap-1");
 
   if (isFloating) {
     return (
       <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex h-14 items-start justify-between px-4 pt-3">
         <div className="flex min-w-0 items-center gap-2">
-          {hasLeadingActions
-            ? renderSegmentedActions(leadingActions ?? [], "pointer-events-auto")
-            : null}
+          {hasLeadingActions && renderSegmentedActions(leadingActions ?? [], "pointer-events-auto")}
         </div>
 
-        {actions && actions.length > 0
-          ? renderSegmentedActions(actions, "pointer-events-auto justify-end")
-          : null}
+        {hasTrailingActions && renderSegmentedActions(actions ?? [], "pointer-events-auto justify-end")}
       </div>
     );
   }
@@ -191,92 +225,15 @@ const LibraryHeaderToolbar = ({ activeValue, tabs, secondaryTabs, leadingActions
           hasLeadingContentBeforeActions ? "gap-3" : "gap-0",
         )}
       >
-        {hasTabs ? (
-          isSegmented ? (
-            renderSegmentedTabs(tabs, `${WORKSPACE_TAB_INDICATOR_ID}-primary`)
-          ) : (
-            <div className="flex h-7 shrink-0 items-start gap-1.5">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                const isActive = activeValue === tab.value;
-
-                return (
-                  <div key={tab.value} className="flex flex-col items-start pb-2">
-                    <button
-                      type="button"
-                      className={cn(
-                        "flex h-7 items-center gap-1.5 rounded py-0.5 pl-0 pr-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                        isActive ? "text-[#25272d]" : "text-slate-500",
-                      )}
-                      aria-pressed={isActive}
-                      onClick={tab.onClick}
-                    >
-                      <Icon className="h-4 w-4 shrink-0" />
-                      <span
-                        className={cn(
-                          "flex h-7 items-center whitespace-nowrap",
-                          isActive && "border-b-2 border-[#74798b]",
-                        )}
-                      >
-                        {tab.label}
-                      </span>
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )
-        ) : null}
-
-        {hasSecondaryTabs ? (
-          isSegmented ? (
-            renderSegmentedTabs(
-              secondaryTabs ?? [],
-              `${WORKSPACE_TAB_INDICATOR_ID}-secondary`,
-            )
-          ) : (
-            <div className="ml-3 flex h-7 shrink-0 items-start gap-1">
-              {secondaryTabs?.map((tab) => {
-                const Icon = tab.icon;
-                const isActive = activeValue === tab.value;
-
-                return (
-                  <div key={tab.value} className="flex flex-col items-start pb-2">
-                    <button
-                      type="button"
-                      className={cn(
-                        "flex h-7 items-center gap-1.5 rounded px-2 text-[length:var(--ds-layout-font-size-meta)] font-medium leading-normal transition-colors hover:bg-[#f6f7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                        isActive ? "text-[#25272d]" : "text-slate-500",
-                      )}
-                      aria-pressed={isActive}
-                      onClick={tab.onClick}
-                    >
-                      <Icon className="h-4 w-4 shrink-0" />
-                      <span
-                        className={cn(
-                          "flex h-7 items-center whitespace-nowrap",
-                          isActive && "border-b-2 border-[#74798b]",
-                        )}
-                      >
-                        {tab.label}
-                      </span>
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          )
-        ) : null}
-
-        {hasLeadingActions
-          ? renderSegmentedActions(
-            leadingActions ?? [],
-            hasLeadingContentBeforeActions ? "ml-2" : "ml-0",
-          )
-          : null}
+        {hasTabs && primaryTabsContent}
+        {hasSecondaryTabs && secondaryTabsContent}
+        {hasLeadingActions && renderSegmentedActions(
+          leadingActions ?? [],
+          hasLeadingContentBeforeActions ? "ml-2" : "ml-0",
+        )}
       </div>
 
-      {actions && actions.length > 0 ? renderSegmentedActions(actions) : null}
+      {hasTrailingActions && renderSegmentedActions(actions ?? [])}
     </div>
   );
 };
