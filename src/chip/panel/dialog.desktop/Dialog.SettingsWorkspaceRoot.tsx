@@ -12,7 +12,9 @@ const SettingsWorkspaceRootPanel = ({ open, onOpenChange }: SettingsWorkspaceRoo
   if (!open) return null;
   return (
     <DialogDesktopPanel surfaceClassName="settings-workspace-dialog" ariaLabel="Settings" onClose={handleClose}>
-      <SettingsWorkspaceRootScreen />
+      <div className="flex h-full min-h-0 w-full [--primary-color:var(--theme-accent-color)]">
+        <SettingsWorkspaceRootScreen />
+      </div>
     </DialogDesktopPanel>
   );
 };
