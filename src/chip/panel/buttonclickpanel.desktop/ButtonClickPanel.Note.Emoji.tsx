@@ -1,5 +1,6 @@
 "use client";
 
+import "@/chip/panel/Surface.Panel.css";
 import * as React from "react";
 import type { Emoji } from "@emoji-mart/data";
 import type { EmojiCategoryList, EmojiIconList, GridRow } from "@platejs/emoji";
@@ -148,7 +149,7 @@ const EmojiPopover = ({
     <Popover.Root open={isOpen} onOpenChange={setIsOpen}>
       <Popover.Trigger asChild>{control}</Popover.Trigger>
       <Popover.Portal>
-        <Popover.Content className="z-100">{children}</Popover.Content>
+        <Popover.Content className="surface-panel z-100 overflow-hidden rounded-xl border p-0 outline-none">{children}</Popover.Content>
       </Popover.Portal>
     </Popover.Root>
   );
@@ -180,8 +181,8 @@ const EmojiPicker = ({
   return (
     <div
       className={cn(
-        "flex flex-col rounded-xl bg-popover text-popover-foreground",
-        "h-96 w-80 border shadow-md",
+        "flex flex-col rounded-xl text-popover-foreground",
+        "h-96 w-80",
       )}
     >
       <EmojiPickerNavigation
@@ -503,7 +504,7 @@ const EmojiPickerContent = ({
               style={{ width: getRowWidth }}
               data-id={categoryId}
             >
-              <div className="bg-popover p-1 py-2 font-semibold text-sm">
+              <div className="p-1 py-2 font-semibold text-sm">
                 {i18n.categories[categoryId]}
               </div>
               <div
@@ -540,7 +541,7 @@ const EmojiPickerContent = ({
   const SearchList = React.useCallback(
     () => (
       <div style={{ width: getRowWidth }} data-id="search">
-        <div className="bg-popover p-1 py-2 font-semibold text-card-foreground text-sm">
+        <div className="p-1 py-2 font-semibold text-card-foreground text-sm">
           {i18n.searchResult}
         </div>
         <div className="relative flex flex-wrap">
@@ -574,7 +575,7 @@ const EmojiPickerContent = ({
         "[&::-webkit-scrollbar]:w-4",
         "[&::-webkit-scrollbar-button]:hidden [&::-webkit-scrollbar-button]:size-0",
         "[&::-webkit-scrollbar-thumb]:min-h-11 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted [&::-webkit-scrollbar-thumb]:hover:bg-muted-foreground/25",
-        "[&::-webkit-scrollbar-thumb]:border-4 [&::-webkit-scrollbar-thumb]:border-popover [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:bg-clip-padding",
+        "[&::-webkit-scrollbar-thumb]:border-4 [&::-webkit-scrollbar-thumb]:border-transparent [&::-webkit-scrollbar-thumb]:border-solid [&::-webkit-scrollbar-thumb]:bg-clip-padding",
       )}
       data-id="scroll"
     >
