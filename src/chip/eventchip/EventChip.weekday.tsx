@@ -188,29 +188,38 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
       resizeObserver.disconnect();
     };
   }, [timeLabel, titleLabel]);
+  const visibleContent = (() => {
+    if (chipLayout.useInlineTimeLayout) {
+      return (
+        <div className={CHIP_INLINE_ROW_CLASS}>
+          <span className={CHIP_INLINE_TITLE_CLASS}>{titleLabel}</span>
+          <span className={CHIP_INLINE_TIME_CLASS}>{timeLabel}</span>
+        </div>
+      );
+    }
+    if (chipLayout.useLastLineTimeLayout) {
+      return (
+        <span className={CHIP_TITLE_WITH_TIME_CLASS} style={createTitleStyle(chipLayout.titleLineClamp)}>
+          {titleLabel}
+          <span className={CHIP_LAST_LINE_TIME_CLASS}>{timeLabel}</span>
+        </span>
+      );
+    }
+    return (
+      <>
+        <span className={CHIP_TITLE_CLASS} style={createTitleStyle(chipLayout.titleLineClamp)}>
+          {titleLabel}
+        </span>
+        {chipLayout.showTimeLabel && <span className={CHIP_TIME_CLASS}>{timeLabel}</span>}
+      </>
+    );
+  })();
   return (
     <HoverEventTooltip title={titleLabel} subtitle={timeLabel} accentColor={tokens.border} className="h-full min-h-0 w-full" disabled={tooltipDisabled} onEdit={handleEdit}>
       <div className={CHIP_ROOT_CLASS}>
         <div aria-hidden="true" className={CHIP_LINE_MASK_CLASS} />
         <div data-calendar-event-chip="weekday" className={getChipClassName(chipLayout.useInlineTimeLayout)} style={chipStyle}>
-          {chipLayout.useInlineTimeLayout ? (
-            <div className={CHIP_INLINE_ROW_CLASS}>
-              <span className={CHIP_INLINE_TITLE_CLASS}>{titleLabel}</span>
-              <span className={CHIP_INLINE_TIME_CLASS}>{timeLabel}</span>
-            </div>
-          ) : chipLayout.useLastLineTimeLayout ? (
-            <span className={CHIP_TITLE_WITH_TIME_CLASS} style={createTitleStyle(chipLayout.titleLineClamp)}>
-              {titleLabel}
-              <span className={CHIP_LAST_LINE_TIME_CLASS}>{timeLabel}</span>
-            </span>
-          ) : (
-            <>
-              <span className={CHIP_TITLE_CLASS} style={createTitleStyle(chipLayout.titleLineClamp)}>
-                {titleLabel}
-              </span>
-              {chipLayout.showTimeLabel ? <span className={CHIP_TIME_CLASS}>{timeLabel}</span> : null}
-            </>
-          )}
+          {visibleContent}
           <div ref={layoutMeasurementRef} aria-hidden="true" className={getMeasurementClassName()}>
             <span ref={titleMeasurementRef} className={CHIP_TITLE_CLASS}>
               {titleLabel}
