@@ -1,4 +1,4 @@
-.surface-panel {
+.surface-panel.surface-panel {
   border-color: var(--ds-semantic-color-border-floating);
   background: color-mix(
     in srgb,
