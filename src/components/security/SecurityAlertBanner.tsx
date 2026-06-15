@@ -1,6 +1,6 @@
 import React from "react";
 import { useSecurity } from "@/contexts/security/SecurityContext";
-import { AlertTriangle, X } from "@/chip/icons";
+import { AlertTriangle, X } from "@/chip/icons/icons";
 
 const SecurityAlertBanner: React.FC = () => {
   const { securityState, dismissSecurityAlert } = useSecurity();
