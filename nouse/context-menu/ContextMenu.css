@@ -54,7 +54,8 @@
 .cm-submenu-trigger .cm-item {
   cursor: default;
 }
-.cm-selected {
+.cm-selected,
+.cm-child.cm-selected .cm-item {
   color: var(--cm-selected-fg);
   background: var(--cm-selected-bg);
 }
