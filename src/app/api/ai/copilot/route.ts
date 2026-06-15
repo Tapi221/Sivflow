@@ -1,6 +1,8 @@
 import { createGateway } from "@ai-sdk/gateway";
 import { streamText } from "ai";
 
+
+
 type CopilotRequestPayload = {
   apiKey?: string;
   model?: string;
@@ -8,9 +10,15 @@ type CopilotRequestPayload = {
   system?: string;
 };
 
+
+
 const DEFAULT_COPILOT_MODEL = "openai/gpt-4o-mini";
 
+
+
 const createErrorResponse = (status: number, error: string) => Response.json({ error }, { status });
+
+
 
 const POST = async (req: Request) => {
   try {
@@ -30,5 +38,7 @@ const POST = async (req: Request) => {
     return createErrorResponse(500, "Failed to process copilot request.");
   }
 };
+
+
 
 export { POST };
