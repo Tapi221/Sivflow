@@ -7,8 +7,6 @@ import { EXPLORER_ENTITY_ROW_DENSITY_COMPACT_CLASS, EXPLORER_ENTITY_ROW_INTERACT
 import { SidebarTreeRow } from "@/components/folder/explorer/rows/SidebarTreeRow";
 import { cn } from "@/lib/utils";
 
-
-
 interface SidebarEntityRowProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
   "children" | "title"
@@ -43,8 +41,6 @@ interface SidebarEntityRowProps extends Omit<
   density?: "compact";
   selected?: boolean;
 }
-
-
 
 const SidebarEntityRowBase = ({
   menuOpen = false,
@@ -81,10 +77,7 @@ const SidebarEntityRowBase = ({
   ...props
 }: SidebarEntityRowProps) => {
   const handleMenuOpenChange = onMenuOpenChange ?? (() => {});
-
-  const densityClassName =
-    density === "compact" ? EXPLORER_ENTITY_ROW_DENSITY_COMPACT_CLASS : "";
-
+  const densityClassName = density === "compact" ? EXPLORER_ENTITY_ROW_DENSITY_COMPACT_CLASS : "";
   return (
     <SidebarTreeRow
       menuOpen={menuOpen}
@@ -144,8 +137,6 @@ const SidebarEntityRowBase = ({
     </SidebarTreeRow>
   );
 };
-
-
 
 const SidebarEntityRow = React.memo(SidebarEntityRowBase);
 SidebarEntityRow.displayName = "SidebarEntityRow";
