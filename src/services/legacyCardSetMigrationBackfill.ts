@@ -13,7 +13,7 @@ type LegacyCardSetFields = {
   description?: string | null;
   defaultDisplayMode?: string | null;
 };
-type LegacyCardFields = {
+type LegacyCard = Omit<Card, "cardSetId"> & {
   cardSetId?: string | null;
 };
 
@@ -47,6 +47,9 @@ const getGeneratedSetName = (folderId: string | null, folderNameById: Map<string
 };
 const getCardSetFolderKey = (folderId: string | null | undefined): string => {
   return folderId ?? "__root__";
+};
+const getCardSetId = (card: Card): string | null => {
+  return (card as LegacyCard).cardSetId ?? null;
 };
 const isDeletedCardSet = (set: CardSet): boolean => {
   return Boolean(set.isDeleted);
@@ -94,15 +97,16 @@ const toMillis = (value: unknown): number => {
   }
   return 0;
 };
-const getNormalizedCardSetId = (card: Card, replacementByDeletedSetId: Map<string, string>): string | null | undefined => {
-  const cardSetId = (card as Card & LegacyCardFields).cardSetId;
+const getNormalizedCardSetId = (card: Card, replacementByDeletedSetId: Map<string, string>): string | null => {
+  const cardSetId = getCardSetId(card);
   if (!cardSetId) return cardSetId;
   return replacementByDeletedSetId.get(cardSetId) ?? cardSetId;
 };
 const createNormalizedCard = (card: Card, replacementByDeletedSetId: Map<string, string>): Card => {
+  const currentCardSetId = getCardSetId(card);
   const nextCardSetId = getNormalizedCardSetId(card, replacementByDeletedSetId);
-  if (nextCardSetId === (card as Card & LegacyCardFields).cardSetId) return card;
-  return { ...card, cardSetId: nextCardSetId };
+  if (nextCardSetId === currentCardSetId) return card;
+  return { ...card, cardSetId: nextCardSetId ?? "" };
 };
 const mergeDuplicateLegacyGeneratedCardSets = async ({ syncDb, activeSets, activeCards, folderNameById, now }: { syncDb: LocalFirstBackfillDb; activeSets: CardSet[]; activeCards: Card[]; folderNameById: Map<string, string>; now: Date; }): Promise<LegacyCardSetCleanupResult> => {
   const generatedSetsByFolder = new Map<string, CardSet[]>();
@@ -127,7 +131,7 @@ const mergeDuplicateLegacyGeneratedCardSets = async ({ syncDb, activeSets, activ
     return { deletedSetIds, replacementByDeletedSetId };
   }
   for (const card of activeCards) {
-    const cardSetId = (card as Card & LegacyCardFields).cardSetId;
+    const cardSetId = getCardSetId(card);
     if (!cardSetId) continue;
     const replacementCardSetId = replacementByDeletedSetId.get(cardSetId);
     if (!replacementCardSetId) continue;
@@ -241,7 +245,7 @@ const backfillLegacyCardsToCardSets = async (userId: string): Promise<void> => {
         nextOrderIndexByFolder.set(folderKey, restoredOrder + 1);
       }
       for (const card of cards) {
-        if (card.cardSetId === targetSet.id) continue;
+        if (getCardSetId(card) === targetSet.id) continue;
         await syncDb.updateItem("cards", card.id, {
           cardSetId: targetSet.id,
           updatedAt: now,
@@ -291,4 +295,4 @@ const ensureLegacyCardsBackfilled = async (userId: string) => {
   await promise;
 };
 
-export { backfillLegacyCardsToCardSets, ensureLegacyCardsBackfilled };
+export { backfillLegacyCardsBackfilled, ensureLegacyCardsBackfilled };".replace("backfillLegacyCardsBackfilled
