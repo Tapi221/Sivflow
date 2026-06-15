@@ -230,14 +230,6 @@ const PortableImportBatchDialog = ({ open, onOpenChange, folderId, folderName, f
         <DialogFooter>
           <Button
             type="button"
-            variant="outline"
-            onClick={() => handleClose(false)}
-            disabled={isImporting}
-          >
-            閉じる
-          </Button>
-          <Button
-            type="button"
             onClick={handleImportAll}
             disabled={isImporting || items.length === 0 || !folderId}
           >
