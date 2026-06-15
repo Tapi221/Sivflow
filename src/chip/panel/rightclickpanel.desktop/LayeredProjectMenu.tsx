@@ -162,5 +162,6 @@ const LayeredProjectMenuBase = ({ x, y, actions, menuRef, noDragStyle, panelId =
 
 const LayeredProjectMenu = memo(LayeredProjectMenuBase);
 LayeredProjectMenu.displayName = "LayeredProjectMenu";
+
 export { LayeredProjectMenu, LAYERED_PROJECT_MENU_PANEL_ID, LAYERED_PROJECT_MENU_WIDTH, LAYERED_PROJECT_MENU_HEIGHT, LAYERED_PROJECT_MENU_MARGIN };
 export type { LayeredProjectMenuActionId, LayeredProjectMenuAction, LayeredProjectMenuSubmenuAnchor };

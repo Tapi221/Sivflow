@@ -965,4 +965,5 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
 
 const EditorSidePane = memo(EditorSidePaneInner, areEditorSidePanePropsEqual);
 EditorSidePane.displayName = "EditorSidePane";
+
 export { CardEditorPane };

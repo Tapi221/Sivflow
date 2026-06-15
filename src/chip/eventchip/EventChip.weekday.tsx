@@ -230,4 +230,5 @@ const CalendarEventChipWeekday = ({ event, tooltipDisabled = false }: CalendarEv
 };
 
 CalendarEventChipWeekday.displayName = "CalendarEventChipWeekday";
+
 export { CalendarEventChipWeekday };

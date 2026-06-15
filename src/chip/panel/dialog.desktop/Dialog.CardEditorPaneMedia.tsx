@@ -80,5 +80,6 @@ const CardEditorPaneMediaDialogsInner = ({ imageDialogSide, setImageDialogSide, 
 
 const CardEditorPaneMediaDialogs = memo(CardEditorPaneMediaDialogsInner, areMediaDialogsPropsEqual);
 CardEditorPaneMediaDialogs.displayName = "CardEditorPaneMediaDialogs";
+
 export { CardEditorPaneMediaDialogs };
 export type { CardEditorPaneMediaDialogsProps };

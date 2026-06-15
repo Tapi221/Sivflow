@@ -124,4 +124,5 @@ CommandGroup.displayName = CommandPrimitive.Group.displayName;
 CommandSeparator.displayName = CommandPrimitive.Separator.displayName;
 CommandItem.displayName = CommandPrimitive.Item.displayName;
 CommandShortcut.displayName = "CommandShortcut";
+
 export { Command, CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandShortcut, CommandSeparator };

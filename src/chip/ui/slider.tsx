@@ -227,4 +227,5 @@ const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
 );
 
 Slider.displayName = "Slider";
+
 export { Slider };

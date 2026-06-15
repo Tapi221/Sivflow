@@ -453,5 +453,6 @@ const CalendarYearViewComponent = ({
 
 const CalendarYearView = memo(CalendarYearViewComponent);
 CalendarYearView.displayName = "CalendarYearView";
+
 export { CalendarYearView };
 export type { CalendarYearEventPriority, CalendarYearEventDisplay, CalendarYearEventDisplayResolver };

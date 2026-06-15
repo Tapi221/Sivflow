@@ -324,5 +324,6 @@ const FlashcardInner = ({
 
 const Flashcard = React.memo(FlashcardInner, areFlashcardPropsEqual);
 Flashcard.displayName = "Flashcard";
+
 export { Flashcard };
 export type { FlashcardCardLike };

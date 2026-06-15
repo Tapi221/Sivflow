@@ -50,4 +50,5 @@ const SharedCardEditSceneInner = ({
 
 const SharedCardEditScene = React.memo(SharedCardEditSceneInner);
 SharedCardEditScene.displayName = "SharedCardEditScene";
+
 export { SharedCardEditScene };
