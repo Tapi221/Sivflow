@@ -1,5 +1,4 @@
 // @vitest-environment jsdom
-
 import React from "react";
 import type { ReactNode } from "react";
 import { cleanup, render, screen } from "@testing-library/react";
@@ -23,9 +22,7 @@ const ALL_DAY_EVENT: GoogleCalendarEvent = {
 
 const getMonthChipElement = (title = ALL_DAY_EVENT.title): HTMLElement => {
   const chipElement = screen.getByText(title).closest('[data-calendar-event-chip="month"]');
-
   if (!(chipElement instanceof HTMLElement)) throw new Error("month event chip was not rendered");
-
   return chipElement;
 };
 
@@ -36,27 +33,18 @@ afterEach(() => {
 describe("CalendarEventChipMonth vertical spacing", () => {
   it("終日チップは上下 padding を 2px に固定する", () => {
     render(<CalendarEventChipMonth event={ALL_DAY_EVENT} showTimeLabel={false} />);
-
     const chipElement = getMonthChipElement();
-
-    expect(chipElement.className).toContain("pt-0.5");
-    expect(chipElement.className).toContain("pb-0.5");
+    expect(chipElement.className).toContain("py-0.5");
     expect(chipElement.className).not.toContain("pb-1");
   });
-
-  it("時刻を非表示にした終日チップは1px下げて上下の見た目の余白を揃える", () => {
+  it("時刻を非表示にした終日チップにも位置補正を入れない", () => {
     render(<CalendarEventChipMonth event={ALL_DAY_EVENT} showTimeLabel={false} />);
-
     const chipElement = getMonthChipElement();
-
-    expect(chipElement.className).toContain("translate-y-px");
+    expect(chipElement.className).not.toContain("translate-y-px");
   });
-
-  it("時刻を表示する通常の月チップには終日行用の位置補正を入れない", () => {
+  it("時刻を表示する通常の月チップにも位置補正を入れない", () => {
     render(<CalendarEventChipMonth event={ALL_DAY_EVENT} showTimeLabel />);
-
     const chipElement = getMonthChipElement();
-
     expect(chipElement.className).not.toContain("translate-y-px");
   });
 });
