@@ -1,30 +1,18 @@
 "use client";
 
 import { isOrderedList } from "@platejs/list";
-
 import { useTodoListElement, useTodoListElementState } from "@platejs/list/react";
-
 import type { TListElement } from "platejs";
-
 import type { PlateElementProps, RenderNodeWrapper } from "platejs/react";
-
 import { useReadOnly } from "platejs/react";
-
 import type * as React from "react";
-
 import { Checkbox } from "@/chip/ui/checkbox";
-
 import { cn } from "@/lib/utils";
-
-
 
 type ListItemProps = PlateElementProps & {
   lineBreakBadge?: React.ReactNode;
 };
-
 type ListConfig = Record<string, { Li: React.FC<ListItemProps>; Marker: React.FC<PlateElementProps> }>;
-
-
 
 const TodoMarker = (props: PlateElementProps) => {
   const state = useTodoListElementState({ element: props.element });
@@ -42,7 +30,6 @@ const TodoMarker = (props: PlateElementProps) => {
     </div>
   );
 };
-
 const TodoLi = (props: ListItemProps) => {
   return (
     <li
@@ -57,16 +44,12 @@ const TodoLi = (props: ListItemProps) => {
   );
 };
 
-
-
 const LIST_CONFIG: ListConfig = {
   todo: {
     Li: TodoLi,
     Marker: TodoMarker,
   },
 };
-
-
 
 const List = (props: ListItemProps) => {
   const { listStart, listStyleType } = props.element as TListElement;
@@ -78,7 +61,7 @@ const List = (props: ListItemProps) => {
       start={listStart}
       style={{ listStyleType }}
     >
-      {Marker ? <Marker {...props} /> : null}
+      {Marker !== undefined && <Marker {...props} />}
       {Li ? (
         <Li {...props} />
       ) : (
@@ -90,13 +73,10 @@ const List = (props: ListItemProps) => {
     </ListTag>
   );
 };
-
 const BlockList: RenderNodeWrapper = (props) => {
   if (!props.element.listStyleType) return;
   if (!isOrderedList(props.element)) return;
   return (nextProps) => <List {...nextProps} />;
 };
-
-
 
 export { BlockList };
