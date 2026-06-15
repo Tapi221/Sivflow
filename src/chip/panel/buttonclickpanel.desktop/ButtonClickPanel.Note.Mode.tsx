@@ -38,7 +38,7 @@ const ModeIndicator = () => {
     </span>
   );
 };
-const ModeToolbarButton = (props: DropdownMenuProps) => {
+const ButtonClickPanelNoteMode = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
   const readOnly = useEditorReadOnly();
   const [open, setOpen] = useState(false);
@@ -92,4 +92,4 @@ const ModeToolbarButton = (props: DropdownMenuProps) => {
   );
 };
 
-export { ModeToolbarButton };
+export { ButtonClickPanelNoteMode };

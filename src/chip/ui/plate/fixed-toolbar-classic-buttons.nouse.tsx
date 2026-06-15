@@ -16,7 +16,7 @@ import { LineHeightToolbarButton } from "@/chip/ui/plate/line-height-toolbar-but
 import { LinkToolbarButton } from "@/chip/ui/plate/link-toolbar-button";
 import { MarkToolbarButton } from "@/chip/ui/plate/mark-toolbar-button";
 import { MediaToolbarButton } from "@/chip/button/Button.Note.Media";
-import { ModeToolbarButton } from "@/chip/ui/plate/mode-toolbar-button";
+import { ButtonClickPanelNoteMode } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Mode";
 import { MoreToolbarButton } from "@/chip/ui/plate/more-toolbar-button";
 import { TableToolbarButton } from "@/chip/ui/plate/table-toolbar-button";
 import { ToggleToolbarButton } from "@/chip/button/Button.Note.Toggle";
@@ -100,7 +100,7 @@ const FixedToolbarButtons = () => {
         <CommentToolbarButton />
       </ToolbarGroup>
       <ToolbarGroup>
-        <ModeToolbarButton />
+        <ButtonClickPanelNoteMode />
       </ToolbarGroup>
     </div>
   );
