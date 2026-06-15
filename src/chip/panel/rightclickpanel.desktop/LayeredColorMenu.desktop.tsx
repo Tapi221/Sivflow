@@ -1,8 +1,8 @@
 import { memo } from "react";
-import { TAG_COLOR_PALETTE } from "@shared/design-tokens/color/Color.Tag";
+import { TAG_COLOR_KEYS, TAG_COLOR_PALETTE } from "@shared/design-tokens/color/Color.Tag";
 import type { CSSProperties, RefObject } from "react";
-import type { TagColorKey } from "@/chip/budge/tag/tagColor";
-import { getTagColorSwatchStyle, TAG_COLOR_KEYS } from "@/chip/budge/tag/tagColor";
+import type { TagColorKey } from "@shared/design-tokens/color/Color.Tag";
+import { getTagColorSwatchStyle } from "@/chip/budge/tag/tag.style";
 import { RightClickPanel } from "@/chip/panel/rightclickpanel";
 import type { RightClickPanelId } from "@/chip/panel/rightClickPanel.utils";
 import { RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING } from "@/chip/panel/rightClickPanel.utils";
@@ -107,7 +107,6 @@ const LayeredColorMenuBase = ({
   onSelectColor,
 }: LayeredColorMenuProps) => {
   const normalizedCurrentColor = normalizeColorValue(currentColor);
-
   return (
     <>
       <style>{LAYERED_COLOR_MENU_STYLE}</style>
@@ -115,7 +114,6 @@ const LayeredColorMenuBase = ({
         <div className="layered-color-menu-grid">
           {options.map((option) => {
             const isSelected = normalizeColorValue(option.value) === normalizedCurrentColor;
-
             return (
               <button key={option.id} type="button" aria-label={`色を${option.label}に変更`} aria-pressed={isSelected} title={option.label} className={["layered-color-menu-swatch", isSelected ? "layered-color-menu-swatch--selected" : null].filter(Boolean).join(" ")} style={getTagColorSwatchStyle(option.id)} onClick={(event) => {
                 event.preventDefault();
