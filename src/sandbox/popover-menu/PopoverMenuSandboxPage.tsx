@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import type { ReactNode } from "react";
-import { PopoverMenu, usePopoverMenuHandle } from "@/../nouse/popover-menu/PopoverMenu";
+import { PopoverMenu, usePopoverMenuHandle } from "@/nouse/popover-menu/PopoverMenu";
 
 type DemoLog = {
   id: string;
@@ -13,7 +13,6 @@ type DemoMenuContentProps = {
   onToggleDense: () => void;
   footer?: ReactNode;
 };
-
 type MenuItemProps = {
   label: string;
   shortcut?: string;
@@ -26,6 +25,7 @@ const MENU_ITEM_CLASS_NAME = "flex h-7 w-full items-center justify-between round
 const MENU_SHORTCUT_CLASS_NAME = "ml-5 text-[12px] text-slate-400";
 const MENU_MUTED_ITEM_CLASS_NAME = "px-2.5 py-1.5 text-[11px] leading-4 text-slate-500";
 const createDemoLogId = (): string => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
 const MenuItem = ({ label, shortcut, onClick }: MenuItemProps) => {
   return (
     <button className={MENU_ITEM_CLASS_NAME} type="button" onClick={onClick}>
@@ -82,7 +82,7 @@ const PopoverMenuSandboxPage = () => {
         </div>
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex flex-wrap items-center gap-3">
-            <PopoverMenu id="popover-primary" anchor="bottom-left" attach="top-left" handle={primaryHandle} menu={() => renderMenu("Primary popover")} onOpen={() => pushLog("Primary open")} onDismiss={() => pushLog("Primary dismiss")}>
+            <PopoverMenu id="popover-primary" anchor="bottom-left" attach="top-left" handle={primaryHandle} menu={() => renderMenu("Primary popover")} onOpen={() => pushLog("Primary open")} onDismiss={(reason) => pushLog(`Primary dismiss: ${reason}`)}>
               {({ open, triggerProps }) => (
                 <button className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white" type="button" {...triggerProps}>
                   {open ? "Close primary" : "Open primary"}
