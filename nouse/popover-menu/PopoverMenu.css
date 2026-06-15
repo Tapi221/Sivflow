@@ -1,0 +1,24 @@
+.pm-root {
+  position: relative;
+  display: inline-flex;
+}
+
+.pm-root-full-width {
+  display: flex;
+  width: 100%;
+}
+
+.pm-root-full-width > .pm-trigger {
+  width: 100%;
+}
+
+.pm-trigger {
+  display: inline-flex;
+}
+
+.pm-menu-layer {
+  position: fixed;
+  z-index: 1000;
+  outline: none;
+  pointer-events: auto;
+}
