@@ -2,11 +2,9 @@ import React from "react";
 import { ChevronDown, ChevronRight } from "@/chip/icons";
 import { ExplorerChromeCardSetIcon } from "@/components/explorer/icons";
 import { buildEntityRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
+import { SidebarEntityRow } from "@/components/folder/explorer/rows/SidebarEntityRow";
+import { EXPLORER_ROW_CONTENT_CLASS, EXPLORER_ROW_ICON_SLOT_CLASS, EXPLORER_ROW_INPUT_CLASS, EXPLORER_ROW_LEADING_SLOT_CLASS, EXPLORER_ROW_TITLE_SLOT_CLASS, FOLDER_ROW_ICON_ACTIVE_CLASS, FOLDER_ROW_ICON_MUTED_CLASS, FOLDER_ROW_ICON_SIZE_CLASS, FOLDER_ROW_TITLE_CLASS } from "@/components/folder/explorer/rows/shared";
 import { cn } from "@/lib/utils";
-import { EXPLORER_ROW_CONTENT_CLASS, EXPLORER_ROW_ICON_SLOT_CLASS, EXPLORER_ROW_INPUT_CLASS, EXPLORER_ROW_LEADING_SLOT_CLASS, EXPLORER_ROW_TITLE_SLOT_CLASS, FOLDER_ROW_ICON_ACTIVE_CLASS, FOLDER_ROW_ICON_MUTED_CLASS, FOLDER_ROW_ICON_SIZE_CLASS, FOLDER_ROW_TITLE_CLASS } from "./shared";
-import { SidebarEntityRow } from "./SidebarEntityRow";
-
-
 
 type TreeNode = {
   rawId: string;
@@ -45,15 +43,12 @@ interface CardSetRowProps {
   setRowRef: (id: string, node: HTMLElement | null) => void;
 }
 
-
-
 const CardSetRow = ({ treeNode, style, depth, isOpen, isSelected, toggle, editingId, editingName, renameCancelledRef, editInputRef, setEditingId, setEditingName, openRowMenuId, setOpenRowMenuId, onItemSelect, canRename, canDelete, handleDelete, handleRenameConfirm, setRowRef }: CardSetRowProps) => {
   const rowMenuId = `cardSet:${treeNode.rawId}`;
   const isRowMenuOpen = openRowMenuId === rowMenuId;
   const isEditing = editingId === treeNode.rawId;
   const hasChildren = (treeNode.children?.length ?? 0) > 0;
   const Chevron = isOpen ? ChevronDown : ChevronRight;
-
   const rowMenuActions = React.useMemo(
     () =>
       buildEntityRenameDeleteMenuActions({
@@ -87,7 +82,6 @@ const CardSetRow = ({ treeNode, style, depth, isOpen, isSelected, toggle, editin
       treeNode.rawId,
     ],
   );
-
   const attachEditInputRef = React.useCallback(
     (node: HTMLInputElement | null) => {
       editInputRef.current = node;
@@ -102,7 +96,6 @@ const CardSetRow = ({ treeNode, style, depth, isOpen, isSelected, toggle, editin
     },
     [editInputRef, isEditing],
   );
-
   return (
     <SidebarEntityRow
       containerStyle={style}
@@ -181,15 +174,12 @@ const CardSetRow = ({ treeNode, style, depth, isOpen, isSelected, toggle, editin
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => {
             const isComposing = e.nativeEvent.isComposing || e.keyCode === 229;
-
             if (e.key === "Enter" && isComposing) return;
-
             if (e.key === "Enter") {
               e.preventDefault();
               setEditingName(e.currentTarget.value);
               e.currentTarget.blur();
             }
-
             if (e.key === "Escape") {
               e.preventDefault();
               e.stopPropagation();
@@ -213,7 +203,5 @@ const CardSetRow = ({ treeNode, style, depth, isOpen, isSelected, toggle, editin
     />
   );
 };
-
-
 
 export { CardSetRow };
