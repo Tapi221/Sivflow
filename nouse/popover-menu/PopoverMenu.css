@@ -20,3 +20,103 @@
 .pm-menu-layer:focus {
   outline: none;
 }
+.pm-zed-menu {
+  min-width: 192px;
+  padding: 4px 0;
+  overflow: hidden;
+  color: var(--pm-zed-text-color, #d6d6d6);
+  background: var(--pm-zed-elevated-surface-background, #1f1f1f);
+  border: 1px solid var(--pm-zed-border-color, #3a3a3a);
+  border-radius: 6px;
+  box-shadow: 0 2px 3px rgb(0 0 0 / 12%), 0 1px 0 rgb(0 0 0 / 6%);
+  font-family: var(--pm-zed-font-family, Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  font-size: 13px;
+  line-height: 20px;
+}
+.pm-zed-menu-header {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 8px;
+  color: var(--pm-zed-muted-text-color, #9a9a9a);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+}
+.pm-zed-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 24px;
+  padding: 0 6px;
+  gap: 6px;
+  color: inherit;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font: inherit;
+  line-height: 20px;
+  text-align: left;
+  cursor: default;
+}
+.pm-zed-menu-item:hover {
+  background: var(--pm-zed-ghost-element-hover, #313131);
+}
+.pm-zed-menu-item:active {
+  background: var(--pm-zed-ghost-element-active, #3a3a3a);
+}
+.pm-zed-menu-item:focus-visible {
+  outline: none;
+  border-color: var(--pm-zed-border-focused, #6b8afd);
+}
+.pm-zed-menu-item-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pm-zed-menu-item-shortcut {
+  flex: none;
+  margin-left: 24px;
+  color: var(--pm-zed-muted-text-color, #9a9a9a);
+  font-size: 12px;
+}
+.pm-zed-menu-separator {
+  height: 1px;
+  width: 100%;
+  margin: 6px 0;
+  background: var(--pm-zed-border-variant, #323232);
+}
+.pm-zed-menu-note {
+  padding: 2px 6px;
+  color: var(--pm-zed-muted-text-color, #9a9a9a);
+  font-size: 12px;
+  line-height: 18px;
+}
+.pm-zed-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 10px;
+  gap: 6px;
+  color: var(--pm-zed-text-color, #d6d6d6);
+  background: var(--pm-zed-button-background, #2a2a2a);
+  border: 1px solid var(--pm-zed-border-color, #3a3a3a);
+  border-radius: 6px;
+  font-family: var(--pm-zed-font-family, Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  font-size: 13px;
+  line-height: 20px;
+  cursor: default;
+}
+.pm-zed-trigger:hover {
+  background: var(--pm-zed-button-hover-background, #343434);
+}
+.pm-zed-trigger[aria-expanded="true"] {
+  background: var(--pm-zed-ghost-element-selected, #383838);
+}
+.pm-zed-trigger-full-width {
+  width: 100%;
+  justify-content: space-between;
+}
