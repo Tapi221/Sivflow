@@ -1,11 +1,3 @@
-import { TAG_COLOR_KEYS } from "./tag.constants";
-
-type TagColorKey = (typeof TAG_COLOR_KEYS)[number];
-type TagColorPalette = {
-  fg: string;
-  fgRgb: string;
-  border: string;
-  swatch: string;
-};
+import type { TagColorKey, TagColorPalette } from "@shared/design-tokens/color/Color.Tag";
 
 export type { TagColorKey, TagColorPalette };
