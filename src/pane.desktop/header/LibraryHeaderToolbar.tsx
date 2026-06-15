@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import type { Transition } from "framer-motion";
 import { motion } from "framer-motion";
 import type { ComponentType, ReactNode, SVGProps } from "react";
-import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
+import { HoverTooltip } from "@/chip/panel/toolchip/HoverTooltip";
 import { cn } from "@/lib/utils";
 
 type LibraryHeaderToolbarIconProps = SVGProps<SVGSVGElement> & { className?: string;

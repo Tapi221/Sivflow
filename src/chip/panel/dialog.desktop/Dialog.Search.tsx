@@ -1,7 +1,8 @@
 import { useMemo, useRef } from "react";
 import { Command as CommandPrimitive } from "cmdk";
-import { Command, CommandItem, CommandList } from "@/chip/ui/command";
+import { Calendar, FileText, Folder, Image, Layers, List, MessageSquare, Search, SearchX, Settings2, Tag, Trash2, X } from "@/chip/icons/icons";
 import { Dialog, DialogContent } from "@/chip/panel/dialog.desktop/dialog/dialog";
+import { Command, CommandItem, CommandList } from "@/chip/ui/command";
 import { ExplorerRowContent } from "@/components/folder/explorer/rows/ExplorerRowContent";
 import { EXPLORER_ENTITY_ROW_DENSITY_COMPACT_CLASS, EXPLORER_ENTITY_ROW_INTERACTIVE_CLASS, EXPLORER_ENTITY_ROW_SHELL_BASE_CLASS, EXPLORER_ROW_BASE_CLASS_NAME, EXPLORER_ROW_CONTENT_CLASS, EXPLORER_ROW_ICON_SLOT_CLASS, FOLDER_ROW_ICON_SIZE_CLASS, FOLDER_ROW_TITLE_CLASS } from "@/components/folder/explorer/rows/shared";
 import { useSearchHotkey } from "@/features/hotkey/useSearchHotkey";
@@ -9,7 +10,6 @@ import { rankSearchResults } from "@/features/search/lib/rankSearchResults";
 import type { SearchIconKind, SearchItem } from "@/features/search/model/search.types";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { cn } from "@/lib/utils";
-import { Calendar, FileText, Folder, Image, Layers, List, MessageSquare, Search, SearchX, Settings2, Tag, Trash2, X } from "@/chip/icons/icons";
 import { toMillis } from "@/utils/toMillis";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;

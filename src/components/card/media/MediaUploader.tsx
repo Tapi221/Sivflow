@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { Check, RotateCcw, Upload, X } from "@/chip/icons";
 import { Button } from "@/chip/ui/button/button";
 import { Slider } from "@/chip/ui/slider";
 import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
@@ -11,7 +12,6 @@ import { deleteImageBlob, getImageBlob, putImageBlob } from "@/services/imageFil
 import { getLocalDb } from "@/services/localdb";
 import { persistentQueue } from "@/services/PersistentOfflineQueue";
 import type { AssetRecord, UploadedImage } from "@/types";
-import { Check, RotateCcw, Upload, X } from "@/chip/icons";
 import { loadImageNaturalSize } from "@/utils/uploaded-image/naturalSize.utils";
 
 type ResolvedEditableImageStatus = "pending" | "uploading" | "ready" | "failed";

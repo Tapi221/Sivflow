@@ -2,17 +2,17 @@
 
 import * as React from "react";
 import type { DropdownMenuItemProps, DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
+import type { PaletteNoteFontColorToken } from "@shared/design-tokens/color/Palette.Note.Font";
+import { PALETTE_NOTE_FONT_COLORS, PALETTE_NOTE_FONT_CUSTOM_COLORS } from "@shared/design-tokens/color/Palette.Note.Font";
 import { useComposedRef } from "@udecode/cn";
 import debounce from "lodash/debounce.js";
 import { CheckIcon, EraserIcon, PlusIcon } from "lucide-react";
 import type { PlateEditor } from "platejs/react";
 import { useEditorRef, useEditorSelector } from "platejs/react";
-import { PALETTE_NOTE_FONT_COLORS, PALETTE_NOTE_FONT_CUSTOM_COLORS } from "@shared/design-tokens/color/Palette.Note.Font";
-import type { PaletteNoteFontColorToken } from "@shared/design-tokens/color/Palette.Note.Font";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/toolchip/Tooltip.Editor";
 import { buttonVariants } from "@/chip/ui/button/button";
 import { ToolbarButton, ToolbarMenuGroup } from "@/chip/ui/plate/toolbar";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/toolchip/Tooltip.Editor";
 import { cn } from "@/lib/utils";
 
 type ColorDropdownMenuItemProps = {
@@ -298,5 +298,4 @@ const ButtonClickPanelNoteFontColor = ({ children, nodeType, tooltip, ...props }
 };
 
 const ColorPicker = React.memo(PureColorPicker, (prev, next) => prev.color === next.color && prev.colors === next.colors && prev.colorsQueue === next.colorsQueue && prev.customColors === next.customColors && prev.updatedColor === next.updatedColor);
-
 export { ButtonClickPanelNoteFontColor, ColorDropdownMenuItems };

@@ -1,6 +1,6 @@
+import { ExternalLink, Globe, Link as LinkIcon } from "@/chip/icons/icons";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/chip/panel/dialog.desktop/dialog/dialog";
 import type { ReferenceBlockData } from "@/types";
-import { ExternalLink, Globe, Link as LinkIcon } from "@/chip/icons/icons";
 
 interface ReferencePopupProps {
   isOpen: boolean;
@@ -15,6 +15,7 @@ const resolveReferenceHost = (url: string) => {
     return url;
   }
 };
+
 const ReferencePopup = ({ isOpen, onClose, references }: ReferencePopupProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>

@@ -7,8 +7,8 @@ import type { TCodeBlockElement, TCodeSyntaxLeaf } from "platejs";
 import { NodeApi } from "platejs";
 import type { PlateElementProps, PlateLeafProps } from "platejs/react";
 import { PlateElement, PlateLeaf, useEditorRef, useElement, useReadOnly } from "platejs/react";
-import { ButtonClickPanelCodeLanguage } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.CodeLanguage";
 import type { ButtonClickPanelCodeLanguageItem } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.CodeLanguage";
+import { ButtonClickPanelCodeLanguage } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.CodeLanguage";
 import { Button } from "@/chip/ui/button/button";
 
 type CodeLanguage = ButtonClickPanelCodeLanguageItem;

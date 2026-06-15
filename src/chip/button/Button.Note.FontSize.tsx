@@ -7,9 +7,9 @@ import { Minus, Plus } from "lucide-react";
 import type { TElement } from "platejs";
 import { KEYS } from "platejs";
 import { useEditorPlugin, useEditorSelector } from "platejs/react";
+import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
 import { cn } from "@/lib/utils";
-import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
 const DEFAULT_FONT_SIZE = "16";
 const FONT_SIZE_MAP = { h1: "36", h2: "24", h3: "20" } as const;

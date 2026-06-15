@@ -1,10 +1,10 @@
-import { Button } from "@/chip/ui/button/button";
-import { Dialog, DialogContent } from "@/chip/panel/dialog.desktop/dialog/dialog";
-import { ReferencePopup } from "@/chip/panel/dialog.desktop/Dialog.ReferencePopup";
-import { AudioPlayer, ImageGallery } from "@/components/card/media/CardMedia";
-import type { FlashcardMediaLike } from "@/components/card/frame/flashcard.types";
-import type { ReferenceBlockData } from "@/types";
 import { Volume2, X } from "@/chip/icons";
+import { ReferencePopup } from "@/chip/panel/dialog.desktop/Dialog.ReferencePopup";
+import { Dialog, DialogContent } from "@/chip/panel/dialog.desktop/dialog/dialog";
+import { Button } from "@/chip/ui/button/button";
+import type { FlashcardMediaLike } from "@/components/card/frame/flashcard.types";
+import { AudioPlayer, ImageGallery } from "@/components/card/media/CardMedia";
+import type { ReferenceBlockData } from "@/types";
 
 interface FlashcardMediaDialogsProps {
   isImagePopupOpen: boolean;

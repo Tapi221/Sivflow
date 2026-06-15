@@ -7,8 +7,8 @@ import { AudioLinesIcon, FileUpIcon, FilmIcon, ImageIcon, LinkIcon } from "lucid
 import { KEYS } from "platejs";
 import { useEditorRef } from "platejs/react";
 import { useFilePicker } from "use-file-picker";
-import { MediaUrlDialog } from "@/chip/panel/dialog.desktop/Dialog.MediaUrl";
 import type { MediaConfig } from "@/chip/panel/dialog.desktop/Dialog.MediaUrl";
+import { MediaUrlDialog } from "@/chip/panel/dialog.desktop/Dialog.MediaUrl";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary } from "@/chip/ui/plate/toolbar";
 

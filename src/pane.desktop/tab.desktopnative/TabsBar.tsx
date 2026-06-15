@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ComponentType, CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
+import { FileText, Layers, X } from "@/chip/icons";
 import { PlusLineIcon } from "@/chip/icons/icons.schedule";
 import { ClockIcon, HomeIcon, InboxIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";
 import { WORKSPACE_TAB_CONTEXT_MENU_HEIGHT, WORKSPACE_TAB_CONTEXT_MENU_MARGIN, WORKSPACE_TAB_CONTEXT_MENU_WIDTH, WORKSPACE_TAB_CONTEXT_PANEL_ID, WorkspaceTabContextMenu } from "@/chip/panel/rightclickpanel.desktop/RightClickPanel.Tab.desktop";
@@ -9,7 +10,6 @@ import { useWorkspaceTabDnd } from "@/features/dnd/tab/useWorkspaceTabDnd";
 import { WorkspaceTabDndItem, WorkspaceTabDndList } from "@/features/dnd/tab/WorkspaceTabDnd";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import { FileText, Layers, X } from "@/chip/icons";
 import type { WorkspaceSidebarSection, WorkspaceTab } from "./Tab";
 
 type TabsBarVariant = "workspace" | "titlebar";

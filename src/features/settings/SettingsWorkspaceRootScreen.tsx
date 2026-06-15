@@ -3,14 +3,14 @@ import type { LocalAiSettings } from "@platform/ai/localAiSettings";
 import { getLocalAiSettings, setLocalAiSettings } from "@platform/ai/localAiSettings";
 import { testOllamaConnection } from "@platform/ai/ollamaClient";
 import type { ReactNode } from "react";
+import { Brain, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/chip/icons";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-import { SettingsThemeColorControl } from "@/features/settings/SettingsThemeColorControl";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
+import { SettingsThemeColorControl } from "@/features/settings/SettingsThemeColorControl";
 import type { StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
 import { readStoredAccounts } from "@/integration/googlecalendar-integration/gcal.multi-storage";
 import { cn } from "@/lib/utils";
 import type { UserSettings } from "@/types";
-import { Brain, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/chip/icons";
 
 type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "ai" | "hotkey";
 type SettingsLanguage = UserSettings["language"];

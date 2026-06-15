@@ -1,4 +1,5 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { X } from "@/chip/icons";
 import { CardEditorPaneMediaDialogs } from "@/chip/panel/dialog.desktop/Dialog.CardEditorPaneMedia";
 import { BlockEditModeContext } from "@/components/card/blocks/core/BlockEditModeContext";
 import { CardFaceWithAttachments } from "@/components/card/common/CardFaceWithAttachments";
@@ -25,7 +26,6 @@ import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web
 import { cn } from "@/lib/utils";
 import type { Card, CardBlock, CardFaceAttachments } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { X } from "@/chip/icons";
 import { toMillisOrNull } from "@/utils/toMillis";
 
 type CardEditorPaneSettings = {

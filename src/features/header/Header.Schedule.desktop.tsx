@@ -2,8 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useT } from "@shared/i18n/useT";
 import type { ReactNode, Ref } from "react";
 import { TodayBar } from "@/chip/bar/TodayBar";
-import { ButtonClickPanelSchedulePrint } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.SchedulePrint";
+import { ChevronDown, Download, Minus, Plus } from "@/chip/icons/icons";
 import type { ButtonClickPanelSchedulePrintOption } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.SchedulePrint";
+import { ButtonClickPanelSchedulePrint } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.SchedulePrint";
 import { ViewModeDropdown } from "@/chip/toggle/Toggle.calendarviewmode";
 import type { PlanResultMode } from "@/chip/toggle/Toggle.planresult";
 import { TogglePlanResult } from "@/chip/toggle/Toggle.planresult";
@@ -11,7 +12,6 @@ import * as C from "@/features/calendar/calendar.constants.desktop";
 import type { CalendarPrintRangeMode, CalendarPrintRangeState } from "@/features/calendar/print/calendarPrint.types";
 import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/calendar/scheduleScreen.types";
 import { cn } from "@/lib/utils";
-import { ChevronDown, Download, Minus, Plus } from "@/chip/icons/icons";
 
 type HeaderScheduleViewOption = {
   value: CalendarViewMode;

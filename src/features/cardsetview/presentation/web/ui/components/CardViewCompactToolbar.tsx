@@ -1,4 +1,5 @@
 import React from "react";
+import { Edit } from "@/chip/icons";
 import { OverlayToolbar } from "@/chip/panel/overlay-toolbar/OverlayToolbar";
 import { OverlayToolbarButton } from "@/chip/panel/overlay-toolbar/OverlayToolbarButton";
 import { OverlayToolbarDivider } from "@/chip/panel/overlay-toolbar/OverlayToolbarDivider";
@@ -10,7 +11,6 @@ import { CARD_LAYOUT_MODE_LABELS } from "@/features/cardsetview/domain/cardLayou
 import { CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT } from "@/features/cardsetview/domain/cardSetView.constants";
 import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
-import { Edit } from "@/chip/icons";
 
 type ZoomControlProps = {
   value: number;

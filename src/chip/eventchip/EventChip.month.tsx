@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import type { CSSProperties } from "react";
-import { HoverMonthEventTooltip } from "@/chip/toolchip/HoverMonthEventTooltip";
+import { HoverMonthEventTooltip } from "@/chip/panel/toolchip/HoverMonthEventTooltip";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 

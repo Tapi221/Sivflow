@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { hasDesktopRuntime } from "@platform/runtime";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { ScheduleScreen as DesktopScheduleScreen } from "@/pane.desktop/view/Screen.Schedule.desktop";
 import { WorkspaceScreen } from "@/pane.desktop/view/WorkspaceScreen";

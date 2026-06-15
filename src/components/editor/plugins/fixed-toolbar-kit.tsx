@@ -1,8 +1,8 @@
 "use client";
 
 import { createPlatePlugin } from "platejs/react";
-import { FixedToolbar } from "@/chip/ui/plate/fixed-toolbar";
 import { ToolbarNote } from "@/chip/panel/overlay-toolbar/OverlayToolbar.Note";
+import { FixedToolbar } from "@/chip/ui/plate/fixed-toolbar";
 
 const FixedToolbarKit = [
   createPlatePlugin({

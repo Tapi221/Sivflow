@@ -1,6 +1,7 @@
 import React from "react";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/chip/ui/select";
+import { Code, HelpCircle, Link, NotebookPen, Sigma, Type, Volume2 } from "@/chip/icons/icons";
 import { MathEditorDialog } from "@/chip/panel/dialog.desktop/Dialog.MathEditor";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/chip/ui/select";
 import { CodeBlockContent } from "@/components/card/blocks/code/CodeBlockContent";
 import { normalizeEditorLanguage } from "@/components/card/blocks/code/codeBlockLanguage";
 import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
@@ -19,7 +20,6 @@ import type { CodeBlockData } from "@/types/core/code-block";
 import type { UploadedImage } from "@/types/domain/assets";
 import type { MathBlockData, ReferenceBlockData } from "@/types/domain/base";
 import type { CardBlock } from "@/types/domain/card";
-import { Code, HelpCircle, Link, NotebookPen, Sigma, Type, Volume2 } from "@/chip/icons/icons";
 
 type CardBlockLayoutReplaceBlock = MarkdownReplaceBlock;
 type ViewerProps = Readonly<{ questionDisplayMode: "always" | "tap_to_reveal";

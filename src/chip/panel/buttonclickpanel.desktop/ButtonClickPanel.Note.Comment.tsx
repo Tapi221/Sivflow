@@ -1,9 +1,9 @@
 "use client";
 
-import type * as React from "react";
 import { ArrowUpIcon } from "lucide-react";
 import type { Value } from "platejs";
 import { Plate } from "platejs/react";
+import type * as React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/chip/ui/avatar";
 import { Button } from "@/chip/ui/button/button";
 import { Editor, EditorContainer } from "@/chip/ui/plate/editor";

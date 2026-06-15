@@ -2,12 +2,12 @@ import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { generateOllamaAnswer } from "@platform/ai/ollamaClient";
 import { useToast } from "@web-renderer/contexts/ToastContext";
 import type { KeyboardEvent } from "react";
+import { MessageSquare, Plus, Sparkles } from "@/chip/icons";
 import { Dialog, DialogContent } from "@/chip/panel/dialog.desktop/dialog/dialog";
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-import { MessageSquare, Plus, Sparkles } from "@/chip/icons";
 
 type QuickQaChatDialogProps = {
   open: boolean;

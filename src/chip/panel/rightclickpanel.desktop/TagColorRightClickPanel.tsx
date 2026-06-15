@@ -1,5 +1,5 @@
-import type { CSSProperties, RefObject } from "react";
 import type { TagColorKey } from "@shared/design-tokens/color/Color.Tag";
+import type { CSSProperties, RefObject } from "react";
 import { getTagColorSwatchStyle } from "@/chip/budge/tag/tagColor";
 import { RightClickPanel } from "@/chip/panel/rightclickpanel";
 import type { RightClickPanelId } from "@/chip/panel/rightClickPanel.utils";

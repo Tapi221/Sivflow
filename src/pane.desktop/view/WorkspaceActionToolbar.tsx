@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { CSSProperties } from "react";
-import { QuickQaChatDialog } from "@/chip/panel/dialog.desktop/Dialog.QuickQaChat";
 import { MessageSquare } from "@/chip/icons";
+import { QuickQaChatDialog } from "@/chip/panel/dialog.desktop/Dialog.QuickQaChat";
 
 type Props = {
   className?: string;

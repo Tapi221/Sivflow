@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import type { IconProps } from "@/chip/icons";
+import { Plus } from "@/chip/icons";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { overlayGlassActionButtonClassName, overlayGlassPillClassName, overlayGlassToolbarClassName } from "@/components/card/shell/overlaySurfaceClassNames";
 import type { EditorBlockIconName, EditorBlockType } from "@/lib/editorBlockSettings";
 import { getEditorBlockDefinition, parseEditorBlockSettings } from "@/lib/editorBlockSettings";
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
-import type { IconProps } from "@/chip/icons";
-import { Plus } from "@/chip/icons";
 
 interface BlockToolbarProps {
   label: string;

@@ -60,6 +60,7 @@ const META_PANEL_ACTION_ROW_ALIGN_CLASS: Record<MetaPanelActionRowAlign, string>
   between: "ds-editor-pane__action-row--between",
   end: "ds-editor-pane__action-row--end",
 };
+
 const noopToggleSwitchChange = () => undefined;
 
 const MetaPanelActionRow = ({

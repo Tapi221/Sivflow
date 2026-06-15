@@ -1,5 +1,5 @@
-import type { ChangeEvent, CSSProperties, HTMLAttributes, ReactNode } from "react";
 import { useCallback, useMemo, useState } from "react";
+import type { ChangeEvent, CSSProperties, HTMLAttributes, ReactNode } from "react";
 
 type ToggleSwitchProps = Omit<HTMLAttributes<HTMLLabelElement>, "onChange"> & {
   checked?: boolean;
