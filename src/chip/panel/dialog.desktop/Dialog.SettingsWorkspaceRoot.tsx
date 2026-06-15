@@ -7,14 +7,14 @@ type SettingsWorkspaceRootPanelProps = {
   onOpenChange: (open: boolean) => void;
 };
 
+const SettingsWorkspaceRootContent = SettingsWorkspaceRootScreen;
+
 const SettingsWorkspaceRootPanel = ({ open, onOpenChange }: SettingsWorkspaceRootPanelProps) => {
   const handleClose = () => onOpenChange(false);
   if (!open) return null;
   return (
     <DialogDesktopPanel surfaceClassName="settings-workspace-dialog" ariaLabel="Settings" onClose={handleClose}>
-      <div className="flex h-full min-h-0 w-full [--primary-color:var(--theme-accent-color)]">
-        <SettingsWorkspaceRootScreen />
-      </div>
+      <SettingsWorkspaceRootContent></SettingsWorkspaceRootContent>
     </DialogDesktopPanel>
   );
 };
