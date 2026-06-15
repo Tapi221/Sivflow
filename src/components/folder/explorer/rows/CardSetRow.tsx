@@ -96,6 +96,33 @@ const CardSetRow = ({ treeNode, style, depth, isOpen, isSelected, toggle, editin
     },
     [editInputRef, isEditing],
   );
+  const leadingNode = hasChildren ? (
+    <button
+      type="button"
+      className="grid h-4 w-4 place-items-center"
+      onClick={(event) => {
+        event.stopPropagation();
+        toggle();
+      }}
+      aria-label={
+        isOpen ? "カードセットを折りたたむ" : "カードセットを展開する"
+      }
+    >
+      <Chevron
+        className={cn(
+          "sidebar-icon ds-list-item__icon",
+          FOLDER_ROW_ICON_SIZE_CLASS,
+          FOLDER_ROW_ICON_MUTED_CLASS,
+          isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
+        )}
+      />
+    </button>
+  ) : undefined;
+  const trailingNode = hasChildren ? (
+    <span className="ds-list-item__subtitle ml-auto text-xs tabular-nums">
+      {treeNode.children!.length}
+    </span>
+  ) : undefined;
   return (
     <SidebarEntityRow
       containerStyle={style}
@@ -113,30 +140,7 @@ const CardSetRow = ({ treeNode, style, depth, isOpen, isSelected, toggle, editin
       depth={depth}
       selected={isSelected}
       contentClassName={EXPLORER_ROW_CONTENT_CLASS}
-      leading={
-        hasChildren ? (
-          <button
-            type="button"
-            className="grid h-4 w-4 place-items-center"
-            onClick={(event) => {
-              event.stopPropagation();
-              toggle();
-            }}
-            aria-label={
-              isOpen ? "カードセットを折りたたむ" : "カードセットを展開する"
-            }
-          >
-            <Chevron
-              className={cn(
-                "sidebar-icon ds-list-item__icon",
-                FOLDER_ROW_ICON_SIZE_CLASS,
-                FOLDER_ROW_ICON_MUTED_CLASS,
-                isSelected && FOLDER_ROW_ICON_ACTIVE_CLASS,
-              )}
-            />
-          </button>
-        ) : null
-      }
+      leading={leadingNode}
       leadingClassName={EXPLORER_ROW_LEADING_SLOT_CLASS}
       iconClassName={EXPLORER_ROW_ICON_SLOT_CLASS}
       titleSlotClassName={EXPLORER_ROW_TITLE_SLOT_CLASS}
@@ -146,13 +150,7 @@ const CardSetRow = ({ treeNode, style, depth, isOpen, isSelected, toggle, editin
         FOLDER_ROW_TITLE_CLASS,
         isSelected ? "font-medium" : "font-normal",
       )}
-      trailing={
-        hasChildren ? (
-          <span className="ds-list-item__subtitle ml-auto text-xs tabular-nums">
-            {treeNode.children!.length}
-          </span>
-        ) : null
-      }
+      trailing={trailingNode}
       icon={
         <ExplorerChromeCardSetIcon className={cn(FOLDER_ROW_ICON_SIZE_CLASS)} />
       }
