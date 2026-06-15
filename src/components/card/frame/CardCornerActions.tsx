@@ -1,9 +1,8 @@
-import React, { useCallback } from "react";
+import { useCallback } from "react";
+import type { CSSProperties, SyntheticEvent } from "react";
 import { CircleHelp, Star, Tag } from "@/chip/icons/icons";
+import { CARD_ACTION_BG_CLASS, CARD_ACTION_BUTTON_PX, CARD_ACTION_COLOR_ACTIVE_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS, CARD_ACTION_ICON_PX } from "@/components/card/frame/cardAction.constants";
 import { cn } from "@/lib/utils";
-import { CARD_ACTION_BG_CLASS, CARD_ACTION_BUTTON_PX, CARD_ACTION_COLOR_ACTIVE_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS, CARD_ACTION_ICON_PX } from "./cardAction.constants";
-
-
 
 interface CardCornerActionsProps {
   onHelp?: () => void;
@@ -15,8 +14,6 @@ interface CardCornerActionsProps {
   visualScale?: number;
   iconPx?: number;
 }
-
-
 
 const resolveSafeVisualScale = (value?: number) => {
   if (typeof value !== "number") return 1;
@@ -31,8 +28,6 @@ const resolveSafeIconPx = (value?: number) => {
   return value;
 };
 
-
-
 const CardCornerActions = ({
   onHelp,
   onStar,
@@ -43,35 +38,31 @@ const CardCornerActions = ({
   visualScale = 1,
   iconPx,
 }: CardCornerActionsProps) => {
-  const stop = useCallback((event: React.SyntheticEvent) => {
+  const stop = useCallback((event: SyntheticEvent) => {
     event.stopPropagation();
   }, []);
-
   if (!onHelp && !onStar) return null;
-
   const safeVisualScale = resolveSafeVisualScale(visualScale);
   const explicitIconPx = resolveSafeIconPx(iconPx);
   const resolvedIconPx = explicitIconPx ?? CARD_ACTION_ICON_PX / safeVisualScale;
   const resolvedButtonPx = CARD_ACTION_BUTTON_PX / safeVisualScale;
-
   const buttonBaseClass =
     "rounded-full min-h-0 min-w-0 flex items-center justify-center bg-transparent hover:bg-transparent " +
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40";
   const disabledClass = disabled ? "opacity-50 pointer-events-none" : "";
-  const buttonSizeStyle: React.CSSProperties = {
+  const buttonSizeStyle: CSSProperties = {
     width: `${resolvedButtonPx}px`,
     height: `${resolvedButtonPx}px`,
     minWidth: `${resolvedButtonPx}px`,
     minHeight: `${resolvedButtonPx}px`,
   };
-  const iconSizeStyle: React.CSSProperties = {
+  const iconSizeStyle: CSSProperties = {
     width: `${resolvedIconPx}px`,
     height: `${resolvedIconPx}px`,
   };
-
   return (
     <div className={cn("flex items-center gap-0", className)}>
-      {onHelp ? (
+      {onHelp !== undefined && (
         <button
           type="button"
           aria-label="不確実フラグ"
@@ -100,9 +91,8 @@ const CardCornerActions = ({
             style={iconSizeStyle}
           />
         </button>
-      ) : null}
-
-      {onStar ? (
+      )}
+      {onStar !== undefined && (
         <button
           type="button"
           aria-label="ブックマーク"
@@ -131,9 +121,8 @@ const CardCornerActions = ({
             style={iconSizeStyle}
           />
         </button>
-      ) : null}
-
-      {onStar ? (
+      )}
+      {onStar !== undefined && (
         <span
           aria-hidden="true"
           className={cn(
@@ -153,11 +142,9 @@ const CardCornerActions = ({
             style={iconSizeStyle}
           />
         </span>
-      ) : null}
+      )}
     </div>
   );
 };
-
-
 
 export { CardCornerActions };
