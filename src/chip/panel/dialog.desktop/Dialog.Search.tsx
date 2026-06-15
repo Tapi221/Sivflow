@@ -9,7 +9,7 @@ import { rankSearchResults } from "@/features/search/lib/rankSearchResults";
 import type { SearchIconKind, SearchItem } from "@/features/search/model/search.types";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { cn } from "@/lib/utils";
-import { Calendar, FileText, Folder, Image, Layers, List, MessageSquare, Search, SearchX, Settings2, Tag, Trash2, X } from "@/chip/icons";
+import { Calendar, FileText, Folder, Image, Layers, List, MessageSquare, Search, SearchX, Settings2, Tag, Trash2, X } from "@/chip/icons/icons";
 import { toMillis } from "@/utils/toMillis";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
