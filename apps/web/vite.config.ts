@@ -40,7 +40,7 @@ const optimizedDependencyIncludes = [
 ];
 const apiRouteModulePaths = {
   "/api/ai/command": "src/app/api/ai/command/route.ts",
-  "/api/ai/copilot": "src/app/api/copilot/route.ts",
+  "/api/ai/copilot": "src/app/api/ai/copilot/route.ts",
   "/api/uploadthing": "src/app/api/uploadthing/route.ts",
 };
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
