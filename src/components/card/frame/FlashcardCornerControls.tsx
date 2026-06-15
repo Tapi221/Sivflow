@@ -32,6 +32,16 @@ const resolveSafeVisualScale = (value?: number) => {
   if (value <= 0) return 1;
   return value;
 };
+const resolveUncertaintyHandler = (card: FlashcardCardLike, hasUncertainty: boolean, onToggleUncertainty?: (card: FlashcardCardLike) => void) => {
+  if (onToggleUncertainty) return () => onToggleUncertainty(card);
+  if (hasUncertainty) return () => {};
+  return undefined;
+};
+const resolveBookmarkHandler = (card: FlashcardCardLike, isBookmarked: boolean, onToggleBookmark?: (card: FlashcardCardLike) => void) => {
+  if (onToggleBookmark) return () => onToggleBookmark(card);
+  if (isBookmarked) return () => {};
+  return undefined;
+};
 const useFlashcardCornerControls = ({ card, hasUncertainty, isBookmarked, activeImageItems, activeAudioUrls, activeReferences, extraHeaderLeft, onToggleUncertainty, onToggleBookmark, onOpenImagePopup, onOpenAudioPopup, onOpenReferencePopup, headerIconVisualScale = 1 }: FlashcardCornerControlsProps) => {
   return React.useMemo(() => {
     const actionsTopLeft: React.ReactNode[] = [];
@@ -95,20 +105,8 @@ const useFlashcardCornerControls = ({ card, hasUncertainty, isBookmarked, active
       actionsTopLeft.push(
         <CardCornerActions
           key="corner-actions"
-          onHelp={
-            onToggleUncertainty
-              ? () => onToggleUncertainty(card)
-              : hasUncertainty
-                ? () => {}
-                : undefined
-          }
-          onStar={
-            onToggleBookmark
-              ? () => onToggleBookmark(card)
-              : isBookmarked
-                ? () => {}
-                : undefined
-          }
+          onHelp={resolveUncertaintyHandler(card, hasUncertainty, onToggleUncertainty)}
+          onStar={resolveBookmarkHandler(card, isBookmarked, onToggleBookmark)}
           helpActive={hasUncertainty}
           starActive={isBookmarked}
           disabled={!onToggleUncertainty && !onToggleBookmark}
