@@ -8,7 +8,7 @@ import { CheckIcon, EyeIcon, PencilLineIcon, PenIcon } from "lucide-react";
 import { useEditorReadOnly, useEditorRef, usePluginOption } from "platejs/react";
 import type { ReactNode } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
-import { ToolbarButton } from "./toolbar";
+import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
 type ModeValue = "editing" | "suggestion" | "viewing";
 type ModeItem = {
