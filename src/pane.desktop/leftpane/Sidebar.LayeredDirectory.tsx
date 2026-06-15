@@ -1,6 +1,9 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent, ReactNode, RefObject } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
+import type { Locale } from "@shared/i18n/locale.store";
+import { useLocaleStore } from "@shared/i18n/locale.store";
+import { Tag } from "@/chip/icons";
 import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
 import { TagFilterPopover } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.TagFilter";
 import { RightClickPanel } from "@/chip/panel/rightclickpanel";
@@ -8,15 +11,15 @@ import { clampRightClickPanelPosition, resolveRightClickPanelTextWidth, RIGHT_CL
 import { useCardSets } from "@/components/card/hooks/useCardSets";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import type { FolderTreeNode } from "@/components/folder/explorer/model/utils";
-import { DEFAULT_NEW_CARD_SET_NAME, DEFAULT_NEW_FOLDER_NAME, DEFAULT_NEW_PROJECT_NAME, getFolderId } from "@/components/folder/explorer/model/utils";
+import { getFolderId } from "@/components/folder/explorer/model/utils";
 import { useExplorerDerivedData } from "@/components/folder/hooks/useExplorerDerivedData";
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
 import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
+import { useNotes } from "@/features/note/hooks/useNotes";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { useTags } from "@/features/settings/hooks/useTags";
-import { useNotes } from "@/features/note/hooks/useNotes";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { cn } from "@/lib/utils";
 import { LibraryHierarchySidebar, ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";
@@ -24,7 +27,6 @@ import { TagTreeSidebar } from "@/pane.desktop/leftpane/folder/TagTreeSidebar";
 import { useFolderTagModeStore } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
-import { Tag } from "@/chip/icons";
 
 type IconProps = {
   className?: string;
@@ -37,10 +39,14 @@ type ProjectAddMenuItemDefinition = {
 type ProjectAddMenuState = {
   x: number;
   y: number;
+  width: number;
 };
 type ProjectAddMenuProps = {
   x: number;
   y: number;
+  width: number;
+  itemDefinitions: readonly ProjectAddMenuItemDefinition[];
+  ariaLabel: string;
   menuRef: RefObject<HTMLDivElement | null>;
   onCreateNote: () => void;
   onCreateCardSet: () => void;
@@ -52,35 +58,132 @@ type SidebarLayeredDirectoryProps = {
   onToggleLeftPanel?: () => void;
   onOpenSettings?: () => void;
 };
+type SidebarLayeredDirectoryCopy = {
+  workspaceName: (ownerName: string) => string;
+  workspaceOpenAriaLabel: (workspaceName: string) => string;
+  sidebarCloseAriaLabel: string;
+  workspaceNavigationAriaLabel: string;
+  homeLabel: string;
+  libraryLabel: string;
+  tagsLabel: string;
+  scheduleLabel: string;
+  exploreLabel: string;
+  settingsLabel: string;
+  favoriteSectionLabel: string;
+  favoriteEmptyMessage: string;
+  projectSectionLabel: string;
+  tagSectionLabel: string;
+  defaultNewTagName: string;
+  defaultNewNoteName: string;
+  defaultNewFolderName: string;
+  defaultNewProjectName: string;
+  defaultNewCardSetName: string;
+  importPdfLabel: string;
+  untitledFolderName: string;
+  addProjectAriaLabel: string;
+  addSelectedFolderContentAriaLabel: string;
+  addTagAriaLabel: string;
+  filterAriaLabel: string;
+  openProjectListAriaLabel: string;
+  projectAddMenuAriaLabel: string;
+  libraryTabTitle: string;
+};
 
 const WORKSPACE_OWNER_FALLBACK_NAME = "Akari T";
-const WORKSPACE_NAME_SUFFIX = "のWorkspace";
 const WORKSPACE_AVATAR_FALLBACK = "A";
-const WORKSPACE_HOME_LABEL = "ホーム";
-const WORKSPACE_LIBRARY_LABEL = "ライブラリ";
-const WORKSPACE_TAGS_LABEL = "タグ";
-const WORKSPACE_SCHEDULE_LABEL = "カレンダー";
-const WORKSPACE_EXPLORE_LABEL = "Explore";
-const WORKSPACE_SETTINGS_LABEL = "設定";
-const FAVORITE_SECTION_LABEL = "お気に入り";
-const FAVORITE_EMPTY_MESSAGE = "プロジェクトをお気に入りに追加すると、ここからすぐ開けます";
-const PROJECT_SECTION_LABEL = "プロジェクト";
-const TAG_SECTION_LABEL = "タグツリー";
-const DEFAULT_NEW_TAG_NAME = "新規タグ";
-const DEFAULT_NEW_NOTE_NAME = "新規ノート";
-const ADD_PROJECT_ARIA_LABEL = "プロジェクトを追加";
-const ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL = "選択中のフォルダに追加";
-const ADD_TAG_ARIA_LABEL = "タグを追加";
-const FILTER_ARIA_LABEL = "絞り込みを開く";
+const SIDEBAR_LAYERED_DIRECTORY_COPY: Record<Locale, SidebarLayeredDirectoryCopy> = {
+  ja: {
+    workspaceName: (ownerName) => `${ownerName}のWorkspace`,
+    workspaceOpenAriaLabel: (workspaceName) => `${workspaceName}を開く`,
+    sidebarCloseAriaLabel: "サイドバーを閉じる",
+    workspaceNavigationAriaLabel: "ワークスペースナビゲーション",
+    homeLabel: "ホーム",
+    libraryLabel: "ライブラリ",
+    tagsLabel: "タグ",
+    scheduleLabel: "カレンダー",
+    exploreLabel: "Explore",
+    settingsLabel: "設定",
+    favoriteSectionLabel: "お気に入り",
+    favoriteEmptyMessage: "プロジェクトをお気に入りに追加すると、ここからすぐ開けます",
+    projectSectionLabel: "プロジェクト",
+    tagSectionLabel: "タグツリー",
+    defaultNewTagName: "新規タグ",
+    defaultNewNoteName: "新規ノート",
+    defaultNewFolderName: "新規フォルダ",
+    defaultNewProjectName: "新規プロジェクト",
+    defaultNewCardSetName: "新規カードセット",
+    importPdfLabel: "PDFを追加",
+    untitledFolderName: "無題のフォルダ",
+    addProjectAriaLabel: "プロジェクトを追加",
+    addSelectedFolderContentAriaLabel: "選択中のフォルダに追加",
+    addTagAriaLabel: "タグを追加",
+    filterAriaLabel: "絞り込みを開く",
+    openProjectListAriaLabel: "プロジェクト一覧を開く",
+    projectAddMenuAriaLabel: "project add menu",
+    libraryTabTitle: "Library",
+  },
+  en: {
+    workspaceName: (ownerName) => `${ownerName}'s Workspace`,
+    workspaceOpenAriaLabel: (workspaceName) => `Open ${workspaceName}`,
+    sidebarCloseAriaLabel: "Close sidebar",
+    workspaceNavigationAriaLabel: "Workspace navigation",
+    homeLabel: "Home",
+    libraryLabel: "Library",
+    tagsLabel: "Tags",
+    scheduleLabel: "Calendar",
+    exploreLabel: "Explore",
+    settingsLabel: "Settings",
+    favoriteSectionLabel: "Favorites",
+    favoriteEmptyMessage: "Add projects to favorites to open them quickly here",
+    projectSectionLabel: "Projects",
+    tagSectionLabel: "Tag tree",
+    defaultNewTagName: "New tag",
+    defaultNewNoteName: "New note",
+    defaultNewFolderName: "New folder",
+    defaultNewProjectName: "New project",
+    defaultNewCardSetName: "New card set",
+    importPdfLabel: "Add PDF",
+    untitledFolderName: "Untitled folder",
+    addProjectAriaLabel: "Add project",
+    addSelectedFolderContentAriaLabel: "Add content to selected folder",
+    addTagAriaLabel: "Add tag",
+    filterAriaLabel: "Open filter",
+    openProjectListAriaLabel: "Open project list",
+    projectAddMenuAriaLabel: "project add menu",
+    libraryTabTitle: "Library",
+  },
+  zh: {
+    workspaceName: (ownerName) => `${ownerName} 的工作区`,
+    workspaceOpenAriaLabel: (workspaceName) => `打开${workspaceName}`,
+    sidebarCloseAriaLabel: "关闭侧边栏",
+    workspaceNavigationAriaLabel: "工作区导航",
+    homeLabel: "首页",
+    libraryLabel: "资料库",
+    tagsLabel: "标签",
+    scheduleLabel: "日历",
+    exploreLabel: "探索",
+    settingsLabel: "设置",
+    favoriteSectionLabel: "收藏",
+    favoriteEmptyMessage: "将项目添加到收藏后，可从这里快速打开",
+    projectSectionLabel: "项目",
+    tagSectionLabel: "标签树",
+    defaultNewTagName: "新建标签",
+    defaultNewNoteName: "新建笔记",
+    defaultNewFolderName: "新建文件夹",
+    defaultNewProjectName: "新建项目",
+    defaultNewCardSetName: "新建卡片集",
+    importPdfLabel: "添加 PDF",
+    untitledFolderName: "未命名文件夹",
+    addProjectAriaLabel: "添加项目",
+    addSelectedFolderContentAriaLabel: "向所选文件夹添加内容",
+    addTagAriaLabel: "添加标签",
+    filterAriaLabel: "打开筛选",
+    openProjectListAriaLabel: "打开项目列表",
+    projectAddMenuAriaLabel: "项目添加菜单",
+    libraryTabTitle: "资料库",
+  },
+};
 const PROJECT_ADD_MENU_PANEL_ID = "layered-project-add-menu";
-const PROJECT_ADD_MENU_ITEM_DEFINITIONS: readonly ProjectAddMenuItemDefinition[] = [
-  { id: "create-note", label: DEFAULT_NEW_NOTE_NAME },
-  { id: "create-card-set", label: DEFAULT_NEW_CARD_SET_NAME },
-  { id: "create-folder", label: "新規フォルダ" },
-  { id: "import-pdf", label: "PDFを追加" },
-];
-const PROJECT_ADD_MENU_WIDTH = resolveRightClickPanelTextWidth(PROJECT_ADD_MENU_ITEM_DEFINITIONS.map((item) => item.label), 132);
-const PROJECT_ADD_MENU_HEIGHT = PROJECT_ADD_MENU_ITEM_DEFINITIONS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
 const EMPTY_COLLECTION: never[] = [];
 const OPENABLE_ENTITY_SELECTOR = "[data-directory-entity-kind='cardSet'], [data-directory-entity-kind='document'], [data-directory-entity-kind='note']";
 const ROOT_CLASS_NAME = "relative isolate z-[1] flex h-full min-h-0 w-60 min-w-60 shrink-0 flex-col overflow-hidden bg-transparent font-sans text-stone-500 antialiased [-webkit-app-region:no-drag] [&_*]:[-webkit-app-region:no-drag] [&_svg]:pointer-events-none";
@@ -102,9 +205,15 @@ const ADD_BUTTON_CLASS_NAME = "flex h-5 min-h-5 w-5 min-w-5 items-center justify
 const EMPTY_MESSAGE_CLASS_NAME = "m-0 pr-3 text-xs font-bold leading-4 tracking-normal text-stone-500";
 const PROJECT_ADD_MENU_ITEM_CLASS_NAME = "flex min-h-8 w-full items-center px-3 text-left text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 focus-visible:bg-stone-100 focus-visible:outline-none";
 
-const getFolderName = (folder: FolderTreeNode): string => {
+const buildProjectAddMenuItemDefinitions = (copy: SidebarLayeredDirectoryCopy): ProjectAddMenuItemDefinition[] => [
+  { id: "create-note", label: copy.defaultNewNoteName },
+  { id: "create-card-set", label: copy.defaultNewCardSetName },
+  { id: "create-folder", label: copy.defaultNewFolderName },
+  { id: "import-pdf", label: copy.importPdfLabel },
+];
+const getFolderName = (folder: FolderTreeNode, untitledFolderName: string): string => {
   const name = folder.folderName ?? folder.folder_name;
-  return typeof name === "string" && name.trim() ? name.trim() : "無題のフォルダ";
+  return typeof name === "string" && name.trim() ? name.trim() : untitledFolderName;
 };
 const getUniqueTagName = (baseName: string, tagNames: readonly string[]): string => {
   const usedTagNameSet = new Set(tagNames.map((tagName) => tagName.trim().toLowerCase()).filter((tagName) => tagName.length > 0));
@@ -138,9 +247,12 @@ const getWorkspaceInitial = (workspaceOwnerName: string): string => {
   const initial = workspaceOwnerName.trim().charAt(0);
   return initial ? initial.toUpperCase() : WORKSPACE_AVATAR_FALLBACK;
 };
-const getProjectAddMenuPosition = (event: ReactMouseEvent<HTMLElement>): ProjectAddMenuState => {
+const getProjectAddMenuWidth = (itemDefinitions: readonly ProjectAddMenuItemDefinition[]): number => resolveRightClickPanelTextWidth(itemDefinitions.map((item) => item.label), 132);
+const getProjectAddMenuPosition = (event: ReactMouseEvent<HTMLElement>, itemDefinitions: readonly ProjectAddMenuItemDefinition[]): ProjectAddMenuState => {
   const rect = event.currentTarget.getBoundingClientRect();
-  return clampRightClickPanelPosition(rect.right - PROJECT_ADD_MENU_WIDTH, rect.bottom + 6, { width: PROJECT_ADD_MENU_WIDTH, height: PROJECT_ADD_MENU_HEIGHT });
+  const width = getProjectAddMenuWidth(itemDefinitions);
+  const height = itemDefinitions.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
+  return { ...clampRightClickPanelPosition(rect.right - width, rect.bottom + 6, { width, height }), width };
 };
 const getActiveLibraryFolderId = (tab: WorkspaceTab | null): string | null => {
   if (!tab || tab.sectionKey !== "library") return null;
@@ -162,7 +274,7 @@ const getNavActionClassName = (isActive: boolean): string => cn(
 
 const IconPlus = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
 const IconChevronDown = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M4 6.25L8 10.25L12 6.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>);
-const ProjectAddMenu = ({ x, y, menuRef, onCreateNote, onCreateCardSet, onCreateFolder, onImportPdf }: ProjectAddMenuProps) => {
+const ProjectAddMenu = ({ x, y, width, itemDefinitions, ariaLabel, menuRef, onCreateNote, onCreateCardSet, onCreateFolder, onImportPdf }: ProjectAddMenuProps) => {
   const handleItemClick = (event: ReactMouseEvent<HTMLButtonElement>, id: ProjectAddMenuActionId) => {
     event.preventDefault();
     event.stopPropagation();
@@ -181,8 +293,8 @@ const ProjectAddMenu = ({ x, y, menuRef, onCreateNote, onCreateCardSet, onCreate
     onImportPdf();
   };
   return (
-    <RightClickPanel id={PROJECT_ADD_MENU_PANEL_ID} x={x} y={y} width={PROJECT_ADD_MENU_WIDTH} panelRef={menuRef} style={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} ariaLabel="project add menu">
-      {PROJECT_ADD_MENU_ITEM_DEFINITIONS.map((item) => (
+    <RightClickPanel id={PROJECT_ADD_MENU_PANEL_ID} x={x} y={y} width={width} panelRef={menuRef} style={RIGHT_CLICK_PANEL_NO_DRAG_STYLE} ariaLabel={ariaLabel}>
+      {itemDefinitions.map((item) => (
         <button key={item.id} type="button" className={PROJECT_ADD_MENU_ITEM_CLASS_NAME} role="menuitem" onClick={(event) => handleItemClick(event, item.id)}>
           <span>{item.label}</span>
         </button>
@@ -194,6 +306,8 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
   const navigate = useNavigate();
   const { onOpenSettings: outletOpenSettings, onToggleLeftPanel: outletToggleLeftPanel } = useOutletContext<AppLayoutOutletContext>();
   const { currentUser } = useAuthSession();
+  const locale = useLocaleStore((state) => state.locale);
+  const copy = SIDEBAR_LAYERED_DIRECTORY_COPY[locale];
   const folderTagMode = useFolderTagModeStore((state) => state.folderTagMode);
   const setFolderTagMode = useFolderTagModeStore((state) => state.setFolderTagMode);
   const { addTag, tags } = useTags();
@@ -217,11 +331,12 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
   const selectedFolderId = useMemo(() => getActiveLibraryFolderId(activeTab), [activeTab]);
   const selectedFolder = selectedFolderId ? folderById.get(selectedFolderId) ?? null : null;
   const selectedNavigationFolderId = selectedFolderId;
-  const sectionLabel = folderTagMode === "tag" ? TAG_SECTION_LABEL : selectedFolder ? getFolderName(selectedFolder) : PROJECT_SECTION_LABEL;
+  const sectionLabel = folderTagMode === "tag" ? copy.tagSectionLabel : selectedFolder ? getFolderName(selectedFolder, copy.untitledFolderName) : copy.projectSectionLabel;
   const shouldShowFavoriteSection = !selectedFolderId;
   const existingTagNames = useMemo(() => tags.map((tag) => tag.name), [tags]);
+  const projectAddMenuItemDefinitions = useMemo(() => buildProjectAddMenuItemDefinitions(copy), [copy]);
   const workspaceOwnerName = useMemo(() => getWorkspaceOwnerName(currentUser?.displayName, currentUser?.email), [currentUser?.displayName, currentUser?.email]);
-  const workspaceName = `${workspaceOwnerName}${WORKSPACE_NAME_SUFFIX}`;
+  const workspaceName = useMemo(() => copy.workspaceName(workspaceOwnerName), [copy, workspaceOwnerName]);
   const workspaceInitial = useMemo(() => getWorkspaceInitial(workspaceOwnerName), [workspaceOwnerName]);
   const isHomeActive = activeTab?.sectionKey === "home";
   const isFolderActive = activeTab?.sectionKey === "library" && folderTagMode === "folder";
@@ -237,11 +352,11 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
   }, []);
   useRightClickPanelDismiss(PROJECT_ADD_MENU_PANEL_ID, projectAddMenu !== null, projectAddMenuRef, closeProjectAddMenu);
   const handleCreateRootFolder = useCallback(() => {
-    void createFolder(DEFAULT_NEW_PROJECT_NAME);
-  }, [createFolder]);
+    void createFolder(copy.defaultNewProjectName);
+  }, [copy.defaultNewProjectName, createFolder]);
   const handleCreateRootTag = useCallback(() => {
-    void addTag(getUniqueTagName(DEFAULT_NEW_TAG_NAME, existingTagNames));
-  }, [addTag, existingTagNames]);
+    void addTag(getUniqueTagName(copy.defaultNewTagName, existingTagNames));
+  }, [addTag, copy.defaultNewTagName, existingTagNames]);
   const handleOpenHome = useCallback(() => {
     navigate("/schedule");
     openSectionTab("home");
@@ -249,41 +364,41 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
   const handleOpenProjectList = useCallback(() => {
     navigate("/schedule");
     setFolderTagMode("folder");
-    openExplorerTab({ title: "Library", explorerState: { isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null } });
-  }, [navigate, openExplorerTab, setFolderTagMode]);
+    openExplorerTab({ title: copy.libraryTabTitle, explorerState: { isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null } });
+  }, [copy.libraryTabTitle, navigate, openExplorerTab, setFolderTagMode]);
   const handleOpenTagTree = useCallback(() => {
     navigate("/schedule");
     setFolderTagMode("tag");
-    openExplorerTab({ title: "Library", explorerState: { isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null } });
-  }, [navigate, openExplorerTab, setFolderTagMode]);
+    openExplorerTab({ title: copy.libraryTabTitle, explorerState: { isHomeOnlyMode: false, isSectionListMode: true, selectedFolderId: null, selectedItem: null } });
+  }, [copy.libraryTabTitle, navigate, openExplorerTab, setFolderTagMode]);
   const handleOpenProjectAddMenu = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    setProjectAddMenu(getProjectAddMenuPosition(event));
-  }, []);
+    setProjectAddMenu(getProjectAddMenuPosition(event, projectAddMenuItemDefinitions));
+  }, [projectAddMenuItemDefinitions]);
   const handleCreateSelectedFolderNote = useCallback(() => {
     if (!selectedNavigationFolderId) return;
     closeProjectAddMenu();
     void (async () => {
-      const note = await createNote(DEFAULT_NEW_NOTE_NAME, selectedNavigationFolderId, { orderIndex: getNextOrderIndex(selectedNavigationFolderId) });
+      const note = await createNote(copy.defaultNewNoteName, selectedNavigationFolderId, { orderIndex: getNextOrderIndex(selectedNavigationFolderId) });
       openNoteTab({ noteId: note.id, title: note.title, folderId: note.folderId });
     })();
-  }, [closeProjectAddMenu, createNote, getNextOrderIndex, openNoteTab, selectedNavigationFolderId]);
+  }, [closeProjectAddMenu, copy.defaultNewNoteName, createNote, getNextOrderIndex, openNoteTab, selectedNavigationFolderId]);
   const handleCreateSelectedFolderCardSet = useCallback(() => {
     if (!selectedNavigationFolderId) return;
     closeProjectAddMenu();
     void (async () => {
-      const cardSet = await createCardSet(DEFAULT_NEW_CARD_SET_NAME, selectedNavigationFolderId);
+      const cardSet = await createCardSet(copy.defaultNewCardSetName, selectedNavigationFolderId);
       navigate("/schedule");
       setFolderTagMode("folder");
-      openExplorerTab({ title: "Library", explorerState: { isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: selectedNavigationFolderId, selectedItem: { type: "cardSet", id: cardSet.id } } });
+      openExplorerTab({ title: copy.libraryTabTitle, explorerState: { isHomeOnlyMode: false, isSectionListMode: false, selectedFolderId: selectedNavigationFolderId, selectedItem: { type: "cardSet", id: cardSet.id } } });
     })();
-  }, [closeProjectAddMenu, createCardSet, navigate, openExplorerTab, selectedNavigationFolderId, setFolderTagMode]);
+  }, [closeProjectAddMenu, copy.defaultNewCardSetName, copy.libraryTabTitle, createCardSet, navigate, openExplorerTab, selectedNavigationFolderId, setFolderTagMode]);
   const handleCreateSelectedFolderChild = useCallback(() => {
     if (!selectedNavigationFolderId) return;
     closeProjectAddMenu();
-    void createFolder(DEFAULT_NEW_FOLDER_NAME, selectedNavigationFolderId);
-  }, [closeProjectAddMenu, createFolder, selectedNavigationFolderId]);
+    void createFolder(copy.defaultNewFolderName, selectedNavigationFolderId);
+  }, [closeProjectAddMenu, copy.defaultNewFolderName, createFolder, selectedNavigationFolderId]);
   const handleImportSelectedFolderPdf = useCallback(() => {
     handleToolbarAddDocument();
     closeProjectAddMenu();
@@ -311,31 +426,31 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
     <div className={ROOT_CLASS_NAME} onClickCapture={handleDirectoryClickCapture} onKeyDownCapture={handleDirectoryKeyDownCapture}>
       <div className={PRIMARY_NAV_CLASS_NAME}>
         <div className={WORKSPACE_HEADER_CLASS_NAME}>
-          <button type="button" className={WORKSPACE_TOGGLE_CLASS_NAME} onClick={resolvedOnToggleLeftPanel} aria-label="サイドバーを閉じる" disabled={!resolvedOnToggleLeftPanel}>
+          <button type="button" className={WORKSPACE_TOGGLE_CLASS_NAME} onClick={resolvedOnToggleLeftPanel} aria-label={copy.sidebarCloseAriaLabel} disabled={!resolvedOnToggleLeftPanel}>
             <SidebarOpenIcon className={NAV_ICON_CLASS_NAME} />
           </button>
-          <button type="button" className={WORKSPACE_BUTTON_CLASS_NAME} onClick={handleOpenProjectList} aria-label={`${workspaceName}を開く`}>
+          <button type="button" className={WORKSPACE_BUTTON_CLASS_NAME} onClick={handleOpenProjectList} aria-label={copy.workspaceOpenAriaLabel(workspaceName)}>
             <span className={WORKSPACE_AVATAR_CLASS_NAME} aria-hidden="true">{workspaceInitial}</span>
             <span className="block min-w-0 overflow-hidden truncate text-stone-950">{workspaceName}</span>
           </button>
         </div>
-        <nav className={NAV_CLASS_NAME} aria-label="ワークスペースナビゲーション">
-          <button type="button" className={getNavActionClassName(isHomeActive)} onClick={handleOpenHome} aria-current={isHomeActive ? "page" : undefined} aria-label={WORKSPACE_HOME_LABEL} title={WORKSPACE_HOME_LABEL}>
+        <nav className={NAV_CLASS_NAME} aria-label={copy.workspaceNavigationAriaLabel}>
+          <button type="button" className={getNavActionClassName(isHomeActive)} onClick={handleOpenHome} aria-current={isHomeActive ? "page" : undefined} aria-label={copy.homeLabel} title={copy.homeLabel}>
             <HomeIcon className={NAV_ICON_CLASS_NAME} />
           </button>
-          <button type="button" className={getNavActionClassName(isFolderActive)} onClick={handleOpenProjectList} aria-current={isFolderActive ? "page" : undefined} aria-label={WORKSPACE_LIBRARY_LABEL} title={WORKSPACE_LIBRARY_LABEL}>
+          <button type="button" className={getNavActionClassName(isFolderActive)} onClick={handleOpenProjectList} aria-current={isFolderActive ? "page" : undefined} aria-label={copy.libraryLabel} title={copy.libraryLabel}>
             <ExplorerChromeFolderIcon className={NAV_ICON_CLASS_NAME} />
           </button>
-          <button type="button" className={getNavActionClassName(isTagActive)} onClick={handleOpenTagTree} aria-current={isTagActive ? "page" : undefined} aria-label={WORKSPACE_TAGS_LABEL} title={WORKSPACE_TAGS_LABEL}>
+          <button type="button" className={getNavActionClassName(isTagActive)} onClick={handleOpenTagTree} aria-current={isTagActive ? "page" : undefined} aria-label={copy.tagsLabel} title={copy.tagsLabel}>
             <Tag className={NAV_ICON_CLASS_NAME} />
           </button>
-          <button type="button" className={getNavActionClassName(isScheduleActive)} onClick={handleOpenSchedule} aria-current={isScheduleActive ? "page" : undefined} aria-label={WORKSPACE_SCHEDULE_LABEL} title={WORKSPACE_SCHEDULE_LABEL}>
+          <button type="button" className={getNavActionClassName(isScheduleActive)} onClick={handleOpenSchedule} aria-current={isScheduleActive ? "page" : undefined} aria-label={copy.scheduleLabel} title={copy.scheduleLabel}>
             <CalendarIcon className={NAV_ICON_CLASS_NAME} />
           </button>
-          <button type="button" className={getNavActionClassName(false)} onClick={handleOpenExplore} aria-label={WORKSPACE_EXPLORE_LABEL} title={WORKSPACE_EXPLORE_LABEL}>
+          <button type="button" className={getNavActionClassName(false)} onClick={handleOpenExplore} aria-label={copy.exploreLabel} title={copy.exploreLabel}>
             <GalleryIcon className={NAV_ICON_CLASS_NAME} />
           </button>
-          <button type="button" className={getNavActionClassName(false)} onClick={handleOpenSettings} aria-label={WORKSPACE_SETTINGS_LABEL} title={WORKSPACE_SETTINGS_LABEL}>
+          <button type="button" className={getNavActionClassName(false)} onClick={handleOpenSettings} aria-label={copy.settingsLabel} title={copy.settingsLabel}>
             <SettingIcon className={NAV_ICON_CLASS_NAME} />
           </button>
         </nav>
@@ -344,28 +459,28 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
         <>
           <div className={SECTION_STRIP_CLASS_NAME}>
             {shouldShowFavoriteSection ? (
-              <section className={FAVORITES_SECTION_CLASS_NAME} aria-label={FAVORITE_SECTION_LABEL}>
-                <h2 className={SECTION_HEADING_CLASS_NAME}>{FAVORITE_SECTION_LABEL}</h2>
-                <p className={EMPTY_MESSAGE_CLASS_NAME}>{FAVORITE_EMPTY_MESSAGE}</p>
+              <section className={FAVORITES_SECTION_CLASS_NAME} aria-label={copy.favoriteSectionLabel}>
+                <h2 className={SECTION_HEADING_CLASS_NAME}>{copy.favoriteSectionLabel}</h2>
+                <p className={EMPTY_MESSAGE_CLASS_NAME}>{copy.favoriteEmptyMessage}</p>
               </section>
             ) : null}
             <section className={SECTION_CLASS_NAME} aria-label={sectionLabel}>
               <div className={SECTION_ROW_CLASS_NAME}>
                 {folderTagMode !== "tag" && selectedFolder ? (
-                  <button type="button" className={SECTION_HEADING_BUTTON_CLASS_NAME} onClick={handleOpenProjectList} aria-label="プロジェクト一覧を開く">
+                  <button type="button" className={SECTION_HEADING_BUTTON_CLASS_NAME} onClick={handleOpenProjectList} aria-label={copy.openProjectListAriaLabel}>
                     <span className="block truncate">{sectionLabel}</span>
                     <IconChevronDown className={SECTION_CHEVRON_CLASS_NAME} />
                   </button>
                 ) : (
                   <h2 className={SECTION_HEADING_CLASS_NAME}>{sectionLabel}</h2>
                 )}
-                <TagFilterPopover allTags={existingTagNames} ariaLabel={FILTER_ARIA_LABEL} className={ADD_BUTTON_CLASS_NAME} />
+                <TagFilterPopover allTags={existingTagNames} ariaLabel={copy.filterAriaLabel} className={ADD_BUTTON_CLASS_NAME} />
                 {folderTagMode === "tag" ? (
-                  <button type="button" onClick={handleCreateRootTag} aria-label={ADD_TAG_ARIA_LABEL} title={ADD_TAG_ARIA_LABEL} className={ADD_BUTTON_CLASS_NAME}>
+                  <button type="button" onClick={handleCreateRootTag} aria-label={copy.addTagAriaLabel} title={copy.addTagAriaLabel} className={ADD_BUTTON_CLASS_NAME}>
                     <IconPlus className="h-4 w-4" />
                   </button>
                 ) : (
-                  <button type="button" onClick={selectedFolder ? handleOpenProjectAddMenu : handleCreateRootFolder} aria-label={selectedFolder ? ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} title={selectedFolder ? ADD_SELECTED_FOLDER_CONTENT_ARIA_LABEL : ADD_PROJECT_ARIA_LABEL} className={ADD_BUTTON_CLASS_NAME}>
+                  <button type="button" onClick={selectedFolder ? handleOpenProjectAddMenu : handleCreateRootFolder} aria-label={selectedFolder ? copy.addSelectedFolderContentAriaLabel : copy.addProjectAriaLabel} title={selectedFolder ? copy.addSelectedFolderContentAriaLabel : copy.addProjectAriaLabel} className={ADD_BUTTON_CLASS_NAME}>
                     <IconPlus className="h-4 w-4" />
                   </button>
                 )}
@@ -379,7 +494,7 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
         </>
       ) : null}
       {shouldShowCalendarContent ? <div className="min-h-0 flex-1">{calendarContent}</div> : null}
-      {shouldShowDirectoryContent && projectAddMenu ? <ProjectAddMenu x={projectAddMenu.x} y={projectAddMenu.y} menuRef={projectAddMenuRef} onCreateNote={handleCreateSelectedFolderNote} onCreateCardSet={handleCreateSelectedFolderCardSet} onCreateFolder={handleCreateSelectedFolderChild} onImportPdf={handleImportSelectedFolderPdf} /> : null}
+      {shouldShowDirectoryContent && projectAddMenu ? <ProjectAddMenu x={projectAddMenu.x} y={projectAddMenu.y} width={projectAddMenu.width} itemDefinitions={projectAddMenuItemDefinitions} ariaLabel={copy.projectAddMenuAriaLabel} menuRef={projectAddMenuRef} onCreateNote={handleCreateSelectedFolderNote} onCreateCardSet={handleCreateSelectedFolderCardSet} onCreateFolder={handleCreateSelectedFolderChild} onImportPdf={handleImportSelectedFolderPdf} /> : null}
     </div>
   );
 };
