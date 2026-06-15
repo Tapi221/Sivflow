@@ -8,7 +8,7 @@ import type { TFileElement } from "platejs";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement, useReadOnly, withHOC } from "platejs/react";
 import { cn } from "@/lib/utils";
-import { Caption, CaptionTextarea } from "./caption";
+import { Caption, CaptionTextarea } from "@/chip/ui/plate/caption";
 
 const FileElement = withHOC(ResizableProvider, (props: PlateElementProps<TFileElement>) => {
   const readOnly = useReadOnly();
