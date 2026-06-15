@@ -181,8 +181,8 @@ const TagTreeRow = ({ item, selectedTagNames, dragState, onToggleTag, onSelectTa
         )}
         style={{ paddingLeft: rowPaddingLeft }}
       >
-        {dropPosition === "before" ? <LayeredTreeDropIndicator position="before" left={dropIndicatorLeft} /> : null}
-        {dropPosition === "after" ? <LayeredTreeDropIndicator position="after" left={dropIndicatorLeft} /> : null}
+        {dropPosition === "before" && <LayeredTreeDropIndicator position="before" left={dropIndicatorLeft} />}
+        {dropPosition === "after" && <LayeredTreeDropIndicator position="after" left={dropIndicatorLeft} />}
         {item.hasChildren ? (
           <button
             type="button"
@@ -255,7 +255,7 @@ const TagTreeSidebar = () => {
           {visibleTagItems.length > 0 ? visibleTagItems.map((item) => (
             <TagTreeRow key={item.id} item={item} selectedTagNames={selectedTagNames} dragState={dragState} onToggleTag={handleToggleTag} onSelectTag={handleSelectTag} onTagDragStart={handleItemDragStart} onTagDragOver={handleItemDragOver} onTagDragLeave={handleItemDragLeave} onTagDrop={handleItemDrop} onTagDragEnd={handleItemDragEnd} />
           )) : <p className="px-1 py-2 text-xs font-medium text-[#9aa1ad]">{EMPTY_TAG_MESSAGE}</p>}
-          {isAppendingToRoot ? <LayeredTreeDropIndicator position="append" left={LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX} className="mx-2" /> : null}
+          {isAppendingToRoot && <LayeredTreeDropIndicator position="append" left={LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX} className="mx-2" />}
           <div aria-hidden="true" className="min-h-8 flex-1" />
         </div>
       </div>
