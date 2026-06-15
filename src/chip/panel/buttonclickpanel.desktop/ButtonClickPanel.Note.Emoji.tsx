@@ -124,57 +124,43 @@ const EmojiPickerSearchBar = ({ clearSearch, i18n, searchValue, setSearch }: Emo
     </div>
   );
 };
-const EmojiPicker = ({ clearSearch, emojiLibrary, i18n, isOpen, isSearching = false, refs, searchResult, searchValue, setSearch, settings = PLANE_EMOJI_SETTINGS, visibleCategories, onMouseOver, onSelectEmoji }: Omit<UseEmojiPickerType, "icons">) => {
-  React.useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-    refs.current.contentRoot.current?.scrollTo({ top: 0 });
-  }, [isOpen, refs]);
+const EmojiButton = ({ emoji, index, onMouseOver, onSelect }: EmojiButtonProps) => {
+  const nativeEmoji = getEmojiNative(emoji);
   return (
-    <div
-      data-slot="emoji-picker"
-      className="isolate flex w-80 flex-col overflow-hidden rounded-md border-[0.5px] border-border bg-popover text-popover-foreground shadow-md"
+    <button
+      data-slot="emoji-picker-list-emoji"
+      className="flex size-8 cursor-pointer items-center justify-center rounded-md border-none bg-transparent text-base leading-none hover:bg-accent"
+      onClick={() => onSelect(emoji)}
+      onMouseEnter={() => onMouseOver(emoji)}
+      onMouseLeave={() => onMouseOver()}
+      aria-label={nativeEmoji}
+      data-index={index}
+      tabIndex={-1}
+      type="button"
     >
-      <EmojiPickerSearchBar
-        clearSearch={clearSearch}
-        i18n={i18n}
-        searchValue={searchValue}
-        setSearch={setSearch}
-      />
-      <EmojiPickerContent
-        onMouseOver={onMouseOver}
-        onSelectEmoji={onSelectEmoji}
-        emojiLibrary={emojiLibrary}
-        i18n={i18n}
-        isSearching={isSearching}
-        refs={refs}
-        searchResult={searchResult}
-        settings={settings}
-        visibleCategories={visibleCategories}
-      />
-    </div>
+      <span
+        className="relative"
+        style={{ fontFamily: EMOJI_FONT_FAMILY }}
+        data-emoji-set="native"
+      >
+        {nativeEmoji}
+      </span>
+    </button>
   );
 };
-const ButtonClickPanelNoteEmoji = ({ options, ...props }: ButtonClickPanelNoteEmojiProps) => {
-  const { emojiPickerState, isOpen, setIsOpen } = useEmojiDropdownMenuState(options);
+const RowOfButtons = ({ emojiLibrary, row, onMouseOver, onSelectEmoji }: RowOfButtonsProps) => {
   return (
-    <EmojiPopover
-      control={
-        <ToolbarButton pressed={isOpen} tooltip="Emoji" isDropdown {...props}>
-          <SmileIcon />
-        </ToolbarButton>
-      }
-      isOpen={isOpen}
-      setIsOpen={setIsOpen}
-    >
-      <EmojiPicker
-        {...emojiPickerState}
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-        settings={options?.settings ?? PLANE_EMOJI_SETTINGS}
-      />
-    </EmojiPopover>
+    <div key={row.id} className="flex scroll-my-1.5 px-1.5" data-index={row.id}>
+      {row.elements.map((emojiId, index) => (
+        <EmojiButton
+          key={emojiId}
+          onMouseOver={onMouseOver}
+          onSelect={onSelectEmoji}
+          emoji={emojiLibrary.getEmoji(emojiId)}
+          index={index}
+        />
+      ))}
+    </div>
   );
 };
 const EmojiPickerContent = ({ emojiLibrary, i18n, isSearching = false, refs, searchResult, settings = PLANE_EMOJI_SETTINGS, visibleCategories, onMouseOver, onSelectEmoji }: EmojiPickerContentProps) => {
@@ -284,43 +270,57 @@ const EmojiPickerContent = ({ emojiLibrary, i18n, isSearching = false, refs, sea
     </div>
   );
 };
-const EmojiButton = ({ emoji, index, onMouseOver, onSelect }: EmojiButtonProps) => {
-  const nativeEmoji = getEmojiNative(emoji);
+const EmojiPicker = ({ clearSearch, emojiLibrary, i18n, isOpen, isSearching = false, refs, searchResult, searchValue, setSearch, settings = PLANE_EMOJI_SETTINGS, visibleCategories, onMouseOver, onSelectEmoji }: Omit<UseEmojiPickerType, "icons">) => {
+  React.useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+    refs.current.contentRoot.current?.scrollTo({ top: 0 });
+  }, [isOpen, refs]);
   return (
-    <button
-      data-slot="emoji-picker-list-emoji"
-      className="flex size-8 cursor-pointer items-center justify-center rounded-md border-none bg-transparent text-base leading-none hover:bg-accent"
-      onClick={() => onSelect(emoji)}
-      onMouseEnter={() => onMouseOver(emoji)}
-      onMouseLeave={() => onMouseOver()}
-      aria-label={nativeEmoji}
-      data-index={index}
-      tabIndex={-1}
-      type="button"
+    <div
+      data-slot="emoji-picker"
+      className="isolate flex w-80 flex-col overflow-hidden rounded-md border-[0.5px] border-border bg-popover text-popover-foreground shadow-md"
     >
-      <span
-        className="relative"
-        style={{ fontFamily: EMOJI_FONT_FAMILY }}
-        data-emoji-set="native"
-      >
-        {nativeEmoji}
-      </span>
-    </button>
+      <EmojiPickerSearchBar
+        clearSearch={clearSearch}
+        i18n={i18n}
+        searchValue={searchValue}
+        setSearch={setSearch}
+      />
+      <EmojiPickerContent
+        onMouseOver={onMouseOver}
+        onSelectEmoji={onSelectEmoji}
+        emojiLibrary={emojiLibrary}
+        i18n={i18n}
+        isSearching={isSearching}
+        refs={refs}
+        searchResult={searchResult}
+        settings={settings}
+        visibleCategories={visibleCategories}
+      />
+    </div>
   );
 };
-const RowOfButtons = ({ emojiLibrary, row, onMouseOver, onSelectEmoji }: RowOfButtonsProps) => {
+const ButtonClickPanelNoteEmoji = ({ options, ...props }: ButtonClickPanelNoteEmojiProps) => {
+  const { emojiPickerState, isOpen, setIsOpen } = useEmojiDropdownMenuState(options);
   return (
-    <div key={row.id} className="flex scroll-my-1.5 px-1.5" data-index={row.id}>
-      {row.elements.map((emojiId, index) => (
-        <EmojiButton
-          key={emojiId}
-          onMouseOver={onMouseOver}
-          onSelect={onSelectEmoji}
-          emoji={emojiLibrary.getEmoji(emojiId)}
-          index={index}
-        />
-      ))}
-    </div>
+    <EmojiPopover
+      control={
+        <ToolbarButton pressed={isOpen} tooltip="Emoji" isDropdown {...props}>
+          <SmileIcon />
+        </ToolbarButton>
+      }
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+    >
+      <EmojiPicker
+        {...emojiPickerState}
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        settings={options?.settings ?? PLANE_EMOJI_SETTINGS}
+      />
+    </EmojiPopover>
   );
 };
 
