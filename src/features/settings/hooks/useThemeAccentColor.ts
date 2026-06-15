@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { INTERACTION_COLOR } from "@shared/design-tokens/color/Color.Interaction";
 import { normalizeThemeAccentColor, useUserSettings } from "@/features/settings/hooks/useUserSettings";
 
 type RgbColor = {
@@ -37,6 +38,7 @@ const mixRgbColors = (base: RgbColor, target: RgbColor, targetRatio: number): Rg
   blue: base.blue * (1 - targetRatio) + target.blue * targetRatio,
 });
 const rgbToCssValue = ({ red, green, blue }: RgbColor): string => `${clampColorChannel(red)} ${clampColorChannel(green)} ${clampColorChannel(blue)}`;
+const toAlphaColor = (rgb: RgbColor, alpha: number): string => `rgb(${rgbToCssValue(rgb)} / ${alpha})`;
 const rgbToHslCssValue = ({ red, green, blue }: RgbColor): string => {
   const normalizedRed = red / RGB_MAX_VALUE;
   const normalizedGreen = green / RGB_MAX_VALUE;
@@ -83,6 +85,10 @@ const createThemeAccentRuntimeVariables = (color: string): ThemeAccentRuntimeVar
     "--theme-accent-primary-600-rgb": rgbToCssValue(hexToRgbColor(primary600)),
     "--theme-accent-primary-700": primary700,
     "--theme-accent-primary-700-rgb": rgbToCssValue(hexToRgbColor(primary700)),
+    "--interactive-accent-hover-bg": toAlphaColor(accentRgb, INTERACTION_COLOR.accentHoverAlpha),
+    "--interactive-accent-pressed-bg": toAlphaColor(accentRgb, INTERACTION_COLOR.accentPressedAlpha),
+    "--interactive-accent-selected-bg": toAlphaColor(accentRgb, INTERACTION_COLOR.accentSelectedAlpha),
+    "--interactive-accent-outline": toAlphaColor(accentRgb, INTERACTION_COLOR.accentOutlineAlpha),
     "--primary-color": color,
   };
 };
