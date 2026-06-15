@@ -1,10 +1,8 @@
 import type { TagColorKey } from "@shared/design-tokens/color/Color.Tag";
 import type { SVGProps } from "react";
-import { getTagColorStyle } from "./tagColor";
 import { X } from "@/chip/icons/icons";
+import { getTagColorStyle } from "@/chip/budge/tag/tagColor";
 import { cn } from "@/lib/utils";
-
-
 
 type TagBadgeProps = {
   label: string;
@@ -17,8 +15,6 @@ type TagBadgeProps = {
   removeAriaLabel?: string;
 };
 
-
-
 const LONG_DOT_SEQUENCE_PATTERN = /[.。．]{4,}/g;
 const TAG_BADGE_ROOT_CLASS_NAME = "inline-flex min-w-0 max-w-full items-center gap-1 rounded-full border px-2 py-0.5 align-middle text-xs font-semibold leading-4 tracking-normal shadow-none transition-[opacity,transform] duration-150";
 const TAG_BADGE_INTERACTIVE_CLASS_NAME = "cursor-pointer appearance-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500/30";
@@ -27,13 +23,9 @@ const TAG_BADGE_TEXT_CLASS_NAME = "min-w-0 truncate opacity-70";
 const TAG_BADGE_REMOVE_CLASS_NAME = "grid h-4 w-4 place-items-center rounded-full text-current opacity-60 transition-[background-color,opacity] duration-150 hover:bg-current/10 hover:opacity-100";
 const TAG_BADGE_REMOVE_ICON_CLASS_NAME = "h-3 w-3";
 
-
-
 const normalizeTagText = (value: string): string => {
   return value.replace(LONG_DOT_SEQUENCE_PATTERN, "...");
 };
-
-
 
 const TagHashIcon = ({ className }: SVGProps<SVGSVGElement>) => (
   <svg
@@ -65,11 +57,12 @@ const TagBadge = ({
   const rawTextLabel = label.startsWith("#") ? label.slice(1) : label;
   const textLabel = normalizeTagText(rawTextLabel);
   const displayLabel = `#${textLabel}`;
+  const hasRemoveAction = onRemove !== undefined;
   const content = (
     <>
       <TagHashIcon className="h-3 w-3 shrink-0 opacity-70" />
       <span className={cn(TAG_BADGE_TEXT_CLASS_NAME, textClassName)}>{textLabel}</span>
-      {onRemove ? (
+      {hasRemoveAction && (
         <button
           type="button"
           aria-label={removeAriaLabel ?? `${displayLabel}を削除`}
@@ -81,12 +74,12 @@ const TagBadge = ({
         >
           <X className={TAG_BADGE_REMOVE_ICON_CLASS_NAME} />
         </button>
-      ) : null}
+      )}
     </>
   );
   const rootClassName = cn(
     TAG_BADGE_ROOT_CLASS_NAME,
-    onClick && TAG_BADGE_INTERACTIVE_CLASS_NAME,
+    onClick !== undefined && TAG_BADGE_INTERACTIVE_CLASS_NAME,
     selected && TAG_BADGE_SELECTED_CLASS_NAME,
     className,
   );
@@ -114,9 +107,5 @@ const TagBadge = ({
   );
 };
 
-
-
 export { TagBadge };
-
-
 export type { TagBadgeProps };
