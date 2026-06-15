@@ -11,7 +11,6 @@ type EventChipDesign = {
     titleFontSizePx: number;
     timeFontSizePx: number;
     gapPx: number;
-    allDayOffsetPx: number;
   };
   weekday: {
     radiusPx: number;
@@ -64,7 +63,6 @@ const eventChipDesign: EventChipDesign = {
     titleFontSizePx: 12,
     timeFontSizePx: 12,
     gapPx: 4,
-    allDayOffsetPx: 0,
   },
   weekday: {
     radiusPx: 6,
