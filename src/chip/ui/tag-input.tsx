@@ -1,42 +1,34 @@
 import * as React from "react";
 import type { DropResult } from "@hello-pangea/dnd";
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
+import type { TagColorKey } from "@shared/design-tokens/color/Color.Tag";
 import { TagBadge } from "@/chip/budge/tag/Badge.Tag";
-import { TagBadge } from "@/chip/budge/tag/tag/Badge.Tag";
-import { TagChip } from "@/chip/budge/tag/tag/TagChip";
 import { TagChip } from "@/chip/budge/tag/TagChip";
-import type { TagColorKey } from "@/chip/budge/tag/tagColor";
-import type { TagColorKey } from "@/chip/budge/tag/tagColor";
-import { getTagColorKey, getTagColorSwatchStyle } from "@/chip/budge/tag/tagColor";
-import { getTagColorKey, getTagColorSwatchStyle } from "@/chip/budge/tag/tagColor";
+import { getTagColorKey } from "@/chip/budge/tag/tag.parser";
+import { getTagColorSwatchStyle } from "@/chip/budge/tag/tag.style";
+import { Check, Palette, Plus, Tag as TagIcon } from "@/chip/icons";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
-import { Check, Palette, Plus, Tag as TagIcon } from "@/chip/icons";
-import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "./command";
-import { PlaceholderText } from "./placeholder-text";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "@/chip/ui/command";
+import { PlaceholderText } from "@/chip/ui/placeholder-text";
+import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
 
-interface TagInputProps {
+type TagInputProps = {
   tags: string[];
   onChange: (tags: string[]) => void;
   placeholder?: string;
   className?: string;
   quietHover?: boolean;
-}
+};
 
 const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", className, quietHover = false }: TagInputProps) => {
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
-  const [selectedColor, setSelectedColor] = React.useState<TagColorKey | null>(
-    null,
-  );
-
+  const [selectedColor, setSelectedColor] = React.useState<TagColorKey | null>(null);
   const { tags: allTags, availableColors, addTag } = useTags();
-
   const handleUnselect = (tagToRemove: string) => {
     onChange(tags.filter((tag) => tag !== tagToRemove));
   };
-
   const handleSelect = (tag: string) => {
     if (tags.includes(tag)) {
       handleUnselect(tag);
@@ -44,56 +36,39 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
       onChange([...tags, tag]);
     }
   };
-
   const handleCreateTag = async () => {
     const trimmed = inputValue.trim();
     if (trimmed && !tags.includes(trimmed)) {
-      await addTag(trimmed, selectedColor || availableColors[0]);
+      await addTag(trimmed, selectedColor ?? availableColors[0]);
       onChange([...tags, trimmed]);
       setInputValue("");
       setSelectedColor(null);
     }
   };
-
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
-
     const items = Array.from(tags);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
-
     onChange(items);
   };
-
   const uniqueTags = React.useMemo(() => {
     return allTags ? allTags.map((tag) => tag.name).sort() : [];
   }, [allTags]);
-
   const colorKeyByName = React.useMemo(() => {
     const map = new Map<string, TagColorKey>();
-
     (allTags ?? []).forEach((tag) => {
       const resolvedColorKey = getTagColorKey(tag.color);
       map.set(tag.name, resolvedColorKey);
       map.set(tag.name.toLowerCase(), resolvedColorKey);
     });
-
     return map;
   }, [allTags]);
-
   const resolveTagColorKey = React.useCallback(
-    (tagName: string): TagColorKey =>
-      colorKeyByName.get(tagName) ??
-      colorKeyByName.get(tagName.toLowerCase()) ??
-      availableColors[0] ??
-      getTagColorKey(),
+    (tagName: string): TagColorKey => colorKeyByName.get(tagName) ?? colorKeyByName.get(tagName.toLowerCase()) ?? availableColors[0] ?? getTagColorKey(),
     [availableColors, colorKeyByName],
   );
-
-  const filteredTags = uniqueTags.filter((tag) =>
-    tag.toLowerCase().includes(inputValue.toLowerCase()),
-  );
-
+  const filteredTags = uniqueTags.filter((tag) => tag.toLowerCase().includes(inputValue.toLowerCase()));
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <div
@@ -127,8 +102,7 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
                             colorKey={resolveTagColorKey(tag)}
                             badgeClassName={cn(
                               "select-none",
-                              quietHover &&
-                              "transition-none shadow-none [&_button]:hover:bg-transparent [&_button]:hover:text-slate-500",
+                              quietHover && "transition-none shadow-none [&_button]:hover:bg-transparent [&_button]:hover:text-slate-500",
                               snapshot.isDragging && "scale-105 shadow-md z-50",
                             )}
                             onRemove={() => handleUnselect(tag)}
@@ -168,13 +142,11 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
       >
         <Command
           className="border-none bg-transparent shadow-none"
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && inputValue.trim()) {
-              const exists = uniqueTags.some(
-                (tag) => tag.toLowerCase() === inputValue.trim().toLowerCase(),
-              );
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && inputValue.trim()) {
+              const exists = uniqueTags.some((tag) => tag.toLowerCase() === inputValue.trim().toLowerCase());
               if (!exists) {
-                e.preventDefault();
+                event.preventDefault();
                 handleCreateTag();
               }
             }
@@ -189,10 +161,7 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
             />
           </div>
           <CommandList className="max-h-80">
-            {inputValue &&
-              !uniqueTags.some(
-                (tag) => tag.toLowerCase() === inputValue.toLowerCase(),
-              ) && (
+            {inputValue && !uniqueTags.some((tag) => tag.toLowerCase() === inputValue.toLowerCase()) && (
               <div className="p-3 space-y-3">
                 <div
                   className="ds-tag-input__create flex items-center gap-2 p-2 cursor-pointer text-xs font-bold"
@@ -212,15 +181,13 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
                         aria-label={`${colorKey}を選択`}
                         className={cn(
                           "w-7 h-7 rounded-full border-2 ring-1 ring-slate-300/70 shadow-sm transition-all",
-                          selectedColor === colorKey ||
-                              (!selectedColor &&
-                                colorKey === availableColors[0])
+                          selectedColor === colorKey || (!selectedColor && colorKey === availableColors[0])
                             ? "ring-2 ring-offset-2 ring-primary-600 scale-110 shadow-md"
                             : "hover:scale-105 hover:ring-slate-400",
                         )}
                         style={getTagColorSwatchStyle(colorKey)}
-                        onClick={(e) => {
-                          e.stopPropagation();
+                        onClick={(event) => {
+                          event.stopPropagation();
                           setSelectedColor(colorKey);
                         }}
                       />
@@ -229,7 +196,6 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
                 </div>
               </div>
             )}
-
             <CommandGroup
               heading={
                 <span className="ds-command__group-title px-2 text-xs font-bold uppercase tracking-widest">
@@ -279,3 +245,4 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
 };
 
 export { TagInput };
+export type { TagInputProps };
