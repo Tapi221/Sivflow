@@ -6,11 +6,13 @@ import { TagBadge } from "@/chip/budge/tag/Badge.Tag";
 import { TagChip } from "@/chip/budge/tag/TagChip";
 import { getTagColorKey, getTagColorSwatchStyle } from "@/chip/budge/tag/tagColor";
 import { Check, Palette, Plus, Tag as TagIcon } from "@/chip/icons";
-import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "@/chip/ui/command";
-import { PlaceholderText } from "@/chip/ui/placeholder-text";
-import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
+import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "./command";
+import { PlaceholderText } from "./placeholder-text";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
+
+
 
 type TagInputProps = {
   tags: string[];
@@ -19,6 +21,8 @@ type TagInputProps = {
   className?: string;
   quietHover?: boolean;
 };
+
+
 
 const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", className, quietHover = false }: TagInputProps) => {
   const [open, setOpen] = React.useState(false);
@@ -138,5 +142,9 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
   );
 };
 
+
+
 export { TagInput };
+
+
 export type { TagInputProps };

@@ -1,8 +1,10 @@
 import React from "react";
 import { MarkdownEditorDialog } from "@/chip/panel/dialog.desktop/Dialog.MarkdownEditor";
-import { MarkdownBlockDisplay } from "@/components/card/blocks/markdown/MarkdownBlockDisplay";
+import { MarkdownBlockDisplay } from "./MarkdownBlockDisplay";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { clampMarkdownTabSize, normalizeMarkdownEditorValue, normalizeMarkdownInsertionText, resolveMarkdownTabKeyText } from "@/utils/markdownWhitespace";
+
+
 
 type MarkdownReplaceBlock =
   | { type: "markdown"; markdown: string; }
@@ -35,7 +37,11 @@ type BlockRange = Readonly<{
   type: MarkdownReplaceBlock["type"];
 }>;
 
+
+
 const MAX_LENGTH = 50000;
+
+
 
 const validateBlocksLength = (blocks: MarkdownReplaceBlock[]) => {
   for (const block of blocks) {
@@ -282,6 +288,8 @@ const parseAndSplitFencesWithRanges = (
   return { blocks, ranges };
 };
 
+
+
 const MarkdownBlockContent = (props: MarkdownBlockContentProps) => {
   const { settings } = useUserSettings();
   const [error, setError] = React.useState<string | null>(null);
@@ -403,5 +411,9 @@ const MarkdownBlockContent = (props: MarkdownBlockContentProps) => {
   );
 };
 
+
+
 export { MarkdownBlockContent };
+
+
 export type { MarkdownBlockContentProps, MarkdownReplaceBlock, MarkdownReplaceFocus };

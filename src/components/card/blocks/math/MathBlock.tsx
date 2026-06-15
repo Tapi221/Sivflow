@@ -2,9 +2,11 @@ import React, { useCallback, useState } from "react";
 import { Sigma } from "@/chip/icons";
 import { MathEditorDialog } from "@/chip/panel/dialog.desktop/Dialog.MathEditor";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
-import { MathBlockPreviewPane } from "@/components/card/blocks/math/MathBlockPreviewPane";
+import { MathBlockPreviewPane } from "./MathBlockPreviewPane";
 import { cn } from "@/lib/utils";
 import type { MathBlockData } from "@/types";
+
+
 
 interface MathBlockProps {
   data: MathBlockData;
@@ -25,7 +27,11 @@ interface MathBlockProps {
   zoom?: number;
 }
 
+
+
 const MAX_LATEX_LENGTH = 10000;
+
+
 
 const areMathBlockPropsEqual = (prev: MathBlockProps, next: MathBlockProps) =>
   prev.data === next.data &&
@@ -36,6 +42,8 @@ const areMathBlockPropsEqual = (prev: MathBlockProps, next: MathBlockProps) =>
   prev.canMoveUp === next.canMoveUp &&
   prev.canMoveDown === next.canMoveDown &&
   prev.zoom === next.zoom;
+
+
 
 const MathBlockInner: React.FC<MathBlockProps> = ({
   data,
@@ -119,6 +127,8 @@ const MathBlockInner: React.FC<MathBlockProps> = ({
     </BlockWrapper>
   );
 };
+
+
 
 const MathBlock = React.memo(MathBlockInner, areMathBlockPropsEqual);
 MathBlock.displayName = "MathBlock";

@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/chip/panel/dialog.desktop/dialog/alert-dialog";
 import { Input } from "@/chip/ui/input";
 
+
+
 type MediaConfig = {
   accept: string[];
   icon: ReactNode;
@@ -23,6 +25,8 @@ interface MediaUrlDialogContentProps {
   nodeType: string;
   setOpen: (value: boolean) => void;
 }
+
+
 
 const MediaUrlDialogContent = ({ currentConfig, nodeType, setOpen }: MediaUrlDialogContentProps) => {
   const editor = useEditorRef();
@@ -77,5 +81,9 @@ const MediaUrlDialog = ({ open, onOpenChange, currentConfig, nodeType }: MediaUr
   );
 };
 
+
+
 export { MediaUrlDialog };
+
+
 export type { MediaConfig, MediaUrlDialogProps };

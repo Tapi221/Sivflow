@@ -4,6 +4,8 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
 import { Progress } from "./progress";
 
+
+
 interface UploadProgressProps {
   fileName: string;
   progress: number;
@@ -13,6 +15,8 @@ interface UploadProgressProps {
   className?: string;
   showIcon?: boolean;
 }
+
+
 
 const UploadProgress = ({
   fileName,
@@ -111,5 +115,9 @@ const UploadProgress = ({
   );
 };
 
+
+
 export { UploadProgress };
+
+
 export type { UploadProgressProps };

@@ -3,10 +3,14 @@ import type { MouseEvent as ReactMouseEvent } from "react";
 import { AlertTriangle, ChevronDown } from "@/chip/icons/icons";
 import type { Notification } from "@/types/notification";
 
+
+
 interface WarningDialogProps {
   notification: Notification;
   onDismiss: () => void;
 }
+
+
 
 const WarningDialog = ({ notification, onDismiss }: WarningDialogProps) => {
   const [showDetails, setShowDetails] = useState(false);
@@ -77,5 +81,7 @@ const WarningDialog = ({ notification, onDismiss }: WarningDialogProps) => {
     </div>
   );
 };
+
+
 
 export { WarningDialog };

@@ -1,20 +1,36 @@
 "use client";
 
 import * as React from "react";
+
 import { DndPlugin, useDraggable, useDropLine } from "@platejs/dnd";
+
 import { expandListItemsWithChildren } from "@platejs/list";
+
 import { BlockSelectionPlugin } from "@platejs/selection/react";
+
 import { GripVertical } from "lucide-react";
+
 import type { TElement } from "platejs";
+
 import { getPluginByType, isType, KEYS } from "platejs";
+
 import type { PlateEditor, PlateElementProps, RenderNodeWrapper } from "platejs/react";
+
 import { MemoizedChildren, useEditorRef, useElement, usePluginOption } from "platejs/react";
+
 import { useSelected } from "platejs/react";
+
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/chip/toolchip/Tooltip.Editor";
+
 import { Button } from "@/chip/ui/button/button";
+
 import { cn } from "@/lib/utils";
 
+
+
 const UNDRAGGABLE_KEYS = [KEYS.column, KEYS.tr, KEYS.td];
+
+
 
 const createDragPreviewElements = (
   editor: PlateEditor,
@@ -85,6 +101,7 @@ const createDragPreviewElements = (
   editor.setOption(DndPlugin, "draggingId", ids);
   return elements;
 };
+
 const calculatePreviewTop = (
   editor: PlateEditor,
   {
@@ -121,12 +138,15 @@ const calculatePreviewTop = (
     currentMarginTop;
   return previewElementsTopDistance;
 };
+
 const calcDragButtonTop = (editor: PlateEditor, element: TElement): number => {
   const child = editor.api.toDOMNode(element)!;
   const currentMarginTopString = window.getComputedStyle(child).marginTop;
   const currentMarginTop = Number(currentMarginTopString.replace("px", ""));
   return currentMarginTop;
 };
+
+
 
 const Gutter = ({ children, className, ...props }: React.ComponentProps<"div">) => {
   const editor = useEditorRef();
@@ -155,6 +175,7 @@ const Gutter = ({ children, className, ...props }: React.ComponentProps<"div">) 
     </div>
   );
 };
+
 const BlockDraggable: RenderNodeWrapper = (props) => {
   const { editor, element, path } = props;
   const enabled = React.useMemo(() => {
@@ -189,6 +210,7 @@ const BlockDraggable: RenderNodeWrapper = (props) => {
   if (!enabled) return;
   return (props) => <Draggable {...props} />;
 };
+
 const Draggable = (props: PlateElementProps) => {
   const { children, editor, element, path } = props;
   const blockSelectionApi = editor.getApi(BlockSelectionPlugin).blockSelection;
@@ -293,6 +315,8 @@ const Draggable = (props: PlateElementProps) => {
   );
 };
 
+
+
 const DragHandle = React.memo(({
   isDragging,
   previewRef,
@@ -385,6 +409,7 @@ const DragHandle = React.memo(({
     </Tooltip>
   );
 });
+
 const DropLine = React.memo(({
   className,
   ...props

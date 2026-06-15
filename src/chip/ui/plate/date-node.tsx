@@ -1,9 +1,14 @@
 "use client";
 
 import type { TDateElement } from "platejs";
+
 import type { PlateElementProps } from "platejs/react";
+
 import { PlateElement } from "platejs/react";
+
 import { cn } from "@/lib/utils";
+
+
 
 const DateElement = (props: PlateElementProps<TDateElement>) => {
   const { element } = props;
@@ -16,5 +21,7 @@ const DateElement = (props: PlateElementProps<TDateElement>) => {
     </PlateElement>
   );
 };
+
+
 
 export { DateElement };

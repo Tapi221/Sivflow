@@ -1,13 +1,22 @@
 "use client";
 
 import type { VariantProps } from "class-variance-authority";
+
 import { cva } from "class-variance-authority";
+
 import type { PlateContentProps, PlateViewProps } from "platejs/react";
+
 import { PlateContainer, PlateContent, PlateView } from "platejs/react";
+
 import type * as React from "react";
+
 import { cn } from "@/lib/utils";
 
+
+
 type EditorProps = PlateContentProps & VariantProps<typeof editorVariants>;
+
+
 
 const editorContainerVariants = cva(
   "relative w-full cursor-text select-text overflow-y-auto caret-foreground selection:bg-muted-foreground/20 focus-visible:outline-none [&_.slate-selection-area]:z-50 [&_.slate-selection-area]:border [&_.slate-selection-area]:border-ring/30 [&_.slate-selection-area]:bg-muted-foreground/15",
@@ -33,6 +42,7 @@ const editorContainerVariants = cva(
     },
   },
 );
+
 const editorVariants = cva(
   cn(
     "group/editor",
@@ -65,6 +75,7 @@ const editorVariants = cva(
     },
   },
 );
+
 const plateContentDomBlockedPropNames = [
   "decorate",
   "renderChunk",
@@ -73,6 +84,8 @@ const plateContentDomBlockedPropNames = [
   "renderText",
 ] as const;
 
+
+
 const omitPlateContentDomBlockedProps = (props: PlateContentProps): PlateContentProps => {
   const nextProps = { ...props } as Record<string, unknown>;
   plateContentDomBlockedPropNames.forEach((propName) => {
@@ -80,6 +93,7 @@ const omitPlateContentDomBlockedProps = (props: PlateContentProps): PlateContent
   });
   return nextProps as PlateContentProps;
 };
+
 const omitPlateDomBlockedProps = <TProps extends Record<string, unknown>>(props: TProps): TProps => {
   const nextProps = { ...props };
   plateContentDomBlockedPropNames.forEach((propName) => {
@@ -88,10 +102,13 @@ const omitPlateDomBlockedProps = <TProps extends Record<string, unknown>>(props:
   return nextProps;
 };
 
+
+
 const EditorContainer = ({ className, variant, ...props }: React.ComponentProps<"div"> & VariantProps<typeof editorContainerVariants>) => {
   const containerProps = omitPlateDomBlockedProps(props);
   return <PlateContainer className={cn("ignore-click-outside/toolbar", editorContainerVariants({ variant }), className)} {...containerProps} />;
 };
+
 const Editor = ({ className, disabled, focused, variant, ref, ...props }: EditorProps & { ref?: React.RefObject<HTMLDivElement | null> }) => {
   const contentProps = omitPlateContentDomBlockedProps(props);
   return (
@@ -110,13 +127,20 @@ const Editor = ({ className, disabled, focused, variant, ref, ...props }: Editor
     />
   );
 };
+
 const EditorView = ({ className, variant, ...props }: PlateViewProps & VariantProps<typeof editorVariants>) => {
   const viewProps = omitPlateDomBlockedProps(props);
   return <PlateView {...viewProps} className={cn(editorVariants({ variant }), className)} />;
 };
 
+
+
 Editor.displayName = "Editor";
+
 EditorView.displayName = "EditorView";
 
 export { EditorContainer, Editor, EditorView };
+
+
+
 export type { EditorProps };

@@ -3,6 +3,8 @@ import { IndentDecreaseIcon, IndentIncreaseIcon } from "lucide-react";
 import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
 import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
+
+
 const ButtonNoteIndent = (props: ToolbarButtonProps) => {
   const { props: buttonProps } = useIndentButton();
   return (
@@ -19,5 +21,7 @@ const ButtonNoteOutdent = (props: ToolbarButtonProps) => {
     </ToolbarButton>
   );
 };
+
+
 
 export { ButtonNoteIndent, ButtonNoteOutdent };

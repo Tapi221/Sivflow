@@ -50,6 +50,8 @@ type EventChipDesign = {
   };
 };
 
+
+
 const eventChipDesign: EventChipDesign = {
   backgroundAlpha: 0.16,
   month: {
@@ -102,5 +104,9 @@ const eventChipDesign: EventChipDesign = {
   },
 };
 
+
+
 export { eventChipDesign };
+
+
 export type { EventChipDesign };

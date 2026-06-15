@@ -1,6 +1,8 @@
 import { memo } from "react";
 import { cn } from "@/lib/utils";
 
+
+
 type TimePercentageToggleValue = "time" | "percentage";
 type TimePercentageToggleOption = {
   value: TimePercentageToggleValue;
@@ -10,6 +12,8 @@ type ToggleTimePercentageProps = {
   value: TimePercentageToggleValue;
   className?: string;
 };
+
+
 
 const TIME_PERCENTAGE_TOGGLE_OPTIONS: readonly TimePercentageToggleOption[] = [
   {
@@ -21,6 +25,8 @@ const TIME_PERCENTAGE_TOGGLE_OPTIONS: readonly TimePercentageToggleOption[] = [
     label: "割合",
   },
 ];
+
+
 
 const ToggleTimePercentageComponent = ({ value, className }: ToggleTimePercentageProps) => {
   return (
@@ -51,8 +57,12 @@ const ToggleTimePercentageComponent = ({ value, className }: ToggleTimePercentag
   );
 };
 
+
+
 const ToggleTimePercentage = memo(ToggleTimePercentageComponent);
 ToggleTimePercentage.displayName = "ToggleTimePercentage";
 
 export { ToggleTimePercentage };
+
+
 export type { TimePercentageToggleValue };

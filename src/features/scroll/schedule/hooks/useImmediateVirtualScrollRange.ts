@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useRef } from "react";
 
+
+
 type HookConfig<E extends HTMLElement> = {
   updateRange: (element: E | null) => void;
   onDeferredScroll?: (element: E) => void;
   resetKey?: unknown;
 };
+
+
 
 const useImmediateVirtualScrollRange = <E extends HTMLElement>(config: HookConfig<E>) => {
   const updateRangeRef = useRef(config.updateRange);
@@ -40,5 +44,7 @@ const useImmediateVirtualScrollRange = <E extends HTMLElement>(config: HookConfi
   useEffect(() => cancelDeferredScroll, [cancelDeferredScroll]);
   return { handleScrollElement };
 };
+
+
 
 export { useImmediateVirtualScrollRange };

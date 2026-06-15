@@ -2,11 +2,15 @@ import { ExternalLink, Globe, Link as LinkIcon } from "@/chip/icons/icons";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/chip/panel/dialog.desktop/dialog/dialog";
 import type { ReferenceBlockData } from "@/types";
 
+
+
 interface ReferencePopupProps {
   isOpen: boolean;
   onClose: () => void;
   references: ReferenceBlockData[];
 }
+
+
 
 const resolveReferenceHost = (url: string) => {
   try {
@@ -15,6 +19,8 @@ const resolveReferenceHost = (url: string) => {
     return url;
   }
 };
+
+
 
 const ReferencePopup = ({ isOpen, onClose, references }: ReferencePopupProps) => {
   return (
@@ -58,5 +64,9 @@ const ReferencePopup = ({ isOpen, onClose, references }: ReferencePopupProps) =>
   );
 };
 
+
+
 export { ReferencePopup };
+
+
 export type { ReferencePopupProps };

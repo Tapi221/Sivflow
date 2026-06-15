@@ -4,6 +4,8 @@ import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { getLocalDb } from "@/services/localdb";
 import type { Folder } from "@/types";
 
+
+
 const isDatabaseClosedError = (error: unknown) => {
   if (!error || typeof error !== "object") {
     return false;
@@ -51,5 +53,7 @@ const useFoldersRead = () => {
     error: null as string | null,
   };
 };
+
+
 
 export { useFoldersRead, normalizeVisibleFolders };

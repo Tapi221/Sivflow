@@ -1,30 +1,56 @@
 "use client";
 
 import { ArrowUpToLineIcon, BaselineIcon, BoldIcon, Code2Icon, HighlighterIcon, ItalicIcon, PaintBucketIcon, StrikethroughIcon, UnderlineIcon, WandSparklesIcon } from "lucide-react";
+
 import { KEYS } from "platejs";
+
 import { useEditorReadOnly } from "platejs/react";
+
 import { ButtonNoteFontSize } from "@/chip/button/Button.Note.FontSize";
+
 import { ButtonNoteIndent, ButtonNoteOutdent } from "@/chip/button/Button.Note.Indent";
+
 import { ButtonNoteMedia } from "@/chip/button/Button.Note.Media";
+
 import { ButtonNoteToggle } from "@/chip/button/Button.Note.Toggle";
+
 import { ButtonClickPanelNoteAi } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Ai";
+
 import { ButtonClickPanelNoteAlign } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Align";
+
 import { ButtonClickPanelNoteEmoji } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Emoji";
+
 import { ButtonClickPanelNoteExport } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Export";
+
 import { ButtonClickPanelNoteFontColor } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.FontColor";
+
 import { ButtonClickPanelNoteImport } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Import";
+
 import { ButtonClickPanelNoteInsert } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Insert";
+
 import { ButtonClickPanelNoteLineHeight } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.LineHeight";
+
 import { ButtonClickPanelNoteBulletedList, ButtonClickPanelNoteNumberedList, ButtonClickPanelNoteTodoList } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.List";
+
 import { ButtonClickPanelNoteMode } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Mode";
+
 import { ButtonClickPanelNoteMore } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.More";
+
 import { ButtonClickPanelNoteTable } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Table";
+
 import { ButtonClickPanelNoteTurnInto } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.TurnInto";
+
 import { CommentToolbarButton } from "@/chip/ui/plate/comment-toolbar-button";
+
 import { RedoToolbarButton, UndoToolbarButton } from "@/chip/ui/plate/history-toolbar-button";
+
 import { LinkToolbarButton } from "@/chip/ui/plate/link-toolbar-button";
+
 import { MarkToolbarButton } from "@/chip/ui/plate/mark-toolbar-button";
+
 import { ToolbarGroup } from "@/chip/ui/plate/toolbar";
+
+
 
 const ToolbarNote = () => {
   const readOnly = useEditorReadOnly();
@@ -116,5 +142,7 @@ const ToolbarNote = () => {
     </div>
   );
 };
+
+
 
 export { ToolbarNote };

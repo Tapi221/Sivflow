@@ -5,6 +5,8 @@ type PaletteNoteFontColorToken = {
 };
 type PaletteNoteFontColorEntry = readonly [name: string, value: string, isBrightColor: boolean];
 
+
+
 const PALETTE_NOTE_FONT_CUSTOM_COLOR_ENTRIES: PaletteNoteFontColorEntry[] = [
   ["dark orange 3", "#783f04", false],
   ["dark grey 3", "#666", false],
@@ -97,5 +99,9 @@ const PALETTE_NOTE_FONT_COLOR_ENTRIES: PaletteNoteFontColorEntry[] = [
 const PALETTE_NOTE_FONT_CUSTOM_COLORS: PaletteNoteFontColorToken[] = PALETTE_NOTE_FONT_CUSTOM_COLOR_ENTRIES.map(([name, value, isBrightColor]) => ({ isBrightColor, name, value }));
 const PALETTE_NOTE_FONT_COLORS: PaletteNoteFontColorToken[] = PALETTE_NOTE_FONT_COLOR_ENTRIES.map(([name, value, isBrightColor]) => ({ isBrightColor, name, value }));
 
+
+
 export { PALETTE_NOTE_FONT_COLORS, PALETTE_NOTE_FONT_CUSTOM_COLORS };
+
+
 export type { PaletteNoteFontColorToken };
