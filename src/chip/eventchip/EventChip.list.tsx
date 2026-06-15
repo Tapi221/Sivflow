@@ -91,7 +91,7 @@ const CalendarEventChipListComponent = ({ event }: CalendarEventChipListProps) =
         <span className={LIST_EVENT_DOT_CLASS_NAME} style={{ borderColor: tokens.border, boxShadow: `0 0 0 2px ${tokens.bg}` }} aria-hidden="true" />
       </div>
       <div className={getEventChipClassName(event.isAllDay)} style={chipStyle}>
-        {timeRangeLabel ? <div className={LIST_EVENT_TIME_CLASS_NAME}>{timeRangeLabel}</div> : null}
+        {timeRangeLabel !== null && <div className={LIST_EVENT_TIME_CLASS_NAME}>{timeRangeLabel}</div>}
         <div className={getEventTitleClassName(event.isAllDay)}>{title}</div>
       </div>
     </div>
