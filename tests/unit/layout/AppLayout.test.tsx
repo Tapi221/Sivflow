@@ -1,69 +1,56 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import React from "react";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AppLayout } from "@/layout/AppLayout";
-import { DESKTOP_LAYOUT_MEDIA_QUERY } from "@/layout/hooks/useDesktopLayoutMediaQuery";
+
+type AppOutletContextStub = {
+  isLeftPanelCollapsed?: boolean;
+  onToggleLeftPanel?: () => void;
+};
+type MatchMediaListener = (event: MediaQueryListEvent) => void;
+
+const LEFT_PANEL_COLLAPSED_STORAGE_KEY = "sivflow:layout:left-panel-collapsed";
+const LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY = "flashcard-master:layout:left-panel-collapsed";
+const { mockNavigate } = vi.hoisted(() => ({ mockNavigate: vi.fn() }));
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
-
   return {
     ...actual,
-    Outlet: ({ context }: { context?: { isLeftPanelCollapsed?: boolean; }; }) => <div data-is-left-panel-collapsed={String(context?.isLeftPanelCollapsed ?? false)} data-testid="app-outlet" />,
+    Outlet: ({ context }: { context?: AppOutletContextStub; }) => (
+      <div data-is-left-panel-collapsed={String(context?.isLeftPanelCollapsed ?? false)} data-testid="app-outlet">
+        <button type="button" onClick={context?.onToggleLeftPanel}>toggle left panel</button>
+      </div>
+    ),
+    useNavigate: () => mockNavigate,
   };
 });
-
-vi.mock("@/features/hotkey/useHotKey.desktop", () => ({
-  useHotKeyDesktop: () => undefined,
+vi.mock("@/chip/panel/dialog.desktop/Dialog.SettingsWorkspaceRoot", () => ({
+  SettingsWorkspaceRootPanel: ({ open }: { open: boolean; }) => <div data-open={String(open)} data-testid="settings-root-panel" />,
 }));
-
+vi.mock("@/features/settings/hooks/useThemeAccentColor", () => ({
+  useThemeAccentColor: () => undefined,
+}));
 vi.mock("@/layout/hooks/useLayoutRouteState.desktop", () => ({
   useLayoutRouteStateDesktop: () => ({
-    isFoldersRoute: false,
     isScrollLocked: false,
     pathname: "/schedule",
   }),
 }));
-
 vi.mock("@/layout/hooks/useResetWorkspaceScroll.desktop", () => ({
   useResetWorkspaceScrollDesktop: () => undefined,
 }));
-
+vi.mock("@/layout/WorkspaceLayoutRevisionContext", () => ({
+  WorkspaceLayoutRevisionProvider: ({ children }: { children: ReactNode; }) => <>{children}</>,
+}));
 vi.mock("@/layout/WorkspaceShell", () => ({
   WorkspaceShell: ({ children }: { children: ReactNode; }) => <main data-testid="workspace-shell">{children}</main>,
 }));
 
-vi.mock("@/pane.desktop/leftpane/Sidebar.desktop", () => ({
-  Sidebar: ({ isLeftPanelCollapsed = false, onToggleLeftPanel }: { isLeftPanelCollapsed?: boolean; onToggleLeftPanel?: () => void; }) => (
-    <aside aria-label="Sidebar" data-is-left-panel-collapsed={String(isLeftPanelCollapsed)} data-testid="desktop-sidebar">
-      <button type="button" onClick={onToggleLeftPanel} aria-label={isLeftPanelCollapsed ? "サイドバーを開く" : "サイドバーを閉じる"}>
-        {isLeftPanelCollapsed ? "開く" : "閉じる"}
-      </button>
-    </aside>
-  ),
-}));
-
-vi.mock("@/pane.desktop/tab.desktopnative/hooks/useTabsRouteSync", () => ({
-  useWorkspaceTabsRouteSync: () => undefined,
-}));
-
-vi.mock("@/platform/runtime", () => ({
-  hasDesktopBridge: () => false,
-  hasDesktopRuntime: () => false,
-  isDesktopRuntime: () => false,
-}));
-
-type MatchMediaListener = (event: MediaQueryListEvent) => void;
-
-const LEFT_PANEL_COLLAPSED_LAYOUT_CLASS_NAME = "app-layout--left-panel-collapsed";
-const WITHOUT_SIDEBAR_LAYOUT_CLASS_NAME = "app-layout--without-sidebar";
-
 const createMatchMedia = (matches: boolean) => {
   const listeners = new Set<MatchMediaListener>();
-
   return vi.fn((query: string): MediaQueryList => ({
     matches,
     media: query,
@@ -87,73 +74,42 @@ const createMatchMedia = (matches: boolean) => {
     dispatchEvent: () => true,
   }));
 };
-
-const getAppLayout = () => document.querySelector(".app-layout") as HTMLElement;
-
-const setDesktopLayoutMatchMedia = (matches: boolean) => {
+const setMatchMedia = (matches: boolean) => {
   vi.stubGlobal("matchMedia", createMatchMedia(matches));
 };
-
 const renderAppLayout = () => {
+  setMatchMedia(false);
   render(<AppLayout />);
+};
+const expectStoredCollapsedStateCleared = () => {
+  expect(window.localStorage.getItem(LEFT_PANEL_COLLAPSED_STORAGE_KEY)).toBeNull();
+  expect(window.localStorage.getItem(LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY)).toBeNull();
+};
+const seedStoredCollapsedState = () => {
+  window.localStorage.setItem(LEFT_PANEL_COLLAPSED_STORAGE_KEY, "collapsed");
+  window.localStorage.setItem(LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY, "collapsed");
 };
 
 afterEach(() => {
   cleanup();
+  mockNavigate.mockClear();
+  window.localStorage.clear();
   vi.unstubAllGlobals();
 });
 
-describe("AppLayout のサイドバー表示幅判定", () => {
-  it("画面幅が 768px 以上なら左サイドバーを表示する", () => {
-    setDesktopLayoutMatchMedia(true);
-
+describe("AppLayout の左パネル折りたたみ状態", () => {
+  it("保存済みの折りたたみ状態を reload 後に復元せず、保存キーを削除する", () => {
+    seedStoredCollapsedState();
     renderAppLayout();
-
-    expect(window.matchMedia).toHaveBeenCalledWith(DESKTOP_LAYOUT_MEDIA_QUERY);
-    expect(screen.getByTestId("desktop-sidebar")).not.toBeNull();
     expect(screen.getByTestId("workspace-shell")).not.toBeNull();
-    expect(screen.getByTestId("app-outlet")).not.toBeNull();
-    expect(getAppLayout().className).not.toContain(WITHOUT_SIDEBAR_LAYOUT_CLASS_NAME);
+    expect(screen.getByTestId("app-outlet").getAttribute("data-is-left-panel-collapsed")).toBe("false");
+    expectStoredCollapsedStateCleared();
   });
-
-  it("画面幅が 768px 未満なら左サイドバーを表示しない", () => {
-    setDesktopLayoutMatchMedia(false);
-
-    renderAppLayout();
-
-    expect(window.matchMedia).toHaveBeenCalledWith(DESKTOP_LAYOUT_MEDIA_QUERY);
-    expect(screen.queryByTestId("desktop-sidebar")).toBeNull();
-    expect(screen.getByTestId("workspace-shell")).not.toBeNull();
-    expect(screen.getByTestId("app-outlet")).not.toBeNull();
-    expect(getAppLayout().className).toContain(WITHOUT_SIDEBAR_LAYOUT_CLASS_NAME);
-  });
-
-  it("左サイドバーのトグルを押すと左ペインだけが閉じた状態になり、再度押すと開いた状態に戻る", async () => {
+  it("左パネルを閉じても折りたたみ状態を localStorage に残さない", async () => {
     const user = userEvent.setup();
-
-    setDesktopLayoutMatchMedia(true);
     renderAppLayout();
-
-    const sidebar = screen.getByTestId("desktop-sidebar");
-
-    expect(sidebar.getAttribute("data-is-left-panel-collapsed")).toBe("false");
-    expect(screen.getByTestId("app-outlet").getAttribute("data-is-left-panel-collapsed")).toBe("false");
-    expect(getAppLayout().className).not.toContain(LEFT_PANEL_COLLAPSED_LAYOUT_CLASS_NAME);
-
-    await user.click(screen.getByRole("button", {
-      name: "サイドバーを閉じる",
-    }));
-
-    expect(screen.getByTestId("desktop-sidebar").getAttribute("data-is-left-panel-collapsed")).toBe("true");
+    await user.click(screen.getByRole("button", { name: "toggle left panel" }));
     expect(screen.getByTestId("app-outlet").getAttribute("data-is-left-panel-collapsed")).toBe("true");
-    expect(getAppLayout().className).toContain(LEFT_PANEL_COLLAPSED_LAYOUT_CLASS_NAME);
-
-    await user.click(screen.getByRole("button", {
-      name: "サイドバーを開く",
-    }));
-
-    expect(screen.getByTestId("desktop-sidebar").getAttribute("data-is-left-panel-collapsed")).toBe("false");
-    expect(screen.getByTestId("app-outlet").getAttribute("data-is-left-panel-collapsed")).toBe("false");
-    expect(getAppLayout().className).not.toContain(LEFT_PANEL_COLLAPSED_LAYOUT_CLASS_NAME);
+    expectStoredCollapsedStateCleared();
   });
 });
