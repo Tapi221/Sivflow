@@ -105,7 +105,7 @@ const SidebarTreeRow = ({ menuOpen, onMenuOpenChange, menuActions = [], hasConte
       }
     >
       {children}
-      {canOpenContextMenu ? (
+      {canOpenContextMenu && (
         <ContextMenu
           open={menuOpen}
           anchorPoint={menuOpen ? anchorPoint : null}
@@ -119,7 +119,7 @@ const SidebarTreeRow = ({ menuOpen, onMenuOpenChange, menuActions = [], hasConte
           actions={menuActions}
           variant={contextMenuVariant}
         />
-      ) : null}
+      )}
     </div>
   );
 };
