@@ -6,9 +6,9 @@ import { TagBadge } from "@/chip/budge/tag/Badge.Tag";
 import { TagChip } from "@/chip/budge/tag/TagChip";
 import { getTagColorKey, getTagColorSwatchStyle } from "@/chip/budge/tag/tagColor";
 import { Check, Palette, Plus, Tag as TagIcon } from "@/chip/icons";
-import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "./command";
-import { PlaceholderText } from "./placeholder-text";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "../ui/command";
+import { PlaceholderText } from "../ui/placeholder-text";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { cn } from "@/lib/utils";
 

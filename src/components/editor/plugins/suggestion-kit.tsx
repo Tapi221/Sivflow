@@ -28,16 +28,6 @@ type SuggestionConfig = ExtendConfig<
 
 const INLINE_SUGGESTION_TARGET_PLUGINS = [KEYS.date, KEYS.inlineEquation, KEYS.link, KEYS.mention];
 
-const trailingBlockPlugin = TrailingBlockPlugin.configure({
-  options: {
-    insert: (editor, { insert }) => {
-      editor.getApi(suggestionPlugin).suggestion.withoutSuggestions(insert);
-    },
-  },
-});
-
-const SuggestionKit = [suggestionPlugin, trailingBlockPlugin];
-
 
 
 const getInlineSuggestionData = (editor: any, element: TElement) => {
@@ -118,6 +108,16 @@ const suggestionPlugin = toTPlatePlugin<SuggestionConfig>(BaseSuggestionPlugin, 
     node: SuggestionLeaf,
   },
 });
+
+const trailingBlockPlugin = TrailingBlockPlugin.configure({
+  options: {
+    insert: (editor, { insert }) => {
+      editor.getApi(suggestionPlugin).suggestion.withoutSuggestions(insert);
+    },
+  },
+});
+
+const SuggestionKit = [suggestionPlugin, trailingBlockPlugin];
 
 
 
