@@ -42,7 +42,7 @@ const BlockContextMenu = ({ children }: { children: React.ReactNode }) => {
   }
   return (
     <ContextMenu
-      onOpenChange={(open) => {
+      onOpenChange={(open: boolean) => {
         if (!open) {
           api.blockMenu.hide();
         }
@@ -51,10 +51,13 @@ const BlockContextMenu = ({ children }: { children: React.ReactNode }) => {
     >
       <ContextMenuTrigger
         asChild
-        onContextMenu={(event) => {
+        onContextMenu={(event: React.MouseEvent<HTMLElement>) => {
           const dataset = (event.target as HTMLElement).dataset;
           const disabled = dataset?.slateEditor === "true" || readOnly || dataset?.plateOpenContextMenu === "false";
-          if (disabled) return event.preventDefault();
+          if (disabled) {
+            event.preventDefault();
+            return;
+          }
           window.setTimeout(() => {
             api.blockMenu.show(BLOCK_CONTEXT_MENU_ID, {
               x: event.clientX,
@@ -68,7 +71,7 @@ const BlockContextMenu = ({ children }: { children: React.ReactNode }) => {
       {isOpen && (
         <ContextMenuContent
           className="w-64"
-          onCloseAutoFocus={(event) => {
+          onCloseAutoFocus={(event: Event) => {
             event.preventDefault();
             editor.getApi(BlockSelectionPlugin).blockSelection.focus();
             if (value === "askAI") {
