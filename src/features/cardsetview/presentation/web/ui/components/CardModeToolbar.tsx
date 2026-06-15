@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
-import { OverlayToolbar } from "@/chip/overlay-toolbar/OverlayToolbar";
-import { OverlayToolbarButton } from "@/chip/overlay-toolbar/OverlayToolbarButton";
-import { OverlayToolbarDivider } from "@/chip/overlay-toolbar/OverlayToolbarDivider";
-import { FixedDisplayGlyph, FlipGlyph, FluidDisplayGlyph, SplitGlyph, StackGlyph } from "@/chip/overlay-toolbar/OverlayToolbarGlyphs";
+import { OverlayToolbar } from "@/chip/panel/overlay-toolbar/OverlayToolbar";
+import { OverlayToolbarButton } from "@/chip/panel/overlay-toolbar/OverlayToolbarButton";
+import { OverlayToolbarDivider } from "@/chip/panel/overlay-toolbar/OverlayToolbarDivider";
+import { FixedDisplayGlyph, FlipGlyph, FluidDisplayGlyph, SplitGlyph, StackGlyph } from "@/chip/panel/overlay-toolbar/OverlayToolbarGlyphs";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { CARD_LAYOUT_MODE_LABELS } from "@/features/cardsetview/domain/cardLayoutMode";
 import type { CardDisplayMode } from "@/types/domain/cardSet";

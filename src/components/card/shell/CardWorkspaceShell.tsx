@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode, Ref } from "react";
-import { SelectionCaptureGlyph } from "@/chip/overlay-toolbar/OverlayToolbarGlyphs";
+import { SelectionCaptureGlyph } from "@/chip/panel/overlay-toolbar/OverlayToolbarGlyphs";
 import { CardPaneWidthAdjuster } from "@/features/cardsetview/hooks/components/CardPaneWidthAdjuster";
 import type { CardSelectionCaptureSide } from "@/features/selection-capture/cardSelectionCaptureEvents";
 import { dispatchCardSelectionCaptureEvent } from "@/features/selection-capture/cardSelectionCaptureEvents";

@@ -75,7 +75,7 @@ const getEditorColorMarks = (editor: PlateEditor, nodeType: string): string[] =>
   return Array.from(usedColors);
 };
 
-const ColorInput = ({ children, className, value = "#000000", ...props }: React.ComponentProps<"input"> & { className?: string }) => {
+const ColorInput = ({ children, className, value = "#000", ...props }: React.ComponentProps<"input"> & { className?: string }) => {
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   return (
     <div className={cn("flex flex-col items-center", className)}>
@@ -130,7 +130,7 @@ const ColorDropdownMenuItems = ({ className, color, colors, updateColor, ...prop
   );
 };
 const ColorCustom = ({ className, color, colors, colorsQueue, customColors, recordColorUsage, updateColor, updateCustomColor, updatedColor, ...props }: ColorCustomProps) => {
-  const [value, setValue] = React.useState<string>(color ?? "#000000");
+  const [value, setValue] = React.useState<string>(color ?? "#000");
   const fullCustomColors = React.useMemo(
     () => colorsQueue
       .filter((queuedColor) => normalizeColor(queuedColor) !== normalizeColor(updatedColor ?? ""))

@@ -2,7 +2,7 @@
 
 import { createPlatePlugin } from "platejs/react";
 import { FixedToolbar } from "@/chip/ui/plate/fixed-toolbar";
-import { ToolbarNote } from "@/chip/overlay-toolbar/OverlayToolbar.Note";
+import { ToolbarNote } from "@/chip/panel/overlay-toolbar/OverlayToolbar.Note";
 
 const FixedToolbarKit = [
   createPlatePlugin({
