@@ -8,7 +8,7 @@ import { useEditorRef } from "platejs/react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
-const MoreToolbarButton = (props: DropdownMenuProps) => {
+const ButtonClickPanelNoteMore = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
   return (
@@ -54,4 +54,4 @@ const MoreToolbarButton = (props: DropdownMenuProps) => {
   );
 };
 
-export { MoreToolbarButton };
+export { ButtonClickPanelNoteMore };

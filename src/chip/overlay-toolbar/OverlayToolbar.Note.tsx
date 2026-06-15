@@ -13,15 +13,15 @@ import { ButtonClickPanelNoteFontColor } from "@/chip/panel/buttonclickpanel.des
 import { ButtonNoteFontSize } from "@/chip/button/Button.Note.FontSize";
 import { RedoToolbarButton, UndoToolbarButton } from "@/chip/ui/plate/history-toolbar-button";
 import { ButtonClickPanelNoteImport } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Import";
-import { IndentToolbarButton, OutdentToolbarButton } from "@/chip/ui/plate/indent-toolbar-button";
+import { ButtonNoteIndent, ButtonNoteOutdent } from "@/chip/button/Button.Note.Indent";
 import { LineHeightToolbarButton } from "@/chip/ui/plate/line-height-toolbar-button";
 import { LinkToolbarButton } from "@/chip/ui/plate/link-toolbar-button";
 import { ButtonClickPanelNoteBulletedList, ButtonClickPanelNoteNumberedList, ButtonClickPanelNoteTodoList } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.List";
 import { MarkToolbarButton } from "@/chip/ui/plate/mark-toolbar-button";
 import { ButtonNoteMedia } from "@/chip/button/Button.Note.Media";
 import { ButtonClickPanelNoteMode } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Mode";
-import { MoreToolbarButton } from "@/chip/ui/plate/more-toolbar-button";
-import { TableToolbarButton } from "@/chip/ui/plate/table-toolbar-button";
+import { ButtonClickPanelNoteMore } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.More";
+import { ButtonClickPanelNoteTable } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Table";
 import { ButtonNoteToggle } from "@/chip/button/Button.Note.Toggle";
 import { ToolbarGroup } from "@/chip/ui/plate/toolbar";
 import { ButtonClickPanelNoteTurnInto } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.TurnInto";
@@ -84,7 +84,7 @@ const ToolbarNote = () => {
           </ToolbarGroup>
           <ToolbarGroup>
             <LinkToolbarButton />
-            <TableToolbarButton />
+            <ButtonClickPanelNoteTable />
             <ButtonClickPanelNoteEmoji />
           </ToolbarGroup>
           <ToolbarGroup>
@@ -95,11 +95,11 @@ const ToolbarNote = () => {
           </ToolbarGroup>
           <ToolbarGroup>
             <LineHeightToolbarButton />
-            <OutdentToolbarButton />
-            <IndentToolbarButton />
+            <ButtonNoteOutdent />
+            <ButtonNoteIndent />
           </ToolbarGroup>
           <ToolbarGroup>
-            <MoreToolbarButton />
+            <ButtonClickPanelNoteMore />
           </ToolbarGroup>
         </>
       )}

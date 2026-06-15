@@ -9,7 +9,7 @@ import { CommentToolbarButton } from "@/chip/ui/plate/comment-toolbar-button";
 import { InlineEquationToolbarButton } from "@/chip/ui/plate/equation-toolbar-button";
 import { LinkToolbarButton } from "@/chip/ui/plate/link-toolbar-button";
 import { MarkToolbarButton } from "@/chip/ui/plate/mark-toolbar-button";
-import { MoreToolbarButton } from "@/chip/ui/plate/more-toolbar-button";
+import { ButtonClickPanelNoteMore } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.More";
 import { SuggestionToolbarButton } from "@/chip/ui/plate/suggestion-toolbar-button";
 import { ToolbarGroup } from "@/chip/ui/plate/toolbar";
 
@@ -50,7 +50,7 @@ const FloatingToolbarButtons = () => {
       <ToolbarGroup>
         <CommentToolbarButton />
         <SuggestionToolbarButton />
-        {!readOnly && <MoreToolbarButton />}
+        {!readOnly && <ButtonClickPanelNoteMore />}
       </ToolbarGroup>
     </>
   );
