@@ -58,6 +58,7 @@ const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
     },
     ref,
   ) => {
+    const hasTopAttachment = topAttachment !== null && topAttachment !== undefined;
     return (
       <ScaleToFitFrame
         baseWidth={baseWidth}
@@ -90,9 +91,9 @@ const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
             height: fitHeight ? "100%" : undefined,
           }}
         >
-          {topAttachment ? (
+          {hasTopAttachment && (
             <div className="w-full overflow-visible">{topAttachment}</div>
-          ) : null}
+          )}
           {(() => {
             const shellStyle: CssVars = {
               ...(style as React.CSSProperties | undefined),
@@ -110,7 +111,6 @@ const CardFrame = React.forwardRef<HTMLDivElement, CardFrameProps>(
                 : {}),
               "--card-base-width": `${Math.max(1, baseWidth)}px`,
             };
-
             return (
               <CardShell
                 ref={ref}
