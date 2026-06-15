@@ -50,4 +50,5 @@ const CalendarEventChipMonth = ({ event, showTimeLabel = true, tooltipDisabled =
 };
 
 CalendarEventChipMonth.displayName = "CalendarEventChipMonth";
+
 export { CalendarEventChipMonth };

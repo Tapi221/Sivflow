@@ -18,5 +18,6 @@ const AIChatEditor = memo(({ content }: AIChatEditorProps) => {
   return <EditorStatic variant="aiChat" editor={aiEditor} value={value} />;
 });
 AIChatEditor.displayName = "AIChatEditor";
+
 export { AIChatEditor };
 export type { AIChatEditorProps };

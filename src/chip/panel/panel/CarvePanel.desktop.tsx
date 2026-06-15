@@ -71,5 +71,6 @@ CarvePanelViewport.displayName = "CarvePanelViewport";
 CarvePanelBase.displayName = "CarvePanelBase";
 const CarvePanel = memo(CarvePanelBase);
 CarvePanel.displayName = "CarvePanel";
+
 export { CarvePanel, CarvePanelShell, CarvePanelViewport };
 export type { CarvePanelShellProps };

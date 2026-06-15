@@ -604,4 +604,5 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
 
 const BlockToolbar = React.memo(BlockToolbarInner, areBlockToolbarPropsEqual);
 BlockToolbar.displayName = "BlockToolbar";
+
 export { BlockToolbar };

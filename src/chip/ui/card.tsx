@@ -67,4 +67,5 @@ CardTitle.displayName = "CardTitle";
 CardDescription.displayName = "CardDescription";
 CardContent.displayName = "CardContent";
 CardFooter.displayName = "CardFooter";
+
 export { Card, CardContent, CardDescription, CardHeader, CardTitle };

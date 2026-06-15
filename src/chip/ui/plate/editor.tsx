@@ -117,5 +117,6 @@ const EditorView = ({ className, variant, ...props }: PlateViewProps & VariantPr
 
 Editor.displayName = "Editor";
 EditorView.displayName = "EditorView";
+
 export { EditorContainer, Editor, EditorView };
 export type { EditorProps };

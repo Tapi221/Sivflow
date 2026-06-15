@@ -531,5 +531,6 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
 
 const CalendarWeekDayGrid = memo(CalendarWeekDayGridComponent);
 CalendarWeekDayGrid.displayName = "CalendarWeekDayGrid";
+
 export { CalendarWeekDayGrid };
 export type { CalendarWeekDayGridRef };

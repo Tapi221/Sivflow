@@ -614,5 +614,6 @@ const BlockEditor = React.forwardRef<BlockEditorHandle, BlockEditorProps>(({ blo
 );
 
 BlockEditor.displayName = "BlockEditor";
+
 export { BlockEditor };
 export type { BlockEditorHandle };

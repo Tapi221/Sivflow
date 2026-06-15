@@ -298,4 +298,5 @@ const ButtonClickPanelNoteFontColor = ({ children, nodeType, tooltip, ...props }
 };
 
 const ColorPicker = React.memo(PureColorPicker, (prev, next) => prev.color === next.color && prev.colors === next.colors && prev.colorsQueue === next.colorsQueue && prev.customColors === next.customColors && prev.updatedColor === next.updatedColor);
+
 export { ButtonClickPanelNoteFontColor, ColorDropdownMenuItems };

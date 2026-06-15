@@ -49,4 +49,5 @@ const CardMetaPanelComponent = (_props: CardMetaPanelProps) => null;
 
 const CardMetaPanel = memo(CardMetaPanelComponent);
 CardMetaPanel.displayName = "CardMetaPanel";
+
 export { CardMetaPanel };

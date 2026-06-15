@@ -32,4 +32,5 @@ const CalendarPanel = ({ children, hasTrailingPanel = false, className }: Calend
 };
 
 CalendarPanelViewport.displayName = "CalendarPanelViewport";
+
 export { CalendarPanelViewport, CalendarPanel };
