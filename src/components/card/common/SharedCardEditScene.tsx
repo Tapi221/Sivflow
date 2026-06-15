@@ -1,30 +1,8 @@
 import React from "react";
 import { BlockEditor } from "@/components/card/blocks/editor/BlockEditor";
-import type { SharedCardContentEditProps } from "./SharedCardContent.types";
+import type { SharedCardContentEditProps } from "@/components/card/common/SharedCardContent.types";
 
-
-
-const SharedCardEditSceneInner = ({
-  blocks,
-  onChange,
-  prefix,
-  label,
-  accentColor,
-  duplicateToOpposite,
-  onCrossDuplicate,
-  autoFocus,
-  customPlaceholders,
-  hideToolbar,
-  onDelete,
-  minDeletableIndex,
-  hiddenBlockTypes,
-  toolbarMount,
-  toolbarDesktopLayout,
-  enableBlockSelectionState,
-  settings,
-  displayMode,
-  zoom,
-}: SharedCardContentEditProps) => {
+const SharedCardEditSceneInner = ({ blocks, onChange, prefix, label, accentColor, duplicateToOpposite, onCrossDuplicate, autoFocus, customPlaceholders, hideToolbar, onDelete, minDeletableIndex, hiddenBlockTypes, toolbarMount, toolbarDesktopLayout, enableBlockSelectionState, settings, displayMode, zoom }: SharedCardContentEditProps) => {
   return (
     <BlockEditor
       blocks={blocks}
@@ -49,8 +27,6 @@ const SharedCardEditSceneInner = ({
     />
   );
 };
-
-
 
 const SharedCardEditScene = React.memo(SharedCardEditSceneInner);
 SharedCardEditScene.displayName = "SharedCardEditScene";
