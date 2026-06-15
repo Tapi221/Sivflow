@@ -1,4 +1,5 @@
 import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
+import { SCHEDULE_EVENT_COLOR } from "@shared/design-tokens/color/Color.Schedule";
 
 type CalendarColorTokens = {
   bg: string;
@@ -11,11 +12,12 @@ type RgbColor = {
   blue: number;
 };
 
-const FALLBACK_ACCENT_COLOR = "#185FA5";
-const LIGHT_ACCENT_LUMINANCE_THRESHOLD = 0.8;
-const LIGHT_ACCENT_BORDER_MIX_AMOUNT = 0.28;
+const FALLBACK_ACCENT_COLOR = SCHEDULE_EVENT_COLOR.fallbackAccent;
+const LIGHT_ACCENT_LUMINANCE_THRESHOLD = SCHEDULE_EVENT_COLOR.lightAccentLuminanceThreshold;
+const LIGHT_ACCENT_BORDER_MIX_AMOUNT = SCHEDULE_EVENT_COLOR.lightAccentBorderMixAmount;
 const colorTokensCache = new Map<string, CalendarColorTokens>();
-const BLACK: RgbColor = { red: 0, green: 0, blue: 0 };
+const COLOR_MIX_TARGET: RgbColor = { ...SCHEDULE_EVENT_COLOR.textMixTarget };
+const HEX_DIGITS = "0123456789abcdefABCDEF";
 
 const clampChannel = (value: number) => Math.max(0, Math.min(255, value));
 const toHexChannel = (value: number) =>
@@ -24,20 +26,19 @@ const rgbToHex = ({ red, green, blue }: RgbColor) =>
   `#${toHexChannel(red)}${toHexChannel(green)}${toHexChannel(blue)}`;
 const rgbToRgba = ({ red, green, blue }: RgbColor, alpha: number) =>
   `rgba(${clampChannel(Math.round(red))}, ${clampChannel(Math.round(green))}, ${clampChannel(Math.round(blue))}, ${alpha})`;
+const isHexColorPart = (value: string): boolean => value.split("").every((character) => HEX_DIGITS.includes(character));
 const normalizeHexColor = (hex: string): string | null => {
-  const value = hex.trim();
-  const shortMatch = /^#?([0-9a-fA-F]{3})$/.exec(value);
+  const value = hex.trim().startsWith("#") ? hex.trim().slice(1) : hex.trim();
 
-  if (shortMatch) {
-    return `#${shortMatch[1]
-      .split("")
-      .map((channel) => channel + channel)
-      .join("")
-      .toUpperCase()}`;
+  if (value.length === 3 && isHexColorPart(value)) {
+    return `#${value.split("").map((channel) => channel + channel).join("").toUpperCase()}`;
   }
 
-  const longMatch = /^#?([0-9a-fA-F]{6})$/.exec(value);
-  return longMatch ? `#${longMatch[1].toUpperCase()}` : null;
+  if (value.length === 6 && isHexColorPart(value)) {
+    return `#${value.toUpperCase()}`;
+  }
+
+  return null;
 };
 const hexToRgb = (hex: string): RgbColor | null => {
   const normalized = normalizeHexColor(hex);
@@ -77,10 +78,10 @@ const generateColorTokens = (hex: string): CalendarColorTokens => {
   const luminance = getRelativeLuminance(accent);
   const isLightAccent = luminance > LIGHT_ACCENT_LUMINANCE_THRESHOLD;
   const border = isLightAccent
-    ? rgbToHex(mixColors(accent, BLACK, LIGHT_ACCENT_BORDER_MIX_AMOUNT))
+    ? rgbToHex(mixColors(accent, COLOR_MIX_TARGET, LIGHT_ACCENT_BORDER_MIX_AMOUNT))
     : cacheKey.split(":")[0];
-  const textMixAmount = luminance > 0.55 ? 0.62 : 0.32;
-  const text = mixColors(accent, BLACK, textMixAmount);
+  const textMixAmount = luminance > SCHEDULE_EVENT_COLOR.lightTextLuminanceThreshold ? SCHEDULE_EVENT_COLOR.lightTextMixAmount : SCHEDULE_EVENT_COLOR.darkTextMixAmount;
+  const text = mixColors(accent, COLOR_MIX_TARGET, textMixAmount);
 
   const tokens = {
     bg: rgbToRgba(accent, eventChipDesign.backgroundAlpha),
