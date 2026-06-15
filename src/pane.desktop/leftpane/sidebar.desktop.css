@@ -10,6 +10,9 @@
   --app-sidebar-text-hover: #2f2f2f;
   --app-sidebar-icon: #8a8a8a;
   --app-sidebar-icon-active: #707070;
+  --app-sidebar-icon-inactive: #b7b7b7;
+  --app-sidebar-icon-hover: #8c8c8c;
+  --app-sidebar-collapsed-toggle-hover: #2f343b;
   --app-sidebar-focus-ring: rgba(0, 0, 0, 0.16);
 }
 
@@ -76,7 +79,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: #8c8c8c;
+  color: var(--app-sidebar-icon-hover);
   box-shadow: none;
   outline: none;
   transition: color 160ms ease, transform 160ms ease;
@@ -84,7 +87,7 @@
 
 .app-sidebar-collapsed-toggle:hover {
   background: transparent;
-  color: #2f343b;
+  color: var(--app-sidebar-collapsed-toggle-hover);
 }
 
 .app-sidebar-collapsed-toggle:active {
@@ -93,7 +96,7 @@
 
 .app-sidebar-collapsed-toggle:focus-visible {
   background: transparent;
-  color: #2f343b;
+  color: var(--app-sidebar-collapsed-toggle-hover);
   box-shadow: none;
 }
 
@@ -191,7 +194,7 @@
   padding: 0;
   border-radius: 999px;
   background: transparent;
-  color: #b7b7b7;
+  color: var(--app-sidebar-icon-inactive);
   font-size: var(--ds-typography-font-size-sm);
   font-weight: 542;
   line-height: 17px;
@@ -203,7 +206,7 @@
 
 .app-sidebar__nav-link:hover {
   background: var(--app-titlebar-surface, var(--app-sidebar-hover-bg));
-  color: #8c8c8c;
+  color: var(--app-sidebar-icon-hover);
 }
 
 .app-sidebar__nav-link:focus-visible {
@@ -212,16 +215,16 @@
 
 .app-sidebar__nav-link.is-active {
   background: var(--app-active-tab-bg, #fff);
-  color: #8c8c8c;
+  color: var(--app-sidebar-icon-hover);
   box-shadow: none;
 }
 
 .app-sidebar__nav-link.is-active .app-sidebar__nav-icon {
-  color: #8c8c8c;
+  color: var(--app-sidebar-icon-hover);
 }
 
 .app-sidebar__nav-link:hover .app-sidebar__nav-icon {
-  color: #8c8c8c;
+  color: var(--app-sidebar-icon-hover);
 }
 
 .app-sidebar__nav-link--disabled,
@@ -233,12 +236,12 @@
 .app-sidebar__nav-link--disabled:hover,
 .app-sidebar__nav-link:disabled:hover {
   background: transparent;
-  color: #b7b7b7;
+  color: var(--app-sidebar-icon-inactive);
 }
 
 .app-sidebar__nav-link--disabled .app-sidebar__nav-icon,
 .app-sidebar__nav-link:disabled .app-sidebar__nav-icon {
-  color: #b7b7b7;
+  color: var(--app-sidebar-icon-inactive);
 }
 
 .app-sidebar__nav-icon-slot {
