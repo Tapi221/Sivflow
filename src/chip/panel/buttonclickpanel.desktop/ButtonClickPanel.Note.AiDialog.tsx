@@ -1,5 +1,6 @@
 "use client";
 
+import "@/chip/panel/Surface.Panel.css";
 import * as React from "react";
 import { AIChatPlugin, AIPlugin } from "@platejs/ai/react";
 import { CheckIcon, CornerUpLeftIcon, Loader2Icon, PauseIcon, PenLineIcon, SendIcon, SmileIcon, WandSparklesIcon, XIcon } from "lucide-react";
@@ -129,7 +130,7 @@ const ButtonClickPanelNoteAiDialog = () => {
   const isLoading = chat.status === "streaming" || chat.status === "submitted";
   if (!open) return null;
   return (
-    <div className="absolute right-4 bottom-4 z-50 w-[min(420px,calc(100vw-2rem))] rounded-lg border bg-popover text-popover-foreground shadow-md">
+    <div className="surface-panel absolute right-4 bottom-4 z-50 w-[min(420px,calc(100vw-2rem))] rounded-lg border text-popover-foreground">
       <Command className="rounded-lg" value={value} onValueChange={setValue} shouldFilter={false}>
         <div className="flex items-center gap-2 border-b px-3 py-2 text-muted-foreground text-sm">
           {isLoading ? <Loader2Icon className="size-4 animate-spin" /> : <WandSparklesIcon className="size-4" />}
@@ -191,7 +192,7 @@ const ButtonClickPanelNoteAiLoadingBar = () => {
   const isLoading = chat.status === "streaming" || chat.status === "submitted";
   if (!isLoading) return null;
   return (
-    <div className="-translate-x-1/2 absolute bottom-4 left-1/2 z-50 flex items-center gap-3 rounded-md border bg-muted px-3 py-1.5 text-muted-foreground text-sm shadow-md">
+    <div className="surface-panel -translate-x-1/2 absolute bottom-4 left-1/2 z-50 flex items-center gap-3 rounded-md border px-3 py-1.5 text-muted-foreground text-sm">
       <Loader2Icon className="size-4 animate-spin" />
       <span>{chat.status === "submitted" ? "Thinking..." : "Writing..."}</span>
       <Button size="sm" variant="ghost" className="flex items-center gap-1 text-xs" onClick={() => api.aiChat.stop()}>
