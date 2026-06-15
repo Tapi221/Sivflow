@@ -11,8 +11,6 @@ import { recognizeSelectionCaptureText } from "@/features/selection-capture/sele
 import { SelectionCaptureOverlay } from "@/features/selection-capture/SelectionCaptureOverlay";
 import { cn } from "@/lib/utils";
 
-
-
 type CardWorkspaceSurfaceVariant = "plain" | "dotted";
 type CardWorkspaceCaptureTarget = {
   side: CardSelectionCaptureSide;
@@ -52,23 +50,17 @@ type CardWorkspaceShellProps = {
   selectionCaptureEnabled?: boolean;
 };
 
-
-
 const WORKSPACE_SURFACE_CLASS_NAMES: Record<CardWorkspaceSurfaceVariant, string> = {
   plain: "workspace-surface--plain",
   dotted: "workspace-surface--dotted",
 };
 
-
-
 const setExternalRef = (ref: Ref<HTMLDivElement> | undefined, node: HTMLDivElement | null): void => {
   if (!ref) return;
-
   if (typeof ref === "function") {
     ref(node);
     return;
   }
-
   (ref as { current: HTMLDivElement | null; }).current = node;
 };
 const getIntersectionArea = (left: DOMRect, right: DOMRect): number => {
@@ -80,7 +72,6 @@ const resolveCaptureSide = (target: HTMLElement, rect: SelectionCaptureRect): Ca
   const targetBounds = target.getBoundingClientRect();
   const selectionBounds = new DOMRect(targetBounds.left + rect.x, targetBounds.top + rect.y, rect.width, rect.height);
   const candidates: CardWorkspaceCaptureTarget[] = [];
-
   target.querySelectorAll<HTMLElement>(".js-question-editor, .js-answer-editor").forEach((element) => {
     const area = getIntersectionArea(selectionBounds, element.getBoundingClientRect());
     if (area <= 0) return;
@@ -90,15 +81,13 @@ const resolveCaptureSide = (target: HTMLElement, rect: SelectionCaptureRect): Ca
       area,
     });
   });
-
   candidates.sort((left, right) => right.area - left.area);
   return candidates[0]?.side ?? "question";
 };
 const resolveTaskMessage = (values: Array<string | void>): string | null => {
   return values.find((value): value is string => typeof value === "string" && value.trim().length > 0) ?? null;
 };
-
-
+const hasRenderableNode = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
 
 const CardWorkspaceShell = ({ children, containerClassName, shellClassName, contentAreaClassName, viewportClassName, viewportStyle, surfaceVariant = "plain", viewportRef, widthControl = null, widthControlClassName, topLeftControl, topRightControl, overlayChildren, overlayTopInsetPx = 0, isMetaOpen, metaPanel, metaPanelContainerClassName, selectionCaptureEnabled = true }: CardWorkspaceShellProps) => {
   const viewportNodeRef = useRef<HTMLDivElement | null>(null);
@@ -108,26 +97,21 @@ const CardWorkspaceShell = ({ children, containerClassName, shellClassName, cont
   const topControlsOffsetPx = overlayTopInsetPx + 8;
   const surfaceClassName = WORKSPACE_SURFACE_CLASS_NAMES[surfaceVariant];
   const metaPanelWidth = isMetaOpen ? "var(--ui-panel-width)" : "0px";
-
   const setViewportNode = useCallback((node: HTMLDivElement | null) => {
     viewportNodeRef.current = node;
     setExternalRef(viewportRef, node);
   }, [viewportRef]);
-
   const handleStartSelectionCapture = useCallback(() => {
     setSelectionCaptureMessage(null);
     setIsSelectionCaptureActive((isActive) => !isActive);
   }, []);
-
   const handleCancelSelectionCapture = useCallback(() => {
     setIsSelectionCaptureActive(false);
     setIsSelectionCaptureBusy(false);
   }, []);
-
   const handleCaptureSelection = useCallback(async (area: SelectionCaptureArea) => {
     const target = viewportNodeRef.current;
     if (!target) return;
-
     const rect = area.rect;
     setIsSelectionCaptureBusy(true);
     try {
@@ -144,7 +128,6 @@ const CardWorkspaceShell = ({ children, containerClassName, shellClassName, cont
         side,
         ocrText,
       });
-
       if (dispatched.handled) {
         const taskResults = await Promise.all(dispatched.tasks);
         setSelectionCaptureMessage(resolveTaskMessage(taskResults) ?? "範囲をカードへ追加しました");
@@ -152,7 +135,6 @@ const CardWorkspaceShell = ({ children, containerClassName, shellClassName, cont
         await copyImageBlobToClipboard(blob);
         setSelectionCaptureMessage("範囲をコピーしました");
       }
-
       setIsSelectionCaptureActive(false);
     } catch (error) {
       console.error("[CardWorkspaceShell] selection capture failed", error);
@@ -161,20 +143,16 @@ const CardWorkspaceShell = ({ children, containerClassName, shellClassName, cont
       setIsSelectionCaptureBusy(false);
     }
   }, []);
-
   useEffect(() => {
     if (!selectionCaptureMessage) return;
-
     const timeoutId = window.setTimeout(() => {
       setSelectionCaptureMessage(null);
     }, 1800);
-
     return () => {
       window.clearTimeout(timeoutId);
     };
   }, [selectionCaptureMessage]);
-
-  const selectionCaptureControl = selectionCaptureEnabled ? (
+  const selectionCaptureControl = selectionCaptureEnabled && (
     <button
       type="button"
       data-selection-capture-ignore="true"
@@ -189,23 +167,18 @@ const CardWorkspaceShell = ({ children, containerClassName, shellClassName, cont
     >
       <SelectionCaptureGlyph />
     </button>
-  ) : null;
-
-  const topRightControls = selectionCaptureControl || topRightControl ? (
-    <div className="flex items-center gap-2">
-      {selectionCaptureControl}
-      {topRightControl}
-    </div>
-  ) : null;
-
+  );
+  const hasTopLeftControls = hasRenderableNode(topLeftControl) || widthControl !== null;
+  const hasTopRightControls = selectionCaptureEnabled || hasRenderableNode(topRightControl);
+  const hasSelectionCaptureMessage = selectionCaptureMessage !== null;
+  const hasMetaPanel = hasRenderableNode(metaPanel);
   return (
     <div className={cn(surfaceClassName, containerClassName)}>
       <div className={cn("relative flex h-full min-h-0 overflow-hidden", shellClassName)}>
-        {topLeftControl || widthControl ? (
+        {hasTopLeftControls && (
           <div data-selection-capture-ignore="true" className="pointer-events-none absolute left-3 z-30 flex items-center gap-2" style={{ top: `${topControlsOffsetPx}px` }}>
-            {topLeftControl ? <div className="pointer-events-auto flex">{topLeftControl}</div> : null}
-
-            {widthControl ? (
+            {hasRenderableNode(topLeftControl) && <div className="pointer-events-auto flex">{topLeftControl}</div>}
+            {widthControl !== null && (
               <div className={cn("pointer-events-auto flex", widthControlClassName)}>
                 <CardPaneWidthAdjuster
                   modeLabel={widthControl.modeLabel}
@@ -220,33 +193,30 @@ const CardWorkspaceShell = ({ children, containerClassName, shellClassName, cont
                   onReset={widthControl.onReset}
                 />
               </div>
-            ) : null}
+            )}
           </div>
-        ) : null}
-
+        )}
         {overlayChildren}
-
-        {topRightControls ? (
+        {hasTopRightControls && (
           <div data-selection-capture-ignore="true" className="pointer-events-auto absolute right-3 z-30 flex" style={{ top: `${topControlsOffsetPx}px` }}>
-            {topRightControls}
+            <div className="flex items-center gap-2">
+              {selectionCaptureControl}
+              {topRightControl}
+            </div>
           </div>
-        ) : null}
-
+        )}
         <div className={cn("flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden", contentAreaClassName)}>
           <div ref={setViewportNode} className={cn("relative min-h-0 min-w-0 flex-1 overflow-hidden", viewportClassName)} style={viewportStyle}>
             {children}
-
             <SelectionCaptureOverlay targetRef={viewportNodeRef} active={isSelectionCaptureActive} busy={isSelectionCaptureBusy} onCancel={handleCancelSelectionCapture} onCapture={handleCaptureSelection} />
-
-            {selectionCaptureMessage ? (
+            {hasSelectionCaptureMessage && (
               <div data-selection-capture-ignore="true" className="pointer-events-none absolute left-1/2 top-4 z-[60] -translate-x-1/2 rounded-full border border-slate-900/10 bg-white/95 px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm">
                 {selectionCaptureMessage}
               </div>
-            ) : null}
+            )}
           </div>
         </div>
-
-        {metaPanel ? (
+        {hasMetaPanel && (
           <div
             aria-hidden={!isMetaOpen}
             className={cn(
@@ -259,15 +229,11 @@ const CardWorkspaceShell = ({ children, containerClassName, shellClassName, cont
           >
             {metaPanel}
           </div>
-        ) : null}
+        )}
       </div>
     </div>
   );
 };
 
-
-
 export { CardWorkspaceShell };
-
-
 export type { CardWorkspaceSurfaceVariant, CardWorkspaceWidthControlProps, CardWorkspaceShellProps };
