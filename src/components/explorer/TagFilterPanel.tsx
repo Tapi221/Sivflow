@@ -9,7 +9,7 @@ import { PanelEmptyState } from "@/components/panel/PanelEmptyState";
 import type { SegmentedOption } from "@/components/panel/SegmentedControlGroup";
 import { SegmentedControlGroup } from "@/components/panel/SegmentedControlGroup";
 import { useTags } from "@/features/settings/hooks/useTags";
-import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+import { useExplorerStore } from "@/features/explorer/store/useExplorerStore";
 import { cn } from "@/lib/utils";
 import { Tag } from "@/chip/icons";
 

@@ -25,7 +25,7 @@ import { readDesktopImportFiles, subscribeDesktopImportFileOpen } from "@/featur
 import { detectImportFileKind, getPortableImportFiles, getSupportedImportFiles, isPortableImportFileKind, isSupportedImportFileKind } from "@/features/import/domain/importFileKind";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
-import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+import { useExplorerStore } from "@/features/explorer/store/useExplorerStore";
 import { cn } from "@/lib/utils";
 import { createAppDestination, createPageUrl } from "@/platform/web/navigation/toWebPath";
 import type { CardSet, Folder, SelectedExplorerItem } from "@/types";

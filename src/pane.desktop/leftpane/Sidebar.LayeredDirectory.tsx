@@ -16,7 +16,7 @@ import { useFolderCommands } from "@/features/folder/hooks/useFolderCommands";
 import { useFoldersRead } from "@/features/folder/hooks/useFoldersRead";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { useTags } from "@/features/settings/hooks/useTags";
-import { useNotes } from "@/hooks/note/useNotes";
+import { useNotes } from "@/features/note/hooks/useNotes";
 import type { AppLayoutOutletContext } from "@/layout/AppLayout";
 import { cn } from "@/lib/utils";
 import { LibraryHierarchySidebar, ProjectListSidebar } from "@/pane.desktop/leftpane/folder/LayeredDirectorySidebar";

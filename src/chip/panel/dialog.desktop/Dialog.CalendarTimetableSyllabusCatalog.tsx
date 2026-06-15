@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
 import { isValidCalendarTimetableWeekdayIndex } from "@core/domain/calendar/timetable/timetable.model";
 import type { CalendarTimetableColorKey, CalendarTimetableInstitution, CalendarTimetableInstitutionKind, CalendarTimetablePeriod, CalendarTimetableSyllabusCourse, CalendarTimetableSyllabusCourseDisplay, CalendarTimetableSyllabusCourseDraft, CalendarTimetableWeekdayIndex } from "@core/domain/calendar/timetable/timetable.types";
-import { TAG_COLOR_KEYS } from "@/chip/budge/tag/tag.constants";
-import { getTagColorStyle } from "@/chip/budge/tag/tag.style";
+import { TAG_COLOR_KEYS } from "@shared/design-tokens/color/Color.Tag";
+import { getTagColorStyle } from "@/chip/budge/tag/tagColor";
 import { cn } from "@/lib/utils";
 
 type CalendarTimetableSyllabusCatalogDialogProps = {

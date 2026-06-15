@@ -6,7 +6,7 @@ import { getTagColorKey } from "@/chip/budge/tag/tagColor";
 import type { Tag as TagRecord } from "@/features/settings/hooks/useTags";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { useTagTreeCommands } from "@/features/settings/hooks/useTagTreeCommands";
-import { useExplorerStore } from "@/hooks/folder/useExplorerStore";
+import { useExplorerStore } from "@/features/explorer/store/useExplorerStore";
 import { cn } from "@/lib/utils";
 import { LayeredTreeDropIndicator } from "@/pane.desktop/leftpane/folder/layeredTreeDnd";
 import { LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX, LAYERED_TREE_ROOT_LEVEL } from "@/pane.desktop/leftpane/folder/layeredTreeDnd.constants";

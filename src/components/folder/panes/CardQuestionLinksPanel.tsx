@@ -5,7 +5,7 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { useToast } from "@/contexts/ToastContext";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
-import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
+import { useEffectiveLocalUserId } from "@/contexts/auth/useEffectiveLocalUserId";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { getLocalDb } from "@/services/localdb";
