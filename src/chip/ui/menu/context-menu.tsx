@@ -1,8 +1,8 @@
 "use client";
 
+import * as React from "react";
 import * as ContextMenuPrimitive from "@radix-ui/react-context-menu";
 import { Check, ChevronRight, Circle } from "lucide-react";
-import * as React from "react";
 import { cn } from "@/lib/utils";
 
 type ContextMenuInsetProps = Readonly<{
@@ -139,20 +139,19 @@ const ContextMenuSeparator = React.forwardRef<
     {...props}
   />
 ));
-const ContextMenuShortcut = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLSpanElement>) => {
-  return (
-    <span
-      className={cn(
-        "ml-auto text-xs tracking-widest text-muted-foreground",
-        className,
-      )}
-      {...props}
-    />
-  );
-};
+const ContextMenuShortcut = React.forwardRef<
+  HTMLSpanElement,
+  React.HTMLAttributes<HTMLSpanElement>
+>(({ className, ...props }, ref) => (
+  <span
+    ref={ref}
+    className={cn(
+      "ml-auto text-xs tracking-widest text-muted-foreground",
+      className,
+    )}
+    {...props}
+  />
+));
 
 ContextMenuSubTrigger.displayName = ContextMenuPrimitive.SubTrigger.displayName;
 ContextMenuSubContent.displayName = ContextMenuPrimitive.SubContent.displayName;
