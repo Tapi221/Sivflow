@@ -12,7 +12,7 @@ import { ButtonClickPanelNoteExport } from "@/chip/panel/buttonclickpanel.deskto
 import { ButtonClickPanelNoteFontColor } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.FontColor";
 import { ButtonNoteFontSize } from "@/chip/button/Button.Note.FontSize";
 import { RedoToolbarButton, UndoToolbarButton } from "@/chip/ui/plate/history-toolbar-button";
-import { ImportToolbarButton } from "@/chip/ui/plate/import-toolbar-button";
+import { ButtonClickPanelNoteImport } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Import";
 import { IndentToolbarButton, OutdentToolbarButton } from "@/chip/ui/plate/indent-toolbar-button";
 import { LineHeightToolbarButton } from "@/chip/ui/plate/line-height-toolbar-button";
 import { LinkToolbarButton } from "@/chip/ui/plate/link-toolbar-button";
@@ -24,7 +24,7 @@ import { MoreToolbarButton } from "@/chip/ui/plate/more-toolbar-button";
 import { TableToolbarButton } from "@/chip/ui/plate/table-toolbar-button";
 import { ButtonNoteToggle } from "@/chip/button/Button.Note.Toggle";
 import { ToolbarGroup } from "@/chip/ui/plate/toolbar";
-import { TurnIntoToolbarButton } from "@/chip/ui/plate/turn-into-toolbar-button";
+import { ButtonClickPanelNoteTurnInto } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.TurnInto";
 
 const ToolbarNote = () => {
   const readOnly = useEditorReadOnly();
@@ -45,11 +45,11 @@ const ToolbarNote = () => {
             <ButtonClickPanelNoteExport>
               <ArrowUpToLineIcon />
             </ButtonClickPanelNoteExport>
-            <ImportToolbarButton />
+            <ButtonClickPanelNoteImport />
           </ToolbarGroup>
           <ToolbarGroup>
             <ButtonClickPanelNoteInsert />
-            <TurnIntoToolbarButton />
+            <ButtonClickPanelNoteTurnInto />
             <ButtonNoteFontSize />
           </ToolbarGroup>
           <ToolbarGroup>

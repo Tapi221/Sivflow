@@ -30,7 +30,7 @@ const turnIntoItems = [
   { icon: <Columns3Icon />, label: "3 columns", value: "action_three_columns" },
 ];
 
-const TurnIntoToolbarButton = (props: DropdownMenuProps) => {
+const ButtonClickPanelNoteTurnInto = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
   const [open, setOpen] = useState(false);
   const value = useSelectionFragmentProp({
@@ -84,4 +84,4 @@ const TurnIntoToolbarButton = (props: DropdownMenuProps) => {
   );
 };
 
-export { TurnIntoToolbarButton, turnIntoItems };
+export { ButtonClickPanelNoteTurnInto, turnIntoItems };
