@@ -3,21 +3,17 @@ import { normalizeUploadedImages } from "@/domain/assets/uploadedImageNormalizer
 import { isGridOffsetType } from "@/domain/card/blockOffset";
 import { LEGACY_BASE_LAYOUT_ROWS, normalizeExtraRows, normalizeLayoutRows } from "@/domain/card/extraRows";
 import { normalizeMemoryStability } from "@/domain/card/review/stability";
-import { normalizeDate } from "@/shared/codec/date";
-import { toArrayOr, toBoolOr, toFiniteNumber, toStringOr } from "@/shared/codec/primitives";
-import { makeFallbackId } from "@/shared/lib/fallbackId";
-import type { UnknownRecord } from "@/shared/lib/records";
-import { asRecord, pick } from "@/shared/lib/records";
+import { normalizeReviewLogs } from "@/domain/card/normalizers/reviewLogs";
 import type { UploadedPdf } from "@/types/domain/assets";
 import type { SubjectiveScoreValue } from "@/types/domain/base";
 import type { Card, CardBlock } from "@/types/domain/card";
-import { normalizeReviewLogs } from "./reviewLogs";
-
-
+import { normalizeDate } from "@/utils/codec/date";
+import { toArrayOr, toBoolOr, toFiniteNumber, toStringOr } from "@/utils/codec/primitives";
+import { makeFallbackId } from "@/utils/fallbackId";
+import type { UnknownRecord } from "@/utils/records";
+import { asRecord, pick } from "@/utils/records";
 
 type GridBlockType = Parameters<typeof isGridOffsetType>[0];
-
-
 
 const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
   "text",
@@ -31,8 +27,6 @@ const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
   "pdf",
 ]);
 const SUBJECTIVE_SCORE_VALUES = new Set<SubjectiveScoreValue>([0, 1, 2, 3]);
-
-
 
 const isGridBlockType = (value: unknown): value is GridBlockType => {
   return (
@@ -61,7 +55,6 @@ const normalizeSubjectiveScore = (value: unknown): SubjectiveScoreValue | undefi
   if (SUBJECTIVE_SCORE_VALUES.has(value as SubjectiveScoreValue)) {
     return value as SubjectiveScoreValue;
   }
-
   return undefined;
 };
 const resolveFallbackTextContent = (block: UnknownRecord): string => {
@@ -71,24 +64,20 @@ const resolveFallbackTextContent = (block: UnknownRecord): string => {
   if (typeof block.markdown === "string" && block.markdown.trim()) {
     return block.markdown;
   }
-
   const code = asRecord(block.code);
   if (typeof code?.code === "string" && code.code.trim()) {
     return code.code;
   }
-
   const questionTitle = toStringOr(block.questionTitle, "").trim();
   const questionAnswer = toStringOr(block.questionAnswer, "").trim();
   if (questionTitle || questionAnswer) {
     return [questionTitle, questionAnswer].filter(Boolean).join("\n\n");
   }
-
   return "";
 };
 const normalizeUploadedPdf = (value: unknown): UploadedPdf | null => {
   const pdf = asRecord(value);
   if (!pdf) return null;
-
   const id = toStringOr(pick(pdf.id, pdf.assetId, pdf.localFileId), "").trim();
   const assetId = toStringOr(pdf.assetId, "").trim();
   const localFileId = toStringOr(pdf.localFileId, "").trim();
@@ -97,7 +86,6 @@ const normalizeUploadedPdf = (value: unknown): UploadedPdf | null => {
   const storagePath = toStringOr(pdf.storagePath, "").trim();
   const hasSource = Boolean(id || assetId || localFileId || remoteUrl || localUrl || storagePath);
   if (!hasSource) return null;
-
   const status =
     pdf.status === "pending" ||
       pdf.status === "uploading" ||
@@ -106,7 +94,6 @@ const normalizeUploadedPdf = (value: unknown): UploadedPdf | null => {
       ? pdf.status
       : "ready";
   const filename = toStringOr(pick(pdf.filename, pdf.name), "").trim() ?? "PDF";
-
   return {
     id: id || assetId || localFileId || makeFallbackId(),
     assetId: assetId || null,
@@ -131,11 +118,9 @@ const normalizeBlockOffsets = (blockRaw: unknown) => {
   const shouldNormalizeOffsetRows =
     isGridBlockType(block.type) &&
     (block.type === "code" || isGridOffsetType(block.type));
-
   if (!shouldNormalizeOffsetRows) {
     return blockRaw;
   }
-
   const fallbackRows = toFiniteNumber(
     pick(block.offsetRows, block.rowOffset),
     0,
@@ -143,7 +128,6 @@ const normalizeBlockOffsets = (blockRaw: unknown) => {
   const normalizedOffsetRows = Number.isFinite(fallbackRows)
     ? Math.max(0, Math.round(fallbackRows))
     : 0;
-
   return {
     ...block,
     offsetRows: normalizedOffsetRows,
@@ -158,7 +142,6 @@ const normalizeCardBlock = (
 ): CardBlock | null => {
   const block = asRecord(blockRaw);
   if (!block) return null;
-
   const explicitType = isCardBlockType(block.type) ? block.type : null;
   const type: CardBlock["type"] = explicitType ?? "text";
   const id = toStringOr(block.id, "") || `${side}-${type}-${cardId}-${index}`;
@@ -167,22 +150,18 @@ const normalizeCardBlock = (
     type,
     orderIndex: index,
   };
-
   const parentBlockId =
     typeof block.parentBlockId === "string" ? block.parentBlockId : null;
   if (parentBlockId !== null) normalized.parentBlockId = parentBlockId;
   else if (block.parentBlockId === null) normalized.parentBlockId = null;
-
   const rowOffset = toFiniteNumber(block.rowOffset, 0);
   if (block.rowOffset !== undefined && Number.isFinite(rowOffset)) {
     normalized.rowOffset = Math.round(rowOffset);
   }
-
   const offsetRows = toFiniteNumber(block.offsetRows, 0);
   if (block.offsetRows !== undefined && Number.isFinite(offsetRows)) {
     normalized.offsetRows = Math.round(offsetRows);
   }
-
   switch (type) {
     case "text": {
       const content =
@@ -253,7 +232,6 @@ const normalizeCardBlock = (
       break;
     }
   }
-
   return normalizeBlockOffsets(normalized) as CardBlock;
 };
 const normalizeCard = (raw: unknown): Card => {
@@ -261,7 +239,6 @@ const normalizeCard = (raw: unknown): Card => {
   const id =
     toStringOr(pick(record.id, record.cardId, record.card_id), "") ||
     makeFallbackId();
-
   const legacyQuestionExtraRows = normalizeExtraRows(
     toFiniteNumber(
       pick(record.questionExtraRows, record.question_extra_rows),
@@ -274,12 +251,10 @@ const normalizeCard = (raw: unknown): Card => {
   const migratedLayoutRows =
     LEGACY_BASE_LAYOUT_ROWS +
     Math.max(legacyQuestionExtraRows, legacyAnswerExtraRows);
-
   const levelNum = toFiniteNumber(
     pick(record.currentLevel, record.current_level, record.level),
     0,
   );
-
   const rawMemoryStability = pick(
     record.memoryStability,
     record.memory_stability,
@@ -295,7 +270,6 @@ const normalizeCard = (raw: unknown): Card => {
       Number.isFinite(memoryStabilityNumber)
       ? memoryStabilityNumber
       : undefined;
-
   const normalizeBlocksWithFallback = (
     side: "question" | "answer",
     blocks: unknown[],
@@ -308,13 +282,10 @@ const normalizeCard = (raw: unknown): Card => {
     const normalizedBlocks = toArrayOr(blocks, [])
       .map((block, index) => normalizeCardBlock(block, side, id, index))
       .filter((block): block is CardBlock => block !== null);
-
     if (normalizedBlocks.length > 0) return normalizedBlocks;
     if (options?.allowLegacyFallback === false) return [];
-
     const fallbackBlocks: CardBlock[] = [];
     let index = 0;
-
     if (text) {
       fallbackBlocks.push({
         id: `${side === "question" ? "q" : "a"}-text-${id}`,
@@ -323,7 +294,6 @@ const normalizeCard = (raw: unknown): Card => {
         orderIndex: index++,
       });
     }
-
     if (code) {
       fallbackBlocks.push({
         id: `${side === "question" ? "q" : "a"}-code-${id}`,
@@ -332,7 +302,6 @@ const normalizeCard = (raw: unknown): Card => {
         orderIndex: index++,
       });
     }
-
     if (Array.isArray(images) && images.length > 0) {
       fallbackBlocks.push({
         id: `${side === "question" ? "q" : "a"}-img-${id}`,
@@ -341,7 +310,6 @@ const normalizeCard = (raw: unknown): Card => {
         orderIndex: index++,
       });
     }
-
     if (Array.isArray(audios) && audios.length > 0) {
       fallbackBlocks.push({
         id: `${side === "question" ? "q" : "a"}-audio-${id}`,
@@ -350,10 +318,8 @@ const normalizeCard = (raw: unknown): Card => {
         orderIndex: index++,
       });
     }
-
     return fallbackBlocks;
   };
-
   const fields = asRecord(record.fields);
   const frontText = toStringOr(
     pick(
@@ -401,7 +367,6 @@ const normalizeCard = (raw: unknown): Card => {
   const backFace = asRecord(record.back);
   const hasFrontFaceBlocks = Array.isArray(frontFace?.blocks);
   const hasBackFaceBlocks = Array.isArray(backFace?.blocks);
-
   const frontBlocks = normalizeBlocksWithFallback(
     "question",
     hasFrontFaceBlocks
@@ -424,7 +389,6 @@ const normalizeCard = (raw: unknown): Card => {
     backAudios,
     { allowLegacyFallback: !hasBackFaceBlocks },
   );
-
   const normalized: Card & {
     question: string;
     answer: string;
@@ -471,27 +435,19 @@ const normalizeCard = (raw: unknown): Card => {
     isSilent: toBoolOr(pick(record.isSilent, record.is_silent), false),
     reviewLogs: normalizeReviewLogs(pick(record.reviewLogs, record.review_logs)),
   };
-
   const subjectiveScore = normalizeSubjectiveScore(
     pick(record.subjectiveScore, record.subjective_score),
   );
   if (subjectiveScore !== undefined) normalized.subjectiveScore = subjectiveScore;
-
   const reviewCount = normalizeOptionalNumber(pick(record.reviewCount, record.review_count));
   if (reviewCount !== undefined) normalized.reviewCount = reviewCount;
-
   const recoveryRemaining = normalizeOptionalNumber(pick(record.recoveryRemaining, record.recovery_remaining));
   if (recoveryRemaining !== undefined) normalized.recoveryRemaining = recoveryRemaining;
-
   const learningStartedAt = normalizeDate(pick(record.learningStartedAt, record.learning_started_at));
   if (learningStartedAt !== null) normalized.learningStartedAt = learningStartedAt;
-
   const inkDocument = normalizeInkDocument(pick(record.inkDocument, record.ink_document));
   if (inkDocument !== undefined) normalized.inkDocument = inkDocument;
-
   return normalized;
 };
-
-
 
 export { normalizeCard };
