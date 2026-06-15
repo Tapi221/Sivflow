@@ -25,6 +25,8 @@ const isHexColor = (color: string) => /^#[0-9a-fA-F]{3,8}$/.test(color);
 const MathEditorDialog: FC<MathEditorDialogProps> = ({ open, onOpenChange, data, onChange, accentColor, error }) => {
   const ringColor = accentColor && isHexColor(accentColor) ? `${accentColor}40` : "var(--primary-color-alpha-40)";
   const latex = data?.latex ?? "";
+  const shouldRenderPreview = latex.trim().length > 0;
+  const shouldRenderError = error !== null && error !== undefined;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[min(92vw,780px)] max-w-96 overflow-hidden p-0">
@@ -58,12 +60,12 @@ const MathEditorDialog: FC<MathEditorDialogProps> = ({ open, onOpenChange, data,
               {latex.length.toLocaleString()} / {MAX_LATEX_LENGTH.toLocaleString()}
             </span>
           </div>
-          {latex.trim() ? <MathRenderer latex={latex} displayMode={data.displayMode ?? "block"} /> : null}
-          {error ? (
+          {shouldRenderPreview && <MathRenderer latex={latex} displayMode={data.displayMode ?? "block"} />}
+          {shouldRenderError && (
             <p className="mt-1 text-xs font-medium text-red-600" role="alert">
               {error}
             </p>
-          ) : null}
+          )}
         </div>
       </DialogContent>
     </Dialog>
