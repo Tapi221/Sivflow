@@ -81,7 +81,7 @@ const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions, class
       >
         {visibleActions.map((action) => (
           <Fragment key={action.id}>
-            {action.separatorBefore === true ? <DropdownMenuSeparator /> : null}
+            {action.separatorBefore === true && <DropdownMenuSeparator />}
             <DropdownMenuItem
               disabled={action.disabled}
               variant={action.danger === true ? "destructive" : "default"}
