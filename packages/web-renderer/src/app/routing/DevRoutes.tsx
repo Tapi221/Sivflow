@@ -10,7 +10,7 @@ const CardLayoutConsistencyTest = DEV_MODE
   ? lazy(() => import("@/routes/CardLayoutConsistencyTest"))
   : null;
 const PdfPerformanceTest = DEV_MODE
-  ? lazy(() => import("@/routes/PdfPerformanceTest"))
+  ? lazy(() => import("@/routes/PdfPerformanceTest").then(({ PdfPerformanceTest }) => ({ default: PdfPerformanceTest })))
   : null;
 const SelectionCaptureSandboxPage = DEV_MODE
   ? lazy(() => import("@/sandbox/2").then(({ SelectionCaptureSandboxPage }) => ({ default: SelectionCaptureSandboxPage })))
@@ -79,7 +79,6 @@ const getDevStandaloneRouteElement = (isTestBypass: boolean): ReactNode | null =
   if (CodeBlockVisualTest && isTestBypass && window.location.pathname === "/codeblock-visual-test") {
     return withDevRouteFallback(<CodeBlockVisualTest />);
   }
-
   if (
     PdfPerformanceTest &&
     isTestBypass &&
@@ -87,11 +86,25 @@ const getDevStandaloneRouteElement = (isTestBypass: boolean): ReactNode | null =
   ) {
     return withDevRouteFallback(<PdfPerformanceTest />);
   }
-
   return null;
 };
 const getDevRouteElements = () => {
-  return (<> {CodeBlockVisualTest ? (<Route path="codeblock-visual-test" element={withDevRouteFallback(<CodeBlockVisualTest />)} />) : null} {CardLayoutConsistencyTest ? (<Route path="card-layout-test" element={withDevRouteFallback(<CardLayoutConsistencyTest />)} />) : null} {PdfPerformanceTest ? (<Route path="pdf-performance-test" element={withDevRouteFallback(<PdfPerformanceTest />)} />) : null} {SelectionCaptureSandboxPage ? (<Route path="sandbox/2/*" element={withDevRouteFallback(<SelectionCaptureSandboxPage />)} />) : null} {KnowledgeSandboxPage ? (<Route path="sandbox/logseq/*" element={withDevRouteFallback(<KnowledgeSandboxPage />)} />) : null} {AnkiFsrsSandboxPage ? (<Route path="sandbox/anki-fsrs/*" element={withDevRouteFallback(<AnkiFsrsSandboxPage />)} />) : null} {ExcalidrawSandboxPage ? (<Route path="sandbox/excalidraw/*" element={withDevRouteFallback(<ExcalidrawSandboxPage />)} />) : null} {EditorEnginesSandboxPage ? (<Route path="sandbox/editor-engines/*" element={withDevRouteFallback(<EditorEnginesSandboxPage />)} />) : null} {LicenseNotesSandboxPage ? (<Route path="sandbox/license-notes/*" element={withDevRouteFallback(<LicenseNotesSandboxPage />)} />) : null} {CalendarTimeGridSandboxPage ? (<Route path="sandbox/calendar-time-grid/*" element={withDevRouteFallback(<CalendarTimeGridSandboxPage />)} />) : null} {CalendarDndSandboxPage ? (<Route path="sandbox/calendar-dnd/*" element={withDevRouteFallback(<CalendarDndSandboxPage />)} />) : null} {EventChipEditorSandboxPage ? (<Route path="sandbox/eventchip-editor/*" element={withDevRouteFallback(<EventChipEditorSandboxPage />)} />) : null} </>);
+  return (
+    <>
+      {CodeBlockVisualTest && <Route path="codeblock-visual-test" element={withDevRouteFallback(<CodeBlockVisualTest />)} />}
+      {CardLayoutConsistencyTest && <Route path="card-layout-test" element={withDevRouteFallback(<CardLayoutConsistencyTest />)} />}
+      {PdfPerformanceTest && <Route path="pdf-performance-test" element={withDevRouteFallback(<PdfPerformanceTest />)} />}
+      {SelectionCaptureSandboxPage && <Route path="sandbox/2/*" element={withDevRouteFallback(<SelectionCaptureSandboxPage />)} />}
+      {KnowledgeSandboxPage && <Route path="sandbox/logseq/*" element={withDevRouteFallback(<KnowledgeSandboxPage />)} />}
+      {AnkiFsrsSandboxPage && <Route path="sandbox/anki-fsrs/*" element={withDevRouteFallback(<AnkiFsrsSandboxPage />)} />}
+      {ExcalidrawSandboxPage && <Route path="sandbox/excalidraw/*" element={withDevRouteFallback(<ExcalidrawSandboxPage />)} />}
+      {EditorEnginesSandboxPage && <Route path="sandbox/editor-engines/*" element={withDevRouteFallback(<EditorEnginesSandboxPage />)} />}
+      {LicenseNotesSandboxPage && <Route path="sandbox/license-notes/*" element={withDevRouteFallback(<LicenseNotesSandboxPage />)} />}
+      {CalendarTimeGridSandboxPage && <Route path="sandbox/calendar-time-grid/*" element={withDevRouteFallback(<CalendarTimeGridSandboxPage />)} />}
+      {CalendarDndSandboxPage && <Route path="sandbox/calendar-dnd/*" element={withDevRouteFallback(<CalendarDndSandboxPage />)} />}
+      {EventChipEditorSandboxPage && <Route path="sandbox/eventchip-editor/*" element={withDevRouteFallback(<EventChipEditorSandboxPage />)} />}
+    </>
+  );
 };
 
 export { getDevStandaloneRouteElement, getDevRouteElements };
