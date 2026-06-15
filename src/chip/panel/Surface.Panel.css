@@ -1,6 +1,11 @@
 .surface-panel.surface-panel {
+  --surface-panel-background: color-mix(
+    in srgb,
+    var(--ds-semantic-color-background-floating) 72%,
+    transparent
+  );
   border-color: var(--ds-semantic-color-border-floating);
-  background: var(--ds-semantic-color-background-floating);
+  background: var(--surface-panel-background);
   background-clip: padding-box;
   color: var(--ds-semantic-color-text-strong);
   box-shadow:
