@@ -49,7 +49,7 @@ describe("useExplorerStore", () => {
     );
 
     const { useExplorerStore } =
-      await import("@/hooks/folder/useExplorerStore");
+      await import("@/features/explorer/store/useExplorerStore");
     await flushHydration();
 
     const state = useExplorerStore.getState() as Record<string, unknown> & {
@@ -99,7 +99,7 @@ describe("useExplorerStore", () => {
     );
 
     const { useExplorerStore } =
-      await import("@/hooks/folder/useExplorerStore");
+      await import("@/features/explorer/store/useExplorerStore");
     await flushHydration();
 
     const state = useExplorerStore.getState();
