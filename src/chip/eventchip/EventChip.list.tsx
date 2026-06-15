@@ -1,5 +1,6 @@
 import { memo, useMemo } from "react";
 import { format } from "date-fns";
+import { SCHEDULE_LIST_COLOR } from "@shared/design-tokens/color/Color.Schedule";
 import type { CSSProperties } from "react";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
@@ -13,10 +14,10 @@ const ALL_DAY_LABEL = "終日";
 const LIST_EVENT_ROW_BASE_CLASS_NAME = "flex items-stretch";
 const LIST_EVENT_TIMED_ROW_CLASS_NAME = "h-12";
 const LIST_EVENT_ALL_DAY_ROW_CLASS_NAME = "h-10";
-const LIST_EVENT_START_TIME_CLASS_NAME = "w-12 shrink-0 bg-white px-1 pt-2.5 text-right text-xs font-medium tabular-nums text-[#85827e]";
+const LIST_EVENT_START_TIME_CLASS_NAME = "w-12 shrink-0 bg-white px-1 pt-2.5 text-right text-xs font-medium tabular-nums";
 const LIST_EVENT_RAIL_CLASS_NAME = "relative flex w-8 shrink-0 justify-center";
-const LIST_EVENT_LINE_CLASS_NAME = "absolute -bottom-2 left-1/2 top-0 w-px -translate-x-1/2 bg-slate-200";
-const LIST_EVENT_DOT_CLASS_NAME = "relative mt-2 h-2 w-2 rounded-full border-2 bg-white shadow-sm";
+const LIST_EVENT_LINE_CLASS_NAME = "absolute -bottom-2 left-1/2 top-0 w-px -translate-x-1/2";
+const LIST_EVENT_DOT_CLASS_NAME = "relative mt-2 h-2 w-2 rounded-full border-2 shadow-sm";
 const LIST_EVENT_CHIP_BASE_CLASS_NAME = "ml-2 min-w-0 flex-1 overflow-hidden rounded-2xl px-3 text-left";
 const LIST_EVENT_TIMED_CHIP_CLASS_NAME = "h-11 py-1";
 const LIST_ALL_DAY_EVENT_CHIP_CLASS_NAME = "flex h-8 items-center py-0";
@@ -25,6 +26,8 @@ const LIST_EVENT_TITLE_CLASS_NAME = "line-clamp-2 overflow-hidden whitespace-nor
 const LIST_TIMED_EVENT_TITLE_CLASS_NAME = "mt-0.5";
 const LIST_ALL_DAY_EVENT_TITLE_CLASS_NAME = "mt-0 line-clamp-1 whitespace-nowrap leading-none";
 const MINUTE_IN_MS = 60_000;
+const LIST_EVENT_START_TIME_STYLE: CSSProperties = { color: SCHEDULE_LIST_COLOR.timeText };
+const LIST_EVENT_LINE_STYLE: CSSProperties = { backgroundColor: SCHEDULE_LIST_COLOR.railLine };
 
 const getEventTitle = (event: GoogleCalendarEvent): string => {
   const title = event.title.trim();
@@ -53,6 +56,11 @@ const createEventChipStyle = (tokens: ReturnType<typeof generateColorTokens>): C
   background: tokens.bg,
   color: tokens.text,
 });
+const createEventDotStyle = (tokens: ReturnType<typeof generateColorTokens>): CSSProperties => ({
+  backgroundColor: SCHEDULE_LIST_COLOR.dotBackground,
+  borderColor: tokens.border,
+  boxShadow: `0 0 0 2px ${tokens.bg}`,
+});
 const getEventRowClassName = (isAllDay: boolean): string =>
   cn(
     LIST_EVENT_ROW_BASE_CLASS_NAME,
@@ -75,12 +83,13 @@ const CalendarEventChipListComponent = ({ event }: CalendarEventChipListProps) =
   const startLabel = getEventStartTimeLabel(event);
   const timeRangeLabel = getEventTimeRangeLabel(event);
   const chipStyle = useMemo(() => createEventChipStyle(tokens), [tokens]);
+  const dotStyle = useMemo(() => createEventDotStyle(tokens), [tokens]);
   return (
     <div className={getEventRowClassName(event.isAllDay)}>
-      <div className={LIST_EVENT_START_TIME_CLASS_NAME}>{startLabel}</div>
+      <div className={LIST_EVENT_START_TIME_CLASS_NAME} style={LIST_EVENT_START_TIME_STYLE}>{startLabel}</div>
       <div className={LIST_EVENT_RAIL_CLASS_NAME}>
-        <span className={LIST_EVENT_LINE_CLASS_NAME} aria-hidden="true" />
-        <span className={LIST_EVENT_DOT_CLASS_NAME} style={{ borderColor: tokens.border, boxShadow: `0 0 0 2px ${tokens.bg}` }} aria-hidden="true" />
+        <span className={LIST_EVENT_LINE_CLASS_NAME} style={LIST_EVENT_LINE_STYLE} aria-hidden="true" />
+        <span className={LIST_EVENT_DOT_CLASS_NAME} style={dotStyle} aria-hidden="true" />
       </div>
       <div className={getEventChipClassName(event.isAllDay)} style={chipStyle}>
         {timeRangeLabel !== null && <div className={LIST_EVENT_TIME_CLASS_NAME}>{timeRangeLabel}</div>}
