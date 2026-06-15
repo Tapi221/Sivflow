@@ -23,9 +23,9 @@ const MediaUploadToast = ({ id, name, progress, status = "loading", ...props }: 
   return (
     <div {...props} className={cn("flex min-w-72 items-center gap-3 rounded-md border bg-background p-3 shadow-md", props.className)}>
       <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
-        {status === "loading" ? <Loader2Icon className="size-4 animate-spin" /> : null}
-        {status === "success" ? <CheckCircleIcon className="size-4" /> : null}
-        {status === "error" ? <XCircleIcon className="size-4" /> : null}
+        {status === "loading" && <Loader2Icon className="size-4 animate-spin" />}
+        {status === "success" && <CheckCircleIcon className="size-4" />}
+        {status === "error" && <XCircleIcon className="size-4" />}
       </div>
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-medium">{name}</div>
@@ -54,6 +54,7 @@ const MediaUploadToast = ({ id, name, progress, status = "loading", ...props }: 
 
 
 export { MediaUploadToast };
+
 
 
 export type { MediaUploadToastProps };
