@@ -1,7 +1,7 @@
 import { useLinkToolbarButton, useLinkToolbarButtonState } from "@platejs/link/react";
 import { LinkIcon } from "lucide-react";
-import type { ToolbarButtonProps } from "./toolbar";
-import { ToolbarButton } from "./toolbar";
+import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
+import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 
 type LinkToolbarButtonProps = ToolbarButtonProps;
 
