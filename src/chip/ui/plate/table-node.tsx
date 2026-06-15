@@ -106,7 +106,7 @@ const TableCellElement = (props: TableCellElementProps) => {
     >
       <div className="relative z-20 box-border h-full px-4 py-2" data-table-cell-path={path.join(".")} style={{ minHeight }}>
         {props.children}
-        {blockSelected ? <div className={blockSelectionVariants({ active: blockSelected })} contentEditable={false} /> : null}
+        {blockSelected && <div className={blockSelectionVariants({ active: blockSelected })} contentEditable={false} />}
       </div>
     </PlateElement>
   );
