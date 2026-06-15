@@ -64,7 +64,7 @@ const eventChipDesign: EventChipDesign = {
     titleFontSizePx: 12,
     timeFontSizePx: 12,
     gapPx: 4,
-    allDayOffsetPx: 1,
+    allDayOffsetPx: 0,
   },
   weekday: {
     radiusPx: 6,
@@ -84,8 +84,8 @@ const eventChipDesign: EventChipDesign = {
     timedOverlapGapPx: 2,
     timedVerticalTrimPx: 0,
     timedMinHeightPx: 24,
-    allDayColumnInsetPx: 0,
-    allDayEventGapPx: 1,
+    allDayColumnInsetPx: 0.5,
+    allDayEventGapPx: 0.5,
   },
   list: {
     rowHeightPx: 48,
