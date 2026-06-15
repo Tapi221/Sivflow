@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
 import { addDays, endOfDay, endOfMonth, format, startOfDay, startOfMonth, subDays } from "date-fns";
 import type { PlanResultMode } from "@/chip/toggle/Toggle.planresult";
-import { CarvePanel, CarvePanelShell } from "@/components/panel/CarvePanel.desktop";
+import { CarvePanel, CarvePanelShell } from "@/chip/panel/panel/CarvePanel.desktop";
 import { DEFAULT_MONTH_VISIBLE_EVENT_COUNT } from "@/features/calendar/calendar.constants.desktop";
 import { createCalendarYearEventDisplayResolver } from "@/features/calendar/calendarEventSourcePriority";
 import { attachCalendarEventDisplayMetadata, filterCalendarEventsBySourceVisibility } from "@/features/calendar/calendarEventVisibility";
