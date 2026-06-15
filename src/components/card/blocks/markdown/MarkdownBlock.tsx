@@ -1,9 +1,9 @@
 import React from "react";
+import { NotebookPen } from "@/chip/icons";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { MarkdownBlockContent } from "@/components/card/blocks/markdown/MarkdownBlockContent";
 import type { MarkdownReplaceBlock, MarkdownReplaceFocus } from "@/components/card/blocks/markdown/MarkdownBlockContent";
 import { cn } from "@/lib/utils";
-import { NotebookPen } from "@/chip/icons";
 
 interface MarkdownBlockProps {
   markdown: string;
