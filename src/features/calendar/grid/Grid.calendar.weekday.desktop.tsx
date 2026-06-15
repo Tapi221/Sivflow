@@ -9,12 +9,12 @@ import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
 import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
-import type { CalendarAllDayEventOrderMap, CalendarGridStyle, CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
 import type { CalendarEventDragPointerSnapshot } from "@/features/calendar/grid/calendarEventDrag.shared";
 import { areSameCalendarEventTimes, CALENDAR_EVENT_DRAGGING_STYLE, createCalendarEventDragPointerSnapshot, createCalendarEventDragPreview, createCalendarEventKey, getCalendarEventDateOrNull, isCalendarEventDraggable, isSameCalendarEventMove, useCalendarEventDragAutoScroll, useCalendarEventDragBodyStyle } from "@/features/calendar/grid/calendarEventDrag.shared";
 import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
 import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";
 import { getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle, WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX } from "@/features/calendar/grid/weekdayTimeGridGeometry";
+import type { CalendarAllDayEventOrderMap, CalendarGridStyle, CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 

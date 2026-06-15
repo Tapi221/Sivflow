@@ -2,10 +2,10 @@ import type { Transition } from "framer-motion";
 import { motion } from "framer-motion";
 import type { ComponentType } from "react";
 import { useNavigate } from "react-router-dom";
-import { FlashCardIcon, PDFIcon } from "@/chip/icons/icons.library";
-import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
-import { cn } from "@/lib/utils";
 import type { IconProps } from "@/chip/icons";
+import { FlashCardIcon, PDFIcon } from "@/chip/icons/icons.library";
+import { HoverTooltip } from "@/chip/panel/toolchip/HoverTooltip";
+import { cn } from "@/lib/utils";
 
 type PdfLibraryWorkspaceSection = "flashcard" | "pdf";
 type PdfLibraryWorkspaceToolbarProps = {

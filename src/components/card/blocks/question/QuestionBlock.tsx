@@ -1,7 +1,7 @@
 import React, { useCallback, useRef } from "react";
+import { HelpCircle } from "@/chip/icons";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import type { CardBlock } from "@/types/domain/card";
-import { HelpCircle } from "@/chip/icons";
 import { QuestionBlockContent } from "./QuestionBlockContent";
 
 interface QuestionBlockProps {

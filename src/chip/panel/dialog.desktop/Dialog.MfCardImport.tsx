@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ChangeEvent } from "react";
-import { Button } from "@/chip/ui/button/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/chip/panel/dialog.desktop/dialog/dialog";
+import { Button } from "@/chip/ui/button/button";
 import { Input } from "@/chip/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/chip/ui/select";
 import { useToast } from "@/contexts/ToastContext";
@@ -32,8 +32,8 @@ type MfCardImportDialogProps = {
   initialFile?: File | null;
   initialFileRevision?: number;
 };
-
 type DestinationMode = "new" | "existing";
+
 const emptyLoadedState = {
   file: null as File | null,
   loaded: null as LoadMfCardFileResult | null,
@@ -146,7 +146,8 @@ const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
             <Select value={destinationMode} onValueChange={(value) => {
               if (value === "existing" && cardSets.length === 0) return;
               setDestinationMode(value as DestinationMode);
-            }}>
+            }}
+            >
               <SelectTrigger><SelectValue placeholder="取り込み先を選択" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="new">新規カードセットを作成</SelectItem>

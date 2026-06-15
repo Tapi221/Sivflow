@@ -90,7 +90,8 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
           if (exists) return;
           event.preventDefault();
           createTag();
-        }}>
+        }}
+        >
           <div className="p-3">
             <CommandInput placeholder="タグを検索・作成..." value={inputValue} onValueChange={setInputValue} className="ds-input h-6 focus:ring-0" />
           </div>
@@ -107,7 +108,8 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
                       <button type="button" key={colorKey} aria-label={`${colorKey}を選択`} className={cn("w-7 h-7 rounded-full border-2 ring-1 ring-slate-300/70 shadow-sm transition-all", selectedColor === colorKey || (!selectedColor && colorKey === availableColors[0]) ? "ring-2 ring-offset-2 ring-primary-600 scale-110 shadow-md" : "hover:scale-105 hover:ring-slate-400")} style={getTagColorSwatchStyle(colorKey)} onClick={(event) => {
                         event.stopPropagation();
                         setSelectedColor(colorKey);
-                      }} />
+                      }}
+                      />
                     ))}
                   </div>
                 </div>

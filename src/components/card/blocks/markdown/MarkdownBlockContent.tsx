@@ -36,6 +36,7 @@ type BlockRange = Readonly<{
 }>;
 
 const MAX_LENGTH = 50000;
+
 const validateBlocksLength = (blocks: MarkdownReplaceBlock[]) => {
   for (const block of blocks) {
     const length =

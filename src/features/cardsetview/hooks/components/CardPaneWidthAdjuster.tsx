@@ -1,6 +1,6 @@
 import React from "react";
-import { Slider } from "@/chip/ui/slider";
 import { Minus, Plus, RefreshCw } from "@/chip/icons";
+import { Slider } from "@/chip/ui/slider";
 
 interface CardPaneWidthAdjusterProps {
   modeLabel: string;

@@ -86,7 +86,6 @@ const createThemeAccentRuntimeVariables = (color: string): ThemeAccentRuntimeVar
     "--primary-color": color,
   };
 };
-
 const useThemeAccentColor = () => {
   const { settings } = useUserSettings();
   const accentColor = normalizeThemeAccentColor(settings?.accentColor);

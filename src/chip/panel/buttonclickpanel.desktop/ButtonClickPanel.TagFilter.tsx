@@ -1,10 +1,10 @@
 import { useState } from "react";
+import { Filter } from "@/chip/icons";
 import { floatingPanelPresets } from "@/chip/ui/menu-styles";
 import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
 import { TagFilterPanel } from "@/components/explorer/TagFilterPanel";
 import { useExplorerStore } from "@/features/explorer/store/useExplorerStore";
 import { cn } from "@/lib/utils";
-import { Filter } from "@/chip/icons";
 
 interface TagFilterPopoverProps {
   allTags: string[];

@@ -1,6 +1,6 @@
-import type { CSSProperties } from "react";
-import { DEFAULT_TAG_COLOR_KEY, TAG_COLOR_KEYS, TAG_COLOR_PALETTE } from "@shared/design-tokens/color/Color.Tag";
 import type { TagColorKey, TagColorPalette } from "@shared/design-tokens/color/Color.Tag";
+import { DEFAULT_TAG_COLOR_KEY, TAG_COLOR_KEYS, TAG_COLOR_PALETTE } from "@shared/design-tokens/color/Color.Tag";
+import type { CSSProperties } from "react";
 
 const TAG_COLOR_KEY_SET = new Set<string>(TAG_COLOR_KEYS);
 

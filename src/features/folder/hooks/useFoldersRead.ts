@@ -1,6 +1,6 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { useEffectiveLocalUserId } from "@/contexts/auth/useEffectiveLocalUserId";
+import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { getLocalDb } from "@/services/localdb";
 import type { Folder } from "@/types";
 

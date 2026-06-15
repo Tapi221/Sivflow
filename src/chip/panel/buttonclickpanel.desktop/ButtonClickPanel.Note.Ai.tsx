@@ -1,9 +1,9 @@
 "use client";
 
-import type { MouseEvent } from "react";
 import { AIChatPlugin } from "@platejs/ai/react";
 import { WandSparklesIcon } from "lucide-react";
 import { useEditorPlugin, usePluginOption } from "platejs/react";
+import type { MouseEvent } from "react";
 import type { ToolbarButtonProps } from "@/chip/ui/plate/toolbar";
 import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import type { Notification } from "@/types/notification";
 import { Info } from "@/chip/icons/icons";
+import type { Notification } from "@/types/notification";
 
 type InfoToastProps = {
   notification: Notification;

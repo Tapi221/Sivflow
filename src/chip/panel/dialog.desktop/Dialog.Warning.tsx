@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { MouseEvent as ReactMouseEvent } from "react";
-import type { Notification } from "@/types/notification";
 import { AlertTriangle, ChevronDown } from "@/chip/icons/icons";
+import type { Notification } from "@/types/notification";
 
 interface WarningDialogProps {
   notification: Notification;

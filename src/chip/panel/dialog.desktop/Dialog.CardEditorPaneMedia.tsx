@@ -43,6 +43,7 @@ const areMediaDialogsPropsEqual = (prev: CardEditorPaneMediaDialogsProps, next: 
   if (prevClosed && nextClosed) return true;
   return false;
 };
+
 const MediaDialog = ({ title, open, onClose, maxWidth = "max-w-2xl", children }: MediaDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>

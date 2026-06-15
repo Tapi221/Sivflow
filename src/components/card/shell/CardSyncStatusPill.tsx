@@ -1,7 +1,7 @@
 import React from "react";
+import { RefreshCw } from "@/chip/icons";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
-import { RefreshCw } from "@/chip/icons";
 import { formatLastSyncedAt } from "./formatLastSyncedAt";
 import { overlayGlassPillClassName } from "./overlaySurfaceClassNames";
 

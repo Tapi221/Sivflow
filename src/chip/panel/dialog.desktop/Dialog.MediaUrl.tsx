@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
-import type { ReactNode } from "react";
 import { isUrl, KEYS } from "platejs";
 import { useEditorRef } from "platejs/react";
+import type { ReactNode } from "react";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/chip/panel/dialog.desktop/dialog/alert-dialog";
 import { Input } from "@/chip/ui/input";
@@ -51,14 +51,16 @@ const MediaUrlDialogContent = ({ currentConfig, nodeType, setOpen }: MediaUrlDia
         </label>
         <Input id="url" className="w-full" value={url} onChange={(event) => setUrl(event.target.value)} onKeyDown={(event) => {
           if (event.key === "Enter") embedMedia();
-        }} placeholder="" type="url" autoFocus />
+        }} placeholder="" type="url" autoFocus
+        />
       </AlertDialogDescription>
       <AlertDialogFooter>
         <AlertDialogCancel>Cancel</AlertDialogCancel>
         <AlertDialogAction onClick={(event) => {
           event.preventDefault();
           embedMedia();
-        }}>
+        }}
+        >
           Accept
         </AlertDialogAction>
       </AlertDialogFooter>

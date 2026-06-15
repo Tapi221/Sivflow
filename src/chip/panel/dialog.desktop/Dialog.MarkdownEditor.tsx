@@ -1,7 +1,7 @@
-import AutoResizeTextarea from "@/chip/ui/AutoResizeTextarea";
+import type { ClipboardEvent, CSSProperties, FC, KeyboardEvent } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/chip/panel/dialog.desktop/dialog/dialog";
+import AutoResizeTextarea from "@/chip/ui/AutoResizeTextarea";
 import { cn } from "@/lib/utils";
-import type { CSSProperties, ClipboardEvent, FC, KeyboardEvent } from "react";
 
 type CSSCustomProperties = CSSProperties & Record<`--${string}`, string>;
 interface MarkdownEditorDialogProps {

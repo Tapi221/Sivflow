@@ -1,7 +1,7 @@
 import { useState } from "react";
-import type { CSSProperties } from "react";
 import authBackgroundSrc from "@shared/assets/backgrounds/sivflow-flow-background.svg";
 import appIconSrc from "@shared/assets/icons/app-icon.svg";
+import type { CSSProperties } from "react";
 import { signInWithGoogle } from "@/services/auth/googleSignIn";
 
 type MobileLoginPageStyles = {

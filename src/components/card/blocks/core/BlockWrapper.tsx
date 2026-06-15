@@ -1,6 +1,6 @@
 import React from "react";
-import { cn } from "@/lib/utils";
 import { Copy, GripVertical, Trash2 } from "@/chip/icons/icons";
+import { cn } from "@/lib/utils";
 import { BlockFrame } from "./BlockFrame";
 
 interface BlockWrapperProps {

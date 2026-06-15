@@ -1,17 +1,17 @@
 import { memo, useCallback, useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { Link, Plus } from "@/chip/icons";
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { useEffectiveLocalUserId } from "@/contexts/auth/useEffectiveLocalUserId";
 import { useToast } from "@/contexts/ToastContext";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
-import { useEffectiveLocalUserId } from "@/contexts/auth/useEffectiveLocalUserId";
 import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { getLocalDb } from "@/services/localdb";
 import type { Card, CardBlock } from "@/types/domain/card";
 import type { CardSet } from "@/types/domain/cardSet";
-import { Link, Plus } from "@/chip/icons";
 
 type CardQuestionLinksPanelProps = {
   selectedCardId: string | null;

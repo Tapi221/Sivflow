@@ -1,4 +1,5 @@
 import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { Copy, Download, Image as ImageIcon, Pause, Play, Volume2 } from "@/chip/icons/icons";
 import { Button } from "@/chip/ui/button/button";
 import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
@@ -6,7 +7,6 @@ import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
 import { resolveCardImageUrl } from "@/services/cardImageResolver";
 import type { ResolvableImageRef } from "@/types/domain/assets";
-import { Copy, Download, Image as ImageIcon, Pause, Play, Volume2 } from "@/chip/icons/icons";
 import type { ImageGalleryItem } from "./media.types";
 
 interface AudioPlayerProps {

@@ -1,9 +1,9 @@
-import AutoResizeTextarea from "@/chip/ui/AutoResizeTextarea";
+import type { CSSProperties, FC } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/chip/panel/dialog.desktop/dialog/dialog";
+import AutoResizeTextarea from "@/chip/ui/AutoResizeTextarea";
 import { MathRenderer } from "@/components/card/blocks/math/MathBlockContent";
 import { cn } from "@/lib/utils";
 import type { MathBlockData } from "@/types/domain/base";
-import type { CSSProperties, FC } from "react";
 
 type CSSCustomProperties = CSSProperties & Record<`--${string}`, string>;
 interface MathEditorDialogProps {
