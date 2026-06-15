@@ -165,8 +165,8 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
         accessibleTitle="Q&Aチャット"
         accessibleDescription="チャット形式でQ&Aカードを作成します。"
         className="app-modal-surface w-full max-w-96 p-0"
-        overlayClassName="app-modal-backdrop"
-        contentWrapperClassName="app-modal-content-frame"
+        overlayClassName="app-modal-backdrop bg-[rgba(15,16,18,0.28)]"
+        contentWrapperClassName="app-modal-content-frame left-0 top-0 max-w-none translate-x-0 translate-y-0"
       >
         <div className="border-b border-[#eceae4] px-5 py-4">
           <div className="flex items-center gap-2">
