@@ -1,12 +1,14 @@
 import React from "react";
 import { MarkdownEditorDialog } from "@/chip/panel/dialog.desktop/Dialog.MarkdownEditor";
+import { MarkdownBlockDisplay } from "@/components/card/blocks/markdown/MarkdownBlockDisplay";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { clampMarkdownTabSize, normalizeMarkdownEditorValue, normalizeMarkdownInsertionText, resolveMarkdownTabKeyText } from "@/utils/markdownWhitespace";
-import { MarkdownBlockDisplay } from "./MarkdownBlockDisplay";
 
-export type MarkdownReplaceBlock = | { type: "markdown"; markdown: string; }
+type MarkdownReplaceBlock =
+  | { type: "markdown"; markdown: string; }
   | { type: "code"; code: { language: string; code: string; }; };
-type MarkdownReplaceFocus = Readonly<{ relativeIndex: number;
+type MarkdownReplaceFocus = Readonly<{
+  relativeIndex: number;
 }>;
 type MarkdownBlockContentProps =
   | Readonly<{
@@ -34,7 +36,6 @@ type BlockRange = Readonly<{
 }>;
 
 const MAX_LENGTH = 50000;
-
 const validateBlocksLength = (blocks: MarkdownReplaceBlock[]) => {
   for (const block of blocks) {
     const length =
@@ -50,7 +51,7 @@ const htmlToPlainText = (html: string) => {
   try {
     const div = document.createElement("div");
     div.innerHTML = html;
-    return (div.textContent || div.innerText) ?? "";
+    return div.textContent ?? div.innerText ?? "";
   } catch {
     return "";
   }
@@ -151,7 +152,7 @@ const extractPreTextFromHtml = (html: string) => {
     const code = pre?.querySelector("code");
     if (code?.textContent) return code.textContent;
     if (pre?.textContent) return pre.textContent;
-    return (div.textContent || div.innerText) ?? "";
+    return div.textContent ?? div.innerText ?? "";
   } catch {
     return "";
   }
@@ -347,7 +348,7 @@ const MarkdownBlockContent = (props: MarkdownBlockContentProps) => {
     if (props.mode !== "edit") return;
     const plain = event.clipboardData.getData("text/plain");
     const html = event.clipboardData.getData("text/html");
-    const value = plain || htmlToPlainText(html);
+    const value = plain.length > 0 ? plain : htmlToPlainText(html);
     if (!value) return;
     const textarea = event.currentTarget;
     const selectionStart = textarea.selectionStart;
@@ -360,7 +361,7 @@ const MarkdownBlockContent = (props: MarkdownBlockContentProps) => {
     const afterLine = nextNewline >= 0 ? after.slice(0, nextNewline) : after;
     const atLineEnd = afterLine.trim().length === 0;
     const normalized = normalizeMarkdownInsertionText(value, markdownTabSize);
-    const insertText = html && looksLikeHtmlBlockCandidate(value)
+    const insertText = html.length > 0 && looksLikeHtmlBlockCandidate(value)
       ? wrapFence(extractPreTextFromHtml(html), detectLang(value, html))
       : normalized;
     const fenced = normalizeFenceBoundaries(insertText, { atLineStart, atLineEnd });
@@ -374,7 +375,11 @@ const MarkdownBlockContent = (props: MarkdownBlockContentProps) => {
     if (props.mode !== "edit") return;
     if (event.key !== "Tab") return;
     const textarea = event.currentTarget;
-    const tabText = resolveMarkdownTabKeyText(markdownTabSize);
+    const tabText = resolveMarkdownTabKeyText(
+      props.markdown,
+      textarea.selectionStart,
+      markdownTabSize,
+    );
     event.preventDefault();
     applyInsert(textarea, tabText, textarea.selectionStart, textarea.selectionEnd, {
       attemptSplitFences: false,
@@ -398,4 +403,4 @@ const MarkdownBlockContent = (props: MarkdownBlockContentProps) => {
 };
 
 export { MarkdownBlockContent };
-export type { MarkdownBlockContentProps };
+export type { MarkdownBlockContentProps, MarkdownReplaceBlock, MarkdownReplaceFocus };
