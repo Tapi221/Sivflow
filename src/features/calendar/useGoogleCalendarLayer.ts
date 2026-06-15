@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { SCHEDULE_EVENT_COLOR } from "@shared/design-tokens/color/Color.Schedule";
 import { createGoogleCalendarEvent, deleteGoogleCalendarEvent, updateGoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcal.api";
 import type { GCalConnectionStatus, GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritableEventUpdateInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import type { GoogleAccountEntry } from "@/integration/googlecalendar-integration/useMultiAccountGoogleCalendar";
@@ -8,6 +9,7 @@ import { useGoogleTaskLists } from "@/integration/googletask-integration/useGoog
 import { useGoogleTasks } from "@/integration/googletask-integration/useGoogleTasks";
 
 const RECURRENCE_REFRESH_FUTURE_DAYS = 366;
+const GOOGLE_CALENDAR_EVENT_FALLBACK_ACCENT_COLOR = SCHEDULE_EVENT_COLOR.fallbackAccent;
 
 const resolveExternalEventId = (accountId: string, calendarId: string, eventId: string): string => {
   const accountPrefix = `${accountId}:${calendarId}:`;
@@ -91,7 +93,7 @@ const useGoogleCalendarLayer = () => {
     const created = await createGoogleCalendarEvent({
       accessToken: account.accessToken!,
       accountId,
-      accentColor: calendar?.backgroundColor ?? "#185FA5",
+      accentColor: calendar?.backgroundColor ?? GOOGLE_CALENDAR_EVENT_FALLBACK_ACCENT_COLOR,
       event,
     });
 
@@ -107,7 +109,7 @@ const useGoogleCalendarLayer = () => {
     const updated = await updateGoogleCalendarEvent({
       accessToken: account.accessToken!,
       accountId,
-      accentColor: calendar?.backgroundColor ?? "#185FA5",
+      accentColor: calendar?.backgroundColor ?? GOOGLE_CALENDAR_EVENT_FALLBACK_ACCENT_COLOR,
       event: {
         ...event,
         eventId: resolveExternalEventId(accountId, event.calendarId, event.eventId),
