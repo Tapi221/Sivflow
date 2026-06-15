@@ -5,9 +5,9 @@
   --cm-disabled: var(--zed-text-disabled, var(--context-menu-disabled, var(--menu-disabled, #6f6f6f)));
   --cm-border: var(--zed-border, var(--context-menu-border, var(--menu-border, #363636)));
   --cm-border-variant: var(--zed-border-variant, var(--context-menu-separator, var(--menu-separator, #383838)));
-  --cm-hover-bg: var(--zed-ghost-element-hover, var(--context-menu-hover-background, rgb(255 255 255 / 6%)));
-  --cm-active-bg: var(--zed-ghost-element-active, var(--context-menu-active-background, rgb(255 255 255 / 10%)));
-  --cm-selected-bg: var(--zed-ghost-element-selected, var(--context-menu-selected-background, rgb(255 255 255 / 8%)));
+  --cm-hover-bg: var(--zed-ghost-element-hover, var(--context-menu-hover-background, color-mix(in srgb, var(--cm-fg) 6%, transparent)));
+  --cm-active-bg: var(--zed-ghost-element-active, var(--context-menu-active-background, color-mix(in srgb, var(--cm-fg) 10%, transparent)));
+  --cm-selected-bg: var(--zed-ghost-element-selected, var(--context-menu-selected-background, color-mix(in srgb, var(--cm-fg) 8%, transparent)));
   --cm-accent: var(--zed-accent, var(--context-menu-accent, var(--menu-accent, #74a3ff)));
   --cm-shadow: var(--zed-elevation-2-shadow, 0 2px 3px rgb(0 0 0 / 12%), 0 1px 0 rgb(0 0 0 / 6%));
   position: relative;
