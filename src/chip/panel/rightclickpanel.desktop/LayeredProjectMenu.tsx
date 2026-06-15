@@ -65,7 +65,7 @@ const LAYERED_PROJECT_MENU_STYLE = `
 .layered-project-menu-item--open,
 .layered-project-menu-item--open:not(:disabled):hover,
 .layered-project-menu-item--open:not(:disabled):focus-visible {
-  background: #eee;
+  background: var(--interactive-accent-hover-bg);
 }
 
 .layered-project-menu-separator {
