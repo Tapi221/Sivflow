@@ -52,7 +52,6 @@
   gap: 6px;
   width: 100%;
   padding: 0 6px;
-  border-radius: 0;
   color: var(--cm-fg);
   white-space: nowrap;
   cursor: default;
@@ -61,16 +60,16 @@
 .cm-submenu-trigger .cm-item {
   cursor: pointer;
 }
-.cm-child:not(:has(.cm-item-disabled)):hover .cm-item,
-.cm-submenu-trigger:hover .cm-item {
+.cm-child:not(:has(.cm-item-disabled)):hover,
+.cm-submenu-trigger:hover {
   background: var(--cm-hover-bg);
 }
-.cm-child:not(:has(.cm-item-disabled)):active .cm-item,
-.cm-submenu-trigger:active .cm-item {
+.cm-child:not(:has(.cm-item-disabled)):active,
+.cm-submenu-trigger:active {
   background: var(--cm-active-bg);
 }
 .cm-selected,
-.cm-child.cm-selected .cm-item {
+.cm-child.cm-selected {
   color: var(--cm-fg);
   background: var(--cm-selected-bg);
 }
