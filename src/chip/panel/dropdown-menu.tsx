@@ -110,13 +110,16 @@ const DropdownMenuSubTrigger = ({ className, inset, children, ...props }: React.
     </DropdownMenuPrimitive.SubTrigger>
   );
 };
-const DropdownMenuSubContent = ({ className, ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.SubContent>) => {
+const DropdownMenuSubContent = ({ className, sideOffset = 4, ...props }: React.ComponentProps<typeof DropdownMenuPrimitive.SubContent>) => {
   return (
-    <DropdownMenuPrimitive.SubContent
-      className={cn("dropdown-menu__sub-content", "surface-panel", className)}
-      data-slot="dropdown-menu-sub-content"
-      {...props}
-    />
+    <DropdownMenuPrimitive.Portal>
+      <DropdownMenuPrimitive.SubContent
+        className={cn("dropdown-menu__sub-content", "surface-panel", className)}
+        data-slot="dropdown-menu-sub-content"
+        sideOffset={sideOffset}
+        {...props}
+      />
+    </DropdownMenuPrimitive.Portal>
   );
 };
 
