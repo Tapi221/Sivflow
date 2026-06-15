@@ -1,7 +1,7 @@
-import { normalizeDate } from "@/shared/codec/date";
-import { toArrayOr, toBoolOr, toFiniteNumber, toOptionalString, toStringOr } from "@/shared/codec/primitives";
-import { makeFallbackId } from "@/shared/lib/fallbackId";
-import { asRecord, pick } from "@/shared/lib/records";
+import { normalizeDate } from "@/utils/codec/date";
+import { toArrayOr, toBoolOr, toFiniteNumber, toOptionalString, toStringOr } from "@/utils/codec/primitives";
+import { makeFallbackId } from "@/utils/fallbackId";
+import { asRecord, pick } from "@/utils/records";
 import type { Folder } from "@/types/domain/folder";
 
 
