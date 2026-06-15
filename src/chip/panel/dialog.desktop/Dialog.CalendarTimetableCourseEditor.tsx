@@ -60,7 +60,6 @@ const CalendarTimetableCourseEditorDialog = ({ course, semesterId, initialSlot, 
       <div className="flex max-h-full w-full max-w-96 flex-col overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-[0_18px_60px_rgba(0,0,0,0.18)]">
         <div className="flex shrink-0 items-center justify-between border-b border-[#f0f0f2] px-5 py-4">
           <h2 className="text-base font-bold tracking-tight text-zinc-900">{course ? "授業を編集" : "授業を追加"}</h2>
-          <button type="button" className="rounded-full px-3 py-1.5 text-xs font-semibold text-zinc-500 hover:bg-zinc-50" onClick={onClose}>閉じる</button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
           <div className="grid gap-3">
