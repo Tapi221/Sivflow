@@ -1,7 +1,7 @@
-import { DEFAULT_TAG_COLOR_CLASS_NAME, DEFAULT_TAG_COLOR_KEY, TAG_COLOR_KEYS } from "./tag.constants";
-import { getTagColorClassName, getTagColorKey } from "./tag.parser";
-import { getTagColorStyle, getTagColorSwatchStyle } from "./tag.style";
-import type { TagColorKey, TagColorPalette } from "./tag.types";
+import { DEFAULT_TAG_COLOR_KEY, TAG_COLOR_KEYS } from "@shared/design-tokens/color/Color.Tag";
+import type { TagColorKey, TagColorPalette } from "@shared/design-tokens/color/Color.Tag";
+import { getTagColorClassName, getTagColorKey } from "@/chip/budge/tag/tag.parser";
+import { getTagColorStyle, getTagColorSwatchStyle } from "@/chip/budge/tag/tag.style";
 
-export { DEFAULT_TAG_COLOR_CLASS_NAME, DEFAULT_TAG_COLOR_KEY, TAG_COLOR_KEYS, getTagColorClassName, getTagColorKey, getTagColorStyle, getTagColorSwatchStyle };
+export { DEFAULT_TAG_COLOR_KEY, TAG_COLOR_KEYS, getTagColorClassName, getTagColorKey, getTagColorStyle, getTagColorSwatchStyle };
 export type { TagColorKey, TagColorPalette };
