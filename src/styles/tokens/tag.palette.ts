@@ -1,1 +1,1 @@
-// removed tag palette file
+// removed
