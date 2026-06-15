@@ -1,3 +1,4 @@
+type TagColorKey = (typeof TAG_COLOR_KEYS)[number];
 type TagColorPalette = {
   bg: string;
   bgRgb: readonly [number, number, number];
@@ -6,8 +7,21 @@ type TagColorPalette = {
   border: string;
   swatch: string;
 };
-type TagColorPaletteMap = Record<string, TagColorPalette>;
+type TagColorPaletteMap = Record<TagColorKey, TagColorPalette>;
 
+const TAG_COLOR_KEYS = [
+  "gray",
+  "purple",
+  "teal",
+  "pink",
+  "amber",
+  "blue",
+  "green",
+  "red",
+  "coral",
+  "sky",
+] as const;
+const DEFAULT_TAG_COLOR_KEY: TagColorKey = "gray";
 const TAG_COLOR_PALETTE = {
   gray: {
     bg: "#F1EFE8",
@@ -91,5 +105,5 @@ const TAG_COLOR_PALETTE = {
   },
 } as const satisfies TagColorPaletteMap;
 
-export { TAG_COLOR_PALETTE };
-export type { TagColorPalette, TagColorPaletteMap };
+export { DEFAULT_TAG_COLOR_KEY, TAG_COLOR_KEYS, TAG_COLOR_PALETTE };
+export type { TagColorKey, TagColorPalette, TagColorPaletteMap };
