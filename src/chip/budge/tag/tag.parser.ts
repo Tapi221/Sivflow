@@ -1,1 +1,2 @@
-import { getTagColorClassName, getTagColorKey } from "@/chip/budge/tag/tagColor";export { getTagColorClassName, getTagColorKey };
+import { getTagColorClassName, getTagColorKey } from "@/chip/budge/tag/tagColor";
+export { getTagColorClassName, getTagColorKey };
