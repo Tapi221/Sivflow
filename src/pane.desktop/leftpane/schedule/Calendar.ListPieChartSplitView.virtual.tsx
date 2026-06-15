@@ -1,7 +1,8 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { differenceInCalendarDays, differenceInMinutes, format, getDaysInMonth, isSameDay, startOfMonth, subDays } from "date-fns";
 import { ja } from "date-fns/locale";
-import type { UIEvent } from "react";
+import { SCHEDULE_CONTENT_COLOR, SCHEDULE_DATE_COLOR, SCHEDULE_PIE_CHART_COLOR } from "@shared/design-tokens/color/Color.Schedule";
+import type { CSSProperties, UIEvent } from "react";
 import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
 import { LIST_DAY_GAP_PX, LIST_DAY_SECTION_MIN_HEIGHT_PX, LIST_EMPTY_DAY_HEIGHT_PX, LIST_EVENT_ROW_GAP_PX, LIST_EVENT_ROW_HEIGHT_PX } from "@/chip/eventchip/EventChip.list.placement";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
@@ -66,6 +67,9 @@ type SplitVirtualMetrics = {
   dynamicHeightEntries: SplitVirtualDynamicHeightEntry[];
   totalHeight: number;
 };
+type SplitDayDateButtonStyle = CSSProperties & {
+  "--schedule-date-focus-ring": string;
+};
 
 const SPLIT_DAY_MIN_HEIGHT_PX = LIST_DAY_SECTION_MIN_HEIGHT_PX;
 const SPLIT_DAY_GAP_PX = LIST_DAY_GAP_PX;
@@ -76,11 +80,16 @@ const ANCHOR_OFFSET = 160;
 const SELECTED_OFFSET = 8;
 const USER_SCROLL_AUTO_SCROLL_BLOCK_MS = 350;
 const EMPTY_DAY_LABEL = "予定なし";
-const DEFAULT_COLOR = "#8e8e93";
-const GAP_COLOR = "#f2f2f7";
+const DEFAULT_COLOR = SCHEDULE_PIE_CHART_COLOR.defaultSegment;
+const GAP_COLOR = SCHEDULE_PIE_CHART_COLOR.gapSegment;
 const DATE_KEY_PART_COUNT = 3;
 const DAY_DATE_NUMBER_CLASS_NAME = "flex h-8 w-8 items-center justify-center rounded-full text-base font-bold leading-none tracking-tight tabular-nums transition-all duration-150";
-const DAY_WEEKDAY_CLASS_NAME = "text-xs font-semibold leading-none text-[rgba(60,60,67,0.58)]";
+const DAY_WEEKDAY_CLASS_NAME = "text-xs font-semibold leading-none";
+const SPLIT_VIEW_ROOT_STYLE: CSSProperties = { backgroundColor: SCHEDULE_CONTENT_COLOR.surface };
+const DAY_WEEKDAY_STYLE: CSSProperties = { color: SCHEDULE_DATE_COLOR.weekdayText };
+const EMPTY_DAY_CARD_STYLE: CSSProperties = { backgroundColor: SCHEDULE_CONTENT_COLOR.surface, borderColor: SCHEDULE_DATE_COLOR.emptyDayBorder };
+const PIE_CHART_INNER_STYLE: CSSProperties = { backgroundColor: SCHEDULE_CONTENT_COLOR.surface };
+const SPLIT_DAY_DATE_BUTTON_STYLE: SplitDayDateButtonStyle = { "--schedule-date-focus-ring": SCHEDULE_DATE_COLOR.todayFocusRing };
 
 const createRail = (selectedDate: Date): ScheduleVirtualRail => ({ startDate: subDays(startOfMonth(selectedDate), LOCAL_DAYS), anchorIndex: LOCAL_DAYS, totalDayCount: LOCAL_DAYS * 2 + getDaysInMonth(selectedDate) });
 const getIndexForDate = (rail: ScheduleVirtualRail, date: Date) => differenceInCalendarDays(date, rail.startDate);
@@ -286,13 +295,28 @@ const buildConicGradient = (segments: PieSegment[]) => {
   if (cursor < total) stops.push(`${GAP_COLOR} ${(cursor / total) * 360}deg 360deg`);
   return `conic-gradient(${stops.join(", ")})`;
 };
-const getSplitDayDateNumberClassName = (day: SplitDay): string => cn(DAY_DATE_NUMBER_CLASS_NAME, day.isSelected ? "bg-[#3a77b2] text-white ring-1 ring-[#3a77b2]" : day.isToday ? "text-[#0a84ff]" : "text-zinc-900");
+const getSplitDayDateNumberClassName = (day: SplitDay): string => cn(DAY_DATE_NUMBER_CLASS_NAME, !day.isSelected && !day.isToday && "text-zinc-900");
+const createSplitDayDateNumberStyle = (day: SplitDay): CSSProperties => {
+  if (day.isSelected) {
+    return {
+      backgroundColor: SCHEDULE_DATE_COLOR.selectedBackground,
+      boxShadow: `0 0 0 1px ${SCHEDULE_DATE_COLOR.selectedBackground}`,
+      color: SCHEDULE_DATE_COLOR.selectedText,
+    };
+  }
 
-const EmptyDayCard = () => <div className="flex h-8 items-center rounded-xl border border-dashed border-[#dedede] bg-white px-3 text-xs font-semibold text-zinc-500">{EMPTY_DAY_LABEL}</div>;
+  if (day.isToday) {
+    return { color: SCHEDULE_DATE_COLOR.todayText };
+  }
+
+  return {};
+};
+
+const EmptyDayCard = () => <div className="flex h-8 items-center rounded-xl border border-dashed px-3 text-xs font-semibold text-zinc-500" style={EMPTY_DAY_CARD_STYLE}>{EMPTY_DAY_LABEL}</div>;
 const SplitDayDateButton = ({ day, onSelectDate }: SplitDayDateButtonProps) => (
-  <button type="button" className="mt-0.5 flex h-8 items-center justify-end gap-1 rounded-xl pr-0.5 text-right transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]/25" onClick={() => onSelectDate?.(day.date)}>
-    <span className={getSplitDayDateNumberClassName(day)}>{format(day.date, "d")}</span>
-    <span className={DAY_WEEKDAY_CLASS_NAME}>{format(day.date, "EEE", { locale: ja })}</span>
+  <button type="button" className="mt-0.5 flex h-8 items-center justify-end gap-1 rounded-xl pr-0.5 text-right transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--schedule-date-focus-ring)]" style={SPLIT_DAY_DATE_BUTTON_STYLE} onClick={() => onSelectDate?.(day.date)}>
+    <span className={getSplitDayDateNumberClassName(day)} style={createSplitDayDateNumberStyle(day)}>{format(day.date, "d")}</span>
+    <span className={DAY_WEEKDAY_CLASS_NAME} style={DAY_WEEKDAY_STYLE}>{format(day.date, "EEE", { locale: ja })}</span>
   </button>
 );
 const SplitDaySectionComponent = ({ day, onSelectDate }: SplitDaySectionProps) => {
@@ -322,7 +346,7 @@ const SplitDaySectionComponent = ({ day, onSelectDate }: SplitDaySectionProps) =
             {day.segments.length === 0 ? <div className="text-xs font-semibold text-zinc-500">時間指定なし</div> : null}
           </div>
           <div className="mx-auto flex aspect-square w-full max-w-44 items-center justify-center rounded-full border border-slate-200" style={{ background: buildConicGradient(day.segments) }}>
-            <div className="flex h-7/12 w-7/12 items-center justify-center rounded-full bg-white text-xs font-semibold text-slate-700 shadow-sm">{hours}h</div>
+            <div className="flex h-7/12 w-7/12 items-center justify-center rounded-full text-xs font-semibold text-slate-700 shadow-sm" style={PIE_CHART_INNER_STYLE}>{hours}h</div>
           </div>
         </div>
       </div>
@@ -397,7 +421,7 @@ const CalendarListPieChartSplitViewComponent = ({ virtualRail, selectedDate, eve
     if (frameRef.current !== null) window.cancelAnimationFrame(frameRef.current); }, []);
 
   return (
-    <div className={cn("ml-4 mr-4 flex min-h-0 flex-1 overflow-hidden bg-white", className)}>
+    <div className={cn("ml-4 mr-4 flex min-h-0 flex-1 overflow-hidden", className)} style={SPLIT_VIEW_ROOT_STYLE}>
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto pb-6 pt-2 scrollbar-hidden" onScroll={handleScroll}>
         <div className="relative min-w-0" style={{ height: totalHeight }}>
           {days.map((day, offset) => {
