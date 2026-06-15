@@ -3,8 +3,6 @@ import type * as React from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-
-
 type MediaUploadToastProps = React.ComponentPropsWithoutRef<"div"> & {
   id?: string | number;
   name?: string;
@@ -12,11 +10,7 @@ type MediaUploadToastProps = React.ComponentPropsWithoutRef<"div"> & {
   status?: "error" | "loading" | "success";
 };
 
-
-
 const getProgress = (progress: MediaUploadToastProps["progress"]) => Math.max(0, Math.min(100, progress ?? 0));
-
-
 
 const MediaUploadToast = ({ id, name, progress, status = "loading", ...props }: MediaUploadToastProps) => {
   const resolvedProgress = getProgress(progress);
@@ -51,10 +45,5 @@ const MediaUploadToast = ({ id, name, progress, status = "loading", ...props }: 
   );
 };
 
-
-
 export { MediaUploadToast };
-
-
-
 export type { MediaUploadToastProps };
