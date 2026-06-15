@@ -14,7 +14,7 @@ import { ButtonNoteFontSize } from "@/chip/button/Button.Note.FontSize";
 import { RedoToolbarButton, UndoToolbarButton } from "@/chip/ui/plate/history-toolbar-button";
 import { ButtonClickPanelNoteImport } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.Import";
 import { ButtonNoteIndent, ButtonNoteOutdent } from "@/chip/button/Button.Note.Indent";
-import { LineHeightToolbarButton } from "@/chip/ui/plate/line-height-toolbar-button";
+import { ButtonClickPanelNoteLineHeight } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.LineHeight";
 import { LinkToolbarButton } from "@/chip/ui/plate/link-toolbar-button";
 import { ButtonClickPanelNoteBulletedList, ButtonClickPanelNoteNumberedList, ButtonClickPanelNoteTodoList } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.List";
 import { MarkToolbarButton } from "@/chip/ui/plate/mark-toolbar-button";
@@ -94,7 +94,7 @@ const ToolbarNote = () => {
             <ButtonNoteMedia nodeType={KEYS.file} />
           </ToolbarGroup>
           <ToolbarGroup>
-            <LineHeightToolbarButton />
+            <ButtonClickPanelNoteLineHeight />
             <ButtonNoteOutdent />
             <ButtonNoteIndent />
           </ToolbarGroup>
