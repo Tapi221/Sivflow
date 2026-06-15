@@ -1,9 +1,9 @@
 import React from "react";
-import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
-import { cn } from "@/lib/utils";
 import { NotebookPen } from "@/chip/icons";
-import type { MarkdownReplaceBlock, MarkdownReplaceFocus } from "./MarkdownBlockContent";
-import { MarkdownBlockContent } from "./MarkdownBlockContent";
+import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
+import { MarkdownBlockContent } from "@/components/card/blocks/markdown/MarkdownBlockContent";
+import type { MarkdownReplaceBlock, MarkdownReplaceFocus } from "@/components/card/blocks/markdown/MarkdownBlockContent";
+import { cn } from "@/lib/utils";
 
 interface MarkdownBlockProps {
   markdown: string;
@@ -62,7 +62,6 @@ const MarkdownBlockInner: React.FC<MarkdownBlockProps> = ({
 }) => {
   const [isEditorOpen, setIsEditorOpen] = React.useState(false);
   const isMarkdownEmpty = markdown.trim().length === 0;
-
   return (
     <BlockWrapper
       onDelete={onDelete}
