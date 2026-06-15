@@ -5,18 +5,11 @@
   padding: 0.25rem;
   border: 1px solid var(--ds-semantic-color-border-floating);
   border-radius: 0.375rem;
-  background: var(--ds-semantic-color-background-floating);
   background-clip: padding-box;
   color: var(--ds-semantic-color-text-strong);
   transform-origin: var(--radix-dropdown-menu-content-transform-origin);
   overflow-x: hidden;
   overflow-y: auto;
-  box-shadow:
-    var(--ds-semantic-elevation-floating),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 0 rgba(148, 163, 184, 0.18);
-  backdrop-filter: blur(var(--ds-elevation-blur-floating));
-  -webkit-backdrop-filter: blur(var(--ds-elevation-blur-floating));
 }
 
 .dropdown-menu__content.min-w-0 {
@@ -29,17 +22,10 @@
   padding: 0.25rem;
   border: 1px solid var(--ds-semantic-color-border-floating);
   border-radius: 0.375rem;
-  background: var(--ds-semantic-color-background-floating);
   background-clip: padding-box;
   color: var(--ds-semantic-color-text-strong);
   transform-origin: var(--radix-dropdown-menu-content-transform-origin);
   overflow: hidden;
-  box-shadow:
-    var(--ds-semantic-elevation-floating),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 0 rgba(148, 163, 184, 0.18);
-  backdrop-filter: blur(var(--ds-elevation-blur-floating));
-  -webkit-backdrop-filter: blur(var(--ds-elevation-blur-floating));
 }
 
 .dropdown-menu__content[data-state="open"],
