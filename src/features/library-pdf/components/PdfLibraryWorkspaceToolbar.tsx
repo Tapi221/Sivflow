@@ -36,6 +36,7 @@ const resolveLibrarySectionRoute = (section: PdfLibraryWorkspaceSection): string
 
 const PdfLibraryWorkspaceToolbar = ({ activeSection, onSelectSection, onAddPdf }: PdfLibraryWorkspaceToolbarProps) => {
   const navigate = useNavigate();
+  const shouldRenderAddPdf = activeSection === "pdf" && onAddPdf !== undefined;
 
   const handleSelectSection = (section: PdfLibraryWorkspaceSection) => {
     onSelectSection?.(section);
@@ -56,7 +57,7 @@ const PdfLibraryWorkspaceToolbar = ({ activeSection, onSelectSection, onAddPdf }
               return (
                 <HoverTooltip key={tab.value} label={tab.label} side="top" align={isStartEdgeTab ? "start" : "center"} offset={6} preset="segmented">
                   <button type="button" onClick={() => handleSelectSection(tab.value)} aria-label={tab.label} aria-pressed={isActive} className={cn("relative z-10 flex h-7 w-8 min-w-0 items-center justify-center rounded-lg p-0", "appearance-none select-none", "outline-none ring-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none", "focus:outline-none focus:ring-0 focus-visible:outline-none", isActive ? "text-[#8c8c8c]" : "text-[#b3b3b3] hover:text-[#8c8c8c]")}>
-                    {isActive ? <motion.span layoutId={TAB_INDICATOR_ID} className="absolute inset-0 -z-10 rounded-lg border border-slate-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]" transition={TAB_MOTION_TRANSITION} /> : null}
+                    {isActive && <motion.span layoutId={TAB_INDICATOR_ID} className="absolute inset-0 -z-10 rounded-lg border border-slate-200 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]" transition={TAB_MOTION_TRANSITION} />}
                     <Icon aria-hidden="true" className={cn("block h-4 w-4 shrink-0 transition-colors duration-300 ease-[cubic-bezier(.22,1,.36,1)] motion-reduce:transition-none", isActive ? "text-[#8c8c8c]" : "text-[#b7b7b7]")} />
                   </button>
                 </HoverTooltip>
@@ -64,14 +65,14 @@ const PdfLibraryWorkspaceToolbar = ({ activeSection, onSelectSection, onAddPdf }
             })}
           </div>
         </div>
-        {activeSection === "pdf" && onAddPdf ? (
+        {shouldRenderAddPdf && (
           <HoverTooltip label="PDFを追加" side="top" align="end" offset={6} preset="segmented">
             <button type="button" onClick={onAddPdf} className="inline-flex h-8 items-center gap-2 rounded-lg border border-[#e8e8e8] bg-white px-3 text-xs font-medium text-[#707070] shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-colors hover:bg-zinc-100" aria-label="PDFを追加">
               <PDFIcon aria-hidden="true" className="block h-4 w-4 text-[#b7b7b7]" />
               <span>PDF追加</span>
             </button>
           </HoverTooltip>
-        ) : null}
+        )}
       </div>
     </>
   );
