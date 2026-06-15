@@ -2,8 +2,6 @@ import { createContext } from "react";
 import type { ReactNode } from "react";
 import type { SyncConflict } from "@/types/domain/sync";
 
-
-
 type SyncStatus = "idle" | "syncing" | "success" | "error";
 type SyncNotice = "none" | "wifi_wait" | "offline" | "error";
 type SyncTableName = "cards" | "folders" | "cardSets" | "documents" | "tagRecords" | "userSettings" | "images";
@@ -23,8 +21,6 @@ interface SyncProviderProps {
   children: ReactNode;
 }
 
-
-
 const defaultSyncContext: SyncContextType = {
   syncStatus: "idle",
   syncNotice: "none",
@@ -39,9 +35,5 @@ const defaultSyncContext: SyncContextType = {
 };
 const SyncContext = createContext<SyncContextType>(defaultSyncContext);
 
-
-
 export { SyncContext };
-
-
 export type { SyncStatus, SyncNotice, SyncTableName, SyncContextType, SyncProviderProps };

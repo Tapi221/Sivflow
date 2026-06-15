@@ -1,14 +1,10 @@
+import { IndexedDBMetadataService } from "@/services/IndexedDBMetadataService";
+import { IndexedDBRebuildOrchestrator } from "@/services/IndexedDBRebuildOrchestrator";
 import { getLocalDb } from "@/services/localdb";
-import { IndexedDBMetadataService } from "./IndexedDBMetadataService";
-import { IndexedDBRebuildOrchestrator } from "./IndexedDBRebuildOrchestrator";
-
-
 
 type ResettableLocalDb = {
   delete: () => Promise<void>;
 };
-
-
 
 const rebuildIndexedDb = async (userId: string, reason?: string): Promise<{ degraded: boolean;
   failures: Array<{ type: string; id: string; error: string; }>;
@@ -51,7 +47,5 @@ const rebuildIndexedDb = async (userId: string, reason?: string): Promise<{ degr
     failures: rebuildResult.failures,
   };
 };
-
-
 
 export { rebuildIndexedDb };

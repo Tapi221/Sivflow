@@ -9,8 +9,6 @@ import { getEditorBlockDefinition, parseEditorBlockSettings } from "@/lib/editor
 import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
 
-
-
 interface BlockToolbarProps {
   label: string;
   onAddBlock: (type: CardBlock["type"]) => void;
@@ -26,8 +24,6 @@ type ToolbarBlockConfig = {
   isVisible: boolean;
   orderIndex: number;
 };
-
-
 
 const areBlockToolbarPropsEqual = (
   prev: BlockToolbarProps,
@@ -53,8 +49,6 @@ const getIcon = (
 
   return map[iconName];
 };
-
-
 
 const TextBlockGlyph = ({
   size = 16,
@@ -608,9 +602,6 @@ const BlockToolbarInner: React.FC<BlockToolbarProps> = ({
   return renderToolbarShell();
 };
 
-
-
 const BlockToolbar = React.memo(BlockToolbarInner, areBlockToolbarPropsEqual);
 BlockToolbar.displayName = "BlockToolbar";
-
 export { BlockToolbar };

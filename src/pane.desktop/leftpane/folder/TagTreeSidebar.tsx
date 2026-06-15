@@ -8,14 +8,12 @@ import type { Tag as TagRecord } from "@/features/settings/hooks/useTags";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { useTagTreeCommands } from "@/features/settings/hooks/useTagTreeCommands";
 import { cn } from "@/lib/utils";
-import { LayeredTreeDropIndicator } from "./layeredTreeDnd";
-import { LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX, LAYERED_TREE_ROOT_LEVEL } from "./layeredTreeDnd.constants";
-import type { LayeredTreeDragState } from "./layeredTreeDnd.types";
-import { getLayeredTreeDropIndicatorLeft, isLayeredTreeAppendDropTarget } from "./layeredTreeDnd.utils";
-import { useLayeredTreeDragDrop } from "./useLayeredTreeDragDrop";
+import { LayeredTreeDropIndicator } from "@/pane.desktop/leftpane/folder/layeredTreeDnd";
+import { LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX, LAYERED_TREE_ROOT_LEVEL } from "@/pane.desktop/leftpane/folder/layeredTreeDnd.constants";
+import type { LayeredTreeDragState } from "@/pane.desktop/leftpane/folder/layeredTreeDnd.types";
+import { getLayeredTreeDropIndicatorLeft, isLayeredTreeAppendDropTarget } from "@/pane.desktop/leftpane/folder/layeredTreeDnd.utils";
+import { useLayeredTreeDragDrop } from "@/pane.desktop/leftpane/folder/useLayeredTreeDragDrop";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
-
-
 
 type TagTreeNode = {
   id: string;
@@ -52,12 +50,8 @@ type TagMovePatch = {
   orderIndex: number;
 };
 
-
-
 const LIBRARY_TITLE = "Library";
 const EMPTY_TAG_MESSAGE = "タグがありません";
-
-
 
 const getTagName = (tag: TagRecord): string => {
   const name = tag.name.trim();
@@ -127,8 +121,6 @@ const flattenVisibleTagTree = (nodes: TagTreeNode[], expandedTagIds: Set<string>
   if (!hasChildren || !isExpanded) return [item];
   return [item, ...flattenVisibleTagTree(node.children, expandedTagIds, level + 1, nextVisitedTagIds)];
 });
-
-
 
 const IconChevronRight = ({ className }: { className?: string; }) => (
   <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
@@ -270,7 +262,5 @@ const TagTreeSidebar = () => {
     </aside>
   );
 };
-
-
 
 export { TagTreeSidebar };

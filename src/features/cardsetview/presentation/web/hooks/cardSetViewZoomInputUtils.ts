@@ -4,14 +4,10 @@ import { clampNormalizedZoomPercent, resolveZoomPercentForPresentationWidthPx } 
 import { resolveWheelZoomStepCount } from "@/utils/zoom/wheelZoomMath";
 import { DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR, shouldHandleZoomInputTarget } from "@/utils/zoom/zoomInputTarget";
 
-
-
 const CARD_SET_VIEW_ZOOM_INPUT_IGNORE_SELECTOR = [
   DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR,
   "[data-card-zoom-input-ignore='true']",
 ].join(",");
-
-
 
 const clampZoomPercentToBounds = (
   value: number,
@@ -119,7 +115,5 @@ const computeNextCardSetViewZoomPercentFromGesture = ({ currentZoomPercent, base
     maxZoomPercent,
   });
 };
-
-
 
 export { shouldHandleCardSetViewZoomInputTarget, computeNextCardSetViewZoomPercentFromWheel, computeNextCardSetViewZoomPercentFromGesture };

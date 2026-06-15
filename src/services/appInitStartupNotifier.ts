@@ -1,7 +1,5 @@
-import { openSupportContact } from "./appInitSupportContact";
-import { notificationService } from "./NotificationService";
-
-
+import { openSupportContact } from "@/services/appInitSupportContact";
+import { notificationService } from "@/services/NotificationService";
 
 const notifyLocalDbFallbackMode = (args: { recoveryGuideUrl: string;
 }): void => {
@@ -29,7 +27,5 @@ const notifyRebuildLoopDetected = (args: { userId: string; }): void => {
 const notifyStartupDegraded = (): void => {
   notificationService.warning("一部データをスキップして起動しました", "破損データを除外して継続しています。必要に応じて同期を実行してください。", { closeable: true });
 };
-
-
 
 export { notifyLocalDbFallbackMode, notifyRebuildLoopDetected, notifyStartupDegraded };

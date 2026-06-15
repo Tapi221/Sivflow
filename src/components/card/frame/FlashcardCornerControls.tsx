@@ -1,12 +1,10 @@
 import React from "react";
 import { Image as ImageIcon, Link, Volume2 } from "@/chip/icons";
+import { CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS } from "@/components/card/frame/cardAction.constants";
+import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
+import type { FlashcardCardLike, FlashcardMediaLike } from "@/components/card/frame/flashcard.types";
 import { cn } from "@/lib/utils";
 import type { ReferenceBlockData } from "@/types";
-import { CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS } from "./cardAction.constants";
-import { CardCornerActions } from "./CardCornerActions";
-import type { FlashcardCardLike, FlashcardMediaLike } from "./flashcard.types";
-
-
 
 interface FlashcardCornerControlsProps {
   card: FlashcardCardLike;
@@ -27,8 +25,6 @@ interface FlashcardCornerControlsResult {
   actionsTopLeft: React.ReactNode[] | undefined;
   actionsTopRight: React.ReactNode[] | undefined;
 }
-
-
 
 const resolveSafeVisualScale = (value?: number) => {
   if (typeof value !== "number") return 1;
@@ -226,9 +222,5 @@ const useFlashcardCornerControls = ({ card, hasUncertainty, isBookmarked, active
   ]);
 };
 
-
-
 export { useFlashcardCornerControls };
-
-
 export type { FlashcardCornerControlsResult };

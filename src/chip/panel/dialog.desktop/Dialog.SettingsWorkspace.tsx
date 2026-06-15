@@ -8,6 +8,7 @@ type SettingsWorkspaceDialogProps = {
 };
 
 const SettingsWorkspaceRootContent = SettingsWorkspaceRootScreen;
+
 const SettingsWorkspaceDialog = ({ open, onOpenChange }: SettingsWorkspaceDialogProps) => {
   const handleClose = () => onOpenChange(false);
   if (!open) return null;

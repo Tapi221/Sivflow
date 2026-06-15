@@ -1,8 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import type { ChangeEvent, CSSProperties, HTMLAttributes, ReactNode } from "react";
 
-
-
 type ToggleSwitchProps = Omit<HTMLAttributes<HTMLLabelElement>, "onChange"> & {
   checked?: boolean;
   onChange?: (checked: boolean) => void;
@@ -24,8 +22,6 @@ type ToggleSwitchStyles = {
   switchThumb: CSSProperties;
 };
 
-
-
 const DEFAULT_SWITCH_SIZE = 26;
 const DEFAULT_SWITCH_PADDING = 3;
 const SWITCH_GAP = 10;
@@ -35,8 +31,6 @@ const SWITCH_THUMB_TRANSITION = "all .2s cubic-bezier(0.27, 0.2, 0.25, 1.51)";
 const SWITCH_DISABLED_BACKGROUND_COLOR = "var(--toggle-disable-background-color, #d9d9d6)";
 const SWITCH_CIRCLE_BACKGROUND_COLOR = "var(--toggle-circle-background-color, #fff)";
 const SWITCH_CHECKED_BACKGROUND_COLOR = "var(--toggle-checked-background-color, var(--ds-semantic-color-action-accent, var(--primary-color, #1e96eb)))";
-
-
 
 const createToggleSwitchStyles = ({
   checked,
@@ -88,8 +82,6 @@ const createToggleSwitchStyles = ({
     },
   };
 };
-
-
 
 const ToggleSwitch = ({
   checked: checkedProp = false,
@@ -151,9 +143,5 @@ const ToggleSwitch = ({
   );
 };
 
-
-
 export { ToggleSwitch };
-
-
 export type { ToggleSwitchProps };

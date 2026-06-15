@@ -97,5 +97,4 @@ const TextBlockInner = ({
 
 const TextBlock = React.memo(TextBlockInner, areTextBlockPropsEqual);
 TextBlock.displayName = "TextBlock";
-
 export { TextBlock };

@@ -9,8 +9,6 @@ import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { cn } from "@/lib/utils";
 
-
-
 type CalendarYearEventPriority = {
   group: number;
   index: number;
@@ -64,8 +62,6 @@ type YearVirtualWindow = {
   endOffset: number;
 };
 
-
-
 const YEAR_MONTH_GRID_DAY_COUNT = 42;
 const YEAR_INITIAL_RENDERED_FUTURE_YEARS = 3;
 const YEAR_EXTEND_YEARS = 1;
@@ -84,8 +80,6 @@ const YEAR_EVENT_TONE_CLASSES: Record<CalendarYearEventTone, string> = {
   violet: "bg-violet-100",
   zinc: "bg-zinc-100",
 };
-
-
 
 const createDayAriaLabel = (date: Date, eventCount: number): string => {
   const baseLabel = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
@@ -194,8 +188,6 @@ const getDayEventToneClassName = (day: CalendarYearDay, selected: boolean): stri
   if (selected || !day.events) return null;
   return YEAR_EVENT_TONE_CLASSES[day.events.tone];
 };
-
-
 
 const CalendarYearViewComponent = ({
   yearDate,
@@ -459,12 +451,7 @@ const CalendarYearViewComponent = ({
   );
 };
 
-
-
 const CalendarYearView = memo(CalendarYearViewComponent);
 CalendarYearView.displayName = "CalendarYearView";
-
 export { CalendarYearView };
-
-
 export type { CalendarYearEventPriority, CalendarYearEventDisplay, CalendarYearEventDisplayResolver };

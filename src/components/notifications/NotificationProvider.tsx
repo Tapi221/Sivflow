@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { ErrorDialog } from "@/chip/panel/dialog.desktop/Dialog.Error";
 import { WarningDialog } from "@/chip/panel/dialog.desktop/Dialog.Warning";
+import { InfoToast } from "@/components/notifications/InfoToast";
 import { notificationService } from "@/services/NotificationService";
 import type { Notification } from "@/types/notification";
-import { InfoToast } from "./InfoToast";
-
-
 
 /**
  * 通知プロバイダー
@@ -84,7 +82,5 @@ const NotificationProvider: React.FC<{ children: React.ReactNode; }> = ({ childr
     </>
   );
 };
-
-
 
 export { NotificationProvider };

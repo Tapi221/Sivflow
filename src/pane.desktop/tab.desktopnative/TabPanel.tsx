@@ -1,5 +1,3 @@
 void "tab";
 
-
-
-export { WorkspaceTabPanel } from "./WorkspaceTabPanel";
+export { WorkspaceTabPanel } from "@/pane.desktop/tab.desktopnative/WorkspaceTabPanel";

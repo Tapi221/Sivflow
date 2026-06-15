@@ -1,10 +1,8 @@
+import type { MfDeckTagLookup } from "@/features/deckFile/application/mfDeck.types";
+import { bundleMediaInMfDeckCards } from "@/features/deckFile/application/mfDeckMediaBundler";
 import type { MfDeckArchiveV1, MfDeckCardV1, MfDeckIssue } from "@/features/deckFile/domain/mfDeck.types";
 import { MF_DECK_FORMAT, MF_DECK_VERSION, MfDeckExportError } from "@/features/deckFile/domain/mfDeck.types";
 import type { Card, CardBlock, CardSet } from "@/types";
-import type { MfDeckTagLookup } from "./mfDeck.types";
-import { bundleMediaInMfDeckCards } from "./mfDeckMediaBundler";
-
-
 
 const toEpoch = (value: unknown): number => {
   if (value instanceof Date) return value.getTime();
@@ -185,7 +183,5 @@ const buildMfDeckArchive = async ({ cardSet, cards, tagById, appVersion }: { car
     ...(mediaBundled ? { media: mediaBundle.media } : {}),
   };
 };
-
-
 
 export { collectMfDeckExportIssues, mapCardToMfDeckCard, buildMfDeckArchive };

@@ -2,8 +2,6 @@ import { addDays, getDaysInMonth, isSameDay, startOfMonth } from "date-fns";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
-
-
 type CalendarListPlacementDay = {
   date: Date;
   dateKey: string;
@@ -26,8 +24,6 @@ type BuildListPlacementDaysParams = {
   selectedDate: Date;
 };
 
-
-
 const LIST_DAY_SECTION_MIN_HEIGHT_PX = 432;
 const LIST_DAY_GAP_PX = 8;
 const LIST_EMPTY_DAY_HEIGHT_PX = 40;
@@ -37,8 +33,6 @@ const LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX = 40;
 const LIST_ALL_DAY_EVENT_CHIP_HEIGHT_PX = 32;
 const LIST_EVENT_ROW_GAP_PX = 4;
 const LIST_VIRTUAL_OVERSCAN_PX = 6000;
-
-
 
 const buildMonthDays = (date: Date): Date[] => {
   const monthStart = startOfMonth(date);
@@ -133,9 +127,5 @@ const getListVirtualRange = (metrics: CalendarListVirtualMetrics, scrollTop: num
   };
 };
 
-
-
 export { LIST_ALL_DAY_EVENT_CHIP_HEIGHT_PX, LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX, LIST_DAY_GAP_PX, LIST_DAY_SECTION_MIN_HEIGHT_PX, LIST_EMPTY_DAY_HEIGHT_PX, LIST_EVENT_CHIP_HEIGHT_PX, LIST_EVENT_ROW_GAP_PX, LIST_EVENT_ROW_HEIGHT_PX, buildListPlacementDays, buildListVirtualMetrics, getListVirtualRange };
-
-
 export type { CalendarListPlacementDay, CalendarListVirtualMetrics, CalendarListVirtualRange };

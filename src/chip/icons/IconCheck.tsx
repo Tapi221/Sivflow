@@ -6,6 +6,4 @@ const IconCheck = () => {
   );
 };
 
-
-
 export { IconCheck };

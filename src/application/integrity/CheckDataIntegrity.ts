@@ -3,12 +3,10 @@ import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { normalizeFolder } from "@/domain/folder/normalizers/normalizeFolder";
 import { getLocalDb } from "@/infrastructure/persistence/indexeddb";
 import type { IntegrityIssue, IntegrityReport } from "@/services/dataIntegrity.types";
-import { normalizeDate } from "@/utils/codec/date";
 import type { Card } from "@/types/domain/card";
 import type { Folder } from "@/types/domain/folder";
+import { normalizeDate } from "@/utils/codec/date";
 import { sanitizeForLog } from "@/utils/logSanitizer";
-
-
 
 const TIMESTAMP_KEYS = [
   "createdAt",
@@ -17,8 +15,6 @@ const TIMESTAMP_KEYS = [
   "nextReviewDate",
   "lastReviewAt",
 ] as const;
-
-
 
 const isMissingFolderId = (folderId: unknown): boolean => {
   return (
@@ -215,7 +211,5 @@ const createCheckDataIntegrityUseCase = () => {
     execute,
   };
 };
-
-
 
 export { createCheckDataIntegrityUseCase };

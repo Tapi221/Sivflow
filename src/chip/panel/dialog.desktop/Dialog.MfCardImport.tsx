@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ChangeEvent } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/chip/panel/dialog.desktop/dialog/dialog";
 import { Button } from "@/chip/button/button/button";
 import { Input } from "@/chip/input-field/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/chip/panel/dialog.desktop/dialog/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/chip/ui/select";
 import { useToast } from "@/contexts/ToastContext";
 import { importMfCardFile } from "@/features/cardFile/application/importMfCard";
@@ -11,8 +11,6 @@ import type { LoadMfCardFileResult } from "@/features/cardFile/infra/web/readMfC
 import { readMfCardFile } from "@/features/cardFile/infra/web/readMfCardFile";
 import type { CreateMfDeckCard, CreateMfDeckCardSet, EnsureMfDeckTagByName, UpdateMfDeckCardSet } from "@/features/deckFile/application/importMfDeck";
 import type { CardSet } from "@/types";
-
-
 
 type MfCardImportCompletedPayload = {
   cardSetId: string;
@@ -36,14 +34,10 @@ type MfCardImportDialogProps = {
 };
 type DestinationMode = "new" | "existing";
 
-
-
 const emptyLoadedState = {
   file: null as File | null,
   loaded: null as LoadMfCardFileResult | null,
 };
-
-
 
 const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets, onImported, createCardSet, updateCardSet, createCard, ensureTagByName, initialFile = null, initialFileRevision = 0 }: MfCardImportDialogProps) => {
   const toast = useToast();
@@ -185,9 +179,5 @@ const MfCardImportDialog = ({ open, onOpenChange, folderId, folderName, cardSets
   );
 };
 
-
-
 export { MfCardImportDialog };
-
-
 export type { MfCardImportCompletedPayload, MfCardImportDialogProps };

@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ComponentProps } from "react";
+import { Button } from "@/chip/button/button/button";
 import { Volume2 } from "@/chip/icons";
 import { Badge } from "@/chip/ui/badge";
-import { Button } from "@/chip/button/button/button";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import type { Card } from "@/types";
 import { toIsoStringOrNull } from "@/utils/toMillis";
-
-
 
 type FlashcardCardLike = ComponentProps<typeof Flashcard>["card"];
 type StudyPhase = "timing" | "answer";
@@ -50,8 +48,6 @@ type Keyable = {
 };
 type InnerProps = Omit<StudyCardProps, "card"> & { card: Card; };
 
-
-
 const stableKeyPart = (value: unknown): string => {
   if (typeof value === "string") return value;
   if (typeof value === "number") return String(value);
@@ -68,8 +64,6 @@ const getCardKey = (card: Card): string => {
 
   return direct && direct.length > 0 ? direct : "card";
 };
-
-
 
 const StudyCard = (props: StudyCardProps) => {
   const { card } = props;
@@ -431,9 +425,5 @@ const StudyCardInner = ({
   );
 };
 
-
-
 export default StudyCard;
-
-
 export type { StudyCardProps };

@@ -30,5 +30,4 @@ const SharedCardEditSceneInner = ({ blocks, onChange, prefix, label, accentColor
 
 const SharedCardEditScene = React.memo(SharedCardEditSceneInner);
 SharedCardEditScene.displayName = "SharedCardEditScene";
-
 export { SharedCardEditScene };

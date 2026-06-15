@@ -1,10 +1,8 @@
 /**
  * Flashcard の下部ナビゲーション（Previous / Next / インデックス表示）
  */
-import { ChevronLeft, ChevronRight } from "@/chip/icons";
 import { Button } from "@/chip/button/button/button";
-
-
+import { ChevronLeft, ChevronRight } from "@/chip/icons";
 
 interface FlashcardNavigationProps {
   onNext?: () => void;
@@ -14,8 +12,6 @@ interface FlashcardNavigationProps {
   currentIndex?: number;
   totalCards?: number;
 }
-
-
 
 const FlashcardNavigation = ({ onNext, onPrev, hasNext, hasPrev, currentIndex, totalCards }: FlashcardNavigationProps) => {
   const showNav = onNext || onPrev || (currentIndex !== undefined && totalCards !== undefined);
@@ -60,7 +56,5 @@ const FlashcardNavigation = ({ onNext, onPrev, hasNext, hasPrev, currentIndex, t
     </div>
   );
 };
-
-
 
 export { FlashcardNavigation };

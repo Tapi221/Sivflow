@@ -1,10 +1,8 @@
 import * as React from "react";
-import { ToggleSwitch } from "@/chip/toggle/Toggle.switch";
 import type { SurfaceButtonProps } from "@/chip/button/button/surface-button";
 import { SurfaceButton } from "@/chip/button/button/surface-button";
+import { ToggleSwitch } from "@/chip/toggle/Toggle.switch";
 import { cn } from "@/lib/utils";
-
-
 
 type MetaPanelActionRowAlign = "start" | "between" | "end";
 type MetaPanelActionRowProps = {
@@ -57,19 +55,13 @@ type MetaPanelSwitchProps = {
   switchAriaLabel?: string;
 };
 
-
-
 const META_PANEL_ACTION_ROW_ALIGN_CLASS: Record<MetaPanelActionRowAlign, string> = {
   start: "ds-editor-pane__action-row--start",
   between: "ds-editor-pane__action-row--between",
   end: "ds-editor-pane__action-row--end",
 };
 
-
-
 const noopToggleSwitchChange = () => undefined;
-
-
 
 const MetaPanelActionRow = ({
   children,
@@ -228,9 +220,6 @@ const MetaPanelSwitch = ({
   );
 };
 
-
-
 MetaPanelInput.displayName = "MetaPanelInput";
 MetaPanelSectionActionButton.displayName = "MetaPanelSectionActionButton";
-
 export { MetaPanelActionRow, MetaPanelInfoRow, MetaPanelInput, MetaPanelMutedSurface, MetaPanelSectionActionButton, MetaPanelSectionHeader, MetaPanelSectionTitle, MetaPanelSurfaceField, MetaPanelSwitch, MetaPanelSwitchRow };

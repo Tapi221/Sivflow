@@ -2,8 +2,6 @@ import type { TFileElement } from "platejs";
 import type { SlateElementProps } from "platejs/static";
 import { SlateElement } from "platejs/static";
 
-
-
 const FileElementStatic = (props: SlateElementProps<TFileElement>) => {
   const { element } = props;
   const label = element.name ?? element.url ?? "file";
@@ -14,7 +12,5 @@ const FileElementStatic = (props: SlateElementProps<TFileElement>) => {
     </SlateElement>
   );
 };
-
-
 
 export { FileElementStatic };

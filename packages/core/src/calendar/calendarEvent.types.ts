@@ -1,6 +1,4 @@
-import type { CalendarRecurrenceRule } from "./calendarRecurrence";
-
-
+import type { CalendarRecurrenceRule } from "@core/calendar/calendarRecurrence";
 
 type CalendarEvent = {
   id: string;

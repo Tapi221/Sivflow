@@ -47,7 +47,6 @@ const BlockComment = ({ discussion, isLast }: BlockCommentProps) => {
     </>
   );
 };
-
 const BlockCommentContent = ({ children, element }: PlateElementProps) => {
   const editor = useEditorRef();
   const commentsApi = editor.getApi(CommentPlugin).comment;
@@ -180,7 +179,6 @@ const BlockCommentContent = ({ children, element }: PlateElementProps) => {
     </div>
   );
 };
-
 const BlockDiscussion: RenderNodeWrapper<AnyPluginConfig> = (_props) => (props) => <BlockCommentContent {...props} />;
 
 export { BlockDiscussion };

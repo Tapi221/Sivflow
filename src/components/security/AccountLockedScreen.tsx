@@ -4,8 +4,6 @@ import { Shield } from "@/chip/icons/icons";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useSecurity } from "@/contexts/security/SecurityContext";
 
-
-
 // CSSはApp.tsx等でグローバル定義するか、インラインでシンプルに実装
 const AccountLockedScreen: React.FC = () => {
   const { securityState } = useSecurity();
@@ -36,7 +34,5 @@ const AccountLockedScreen: React.FC = () => {
     </div>
   );
 };
-
-
 
 export { AccountLockedScreen };

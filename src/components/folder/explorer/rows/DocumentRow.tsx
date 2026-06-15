@@ -2,8 +2,8 @@ import React from "react";
 import { ExplorerChromePdfIcon } from "@/components/explorer/icons";
 import { buildRenameDeleteMenuActions } from "@/components/folder/components/menus/explorerMenuActionBuilders";
 import { beginInlineRename } from "@/components/folder/components/menus/explorerMenuStateHelpers";
-import { SidebarEntityRow } from "@/components/folder/explorer/rows/SidebarEntityRow";
 import { EXPLORER_ROW_CONTENT_CLASS, EXPLORER_ROW_ICON_SLOT_CLASS, EXPLORER_ROW_INPUT_CLASS, EXPLORER_ROW_LEADING_SLOT_CLASS, EXPLORER_ROW_TITLE_SLOT_CLASS, FOLDER_ROW_ICON_SIZE_CLASS, FOLDER_ROW_TITLE_CLASS } from "@/components/folder/explorer/rows/shared";
+import { SidebarEntityRow } from "@/components/folder/explorer/rows/SidebarEntityRow";
 import { cn } from "@/lib/utils";
 
 type ExplorerItemType = "folder" | "cardSet" | "card" | "document";

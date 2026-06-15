@@ -2,8 +2,6 @@ import type { CardPaneMode } from "@/components/card/frame/cardPane.constants";
 import { DISPLAY_MODE_LABELS, DISPLAY_MODE_TRIGGER_LABELS } from "@/features/cardsetview/domain/cardDisplayMode.constants";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-
-
 type WidthControlViewModel = {
   modeLabel: string;
   value: number;
@@ -16,8 +14,6 @@ type WidthControlViewModel = {
   onStepUp: () => void;
   onReset: () => void;
 };
-
-
 
 const resolveDisplayModeLabels = (currentDisplayMode: CardDisplayMode) => {
   return { currentLabel: DISPLAY_MODE_LABELS[currentDisplayMode], triggerLabel: DISPLAY_MODE_TRIGGER_LABELS[currentDisplayMode] };
@@ -61,9 +57,5 @@ const buildWidthControl = ({ isDesktop, isGlobalEditing, activePaneWidthPx, acti
   };
 };
 
-
-
 export { resolveDisplayModeLabels, buildWidthControl };
-
-
 export type { WidthControlViewModel };

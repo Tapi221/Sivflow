@@ -1,10 +1,8 @@
 import { httpsCallable } from "firebase/functions";
 import { auth, functionsClient } from "@/infrastructure/firebase/client";
 import { getServerStoredGoogleCalendarAccessToken } from "@/integration/google-integration/google.server-oauth";
-import type { StoredGoogleAccount } from "./gcal.multi-storage";
-import { buildTokenExpiry, readStoredAccounts, writeStoredAccounts } from "./gcal.multi-storage";
-
-
+import type { StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
+import { buildTokenExpiry, readStoredAccounts, writeStoredAccounts } from "@/integration/googlecalendar-integration/gcal.multi-storage";
 
 type ServerStoredGoogleCalendarAccount = {
   accountId: string;
@@ -16,11 +14,7 @@ type ListGoogleCalendarAccountsOutput = {
   accounts: ServerStoredGoogleCalendarAccount[];
 };
 
-
-
 const listGoogleCalendarAccountsCallable = httpsCallable<undefined, ListGoogleCalendarAccountsOutput>(functionsClient, "listGoogleCalendarAccounts");
-
-
 
 const waitForCallableAuth = async (): Promise<void> => {
   await auth.authStateReady();
@@ -76,9 +70,5 @@ const hydrateServerStoredGoogleCalendarAccounts = async (): Promise<number> => {
   return hydratedAccounts.length;
 };
 
-
-
 export { listServerStoredGoogleCalendarAccounts, hydrateServerStoredGoogleCalendarAccounts };
-
-
 export type { ServerStoredGoogleCalendarAccount };

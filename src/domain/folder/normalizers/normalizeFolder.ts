@@ -1,14 +1,10 @@
+import type { Folder } from "@/types/domain/folder";
 import { normalizeDate } from "@/utils/codec/date";
 import { toArrayOr, toBoolOr, toFiniteNumber, toOptionalString, toStringOr } from "@/utils/codec/primitives";
 import { makeFallbackId } from "@/utils/fallbackId";
 import { asRecord, pick } from "@/utils/records";
-import type { Folder } from "@/types/domain/folder";
-
-
 
 type NotePdf = NonNullable<Folder["notePdfs"]>[number];
-
-
 
 const isNotePdf = (value: unknown): value is NotePdf => {
   const record = asRecord(value);
@@ -98,7 +94,5 @@ const normalizeFolderWithSilent = (raw: unknown) => {
 
   return normalizeFolder(normalizedInput);
 };
-
-
 
 export { normalizeFolder, normalizeFolderWithSilent };

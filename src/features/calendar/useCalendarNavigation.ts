@@ -1,24 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { addDays, addMonths, addYears, startOfDay, startOfMonth, startOfWeek, startOfYear, subDays, subMonths, subYears } from "date-fns";
+import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
+import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
+import type { ScheduleNavigationState } from "@/features/calendar/scheduleNavigationPersistence";
+import { persistScheduleNavigationState, readStoredScheduleNavigationState } from "@/features/calendar/scheduleNavigationPersistence";
+import type { CalendarViewMode, CalendarViewModeSelection } from "@/features/calendar/scheduleScreen.types";
 import { createCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
-import type { CalendarWeekStartDay } from "./calendar.types";
-import { getCalendarWeekStartsOn } from "./calendarWeekStart";
-import type { ScheduleNavigationState } from "./scheduleNavigationPersistence";
-import { persistScheduleNavigationState, readStoredScheduleNavigationState } from "./scheduleNavigationPersistence";
-import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScreen.types";
-
-
 
 type CalendarNavigationOptions = {
   allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay; };
 
-
-
 const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_MODES);
-
-
 
 const isViewModeSelectionArray = (selection: CalendarViewModeSelection): selection is readonly CalendarViewMode[] => Array.isArray(selection);
 const isMultiSelectViewMode = (viewMode: CalendarViewMode): boolean => MULTI_SELECT_VIEW_MODE_SET.has(viewMode);
@@ -292,7 +286,5 @@ const useCalendarNavigation = ({ allowMultiSelectViewMode = true, weekStartDay =
     resetCalendarPosition,
   };
 };
-
-
 
 export { useCalendarNavigation };

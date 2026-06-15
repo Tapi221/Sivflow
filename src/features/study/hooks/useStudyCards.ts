@@ -1,9 +1,7 @@
 import { useMemo } from "react";
 import { buildCardSetById, filterCardsByFolderId, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
-import { normalizeDate } from "@/utils/codec/date";
 import type { Card, CardSet, Folder, UserSettings } from "@/types";
-
-
+import { normalizeDate } from "@/utils/codec/date";
 
 type StudyCard = Card;
 type Params = {
@@ -14,8 +12,6 @@ type Params = {
   foldersLoading: boolean;
   settings: Partial<UserSettings> | null | undefined;
 };
-
-
 
 const useStudyCards = ({ folderId, allCards, cardSets, folders, foldersLoading, settings }: Params) => {
   const cardSetById = useMemo(() => buildCardSetById(cardSets.filter((cardSet) => !cardSet.isDeleted)), [cardSets]);
@@ -85,7 +81,5 @@ const useStudyCards = ({ folderId, allCards, cardSets, folders, foldersLoading, 
     isEmpty: studyCards.length === 0,
   };
 };
-
-
 
 export { useStudyCards };

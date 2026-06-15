@@ -1,36 +1,21 @@
 "use client";
 
 import * as React from "react";
-
 import type { Emoji } from "@emoji-mart/data";
-
 import type { EmojiCategoryList, EmojiIconList, GridRow } from "@platejs/emoji";
-
 import { EmojiSettings } from "@platejs/emoji";
-
 import type { EmojiDropdownMenuOptions, UseEmojiPickerType } from "@platejs/emoji/react";
-
 import { useEmojiDropdownMenuState } from "@platejs/emoji/react";
-
 import * as Popover from "@radix-ui/react-popover";
-
 import { AppleIcon, ClockIcon, CompassIcon, FlagIcon, LeafIcon, LightbulbIcon, MusicIcon, SearchIcon, SmileIcon, StarIcon, XIcon } from "lucide-react";
-
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/panel/toolchip/Tooltip.Editor";
-
 import { Button } from "@/chip/button/button/button";
-
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/panel/toolchip/Tooltip.Editor";
 import { ToolbarButton } from "@/chip/ui/plate/toolbar";
-
 import { cn } from "@/lib/utils";
-
-
 
 type ButtonClickPanelNoteEmojiProps = {
   options?: EmojiDropdownMenuOptions;
 } & React.ComponentPropsWithoutRef<typeof ToolbarButton>;
-
-
 
 const emojiCategoryIcons: Record<
   EmojiCategoryList,
@@ -121,13 +106,10 @@ const emojiCategoryIcons: Record<
     solid: <MusicIcon className="size-full" />,
   },
 };
-
 const emojiSearchIcons = {
   delete: <XIcon className="size-4 text-current" />,
   loupe: <SearchIcon className="size-4 text-current" />,
 };
-
-
 
 const ButtonClickPanelNoteEmoji = ({ options, ...props }: ButtonClickPanelNoteEmojiProps) => {
   const { emojiPickerState, isOpen, setIsOpen } = useEmojiDropdownMenuState(options);
@@ -151,7 +133,6 @@ const ButtonClickPanelNoteEmoji = ({ options, ...props }: ButtonClickPanelNoteEm
     </EmojiPopover>
   );
 };
-
 const EmojiPopover = ({
   children,
   control,
@@ -172,7 +153,6 @@ const EmojiPopover = ({
     </Popover.Root>
   );
 };
-
 const EmojiPicker = ({
   clearSearch,
   emoji,
@@ -242,7 +222,6 @@ const EmojiPicker = ({
     </div>
   );
 };
-
 const EmojiPickerSearchBar = ({
   children,
   i18n,
@@ -269,7 +248,6 @@ const EmojiPickerSearchBar = ({
     </div>
   );
 };
-
 const EmojiPickerSearchAndClear = ({
   clearSearch,
   i18n,
@@ -302,7 +280,6 @@ const EmojiPickerSearchAndClear = ({
     </div>
   );
 };
-
 const EmojiPreview = ({ emoji }: Pick<UseEmojiPickerType, "emoji">) => {
   return (
     <div className="flex h-14 max-h-14 min-h-14 items-center border-muted border-t p-2">
@@ -316,7 +293,6 @@ const EmojiPreview = ({ emoji }: Pick<UseEmojiPickerType, "emoji">) => {
     </div>
   );
 };
-
 const NoEmoji = ({ i18n }: Pick<UseEmojiPickerType, "i18n">) => {
   return (
     <div className="flex h-14 max-h-14 min-h-14 items-center border-muted border-t p-2">
@@ -330,7 +306,6 @@ const NoEmoji = ({ i18n }: Pick<UseEmojiPickerType, "i18n">) => {
     </div>
   );
 };
-
 const PickAnEmoji = ({ i18n }: Pick<UseEmojiPickerType, "i18n">) => {
   return (
     <div className="flex h-14 max-h-14 min-h-14 items-center border-muted border-t p-2">
@@ -341,7 +316,6 @@ const PickAnEmoji = ({ i18n }: Pick<UseEmojiPickerType, "i18n">) => {
     </div>
   );
 };
-
 const EmojiPickerPreview = ({
   emoji,
   hasFound = true,
@@ -361,7 +335,6 @@ const EmojiPickerPreview = ({
     </>
   );
 };
-
 const EmojiPickerNavigation = ({
   emojiLibrary,
   focusedCategory,
@@ -417,8 +390,6 @@ const EmojiPickerNavigation = ({
   );
 };
 
-
-
 const EmojiButton = React.memo(({
   emoji,
   index,
@@ -458,7 +429,6 @@ const EmojiButton = React.memo(({
     </button>
   );
 });
-
 const RowOfButtons = React.memo(({
   emojiLibrary,
   row,
@@ -484,8 +454,6 @@ const RowOfButtons = React.memo(({
     </div>
   );
 });
-
-
 
 const EmojiPickerContent = ({
   emojiLibrary,
@@ -616,7 +584,5 @@ const EmojiPickerContent = ({
     </div>
   );
 };
-
-
 
 export { ButtonClickPanelNoteEmoji, EmojiPopover, EmojiPicker };

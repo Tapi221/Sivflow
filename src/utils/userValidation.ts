@@ -6,8 +6,6 @@ interface ValidationResult {
   message: string;
 }
 
-
-
 /**
  * ユーザーネームバリデーションユーティリティ
  */
@@ -19,8 +17,6 @@ const USERNAME_VALIDATION = {
   ALLOWED_CHARS_REGEX:
     /^[a-zA-Z0-9\s\-_ \u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF\u3400-\u4DBF]+$/,
 };
-
-
 
 /**
  * 文字列をUnicode単位（サロゲートペア対応）でカウントする
@@ -90,9 +86,5 @@ const truncateUsername = (name: string, maxLength: number = 20) => {
   return chars.slice(0, maxLength).join("") + "...";
 };
 
-
-
 export { countUnicodeCharacters, validateUsername, truncateUsername };
-
-
 export type { ValidationResult };

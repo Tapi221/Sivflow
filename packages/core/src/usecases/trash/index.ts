@@ -1,4 +1,4 @@
 
 
-export * from "./trashTypes";
-export * from "./trashUseCases";
+export * from "@core/usecases/trash/trashTypes";
+export * from "@core/usecases/trash/trashUseCases";
