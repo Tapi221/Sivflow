@@ -109,14 +109,12 @@ const SidebarEntityRowBase = ({
         <ExplorerRowContent
           left={
             <>
-              {leading !== undefined ? (
+              {leading !== undefined && (
                 <div className={leadingClassName} style={leadingStyle}>
                   {leading}
                 </div>
-              ) : null}
-              {icon !== undefined ? (
-                <span className={iconClassName}>{icon}</span>
-              ) : null}
+              )}
+              {icon !== undefined && <span className={iconClassName}>{icon}</span>}
             </>
           }
           title={
