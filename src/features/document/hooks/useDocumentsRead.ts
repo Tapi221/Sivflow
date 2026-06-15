@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { useEffectiveLocalUserId } from "@/hooks/auth/useEffectiveLocalUserId";
+import { useEffectiveLocalUserId } from "@/contexts/auth/useEffectiveLocalUserId";
 import { getLocalDb } from "@/services/localdb";
 import type { DocumentItem } from "@/types";
 
