@@ -1,17 +1,19 @@
 .cm-wrapper {
-  --cm-bg: var(--context-menu-background, var(--menu-bg, #202020));
-  --cm-fg: var(--context-menu-foreground, var(--menu-fg, #dedede));
-  --cm-muted: var(--context-menu-muted, var(--menu-muted, #9a9a9a));
-  --cm-disabled: var(--context-menu-disabled, var(--menu-disabled, #6f6f6f));
-  --cm-border: var(--context-menu-border, var(--menu-border, #3a3a3a));
-  --cm-selected-bg: var(--context-menu-selected-background, var(--menu-selected-bg, #2d5fd3));
-  --cm-selected-fg: var(--context-menu-selected-foreground, var(--menu-selected-fg, #ffffff));
-  --cm-separator: var(--context-menu-separator, var(--menu-separator, #393939));
-  --cm-accent: var(--context-menu-accent, var(--menu-accent, #7aa2ff));
+  --cm-bg: var(--zed-elevated-surface-background, var(--context-menu-background, var(--menu-bg, #202020)));
+  --cm-fg: var(--zed-text, var(--context-menu-foreground, var(--menu-fg, #dedede)));
+  --cm-muted: var(--zed-text-muted, var(--context-menu-muted, var(--menu-muted, #9a9a9a)));
+  --cm-disabled: var(--zed-text-disabled, var(--context-menu-disabled, var(--menu-disabled, #6f6f6f)));
+  --cm-border: var(--zed-border, var(--context-menu-border, var(--menu-border, #363636)));
+  --cm-border-variant: var(--zed-border-variant, var(--context-menu-separator, var(--menu-separator, #383838)));
+  --cm-hover-bg: var(--zed-ghost-element-hover, var(--context-menu-hover-background, rgb(255 255 255 / 6%)));
+  --cm-active-bg: var(--zed-ghost-element-active, var(--context-menu-active-background, rgb(255 255 255 / 10%)));
+  --cm-selected-bg: var(--zed-ghost-element-selected, var(--context-menu-selected-background, rgb(255 255 255 / 8%)));
+  --cm-accent: var(--zed-accent, var(--context-menu-accent, var(--menu-accent, #74a3ff)));
+  --cm-shadow: var(--zed-elevation-2-shadow, 0 2px 3px rgb(0 0 0 / 12%), 0 1px 0 rgb(0 0 0 / 6%));
   position: relative;
   display: inline-flex;
   color: var(--cm-fg);
-  font: 13px/1.4 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font: 13px/20px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 .cm-menu {
   position: relative;
@@ -23,12 +25,13 @@
   min-width: 200px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 4px;
+  padding: 4px 0;
   outline: none;
   border: 1px solid var(--cm-border);
   border-radius: 8px;
   background: var(--cm-bg);
-  box-shadow: 0 12px 32px rgb(0 0 0 / 35%), 0 2px 8px rgb(0 0 0 / 25%);
+  box-shadow: var(--cm-shadow);
+  color: var(--cm-fg);
   user-select: none;
 }
 .cm-menu:focus {
@@ -37,30 +40,40 @@
 .cm-child,
 .cm-submenu-trigger {
   position: relative;
+  padding: 0 4px;
 }
 .cm-item {
-  min-height: 28px;
+  min-height: 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 0 8px;
-  border-radius: 6px;
+  padding: 0 6px;
+  border-radius: 4px;
   color: var(--cm-fg);
   white-space: nowrap;
   cursor: default;
 }
 .cm-child-selectable .cm-item,
 .cm-submenu-trigger .cm-item {
-  cursor: default;
+  cursor: pointer;
+}
+.cm-child:not(:has(.cm-item-disabled)):hover .cm-item,
+.cm-submenu-trigger:hover .cm-item {
+  background: var(--cm-hover-bg);
+}
+.cm-child:not(:has(.cm-item-disabled)):active .cm-item,
+.cm-submenu-trigger:active .cm-item {
+  background: var(--cm-active-bg);
 }
 .cm-selected,
 .cm-child.cm-selected .cm-item {
-  color: var(--cm-selected-fg);
+  color: var(--cm-fg);
   background: var(--cm-selected-bg);
 }
 .cm-item-disabled {
   color: var(--cm-disabled);
+  cursor: default;
 }
 .cm-main,
 .cm-end {
@@ -70,10 +83,12 @@
 }
 .cm-main {
   gap: 6px;
+  overflow: hidden;
 }
 .cm-end {
   gap: 8px;
   margin-left: 16px;
+  overflow: hidden;
 }
 .cm-label {
   min-width: 0;
@@ -91,13 +106,16 @@
   align-items: center;
   justify-content: center;
   color: currentColor;
-  opacity: 0.86;
+  line-height: 16px;
+}
+.cm-icon {
+  color: var(--cm-fg);
 }
 .cm-check {
   color: var(--cm-accent);
 }
 .cm-selected .cm-check {
-  color: currentColor;
+  color: var(--cm-accent);
 }
 .cm-invisible {
   visibility: hidden;
@@ -105,14 +123,15 @@
 .cm-shortcut {
   color: var(--cm-muted);
   font-size: 12px;
+  line-height: 16px;
 }
 .cm-selected .cm-shortcut {
-  color: currentColor;
-  opacity: 0.82;
+  color: var(--cm-muted);
+  opacity: 1;
 }
 .cm-end-slot {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -121,10 +140,13 @@
   padding: 0;
   color: currentColor;
   background: transparent;
-  cursor: default;
+  cursor: pointer;
 }
 .cm-end-slot:hover {
-  background: rgb(255 255 255 / 14%);
+  background: var(--cm-hover-bg);
+}
+.cm-end-slot:active {
+  background: var(--cm-active-bg);
 }
 .cm-end-slot-hover {
   opacity: 0;
@@ -135,18 +157,20 @@
 }
 .cm-separator {
   height: 1px;
-  margin: 4px 6px;
-  background: var(--cm-separator);
+  margin: 6px 0;
+  background: var(--cm-border-variant);
 }
 .cm-subheader {
-  padding: 6px 8px 4px;
-  color: var(--cm-muted);
-  font-size: 12px;
-  font-weight: 600;
-}
-.cm-subheader-with-link {
+  min-height: 20px;
   display: flex;
   align-items: center;
+  padding: 0 10px 4px;
+  color: var(--cm-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+}
+.cm-subheader-with-link {
   justify-content: space-between;
   gap: 12px;
 }
@@ -154,15 +178,18 @@
   border: 0;
   padding: 0;
   background: transparent;
-  color: var(--context-menu-link, var(--menu-link, #8ab4ff));
+  color: var(--cm-muted);
   font: inherit;
   cursor: pointer;
+}
+.cm-header-link:hover {
+  color: var(--cm-fg);
 }
 .cm-chevron {
   color: var(--cm-muted);
 }
 .cm-selected .cm-chevron {
-  color: currentColor;
+  color: var(--cm-muted);
 }
 .cm-submenu-container {
   position: absolute;
@@ -177,7 +204,7 @@
   border: 1px solid var(--cm-border);
   border-radius: 8px;
   background: var(--cm-bg);
-  box-shadow: 0 12px 32px rgb(0 0 0 / 35%), 0 2px 8px rgb(0 0 0 / 25%);
+  box-shadow: var(--cm-shadow);
 }
 .cm-aside-left {
   right: calc(100% + 4px);
