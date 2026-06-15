@@ -31,7 +31,7 @@ const TodoMarkerStatic = (props: SlateRenderElementProps) => {
         type="button"
       >
         <div className={cn("flex items-center justify-center text-current")}>
-          {checked ? <CheckIcon className="size-4" /> : null}
+          {checked && <CheckIcon className="size-4" />}
         </div>
       </button>
     </div>
@@ -74,7 +74,7 @@ const List = (props: SlateRenderElementProps) => {
       start={listStart}
       style={{ listStyleType, marginLeft }}
     >
-      {Marker ? <Marker {...props} /> : null}
+      {Marker !== undefined && <Marker {...props} />}
       {Li ? <Li {...props} /> : <li>{props.children}</li>}
     </ListTag>
   );
