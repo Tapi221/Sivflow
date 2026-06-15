@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { SurfaceButton } from "@/chip/ui/button/surface-button";
+import { SurfaceButton } from "@/chip/button/button/surface-button";
 import { cn } from "@/lib/utils";
 
 

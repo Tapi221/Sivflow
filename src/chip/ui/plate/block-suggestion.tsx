@@ -12,7 +12,7 @@ import { useEditorPlugin, usePluginOption } from "platejs/react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/chip/ui/avatar";
 
-import { Button } from "@/chip/ui/button/button";
+import { Button } from "@/chip/button/button/button";
 
 import { Comment, CommentCreateForm, formatCommentDate } from "./comment";
 

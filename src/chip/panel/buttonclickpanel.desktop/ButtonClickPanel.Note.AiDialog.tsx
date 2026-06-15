@@ -8,7 +8,7 @@ import { CheckIcon, CornerUpLeftIcon, Loader2Icon, PauseIcon, PenLineIcon, SendI
 
 import { useEditorPlugin, usePluginOption } from "platejs/react";
 
-import { Button } from "@/chip/ui/button/button";
+import { Button } from "@/chip/button/button/button";
 
 import { Command, CommandGroup, CommandInput, CommandItem, CommandList } from "@/chip/ui/command";
 

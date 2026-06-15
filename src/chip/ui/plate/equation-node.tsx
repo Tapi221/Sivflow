@@ -18,7 +18,7 @@ import type { TextareaAutosizeProps } from "react-textarea-autosize";
 
 import TextareaAutosize from "react-textarea-autosize";
 
-import { Button } from "@/chip/ui/button/button";
+import { Button } from "@/chip/button/button/button";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/chip/ui/popover";
 

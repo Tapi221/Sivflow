@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useToast } from "@web-renderer/contexts/ToastContext";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/chip/panel/dialog.desktop/dialog/dialog";
-import { Button } from "@/chip/ui/button/button";
-import { Input } from "@/chip/ui/input";
+import { Button } from "@/chip/button/button/button";
+import { Input } from "@/chip/input-field/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/chip/ui/select";
 import type { CreateCard, CreateCardSet } from "@/features/import/application/xlsxImportUseCases";
 import { executeXlsxImport, loadXlsxImportFile } from "@/features/import/application/xlsxImportUseCases";

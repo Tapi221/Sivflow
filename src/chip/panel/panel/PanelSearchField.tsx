@@ -1,6 +1,6 @@
 import type { Ref } from "react";
 import { Search } from "@/chip/icons";
-import { Input } from "@/chip/ui/input";
+import { Input } from "@/chip/input-field/input";
 import { cn } from "@/lib/utils";
 
 

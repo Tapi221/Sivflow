@@ -4,7 +4,7 @@ import { useEditorRef } from "platejs/react";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/chip/panel/dialog.desktop/dialog/alert-dialog";
-import { Input } from "@/chip/ui/input";
+import { Input } from "@/chip/input-field/input";
 
 
 

@@ -1,5 +1,5 @@
 import { CheckCircle2, FileText, X } from "@/chip/icons";
-import { Button } from "@/chip/ui/button/button";
+import { Button } from "@/chip/button/button/button";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
 import { Progress } from "./progress";

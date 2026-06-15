@@ -20,9 +20,9 @@ import { MemoizedChildren, useEditorRef, useElement, usePluginOption } from "pla
 
 import { useSelected } from "platejs/react";
 
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/chip/toolchip/Tooltip.Editor";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/chip/panel/toolchip/Tooltip.Editor";
 
-import { Button } from "@/chip/ui/button/button";
+import { Button } from "@/chip/button/button/button";
 
 import { cn } from "@/lib/utils";
 

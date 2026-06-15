@@ -1,7 +1,7 @@
 import * as React from "react";
 import { ToggleSwitch } from "@/chip/toggle/Toggle.switch";
-import type { SurfaceButtonProps } from "@/chip/ui/button/surface-button";
-import { SurfaceButton } from "@/chip/ui/button/surface-button";
+import type { SurfaceButtonProps } from "@/chip/button/button/surface-button";
+import { SurfaceButton } from "@/chip/button/button/surface-button";
 import { cn } from "@/lib/utils";
 
 

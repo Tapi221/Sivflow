@@ -1,7 +1,7 @@
 import { Plus } from "@/chip/icons";
 import { Link } from "@/chip/icons";
-import { Button } from "@/chip/ui/button/button";
-import { Input } from "@/chip/ui/input";
+import { Button } from "@/chip/button/button/button";
+import { Input } from "@/chip/input-field/input";
 import { cn } from "@/lib/utils";
 import type { ReferenceBlockData } from "@/types";
 

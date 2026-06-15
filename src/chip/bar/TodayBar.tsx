@@ -1,7 +1,7 @@
 import { useDateFnsLocale, useT } from "@shared/i18n/useT";
 import { format } from "date-fns";
 import { ChevronLeft, ChevronRight } from "@/chip/icons";
-import { HoverTooltip } from "@/chip/toolchip/HoverTooltip";
+import { HoverTooltip } from "@/chip/panel/toolchip/HoverTooltip";
 import { cn } from "@/lib/utils";
 
 

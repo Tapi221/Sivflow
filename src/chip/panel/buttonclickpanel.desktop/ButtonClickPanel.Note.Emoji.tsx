@@ -16,9 +16,9 @@ import * as Popover from "@radix-ui/react-popover";
 
 import { AppleIcon, ClockIcon, CompassIcon, FlagIcon, LeafIcon, LightbulbIcon, MusicIcon, SearchIcon, SmileIcon, StarIcon, XIcon } from "lucide-react";
 
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/toolchip/Tooltip.Editor";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/chip/panel/toolchip/Tooltip.Editor";
 
-import { Button } from "@/chip/ui/button/button";
+import { Button } from "@/chip/button/button/button";
 
 import { ToolbarButton } from "@/chip/ui/plate/toolbar";
 

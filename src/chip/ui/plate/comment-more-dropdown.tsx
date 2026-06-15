@@ -8,7 +8,7 @@ import { useEditorRef } from "platejs/react";
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 
-import { Button } from "@/chip/ui/button/button";
+import { Button } from "@/chip/button/button/button";
 
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 

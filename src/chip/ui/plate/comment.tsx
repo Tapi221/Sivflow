@@ -22,7 +22,7 @@ import { ButtonClickPanelNoteComment } from "@/chip/panel/buttonclickpanel.deskt
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/chip/ui/avatar";
 
-import { Button } from "@/chip/ui/button/button";
+import { Button } from "@/chip/button/button/button";
 
 import { CommentMoreDropdown } from "./comment-more-dropdown";
 
