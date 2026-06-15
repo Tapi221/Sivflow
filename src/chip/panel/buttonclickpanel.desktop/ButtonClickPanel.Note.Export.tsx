@@ -112,7 +112,7 @@ const ButtonClickPanelNoteExport = (props: DropdownMenuProps) => {
           <ArrowDownToLineIcon className="size-4" />
         </ToolbarButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
+      <DropdownMenuContent align="start" className="dropdown-menu__content--export-surface-texture">
         <DropdownMenuGroup>
           <DropdownMenuItem onSelect={exportToHtml}>Export as HTML</DropdownMenuItem>
           <DropdownMenuItem onSelect={exportToPdf}>Export as PDF</DropdownMenuItem>
