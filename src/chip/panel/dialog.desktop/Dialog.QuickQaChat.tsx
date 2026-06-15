@@ -2,7 +2,7 @@ import { memo, useCallback, useMemo, useRef, useState } from "react";
 import { generateOllamaAnswer } from "@platform/ai/ollamaClient";
 import { useToast } from "@web-renderer/contexts/ToastContext";
 import type { KeyboardEvent } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/chip/ui/dialog/dialog";
+import { Dialog, DialogContent } from "@/chip/ui/dialog/dialog";
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { cn } from "@/lib/utils";
@@ -160,9 +160,14 @@ const QuickQaChatDialogComponent = ({ open, onOpenChange }: QuickQaChatDialogPro
   }, [pendingQuestion]);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="app-modal-surface max-w-96 gap-0 p-0">
-        <DialogTitle className="sr-only">Q&Aチャット</DialogTitle>
-        <DialogDescription className="sr-only">チャット形式でQ&Aカードを作成します。</DialogDescription>
+      <DialogContent
+        surface="plain"
+        accessibleTitle="Q&Aチャット"
+        accessibleDescription="チャット形式でQ&Aカードを作成します。"
+        className="app-modal-surface w-full max-w-96 p-0"
+        overlayClassName="app-modal-backdrop"
+        contentWrapperClassName="app-modal-content-frame"
+      >
         <div className="border-b border-[#eceae4] px-5 py-4">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full border border-stone-300 bg-white text-[#85827e]">
