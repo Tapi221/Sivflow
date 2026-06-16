@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
+import { cn } from "@web-renderer/lib/utils";
 import katex from "katex";
-import { cn } from "@/lib/utils";
 
 interface MathRendererProps {
   latex: string;
@@ -96,4 +96,5 @@ const MathRendererComponent: React.FC<MathRendererProps> = ({
 
 const MathRenderer = React.memo(MathRendererComponent);
 MathRenderer.displayName = "MathRenderer";
+
 export { MathRenderer };

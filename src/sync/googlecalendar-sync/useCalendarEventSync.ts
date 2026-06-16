@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { auth } from "@platform/firebase/client";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/infrastructure/firebase/client";
 import type { BuildCalendarEventSyncRangeOptions, CalendarEventSyncRange } from "@/sync/googlecalendar-sync/calendarEventSyncRange";
 import { buildCalendarEventPrioritySyncRange, buildCalendarEventSyncRange } from "@/sync/googlecalendar-sync/calendarEventSyncRange";
 import { useGoogleCalendarPushSync } from "@/sync/googlecalendar-sync/useGoogleCalendarPushSync";

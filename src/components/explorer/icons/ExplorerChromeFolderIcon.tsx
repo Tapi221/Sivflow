@@ -1,5 +1,5 @@
+import { cn } from "@web-renderer/lib/utils";
 import type { SVGProps } from "react";
-import { cn } from "@/lib/utils";
 
 type ExplorerChromeFolderIconProps = SVGProps<SVGSVGElement> & {
   size?: number;

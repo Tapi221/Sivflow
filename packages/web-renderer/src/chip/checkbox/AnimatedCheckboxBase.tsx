@@ -1,0 +1,124 @@
+import { cn } from "@web-renderer/lib/utils";
+import type { CSSProperties } from "react";
+
+type AnimatedCheckboxShape = "circle" | "square";
+type AnimatedCheckboxVariant = "filled" | "soft" | "outline" | "radio";
+type AnimatedCheckboxBaseProps = {
+  checked: boolean;
+  color: string;
+  className?: string;
+  shape?: AnimatedCheckboxShape;
+  variant?: AnimatedCheckboxVariant;
+  indeterminate?: boolean;
+  strokeWidth?: number;
+  borderWidth?: number;
+  inactiveBorderColor?: string;
+};
+
+const DEFAULT_CHECKBOX_STROKE_WIDTH = 1.4;
+const CHECKBOX_STROKE_TRANSITION = "stroke-dashoffset 120ms ease-out";
+const CHECKBOX_INDETERMINATE_STROKE_TRANSITION = "stroke-dashoffset 120ms ease-out";
+
+const AnimatedCheckboxBase = ({
+  checked,
+  color,
+  className,
+  shape = "circle",
+  variant = "filled",
+  indeterminate = false,
+  strokeWidth = DEFAULT_CHECKBOX_STROKE_WIDTH,
+  borderWidth,
+  inactiveBorderColor,
+}: AnimatedCheckboxBaseProps) => {
+  const active = checked || indeterminate;
+  const borderColor = active ? color : inactiveBorderColor ?? color;
+  let radiusClass = "rounded-full";
+  if (shape === "square") radiusClass = "rounded";
+  let strokeColor = color;
+  if (variant === "filled") strokeColor = "white";
+  let strokeDashoffset = 16;
+  if (checked) strokeDashoffset = 0;
+  let showFill = active && variant === "filled";
+  if (variant === "soft" && active) showFill = true;
+  let fillColor = color;
+  if (variant === "soft") fillColor = "color-mix(in srgb, var(--checkbox-color) 16%, transparent)";
+  const rootStyle = { "--checkbox-color": color } as CSSProperties;
+  return (
+    <span className={cn("relative inline-flex h-3.5 w-3.5 shrink-0", className)} style={rootStyle}>
+      <span
+        className={cn(
+          "absolute inset-0 border transition-all duration-200 ease-out",
+          radiusClass,
+          active && variant === "filled" && "scale-75 opacity-0",
+          (!active || variant !== "filled") && "scale-100 opacity-100",
+        )}
+        style={{ borderColor, borderWidth }}
+      />
+      <span
+        className={cn(
+          "absolute inset-0 transition-all duration-200",
+          radiusClass,
+          showFill && "scale-100 opacity-100",
+          !showFill && "scale-0 opacity-0",
+        )}
+        style={{
+          backgroundColor: fillColor,
+          transitionTimingFunction: "cubic-bezier(.2,.9,.3,1.25)",
+        }}
+      />
+      {variant === "radio" && (
+        <span
+          className={cn(
+            "absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-200",
+            checked && "scale-100 opacity-100",
+            !checked && "scale-0 opacity-0",
+          )}
+          style={{ backgroundColor: color }}
+        />
+      )}
+      {variant !== "radio" && (
+        <svg
+          viewBox="0 0 20 20"
+          className={cn(
+            "absolute inset-0 h-full w-full transition-all duration-100 ease-out",
+            active && "scale-100 opacity-100",
+            !active && "scale-50 opacity-0",
+          )}
+          aria-hidden="true"
+        >
+          {indeterminate ? (
+            <path
+              d="M5.5 10H14.5"
+              fill="none"
+              stroke={strokeColor}
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+              style={{
+                strokeDasharray: 10,
+                strokeDashoffset: active ? 0 : 10,
+                transition: CHECKBOX_INDETERMINATE_STROKE_TRANSITION,
+              }}
+            />
+          ) : (
+            <path
+              d="M5.25 10.4L8.4 13.55L14.75 7.2"
+              fill="none"
+              stroke={strokeColor}
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{
+                strokeDasharray: 16,
+                strokeDashoffset,
+                transition: CHECKBOX_STROKE_TRANSITION,
+              }}
+            />
+          )}
+        </svg>
+      )}
+    </span>
+  );
+};
+
+export { AnimatedCheckboxBase };
+export type { AnimatedCheckboxShape, AnimatedCheckboxVariant, AnimatedCheckboxBaseProps };

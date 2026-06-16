@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CardEditorPaneMediaDialogs } from "@/chip/panel/dialog.desktop/Dialog.CardEditorPaneMedia";
+import { CardEditorPaneMediaDialogs } from "@web-renderer/chip/panel/dialog.desktop/Dialog.CardEditorPaneMedia";
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
 import { CardOverlayTopRight } from "@/components/card/frame/CardOverlayTopRight";
 import { FaceSwitchBadge } from "@/components/card/frame/FaceSwitchBadge";

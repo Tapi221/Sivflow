@@ -1,15 +1,15 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { CalendarEventChipList } from "@web-renderer/chip/eventchip/EventChip.list";
+import { LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX, LIST_DAY_GAP_PX, LIST_EMPTY_DAY_HEIGHT_PX, LIST_EVENT_ROW_GAP_PX, LIST_EVENT_ROW_HEIGHT_PX } from "@web-renderer/chip/eventchip/EventChip.list.placement";
+import { cn } from "@web-renderer/lib/utils";
 import { differenceInCalendarDays, format, getDaysInMonth, isSameDay, startOfMonth, subDays } from "date-fns";
 import { ja } from "date-fns/locale";
 import type { CSSProperties, MutableRefObject } from "react";
-import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
-import { LIST_ALL_DAY_EVENT_ROW_HEIGHT_PX, LIST_DAY_GAP_PX, LIST_EMPTY_DAY_HEIGHT_PX, LIST_EVENT_ROW_GAP_PX, LIST_EVENT_ROW_HEIGHT_PX } from "@/chip/eventchip/EventChip.list.placement";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { getScheduleVirtualRailDate } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { useImmediateVirtualScrollRange } from "@/features/scroll/schedule/hooks/useImmediateVirtualScrollRange";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { cn } from "@/lib/utils";
 
 type CalendarListViewProps = {
   days: Date[];
@@ -582,4 +582,5 @@ const CalendarListViewComponent = ({
 
 const CalendarListView = memo(CalendarListViewComponent);
 CalendarListView.displayName = "CalendarListView";
+
 export { CalendarListView };

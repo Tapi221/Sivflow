@@ -12,7 +12,7 @@ vi.mock("firebase/auth", () => ({
   signOut: vi.fn(),
 }));
 
-vi.mock("@/infrastructure/firebase/client", () => ({
+vi.mock("@platform/firebase/client", () => ({
   auth: {},
 }));
 

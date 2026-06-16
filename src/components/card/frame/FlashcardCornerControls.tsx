@@ -1,9 +1,9 @@
 import React from "react";
-import { Image as ImageIcon, Link, Volume2 } from "@/chip/icons";
+import { Image as ImageIcon, Link, Volume2 } from "@web-renderer/chip/icons";
+import { cn } from "@web-renderer/lib/utils";
 import { CARD_ACTION_BG_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS } from "@/components/card/frame/cardAction.constants";
 import { CardCornerActions } from "@/components/card/frame/CardCornerActions";
 import type { FlashcardCardLike, FlashcardMediaLike } from "@/components/card/frame/flashcard.types";
-import { cn } from "@/lib/utils";
 import type { ReferenceBlockData } from "@/types";
 
 interface FlashcardCornerControlsProps {

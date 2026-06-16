@@ -20,7 +20,7 @@
     "dev:tauri": "npm run dev:desktop",
     "dev:android": "npm --prefix apps/android start",
     "build": "npm run build:web",
-    "build:web": "npm run sync:app-icon && node --max-old-space-size=4096 node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts",
+    "build:web": "npm run sync:app-icon && node --max-old-space-size=8192 node_modules/vite/bin/vite.js build --config apps/web/vite.config.ts",
     "build:desktop": "npm run tauri:build",
     "build:tauri": "npm run tauri:build",
     "tauri:build": "npm --prefix apps/desktop run build",

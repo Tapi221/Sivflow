@@ -1,14 +1,14 @@
 import "@/pane.desktop/leftpane/sidebar.desktop.css";
 import { useT } from "@shared/i18n/useT";
+import { LogOut, Tag } from "@web-renderer/chip/icons";
+import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@web-renderer/chip/icons/icons.sidebar";
+import { HoverTooltip } from "@web-renderer/chip/panel/toolchip/HoverTooltip";
+import { cn } from "@web-renderer/lib/utils";
 import type { MouseEvent, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, Tag } from "@/chip/icons";
-import { CalendarIcon, GalleryIcon, HomeIcon, SettingIcon, SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
-import { HoverTooltip } from "@/chip/panel/toolchip/HoverTooltip";
 import { ExplorerChromeFolderIcon } from "@/components/explorer/icons";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
-import { cn } from "@/lib/utils";
 import type { FolderTagMode } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
 import { useFolderTagModeStore } from "@/pane.desktop/leftpane/folder/useFolderTagModeStore";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";

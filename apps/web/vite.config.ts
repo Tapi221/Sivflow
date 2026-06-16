@@ -206,7 +206,7 @@ export default defineConfig(({ command }) => ({
       includeAssets: ["favicon.ico", "icon.svg"],
       injectManifest: {
         globIgnores: ["**/index.html"],
-        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+        maximumFileSizeToCacheInBytes: 15 * 1024 * 1024,
       },
       devOptions: {
         enabled: false,
@@ -239,7 +239,6 @@ export default defineConfig(({ command }) => ({
       { find: /^node:path$/, replacement: resolveFromRoot(nodePathBrowserShimPath) },
       { find: /^path$/, replacement: resolveFromRoot(nodePathBrowserShimPath) },
       { find: /^@\/services\/localDB$/, replacement: resolveFromRoot("src/services/localdb/index.ts") },
-      { find: /^@\/services\/firebase$/, replacement: resolveFromRoot("src/infrastructure/firebase/client.ts") },
       { find: /^@\/features\/tab\/Tab$/, replacement: resolveFromRoot("src/pane.desktop/tab.desktopnative/Tab.ts") },
       { find: "@/nouse", replacement: resolveFromRoot("nouse") },
       { find: "@core", replacement: resolveFromRoot("packages/core/src") },

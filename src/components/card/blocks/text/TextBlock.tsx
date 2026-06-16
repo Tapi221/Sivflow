@@ -1,8 +1,8 @@
 import React from "react";
-import { Type } from "@/chip/icons";
+import { Type } from "@web-renderer/chip/icons";
+import { cn } from "@web-renderer/lib/utils";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { TextBlockContent } from "@/components/card/blocks/text/TextBlockContent";
-import { cn } from "@/lib/utils";
 
 interface TextBlockProps {
   content: string;
@@ -97,4 +97,5 @@ const TextBlockInner = ({
 
 const TextBlock = React.memo(TextBlockInner, areTextBlockPropsEqual);
 TextBlock.displayName = "TextBlock";
+
 export { TextBlock };

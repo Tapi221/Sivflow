@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Info } from "@/chip/icons/icons";
+import { Info } from "@web-renderer/chip/icons/icons";
 import type { Notification } from "@/types/notification";
 
 type InfoToastProps = {

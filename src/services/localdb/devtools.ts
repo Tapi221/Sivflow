@@ -1,7 +1,7 @@
+import { auth, requireFirestoreDb } from "@platform/firebase/client";
 import { SHARED_STORAGE_KEYS } from "@platform/storage/storageKeys.constants";
 import { WEB_STORAGE_KEYS } from "@platform/storage/webStorageKeys.constants";
 import { collection, doc, getDocs, writeBatch } from "firebase/firestore";
-import { auth, requireFirestoreDb } from "@/infrastructure/firebase/client";
 import { auditAndRepairTags } from "@/services/localdb/audit/tags";
 import { getLocalDb, getLocalDbSync, LocalDB } from "@/services/localdb/LocalDB";
 import { LOCALDB_GENERATION_KEY_PREFIX, LOCALDB_GENERATION_MAX, LOCALDB_LEGACY_NAME_PREFIX, LOCALDB_NAME_PREFIX, LOCALDB_SCHEMA_VERSION_FOR_NAME } from "@/services/localdb/localdb.constants";

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
-import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
-import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
+import { CalendarEventChipList } from "@web-renderer/chip/eventchip/EventChip.list";
+import { CalendarEventChipMonth } from "@web-renderer/chip/eventchip/EventChip.month";
+import { eventChipDesign } from "@web-renderer/chip/eventchip/eventChipDesign.generated";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
 import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";

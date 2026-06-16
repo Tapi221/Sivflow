@@ -1,8 +1,8 @@
 /**
  * Flashcard の下部ナビゲーション（Previous / Next / インデックス表示）
  */
-import { Button } from "@/chip/button/button/button";
-import { ChevronLeft, ChevronRight } from "@/chip/icons";
+import { Button } from "@web-renderer/chip/button/button/button";
+import { ChevronLeft, ChevronRight } from "@web-renderer/chip/icons";
 
 interface FlashcardNavigationProps {
   onNext?: () => void;

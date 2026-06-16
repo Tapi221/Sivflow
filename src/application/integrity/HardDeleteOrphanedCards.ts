@@ -1,5 +1,5 @@
+import { requireFirestoreDb } from "@platform/firebase/client";
 import { deleteDoc, doc } from "firebase/firestore";
-import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 import { cardDocPathSegments } from "@/infrastructure/firebase/firestore/paths";
 import type { IntegrityIssue, IntegrityReport } from "@/services/dataIntegrity.types";
 import { getLocalDb } from "@/services/localdb";

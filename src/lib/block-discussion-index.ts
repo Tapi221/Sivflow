@@ -5,11 +5,11 @@ import { CommentPlugin } from "@platejs/comment/react";
 import type { TResolvedSuggestion } from "@platejs/suggestion";
 import { getSuggestionKey, keyId2SuggestionId } from "@platejs/suggestion";
 import { SuggestionPlugin } from "@platejs/suggestion/react";
+import type { TComment } from "@web-renderer/chip/ui/plate/comment";
 import type { NodeEntry, Path, TCommentText, TElement, TSuggestionText } from "platejs";
 import { ElementApi, KEYS, NodeApi, PathApi, TextApi } from "platejs";
 import type { PlateEditor } from "platejs/react";
 import { useEditorRef, useEditorVersion, usePluginOption } from "platejs/react";
-import type { TComment } from "@/chip/ui/plate/comment";
 import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
 import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 

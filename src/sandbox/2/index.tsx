@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { cn } from "@web-renderer/lib/utils";
 import { copyImageBlobToClipboard } from "@/features/selection-capture/clipboardImage";
 import { captureElementRectToBlob } from "@/features/selection-capture/domSelectionCapture";
 import type { SelectionCaptureArea, SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
 import { SelectionCaptureOverlay } from "@/features/selection-capture/SelectionCaptureOverlay";
-import { cn } from "@/lib/utils";
 
 type CaptureStatus = "idle" | "active" | "busy" | "copied" | "downloaded" | "failed";
 

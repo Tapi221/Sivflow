@@ -1,6 +1,6 @@
 import React from "react";
-import { Button } from "@/chip/button/button/button";
-import { Card, CardContent } from "@/chip/ui/card";
+import { Button } from "@web-renderer/chip/button/button/button";
+import { Card, CardContent } from "@web-renderer/chip/ui/card";
 import type { PracticeFilterRating, PracticeSessionState } from "@/features/study/hooks/usePracticeMode";
 import StudyCard from "@/features/study/StudyCard";
 import type { Card as StudyEntityCard } from "@/types";

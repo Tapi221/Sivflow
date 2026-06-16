@@ -1,15 +1,15 @@
 import React from "react";
-import { Edit } from "@/chip/icons";
-import { OverlayToolbar } from "@/chip/panel/overlay-toolbar/OverlayToolbar";
-import { OverlayToolbarButton } from "@/chip/panel/overlay-toolbar/OverlayToolbarButton";
-import { OverlayToolbarDivider } from "@/chip/panel/overlay-toolbar/OverlayToolbarDivider";
-import { FixedDisplayGlyph, FlipGlyph, FluidDisplayGlyph, SplitGlyph, StackGlyph } from "@/chip/panel/overlay-toolbar/OverlayToolbarGlyphs";
-import { OverlayToolbarIndexNavigator } from "@/chip/panel/overlay-toolbar/OverlayToolbarIndexNavigator";
-import { OverlayToolbarZoomControl } from "@/chip/panel/overlay-toolbar/OverlayToolbarZoomControl";
+import { Edit } from "@web-renderer/chip/icons";
+import { OverlayToolbar } from "@web-renderer/chip/panel/overlay-toolbar/OverlayToolbar";
+import { OverlayToolbarButton } from "@web-renderer/chip/panel/overlay-toolbar/OverlayToolbarButton";
+import { OverlayToolbarDivider } from "@web-renderer/chip/panel/overlay-toolbar/OverlayToolbarDivider";
+import { FixedDisplayGlyph, FlipGlyph, FluidDisplayGlyph, SplitGlyph, StackGlyph } from "@web-renderer/chip/panel/overlay-toolbar/OverlayToolbarGlyphs";
+import { OverlayToolbarIndexNavigator } from "@web-renderer/chip/panel/overlay-toolbar/OverlayToolbarIndexNavigator";
+import { OverlayToolbarZoomControl } from "@web-renderer/chip/panel/overlay-toolbar/OverlayToolbarZoomControl";
+import { cn } from "@web-renderer/lib/utils";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
 import { CARD_LAYOUT_MODE_LABELS } from "@/features/cardsetview/domain/cardLayoutMode";
 import { CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT } from "@/features/cardsetview/domain/cardSetView.constants";
-import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 type ZoomControlProps = {

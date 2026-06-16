@@ -1,5 +1,5 @@
+import { auth, functionsClient } from "@platform/firebase/client";
 import { httpsCallable } from "firebase/functions";
-import { auth, functionsClient } from "@/infrastructure/firebase/client";
 
 type ListGoogleCalendarAccountsOutput = {
   accounts: Array<{

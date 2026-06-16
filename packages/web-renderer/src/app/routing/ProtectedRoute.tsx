@@ -1,7 +1,7 @@
 import { isTestBypassEnabled } from "@web-renderer/app/routing/testBypass";
+import { LoadingFallback } from "@web-renderer/components/common/LoadingFallback";
 import type { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
-import { LoadingFallback } from "@/components/common/LoadingFallback";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 
 const ProtectedRoute = ({ children }: { children: ReactNode; }) => {

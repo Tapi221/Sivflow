@@ -1,18 +1,18 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import type { CalendarTimetableColorKey, CalendarTimetableCourse, CalendarTimetableSlot, CalendarTimetableVisibleDayCount, CalendarTimetableWeekdayIndex } from "@core/domain/calendar/timetable/timetable.types";
+import { getTagColorStyle } from "@web-renderer/chip/budge/tag/tagColor";
+import { CalendarTimetableCourseEditorDialog } from "@web-renderer/chip/panel/dialog.desktop/Dialog.CalendarTimetableCourseEditor";
+import { CalendarTimetableSettingsDialog } from "@web-renderer/chip/panel/dialog.desktop/Dialog.CalendarTimetableSettings";
+import { ScheduleSyllabusCatalogDialog } from "@web-renderer/chip/panel/dialog.desktop/Dialog.Schedule.SyllabusCatalog";
+import { cn } from "@web-renderer/lib/utils";
 import { addDays, format, isSameDay, startOfWeek } from "date-fns";
 import { ja } from "date-fns/locale";
 import type { ComponentType, CSSProperties, SVGProps } from "react";
 import * as stratisIcons from "stratis-ui-icons";
-import { getTagColorStyle } from "@/chip/budge/tag/tagColor";
-import { CalendarTimetableCourseEditorDialog } from "@/chip/panel/dialog.desktop/Dialog.CalendarTimetableCourseEditor";
-import { CalendarTimetableSettingsDialog } from "@/chip/panel/dialog.desktop/Dialog.CalendarTimetableSettings";
-import { ScheduleSyllabusCatalogDialog } from "@/chip/panel/dialog.desktop/Dialog.Schedule.SyllabusCatalog";
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
 import { getCalendarWeekStartsOn } from "@/features/calendar/calendarWeekStart";
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
 import { useCalendarTimetable } from "@/features/calendar/timetable/useCalendarTimetable";
-import { cn } from "@/lib/utils";
 
 type TimetableSlot = {
   dayIndex: CalendarTimetableWeekdayIndex;
@@ -149,4 +149,5 @@ const CalendarTimetableViewComponent = ({ weekDate, weekStartDay = DEFAULT_CALEN
 
 const CalendarTimetableView = memo(CalendarTimetableViewComponent);
 CalendarTimetableView.displayName = "CalendarTimetableView";
+
 export { CalendarTimetableView };

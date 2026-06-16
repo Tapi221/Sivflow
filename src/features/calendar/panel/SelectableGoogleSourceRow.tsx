@@ -1,7 +1,7 @@
-import type { KeyboardEvent, MouseEvent } from "react";
-import { AnimatedCheckboxBase } from "@/chip/checkbox/AnimatedCheckboxBase";
-import { cn } from "@/lib/utils";
 import { SIDEBAR_COLOR } from "@shared/design-tokens/color/Color.Sidebar";
+import { AnimatedCheckboxBase } from "@web-renderer/chip/checkbox/AnimatedCheckboxBase";
+import { cn } from "@web-renderer/lib/utils";
+import type { KeyboardEvent, MouseEvent } from "react";
 
 type SelectableGoogleSourceRowProps = {
   id: string;

@@ -1,7 +1,7 @@
 import React from "react";
+import { cn } from "@web-renderer/lib/utils";
 import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 import { buildTypographyStyle, mergeStyles, normalizeCardSetViewZoom } from "@/components/card/common/cardSetViewZoom";
-import { cn } from "@/lib/utils";
 
 type DivDataAttributes = {
   [key: `data-${string}`]: string | number | boolean | undefined;

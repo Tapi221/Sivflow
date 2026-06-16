@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { computeEventLayout } from "@/chip/eventchip/EventChip.weekday.placement";
-import type { LayoutEvent } from "@/chip/eventchip/EventChip.weekday.placement";
+import { computeEventLayout } from "@web-renderer/chip/eventchip/EventChip.weekday.placement";
+import type { LayoutEvent } from "@web-renderer/chip/eventchip/EventChip.weekday.placement";
 
 const getLefts = (events: LayoutEvent[]) =>
   events.map((event) => computeEventLayout(events).get(event.id)?.left);

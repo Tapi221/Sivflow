@@ -1,9 +1,9 @@
 import React from "react";
-import { NotebookPen } from "@/chip/icons";
+import { NotebookPen } from "@web-renderer/chip/icons";
+import { cn } from "@web-renderer/lib/utils";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import type { MarkdownReplaceBlock, MarkdownReplaceFocus } from "@/components/card/blocks/markdown/MarkdownBlockContent";
 import { MarkdownBlockContent } from "@/components/card/blocks/markdown/MarkdownBlockContent";
-import { cn } from "@/lib/utils";
 
 interface MarkdownBlockProps {
   markdown: string;
@@ -101,4 +101,5 @@ const MarkdownBlock = React.memo(
   areMarkdownBlockPropsEqual,
 );
 MarkdownBlock.displayName = "MarkdownBlock";
+
 export { MarkdownBlock };

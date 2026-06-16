@@ -1,8 +1,8 @@
 import { useCallback } from "react";
+import { CircleHelp, Star, Tag } from "@web-renderer/chip/icons/icons";
+import { cn } from "@web-renderer/lib/utils";
 import type { CSSProperties, SyntheticEvent } from "react";
-import { CircleHelp, Star, Tag } from "@/chip/icons/icons";
 import { CARD_ACTION_BG_CLASS, CARD_ACTION_BUTTON_PX, CARD_ACTION_COLOR_ACTIVE_CLASS, CARD_ACTION_COLOR_IDLE_CLASS, CARD_ACTION_ICON_CLASS, CARD_ACTION_ICON_PX } from "@/components/card/frame/cardAction.constants";
-import { cn } from "@/lib/utils";
 
 interface CardCornerActionsProps {
   onHelp?: () => void;

@@ -1,5 +1,6 @@
 import { memo, startTransition, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useDateFnsLocale, useT } from "@shared/i18n/useT";
+import { cn } from "@web-renderer/lib/utils";
 import { addDays, addYears, eachMonthOfInterval, endOfDay, endOfYear, format, isSameMonth, startOfMonth, startOfWeek, startOfYear } from "date-fns";
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
 import { getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
@@ -7,7 +8,6 @@ import type { CalendarDateRange } from "@/features/calendar/calendarRange.types"
 import { getCalendarWeekStartsOn, rotateCalendarWeekdayLabels } from "@/features/calendar/calendarWeekStart";
 import { DEFAULT_CALENDAR_MONTH_WEEK_START_DAY } from "@/features/calendar/model/calendarMonth.model";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { cn } from "@/lib/utils";
 
 type CalendarYearEventPriority = {
   group: number;
@@ -453,5 +453,6 @@ const CalendarYearViewComponent = ({
 
 const CalendarYearView = memo(CalendarYearViewComponent);
 CalendarYearView.displayName = "CalendarYearView";
+
 export { CalendarYearView };
 export type { CalendarYearEventPriority, CalendarYearEventDisplay, CalendarYearEventDisplayResolver };

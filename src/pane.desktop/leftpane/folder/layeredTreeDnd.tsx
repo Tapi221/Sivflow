@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@web-renderer/lib/utils";
 import type { LayeredTreeDropPosition } from "@/pane.desktop/leftpane/folder/layeredTreeDnd.types";
 
 const LayeredTreeDropIndicator = ({ position, left, className }: { position: Exclude<LayeredTreeDropPosition, "inside">; left: number; className?: string; }) => (

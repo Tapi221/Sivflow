@@ -179,13 +179,14 @@ const ContextMenu = ({ items, fixedWidth, keepOpenOnConfirm = false, onDismiss, 
     const aside = getAside(item);
     const row = selectedIndex === null ? null : rowRefs.current.get(selectedIndex) ?? null;
     const menu = menuRef.current;
-    if (aside === null || row === null || menu === null) {
+    if (selectedIndex === null || aside === null || row === null || menu === null) {
       setDocumentationAside(null);
       return;
     }
+    const selectedDocumentationIndex = selectedIndex;
     const rowRect = row.getBoundingClientRect();
     const menuRect = menu.getBoundingClientRect();
-    setDocumentationAside({ index: selectedIndex, aside, top: rowRect.top - menuRect.top, height: rowRect.height });
+    setDocumentationAside({ index: selectedDocumentationIndex, aside, top: rowRect.top - menuRect.top, height: rowRect.height });
   }, [selectedIndex, items]);
   useLayoutEffect(() => {
     if (openSubmenu === null) return;
@@ -261,7 +262,7 @@ const ContextMenu = ({ items, fixedWidth, keepOpenOnConfirm = false, onDismiss, 
   const selectByOffset = (offset: number) => {
     if (selectableIndexes.length === 0) return;
     const currentPosition = selectedIndex === null ? -1 : selectableIndexes.indexOf(selectedIndex);
-    selectIndex(selectableIndexes[(currentPosition + offset + selectableIndexes.length) % selectableIndexes.length]);
+    selectIndex(selectableIndexes[(currentPosition + offset + selectableIndexes.length) % selectableIndexes.length] ?? null);
   };
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "ArrowDown") {

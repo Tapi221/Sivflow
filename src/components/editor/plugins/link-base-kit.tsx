@@ -1,5 +1,5 @@
 import { BaseLinkPlugin } from "@platejs/link";
-import { LinkElementStatic } from "@/chip/ui/plate/link-node-static";
+import { LinkElementStatic } from "@web-renderer/chip/ui/plate/link-node-static";
 
 const BaseLinkKit = [
   BaseLinkPlugin.withComponent(LinkElementStatic),

@@ -2,15 +2,15 @@
 
 import { CaptionPlugin } from "@platejs/caption/react";
 import { AudioPlugin, FilePlugin, ImagePlugin, MediaEmbedPlugin, PlaceholderPlugin, VideoPlugin } from "@platejs/media/react";
+import { AudioElement } from "@web-renderer/chip/ui/plate/media-audio-node";
+import { MediaEmbedElement } from "@web-renderer/chip/ui/plate/media-embed-node";
+import { FileElement } from "@web-renderer/chip/ui/plate/media-file-node";
+import { ImageElement } from "@web-renderer/chip/ui/plate/media-image-node";
+import { PlaceholderElement } from "@web-renderer/chip/ui/plate/media-placeholder-node";
+import { MediaPreviewDialog } from "@web-renderer/chip/ui/plate/media-preview-dialog";
+import { MediaUploadToast } from "@web-renderer/chip/ui/plate/media-upload-toast";
+import { VideoElement } from "@web-renderer/chip/ui/plate/media-video-node";
 import { KEYS } from "platejs";
-import { AudioElement } from "@/chip/ui/plate/media-audio-node";
-import { MediaEmbedElement } from "@/chip/ui/plate/media-embed-node";
-import { FileElement } from "@/chip/ui/plate/media-file-node";
-import { ImageElement } from "@/chip/ui/plate/media-image-node";
-import { PlaceholderElement } from "@/chip/ui/plate/media-placeholder-node";
-import { MediaPreviewDialog } from "@/chip/ui/plate/media-preview-dialog";
-import { MediaUploadToast } from "@/chip/ui/plate/media-upload-toast";
-import { VideoElement } from "@/chip/ui/plate/media-video-node";
 
 const MediaKit = [
   ImagePlugin.configure({

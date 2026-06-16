@@ -1,5 +1,5 @@
 import React from "react";
-import { MarkdownEditorDialog } from "@/chip/panel/dialog.desktop/Dialog.MarkdownEditor";
+import { MarkdownEditorDialog } from "@web-renderer/chip/panel/dialog.desktop/Dialog.MarkdownEditor";
 import { MarkdownBlockDisplay } from "@/components/card/blocks/markdown/MarkdownBlockDisplay";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { clampMarkdownTabSize, normalizeMarkdownEditorValue, normalizeMarkdownInsertionText, resolveMarkdownTabKeyText } from "@/utils/markdownWhitespace";
@@ -66,19 +66,6 @@ const restoreCaret = (textarea: HTMLTextAreaElement, pos: number) => {
       void error;
     }
   });
-};
-const isProbablyCode = (value: string) => {
-  const source = String(value ?? "").trim();
-  if (!source) return false;
-  if (/```|~~~/.test(source)) return true;
-  if (/^\s*<\w+[\s>]/m.test(source)) return true;
-  if (
-    /\b(className|function|const|let|var|import|export|return)\b/.test(source)
-  ) {
-    return true;
-  }
-  if (/[{}();]|=>/.test(source)) return true;
-  return false;
 };
 const looksLikeHtmlBlockCandidate = (value: string) => {
   return /^\s*<\w+[\s>]/.test(String(value ?? ""));

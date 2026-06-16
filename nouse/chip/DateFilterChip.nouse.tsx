@@ -1,4 +1,4 @@
-import { CalendarIcon } from "@/chip/icons/icons.sidebar";
+import { CalendarIcon } from "@web-renderer/chip/icons/icons.sidebar";
 
 type DateFilterChipProps = {
   label: string;

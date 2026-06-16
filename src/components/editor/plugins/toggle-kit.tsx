@@ -1,7 +1,7 @@
 "use client";
 
 import { TogglePlugin } from "@platejs/toggle/react";
-import { ToggleElement } from "@/chip/ui/plate/toggle-node";
+import { ToggleElement } from "@web-renderer/chip/ui/plate/toggle-node";
 import { IndentKit } from "@/components/editor/plugins/indent-kit";
 
 const ToggleKit = [

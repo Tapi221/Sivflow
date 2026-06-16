@@ -1,7 +1,7 @@
 import React from "react";
-import { Button } from "@/chip/button/button/button";
-import { Trophy } from "@/chip/icons";
-import { Card, CardContent } from "@/chip/ui/card";
+import { Button } from "@web-renderer/chip/button/button/button";
+import { Trophy } from "@web-renderer/chip/icons";
+import { Card, CardContent } from "@web-renderer/chip/ui/card";
 
 type Props = {
   folderId: string | null;

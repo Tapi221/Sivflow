@@ -1,16 +1,16 @@
 import "@/features/pdf/PdfPane.css";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { LoadingSpinner } from "@web-renderer/components/common/LoadingSpinner";
+import { cn } from "@web-renderer/lib/utils";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
 import type { ChangeEvent, KeyboardEvent as ReactKeyboardEvent } from "react";
-import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import type { PdfDocumentSource } from "@/features/pdf/pdfDocumentSource";
 import { releasePdfDocumentSourceSoon, retainPdfDocumentSource, toPdfDocumentLoadSource } from "@/features/pdf/pdfDocumentSource";
 import { waitForPdfLoadingTask } from "@/features/pdf/pdfLoadingTaskTimeout";
 import { getSafePdfPageNumber } from "@/features/pdf/pdfPageWindow";
 import { PDF_TRACKPAD_ZOOM_SENSITIVITY, PDF_ZOOM_BUTTON_SCALE_FACTOR, PDF_ZOOM_MAX_SCALE, PDF_ZOOM_MIN_SCALE, PDF_ZOOM_SCALE_EPSILON } from "@/features/pdf/pdfZoom.constants";
 import { clampScale, computeNextScaleFromGesture, normalizeScale } from "@/features/pdf/pdfZoom.utils";
-import { cn } from "@/lib/utils";
 import type { PdfViewerState } from "@/types";
 
 type PdfViewerStateChangePersistence = "immediate" | "deferred" | "none";

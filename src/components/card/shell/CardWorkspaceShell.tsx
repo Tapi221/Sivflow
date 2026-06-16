@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { SelectionCaptureGlyph } from "@web-renderer/chip/panel/overlay-toolbar/OverlayToolbarGlyphs";
+import { cn } from "@web-renderer/lib/utils";
 import type { CSSProperties, ReactNode, Ref } from "react";
-import { SelectionCaptureGlyph } from "@/chip/panel/overlay-toolbar/OverlayToolbarGlyphs";
 import { CardPaneWidthAdjuster } from "@/features/cardsetview/hooks/components/CardPaneWidthAdjuster";
 import type { CardSelectionCaptureSide } from "@/features/selection-capture/cardSelectionCaptureEvents";
 import { dispatchCardSelectionCaptureEvent } from "@/features/selection-capture/cardSelectionCaptureEvents";
@@ -9,7 +10,6 @@ import { captureElementRectToBlob } from "@/features/selection-capture/domSelect
 import type { SelectionCaptureArea, SelectionCaptureRect } from "@/features/selection-capture/selectionCapture.types";
 import { recognizeSelectionCaptureText } from "@/features/selection-capture/selectionCaptureOcr";
 import { SelectionCaptureOverlay } from "@/features/selection-capture/SelectionCaptureOverlay";
-import { cn } from "@/lib/utils";
 
 type CardWorkspaceSurfaceVariant = "plain" | "dotted";
 type CardWorkspaceCaptureTarget = {

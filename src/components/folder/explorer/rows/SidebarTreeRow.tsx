@@ -1,9 +1,9 @@
 import React from "react";
+import { cn } from "@web-renderer/lib/utils";
 import type { ContextMenuVariant } from "@/components/folder/components/menus/ContextMenu";
 import { ContextMenu } from "@/components/folder/components/menus/ContextMenu";
 import type { MenuAction } from "@/components/folder/components/menus/menuActions";
 import { useContextMenuAnchor } from "@/components/folder/components/menus/useContextMenuAnchor";
-import { cn } from "@/lib/utils";
 
 interface SidebarTreeRowProps {
   menuOpen: boolean;

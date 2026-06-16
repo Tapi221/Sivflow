@@ -138,15 +138,6 @@ const serializeKey = (key: unknown): string => {
   return String(key);
 };
 const ensureObject = <T extends object>(value: T): T => ({ ...value });
-const createPayloadId = (payload: object): string => {
-  const record = asRecord(payload);
-  const current = record.id;
-  if (typeof current === "string" && current.trim().length > 0) return current;
-
-  const next = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : nanoid();
-  record.id = next;
-  return next;
-};
 const getQueueEntityForTable = (tableName: string): QueueEntity | null => ENTITY_BY_TABLE[tableName] ?? null;
 class InMemoryCollection<T extends object, TKey = string> {
   constructor(

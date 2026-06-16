@@ -1,5 +1,5 @@
 import { BaseFootnoteDefinitionPlugin, BaseFootnoteReferencePlugin } from "@platejs/footnote";
-import { FootnoteDefinitionElementStatic, FootnoteReferenceElementStatic } from "@/chip/ui/plate/footnote-node-static";
+import { FootnoteDefinitionElementStatic, FootnoteReferenceElementStatic } from "@web-renderer/chip/ui/plate/footnote-node-static";
 
 const BaseFootnoteKit = [
   BaseFootnoteReferencePlugin.withComponent(FootnoteReferenceElementStatic),

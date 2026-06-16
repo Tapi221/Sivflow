@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo } from "react";
 import { UI_TYPO } from "@shared/design-tokens/Typography";
+import { SearchDialog } from "@web-renderer/chip/panel/dialog.desktop/Dialog.Search";
+import { cn } from "@web-renderer/lib/utils";
 import { useLocation, useNavigate } from "react-router-dom";
-import { SearchDialog } from "@/chip/panel/dialog.desktop/Dialog.Search";
 import { useKatexLoader } from "@/components/card/blocks/math/useKatexLoader";
 import { LocalDBStatusBanner } from "@/components/security/LocalDBStatusBanner";
 import { SecurityAlertBanner } from "@/components/security/SecurityAlertBanner";
@@ -9,7 +10,6 @@ import type { SearchItem } from "@/features/search/model/search.types";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
 import { AppLayout } from "@/layout/AppLayout";
 import { DesktopWindowControls } from "@/layout/DesktopWindowControls";
-import { cn } from "@/lib/utils";
 import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 

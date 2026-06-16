@@ -1,7 +1,7 @@
 "use client";
 
 import { FootnoteDefinitionPlugin, FootnoteInputPlugin, FootnoteReferencePlugin } from "@platejs/footnote/react";
-import { FootnoteDefinitionElement, FootnoteInputElement, FootnoteReferenceElement } from "@/chip/ui/plate/footnote-node";
+import { FootnoteDefinitionElement, FootnoteInputElement, FootnoteReferenceElement } from "@web-renderer/chip/ui/plate/footnote-node";
 
 const FootnoteKit = [
   FootnoteInputPlugin.withComponent(FootnoteInputElement),

@@ -1,8 +1,8 @@
 import { Fragment, useMemo, useRef } from "react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@web-renderer/chip/panel/dropdown-menu";
+import { cn } from "@web-renderer/lib/utils";
 import type { ComponentProps, ReactNode } from "react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import type { MenuAction } from "@/components/folder/components/menus/menuActions";
-import { cn } from "@/lib/utils";
 
 type ContextMenuVariant = "default" | "compact" | "create" | "toolbar";
 type ContextMenuAnchorPoint = {

@@ -1,5 +1,5 @@
 import { BaseMentionPlugin } from "@platejs/mention";
-import { MentionElementStatic } from "@/chip/ui/plate/mention-node-static";
+import { MentionElementStatic } from "@web-renderer/chip/ui/plate/mention-node-static";
 
 const BaseMentionKit = [BaseMentionPlugin.withComponent(MentionElementStatic)];
 

@@ -1,0 +1,54 @@
+import { useState } from "react";
+import { Filter } from "@web-renderer/chip/icons";
+import { floatingPanelPresets } from "@web-renderer/chip/ui/menu-styles";
+import { Popover, PopoverContent, PopoverTrigger } from "@web-renderer/chip/ui/popover";
+import { cn } from "@web-renderer/lib/utils";
+import { TagFilterPanel } from "@/components/explorer/TagFilterPanel";
+import { useExplorerStore } from "@/features/explorer/store/useExplorerStore";
+
+interface TagFilterPopoverProps {
+  allTags: string[];
+  className?: string;
+  iconClassName?: string;
+  ariaLabel?: string;
+}
+
+const TagFilterPopover = ({ allTags, className, iconClassName, ariaLabel = "タグフィルターを開く" }: TagFilterPopoverProps) => {
+  const { tagFilter, uncertaintyFilter, bookmarkedFilter, draftFilter, contentTypeFilter } = useExplorerStore();
+  const [isOpen, setIsOpen] = useState(false);
+  const panelPreset = floatingPanelPresets.filter;
+
+  const isFilterActive =
+    tagFilter.length > 0 ||
+    uncertaintyFilter !== "any" ||
+    bookmarkedFilter !== "any" ||
+    draftFilter !== "any" ||
+    contentTypeFilter.length < 2;
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          aria-label={ariaLabel}
+          className={cn(
+            "ds-filter-toggle flex items-center justify-center px-2 py-1 text-xs font-medium whitespace-nowrap",
+            isFilterActive && "ds-filter-toggle--active",
+            className,
+          )}
+        >
+          <Filter className={cn("h-4 w-4", iconClassName)} />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="center"
+        className={cn(panelPreset.className, "w-64")}
+        surface={panelPreset.surface}
+      >
+        <TagFilterPanel allTags={allTags} isOpen={isOpen} />
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+export { TagFilterPopover };

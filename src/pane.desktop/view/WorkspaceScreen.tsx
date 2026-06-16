@@ -1,12 +1,12 @@
 import "@/pane.desktop/leftpane/sidebar.layered-directory.css";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { HotkeyBadge } from "@web-renderer/chip/budge/Budge.hotkey";
+import { Search } from "@web-renderer/chip/icons";
+import { SidebarOpenIcon } from "@web-renderer/chip/icons/icons.sidebar";
+import { SettingsWorkspaceDialog } from "@web-renderer/chip/panel/dialog.desktop/Dialog.SettingsWorkspace";
+import { CarvePanel } from "@web-renderer/chip/panel/panel/CarvePanel.desktop";
 import type { CSSProperties, ReactNode } from "react";
 import { useNavigate, useOutletContext } from "react-router-dom";
-import { HotkeyBadge } from "@/chip/budge/Budge.hotkey";
-import { Search } from "@/chip/icons";
-import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
-import { SettingsWorkspaceDialog } from "@/chip/panel/dialog.desktop/Dialog.SettingsWorkspace";
-import { CarvePanel } from "@/chip/panel/panel/CarvePanel.desktop";
 import TreeViewLayout from "@/components/folder/layout/TreeViewLayout";
 import { NoteDocumentEditor } from "@/components/note/NoteDocumentEditor";
 import { useSetBreadcrumbCrumbs } from "@/contexts/BreadcrumbContext";

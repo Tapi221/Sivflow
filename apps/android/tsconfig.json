@@ -7,6 +7,7 @@
       "@/*": ["../../src/*"],
       "@core/*": ["../../packages/core/src/*"],
       "@platform/*": ["../../packages/platform/src/*"],
+      "@web-renderer/*": ["../../packages/web-renderer/src/*"],
       "@android/*": ["src/*"],
       "@android-renderer/*": ["../../packages/android-renderer/src/*"],
       "@shared/*": ["../../shared/*"]
@@ -17,6 +18,7 @@
     "src",
     "../../packages/core/src",
     "../../packages/platform/src",
+    "../../packages/web-renderer/src",
     "../../packages/android-renderer/src",
     "../../src/pane.mobilenative",
     "../../src/integration/googlecalendar-integration/gcalSync.types.ts",

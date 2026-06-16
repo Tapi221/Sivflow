@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { cn } from "@web-renderer/lib/utils";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { SectionListBlankPane } from "@/components/folder/components/SectionListBlankPane";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
 import { CardSetLibraryDashboard } from "@/features/library-cardset/components/CardSetLibraryDashboard";
 import { PdfLibraryDashboard } from "@/features/library-pdf/components/PdfLibraryDashboard";
-import { cn } from "@/lib/utils";
 import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
 interface SectionListColumnPaneProps {

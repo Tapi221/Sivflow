@@ -1,7 +1,7 @@
 import "@/pane.desktop/leftpane/sidebar.desktop.css";
 import { memo } from "react";
 import { useT } from "@shared/i18n/useT";
-import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
+import { SidebarOpenIcon } from "@web-renderer/chip/icons/icons.sidebar";
 
 type SidebarCollapsedToggleProps = {
   isVisible: boolean;
@@ -23,4 +23,5 @@ const SidebarCollapsedToggleBase = ({ isVisible, onToggleLeftPanel }: SidebarCol
 SidebarCollapsedToggleBase.displayName = "SidebarCollapsedToggleBase";
 const SidebarCollapsedToggle = memo(SidebarCollapsedToggleBase);
 SidebarCollapsedToggle.displayName = "SidebarCollapsedToggle";
+
 export { SidebarCollapsedToggle };

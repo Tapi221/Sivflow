@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { cn } from "@web-renderer/lib/utils";
 import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
 import type { VerticalCardPagerItemWidthSpec } from "@/features/review/verticalCardPagerWidthSpec";
 import { buildVerticalCardPagerItemStyle, resolveVerticalCardPagerItemWidthSpec } from "@/features/review/verticalCardPagerWidthSpec";
-import { cn } from "@/lib/utils";
 import { isTypingTarget } from "@/utils/isTypingTarget";
 
 type ScrollAnchorFace = "question" | "answer";

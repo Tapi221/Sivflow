@@ -1,5 +1,5 @@
+import { cn } from "@web-renderer/lib/utils";
 import type { CSSProperties, ReactNode } from "react";
-import { cn } from "@/lib/utils";
 
 interface SectionListBlankPaneProps {
   className?: string;

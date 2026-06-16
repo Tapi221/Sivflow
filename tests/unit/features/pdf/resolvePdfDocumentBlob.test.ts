@@ -38,7 +38,7 @@ vi.mock("@/integration/google-integration/googleDrive.pdfDownload", () => ({
   downloadPdfFromGoogleDrive: downloadPdfFromGoogleDriveMock,
 }));
 
-vi.mock("@/infrastructure/firebase/client", () => ({
+vi.mock("@platform/firebase/client", () => ({
   auth: { currentUser: { uid: "user-1" } },
   storage: storageMock,
 }));

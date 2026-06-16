@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { Button, buttonVariants } from "@/chip/ui/button/button";
+import { Button, buttonVariants } from "@web-renderer/chip/ui/button/button";
 
 describe("Button", () => {
   it("token class を使用しつつ default public variant contract を維持する", () => {

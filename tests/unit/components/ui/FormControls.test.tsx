@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { ToggleSwitch } from "@/chip/toggle/Toggle.switch";
-import { Checkbox } from "@/chip/ui/checkbox";
-import { Input } from "@/chip/ui/input";
-import { Label } from "@/chip/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/chip/ui/select";
+import { ToggleSwitch } from "@web-renderer/chip/toggle/Toggle.switch";
+import { Checkbox } from "@web-renderer/chip/ui/checkbox";
+import { Input } from "@web-renderer/chip/ui/input";
+import { Label } from "@web-renderer/chip/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@web-renderer/chip/ui/select";
 
 describe("form control primitives", () => {
   it("input、checkbox、label に token-backed class を適用し、toggle を操作可能にする", () => {

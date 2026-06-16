@@ -79,11 +79,11 @@ const PopoverMenuSandboxPage = () => {
   return (
     <main className="min-h-screen bg-slate-100 p-8 text-slate-900">
       <div className="mx-auto flex max-w-4xl flex-col gap-5">
-        <div>
+        <header>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">nouse/popover-menu</p>
           <h1 className="mt-2 text-2xl font-semibold">PopoverMenu trial</h1>
           <p className="mt-2 text-sm text-slate-600">button trigger、anchor / attach、fullWidth、handle.show / hide を試せます。</p>
-        </div>
+        </header>
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex flex-wrap items-center gap-3">
             <PopoverMenu id="popover-primary" anchor="bottom-left" attach="top-left" handle={primaryHandle} menu={() => renderMenu("Primary popover")} onOpen={() => pushLog("Primary open")} onDismiss={(reason) => pushLog(`Primary dismiss: ${reason}`)}>

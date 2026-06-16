@@ -1,5 +1,5 @@
 import React from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@web-renderer/lib/utils";
 
 interface TreeViewSidebarProps {
   sidebarRef: React.RefObject<HTMLDivElement | null>;

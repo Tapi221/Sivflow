@@ -1,6 +1,6 @@
 import React from "react";
+import { cn } from "@web-renderer/lib/utils";
 import { SharedCardAttachments } from "@/components/card/common/SharedCardAttachments";
-import { cn } from "@/lib/utils";
 import type { CardFaceAttachments } from "@/types/domain/card";
 
 type CardFaceWithAttachmentsProps = Readonly<{

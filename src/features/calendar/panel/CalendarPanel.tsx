@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
+import { cn } from "@web-renderer/lib/utils";
 import type { ReactNode } from "react";
-import { cn } from "@/lib/utils";
 
 type CalendarPanelProps = {
   children: ReactNode;
@@ -32,4 +32,5 @@ const CalendarPanel = ({ children, hasTrailingPanel = false, className }: Calend
 };
 
 CalendarPanelViewport.displayName = "CalendarPanelViewport";
+
 export { CalendarPanelViewport, CalendarPanel };

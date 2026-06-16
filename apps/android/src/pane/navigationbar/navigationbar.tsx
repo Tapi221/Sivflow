@@ -1,9 +1,9 @@
 import "@android/pane/navigationbar/navigationbar.css";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { GalleryIcon, HomeIcon, LibraryIcon, SettingIcon } from "@web-renderer/chip/icons/icons.sidebar";
+import { cn } from "@web-renderer/lib/utils";
 import type { CSSProperties, ReactNode } from "react";
-import { GalleryIcon, HomeIcon, LibraryIcon, SettingIcon } from "@/chip/icons/icons.sidebar";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
-import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceSidebarSection } from "@/pane.desktop/tab.desktopnative/Tab";
 
@@ -101,5 +101,6 @@ const NavigationBarMobileComponent = ({ activeItemId, className, onItemSelect, o
 
 const NavigationBarMobile = memo(NavigationBarMobileComponent);
 NavigationBarMobile.displayName = "NavigationBarMobile";
+
 export { NavigationBarMobile };
 export type { NavigationBarItemId, NavigationBarMobileProps };

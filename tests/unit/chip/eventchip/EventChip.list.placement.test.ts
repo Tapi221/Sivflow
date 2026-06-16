@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildListPlacementDays, buildListVirtualMetrics, getListVirtualRange, LIST_DAY_GAP_PX, LIST_DAY_SECTION_MIN_HEIGHT_PX, LIST_EVENT_ROW_GAP_PX, LIST_EVENT_ROW_HEIGHT_PX } from "@/chip/eventchip/EventChip.list.placement";
+import { buildListPlacementDays, buildListVirtualMetrics, getListVirtualRange, LIST_DAY_GAP_PX, LIST_DAY_SECTION_MIN_HEIGHT_PX, LIST_EVENT_ROW_GAP_PX, LIST_EVENT_ROW_HEIGHT_PX } from "@web-renderer/chip/eventchip/EventChip.list.placement";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
 const createEvent = ({

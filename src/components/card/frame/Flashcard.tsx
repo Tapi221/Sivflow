@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { InkDocument } from "@core/domain/card/ink/inkDocument";
-import { FlashcardMediaDialogs } from "@/chip/panel/dialog.desktop/Dialog.FlashcardMedia";
+import { FlashcardMediaDialogs } from "@web-renderer/chip/panel/dialog.desktop/Dialog.FlashcardMedia";
+import { cn } from "@web-renderer/lib/utils";
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import { CardFrame } from "@/components/card/frame/CardFrame";
 import { CARD_SHELL_COMMON_CLASS_NAME } from "@/components/card/frame/cardShellClassNames";
@@ -13,7 +14,6 @@ import { useFlashcardDerived } from "@/components/card/frame/useFlashcardDerived
 import { useFlashcardInk } from "@/components/card/frame/useFlashcardInk";
 import { useFlashcardMediaState } from "@/components/card/frame/useFlashcardMediaState";
 import { CANONICAL_CARD_WIDTH, CARD_DISPLAY_SCALE, layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
-import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 interface FlashcardProps {
@@ -324,5 +324,6 @@ const FlashcardInner = ({
 
 const Flashcard = React.memo(FlashcardInner, areFlashcardPropsEqual);
 Flashcard.displayName = "Flashcard";
+
 export { Flashcard };
 export type { FlashcardCardLike };

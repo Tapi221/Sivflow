@@ -109,7 +109,7 @@ const useCardSetViewScreenController = (params: UseCardSetViewScreenControllerPa
 
   const handleToggleViewMode = useCallback(() => {
     state.handleToggleViewMode();
-  }, [state.handleToggleViewMode]);
+  }, [state]);
 
   const handleNavigationScrollTopChange = useCallback((scrollTop: number) => {
     if (!cardSetId) return;
@@ -210,7 +210,7 @@ const useCardSetViewScreenController = (params: UseCardSetViewScreenControllerPa
       console.error("[CardSetView] Failed to reorder cards", error);
       toastError("カードの並び替えに失敗しました");
     }
-  }, [cardSetId, state.reorderCardsInCardSet, toastError]);
+  }, [cardSetId, state, toastError]);
 
   return {
     cardSetId,

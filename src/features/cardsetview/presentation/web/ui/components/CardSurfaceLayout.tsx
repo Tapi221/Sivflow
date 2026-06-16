@@ -1,6 +1,6 @@
 import React from "react";
+import { cn } from "@web-renderer/lib/utils";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-import { cn } from "@/lib/utils";
 
 type CardSurfaceFace = "question" | "answer";
 type CardSurfaceLayoutProps = {

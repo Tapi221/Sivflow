@@ -1,5 +1,5 @@
+import { auth, storage } from "@platform/firebase/client";
 import { getBlob, ref } from "firebase/storage";
-import { auth, storage } from "@/infrastructure/firebase/client";
 import { requestGoogleDriveFileAccessToken } from "@/integration/google-integration/googleDrive.oauth";
 import { downloadPdfFromGoogleDrive } from "@/integration/google-integration/googleDrive.pdfDownload";
 import { getDocumentBlob, saveDocumentBlob } from "@/services/documentFileStore";

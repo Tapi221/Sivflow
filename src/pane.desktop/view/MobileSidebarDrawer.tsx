@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
+import { cn } from "@web-renderer/lib/utils";
 import type { ReactNode, TouchEvent as ReactTouchEvent } from "react";
-import { cn } from "@/lib/utils";
 
 type MobileSidebarDrawerProps = {
   id: string; isOpen: boolean; onClose: () => void; children: ReactNode; };

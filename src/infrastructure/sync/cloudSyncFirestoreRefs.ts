@@ -1,8 +1,8 @@
+import { requireFirestoreDb } from "@platform/firebase/client";
 import type { CollectionReference, DocumentData, DocumentReference, Firestore, Query } from "firebase/firestore";
 import { collection, doc, query, where } from "firebase/firestore";
 import type { CloudEntityType, PullableEntityType } from "@/application/usecases/cloudSyncShared";
 import { COLLECTION_BY_TYPE } from "@/application/usecases/cloudSyncShared";
-import { requireFirestoreDb } from "@/infrastructure/firebase/client";
 
 const requireCloudSyncFirestore = (): Firestore => requireFirestoreDb();
 const getPullableCollectionRef = (firestore: Firestore, userId: string, type: PullableEntityType): CollectionReference<DocumentData> => collection(firestore, `users/${userId}/${COLLECTION_BY_TYPE[type]}`);

@@ -21,7 +21,7 @@ vi.mock("@/integration/google-integration/google.server-oauth", () => ({
   isServerStoredGoogleOAuthEnabled: vi.fn(() => false),
 }));
 
-vi.mock("@/infrastructure/firebase/client", () => ({
+vi.mock("@platform/firebase/client", () => ({
   auth: {},
 }));
 

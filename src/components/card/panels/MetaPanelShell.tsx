@@ -1,6 +1,6 @@
 import { NUMERIC_TYPO, UI_TYPO } from "@shared/design-tokens/Typography";
+import { cn } from "@web-renderer/lib/utils";
 import type { CSSProperties, ReactNode } from "react";
-import { cn } from "@/lib/utils";
 
 type MetaPanelShellProps = {
   children: ReactNode;
