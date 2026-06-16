@@ -1,10 +1,11 @@
 import { AppContent } from "@web-renderer/app/AppContent";
-import { AppProviders } from "@web-renderer/app/AppProviders";
+import type { AppContentProps } from "@web-renderer/app/AppContent";
 
-const App = () => (
-  <AppProviders>
-    <AppContent />
-  </AppProviders>
-);
+type AppProps = AppContentProps;
+
+const App = (props: AppProps) => {
+  return <AppContent {...props} />;
+};
 
 export { App };
+export type { AppProps };
