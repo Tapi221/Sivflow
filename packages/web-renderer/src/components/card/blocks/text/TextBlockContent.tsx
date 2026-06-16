@@ -1,5 +1,5 @@
 import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/Typography";
-import AutoResizeTextarea from "@web-renderer/chip/ui/AutoResizeTextarea";
+import { AutoResizeTextarea } from "@web-renderer/chip/ui/AutoResizeTextarea";
 import { BlockSurface } from "@web-renderer/components/card/blocks/core/BlockSurface";
 import { buildRuledTextareaStyle } from "@web-renderer/components/card/blocks/core/ruledTextareaStyle";
 import { TEXT_BLOCK_CONTENT_CLASS, TEXT_BLOCK_LINE_HEIGHT_PX } from "./textBlockStyles";
@@ -33,7 +33,6 @@ const buildTextBlockPresentation = (zoom?: number) => {
     zoom,
   });
   const ruledRowPx = scaleTypographyNumberPx(TEXT_BLOCK_LINE_HEIGHT_PX, zoom);
-
   return {
     textStyle,
     ruledRowPx,
@@ -49,11 +48,9 @@ const buildTextBlockPresentation = (zoom?: number) => {
 const TextBlockContent = (props: TextBlockContentProps) => {
   const normalizedContent = normalizeTextBlockContent(props.content);
   const presentation = buildTextBlockPresentation(props.zoom);
-
   if (props.mode === "view") {
     const displayText =
       normalizedContent.length === 0 ? "\u00A0" : normalizedContent;
-
     return (
       <BlockSurface
         ruled={true}
@@ -70,12 +67,11 @@ const TextBlockContent = (props: TextBlockContentProps) => {
       </BlockSurface>
     );
   }
-
   return (
     <AutoResizeTextarea
       value={normalizedContent}
-      onChange={(e) =>
-        props.onChange(normalizeTextBlockContent(e.target.value))
+      onChange={(event) =>
+        props.onChange(normalizeTextBlockContent(event.target.value))
       }
       placeholder={props.placeholder ?? "テキストを入力..."}
       minRows={1}

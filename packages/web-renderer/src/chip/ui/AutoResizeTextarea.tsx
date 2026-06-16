@@ -1,11 +1,16 @@
-import React, { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
+import type { ChangeEvent, TextareaHTMLAttributes } from "react";
 import { cn } from "@web-renderer/lib/utils";
 
+<<<<<<< HEAD
 
 
 interface AutoResizeTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+=======
+interface AutoResizeTextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+>>>>>>> c06f65dcf83503eeadd66a314bd7f052edc70c72
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   placeholder?: string;
   className?: string;
   textareaClassName?: string;
@@ -32,57 +37,33 @@ const AutoResizeTextarea = ({
   ...props
 }: AutoResizeTextareaProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
   const minHeight = minRows * lineHeight;
-
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea) return;
-
-    // Reset height to auto to get the correct scrollHeight
     textarea.style.height = "auto";
-    // Ensure explicit line-height to make height calculations deterministic
     textarea.style.lineHeight = `${lineHeight}px`;
-    // Use border-box to ensure height includes padding/border
     textarea.style.boxSizing = "border-box";
-
-    // Calculate new height from content (newlines + wraps)
-    const measuredHeight =
-      value === "" ? minHeight : Math.max(textarea.scrollHeight, minHeight);
+    const measuredHeight = value === "" ? minHeight : Math.max(textarea.scrollHeight, minHeight);
     const snappedHeight = Math.ceil(measuredHeight / lineHeight) * lineHeight;
-
     if (allowInternalScroll) {
       const boundedHeight = Math.min(snappedHeight, maxHeight);
       textarea.style.height = `${boundedHeight}px`;
       textarea.style.overflowY = snappedHeight > maxHeight ? "auto" : "hidden";
     } else {
       textarea.style.height = `${snappedHeight}px`;
-      // Allow overflowY to be controlled by the style prop for non-scrollable textareas
       if (textarea.style.overflowY !== "hidden") {
         textarea.style.overflowY = "hidden";
       }
     }
-
     textarea.style.minHeight = `${minHeight}px`;
   }, [value, maxHeight, minHeight, lineHeight, allowInternalScroll]);
-
-  // Force hidden overflow when internal scroll is disabled to prevent scrollbar flickering
   useLayoutEffect(() => {
     if (!allowInternalScroll && textareaRef.current) {
-      textareaRef.current.style.setProperty(
-        "overflow-y",
-        "hidden",
-        "important",
-      );
-      // Also hide x overflow just in case
-      textareaRef.current.style.setProperty(
-        "overflow-x",
-        "hidden",
-        "important",
-      );
+      textareaRef.current.style.setProperty("overflow-y", "hidden", "important");
+      textareaRef.current.style.setProperty("overflow-x", "hidden", "important");
     }
   }, [allowInternalScroll]);
-
   return (
     <textarea
       ref={textareaRef}
@@ -99,8 +80,6 @@ const AutoResizeTextarea = ({
       )}
       style={{
         minHeight: `${minHeight}px`,
-        // Force hidden overflow when internal scroll is disabled to prevent scrollbar flickering
-        // Note: style prop doesn't support !important, so we use useLayoutEffect above
         overflowY: allowInternalScroll ? undefined : "hidden",
         ...props.style,
       }}
@@ -109,6 +88,11 @@ const AutoResizeTextarea = ({
   );
 };
 
+<<<<<<< HEAD
 
 
 export default AutoResizeTextarea;
+=======
+export { AutoResizeTextarea };
+export type { AutoResizeTextareaProps };
+>>>>>>> c06f65dcf83503eeadd66a314bd7f052edc70c72

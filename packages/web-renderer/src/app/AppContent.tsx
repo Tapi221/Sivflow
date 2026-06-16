@@ -9,7 +9,11 @@ import { useStartupTasks } from "@/application/startup/useStartupTasks";
 import { AccountLockedScreen } from "@/components/security/AccountLockedScreen";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 
+<<<<<<< HEAD
 
+=======
+type AppContentProps = Record<string, never>;
+>>>>>>> c06f65dcf83503eeadd66a314bd7f052edc70c72
 
 const MOBILE_LOGIN_VIEWPORT_MAX_WIDTH = 767;
 
@@ -19,27 +23,22 @@ const getIsMobileLoginViewport = (): boolean => {
   if (typeof window === "undefined") {
     return false;
   }
-
   return window.innerWidth <= MOBILE_LOGIN_VIEWPORT_MAX_WIDTH;
 };
 const useIsMobileLoginViewport = (): boolean => {
   const [isMobileLoginViewport, setIsMobileLoginViewport] = useState(getIsMobileLoginViewport);
-
   useEffect(() => {
     const updateIsMobileLoginViewport = () => {
       setIsMobileLoginViewport(getIsMobileLoginViewport());
     };
-
     updateIsMobileLoginViewport();
     window.addEventListener("resize", updateIsMobileLoginViewport);
     window.addEventListener("orientationchange", updateIsMobileLoginViewport);
-
     return () => {
       window.removeEventListener("resize", updateIsMobileLoginViewport);
       window.removeEventListener("orientationchange", updateIsMobileLoginViewport);
     };
   }, []);
-
   return isMobileLoginViewport;
 };
 
@@ -48,23 +47,18 @@ const useIsMobileLoginViewport = (): boolean => {
 const AppContent = () => {
   const { currentUser, loading } = useAuthSession();
   const isMobileLoginViewport = useIsMobileLoginViewport();
-
   useStartupTasks(currentUser?.uid);
-
   const isTestBypass = isTestBypassEnabled();
   const devStandaloneRouteElement = getDevStandaloneRouteElement(isTestBypass);
   if (devStandaloneRouteElement) {
     return devStandaloneRouteElement;
   }
-
   if (loading) {
     return <LoadingFallback />;
   }
-
   if (!currentUser && !isTestBypass) {
     return isMobileLoginViewport ? <MobileLoginPage /> : <LoginPage />;
   }
-
   return (
     <>
       <AccountLockedScreen />
@@ -76,3 +70,4 @@ const AppContent = () => {
 
 
 export { AppContent };
+export type { AppContentProps };

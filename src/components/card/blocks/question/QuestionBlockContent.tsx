@@ -1,10 +1,8 @@
 import React, { useMemo, useState } from "react";
-import AutoResizeTextarea from "@web-renderer/chip/ui/AutoResizeTextarea";
+import { AutoResizeTextarea } from "@web-renderer/chip/ui/AutoResizeTextarea";
+import { QuestionBlockLayout } from "@/components/card/blocks/question/QuestionBlockLayout";
+import { QUESTION_BLOCK_ANSWER_TEXT_CLASS, QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX, QUESTION_BLOCK_TITLE_TEXT_CLASS } from "@/components/card/blocks/question/questionBlockTextStyles";
 import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@web-renderer/components/card/common/cardSetViewZoom";
-import { QuestionBlockLayout } from "./QuestionBlockLayout";
-import { QUESTION_BLOCK_ANSWER_TEXT_CLASS, QUESTION_BLOCK_TEXT_LINE_HEIGHT_PX, QUESTION_BLOCK_TITLE_TEXT_CLASS } from "./questionBlockTextStyles";
-
-
 
 type QuestionBlockContentProps =
   | {
@@ -52,8 +50,6 @@ type QuestionBlockViewContentProps = {
   zoom?: number;
 };
 
-
-
 const buildQuestionFieldStyle = (zoom?: number) =>
   buildTypographyStyle({
     fontSizePx: 12,
@@ -72,24 +68,19 @@ const buildViewResetKey = ({
   answerDisplayMode: "always" | "tap_to_reveal";
 }) => [answerDisplayMode, questionTitle ?? "", questionAnswer ?? ""].join("::");
 
-
-
 const QuestionField = (props: QuestionFieldProps) => {
   const style = buildQuestionFieldStyle(props.zoom);
-
   if (props.mode === "view") {
     const resolvedText =
       props.value && props.value.length > 0
         ? props.value
         : (props.fallbackText ?? "\u00a0");
-
     return (
       <p className={`flex-1 ${props.className}`} style={style}>
         {resolvedText}
       </p>
     );
   }
-
   return (
     <AutoResizeTextarea
       value={props.value ?? ""}
@@ -112,20 +103,17 @@ const QuestionBlockViewContent = ({
   zoom,
 }: QuestionBlockViewContentProps) => {
   const [revealed, setRevealed] = useState(answerDisplayMode === "always");
-
   const answerStyle = useMemo<React.CSSProperties>(() => {
     const baseStyle = buildQuestionFieldStyle(zoom);
     if (revealed) {
       return baseStyle;
     }
-
     return mergeStyles(baseStyle, {
       filter: "blur(5px)",
       userSelect: "none",
       pointerEvents: "none",
     });
   }, [revealed, zoom]);
-
   const overlayStyle = useMemo(
     () =>
       buildTypographyStyle({
@@ -135,7 +123,6 @@ const QuestionBlockViewContent = ({
       }),
     [zoom],
   );
-
   return (
     <QuestionBlockLayout
       containerProps={{
@@ -192,7 +179,6 @@ const QuestionBlockContent = (props: QuestionBlockContentProps) => {
       questionAnswer: props.questionAnswer,
       answerDisplayMode,
     });
-
     return (
       <QuestionBlockViewContent
         key={viewResetKey}
@@ -204,7 +190,6 @@ const QuestionBlockContent = (props: QuestionBlockContentProps) => {
       />
     );
   }
-
   return (
     <QuestionBlockLayout
       containerRef={props.containerRef}
@@ -238,7 +223,5 @@ const QuestionBlockContent = (props: QuestionBlockContentProps) => {
     />
   );
 };
-
-
 
 export { QuestionBlockContent };
