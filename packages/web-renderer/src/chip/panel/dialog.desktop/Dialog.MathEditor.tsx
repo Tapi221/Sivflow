@@ -2,15 +2,19 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { AutoResizeTextarea } from "@web-renderer/chip/ui/AutoResizeTextarea";
 import { MathRenderer } from "@web-renderer/components/card/blocks/math/MathRenderer";
 import { cn } from "@web-renderer/lib/utils";
-import type { MathBlockData } from "@/types/domain/base";
 import type { CSSProperties, FC } from "react";
 
 type CSSCustomProperties = CSSProperties & Record<`--${string}`, string>;
+type MathEditorDialogData = {
+  latex: string;
+  displayMode: "block" | "inline";
+  note?: string;
+};
 interface MathEditorDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  data: MathBlockData;
-  onChange: (next: MathBlockData) => void;
+  data: MathEditorDialogData;
+  onChange: (next: MathEditorDialogData) => void;
   accentColor?: string;
   error?: string | null;
 }
@@ -73,4 +77,4 @@ const MathEditorDialog: FC<MathEditorDialogProps> = ({ open, onOpenChange, data,
 };
 
 export { MathEditorDialog };
-export type { MathEditorDialogProps };
+export type { MathEditorDialogData, MathEditorDialogProps };
