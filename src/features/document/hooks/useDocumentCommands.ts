@@ -5,6 +5,8 @@ import { getLocalDb } from "@/services/localdb";
 import type { DocumentItem } from "@/types";
 import { normalizeDate } from "@/utils/codec/date";
 
+
+
 type UpdateDocumentOptions = {
   touchUpdatedAt?: boolean;
 };
@@ -27,7 +29,11 @@ type DocumentPurgeCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   queueDeleteSync: (args: { entity: "document"; targetId: string; priority?: "critical" | "high" | "medium" | "low"; }) => Promise<void>;
 };
 
+
+
 const VIEWER_STATE_UPDATE_KEYS = new Set(["viewerState", "updatedAt"]);
+
+
 
 const normalizeUpdatedAt = (value: DocumentItem["updatedAt"] | undefined): Date | undefined => {
   return normalizeDate(value) ?? undefined;
@@ -116,5 +122,7 @@ const useDocumentCommands = () => {
     purgeDocument,
   };
 };
+
+
 
 export { useDocumentCommands };

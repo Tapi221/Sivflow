@@ -2,8 +2,10 @@ import React from "react";
 import { RefreshCw } from "@web-renderer/chip/icons";
 import { LoadingSpinner } from "@web-renderer/components/common/LoadingSpinner";
 import { cn } from "@web-renderer/lib/utils";
-import { formatLastSyncedAt } from "@/components/card/shell/formatLastSyncedAt";
-import { overlayGlassPillClassName } from "@/components/card/shell/overlaySurfaceClassNames";
+import { formatLastSyncedAt } from "./formatLastSyncedAt";
+import { overlayGlassPillClassName } from "./overlaySurfaceClassNames";
+
+
 
 interface CardSyncStatusPillProps {
   lastSyncedAtMs: number | null;
@@ -13,6 +15,8 @@ interface CardSyncStatusPillProps {
   onRetry?: () => Promise<void> | void;
   className?: string;
 }
+
+
 
 const CardSyncStatusPill = ({ lastSyncedAtMs, hasError = false, isRetrying = false, canRetry = false, onRetry, className }: CardSyncStatusPillProps) => {
   const label = hasError ? "同期失敗" : `最終同期: ${formatLastSyncedAt(lastSyncedAtMs)}`;
@@ -51,5 +55,7 @@ const CardSyncStatusPill = ({ lastSyncedAtMs, hasError = false, isRetrying = fal
     </div>
   );
 };
+
+
 
 export { CardSyncStatusPill };

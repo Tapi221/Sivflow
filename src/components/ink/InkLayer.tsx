@@ -4,10 +4,12 @@ import { cloneInkDocument, createEmptyInkDocument, INK_DOCUMENT_VERSION, INK_PAP
 import { Button } from "@web-renderer/chip/button/button/button";
 import { Eraser, PenLine, Redo2, Trash2, Undo2 } from "@web-renderer/chip/icons";
 import { cn } from "@web-renderer/lib/utils";
-import type { InkHistoryState, InkLayerHandle } from "@/components/ink/inkLayer.types";
-import { saveInkToStorage } from "@/components/ink/inkStorage";
+import type { InkHistoryState, InkLayerHandle } from "./inkLayer.types";
+import { saveInkToStorage } from "./inkStorage";
 import type { RectLike } from "@/utils/inkCoords";
 import { clientPointToPaperPoint, paperPointToCanvasPoint, squaredDistance } from "@/utils/inkCoords";
+
+
 
 interface InkLayerProps {
   cardId?: string | null;
@@ -38,6 +40,8 @@ interface InkToolbarProps {
   onClear: () => void;
 }
 
+
+
 const TOOL_STYLE: Record<
   Exclude<InkEditTool, "eraser">,
   { color: string; width: number; opacity: number; }
@@ -53,6 +57,8 @@ const TOOL_STYLE: Record<
     opacity: 0.35,
   },
 };
+
+
 
 const copyStrokes = (strokes: InkStroke[]): InkStroke[] =>
   strokes.map((stroke) => ({
@@ -79,6 +85,8 @@ const toDocSignature = (doc: InkDocument): string => {
     })),
   });
 };
+
+
 
 const InkLayer = React.memo(React.forwardRef<InkLayerHandle, InkLayerProps>(({ cardId, side, editable, tool, value, onChange, document, className, paperWidth = INK_PAPER_W, paperHeight = INK_PAPER_H, eraserRadius = 28, onDocumentChange, onHistoryChange }, ref) => {
   const containerRef = React.useRef<HTMLDivElement | null>(null);

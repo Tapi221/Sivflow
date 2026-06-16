@@ -2,6 +2,8 @@ import { DEFAULT_LAYOUT_ROWS } from "@/domain/card/extraRows";
 import type { ReferenceBlockData } from "@/types/domain/base";
 import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 
+
+
 type EditorDraft = {
   title: string;
   tags: string[];
@@ -13,7 +15,11 @@ type EditorDraft = {
   layoutRows: number;
 };
 
+
+
 const NEW_SENTINEL = "__new__" as const;
+
+
 
 const makeEmptyCardFaceAttachments = (): CardFaceAttachments => ({ images: [], audios: [], references: [] });
 const normalizeSelectedCardId = (raw: string | null) => {
@@ -94,5 +100,9 @@ const shouldAutoOpenEditorForCard = (card: unknown) => {
   );
 };
 
+
+
 export { makeEmptyCardFaceAttachments, normalizeSelectedCardId, makeNewDraft, sanitizeReferences, normalizeOrderIndex, shouldAutoOpenEditorForCard };
+
+
 export type { EditorDraft };

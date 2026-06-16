@@ -8,12 +8,16 @@ import { MfDeckExportError } from "@/features/deckFile/domain/mfDeck.types";
 import { downloadBytesAsMfDeck } from "@/features/deckFile/infra/web/downloadMfDeck";
 import type { Card, CardSet } from "@/types";
 
+
+
 type ExportMfDeckButtonProps = {
   cardSet: CardSet;
   cards: Card[];
   tagById?: MfDeckTagLookup;
   disabled?: boolean;
 };
+
+
 
 const ExportMfDeckButton = ({
   cardSet,
@@ -75,5 +79,9 @@ const ExportMfDeckButton = ({
   );
 };
 
+
+
 export { ExportMfDeckButton };
+
+
 export type { ExportMfDeckButtonProps };

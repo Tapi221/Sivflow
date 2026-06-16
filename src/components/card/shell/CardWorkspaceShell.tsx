@@ -11,6 +11,8 @@ import type { SelectionCaptureArea, SelectionCaptureRect } from "@/features/sele
 import { recognizeSelectionCaptureText } from "@/features/selection-capture/selectionCaptureOcr";
 import { SelectionCaptureOverlay } from "@/features/selection-capture/SelectionCaptureOverlay";
 
+
+
 type CardWorkspaceSurfaceVariant = "plain" | "dotted";
 type CardWorkspaceCaptureTarget = {
   side: CardSelectionCaptureSide;
@@ -50,10 +52,14 @@ type CardWorkspaceShellProps = {
   selectionCaptureEnabled?: boolean;
 };
 
+
+
 const WORKSPACE_SURFACE_CLASS_NAMES: Record<CardWorkspaceSurfaceVariant, string> = {
   plain: "workspace-surface--plain",
   dotted: "workspace-surface--dotted",
 };
+
+
 
 const setExternalRef = (ref: Ref<HTMLDivElement> | undefined, node: HTMLDivElement | null): void => {
   if (!ref) return;
@@ -88,6 +94,8 @@ const resolveTaskMessage = (values: Array<string | void>): string | null => {
   return values.find((value): value is string => typeof value === "string" && value.trim().length > 0) ?? null;
 };
 const hasRenderableNode = (node: ReactNode): boolean => node !== null && node !== undefined && node !== false;
+
+
 
 const CardWorkspaceShell = ({ children, containerClassName, shellClassName, contentAreaClassName, viewportClassName, viewportStyle, surfaceVariant = "plain", viewportRef, widthControl = null, widthControlClassName, topLeftControl, topRightControl, overlayChildren, overlayTopInsetPx = 0, isMetaOpen, metaPanel, metaPanelContainerClassName, selectionCaptureEnabled = true }: CardWorkspaceShellProps) => {
   const viewportNodeRef = useRef<HTMLDivElement | null>(null);
@@ -235,5 +243,9 @@ const CardWorkspaceShell = ({ children, containerClassName, shellClassName, cont
   );
 };
 
+
+
 export { CardWorkspaceShell };
+
+
 export type { CardWorkspaceSurfaceVariant, CardWorkspaceWidthControlProps, CardWorkspaceShellProps };

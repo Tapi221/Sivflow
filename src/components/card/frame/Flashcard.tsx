@@ -3,18 +3,20 @@ import type { InkDocument } from "@core/domain/card/ink/inkDocument";
 import { FlashcardMediaDialogs } from "@web-renderer/chip/panel/dialog.desktop/Dialog.FlashcardMedia";
 import { cn } from "@web-renderer/lib/utils";
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
-import { CardFrame } from "@/components/card/frame/CardFrame";
-import { CARD_SHELL_COMMON_CLASS_NAME } from "@/components/card/frame/cardShellClassNames";
-import type { FlashcardCardLike } from "@/components/card/frame/flashcard.types";
-import { useFlashcardCornerControls } from "@/components/card/frame/FlashcardCornerControls";
-import { FlashcardInkOverlay } from "@/components/card/frame/FlashcardInkOverlay";
-import { FlashcardNavigation } from "@/components/card/frame/FlashcardNavigation";
-import { useCardFlipBehavior } from "@/components/card/frame/useCardFlipBehavior";
-import { useFlashcardDerived } from "@/components/card/frame/useFlashcardDerived";
-import { useFlashcardInk } from "@/components/card/frame/useFlashcardInk";
-import { useFlashcardMediaState } from "@/components/card/frame/useFlashcardMediaState";
+import { CardFrame } from "./CardFrame";
+import { CARD_SHELL_COMMON_CLASS_NAME } from "./cardShellClassNames";
+import type { FlashcardCardLike } from "./flashcard.types";
+import { useFlashcardCornerControls } from "./FlashcardCornerControls";
+import { FlashcardInkOverlay } from "./FlashcardInkOverlay";
+import { FlashcardNavigation } from "./FlashcardNavigation";
+import { useCardFlipBehavior } from "./useCardFlipBehavior";
+import { useFlashcardDerived } from "./useFlashcardDerived";
+import { useFlashcardInk } from "./useFlashcardInk";
+import { useFlashcardMediaState } from "./useFlashcardMediaState";
 import { CANONICAL_CARD_WIDTH, CARD_DISPLAY_SCALE, layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
+
+
 
 interface FlashcardProps {
   card: FlashcardCardLike | null | undefined;
@@ -51,6 +53,8 @@ interface FlashcardProps {
   contentZoom?: number;
   headerIconVisualScale?: number;
 }
+
+
 
 const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
   if (prev.card !== next.card) return false;
@@ -105,6 +109,8 @@ const areFlashcardPropsEqual = (prev: FlashcardProps, next: FlashcardProps) => {
     prev.headerIconVisualScale === next.headerIconVisualScale
   );
 };
+
+
 
 const FlashcardInner = ({
   card,
@@ -322,8 +328,12 @@ const FlashcardInner = ({
   );
 };
 
+
+
 const Flashcard = React.memo(FlashcardInner, areFlashcardPropsEqual);
 Flashcard.displayName = "Flashcard";
 
 export { Flashcard };
+
+
 export type { FlashcardCardLike };

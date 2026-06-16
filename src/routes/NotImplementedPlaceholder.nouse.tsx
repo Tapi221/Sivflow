@@ -3,6 +3,8 @@ import { Button } from "@web-renderer/chip/button/button/button";
 import { ArrowLeft, Construction } from "@web-renderer/chip/icons";
 import { useNavigate } from "react-router-dom";
 
+
+
 const NotImplementedPlaceholder = () => {
   const navigate = useNavigate();
 
@@ -29,5 +31,7 @@ const NotImplementedPlaceholder = () => {
     </div>
   );
 };
+
+
 
 export default NotImplementedPlaceholder;

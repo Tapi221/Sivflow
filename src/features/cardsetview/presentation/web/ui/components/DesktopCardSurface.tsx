@@ -2,12 +2,14 @@ import React from "react";
 import { useFlashcardDualDerived } from "@/components/card/frame/useFlashcardDualDerived";
 import { layoutRowsToCardHeightPx } from "@/domain/card/cardGeometry.constants";
 import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMode";
-import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
-import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
-import { DesktopEmbeddedCardEditorSurface } from "@/features/cardsetview/presentation/web/ui/components/DesktopEmbeddedCardEditorSurface";
-import { PreparedViewCardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/PreparedViewCardFaceScene";
+import { CardSurfaceLayout } from "./CardSurfaceLayout";
+import { buildCardSurfaceMetrics } from "./cardSurfacePresentation";
+import { DesktopEmbeddedCardEditorSurface } from "./DesktopEmbeddedCardEditorSurface";
+import { PreparedViewCardFaceScene } from "./PreparedViewCardFaceScene";
 import type { Card, UserSettings } from "@/types";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
+
+
 
 interface DesktopCardSurfaceProps {
   card: Card;
@@ -25,6 +27,8 @@ interface DesktopCardSurfaceProps {
   onToggleUncertainty: (card: Card) => void | Promise<void>;
   onToggleBookmark: (card: Card) => void | Promise<void>;
 }
+
+
 
 const areDesktopCardSurfacePropsEqual = (
   prev: DesktopCardSurfaceProps,
@@ -60,6 +64,8 @@ const areDesktopCardSurfacePropsEqual = (
 
   return true;
 };
+
+
 
 const DesktopCardSurfaceInner = ({
   card,
@@ -236,6 +242,8 @@ const DesktopCardSurfaceInner = ({
   );
 };
 
+
+
 const DesktopCardSurface = React.memo(
   DesktopCardSurfaceInner,
   areDesktopCardSurfacePropsEqual,
@@ -243,4 +251,6 @@ const DesktopCardSurface = React.memo(
 DesktopCardSurface.displayName = "DesktopCardSurface";
 
 export { DesktopCardSurface };
+
+
 export type { DesktopCardSurfaceProps };

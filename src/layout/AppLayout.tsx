@@ -1,13 +1,15 @@
 import "@/styles/backpane.css";
-import "@/layout/AppLayout.css";
+import "./AppLayout.css";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { SettingsWorkspaceRootPanel } from "@web-renderer/chip/panel/dialog.desktop/Dialog.SettingsWorkspaceRoot";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useThemeAccentColor } from "@/features/settings/hooks/useThemeAccentColor";
 import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
-import { WorkspaceLayoutRevisionProvider } from "@/layout/WorkspaceLayoutRevisionContext";
-import { WorkspaceShell } from "@/layout/WorkspaceShell";
+import { WorkspaceLayoutRevisionProvider } from "./WorkspaceLayoutRevisionContext";
+import { WorkspaceShell } from "./WorkspaceShell";
+
+
 
 type AppLayoutOutletContext = {
   isLeftPanelCollapsed: boolean;
@@ -22,12 +24,16 @@ type SidebarLongPressState = {
   timerId: number;
 };
 
+
+
 const LEFT_PANEL_COLLAPSED_STORAGE_KEY = "sivflow:layout:left-panel-collapsed";
 const LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY = "flashcard-master:layout:left-panel-collapsed";
 const MOBILE_SETTINGS_ROUTE_MEDIA_QUERY = "(max-width: 767px)";
 const SIDEBAR_LONG_PRESS_CONTEXT_MENU_TARGET_SELECTOR = ".app-layered-directory [role='treeitem']";
 const SIDEBAR_LONG_PRESS_DELAY_MS = 520;
 const SIDEBAR_LONG_PRESS_MOVE_TOLERANCE_PX = 10;
+
+
 
 const clearStoredLeftPanelCollapsed = () => {
   if (typeof window === "undefined") return;
@@ -73,6 +79,8 @@ const useIsMobileSettingsRouteViewport = (): boolean => {
 
   return isMobileSettingsRouteViewport;
 };
+
+
 
 const AppLayout = () => {
   useThemeAccentColor();
@@ -202,5 +210,9 @@ const AppLayout = () => {
   );
 };
 
+
+
 export { AppLayout };
+
+
 export type { AppLayoutOutletContext };

@@ -2,12 +2,14 @@ import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@web-renderer/chip/button/button/button";
 import { Copy, Download, Image as ImageIcon, Pause, Play, Volume2 } from "@web-renderer/chip/icons/icons";
 import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
-import type { ImageGalleryItem } from "@/components/card/media/media.types";
+import type { ImageGalleryItem } from "./media.types";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
 import { resolveCardImageUrl } from "@/services/cardImageResolver";
 import type { ResolvableImageRef } from "@/types/domain/assets";
+
+
 
 interface AudioPlayerProps {
   urls: string[];
@@ -40,6 +42,8 @@ type FailedImagesState = {
   indices: Set<number>;
 };
 
+
+
 const IMAGE_BLOCK_INSET_PX = 4;
 const FIXED_IMAGE_REFERENCE_FRAME_WIDTH_PX =
   CANONICAL_CARD_WIDTH - IMAGE_BLOCK_INSET_PX * 2;
@@ -47,6 +51,8 @@ const EMPTY_FAILED_IMAGE_INDICES = new Set<number>();
 const IMAGE_ACTION_BAR_CLASS_NAME = "absolute top-1 right-1 z-[999] pointer-events-auto flex items-center gap-0.5 rounded bg-white/80 p-px opacity-0 shadow-sm backdrop-blur-sm transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100";
 const IMAGE_ACTION_BUTTON_CLASS_NAME = "flex h-4 w-4 items-center justify-center rounded text-zinc-400 transition-colors hover:bg-zinc-900/5 hover:text-zinc-600 focus:outline-none";
 const IMAGE_ACTION_ICON_CLASS_NAME = "h-2.5 w-2.5";
+
+
 
 const hasDisplayImageUrl = (url: string | null): url is string =>
   typeof url === "string" && url.trim().length > 0;
@@ -102,6 +108,8 @@ const getNormalizedItemsKey = (items: NormalizedDisplayImage[]) =>
       ]),
     )
     .join("\n");
+
+
 
 const AudioPlayer = ({ urls }: AudioPlayerProps) => {
   const [playingIndex, setPlayingIndex] = useState<number | null>(null);
@@ -356,5 +364,7 @@ const ImageGallery = ({ items, displayMode = "fixed", zoom = 1 }: ImageGalleryPr
     </div>
   );
 };
+
+
 
 export { AudioPlayer, ImageGallery };

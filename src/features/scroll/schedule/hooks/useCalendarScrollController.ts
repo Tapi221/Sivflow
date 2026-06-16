@@ -5,8 +5,10 @@ import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColum
 import { getScheduleVirtualRailDate } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { persistScheduleCalendarScrollTop, readStoredScheduleCalendarScrollTop } from "@/features/calendar/scheduleNavigationPersistence";
 import type { CalendarViewMode } from "@/features/calendar/scheduleScreen.types";
-import { useCalendarScrollPositionSync } from "@/features/scroll/schedule/hooks/useCalendarScrollPositionSync";
-import { useSyncedHorizontalScroll } from "@/features/scroll/schedule/hooks/useSyncedHorizontalScroll";
+import { useCalendarScrollPositionSync } from "./useCalendarScrollPositionSync";
+import { useSyncedHorizontalScroll } from "./useSyncedHorizontalScroll";
+
+
 
 type CalendarBuffer = {
   before: number;
@@ -23,8 +25,12 @@ type Props = {
   scrollTargetToken?: number;
 };
 
+
+
 const CALENDAR_TIMELINE_SCROLLED_CLASS_NAME = "calendar-timeline-scroll-scrolled";
 const SCHEDULE_SCROLL_POSITION_PERSIST_DELAY_MS = 200;
+
+
 
 const isWeekdayHorizontalViewMode = (viewMode: CalendarViewMode) =>
   viewMode === "days" ||
@@ -182,5 +188,7 @@ const useCalendarScrollController = ({ selectedViewMode, visibleDays, virtualRai
     handleScroll: undefined,
   };
 };
+
+
 
 export { useCalendarScrollController };

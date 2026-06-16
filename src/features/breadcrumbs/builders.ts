@@ -1,9 +1,13 @@
 import { getCardText } from "@/domain/card/content";
-import type { BreadcrumbCrumb, ExplorerBreadcrumbContext } from "@/features/breadcrumbs/breadcrumbs.types";
+import type { BreadcrumbCrumb, ExplorerBreadcrumbContext } from "./breadcrumbs.types";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 import type { CardSet } from "@/types/domain/cardSet";
 
+
+
 type FolderLike = Pick<Folder, "id" | "folderName" | "parentFolderId">;
+
+
 
 const areBreadcrumbCrumbsEqual = (a: BreadcrumbCrumb[], b: BreadcrumbCrumb[]): boolean => {
   if (a === b) return true;
@@ -121,5 +125,7 @@ const buildCardSetViewBreadcrumbs = ({ folderId, selectedCardSet, selectedCard, 
 
   return crumbs;
 };
+
+
 
 export { areBreadcrumbCrumbsEqual, buildFolderPathCrumbs, buildExplorerBreadcrumbs, buildCardSetViewBreadcrumbs };

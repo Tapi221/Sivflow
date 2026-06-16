@@ -1,7 +1,9 @@
 import { useEffect } from "react";
-import { isPrimaryShortcut, isTypingTarget } from "@/features/hotkey/hotkeyGuards";
-import { hasOpenModalDialog } from "@/features/hotkey/modalGuards";
+import { isPrimaryShortcut, isTypingTarget } from "./hotkeyGuards";
+import { hasOpenModalDialog } from "./modalGuards";
 import { useSearchStore } from "@/features/search/store/useSearchStore";
+
+
 
 const useSearchHotkey = () => {
   const isOpen = useSearchStore((state) => state.isOpen);
@@ -28,5 +30,7 @@ const useSearchHotkey = () => {
     };
   }, [isOpen, toggle]);
 };
+
+
 
 export { useSearchHotkey };

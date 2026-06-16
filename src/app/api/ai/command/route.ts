@@ -6,8 +6,10 @@ import type { SlateEditor, Value } from "platejs";
 import { createSlateEditor, nanoid } from "platejs";
 import { z } from "zod";
 import { buildEditTableMultiCellPrompt, getChooseToolPrompt, getCommentPrompt, getEditPrompt, getGeneratePrompt } from "@/app/api/ai/command/prompt";
-import type { ChatMessage, ToolName } from "@/app/api/ai/command/types";
+import type { ChatMessage, ToolName } from "./types";
 import { markdownJoinerTransform } from "@/lib/markdown-joiner-transform";
+
+
 
 type CommandContext = {
   children: Value;
@@ -26,8 +28,12 @@ type AiToolProps = {
   writer: UIMessageStreamWriter<ChatMessage>;
 };
 
+
+
 const DEFAULT_ROUTING_MODEL = "google/gemini-2.5-flash";
 const DEFAULT_TEXT_MODEL = "openai/gpt-4o-mini";
+
+
 
 const createErrorResponse = (status: number, error: string) => Response.json({ error }, { status });
 const writeToolName = (writer: UIMessageStreamWriter<ChatMessage>, toolName: ToolName) => {
@@ -117,6 +123,8 @@ const createTableTool = (editor: SlateEditor, { messagesRaw, model, writer }: Ai
       });
     },
   });
+
+
 
 const POST = async (req: Request) => {
   try {
@@ -226,5 +234,7 @@ const POST = async (req: Request) => {
     return createErrorResponse(500, "Failed to process AI request.");
   }
 };
+
+
 
 export { POST };

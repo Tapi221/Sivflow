@@ -10,6 +10,8 @@ import { getLocalDb } from "@/services/localdb";
 import type { DocumentItem } from "@/types";
 import { getOrCreateDeviceId } from "@/utils/device";
 
+
+
 interface UseFolderDocumentUploadParams {
   actionFolderId: string | null;
   getNextOrderIndex: (folderId: string | null) => number;
@@ -17,6 +19,8 @@ interface UseFolderDocumentUploadParams {
 }
 type LegacyEntityFields = {
   blobUrl?: string | null; };
+
+
 
 const withLegacyFields = <T extends object>(value: T): T & LegacyEntityFields => value as T & LegacyEntityFields;
 const getErrorMessage = (error: unknown, fallback: string): string => {
@@ -185,5 +189,7 @@ const useFolderDocumentUpload = ({ actionFolderId, getNextOrderIndex, setExpande
     handleToolbarFileInputChange,
   };
 };
+
+
 
 export { useFolderDocumentUpload };

@@ -3,6 +3,8 @@ import { buildTypographyStyle, mergeStyles, normalizeCardSetViewZoom } from "@we
 import { cn } from "@web-renderer/lib/utils";
 import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 
+
+
 type DivDataAttributes = {
   [key: `data-${string}`]: string | number | boolean | undefined;
 };
@@ -19,10 +21,14 @@ type QuestionBlockLayoutProps = {
   zoom?: number;
 };
 
+
+
 const scaleSpacePx = (basePx: number, zoom?: number) => {
   const resolvedZoom = normalizeCardSetViewZoom(zoom);
   return `${Number((basePx * resolvedZoom).toFixed(3))}px`;
 };
+
+
 
 const QuestionBlockLayout = ({ questionContent, answerContent, className, containerRef, containerProps, answerContainerProps, answerOverlay, zoom }: QuestionBlockLayoutProps) => {
   const labelStyle = React.useMemo(() => mergeStyles(buildTypographyStyle({ fontSizePx: 10, lineHeightPx: 10, zoom }), { marginTop: scaleSpacePx(2, zoom) }), [zoom]);
@@ -110,5 +116,7 @@ const QuestionBlockLayout = ({ questionContent, answerContent, className, contai
     </BlockInset>
   );
 };
+
+
 
 export { QuestionBlockLayout };

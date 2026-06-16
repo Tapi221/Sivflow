@@ -1,12 +1,14 @@
 import { useCallback, useMemo, useState } from "react";
 import { Timestamp } from "firebase/firestore";
 import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
-import type { PracticeFilterRating } from "@/features/study/hooks/usePracticeMode";
+import type { PracticeFilterRating } from "./usePracticeMode";
 import { getLocalDb } from "@/services/localdb";
 import { computeNextReview, createReviewLogEntry } from "@/services/reviewAlgorithm";
 import { useTodayStudyStore } from "@/stores/useTodayStudyStore";
 import type { Card, CardPatch, CardSet, SubjectiveScoreValue, UserSettings } from "@/types";
 import { normalizeMemoryStability } from "@/utils/reviewUtils";
+
+
 
 type StudySessionRating = PracticeFilterRating;
 type StudySessionResult = {
@@ -48,12 +50,16 @@ type Params = {
   createLevelHistoryMutation: MutationLike<Record<string, unknown>>;
 };
 
+
+
 const SCORE_TO_RATING: Record<SubjectiveScoreValue, StudySessionRating> = {
   0: "forgot",
   1: "vague",
   2: "remembered",
   3: "easy",
 };
+
+
 
 const createSessionId = () => {
   if (
@@ -216,5 +222,9 @@ const useStudySession = ({ studyCards, cardSets = [], updateCard, currentUser, s
   };
 };
 
+
+
 export { useStudySession };
+
+
 export type { StudySessionRating, StudySessionResult };

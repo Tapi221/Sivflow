@@ -2,9 +2,11 @@ import React from "react";
 import { Image as ImageIcon } from "@web-renderer/chip/icons";
 import { BlockWrapper } from "@web-renderer/components/card/blocks/core/BlockWrapper";
 import { cn } from "@web-renderer/lib/utils";
-import { ImageBlockContent } from "@/components/card/blocks/image/ImageBlockContent";
-import { ImageBlockShell } from "@/components/card/blocks/image/ImageBlockShell";
+import { ImageBlockContent } from "./ImageBlockContent";
+import { ImageBlockShell } from "./ImageBlockShell";
 import type { UploadedImage } from "@/types/domain/assets";
+
+
 
 interface MediaBlockProps {
   data: UploadedImage[];
@@ -29,6 +31,8 @@ interface MediaBlockProps {
   zoom?: number;
 }
 
+
+
 const areMediaBlockPropsEqual = (
   prev: MediaBlockProps,
   next: MediaBlockProps,
@@ -43,6 +47,8 @@ const areMediaBlockPropsEqual = (
   prev.canMoveDown === next.canMoveDown &&
   prev.displayMode === next.displayMode &&
   prev.zoom === next.zoom;
+
+
 
 const MediaBlockInner = ({
   data,
@@ -105,6 +111,8 @@ const MediaBlockInner = ({
     </BlockWrapper>
   );
 };
+
+
 
 const MediaBlock = React.memo(MediaBlockInner, areMediaBlockPropsEqual);
 MediaBlock.displayName = "MediaBlock";

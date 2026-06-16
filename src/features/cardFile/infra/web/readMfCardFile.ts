@@ -1,6 +1,8 @@
 import type { MfCardFileV1, MfCardIssue } from "@/features/cardFile/domain/mfCard.types";
 import { MF_CARD_FILE_EXTENSION, MfCardValidationError } from "@/features/cardFile/domain/mfCard.types";
-import { decodeMfCardFile } from "@/features/cardFile/infra/web/mfCardJsonCodec";
+import { decodeMfCardFile } from "./mfCardJsonCodec";
+
+
 
 type LoadMfCardFileResult = {
   file: File;
@@ -9,7 +11,11 @@ type LoadMfCardFileResult = {
   suggestedCardSetName: string;
 };
 
+
+
 const MAX_MF_CARD_FILE_BYTES = 4 * 1024 * 1024;
+
+
 
 const stripMfCardExtension = (fileName: string) => {
   return fileName.replace(/\.mfcard$/i, "").trim();
@@ -66,5 +72,9 @@ const readMfCardFile = async (file: File): Promise<LoadMfCardFileResult> => {
   };
 };
 
+
+
 export { buildMfCardImportCardSetName, readMfCardFile };
+
+
 export type { LoadMfCardFileResult };
