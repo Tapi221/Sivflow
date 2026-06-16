@@ -1,19 +1,12 @@
 import { AppContent } from "@web-renderer/app/AppContent";
+import { AppProviders } from "@web-renderer/app/AppProviders";
 
-<<<<<<< HEAD
-
-
-const App = () => (
-  <AppProviders>
-    <AppContent />
-  </AppProviders>
-);
-=======
 const App = () => {
-  return <AppContent />;
+  return (
+    <AppProviders>
+      <AppContent />
+    </AppProviders>
+  );
 };
->>>>>>> c06f65dcf83503eeadd66a314bd7f052edc70c72
-
-
 
 export { App };
