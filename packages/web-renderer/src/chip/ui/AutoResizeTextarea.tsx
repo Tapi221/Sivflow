@@ -90,3 +90,4 @@ const AutoResizeTextarea = ({
 
 export { AutoResizeTextarea };
 export type { AutoResizeTextareaProps };
+export default AutoResizeTextarea;
