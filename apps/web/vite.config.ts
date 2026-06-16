@@ -238,8 +238,6 @@ export default defineConfig(({ command }) => ({
     alias: [
       { find: /^node:path$/, replacement: resolveFromRoot(nodePathBrowserShimPath) },
       { find: /^path$/, replacement: resolveFromRoot(nodePathBrowserShimPath) },
-      { find: /^@\/services\/localDB$/, replacement: resolveFromRoot("src/services/localdb/index.ts") },
-      { find: /^@\/features\/tab\/Tab$/, replacement: resolveFromRoot("src/pane.desktop/tab.desktopnative/Tab.ts") },
       { find: "@/nouse", replacement: resolveFromRoot("nouse") },
       { find: "@core", replacement: resolveFromRoot("packages/core/src") },
       { find: "@platform", replacement: resolveFromRoot("packages/platform/src") },
