@@ -1,9 +1,13 @@
 import { cn } from "@web-renderer/lib/utils";
 import type { SVGProps } from "react";
 
+
+
 type IconMoreCircleProps = SVGProps<SVGSVGElement> & {
   title?: string;
 };
+
+
 
 const IconMoreCircle = ({ className, title, ...props }: IconMoreCircleProps) => {
   return (
@@ -13,5 +17,7 @@ const IconMoreCircle = ({ className, title, ...props }: IconMoreCircleProps) => 
     </svg>
   );
 };
+
+
 
 export { IconMoreCircle };

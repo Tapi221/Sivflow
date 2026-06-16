@@ -1,6 +1,8 @@
 import { onRequest } from "firebase-functions/v2/https";
 import { getDb, serverTimestamp } from "#src/firebaseAdmin.js";
 
+
+
 type GoogleCalendarWebhookToken = {
   userId: string;
   calendarId: string;
@@ -11,6 +13,8 @@ type StoredGoogleCalendarWatchChannel = {
   calendarId?: unknown;
   userId?: unknown;
 };
+
+
 
 const REGION = "asia-northeast1";
 const INITIAL_SYNC_RESOURCE_STATE = "sync";
@@ -86,6 +90,8 @@ const googleCalendarWebhook = onRequest({ region: REGION, }, async (request, res
 },
 );
 
+
+
 const getHeader = (
   request: { get: (name: string) => string | undefined; },
   name: string,
@@ -122,5 +128,7 @@ const isMatchingWatchChannel = (
     data.calendarId === expected.calendarId
   );
 };
+
+
 
 export { googleCalendarWebhook };

@@ -1,9 +1,11 @@
 import type { InkDocument, InkSide } from "@core/domain/card/ink/inkDocument";
 import { normalizeInkDocument } from "@core/domain/card/ink/inkDocument";
-import type { DesktopHandwritingReceiverReason, DesktopHandwritingReceiverSession } from "@platform/handwriting/desktopHandwritingReceiver";
-import { receiveDesktopHandwritingMessage } from "@platform/handwriting/desktopHandwritingReceiver";
-import type { HandwritingDeviceInfo, HandwritingSession, HandwritingSessionMessage } from "@platform/handwriting/handwritingSession.types";
-import { attachMobileDeviceToHandwritingSession, closeHandwritingSession, createDesktopHandwritingSession, failHandwritingSession } from "@platform/handwriting/handwritingSessionLifecycle";
+import type { DesktopHandwritingReceiverReason, DesktopHandwritingReceiverSession } from "./desktopHandwritingReceiver";
+import { receiveDesktopHandwritingMessage } from "./desktopHandwritingReceiver";
+import type { HandwritingDeviceInfo, HandwritingSession, HandwritingSessionMessage } from "./handwritingSession.types";
+import { attachMobileDeviceToHandwritingSession, closeHandwritingSession, createDesktopHandwritingSession, failHandwritingSession } from "./handwritingSessionLifecycle";
+
+
 
 type DesktopHandwritingDocumentKey = `${string}:${InkSide}`;
 type DesktopHandwritingSessionManagerState = {
@@ -37,6 +39,8 @@ type ReceiveDesktopHandwritingSessionManagerMessageResult = {
   applied: boolean;
   reason?: DesktopHandwritingReceiverReason | "session-not-found";
 };
+
+
 
 const createDesktopHandwritingSessionManagerState = (): DesktopHandwritingSessionManagerState => ({ activeSessionId: null, documents: {}, sessions: {} });
 const getDesktopHandwritingDocumentKey = (cardId: string, side: InkSide): DesktopHandwritingDocumentKey => {
@@ -131,5 +135,9 @@ const failDesktopHandwritingSession = (state: DesktopHandwritingSessionManagerSt
   };
 };
 
+
+
 export { createDesktopHandwritingSessionManagerState, getDesktopHandwritingDocumentKey, startDesktopHandwritingSession, attachMobileDeviceToDesktopHandwritingSession, receiveDesktopHandwritingSessionManagerMessage, closeDesktopHandwritingSession, failDesktopHandwritingSession };
+
+
 export type { DesktopHandwritingDocumentKey, DesktopHandwritingSessionManagerState, StartDesktopHandwritingSessionInput, AttachMobileDeviceToDesktopHandwritingSessionInput, ReceiveDesktopHandwritingSessionManagerMessageInput, ReceiveDesktopHandwritingSessionManagerMessageResult };

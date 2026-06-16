@@ -1,6 +1,8 @@
 const BASE_ZOOM_INPUT_IGNORE_SELECTORS = ["input", "textarea", "select", "button", "summary", "a[href]", "[role=button]", "[role=slider]", "[contenteditable]:not([contenteditable=false])"];
 const DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR = BASE_ZOOM_INPUT_IGNORE_SELECTORS.join(",");
 
+
+
 const resolveEventTargetElement = (target: EventTarget | null): Element | null => {
   if (typeof Element !== "undefined" && target instanceof Element) {
     return target;
@@ -17,5 +19,7 @@ const shouldHandleZoomInputTarget = ({ container, target, ignoreSelector = DEFAU
   if (!container.contains(targetElement)) return false;
   return targetElement.closest(ignoreSelector) === null;
 };
+
+
 
 export { DEFAULT_ZOOM_INPUT_IGNORE_SELECTOR, resolveEventTargetElement, shouldHandleZoomInputTarget };

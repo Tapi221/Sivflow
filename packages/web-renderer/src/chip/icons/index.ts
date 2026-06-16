@@ -1,3 +1,3 @@
 
 
-export * from "@web-renderer/chip/icons/icons";
+export * from "./icons";

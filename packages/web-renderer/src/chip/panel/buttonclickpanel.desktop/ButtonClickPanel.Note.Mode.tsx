@@ -1,19 +1,31 @@
 "use client";
 
 import { useState } from "react";
+
 import { SuggestionPlugin } from "@platejs/suggestion/react";
+
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@web-renderer/chip/panel/dropdown-menu";
+
 import { ToolbarButton } from "@web-renderer/chip/ui/plate/toolbar";
+
 import { EyeIcon, PencilLineIcon, PenIcon } from "lucide-react";
+
 import { useEditorReadOnly, useEditorRef, usePluginOption } from "platejs/react";
+
 import type { ReactNode } from "react";
 
+
+
 type ModeValue = "editing" | "suggestion" | "viewing";
+
 type ModeItem = {
   icon: ReactNode;
   label: string;
 };
+
+
 
 const modeItems: Record<ModeValue, ModeItem> = {
   editing: { icon: <PenIcon />, label: "Editing" },
@@ -21,11 +33,15 @@ const modeItems: Record<ModeValue, ModeItem> = {
   viewing: { icon: <EyeIcon />, label: "Viewing" },
 };
 
+
+
 const getModeValue = (readOnly: boolean, isSuggesting: boolean): ModeValue => {
   if (readOnly) return "viewing";
   if (isSuggesting) return "suggestion";
   return "editing";
 };
+
+
 
 const ButtonClickPanelNoteMode = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
@@ -77,5 +93,7 @@ const ButtonClickPanelNoteMode = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
+
+
 
 export { ButtonClickPanelNoteMode };

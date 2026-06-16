@@ -22,6 +22,8 @@ import { BaseTableKit } from "@web-renderer/components/editor/plugins/table-base
 import { BaseTocKit } from "@web-renderer/components/editor/plugins/toc-base-kit";
 import { BaseToggleKit } from "@web-renderer/components/editor/plugins/toggle-base-kit";
 
+
+
 const BaseEditorKit = [
   ...BaseBasicBlocksKit,
   ...BaseCodeBlockKit,
@@ -47,5 +49,7 @@ const BaseEditorKit = [
   ...MarkdownKit,
   ...BaseFootnoteKit,
 ];
+
+
 
 export { BaseEditorKit };

@@ -1,14 +1,24 @@
 "use client";
 
 import * as React from "react";
+
 import { EmojiInlineIndexSearch, insertEmoji } from "@platejs/emoji";
+
 import { EmojiPlugin } from "@platejs/emoji/react";
+
 import { useDebounce } from "@web-renderer/chip/ui/plate/hooks/useDebounce";
-import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem } from "@web-renderer/chip/ui/plate/inline-combobox";
+
+import { InlineCombobox, InlineComboboxContent, InlineComboboxEmpty, InlineComboboxGroup, InlineComboboxInput, InlineComboboxItem } from "./inline-combobox";
+
 import type { PlateElementProps } from "platejs/react";
+
 import { PlateElement, usePluginOption } from "platejs/react";
 
+
+
 const TRAILING_COLON_REGEX = /:$/;
+
+
 
 const EmojiInputElement = (props: PlateElementProps) => {
   const { children, editor, element } = props;
@@ -41,5 +51,7 @@ const EmojiInputElement = (props: PlateElementProps) => {
     </PlateElement>
   );
 };
+
+
 
 export { EmojiInputElement };

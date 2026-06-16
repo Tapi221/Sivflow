@@ -1,12 +1,20 @@
 "use client";
 
 import { AIChatPlugin } from "@platejs/ai/react";
+
 import type { CursorData, CursorOverlayState } from "@platejs/selection/react";
+
 import { useCursorOverlay } from "@platejs/selection/react";
+
 import { getTableGridAbove } from "@platejs/table";
+
 import { cn } from "@web-renderer/lib/utils";
+
 import { RangeApi } from "platejs";
+
 import { useEditorRef, usePluginOption } from "platejs/react";
+
+
 
 const Cursor = ({
   id,
@@ -57,11 +65,14 @@ const Cursor = ({
     </>
   );
 };
+
 const CursorOverlay = () => {
   const { cursors } = useCursorOverlay();
   return cursors.map((cursor) => (
     <Cursor key={cursor.id} {...cursor} />
   ));
 };
+
+
 
 export { CursorOverlay };

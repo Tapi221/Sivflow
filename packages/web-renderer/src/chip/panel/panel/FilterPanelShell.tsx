@@ -1,6 +1,8 @@
-import { PanelSearchField } from "@web-renderer/chip/panel/panel/PanelSearchField";
+import { PanelSearchField } from "./PanelSearchField";
 import { cn } from "@web-renderer/lib/utils";
 import type { ReactNode, Ref } from "react";
+
+
 
 interface FilterPanelShellProps {
   title?: string;
@@ -15,6 +17,8 @@ interface FilterPanelShellProps {
   bodyClassName?: string;
   bodyRef?: Ref<HTMLDivElement>;
 }
+
+
 
 const FilterPanelShell = ({ title, searchValue, searchPlaceholder = "検索...", onSearchChange, searchInputRef, headerAction, sections, children, className, bodyClassName, bodyRef }: FilterPanelShellProps) => {
   const shouldRenderSearch = typeof onSearchChange === "function";
@@ -59,5 +63,9 @@ const FilterPanelShell = ({ title, searchValue, searchPlaceholder = "検索...",
   );
 };
 
+
+
 export { FilterPanelShell };
+
+
 export type { FilterPanelShellProps };

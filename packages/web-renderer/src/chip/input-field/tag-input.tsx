@@ -12,6 +12,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@web-renderer/chip/ui/p
 import { cn } from "@web-renderer/lib/utils";
 import { useTags } from "@/features/settings/hooks/useTags";
 
+
+
 type TagInputProps = {
   tags: string[];
   onChange: (tags: string[]) => void;
@@ -19,6 +21,8 @@ type TagInputProps = {
   className?: string;
   quietHover?: boolean;
 };
+
+
 
 const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", className, quietHover = false }: TagInputProps) => {
   const [open, setOpen] = React.useState(false);
@@ -141,5 +145,9 @@ const TagInput = ({ tags = [], onChange, placeholder = "タグを選択...", cla
   );
 };
 
+
+
 export { TagInput };
+
+
 export type { TagInputProps };

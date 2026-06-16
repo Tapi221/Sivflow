@@ -6,6 +6,8 @@ import { useEditorRef } from "platejs/react";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
 
+
+
 type MediaConfig = {
   accept: string[];
   icon: ReactNode;
@@ -23,6 +25,8 @@ interface MediaUrlDialogContentProps {
   nodeType: string;
   setOpen: (value: boolean) => void;
 }
+
+
 
 const MediaUrlDialogContent = ({ currentConfig, nodeType, setOpen }: MediaUrlDialogContentProps) => {
   const editor = useEditorRef();
@@ -77,5 +81,9 @@ const MediaUrlDialog = ({ open, onOpenChange, currentConfig, nodeType }: MediaUr
   );
 };
 
+
+
 export { MediaUrlDialog };
+
+
 export type { MediaConfig, MediaUrlDialogProps };

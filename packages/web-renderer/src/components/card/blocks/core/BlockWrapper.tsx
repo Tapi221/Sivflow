@@ -1,7 +1,9 @@
 import React from "react";
 import { Copy, GripVertical, Trash2 } from "@web-renderer/chip/icons/icons";
-import { BlockFrame } from "@web-renderer/components/card/blocks/core/BlockFrame";
+import { BlockFrame } from "./BlockFrame";
 import { cn } from "@web-renderer/lib/utils";
+
+
 
 interface BlockWrapperProps {
   children: React.ReactNode;
@@ -32,7 +34,11 @@ interface BlockWrapperProps {
   visualMode?: "viewer" | "editor";
 }
 
+
+
 const STEP_PX = 24;
+
+
 
 const BlockWrapper = ({ children, onDelete, onDuplicate, dragHandleProps, dragHandleClassName, className, accentColor, isBlockSelected, showDelete = true, showDuplicate = true, showDragHandle = true, dragEnabled = true, canMoveUp = false, canMoveDown = false, onMoveUp, onMoveDown, onMoveDragStart, onMoveDragEnd, contentClassName, mode = "editor", showOverlay = mode === "editor", visualMode = mode }: BlockWrapperProps) => {
   const [isEditingWithin, setIsEditingWithin] = React.useState(false);
@@ -217,5 +223,7 @@ const BlockWrapper = ({ children, onDelete, onDuplicate, dragHandleProps, dragHa
     </BlockFrame>
   );
 };
+
+
 
 export { BlockWrapper };

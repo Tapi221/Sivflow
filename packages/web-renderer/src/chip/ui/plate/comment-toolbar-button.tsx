@@ -1,10 +1,16 @@
 "use client";
 
-import type { ToolbarButtonProps } from "@web-renderer/chip/ui/plate/toolbar";
-import { ToolbarButton } from "@web-renderer/chip/ui/plate/toolbar";
+import type { ToolbarButtonProps } from "./toolbar";
+
+import { ToolbarButton } from "./toolbar";
+
 import { commentPlugin } from "@web-renderer/components/editor/plugins/comment-kit";
+
 import { MessageSquareTextIcon } from "lucide-react";
+
 import { useEditorRef } from "platejs/react";
+
+
 
 const CommentToolbarButton = (props: ToolbarButtonProps) => {
   const editor = useEditorRef();
@@ -21,5 +27,7 @@ const CommentToolbarButton = (props: ToolbarButtonProps) => {
     </ToolbarButton>
   );
 };
+
+
 
 export { CommentToolbarButton };

@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { AlertTriangle, ChevronDown } from "@web-renderer/chip/icons/icons";
-import { DialogDesktopPanel } from "@web-renderer/chip/panel/dialog.desktop/DialogDesktopPanel";
+import { DialogDesktopPanel } from "./DialogDesktopPanel";
 import type { Notification } from "@/types/notification";
+
+
 
 type WarningDialogProps = {
   notification: Notification;
   onDismiss: () => void;
 };
+
+
 
 const WarningDialog = ({ notification, onDismiss }: WarningDialogProps) => {
   const [showDetails, setShowDetails] = useState(false);
@@ -67,5 +71,7 @@ const WarningDialog = ({ notification, onDismiss }: WarningDialogProps) => {
     </DialogDesktopPanel>
   );
 };
+
+
 
 export { WarningDialog };

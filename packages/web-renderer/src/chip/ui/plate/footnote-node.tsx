@@ -1,9 +1,14 @@
 "use client";
 
 import type { TFootnoteElement } from "@platejs/footnote";
+
 import { cn } from "@web-renderer/lib/utils";
+
 import type { PlateElementProps } from "platejs/react";
+
 import { PlateElement } from "platejs/react";
+
+
 
 const FootnoteReferenceElement = (props: PlateElementProps<TFootnoteElement>) => {
   const identifier = props.element.identifier ?? "";
@@ -14,6 +19,7 @@ const FootnoteReferenceElement = (props: PlateElementProps<TFootnoteElement>) =>
     </PlateElement>
   );
 };
+
 const FootnoteDefinitionElement = (props: PlateElementProps<TFootnoteElement>) => {
   const identifier = props.element.identifier ?? "";
   return (
@@ -25,8 +31,11 @@ const FootnoteDefinitionElement = (props: PlateElementProps<TFootnoteElement>) =
     </PlateElement>
   );
 };
+
 const FootnoteInputElement = (props: PlateElementProps) => {
   return <PlateElement {...props} as="span" />;
 };
+
+
 
 export { FootnoteReferenceElement, FootnoteDefinitionElement, FootnoteInputElement };

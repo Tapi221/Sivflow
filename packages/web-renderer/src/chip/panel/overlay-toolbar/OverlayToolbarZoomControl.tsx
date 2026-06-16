@@ -1,8 +1,10 @@
 import React from "react";
 import { ScrollBar } from "@web-renderer/chip/bar/ScrollBar";
 import { Minus, Plus } from "@web-renderer/chip/icons";
-import { OverlayToolbarButton } from "@web-renderer/chip/panel/overlay-toolbar/OverlayToolbarButton";
+import { OverlayToolbarButton } from "./OverlayToolbarButton";
 import { cn } from "@web-renderer/lib/utils";
+
+
 
 type OverlayToolbarZoomControlBaseProps = {
   value: number;
@@ -33,7 +35,11 @@ type OverlayToolbarZoomControlWithStepButtonsProps =
   };
 type OverlayToolbarZoomControlProps = | OverlayToolbarZoomControlWithoutStepButtonsProps | OverlayToolbarZoomControlWithStepButtonsProps;
 
+
+
 const DEFAULT_FORMAT_VALUE = (value: number) => `${Math.round(value)}%`;
+
+
 
 const OverlayToolbarZoomControl = (props: OverlayToolbarZoomControlProps) => {
   const { value, min, max, step, onChange, label, disabled = false, sliderWrapperClassName, valueClassName, trackClassName, rangeClassName, thumbClassName, formatValue = DEFAULT_FORMAT_VALUE } = props;
@@ -111,5 +117,9 @@ const OverlayToolbarZoomControl = (props: OverlayToolbarZoomControlProps) => {
   );
 };
 
+
+
 export { OverlayToolbarZoomControl };
+
+
 export type { OverlayToolbarZoomControlProps };

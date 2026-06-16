@@ -1,11 +1,15 @@
 import { cn } from "@web-renderer/lib/utils";
 import type { ReactNode } from "react";
 
+
+
 interface PanelEmptyStateProps {
   icon?: ReactNode;
   message: ReactNode;
   className?: string;
 }
+
+
 
 const PanelEmptyState = ({ icon, message, className }: PanelEmptyStateProps) => {
   return (
@@ -15,5 +19,7 @@ const PanelEmptyState = ({ icon, message, className }: PanelEmptyStateProps) => 
     </div>
   );
 };
+
+
 
 export { PanelEmptyState };

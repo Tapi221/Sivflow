@@ -1,17 +1,26 @@
 "use client";
 
 import * as React from "react";
+
 import { Button } from "@web-renderer/chip/button/button/button";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@web-renderer/chip/panel/dropdown-menu";
+
 import { discussionPlugin } from "@web-renderer/components/editor/plugins/discussion-kit";
+
 import { cn } from "@web-renderer/lib/utils";
+
 import { MoreHorizontalIcon, PencilIcon, TrashIcon } from "lucide-react";
+
 import { useEditorRef } from "platejs/react";
+
+
 
 type CommentMoreDropdownComment = {
   id: string;
   discussionId: string;
 };
+
 type CommentMoreDropdownProps = {
   comment: CommentMoreDropdownComment;
   dropdownOpen: boolean;
@@ -20,6 +29,8 @@ type CommentMoreDropdownProps = {
   onCloseAutoFocus?: () => void;
   onRemoveComment?: () => void;
 };
+
+
 
 const CommentMoreDropdown = ({
   comment,
@@ -103,5 +114,10 @@ const CommentMoreDropdown = ({
   );
 };
 
+
+
 export { CommentMoreDropdown };
+
+
+
 export type { CommentMoreDropdownComment, CommentMoreDropdownProps };

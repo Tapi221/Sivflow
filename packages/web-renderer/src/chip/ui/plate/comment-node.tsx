@@ -2,9 +2,13 @@ import { cn } from "@web-renderer/lib/utils";
 import type { PlateLeafProps } from "platejs/react";
 import { PlateLeaf } from "platejs/react";
 
+
+
 type CommentNodeProps = PlateLeafProps & {
   active?: boolean;
 };
+
+
 
 const CommentNode = ({ active, className, children, ...props }: CommentNodeProps) => (
   <PlateLeaf
@@ -15,7 +19,13 @@ const CommentNode = ({ active, className, children, ...props }: CommentNodeProps
   </PlateLeaf>
 );
 
+
+
 const CommentLeaf = CommentNode;
 
+
+
 export { CommentLeaf, CommentNode };
+
+
 export type { CommentNodeProps };

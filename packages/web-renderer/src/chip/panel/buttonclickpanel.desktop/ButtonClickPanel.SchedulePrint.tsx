@@ -4,6 +4,8 @@ import { cn } from "@web-renderer/lib/utils";
 import type { Ref } from "react";
 import type { CalendarPrintRangeMode, CalendarPrintRangeState } from "@/features/calendar/print/calendarPrint.types";
 
+
+
 type ButtonClickPanelSchedulePrintOption = {
   value: CalendarPrintRangeMode;
   label: string;
@@ -22,6 +24,8 @@ type ButtonClickPanelSchedulePrintProps = {
   onPrintCalendar: () => void;
 };
 
+
+
 const PANEL_CLASS_NAME = "surface-panel absolute right-0 top-full z-30 mt-1 w-44 rounded-lg border p-1 text-neutral-900";
 const TITLE_CLASS_NAME = "px-2 pb-1 pt-1.5 text-xs font-semibold leading-none tracking-tight text-neutral-400";
 const OPTION_BUTTON_BASE_CLASS_NAME = "flex h-6 w-full items-center justify-between rounded-md px-1.5 text-xs font-semibold leading-none tracking-tight outline-none ring-0 transition-all duration-150 ease-out active:scale-95 focus:outline-none focus:ring-0 focus-visible:bg-neutral-100 focus-visible:text-neutral-800 focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100";
@@ -33,7 +37,11 @@ const LABEL_CLASS_NAME = "px-1 text-xs font-semibold leading-none tracking-tight
 const DATE_INPUT_CLASS_NAME = "h-6 w-full rounded-md border border-transparent bg-neutral-50 px-1.5 text-xs font-semibold leading-none tracking-tight text-neutral-600 outline-none ring-0 focus:border-neutral-200 focus:bg-white focus:outline-none focus:ring-0 focus-visible:outline-none";
 const ACTION_CLASS_NAME = "mt-1 flex h-6 w-full items-center justify-center gap-1 rounded-md border-0 bg-transparent px-1.5 text-xs font-semibold leading-none tracking-tight text-neutral-500 outline-none ring-0 transition-all duration-150 ease-out hover:bg-neutral-100 hover:text-neutral-800 active:scale-95 focus:outline-none focus:ring-0 focus-visible:bg-neutral-100 focus-visible:text-neutral-800 focus-visible:outline-none motion-reduce:transition-none motion-reduce:active:scale-100";
 
+
+
 const getOptionButtonClassName = (isActive: boolean): string => cn(OPTION_BUTTON_BASE_CLASS_NAME, isActive ? OPTION_BUTTON_ACTIVE_CLASS_NAME : OPTION_BUTTON_INACTIVE_CLASS_NAME);
+
+
 
 const ButtonClickPanelSchedulePrint = ({
   panelRef,
@@ -80,5 +88,9 @@ const ButtonClickPanelSchedulePrint = ({
   </div>
 );
 
+
+
 export { ButtonClickPanelSchedulePrint };
+
+
 export type { ButtonClickPanelSchedulePrintOption, ButtonClickPanelSchedulePrintProps };

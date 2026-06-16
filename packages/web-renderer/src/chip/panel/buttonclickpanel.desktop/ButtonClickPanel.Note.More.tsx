@@ -1,12 +1,20 @@
 "use client";
 
 import * as React from "react";
+
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@web-renderer/chip/panel/dropdown-menu";
+
 import { ToolbarButton } from "@web-renderer/chip/ui/plate/toolbar";
+
 import { KeyboardIcon, MoreHorizontalIcon, SubscriptIcon, SuperscriptIcon } from "lucide-react";
+
 import { KEYS } from "platejs";
+
 import { useEditorRef } from "platejs/react";
+
+
 
 const ButtonClickPanelNoteMore = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
@@ -53,5 +61,7 @@ const ButtonClickPanelNoteMore = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
+
+
 
 export { ButtonClickPanelNoteMore };

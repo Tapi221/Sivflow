@@ -1,12 +1,20 @@
 "use client";
 
 import * as React from "react";
+
 import { ListStyleType, someList, toggleList } from "@platejs/list";
+
 import { useIndentTodoToolBarButton, useIndentTodoToolBarButtonState } from "@platejs/list/react";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@web-renderer/chip/panel/dropdown-menu";
+
 import { ToolbarButton, ToolbarSplitButton, ToolbarSplitButtonPrimary, ToolbarSplitButtonSecondary } from "@web-renderer/chip/ui/plate/toolbar";
+
 import { ListIcon, ListOrderedIcon, ListTodoIcon } from "lucide-react";
+
 import { useEditorRef, useEditorSelector } from "platejs/react";
+
+
 
 const ButtonClickPanelNoteBulletedList = () => {
   const editor = useEditorRef();
@@ -81,6 +89,7 @@ const ButtonClickPanelNoteBulletedList = () => {
     </ToolbarSplitButton>
   );
 };
+
 const ButtonClickPanelNoteNumberedList = () => {
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
@@ -165,6 +174,7 @@ const ButtonClickPanelNoteNumberedList = () => {
     </ToolbarSplitButton>
   );
 };
+
 const ButtonClickPanelNoteTodoList = (props: React.ComponentProps<typeof ToolbarButton>) => {
   const state = useIndentTodoToolBarButtonState({ nodeType: "todo" });
   const { props: buttonProps } = useIndentTodoToolBarButton(state);
@@ -174,5 +184,7 @@ const ButtonClickPanelNoteTodoList = (props: React.ComponentProps<typeof Toolbar
     </ToolbarButton>
   );
 };
+
+
 
 export { ButtonClickPanelNoteBulletedList, ButtonClickPanelNoteNumberedList, ButtonClickPanelNoteTodoList };

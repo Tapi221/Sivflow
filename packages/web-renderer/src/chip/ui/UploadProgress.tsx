@@ -1,8 +1,10 @@
 import { Button } from "@web-renderer/chip/button/button/button";
 import { CheckCircle2, FileText, X } from "@web-renderer/chip/icons";
-import { Progress } from "@web-renderer/chip/ui/progress";
+import { Progress } from "./progress";
 import { LoadingSpinner } from "@web-renderer/components/common/LoadingSpinner";
 import { cn } from "@web-renderer/lib/utils";
+
+
 
 interface UploadProgressProps {
   fileName: string;
@@ -13,6 +15,8 @@ interface UploadProgressProps {
   className?: string;
   showIcon?: boolean;
 }
+
+
 
 const UploadProgress = ({
   fileName,
@@ -111,5 +115,9 @@ const UploadProgress = ({
   );
 };
 
+
+
 export { UploadProgress };
+
+
 export type { UploadProgressProps };

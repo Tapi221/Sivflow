@@ -7,6 +7,8 @@ import { ImageElementStatic } from "@web-renderer/chip/ui/plate/media-image-node
 import { VideoElementStatic } from "@web-renderer/chip/ui/plate/media-video-node-static";
 import { KEYS } from "platejs";
 
+
+
 const BaseMediaKit = [
   BaseImagePlugin.withComponent(ImageElementStatic),
   BaseVideoPlugin.withComponent(VideoElementStatic),
@@ -22,5 +24,7 @@ const BaseMediaKit = [
   }),
   BasePlaceholderPlugin,
 ];
+
+
 
 export { BaseMediaKit };

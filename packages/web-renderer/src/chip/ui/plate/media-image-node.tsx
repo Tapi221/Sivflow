@@ -1,16 +1,28 @@
 "use client";
 
 import * as React from "react";
+
 import { useDraggable } from "@platejs/dnd";
+
 import { Image, ImagePlugin, useMediaState } from "@platejs/media/react";
+
 import { ResizableProvider, useResizableValue } from "@platejs/resizable";
-import { Caption, CaptionTextarea } from "@web-renderer/chip/ui/plate/caption";
-import { MediaToolbar } from "@web-renderer/chip/ui/plate/media-toolbar";
-import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "@web-renderer/chip/ui/plate/resize-handle";
+
+import { Caption, CaptionTextarea } from "./caption";
+
+import { MediaToolbar } from "./media-toolbar";
+
+import { mediaResizeHandleVariants, Resizable, ResizeHandle } from "./resize-handle";
+
 import { cn } from "@web-renderer/lib/utils";
+
 import type { TImageElement } from "platejs";
+
 import type { PlateElementProps } from "platejs/react";
+
 import { PlateElement, withHOC } from "platejs/react";
+
+
 
 const ImageElement = withHOC(ResizableProvider, (props: PlateElementProps<TImageElement>) => {
   const { align = "center", focused, readOnly, selected } = useMediaState();
@@ -65,5 +77,7 @@ const ImageElement = withHOC(ResizableProvider, (props: PlateElementProps<TImage
     </MediaToolbar>
   );
 });
+
+
 
 export { ImageElement };

@@ -1,4 +1,6 @@
-import type { CalendarEvent } from "@core/calendar/calendarEvent.types";
+import type { CalendarEvent } from "./calendarEvent.types";
+
+
 
 type CalendarTimeGridLayoutMode = "overlap" | "no-overlap";
 type CalendarTimeGridStyle = {
@@ -49,9 +51,13 @@ type NoOverlapHorizontalFrame = {
   right: number;
 };
 
+
+
 const MINIMUM_EVENT_DURATION_MS = 1;
 const PERCENT_MAX = 100;
 const LAYOUT_EPSILON = 0.000001;
+
+
 
 const getDateTime = (date: Date): number => date instanceof Date ? date.getTime() : Number.NaN;
 const isFiniteTime = (value: number): boolean => Number.isFinite(value);
@@ -443,5 +449,9 @@ const layoutCalendarTimeGridEvents = ({ events, rangeStart, rangeEnd, layoutMode
   return layoutOverlapEvents({ proxies });
 };
 
+
+
 export { layoutCalendarTimeGridEvents };
+
+
 export type { CalendarTimeGridLayoutMode, CalendarTimeGridStyle, CalendarTimeGridLayoutEntry, CalendarTimeGridLayoutOptions };

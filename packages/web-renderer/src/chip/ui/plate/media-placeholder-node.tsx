@@ -1,15 +1,26 @@
 "use client";
 
 import * as React from "react";
+
 import { PlaceholderPlugin, PlaceholderProvider, updateUploadHistory } from "@platejs/media/react";
+
 import { useUploadFile } from "@web-renderer/chip/ui/plate/hooks/useUploadFile";
+
 import { cn } from "@web-renderer/lib/utils";
+
 import { AudioLines, FileUp, Film, ImageIcon, Loader2Icon } from "lucide-react";
+
 import type { TPlaceholderElement } from "platejs";
+
 import { KEYS } from "platejs";
+
 import type { PlateElementProps } from "platejs/react";
+
 import { PlateElement, useEditorPlugin, withHOC } from "platejs/react";
+
 import { useFilePicker } from "use-file-picker";
+
+
 
 type ImageProgressProps = {
   file: File;
@@ -17,6 +28,8 @@ type ImageProgressProps = {
   imageRef?: React.RefObject<HTMLImageElement | null>;
   progress?: number;
 };
+
+
 
 const formatBytes = (
   bytes: number,
@@ -36,6 +49,8 @@ const formatBytes = (
       : (sizes[index] ?? "Bytes")
   }`;
 };
+
+
 
 const CONTENT: Record<
   string,
@@ -66,6 +81,7 @@ const CONTENT: Record<
     icon: <Film />,
   },
 };
+
 const ImageProgress = ({ className, file, imageRef, progress = 0 }: ImageProgressProps) => {
   const [objectUrl, setObjectUrl] = React.useState<string | null>(null);
   React.useEffect(() => {
@@ -97,6 +113,7 @@ const ImageProgress = ({ className, file, imageRef, progress = 0 }: ImageProgres
     </div>
   );
 };
+
 const PlaceholderElement = withHOC(PlaceholderProvider, (props: PlateElementProps<TPlaceholderElement>) => {
   const { editor, element } = props;
   const { api } = useEditorPlugin(PlaceholderPlugin);
@@ -189,5 +206,7 @@ const PlaceholderElement = withHOC(PlaceholderProvider, (props: PlateElementProp
     </PlateElement>
   );
 });
+
+
 
 export { PlaceholderElement, ImageProgress };

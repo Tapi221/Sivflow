@@ -4,16 +4,20 @@ import type { ISyncService, UserSettingsSnapshot } from "@/services/interfaces/I
 import { getLocalDb } from "@/services/localdb";
 import type { SyncableEntityTable } from "@/services/localdb/types";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
-import type { SyncContextType, SyncNotice, SyncProviderProps, SyncStatus } from "@/sync/appdata-sync/SyncContextCore";
-import { SyncContext } from "@/sync/appdata-sync/SyncContextCore";
+import type { SyncContextType, SyncNotice, SyncProviderProps, SyncStatus } from "./SyncContextCore";
+import { SyncContext } from "./SyncContextCore";
 import type { SyncConflict, SyncEntity, SyncSettings } from "@/types/domain/sync";
 import { DEFAULT_SYNC_SETTINGS } from "@/types/domain/sync";
+
+
 
 type ConflictResolvingLocalDb = Awaited<ReturnType<typeof getLocalDb>> & {
   conflicts: {
     delete: (key: unknown) => Promise<void>;
   };
 };
+
+
 
 const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, SyncableEntityTable> = {
   card: "cards",
@@ -25,6 +29,8 @@ const SYNC_TABLE_BY_ENTITY: Record<SyncEntity, SyncableEntityTable> = {
   asset: "images",
   projectMap: "projectMaps",
 };
+
+
 
 const isSyncIntervalMinutes = (value: unknown): value is SyncSettings["intervalMinutes"] => {
   return value === 5 || value === 15 || value === 30 || value === 60;
@@ -49,6 +55,8 @@ const buildResolvedConflictRecord = (conflict: SyncConflict, resolvedData: unkno
     id: conflict.entityId,
   };
 };
+
+
 
 const SyncProvider = ({ children }: SyncProviderProps) => {
   const { currentUser } = useAuthSession();
@@ -262,5 +270,7 @@ const SyncProvider = ({ children }: SyncProviderProps) => {
 
   return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>;
 };
+
+
 
 export { SyncProvider };

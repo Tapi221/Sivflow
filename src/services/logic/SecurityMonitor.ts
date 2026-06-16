@@ -2,8 +2,10 @@ import { firestoreDb, requireFirestoreDb } from "@platform/firebase/client";
 import type { DocumentData, FirestoreError, QueryDocumentSnapshot, QuerySnapshot, Unsubscribe } from "firebase/firestore";
 import { addDoc, collection, doc, onSnapshot, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 import type { SecurityState as SyncSecurityState } from "@/services/interfaces/ISyncService";
-import { getSecurityEventCatalogEntry } from "@/services/logic/securityEventCatalog";
+import { getSecurityEventCatalogEntry } from "./securityEventCatalog";
 import type { SecurityEventType, SecurityLog, SecurityMetadata } from "@/types/domain/telemetry";
+
+
 
 interface SecurityAlert {
   id: string;
@@ -19,6 +21,8 @@ interface SecurityState {
   requires2FA: boolean;
   alerts: SecurityAlert[];
 }
+
+
 
 /**
  * SecurityMonitor: セキュリティログ送信とサーバー状態監視を行うクラス
@@ -199,5 +203,9 @@ class SecurityMonitor {
   }
 }
 
+
+
 export { SecurityMonitor };
+
+
 export type { SecurityState };

@@ -1,8 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { emitHoverTooltipOpen, subscribeHoverTooltipOpen } from "@web-renderer/chip/panel/toolchip/hoverTooltipEvents";
+import { emitHoverTooltipOpen, subscribeHoverTooltipOpen } from "./hoverTooltipEvents";
 import { cn } from "@web-renderer/lib/utils";
 import type { ReactNode } from "react";
+
+
 
 type TooltipSide = "top" | "bottom";
 type TooltipPosition = {
@@ -27,6 +29,8 @@ type HoverMonthEventTooltipProps = {
   disabled?: boolean;
 };
 
+
+
 const TOOLTIP_SURFACE_CLASS_NAME = "relative flex w-fit max-w-56 flex-col overflow-visible rounded-xl border border-sky-100/80 bg-sky-50/95 px-2.5 py-1.5 text-slate-600 shadow-lg backdrop-blur-xl";
 const TOOLTIP_TITLE_ROW_CLASS_NAME = "flex min-w-0 items-center gap-1.5";
 const TOOLTIP_ACCENT_DOT_CLASS_NAME = "h-1.5 w-1.5 shrink-0 rounded-full";
@@ -35,6 +39,8 @@ const TOOLTIP_ARROW_CLASS_NAME = "absolute h-2 w-2 rotate-45 border-sky-100/80 b
 const TOOLTIP_VIEWPORT_MARGIN = 12;
 const TOOLTIP_BOUNDARY_GAP = 8;
 const TOOLTIP_ARROW_MARGIN = 12;
+
+
 
 const clampNumber = (value: number, min: number, max: number) => {
   if (max < min) return min;
@@ -118,6 +124,8 @@ const getArrowClassName = (side: TooltipSide) => {
   if (side === "bottom") return "-top-0.5 -translate-x-1/2 border-l border-t";
   return "-bottom-0.5 -translate-x-1/2 border-b border-r";
 };
+
+
 
 const HoverMonthEventTooltip = ({
   title,
@@ -244,6 +252,8 @@ const HoverMonthEventTooltip = ({
     </>
   );
 };
+
+
 
 HoverMonthEventTooltip.displayName = "HoverMonthEventTooltip";
 

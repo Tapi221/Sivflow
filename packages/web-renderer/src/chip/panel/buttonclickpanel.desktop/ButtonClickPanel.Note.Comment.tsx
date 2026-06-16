@@ -1,18 +1,28 @@
 "use client";
 
 import { Button } from "@web-renderer/chip/button/button/button";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@web-renderer/chip/ui/avatar";
+
 import { Editor, EditorContainer } from "@web-renderer/chip/ui/plate/editor";
+
 import { cn } from "@web-renderer/lib/utils";
+
 import { ArrowUpIcon } from "lucide-react";
+
 import type { Value } from "platejs";
+
 import { Plate } from "platejs/react";
+
 import type * as React from "react";
+
+
 
 type ButtonClickPanelNoteCommentUser = {
   avatarUrl?: string;
   name?: string;
 };
+
 type ButtonClickPanelNoteCommentProps = {
   autoFocus?: boolean;
   className?: string;
@@ -22,6 +32,8 @@ type ButtonClickPanelNoteCommentProps = {
   onAddComment: () => Promise<void> | void;
   onCommentValueChange: (value: Value) => void;
 };
+
+
 
 const ButtonClickPanelNoteComment = ({
   autoFocus = false,
@@ -81,5 +93,10 @@ const ButtonClickPanelNoteComment = ({
   </div>
 );
 
+
+
 export { ButtonClickPanelNoteComment };
+
+
+
 export type { ButtonClickPanelNoteCommentProps, ButtonClickPanelNoteCommentUser };

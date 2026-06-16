@@ -1,5 +1,7 @@
-import rawTranslations from "@shared/i18n/translations.json";
-import type { Locale } from "@shared/i18n/locale.store";
+import rawTranslations from "./translations.json";
+import type { Locale } from "./locale.store";
+
+
 
 type RawTranslations = Omit<(typeof rawTranslations)[Locale], "dateFnsLocaleKey"> & {
   dateFnsLocaleKey: "ja" | "en-US" | "zh-CN";
@@ -7,6 +9,8 @@ type RawTranslations = Omit<(typeof rawTranslations)[Locale], "dateFnsLocaleKey"
 type Translations = Omit<RawTranslations, "overflowEvents"> & {
   overflowEvents: (count: number) => string;
 };
+
+
 
 const RAW_TRANSLATIONS = rawTranslations as Record<Locale, RawTranslations>;
 const TRANSLATIONS: Record<Locale, Translations> = {
@@ -27,5 +31,9 @@ const TRANSLATIONS: Record<Locale, Translations> = {
   },
 };
 
+
+
 export { RAW_TRANSLATIONS, TRANSLATIONS };
+
+
 export type { RawTranslations, Translations };

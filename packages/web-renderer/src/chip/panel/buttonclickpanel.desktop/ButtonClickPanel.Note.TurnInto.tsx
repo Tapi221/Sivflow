@@ -1,17 +1,29 @@
 "use client";
 
 import { useMemo, useState } from "react";
+
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
+
 import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioItem, DropdownMenuTrigger } from "@web-renderer/chip/panel/dropdown-menu";
+
 import { ToolbarButton, ToolbarMenuGroup } from "@web-renderer/chip/ui/plate/toolbar";
+
 import { getBlockType, setBlockType } from "@web-renderer/components/editor/transforms";
+
 import { CheckIcon, ChevronRightIcon, Code2, Columns3Icon, FileCodeIcon, Heading1Icon, Heading2Icon, Heading3Icon, Heading4Icon, Heading5Icon, Heading6Icon, ListIcon, ListOrderedIcon, PilcrowIcon, QuoteIcon, SquareIcon } from "lucide-react";
+
 import type { TElement } from "platejs";
+
 import { KEYS } from "platejs";
+
 import { useEditorRef, useSelectionFragmentProp } from "platejs/react";
 
+
+
 const TURN_INTO_MENU_ITEM_CLASS_NAME = "dropdown-menu__radio-item--check-end min-w-44";
+
 const turnIntoItems = [
   { icon: <PilcrowIcon />, keywords: ["paragraph"], label: "Text", value: KEYS.p },
   { icon: <Heading1Icon />, keywords: ["title", "h1"], label: "Heading 1", value: "h1" },
@@ -29,6 +41,8 @@ const turnIntoItems = [
   { icon: <QuoteIcon />, keywords: ["citation", "blockquote", ">"], label: "Quote", value: KEYS.blockquote },
   { icon: <Columns3Icon />, label: "3 columns", value: "action_three_columns" },
 ];
+
+
 
 const ButtonClickPanelNoteTurnInto = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
@@ -83,5 +97,7 @@ const ButtonClickPanelNoteTurnInto = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
+
+
 
 export { ButtonClickPanelNoteTurnInto, turnIntoItems };

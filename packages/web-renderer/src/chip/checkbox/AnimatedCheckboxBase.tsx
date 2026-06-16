@@ -1,6 +1,8 @@
 import { cn } from "@web-renderer/lib/utils";
 import type { CSSProperties } from "react";
 
+
+
 type AnimatedCheckboxShape = "circle" | "square";
 type AnimatedCheckboxVariant = "filled" | "soft" | "outline" | "radio";
 type AnimatedCheckboxBaseProps = {
@@ -15,9 +17,13 @@ type AnimatedCheckboxBaseProps = {
   inactiveBorderColor?: string;
 };
 
+
+
 const DEFAULT_CHECKBOX_STROKE_WIDTH = 1.4;
 const CHECKBOX_STROKE_TRANSITION = "stroke-dashoffset 120ms ease-out";
 const CHECKBOX_INDETERMINATE_STROKE_TRANSITION = "stroke-dashoffset 120ms ease-out";
+
+
 
 const AnimatedCheckboxBase = ({
   checked,
@@ -120,5 +126,9 @@ const AnimatedCheckboxBase = ({
   );
 };
 
+
+
 export { AnimatedCheckboxBase };
+
+
 export type { AnimatedCheckboxShape, AnimatedCheckboxVariant, AnimatedCheckboxBaseProps };

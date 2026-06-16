@@ -5,6 +5,8 @@ import { HrElementStatic } from "@web-renderer/chip/ui/plate/hr-node-static";
 import { ParagraphElementStatic } from "@web-renderer/chip/ui/plate/paragraph-node-static";
 import { BaseParagraphPlugin } from "platejs";
 
+
+
 const BaseBasicBlocksKit = [
   BaseParagraphPlugin.withComponent(ParagraphElementStatic),
   BaseH1Plugin.withComponent(H1ElementStatic),
@@ -16,5 +18,7 @@ const BaseBasicBlocksKit = [
   BaseBlockquotePlugin.withComponent(BlockquoteElementStatic),
   BaseHorizontalRulePlugin.withComponent(HrElementStatic),
 ];
+
+
 
 export { BaseBasicBlocksKit };
