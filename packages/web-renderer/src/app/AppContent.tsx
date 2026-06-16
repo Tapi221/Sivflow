@@ -9,12 +9,6 @@ import { useStartupTasks } from "@/application/startup/useStartupTasks";
 import { AccountLockedScreen } from "@/components/security/AccountLockedScreen";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 
-<<<<<<< HEAD
-
-=======
-type AppContentProps = Record<string, never>;
->>>>>>> c06f65dcf83503eeadd66a314bd7f052edc70c72
-
 const MOBILE_LOGIN_VIEWPORT_MAX_WIDTH = 767;
 
 
