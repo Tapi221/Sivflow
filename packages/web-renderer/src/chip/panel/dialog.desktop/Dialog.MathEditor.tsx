@@ -1,11 +1,9 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@web-renderer/chip/panel/dialog.desktop/dialog/dialog";
 import { AutoResizeTextarea } from "@web-renderer/chip/ui/AutoResizeTextarea";
+import { MathRenderer } from "@web-renderer/components/card/blocks/math/MathRenderer";
 import { cn } from "@web-renderer/lib/utils";
-import type { CSSProperties, FC } from "react";
-import { MathRenderer } from "@/components/card/blocks/math/MathBlockContent";
 import type { MathBlockData } from "@/types/domain/base";
-
-
+import type { CSSProperties, FC } from "react";
 
 type CSSCustomProperties = CSSProperties & Record<`--${string}`, string>;
 interface MathEditorDialogProps {
@@ -17,18 +15,12 @@ interface MathEditorDialogProps {
   error?: string | null;
 }
 
-
-
 const EDITOR_LINE_HEIGHT = 24;
 const EDITOR_MIN_ROWS = 8;
 const EDITOR_MAX_HEIGHT = 420;
 const MAX_LATEX_LENGTH = 10000;
 
-
-
 const isHexColor = (color: string) => /^#[0-9a-fA-F]{3,8}$/.test(color);
-
-
 
 const MathEditorDialog: FC<MathEditorDialogProps> = ({ open, onOpenChange, data, onChange, accentColor, error }) => {
   const ringColor = accentColor && isHexColor(accentColor) ? `${accentColor}40` : "var(--primary-color-alpha-40)";
@@ -80,9 +72,5 @@ const MathEditorDialog: FC<MathEditorDialogProps> = ({ open, onOpenChange, data,
   );
 };
 
-
-
 export { MathEditorDialog };
-
-
 export type { MathEditorDialogProps };
