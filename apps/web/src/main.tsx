@@ -7,10 +7,10 @@ import "katex/dist/katex.min.css";
 import { StrictMode } from "react";
 import type { Root } from "react-dom/client";
 import { createRoot } from "react-dom/client";
-import { App } from "@web-renderer/App";
 import { TooltipProvider } from "@web-renderer/chip/panel/toolchip/Tooltip.Editor";
 import { ErrorBoundary } from "@web-renderer/components/common/ErrorScreen";
 import { AppProviders } from "@web/AppProviders";
+import { WebApp } from "@web/WebApp";
 import { renderGoogleOAuthCallback } from "@/integration/google-integration/google.oauth-callback";
 
 type SivflowReactRootStore = {
@@ -57,7 +57,7 @@ const mountApp = (): void => {
       <ErrorBoundary>
         <TooltipProvider>
           <AppProviders>
-            <App />
+            <WebApp />
           </AppProviders>
         </TooltipProvider>
       </ErrorBoundary>
