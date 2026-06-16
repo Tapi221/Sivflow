@@ -1,4 +1,4 @@
-import { SidebarOpenIcon } from "@/chip/icons/icons.sidebar";
+import { SidebarOpenIcon } from "@web-renderer/chip/icons/icons.sidebar";
 import { CalendarSidebarController } from "@/pane.desktop/leftpane/schedule/CalendarSidebarController";
 import { MobileSidebarDrawer } from "@/pane.desktop/view/MobileSidebarDrawer";
 

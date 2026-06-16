@@ -1,8 +1,8 @@
 import React, { useCallback, useRef } from "react";
+import { auth } from "@platform/firebase/client";
 import { useToast } from "@web-renderer/contexts/ToastContext";
 import { buildStoragePath, createDocumentId, extractPdfFiles } from "@/components/folder/explorer/model/utils";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
-import { auth } from "@/infrastructure/firebase/client";
 import { requestGoogleDriveFileAccessToken } from "@/integration/google-integration/googleDrive.oauth";
 import { uploadPdfToGoogleDrive } from "@/integration/google-integration/googleDrive.pdfUpload";
 import { saveDocumentWithBlob } from "@/services/documentFileStore";

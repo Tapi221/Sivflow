@@ -1,9 +1,9 @@
 import { BaseBlockquotePlugin, BaseH1Plugin, BaseH2Plugin, BaseH3Plugin, BaseH4Plugin, BaseH5Plugin, BaseH6Plugin, BaseHorizontalRulePlugin } from "@platejs/basic-nodes";
+import { BlockquoteElementStatic } from "@web-renderer/chip/ui/plate/blockquote-node-static";
+import { H1ElementStatic, H2ElementStatic, H3ElementStatic, H4ElementStatic, H5ElementStatic, H6ElementStatic } from "@web-renderer/chip/ui/plate/heading-node-static";
+import { HrElementStatic } from "@web-renderer/chip/ui/plate/hr-node-static";
+import { ParagraphElementStatic } from "@web-renderer/chip/ui/plate/paragraph-node-static";
 import { BaseParagraphPlugin } from "platejs";
-import { BlockquoteElementStatic } from "@/chip/ui/plate/blockquote-node-static";
-import { H1ElementStatic, H2ElementStatic, H3ElementStatic, H4ElementStatic, H5ElementStatic, H6ElementStatic } from "@/chip/ui/plate/heading-node-static";
-import { HrElementStatic } from "@/chip/ui/plate/hr-node-static";
-import { ParagraphElementStatic } from "@/chip/ui/plate/paragraph-node-static";
 
 const BaseBasicBlocksKit = [
   BaseParagraphPlugin.withComponent(ParagraphElementStatic),

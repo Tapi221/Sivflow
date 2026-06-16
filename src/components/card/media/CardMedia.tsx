@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "@/chip/button/button/button";
-import { Copy, Download, Image as ImageIcon, Pause, Play, Volume2 } from "@/chip/icons/icons";
+import { Button } from "@web-renderer/chip/button/button/button";
+import { Copy, Download, Image as ImageIcon, Pause, Play, Volume2 } from "@web-renderer/chip/icons/icons";
 import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
 import type { ImageGalleryItem } from "@/components/card/media/media.types";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";

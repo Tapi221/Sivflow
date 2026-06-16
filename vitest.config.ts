@@ -11,7 +11,6 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: /^@\/services\/localDB$/, replacement: resolveFromRoot("src/services/localdb/index.ts") },
-      { find: /^@\/services\/firebase$/, replacement: resolveFromRoot("src/infrastructure/firebase/client.ts") },
       { find: "@core", replacement: resolveFromRoot("packages/core/src") },
       { find: "@platform", replacement: resolveFromRoot("packages/platform/src") },
       { find: "@web-renderer", replacement: resolveFromRoot("packages/web-renderer/src") },
@@ -21,10 +20,8 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
-    environmentMatchGlobs: [["tests/unit/features/pdf/pdfZoom.*.test.ts", "node"]],
     exclude: ["**/node_modules/**", "**/dist/**", "nouse/**"],
     maxWorkers: 1,
-    minWorkers: 1,
     pool: "threads",
   },
 });

@@ -1,13 +1,13 @@
 import { memo, useCallback, useMemo, useState } from "react";
+import { Link, Plus } from "@web-renderer/chip/icons";
+import { LoadingSpinner } from "@web-renderer/components/common/LoadingSpinner";
+import { cn } from "@web-renderer/lib/utils";
 import { useLiveQuery } from "dexie-react-hooks";
-import { Link, Plus } from "@/chip/icons";
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
-import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { useEffectiveLocalUserId } from "@/contexts/auth/useEffectiveLocalUserId";
 import { useToast } from "@/contexts/ToastContext";
 import { normalizeCard } from "@/domain/card/normalizers/normalizeCard";
 import { buildCardSetById, resolveCardFolderIdStrict } from "@/domain/card/selectors/cardFolder";
-import { cn } from "@/lib/utils";
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import { getLocalDb } from "@/services/localdb";
 import type { Card, CardBlock } from "@/types/domain/card";
@@ -211,5 +211,6 @@ const CardQuestionLinksPanelComponent = ({ selectedCardId }: CardQuestionLinksPa
 
 const CardQuestionLinksPanel = memo(CardQuestionLinksPanelComponent);
 CardQuestionLinksPanel.displayName = "CardQuestionLinksPanel";
+
 export { CardQuestionLinksPanel };
 export type { CardQuestionLinksPanelProps };

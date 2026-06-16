@@ -1,5 +1,5 @@
+import { storage } from "@platform/firebase/client";
 import { getDownloadURL, ref as storageRef } from "firebase/storage";
-import { storage } from "@/infrastructure/firebase/client";
 import { getOrCreateImageBlobUrl } from "@/services/imageBlobUrlSessionCache";
 import { getCachedRemoteUrl, setCachedRemoteUrl } from "@/services/imagePreloadCache";
 import { getLocalDb } from "@/services/localdb";

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { ErrorDialog } from "@/chip/panel/dialog.desktop/Dialog.Error";
-import { WarningDialog } from "@/chip/panel/dialog.desktop/Dialog.Warning";
+import { ErrorDialog } from "@web-renderer/chip/panel/dialog.desktop/Dialog.Error";
+import { WarningDialog } from "@web-renderer/chip/panel/dialog.desktop/Dialog.Warning";
 import { InfoToast } from "@/components/notifications/InfoToast";
 import { notificationService } from "@/services/NotificationService";
 import type { Notification } from "@/types/notification";

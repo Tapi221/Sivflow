@@ -1,5 +1,5 @@
-import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 import { SCHEDULE_EVENT_COLOR } from "@shared/design-tokens/color/Color.Schedule";
+import { eventChipDesign } from "@web-renderer/chip/eventchip/eventChipDesign.generated";
 
 type CalendarColorTokens = {
   bg: string;

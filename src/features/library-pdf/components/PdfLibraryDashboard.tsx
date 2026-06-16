@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
+import { cn } from "@web-renderer/lib/utils";
 import { useFolderDocumentUpload } from "@/components/folder/hooks/useFolderDocumentUpload";
 import { PdfLibraryWorkspaceToolbar } from "@/features/library-pdf/components/PdfLibraryWorkspaceToolbar";
 import { PdfLibraryContinueSection } from "@/features/library-pdf/components/sections/PdfLibraryContinueSection";
 import type { PdfDashboardRow } from "@/features/library-pdf/model/pdfLibraryRow";
 import { buildPdfDashboardRows } from "@/features/library-pdf/model/pdfLibraryRow";
 import { useTags } from "@/features/settings/hooks/useTags";
-import { cn } from "@/lib/utils";
 import type { DocumentItem, Folder } from "@/types";
 
 type PdfLibraryDashboardProps = {

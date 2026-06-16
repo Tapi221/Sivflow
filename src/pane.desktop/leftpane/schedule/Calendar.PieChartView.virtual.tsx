@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { cn } from "@web-renderer/lib/utils";
 import { differenceInCalendarDays, differenceInMinutes, format, getDaysInMonth, isSameDay, startOfMonth, subDays } from "date-fns";
 import { ja } from "date-fns/locale";
 import type { MutableRefObject } from "react";
@@ -7,7 +8,6 @@ import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColum
 import { buildScheduleVirtualRailDays, getScheduleVirtualRailDate } from "@/features/calendar/grid/ScheduleColumn.shared";
 import type { AppCalendarItem, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { cn } from "@/lib/utils";
 
 type CalendarPieChartViewProps = {
   days: Date[]; virtualRail?: ScheduleVirtualRail; selectedDate: Date; events: GoogleCalendarEvent[]; appProjects: AppCalendarItem[]; googleAccounts: GoogleAccountDisplay[]; onSelectDate?: (date: Date) => void; onVisibleDateChange?: (date: Date) => void; dayHeights?: Record<string, number>; scrollViewportRef?: MutableRefObject<HTMLDivElement | null>; onScrollTopChange?: (scrollTop: number) => void; className?: string; };
@@ -145,4 +145,5 @@ const DayRow = memo(({ day, onSelectDate }: { day: DaySummary; onSelectDate?: (d
 DayRow.displayName = "DayRow";
 const CalendarPieChartView = memo(CalendarPieChartViewComponent);
 CalendarPieChartView.displayName = "CalendarPieChartView";
+
 export { CalendarPieChartView };

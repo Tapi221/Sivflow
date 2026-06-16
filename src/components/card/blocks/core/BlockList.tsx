@@ -1,10 +1,10 @@
 import { Fragment } from "react";
+import { cn } from "@web-renderer/lib/utils";
 import type { HTMLAttributes, ReactNode, Ref } from "react";
 import { shouldRenderInterBlockSeparator } from "@/components/card/blocks/core/blockDisplayPolicy";
 import { BlockSeparator } from "@/components/card/blocks/core/BlockSeparator";
 import { getNormalizedGridOffsetRows, getNormalizedRowOffset, getRowOffsetStyle, isGridOffsetType, isRowPositionableType } from "@/components/card/frame/rowOffset";
 import { CARD_ROW_PX } from "@/domain/card/cardGeometry.constants";
-import { cn } from "@/lib/utils";
 import type { CardBlock } from "@/types/domain/card";
 
 type BlockListRowMeta = {

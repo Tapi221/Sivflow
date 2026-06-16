@@ -32,12 +32,12 @@ const MENU_THEME_STYLES: Record<MenuTheme, MenuCssProperties> = {
     "--menu-muted": "#9a9a9a",
     "--menu-border": "#363636",
     "--menu-selected-bg": "#2f5fdd",
-    "--menu-selected-fg": "#ffffff",
+    "--menu-selected-fg": "#fff",
     "--menu-separator": "#383838",
     "--menu-accent": "#74a3ff",
   },
   light: {
-    "--menu-bg": "#ffffff",
+    "--menu-bg": "#fff",
     "--menu-fg": "#202124",
     "--menu-muted": "#6b7280",
     "--menu-border": "#e5e7eb",
@@ -130,11 +130,11 @@ const ContextMenuSandboxPage = () => {
   return (
     <main className="min-h-screen bg-slate-100 p-8 text-slate-900">
       <div className="mx-auto flex max-w-4xl flex-col gap-5">
-        <div>
+        <header>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">nouse/context-menu</p>
           <h1 className="mt-2 text-2xl font-semibold">ContextMenu trial</h1>
           <p className="mt-2 text-sm text-slate-600">白い領域を右クリック。Dark / Light のボタンで両方の menu を比較できます。</p>
-        </div>
+        </header>
         <div className="flex flex-wrap items-center gap-3">
           <button className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white" type="button" onClick={(event) => openMenuFromButton(event, "dark")}>
             Open dark menu

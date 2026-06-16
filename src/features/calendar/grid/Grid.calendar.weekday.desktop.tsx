@@ -1,12 +1,13 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { CalendarTimeGridLayoutEntry } from "@core/calendar";
 import { layoutCalendarTimeGridEvents } from "@core/calendar";
+import { CalendarEventChipMonth } from "@web-renderer/chip/eventchip/EventChip.month";
+import { CalendarEventChipWeekday } from "@web-renderer/chip/eventchip/EventChip.weekday";
+import { eventChipDesign } from "@web-renderer/chip/eventchip/eventChipDesign.generated";
+import { cn } from "@web-renderer/lib/utils";
 import { addDays, addMinutes, differenceInMinutes, format, startOfDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
-import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
-import { CalendarEventChipWeekday } from "@/chip/eventchip/EventChip.weekday";
-import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 import * as C from "@/features/calendar/calendar.constants.desktop";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { CalendarEventDragPointerSnapshot } from "@/features/calendar/grid/calendarEventDrag.shared";
@@ -16,7 +17,6 @@ import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";
 import { getWeekdayTimedEventFrame, getWeekdayTimedEventPositionStyle, WEEKDAY_TIMED_EVENT_MIN_HEIGHT_PX } from "@/features/calendar/grid/weekdayTimeGridGeometry";
 import type { CalendarAllDayEventOrderMap, CalendarGridStyle, CalendarWeekDayGridProps } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { cn } from "@/lib/utils";
 
 type CalendarWeekDayGridRef = {
   scrollToHour: (hour: number) => void;
@@ -531,5 +531,6 @@ const CalendarWeekDayGridComponent = ({ headerScrollRef, allDayScrollRef, scroll
 
 const CalendarWeekDayGrid = memo(CalendarWeekDayGridComponent);
 CalendarWeekDayGrid.displayName = "CalendarWeekDayGrid";
+
 export { CalendarWeekDayGrid };
 export type { CalendarWeekDayGridRef };

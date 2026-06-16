@@ -1,7 +1,7 @@
+import { functionsClient, requireFirestoreDb } from "@platform/firebase/client";
 import type { Unsubscribe } from "firebase/firestore";
 import { doc, onSnapshot, Timestamp } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
-import { functionsClient, requireFirestoreDb } from "@/infrastructure/firebase/client";
 import { storageStatsDocPathSegments } from "@/infrastructure/firebase/firestore/paths";
 import type { CloudStorageStats } from "@/types";
 

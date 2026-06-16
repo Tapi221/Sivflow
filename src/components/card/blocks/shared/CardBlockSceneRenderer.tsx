@@ -1,7 +1,8 @@
 import React from "react";
-import { Code, HelpCircle, Link, NotebookPen, Sigma, Type, Volume2 } from "@/chip/icons/icons";
-import { MathEditorDialog } from "@/chip/panel/dialog.desktop/Dialog.MathEditor";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/chip/ui/select";
+import { Code, HelpCircle, Link, NotebookPen, Sigma, Type, Volume2 } from "@web-renderer/chip/icons/icons";
+import { MathEditorDialog } from "@web-renderer/chip/panel/dialog.desktop/Dialog.MathEditor";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@web-renderer/chip/ui/select";
+import { cn } from "@web-renderer/lib/utils";
 import { CodeBlockContent } from "@/components/card/blocks/code/CodeBlockContent";
 import { normalizeEditorLanguage } from "@/components/card/blocks/code/codeBlockLanguage";
 import type { BlockListRowMeta } from "@/components/card/blocks/core/BlockList";
@@ -15,7 +16,6 @@ import { QuestionBlockContent } from "@/components/card/blocks/question/Question
 import { TextBlockContent } from "@/components/card/blocks/text/TextBlockContent";
 import { sanitizeReferences } from "@/components/card/editor/cardEditorUtils";
 import { AudioPlayer } from "@/components/card/media/CardMedia";
-import { cn } from "@/lib/utils";
 import type { CodeBlockData } from "@/types/core/code-block";
 import type { UploadedImage } from "@/types/domain/assets";
 import type { MathBlockData, ReferenceBlockData } from "@/types/domain/base";

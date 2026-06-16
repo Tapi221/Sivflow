@@ -1,6 +1,6 @@
-import { Button } from "@/chip/button/button/button";
-import { Plus } from "@/chip/icons";
-import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { Button } from "@web-renderer/chip/button/button/button";
+import { Plus } from "@web-renderer/chip/icons";
+import { LoadingSpinner } from "@web-renderer/components/common/LoadingSpinner";
 
 type NewCardIdleStateProps = {
   onStartEditing: () => void;

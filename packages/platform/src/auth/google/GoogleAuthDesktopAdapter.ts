@@ -1,7 +1,7 @@
+import { auth, functionsClient } from "@platform/firebase/client";
 import { signInWithCustomToken } from "firebase/auth";
 import { httpsCallable } from "firebase/functions";
 import type { GoogleAuthPort } from "@/application/ports/GoogleAuthPort";
-import { auth, functionsClient } from "@/infrastructure/firebase/client";
 import { requestGoogleSignInServerCode } from "@/integration/google-integration/google.oauth";
 
 const exchangeGoogleSignInCodeCallable = httpsCallable<{ code: string; codeVerifier: string; redirectUri: string; }, { firebaseToken: string; }>(functionsClient, "exchangeGoogleSignInCode");

@@ -54,4 +54,5 @@ const CalendarEventChip = memo(({ entry }: CalendarEventChipProperties) => {
   );
 });
 CalendarEventChip.displayName = "CalendarEventChip";
+
 export { CalendarEventChip };

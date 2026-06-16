@@ -1,3 +1,4 @@
+import { cn } from "@web-renderer/lib/utils";
 import type { ReactNode, RefObject, UIEvent } from "react";
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
 import { CalendarWeekDayGrid } from "@/features/calendar/grid/Grid.calendar.weekday.desktop";
@@ -6,7 +7,6 @@ import { CalendarListView } from "@/features/calendar/list/CalendarListView.desk
 import type { AppCalendarItem, CalendarAllDayEventOrderMap, CalendarAllDayEventReorderHandler, CalendarEventMoveHandler, CalendarGridStyle, CalendarViewMode, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import { CalendarTimetableView } from "@/features/calendar/timetable/CalendarTimetableView";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { cn } from "@/lib/utils";
 import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
 
 type CalendarSelectedViewsSplitViewProps = {

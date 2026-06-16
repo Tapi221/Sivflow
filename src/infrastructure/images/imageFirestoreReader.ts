@@ -1,5 +1,5 @@
+import { auth, requireFirestoreDb } from "@platform/firebase/client";
 import { doc, getDoc } from "firebase/firestore";
-import { auth, requireFirestoreDb } from "@/infrastructure/firebase/client";
 import { imageDocPathSegments } from "@/infrastructure/firebase/firestore/paths";
 import type { UploadedImage } from "@/types";
 

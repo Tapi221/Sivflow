@@ -27,7 +27,7 @@ vi.mock("react-router-dom", async () => {
     useNavigate: () => mockNavigate,
   };
 });
-vi.mock("@/chip/panel/dialog.desktop/Dialog.SettingsWorkspaceRoot", () => ({
+vi.mock("@web-renderer/chip/panel/dialog.desktop/Dialog.SettingsWorkspaceRoot", () => ({
   SettingsWorkspaceRootPanel: ({ open }: { open: boolean; }) => <div data-open={String(open)} data-testid="settings-root-panel" />,
 }));
 vi.mock("@/features/settings/hooks/useThemeAccentColor", () => ({
@@ -43,7 +43,7 @@ vi.mock("@/layout/hooks/useResetWorkspaceScroll.desktop", () => ({
   useResetWorkspaceScrollDesktop: () => undefined,
 }));
 vi.mock("@/layout/WorkspaceLayoutRevisionContext", () => ({
-  WorkspaceLayoutRevisionProvider: ({ children }: { children: ReactNode; }) => <>{children}</>,
+  WorkspaceLayoutRevisionProvider: ({ children }: { children: ReactNode; }) => children,
 }));
 vi.mock("@/layout/WorkspaceShell", () => ({
   WorkspaceShell: ({ children }: { children: ReactNode; }) => <main data-testid="workspace-shell">{children}</main>,

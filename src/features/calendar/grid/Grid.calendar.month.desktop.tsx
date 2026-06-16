@@ -1,11 +1,12 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CalendarEventChipMonth } from "@web-renderer/chip/eventchip/EventChip.month";
+import type { CalendarMonthDayEvents } from "@web-renderer/chip/eventchip/EventChip.month.placement";
+import { computeMonthEventsByDay, EMPTY_MONTH_DAY_EVENTS } from "@web-renderer/chip/eventchip/EventChip.month.placement";
+import { CalendarDayNumberCircle } from "@web-renderer/chip/icons/CalendarDayNumberCircle";
+import { cn } from "@web-renderer/lib/utils";
 import { addDays, format, startOfDay } from "date-fns";
 import { ja } from "date-fns/locale";
 import type { CSSProperties, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, RefObject } from "react";
-import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
-import type { CalendarMonthDayEvents } from "@/chip/eventchip/EventChip.month.placement";
-import { computeMonthEventsByDay, EMPTY_MONTH_DAY_EVENTS } from "@/chip/eventchip/EventChip.month.placement";
-import { CalendarDayNumberCircle } from "@/chip/icons/CalendarDayNumberCircle";
 import { WEEKDAY_LABELS } from "@/features/calendar/calendar.text";
 import type { CalendarWeekStartDay } from "@/features/calendar/calendar.types";
 import { rotateCalendarWeekdayLabels } from "@/features/calendar/calendarWeekStart";
@@ -15,7 +16,6 @@ import * as COLOR from "@/features/calendar/grid/grid.color.constants.desktop";
 import * as GD from "@/features/calendar/grid/grid.layout.constants.desktop";
 import type { CalendarEventMoveHandler } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { cn } from "@/lib/utils";
 
 type CalendarMonthGridDay = {
   date: Date; key: string; dayOfMonth: number; isCurrentMonth: boolean; };
@@ -425,4 +425,5 @@ const CalendarMonthWeekRow = memo(({ week, eventsByDay, selectedDayKey, todayDay
 });
 CalendarMonthWeekRow.displayName = "CalendarMonthWeekRow";
 GridCalendarMonthDesktop.displayName = "GridCalendarMonthDesktop";
+
 export { GridCalendarMonthDesktop };

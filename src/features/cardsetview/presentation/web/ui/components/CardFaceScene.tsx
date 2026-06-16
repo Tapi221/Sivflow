@@ -1,9 +1,9 @@
 import React from "react";
+import { cn } from "@web-renderer/lib/utils";
 import type { SharedCardContentProps } from "@/components/card/common/SharedCardContent";
 import { SharedCardContent } from "@/components/card/common/SharedCardContent";
 import { CardFrame } from "@/components/card/frame/CardFrame";
 import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";
-import { cn } from "@/lib/utils";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
 type CardFaceSceneProps = Readonly<{ displayMode: CardDisplayMode;

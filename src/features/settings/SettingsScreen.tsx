@@ -2,14 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 import type { LocalAiSettings } from "@platform/ai/localAiSettings";
 import { getLocalAiSettings, setLocalAiSettings } from "@platform/ai/localAiSettings";
 import { testOllamaConnection } from "@platform/ai/ollamaClient";
+import { Brain, ChevronDown, Globe, Keyboard, Shield, Type, User, Volume2 } from "@web-renderer/chip/icons";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@web-renderer/chip/panel/dropdown-menu";
+import { cn } from "@web-renderer/lib/utils";
 import type { ReactNode } from "react";
-import { Brain, ChevronDown, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/chip/icons";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import type { StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
 import { readStoredAccounts } from "@/integration/googlecalendar-integration/gcal.multi-storage";
-import { cn } from "@/lib/utils";
 import type { UserSettings } from "@/types";
 
 type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "ai" | "hotkey";
@@ -497,7 +497,7 @@ const SettingsWorkspaceScreen = () => {
   const language = pendingLanguage ?? persistedLanguage;
   const copy = SETTINGS_WORKSPACE_COPY[language];
   const sections = useMemo(() => buildSettingsSections(copy), [copy]);
-  const storedGoogleAccounts = useMemo(() => readStoredAccounts(), [currentUser?.uid]);
+  const storedGoogleAccounts = useMemo(() => readStoredAccounts(), []);
   const accountProfile = useMemo(() => getAccountProfile(currentUser, storedGoogleAccounts), [currentUser, storedGoogleAccounts]);
   const languageOptions = useMemo(() => ([{ value: "ja", ...copy.languageOptions.ja }, { value: "en", ...copy.languageOptions.en }, { value: "zh", ...copy.languageOptions.zh }] as const satisfies readonly SettingOption<SettingsLanguage>[]), [copy]);
   const weekStartOptions = useMemo(() => ([{ value: "monday", ...copy.weekStartOptions.monday }, { value: "sunday", ...copy.weekStartOptions.sunday }] as const satisfies readonly SettingOption<UserSettings["weekStartDay"]>[]), [copy]);

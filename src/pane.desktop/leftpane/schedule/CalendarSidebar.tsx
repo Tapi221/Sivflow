@@ -2,17 +2,17 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { SCHEDULE_SOURCE_COLOR } from "@shared/design-tokens/color/Color.Schedule";
 import { useT } from "@shared/i18n/useT";
+import { GoogleIcon } from "@web-renderer/chip/icons/icons.schedule";
+import type { CalendarListMenuAction } from "@web-renderer/chip/panel/rightclickpanel.desktop/CalendarListMenu.desktop";
+import { CALENDAR_LIST_MENU_HEIGHT, CALENDAR_LIST_MENU_PANEL_ID, CALENDAR_LIST_MENU_WIDTH, CalendarListMenu } from "@web-renderer/chip/panel/rightclickpanel.desktop/CalendarListMenu.desktop";
+import type { ProjectCalendarLinksMenuAction } from "@web-renderer/chip/panel/rightclickpanel.desktop/ProjectCalendarLinksMenu.desktop";
+import { getProjectCalendarLinksMenuHeight, PROJECT_CALENDAR_LINKS_MENU_PANEL_ID, PROJECT_CALENDAR_LINKS_MENU_WIDTH, ProjectCalendarLinksMenu } from "@web-renderer/chip/panel/rightclickpanel.desktop/ProjectCalendarLinksMenu.desktop";
+import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, useRightClickPanelDismiss } from "@web-renderer/chip/panel/rightClickPanel.utils";
+import { cn } from "@web-renderer/lib/utils";
 import type { ChangeEvent, CSSProperties, FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent, ReactNode } from "react";
-import { GoogleIcon } from "@/chip/icons/icons.schedule";
-import type { CalendarListMenuAction } from "@/chip/panel/rightclickpanel.desktop/CalendarListMenu.desktop";
-import { CALENDAR_LIST_MENU_HEIGHT, CALENDAR_LIST_MENU_PANEL_ID, CALENDAR_LIST_MENU_WIDTH, CalendarListMenu } from "@/chip/panel/rightclickpanel.desktop/CalendarListMenu.desktop";
-import type { ProjectCalendarLinksMenuAction } from "@/chip/panel/rightclickpanel.desktop/ProjectCalendarLinksMenu.desktop";
-import { getProjectCalendarLinksMenuHeight, PROJECT_CALENDAR_LINKS_MENU_PANEL_ID, PROJECT_CALENDAR_LINKS_MENU_WIDTH, ProjectCalendarLinksMenu } from "@/chip/panel/rightclickpanel.desktop/ProjectCalendarLinksMenu.desktop";
-import { clampRightClickPanelPosition, RIGHT_CLICK_PANEL_NO_DRAG_STYLE, useRightClickPanelDismiss } from "@/chip/panel/rightClickPanel.utils";
 import { GOOGLE_SOURCE_ROW_CLASS_NAME, SelectableGoogleSourceRow } from "@/features/calendar/panel/SelectableGoogleSourceRow";
 import type { AppCalendarItem, CalendarSidebarProps, GoogleAccountDisplay, GoogleCalendarColorOverrideMap, ProjectCalendarLink } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarListItem } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { cn } from "@/lib/utils";
 import { SidebarLayeredDirectory } from "@/pane.desktop/leftpane/Sidebar.LayeredDirectory";
 
 type CalendarContextMenuState = {

@@ -1,10 +1,10 @@
 import { createPortal } from "react-dom";
+import { CalendarEventChipMonth } from "@web-renderer/chip/eventchip/EventChip.month";
+import { cn } from "@web-renderer/lib/utils";
 import { addDays, differenceInCalendarDays, format, isSameMonth, startOfDay } from "date-fns";
 import type { CSSProperties, ReactNode } from "react";
-import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { cn } from "@/lib/utils";
 
 type CalendarPrintRangeDay = {
   date: Date;

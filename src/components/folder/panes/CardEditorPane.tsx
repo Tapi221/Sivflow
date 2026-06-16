@@ -1,6 +1,7 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { X } from "@/chip/icons";
-import { CardEditorPaneMediaDialogs } from "@/chip/panel/dialog.desktop/Dialog.CardEditorPaneMedia";
+import { X } from "@web-renderer/chip/icons";
+import { CardEditorPaneMediaDialogs } from "@web-renderer/chip/panel/dialog.desktop/Dialog.CardEditorPaneMedia";
+import { cn } from "@web-renderer/lib/utils";
 import { BlockEditModeContext } from "@/components/card/blocks/core/BlockEditModeContext";
 import { CardFaceWithAttachments } from "@/components/card/common/CardFaceWithAttachments";
 import { CardEditorLoadingState, NewCardIdleState } from "@/components/card/editor/CardEditorPaneStates";
@@ -23,7 +24,6 @@ import type { CardLayoutMode } from "@/features/cardsetview/domain/cardLayoutMod
 import { CardFaceScene } from "@/features/cardsetview/presentation/web/ui/components/CardFaceScene";
 import { CardSurfaceLayout } from "@/features/cardsetview/presentation/web/ui/components/CardSurfaceLayout";
 import { buildCardSurfaceMetrics } from "@/features/cardsetview/presentation/web/ui/components/cardSurfacePresentation";
-import { cn } from "@/lib/utils";
 import type { Card, CardBlock, CardFaceAttachments } from "@/types/domain/card";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 import { toMillisOrNull } from "@/utils/toMillis";
@@ -965,4 +965,5 @@ const CardEditorPane = ({ selectedCardId, folderId, cardSetId, forcedPaneWidthPx
 
 const EditorSidePane = memo(EditorSidePaneInner, areEditorSidePanePropsEqual);
 EditorSidePane.displayName = "EditorSidePane";
+
 export { CardEditorPane };

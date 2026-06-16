@@ -1,6 +1,6 @@
 import type { CalendarTimeGridLayoutEntry } from "@core/calendar";
+import { eventChipDesign } from "@web-renderer/chip/eventchip/eventChipDesign.generated";
 import type { CSSProperties } from "react";
-import { eventChipDesign } from "@/chip/eventchip/eventChipDesign.generated";
 import * as GRID from "@/features/calendar/grid/grid.layout.constants.desktop";
 
 type WeekdayTimedEventPositionStyle = CSSProperties & { left: string;

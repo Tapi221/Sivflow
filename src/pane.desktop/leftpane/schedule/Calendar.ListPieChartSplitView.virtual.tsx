@@ -1,17 +1,17 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { SCHEDULE_CONTENT_COLOR, SCHEDULE_DATE_COLOR, SCHEDULE_PIE_CHART_COLOR } from "@shared/design-tokens/color/Color.Schedule";
+import { CalendarEventChipList } from "@web-renderer/chip/eventchip/EventChip.list";
+import { LIST_DAY_GAP_PX, LIST_DAY_SECTION_MIN_HEIGHT_PX, LIST_EMPTY_DAY_HEIGHT_PX, LIST_EVENT_ROW_GAP_PX, LIST_EVENT_ROW_HEIGHT_PX } from "@web-renderer/chip/eventchip/EventChip.list.placement";
+import { cn } from "@web-renderer/lib/utils";
 import { differenceInCalendarDays, differenceInMinutes, format, getDaysInMonth, isSameDay, startOfMonth, subDays } from "date-fns";
 import { ja } from "date-fns/locale";
-import { SCHEDULE_CONTENT_COLOR, SCHEDULE_DATE_COLOR, SCHEDULE_PIE_CHART_COLOR } from "@shared/design-tokens/color/Color.Schedule";
 import type { CSSProperties, UIEvent } from "react";
-import { CalendarEventChipList } from "@/chip/eventchip/EventChip.list";
-import { LIST_DAY_GAP_PX, LIST_DAY_SECTION_MIN_HEIGHT_PX, LIST_EMPTY_DAY_HEIGHT_PX, LIST_EVENT_ROW_GAP_PX, LIST_EVENT_ROW_HEIGHT_PX } from "@/chip/eventchip/EventChip.list.placement";
 import { clipEventToDay, compareCalendarEvents, getCalendarDateKey, getEventDateKeys } from "@/features/calendar/calendarEventRange";
 import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { buildScheduleVirtualRailDays, getScheduleVirtualRailDate } from "@/features/calendar/grid/ScheduleColumn.shared";
 import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { AppCalendarItem, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { cn } from "@/lib/utils";
 
 type CalendarListPieChartSplitViewProps = {
   days: Date[];
@@ -444,4 +444,5 @@ const SplitDaySection = memo(SplitDaySectionComponent);
 SplitDaySection.displayName = "SplitDaySection";
 const CalendarListPieChartSplitView = memo(CalendarListPieChartSplitViewComponent);
 CalendarListPieChartSplitView.displayName = "CalendarListPieChartSplitView";
+
 export { CalendarListPieChartSplitView };

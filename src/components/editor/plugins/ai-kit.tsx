@@ -2,11 +2,11 @@
 
 import { BaseAIPlugin, withAIBatch } from "@platejs/ai";
 import { AIChatPlugin, AIPlugin, applyAISuggestions, getInsertPreviewStart, streamInsertChunk, useChatChunk } from "@platejs/ai/react";
+import { ButtonClickPanelNoteAiDialog, ButtonClickPanelNoteAiLoadingBar } from "@web-renderer/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.AiDialog";
+import { AIAnchorElement, AILeaf } from "@web-renderer/chip/ui/plate/ai-node";
 import cloneDeep from "lodash/cloneDeep.js";
 import { ElementApi, getPluginType, KEYS, PathApi } from "platejs";
 import { usePluginOption } from "platejs/react";
-import { ButtonClickPanelNoteAiDialog, ButtonClickPanelNoteAiLoadingBar } from "@/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.AiDialog";
-import { AIAnchorElement, AILeaf } from "@/chip/ui/plate/ai-node";
 import { CursorOverlayKit } from "@/components/editor/plugins/cursor-overlay-kit";
 import { MarkdownKit } from "@/components/editor/plugins/markdown-kit";
 import { useChat } from "@/components/editor/use-chat";

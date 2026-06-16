@@ -3,10 +3,10 @@ import React from "react";
 import type { ReactNode } from "react";
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { CalendarEventChipMonth } from "@/chip/eventchip/EventChip.month";
+import { CalendarEventChipMonth } from "@web-renderer/chip/eventchip/EventChip.month";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
-vi.mock("@/chip/toolchip/HoverMonthEventTooltip", () => ({
+vi.mock("@web-renderer/chip/toolchip/HoverMonthEventTooltip", () => ({
   HoverMonthEventTooltip: ({ children }: { children: ReactNode; }) => children,
 }));
 

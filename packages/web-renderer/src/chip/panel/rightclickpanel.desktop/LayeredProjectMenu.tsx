@@ -1,0 +1,167 @@
+import { Fragment, memo } from "react";
+import { RightClickPanel } from "@web-renderer/chip/panel/rightclickpanel";
+import type { RightClickPanelId } from "@web-renderer/chip/panel/rightClickPanel.utils";
+import { resolveRightClickPanelTextWidth, RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT, RIGHT_CLICK_PANEL_MARGIN, RIGHT_CLICK_PANEL_SURFACE_PADDING, RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE } from "@web-renderer/chip/panel/rightClickPanel.utils";
+import type { CSSProperties, ReactNode, RefObject } from "react";
+
+type LayeredProjectMenuActionId = "change-color" | "rename" | "create-note" | "create-card-set" | "create-folder" | "import-pdf" | "add-to-favorites" | "hide" | "delete";
+type LayeredProjectMenuItemDefinition = {
+  id: LayeredProjectMenuActionId;
+  label: string;
+  danger?: boolean;
+  separatorBefore?: boolean;
+  submenu?: boolean;
+};
+type LayeredProjectMenuAction = {
+  id: LayeredProjectMenuActionId;
+  disabled?: boolean;
+  onSelect: () => void;
+};
+type LayeredProjectMenuSubmenuAnchor = {
+  itemOffsetY: number;
+};
+type LayeredProjectMenuProps = {
+  x: number;
+  y: number;
+  actions: LayeredProjectMenuAction[];
+  menuRef: RefObject<HTMLDivElement | null>;
+  noDragStyle: CSSProperties;
+  panelId?: RightClickPanelId;
+  openSubmenuId?: LayeredProjectMenuActionId | null;
+  submenuElement?: ReactNode;
+  onOpenSubmenu?: (id: LayeredProjectMenuActionId, anchor: LayeredProjectMenuSubmenuAnchor) => void;
+  onCloseSubmenu?: () => void;
+};
+
+const LAYERED_PROJECT_MENU_PANEL_ID = "layered-project-context-menu";
+const LAYERED_PROJECT_MENU_SEPARATOR_HEIGHT = 5;
+const LAYERED_PROJECT_MENU_ITEM_DEFINITIONS: readonly LayeredProjectMenuItemDefinition[] = [
+  { id: "change-color", label: "色を変更", submenu: true },
+  { id: "rename", label: "名前を変更" },
+  { id: "create-note", label: "新規ノート" },
+  { id: "create-card-set", label: "新規カードセット" },
+  { id: "create-folder", label: "新規フォルダ" },
+  { id: "import-pdf", label: "PDFをインポート" },
+  { id: "add-to-favorites", label: "お気に入りに追加" },
+  { id: "hide", label: "非表示" },
+  { id: "delete", label: "削除", danger: true, separatorBefore: true },
+];
+const LAYERED_PROJECT_MENU_LABELS = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.map((item) => item.label);
+const LAYERED_PROJECT_MENU_SEPARATOR_COUNT = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.filter((item) => item.separatorBefore).length;
+const LAYERED_PROJECT_MENU_WIDTH = resolveRightClickPanelTextWidth(LAYERED_PROJECT_MENU_LABELS, 132);
+const LAYERED_PROJECT_MENU_HEIGHT = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.length * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + LAYERED_PROJECT_MENU_SEPARATOR_COUNT * LAYERED_PROJECT_MENU_SEPARATOR_HEIGHT + RIGHT_CLICK_PANEL_SURFACE_VERTICAL_EDGE;
+const LAYERED_PROJECT_MENU_MARGIN = RIGHT_CLICK_PANEL_MARGIN;
+const LAYERED_PROJECT_MENU_STYLE = `
+.panel.layered-project-menu-panel {
+  contain: none;
+  overflow: visible;
+}
+
+.layered-project-menu-item {
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.layered-project-menu-item--open,
+.layered-project-menu-item--open:not(:disabled):hover,
+.layered-project-menu-item--open:not(:disabled):focus-visible {
+  background: var(--interactive-accent-hover-bg);
+}
+
+.layered-project-menu-separator {
+  flex: 0 0 auto;
+  height: 1px;
+  margin: 2px 10px;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.layered-project-menu-item-chevron {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  color: #4a4a4a;
+}
+
+.layered-project-menu-item--danger {
+  color: #b91c1c;
+}
+
+.layered-project-menu-item--danger:not(:disabled):hover,
+.layered-project-menu-item--danger:not(:disabled):focus-visible {
+  background: #fef2f2;
+}
+`;
+
+const getLayeredProjectMenuAction = (actions: LayeredProjectMenuAction[], id: LayeredProjectMenuActionId) => actions.find((action) => action.id === id);
+const getLayeredProjectMenuSubmenuAnchor = (index: number): LayeredProjectMenuSubmenuAnchor => {
+  const separatorOffset = LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.slice(0, index).filter((item) => item.separatorBefore).length * LAYERED_PROJECT_MENU_SEPARATOR_HEIGHT;
+
+  return { itemOffsetY: RIGHT_CLICK_PANEL_SURFACE_PADDING + index * RIGHT_CLICK_PANEL_ITEM_MIN_HEIGHT + separatorOffset };
+};
+
+const LayeredProjectMenuBase = ({ x, y, actions, menuRef, noDragStyle, panelId = LAYERED_PROJECT_MENU_PANEL_ID, openSubmenuId, submenuElement, onOpenSubmenu, onCloseSubmenu }: LayeredProjectMenuProps) => {
+  return (
+    <>
+      <style>{LAYERED_PROJECT_MENU_STYLE}</style>
+      <RightClickPanel id={panelId} x={x} y={y} width={LAYERED_PROJECT_MENU_WIDTH} panelRef={menuRef} style={noDragStyle} className="layered-project-menu-panel" ariaLabel="layered project context menu">
+        {LAYERED_PROJECT_MENU_ITEM_DEFINITIONS.map((item, index) => {
+          const action = getLayeredProjectMenuAction(actions, item.id);
+          const isDisabled = action?.disabled ?? false;
+          const isSubmenuOpen = openSubmenuId === item.id;
+
+          return (
+            <Fragment key={item.id}>
+              {item.separatorBefore ? <div className="layered-project-menu-separator" role="separator" /> : null}
+              <button
+                type="button"
+                disabled={isDisabled}
+                className={["panel__item", "layered-project-menu-item", item.danger ? "layered-project-menu-item--danger" : null, isSubmenuOpen ? "layered-project-menu-item--open" : null].filter(Boolean).join(" ")}
+                role="menuitem"
+                aria-haspopup={item.submenu ? "menu" : undefined}
+                aria-expanded={item.submenu ? isSubmenuOpen : undefined}
+                onMouseEnter={() => {
+                  if (isDisabled) return;
+                  if (item.submenu) {
+                    onOpenSubmenu?.(item.id, getLayeredProjectMenuSubmenuAnchor(index));
+                    return;
+                  }
+                  onCloseSubmenu?.();
+                }}
+                onFocus={() => {
+                  if (isDisabled || !item.submenu) return;
+                  onOpenSubmenu?.(item.id, getLayeredProjectMenuSubmenuAnchor(index));
+                }}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  if (isDisabled) return;
+                  if (item.submenu) {
+                    if (onOpenSubmenu) {
+                      onOpenSubmenu(item.id, getLayeredProjectMenuSubmenuAnchor(index));
+                      return;
+                    }
+                    action?.onSelect();
+                    return;
+                  }
+                  action?.onSelect();
+                }}
+              >
+                <span>{item.label}</span>
+                {item.submenu ? (
+                  <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" className="layered-project-menu-item-chevron"><path d="M6 4L10 8L6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                ) : null}
+              </button>
+            </Fragment>
+          );
+        })}
+        {submenuElement}
+      </RightClickPanel>
+    </>
+  );
+};
+
+const LayeredProjectMenu = memo(LayeredProjectMenuBase);
+LayeredProjectMenu.displayName = "LayeredProjectMenu";
+
+export { LayeredProjectMenu, LAYERED_PROJECT_MENU_PANEL_ID, LAYERED_PROJECT_MENU_WIDTH, LAYERED_PROJECT_MENU_HEIGHT, LAYERED_PROJECT_MENU_MARGIN };
+export type { LayeredProjectMenuActionId, LayeredProjectMenuAction, LayeredProjectMenuSubmenuAnchor };

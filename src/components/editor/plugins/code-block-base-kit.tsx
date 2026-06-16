@@ -1,6 +1,6 @@
 import { BaseCodeBlockPlugin, BaseCodeLinePlugin, BaseCodeSyntaxPlugin } from "@platejs/code-block";
+import { CodeBlockElementStatic, CodeLineElementStatic, CodeSyntaxLeafStatic } from "@web-renderer/chip/ui/plate/code-block-node-static";
 import { all, createLowlight } from "lowlight";
-import { CodeBlockElementStatic, CodeLineElementStatic, CodeSyntaxLeafStatic } from "@/chip/ui/plate/code-block-node-static";
 
 const lowlight = createLowlight(all);
 const BaseCodeBlockKit = [

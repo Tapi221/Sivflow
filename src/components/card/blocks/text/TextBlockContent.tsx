@@ -1,5 +1,5 @@
 import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/Typography";
-import AutoResizeTextarea from "@/chip/ui/AutoResizeTextarea";
+import AutoResizeTextarea from "@web-renderer/chip/ui/AutoResizeTextarea";
 import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
 import { buildRuledTextareaStyle } from "@/components/card/blocks/core/ruledTextareaStyle";
 import { TEXT_BLOCK_CONTENT_CLASS, TEXT_BLOCK_LINE_HEIGHT_PX } from "@/components/card/blocks/text/textBlockStyles";

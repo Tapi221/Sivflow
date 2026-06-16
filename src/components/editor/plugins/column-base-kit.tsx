@@ -1,5 +1,5 @@
 import { BaseColumnItemPlugin, BaseColumnPlugin } from "@platejs/layout";
-import { ColumnElementStatic, ColumnGroupElementStatic } from "@/chip/ui/plate/column-node-static";
+import { ColumnElementStatic, ColumnGroupElementStatic } from "@web-renderer/chip/ui/plate/column-node-static";
 
 const BaseColumnKit = [
   BaseColumnPlugin.withComponent(ColumnGroupElementStatic),

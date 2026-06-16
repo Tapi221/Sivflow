@@ -2,8 +2,8 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { describe, expect, it, vi } from "vitest";
-import type * as DialogModule from "@/chip/ui/dialog/dialog";
-import type * as ReferencePopupModule from "@/chip/panel/dialog.desktop/Dialog.ReferencePopup";
+import type * as DialogModule from "@web-renderer/chip/ui/dialog/dialog";
+import type * as ReferencePopupModule from "@web-renderer/chip/panel/dialog.desktop/Dialog.ReferencePopup";
 import type * as SharedCardContentModule from "@/components/card/common/SharedCardContent";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import type * as CardFrameModule from "@/components/card/frame/CardFrame";
@@ -21,11 +21,11 @@ vi.mock("@/components/card/common/SharedCardContent", () => ({
   SharedCardContent: () => <div data-testid="mock-shared-content" />,
 } satisfies Partial<Record<keyof typeof SharedCardContentModule, unknown>>));
 
-vi.mock("@/chip/panel/dialog.desktop/Dialog.ReferencePopup", () => ({
+vi.mock("@web-renderer/chip/panel/dialog.desktop/Dialog.ReferencePopup", () => ({
   ReferencePopup: () => null,
 } satisfies Partial<Record<keyof typeof ReferencePopupModule, unknown>>));
 
-vi.mock("@/chip/ui/dialog/dialog", () => ({
+vi.mock("@web-renderer/chip/ui/dialog/dialog", () => ({
   Dialog: ({ children }: { children: React.ReactNode; }) => children,
   DialogContent: ({ children }: { children: React.ReactNode; }) => children,
 } satisfies Partial<Record<keyof typeof DialogModule, unknown>>));

@@ -1,8 +1,8 @@
 import * as React from "react";
-import type { SurfaceButtonProps } from "@/chip/button/button/surface-button";
-import { SurfaceButton } from "@/chip/button/button/surface-button";
-import { ToggleSwitch } from "@/chip/toggle/Toggle.switch";
-import { cn } from "@/lib/utils";
+import type { SurfaceButtonProps } from "@web-renderer/chip/button/button/surface-button";
+import { SurfaceButton } from "@web-renderer/chip/button/button/surface-button";
+import { ToggleSwitch } from "@web-renderer/chip/toggle/Toggle.switch";
+import { cn } from "@web-renderer/lib/utils";
 
 type MetaPanelActionRowAlign = "start" | "between" | "end";
 type MetaPanelActionRowProps = {
@@ -222,4 +222,5 @@ const MetaPanelSwitch = ({
 
 MetaPanelInput.displayName = "MetaPanelInput";
 MetaPanelSectionActionButton.displayName = "MetaPanelSectionActionButton";
+
 export { MetaPanelActionRow, MetaPanelInfoRow, MetaPanelInput, MetaPanelMutedSurface, MetaPanelSectionActionButton, MetaPanelSectionHeader, MetaPanelSectionTitle, MetaPanelSurfaceField, MetaPanelSwitch, MetaPanelSwitchRow };

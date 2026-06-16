@@ -2,8 +2,8 @@
 
 import { CodeBlockRules } from "@platejs/code-block";
 import { CodeBlockPlugin, CodeLinePlugin, CodeSyntaxPlugin } from "@platejs/code-block/react";
+import { CodeBlockElement, CodeLineElement, CodeSyntaxLeaf } from "@web-renderer/chip/ui/plate/code-block-node";
 import { all, createLowlight } from "lowlight";
-import { CodeBlockElement, CodeLineElement, CodeSyntaxLeaf } from "@/chip/ui/plate/code-block-node";
 
 const lowlight = createLowlight(all);
 const CodeBlockKit = [

@@ -16,26 +16,26 @@ const workspaceTabsState: WorkspaceTabsState = {
   tabs: [],
 };
 
-vi.mock("@/chip/icons/icons.schedule", () => ({
+vi.mock("@web-renderer/chip/icons/icons.schedule", () => ({
   CalendarIcon: ({ className }: { className?: string; }) => <svg data-testid="my-projects-calendar-icon" className={className} aria-label="calendar icon" />,
   GoogleIcon: ({ className, label }: { className?: string; label?: string; }) => <svg data-testid="google-icon" className={className} aria-label={label ?? "Google"} />,
 }));
 
-vi.mock("@/chip/rightclickpanel.desktop/CalendarListMenu.desktop", () => ({
+vi.mock("@web-renderer/chip/rightclickpanel.desktop/CalendarListMenu.desktop", () => ({
   CALENDAR_LIST_MENU_HEIGHT: 96,
   CALENDAR_LIST_MENU_PANEL_ID: "calendar-list-menu",
   CALENDAR_LIST_MENU_WIDTH: 200,
   CalendarListMenu: () => <div data-testid="calendar-list-menu" />,
 }));
 
-vi.mock("@/chip/rightclickpanel.desktop/ProjectCalendarLinksMenu.desktop", () => ({
+vi.mock("@web-renderer/chip/rightclickpanel.desktop/ProjectCalendarLinksMenu.desktop", () => ({
   PROJECT_CALENDAR_LINKS_MENU_PANEL_ID: "project-calendar-links-menu",
   PROJECT_CALENDAR_LINKS_MENU_WIDTH: 240,
   ProjectCalendarLinksMenu: () => <div data-testid="project-calendar-links-menu" />,
   getProjectCalendarLinksMenuHeight: () => 96,
 }));
 
-vi.mock("@/chip/rightclickpanel.desktop/rightClickPanel.utils", () => ({
+vi.mock("@web-renderer/chip/rightclickpanel.desktop/rightClickPanel.utils", () => ({
   RIGHT_CLICK_PANEL_NO_DRAG_STYLE: {},
   clampRightClickPanelPosition: (x: number, y: number) => ({ x, y }),
   useRightClickPanelDismiss: vi.fn(),

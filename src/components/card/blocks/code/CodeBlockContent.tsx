@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { codeTheme } from "@shared/design-tokens/codeTheme";
+import { Check, Copy } from "@web-renderer/chip/icons/icons";
+import { cn } from "@web-renderer/lib/utils";
 import type { RenderProps } from "prism-react-renderer";
 import { Highlight } from "prism-react-renderer";
 import type { ClipboardEvent as ReactClipboardEvent, FormEvent as ReactFormEvent, KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
-import { Check, Copy } from "@/chip/icons/icons";
 import { CodeBlockFrame } from "@/components/card/blocks/code/CodeBlockFrame";
 import { getViewerLanguageLabels, normalizeEditorLanguage, normalizeViewerLanguage } from "@/components/card/blocks/code/codeBlockLanguage";
 import { Prism } from "@/components/card/blocks/code/prismSetup";
 import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
 import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
-import { cn } from "@/lib/utils";
 import { webClipboardAdapter } from "@/platform/clipboard/webClipboardAdapter";
 
 type CodeBlockContentProps =

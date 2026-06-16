@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import type { ImportFormat } from "@web-renderer/chip/panel/dialog.desktop/Dialog.ImportFormat";
+import { ImportFormatDialog } from "@web-renderer/chip/panel/dialog.desktop/Dialog.ImportFormat";
+import { MfCardImportDialog } from "@web-renderer/chip/panel/dialog.desktop/Dialog.MfCardImport";
+import { MfDeckImportDialog } from "@web-renderer/chip/panel/dialog.desktop/Dialog.MfDeckImport";
+import { PortableImportBatchDialog } from "@web-renderer/chip/panel/dialog.desktop/Dialog.PortableImportBatch";
+import { XlsxImportDialog } from "@web-renderer/chip/panel/dialog.desktop/Dialog.XlsxImport";
+import { cn } from "@web-renderer/lib/utils";
 import type { DragEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import type { ImportFormat } from "@/chip/panel/dialog.desktop/Dialog.ImportFormat";
-import { ImportFormatDialog } from "@/chip/panel/dialog.desktop/Dialog.ImportFormat";
-import { MfCardImportDialog } from "@/chip/panel/dialog.desktop/Dialog.MfCardImport";
-import { MfDeckImportDialog } from "@/chip/panel/dialog.desktop/Dialog.MfDeckImport";
-import { PortableImportBatchDialog } from "@/chip/panel/dialog.desktop/Dialog.PortableImportBatch";
-import { XlsxImportDialog } from "@/chip/panel/dialog.desktop/Dialog.XlsxImport";
 import { useCardCommands } from "@/components/card/hooks/useCardCommands";
 import { useCardSets } from "@/components/card/hooks/useCardSets";
 import { useCardsRead } from "@/components/card/hooks/useCardsRead";
@@ -26,7 +27,6 @@ import { readDesktopImportFiles, subscribeDesktopImportFileOpen } from "@/featur
 import { detectImportFileKind, getPortableImportFiles, getSupportedImportFiles, isPortableImportFileKind, isSupportedImportFileKind } from "@/features/import/domain/importFileKind";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
-import { cn } from "@/lib/utils";
 import { createAppDestination, createPageUrl } from "@/platform/web/navigation/toWebPath";
 import type { CardSet, Folder, SelectedExplorerItem } from "@/types";
 

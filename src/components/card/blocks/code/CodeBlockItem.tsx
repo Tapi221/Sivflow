@@ -1,8 +1,8 @@
 import React from "react";
-import { Code } from "@/chip/icons";
+import { Code } from "@web-renderer/chip/icons";
+import { cn } from "@web-renderer/lib/utils";
 import { CodeBlockEditor } from "@/components/card/blocks/code/CodeBlockEditor";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
-import { cn } from "@/lib/utils";
 import type { CodeBlockData } from "@/types/core/code-block";
 
 interface CodeBlockItemProps {
@@ -96,4 +96,5 @@ const CodeBlockItem = React.memo(
   areCodeBlockItemPropsEqual,
 );
 CodeBlockItem.displayName = "CodeBlockItem";
+
 export { CodeBlockItem };

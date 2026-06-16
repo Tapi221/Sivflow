@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
+import { cn } from "@web-renderer/lib/utils";
 import { CARD_BASE_WIDTH, CARD_DISPLAY_SCALE } from "@/domain/card/cardGeometry.constants";
-import { cn } from "@/lib/utils";
 
 interface MobileScalableCardProps {
   children: React.ReactNode;

@@ -1,8 +1,8 @@
-import { Button } from "@/chip/button/button/button";
-import { Plus } from "@/chip/icons";
-import { Link } from "@/chip/icons";
-import { Input } from "@/chip/input-field/input";
-import { cn } from "@/lib/utils";
+import { Button } from "@web-renderer/chip/button/button/button";
+import { Plus } from "@web-renderer/chip/icons";
+import { Link } from "@web-renderer/chip/icons";
+import { Input } from "@web-renderer/chip/input-field/input";
+import { cn } from "@web-renderer/lib/utils";
 import type { ReferenceBlockData } from "@/types";
 
 type LinkEditorProps = {

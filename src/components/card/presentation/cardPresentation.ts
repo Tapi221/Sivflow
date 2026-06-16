@@ -1,5 +1,5 @@
+import { cn } from "@web-renderer/lib/utils";
 import { CARD_SHELL_COMMON_CLASS_NAME } from "@/components/card/frame/cardShellClassNames";
-import { cn } from "@/lib/utils";
 
 type CardPresentationContext = {
   inPager: boolean;

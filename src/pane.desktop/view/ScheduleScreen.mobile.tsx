@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDateFnsLocale, useMonthLabelFormat, useT } from "@shared/i18n/useT";
+import { CarvePanel } from "@web-renderer/chip/panel/panel/CarvePanel.desktop";
+import { cn } from "@web-renderer/lib/utils";
 import { addDays, endOfDay, endOfMonth, format, startOfDay, startOfMonth, subDays } from "date-fns";
 import type { ComponentType, SVGProps } from "react";
 import * as stratisIcons from "stratis-ui-icons";
-import { CarvePanel } from "@/chip/panel/panel/CarvePanel.desktop";
 import { createCalendarYearEventDisplayResolver } from "@/features/calendar/calendarEventSourcePriority";
 import { attachCalendarEventDisplayMetadata, filterCalendarEventsBySourceVisibility } from "@/features/calendar/calendarEventVisibility";
 import type { CalendarDateRange } from "@/features/calendar/calendarRange.types";
@@ -18,7 +19,6 @@ import { useProjectCalendarActions } from "@/features/calendar/useProjectCalenda
 import { useScheduleScreen } from "@/features/calendar/useScheduleScreen";
 import { createCalendarEventsScopeKey, useTransientEmptyCalendarEvents } from "@/features/calendar/useTransientEmptyCalendarEvents";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
-import { cn } from "@/lib/utils";
 import { CalendarPieChartView } from "@/pane.desktop/leftpane/schedule/Calendar.PieChartView";
 import { MobileCalendarEventComposer } from "@/pane.desktop/view/MobileCalendarEventComposer";
 import { MobileCalendarSidebar, MobileCalendarSidebarOpenButton } from "@/pane.desktop/view/MobileCalendarSidebar";

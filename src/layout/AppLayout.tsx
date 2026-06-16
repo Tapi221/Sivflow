@@ -1,8 +1,8 @@
 import "@/styles/backpane.css";
 import "@/layout/AppLayout.css";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { SettingsWorkspaceRootPanel } from "@web-renderer/chip/panel/dialog.desktop/Dialog.SettingsWorkspaceRoot";
 import { Outlet, useNavigate } from "react-router-dom";
-import { SettingsWorkspaceRootPanel } from "@/chip/panel/dialog.desktop/Dialog.SettingsWorkspaceRoot";
 import { useThemeAccentColor } from "@/features/settings/hooks/useThemeAccentColor";
 import { useLayoutRouteStateDesktop } from "@/layout/hooks/useLayoutRouteState.desktop";
 import { useResetWorkspaceScrollDesktop } from "@/layout/hooks/useResetWorkspaceScroll.desktop";
@@ -24,9 +24,6 @@ type SidebarLongPressState = {
 
 const LEFT_PANEL_COLLAPSED_STORAGE_KEY = "sivflow:layout:left-panel-collapsed";
 const LEGACY_LEFT_PANEL_COLLAPSED_STORAGE_KEY = "flashcard-master:layout:left-panel-collapsed";
-const MOBILE_CALENDAR_SIDEBAR_SELECTOR = "#mobile-calendar-sidebar";
-const MOBILE_CALENDAR_SIDEBAR_TOGGLE_SELECTOR = ".app-layered-directory__workspace-toggle";
-const MOBILE_CALENDAR_SIDEBAR_CLOSE_BUTTON_SELECTOR = 'button[aria-label="サイドバーを閉じる"]';
 const MOBILE_SETTINGS_ROUTE_MEDIA_QUERY = "(max-width: 767px)";
 const SIDEBAR_LONG_PRESS_CONTEXT_MENU_TARGET_SELECTOR = ".app-layered-directory [role='treeitem']";
 const SIDEBAR_LONG_PRESS_DELAY_MS = 520;
@@ -49,13 +46,6 @@ const readStoredLeftPanelCollapsed = (): boolean => {
 const readIsMobileSettingsRouteViewport = (): boolean => {
   if (typeof window === "undefined") return false;
   return window.matchMedia(MOBILE_SETTINGS_ROUTE_MEDIA_QUERY).matches;
-};
-const getMobileCalendarSidebarCloseButton = (target: EventTarget | null): HTMLButtonElement | null => {
-  if (!(target instanceof Element)) return null;
-  if (!target.closest(MOBILE_CALENDAR_SIDEBAR_TOGGLE_SELECTOR)) return null;
-
-  const mobileCalendarSidebar = target.closest(MOBILE_CALENDAR_SIDEBAR_SELECTOR);
-  return mobileCalendarSidebar?.parentElement?.querySelector<HTMLButtonElement>(MOBILE_CALENDAR_SIDEBAR_CLOSE_BUTTON_SELECTOR) ?? null;
 };
 const getSidebarLongPressContextMenuTarget = (target: EventTarget | null): HTMLElement | null => {
   if (!(target instanceof Element)) return null;

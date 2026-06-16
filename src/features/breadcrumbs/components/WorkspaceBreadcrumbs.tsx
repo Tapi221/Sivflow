@@ -1,10 +1,10 @@
 import { useMemo } from "react";
+import { ChevronRight } from "@web-renderer/chip/icons";
+import { cn } from "@web-renderer/lib/utils";
 import type { CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronRight } from "@/chip/icons";
 import { useBreadcrumbExtraCrumbs } from "@/contexts/BreadcrumbContext";
 import type { BreadcrumbCrumb } from "@/features/breadcrumbs/breadcrumbs.types";
-import { cn } from "@/lib/utils";
 
 type WorkspaceBreadcrumbsProps = {
   className?: string;

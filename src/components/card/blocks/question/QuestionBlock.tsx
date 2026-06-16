@@ -1,5 +1,5 @@
 import React, { useCallback, useRef } from "react";
-import { HelpCircle } from "@/chip/icons";
+import { HelpCircle } from "@web-renderer/chip/icons";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { QuestionBlockContent } from "@/components/card/blocks/question/QuestionBlockContent";
 import type { CardBlock } from "@/types/domain/card";
@@ -120,4 +120,5 @@ const QuestionBlock = React.memo(
   areQuestionBlockPropsEqual,
 );
 QuestionBlock.displayName = "QuestionBlock";
+
 export { QuestionBlock };

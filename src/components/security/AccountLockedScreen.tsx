@@ -1,5 +1,5 @@
 import React from "react";
-import { Shield } from "@/chip/icons/icons";
+import { Shield } from "@web-renderer/chip/icons/icons";
 // IDE Check: Shield icon
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useSecurity } from "@/contexts/security/SecurityContext";

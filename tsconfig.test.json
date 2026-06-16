@@ -17,6 +17,7 @@
       "#src/*": ["functions/src/*"],
       "@core/*": ["packages/core/src/*"],
       "@platform/*": ["packages/platform/src/*"],
+      "@web-renderer/*": ["packages/web-renderer/src/*"],
       "@web/*": ["apps/web/src/*"],
       "@/*": ["src/*"],
       "@shared/*": ["shared/*"],
@@ -30,6 +31,8 @@
     "tests/**/*.tsx",
     "functions/src/**/*.ts",
     "shared/**/*.ts",
+    "packages/web-renderer/src/**/*.ts",
+    "packages/web-renderer/src/**/*.tsx",
     "packages/core/src/**/*.ts",
     "packages/platform/src/**/*.ts"
   ]

@@ -2,10 +2,10 @@
 
 import type { BaseSuggestionConfig } from "@platejs/suggestion";
 import { BaseSuggestionPlugin } from "@platejs/suggestion";
+import { SuggestionLeaf, SuggestionLineBreak, VoidRemoveSuggestionOverlay } from "@web-renderer/chip/ui/plate/suggestion-node";
 import type { ExtendConfig, TElement, TInlineSuggestionData, TSuggestionData, TSuggestionText } from "platejs";
 import { KEYS, TextApi, TrailingBlockPlugin } from "platejs";
 import { toTPlatePlugin } from "platejs/react";
-import { SuggestionLeaf, SuggestionLineBreak, VoidRemoveSuggestionOverlay } from "@/chip/ui/plate/suggestion-node";
 import { discussionPlugin, getDiscussionBlockClickTarget, getDiscussionClickTarget } from "@/components/editor/plugins/discussion-kit";
 
 type SuggestionConfig = ExtendConfig<

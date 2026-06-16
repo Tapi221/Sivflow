@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import { Button } from "@/chip/button/button/button";
-import { Check, RotateCcw, Upload, X } from "@/chip/icons";
-import { Slider } from "@/chip/ui/slider";
+import { Button } from "@web-renderer/chip/button/button/button";
+import { Check, RotateCcw, Upload, X } from "@web-renderer/chip/icons";
+import { Slider } from "@web-renderer/chip/ui/slider";
 import { ImageFrame } from "@/components/card/blocks/image/ImageFrame";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { CANONICAL_CARD_WIDTH } from "@/domain/card/cardGeometry.constants";

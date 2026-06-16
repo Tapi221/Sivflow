@@ -1,7 +1,7 @@
 import { useMemo } from "react";
+import type { TagColorKey } from "@web-renderer/chip/budge/tag/tagColor";
+import { getTagColorClassName as resolveTagColorClassName, getTagColorKey as normalizeTagColorKey, TAG_COLOR_KEYS } from "@web-renderer/chip/budge/tag/tagColor";
 import { useLiveQuery } from "dexie-react-hooks";
-import type { TagColorKey } from "@/chip/budge/tag/tagColor";
-import { getTagColorClassName as resolveTagColorClassName, getTagColorKey as normalizeTagColorKey, TAG_COLOR_KEYS } from "@/chip/budge/tag/tagColor";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { getLocalDb } from "@/services/localdb";

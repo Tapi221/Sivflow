@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { TagColorKey } from "@shared/design-tokens/color/Color.Tag";
+import { TagBadge } from "@web-renderer/chip/budge/tag/Badge.Tag";
+import { getTagColorKey } from "@web-renderer/chip/budge/tag/tagColor";
+import { cn } from "@web-renderer/lib/utils";
 import type { DragEvent as ReactDragEvent, KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from "react";
-import { TagBadge } from "@/chip/budge/tag/Badge.Tag";
-import { getTagColorKey } from "@/chip/budge/tag/tagColor";
 import { useExplorerStore } from "@/features/explorer/store/useExplorerStore";
 import type { Tag as TagRecord } from "@/features/settings/hooks/useTags";
 import { useTags } from "@/features/settings/hooks/useTags";
 import { useTagTreeCommands } from "@/features/settings/hooks/useTagTreeCommands";
-import { cn } from "@/lib/utils";
 import { LayeredTreeDropIndicator } from "@/pane.desktop/leftpane/folder/layeredTreeDnd";
 import { LAYERED_TREE_INDENT_PX, LAYERED_TREE_ROOT_DROP_INDICATOR_LEFT_PX, LAYERED_TREE_ROOT_LEVEL } from "@/pane.desktop/leftpane/folder/layeredTreeDnd.constants";
 import type { LayeredTreeDragState } from "@/pane.desktop/leftpane/folder/layeredTreeDnd.types";

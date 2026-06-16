@@ -1,6 +1,6 @@
 import React from "react";
-import { Button } from "@/chip/button/button/button";
-import { Card, CardContent } from "@/chip/ui/card";
+import { Button } from "@web-renderer/chip/button/button/button";
+import { Card, CardContent } from "@web-renderer/chip/ui/card";
 
 type PracticeSummaryState = {
   roundNumber: number;

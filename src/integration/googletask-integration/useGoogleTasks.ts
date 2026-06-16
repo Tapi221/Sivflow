@@ -98,7 +98,7 @@ const getRecoverableAccessToken = async (
   }
 
   if (!account.refreshToken) {
-    const { auth } = await import("@/infrastructure/firebase/client");
+    const { auth } = await import("@platform/firebase/client");
     const result = await requestConnectedServiceAccessToken(auth, true);
     return applyRecoveredToken(result);
   }
@@ -296,27 +296,8 @@ const reduceGoogleTasks = (
       return state;
   }
 };
-const buildAccountTokenKey = (
-  accounts: GoogleConnectedServiceAccountEntry[],
-  taskListsByAccount: Record<string, GoogleTaskListAccountState>,
-) =>
-  accounts
-    .map((account) => {
-      const taskLists = taskListsByAccount[account.id]?.taskLists ?? [];
-
-      return [
-        account.id,
-        account.accessToken ?? "",
-        account.refreshToken ?? "",
-        account.connectionStatus,
-        taskLists.map((taskList) => taskList.id).join(","),
-      ].join("\t");
-    })
-    .join("\n");
 const useGoogleTasks = (accounts: GoogleConnectedServiceAccountEntry[], taskListsByAccount: Record<string, GoogleTaskListAccountState>, onAccessTokenRecovered?: (update: GoogleConnectedServiceAccountTokenUpdate) => void) => {
   const [state, dispatch] = useReducer(reduceGoogleTasks, {});
-
-  const accountTokenKey = buildAccountTokenKey(accounts, taskListsByAccount);
 
   const accountTokens = useMemo(
     () =>
@@ -327,7 +308,7 @@ const useGoogleTasks = (accounts: GoogleConnectedServiceAccountEntry[], taskList
         connectionStatus: account.connectionStatus,
         taskLists: taskListsByAccount[account.id]?.taskLists ?? [],
       })),
-    [accounts, accountTokenKey, taskListsByAccount],
+    [accounts, taskListsByAccount],
   );
 
   const refreshAccount = useCallback(

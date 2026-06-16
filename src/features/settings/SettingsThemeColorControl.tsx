@@ -1,6 +1,6 @@
+import { cn } from "@web-renderer/lib/utils";
 import type { ChangeEvent } from "react";
 import { DEFAULT_THEME_ACCENT_COLOR, normalizeThemeAccentColor, useUserSettings } from "@/features/settings/hooks/useUserSettings";
-import { cn } from "@/lib/utils";
 import type { UserSettings } from "@/types";
 
 type SettingsThemeColorControlProps = {

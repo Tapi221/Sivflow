@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { LoadingSpinner } from "@web-renderer/components/common/LoadingSpinner";
+import { cn } from "@web-renderer/lib/utils";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { PdfDocumentSource } from "@/features/pdf/pdfDocumentSource";
 import { createPdfDocumentDataSourceFromBlob, createPdfDocumentUrlSource, releasePdfDocumentSource } from "@/features/pdf/pdfDocumentSource";
@@ -7,7 +8,6 @@ import { PdfPane } from "@/features/pdf/PdfPane";
 import { createPdfPerformanceTraceName, recordPdfPerformanceMark, recordPdfPerformanceMeasure } from "@/features/pdf/pdfPerformance";
 import { findLocalPdfBlob, resolvePdfDocumentBlob } from "@/features/pdf/resolvePdfDocumentBlob";
 import { resolvePdfDocumentSourceUrl } from "@/features/pdf/resolvePdfDocumentSourceUrl";
-import { cn } from "@/lib/utils";
 import type { DocumentItem, PdfViewerState } from "@/types";
 
 type PdfViewerStateChangePersistence = "immediate" | "deferred" | "none";
@@ -97,7 +97,7 @@ const resolvePreferredPdfBlob = async (document: DocumentItem, currentUserId: st
 const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentPaneProps) => {
   const { currentUser } = useAuthSession();
   const currentUserId = currentUser?.uid ?? null;
-  const persistedSourceUrl = useMemo(() => resolvePdfDocumentSourceUrl(document), [document.blobUrl, document.downloadUrl, document.googleDriveWebContentLink, document.googleDriveWebViewLink, document.localUrl, document.remoteUrl]);
+  const persistedSourceUrl = useMemo(() => resolvePdfDocumentSourceUrl(document), [document]);
   const [failedPersistedSourceUrl, setFailedPersistedSourceUrl] = useState<string | null>(null);
   const activePersistedSourceUrl = persistedSourceUrl && persistedSourceUrl !== failedPersistedSourceUrl ? persistedSourceUrl : null;
   const persistedSource = useMemo(() => createPersistedPdfDocumentSource(activePersistedSourceUrl), [activePersistedSourceUrl]);
@@ -234,7 +234,7 @@ const PdfDocumentPane = ({ document, className, onDocumentUpdate }: PdfDocumentP
       isCancelled = true;
       if (!isSourceHandedOff) releasePdfDocumentSource(resolvedSource);
     };
-  }, [currentUserId, document.googleDriveFileId, document.id, document.localFileId, document.sizeBytes, document.userId, persistedSource]);
+  }, [currentUserId, document, persistedSource]);
 
   useEffect(() => {
     return () => {

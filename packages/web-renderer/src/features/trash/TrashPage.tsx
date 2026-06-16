@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { Button } from "@web-renderer/chip/button/button/button";
+import { LoadingSpinner } from "@web-renderer/components/common/LoadingSpinner";
 import { useTrashItems } from "@web-renderer/features/trash/useTrashItems";
-import { Button } from "@/chip/button/button/button";
-import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import type { Card, CardSet, Document, Folder } from "@/types";
 

@@ -1,9 +1,9 @@
 import React, { useCallback, useState } from "react";
-import { Sigma } from "@/chip/icons";
-import { MathEditorDialog } from "@/chip/panel/dialog.desktop/Dialog.MathEditor";
+import { Sigma } from "@web-renderer/chip/icons";
+import { MathEditorDialog } from "@web-renderer/chip/panel/dialog.desktop/Dialog.MathEditor";
+import { cn } from "@web-renderer/lib/utils";
 import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { MathBlockPreviewPane } from "@/components/card/blocks/math/MathBlockPreviewPane";
-import { cn } from "@/lib/utils";
 import type { MathBlockData } from "@/types";
 
 interface MathBlockProps {
@@ -122,4 +122,5 @@ const MathBlockInner: React.FC<MathBlockProps> = ({
 
 const MathBlock = React.memo(MathBlockInner, areMathBlockPropsEqual);
 MathBlock.displayName = "MathBlock";
+
 export { MathBlock };

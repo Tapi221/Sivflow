@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@web-renderer/lib/utils";
 
 type FadeSkeletonProps = {
   ariaLabel?: string;

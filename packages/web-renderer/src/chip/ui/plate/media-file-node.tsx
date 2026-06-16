@@ -1,0 +1,44 @@
+"use client";
+
+import * as React from "react";
+import { useMediaState } from "@platejs/media/react";
+import { ResizableProvider } from "@platejs/resizable";
+import { Caption, CaptionTextarea } from "@web-renderer/chip/ui/plate/caption";
+import { cn } from "@web-renderer/lib/utils";
+import { FileUp } from "lucide-react";
+import type { TFileElement } from "platejs";
+import type { PlateElementProps } from "platejs/react";
+import { PlateElement, useReadOnly, withHOC } from "platejs/react";
+
+const FileElement = withHOC(ResizableProvider, (props: PlateElementProps<TFileElement>) => {
+  const readOnly = useReadOnly();
+  const { name, unsafeUrl } = useMediaState();
+  return (
+    <PlateElement className="my-px rounded-sm" {...props}>
+      <a
+        className={cn("group relative m-0 flex cursor-pointer items-center rounded px-0.5 py-0.5 hover:bg-muted")}
+        contentEditable={false}
+        download={name}
+        href={unsafeUrl}
+        rel="noopener noreferrer"
+        role="button"
+        target="_blank"
+      >
+        <div className={cn("flex items-center gap-1 p-1")}>
+          <FileUp className="size-5" />
+          {name}
+        </div>
+        <Caption align="left">
+          <CaptionTextarea
+            className="text-left"
+            readOnly={readOnly}
+            placeholder="Write a caption..."
+          />
+        </Caption>
+      </a>
+      {props.children}
+    </PlateElement>
+  );
+});
+
+export { FileElement };

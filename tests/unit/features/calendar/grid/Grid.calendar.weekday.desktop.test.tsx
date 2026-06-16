@@ -27,11 +27,11 @@ const ALL_DAY_ACCENT_COLOR = "#34c759";
 const NEXT_DAY_PREVIEW_HEIGHT_STYLE = "calc(0.5 * var(--calendar-hour-row-height))";
 const FULL_WIDTH_EVENT_STYLE = "calc(100% - 2px)";
 
-vi.mock("@/chip/eventchip/EventChip.weekday", () => ({
+vi.mock("@web-renderer/chip/eventchip/EventChip.weekday", () => ({
   CalendarEventChipWeekday: ({ event, compact = false }: MockCalendarEventChipWeekdayProps) => <div data-accent-color={event.accentColor} data-compact={String(compact)} data-ends-at={event.endsAt.toISOString()} data-testid="weekday-event-chip">{event.title}</div>,
 }));
 
-vi.mock("@/chip/toolchip/HoverEventTooltip", () => ({
+vi.mock("@web-renderer/chip/toolchip/HoverEventTooltip", () => ({
   HoverEventTooltip: ({ children }: { children: ReactNode; }) => children,
 }));
 

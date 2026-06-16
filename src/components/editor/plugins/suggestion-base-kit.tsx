@@ -1,7 +1,7 @@
 import { BaseSuggestionPlugin } from "@platejs/suggestion";
+import { SuggestionLeafStatic, VoidRemoveSuggestionOverlayStatic } from "@web-renderer/chip/ui/plate/suggestion-node-static";
 import type { TElement, TInlineSuggestionData, TSuggestionData, TSuggestionText } from "platejs";
 import { KEYS, TextApi } from "platejs";
-import { SuggestionLeafStatic, VoidRemoveSuggestionOverlayStatic } from "@/chip/ui/plate/suggestion-node-static";
 
 const INLINE_SUGGESTION_TARGET_PLUGINS = [
   KEYS.date,

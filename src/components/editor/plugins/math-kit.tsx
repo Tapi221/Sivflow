@@ -2,7 +2,7 @@
 
 import { MathRules } from "@platejs/math";
 import { EquationPlugin, InlineEquationPlugin } from "@platejs/math/react";
-import { EquationElement, InlineEquationElement } from "@/chip/ui/plate/equation-node";
+import { EquationElement, InlineEquationElement } from "@web-renderer/chip/ui/plate/equation-node";
 
 const MathKit = [
   InlineEquationPlugin.configure({

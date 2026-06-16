@@ -1,7 +1,7 @@
 import { useState } from "react";
+import { Button } from "@web-renderer/chip/button/button/button";
+import { LoadingSpinner } from "@web-renderer/components/common/LoadingSpinner";
 import { useToast } from "@web-renderer/contexts/ToastContext";
-import { Button } from "@/chip/button/button/button";
-import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { exportMfCardBytes } from "@/features/cardFile/application/exportMfCard";
 import { MfCardExportError } from "@/features/cardFile/domain/mfCard.types";
 import { downloadBytesAsMfCard } from "@/features/cardFile/infra/web/downloadMfCard";

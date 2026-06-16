@@ -2,15 +2,15 @@ import { useMemo, useState } from "react";
 import type { LocalAiSettings } from "@platform/ai/localAiSettings";
 import { getLocalAiSettings, setLocalAiSettings } from "@platform/ai/localAiSettings";
 import { testOllamaConnection } from "@platform/ai/ollamaClient";
+import { Brain, ChevronDown, Globe, Keyboard, Shield, Type, User, Volume2 } from "@web-renderer/chip/icons";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@web-renderer/chip/panel/dropdown-menu";
+import { cn } from "@web-renderer/lib/utils";
 import type { ReactNode } from "react";
-import { Brain, ChevronDown, Globe, Keyboard, Shield, Type, User, Volume2 } from "@/chip/icons";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/chip/panel/dropdown-menu";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { useUserSettings } from "@/features/settings/hooks/useUserSettings";
 import { SettingsThemeColorControl } from "@/features/settings/SettingsThemeColorControl";
 import type { StoredGoogleAccount } from "@/integration/googlecalendar-integration/gcal.multi-storage";
 import { readStoredAccounts } from "@/integration/googlecalendar-integration/gcal.multi-storage";
-import { cn } from "@/lib/utils";
 import type { UserSettings } from "@/types";
 
 type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "ai" | "hotkey";
@@ -275,7 +275,7 @@ const SettingsWorkspaceRootScreen = () => {
   const [localAiConnectionStatus, setLocalAiConnectionStatus] = useState<LocalAiConnectionStatus>("idle");
   const language = settings?.language ?? "ja";
   const copy = COPY[language];
-  const storedGoogleAccounts = useMemo(() => readStoredAccounts(), [currentUser?.uid]);
+  const storedGoogleAccounts = useMemo(() => readStoredAccounts(), []);
   const accountProfile = useMemo(() => getAccountProfile(currentUser, storedGoogleAccounts), [currentUser, storedGoogleAccounts]);
   const accountName = getAccountDisplayName(accountProfile, copy.emptyAccount);
   const weekStartDay = settings?.weekStartDay ?? "monday";

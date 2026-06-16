@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { AppRoutes } from "@web-renderer/app/routing/AppRoutes";
 import { getDevStandaloneRouteElement } from "@web-renderer/app/routing/DevRoutes";
 import { isTestBypassEnabled } from "@web-renderer/app/routing/testBypass";
+import { LoadingFallback } from "@web-renderer/components/common/LoadingFallback";
 import { LoginPage } from "@web-renderer/features/auth/LoginPage";
 import { MobileLoginPage } from "@web-renderer/features/auth/MobileLoginPage";
 import { useStartupTasks } from "@/application/startup/useStartupTasks";
-import { LoadingFallback } from "@/components/common/LoadingFallback";
 import { AccountLockedScreen } from "@/components/security/AccountLockedScreen";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Button } from "@web-renderer/chip/button/button/button";
+import { Volume2 } from "@web-renderer/chip/icons";
+import { Badge } from "@web-renderer/chip/ui/badge";
 import type { ComponentProps } from "react";
-import { Button } from "@/chip/button/button/button";
-import { Volume2 } from "@/chip/icons";
-import { Badge } from "@/chip/ui/badge";
 import { Flashcard } from "@/components/card/frame/Flashcard";
 import type { Card } from "@/types";
 import { toIsoStringOrNull } from "@/utils/toMillis";
