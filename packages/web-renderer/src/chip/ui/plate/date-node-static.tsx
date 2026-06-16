@@ -2,9 +2,13 @@ import { cn } from "@web-renderer/lib/utils";
 import type { PlateElementProps } from "platejs/react";
 import { PlateElement } from "platejs/react";
 
+
+
 type DateNodeStaticProps = PlateElementProps & {
   date?: string;
 };
+
+
 
 const DateNodeStatic = ({ className, date, children, ...props }: DateNodeStaticProps) => (
   <PlateElement className={cn("inline-flex rounded-sm bg-muted px-1 text-sm text-muted-foreground", className)} {...props}>
@@ -12,7 +16,13 @@ const DateNodeStatic = ({ className, date, children, ...props }: DateNodeStaticP
   </PlateElement>
 );
 
+
+
 const DateElementStatic = DateNodeStatic;
 
+
+
 export { DateElementStatic, DateNodeStatic };
+
+
 export type { DateNodeStaticProps };

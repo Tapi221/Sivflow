@@ -1,10 +1,16 @@
 "use client";
 
 import { getLinkAttributes } from "@platejs/link";
+
 import { cn } from "@web-renderer/lib/utils";
+
 import type { TLinkElement } from "platejs";
+
 import type { PlateElementProps } from "platejs/react";
+
 import { PlateElement } from "platejs/react";
+
+
 
 const LinkElement = (props: PlateElementProps<TLinkElement>) => {
   return (
@@ -21,5 +27,7 @@ const LinkElement = (props: PlateElementProps<TLinkElement>) => {
     </PlateElement>
   );
 };
+
+
 
 export { LinkElement };

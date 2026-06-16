@@ -1,7 +1,11 @@
 import { platform } from "@platform/index";
 import type { Notification, NotificationOptions } from "@/types/notification";
 
+
+
 type NotificationListener = (notification: Notification) => void;
+
+
 
 const createDismissedNotification = (id: string): Notification => {
   return {
@@ -112,6 +116,10 @@ class NotificationService {
 }
 ;
 
+
+
 const notificationService = new NotificationService();
+
+
 
 export { notificationService };

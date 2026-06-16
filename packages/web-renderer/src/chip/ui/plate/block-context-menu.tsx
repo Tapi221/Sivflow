@@ -1,15 +1,26 @@
 "use client";
 
 import * as React from "react";
+
 import { AIChatPlugin } from "@platejs/ai/react";
+
 import { BLOCK_CONTEXT_MENU_ID, BlockMenuPlugin, BlockSelectionPlugin } from "@platejs/selection/react";
+
 import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuItem, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from "@web-renderer/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.ContextMenu";
+
 import { useIsTouchDevice } from "@web-renderer/chip/ui/hooks/useIsTouchDevice";
+
 import { setBlockType } from "@web-renderer/components/editor/transforms";
+
 import { KEYS } from "platejs";
+
 import { useEditorPlugin, useEditorReadOnly, usePluginOption } from "platejs/react";
 
+
+
 type Value = "askAI" | null;
+
+
 
 const BlockContextMenu = ({ children }: { children: React.ReactNode }) => {
   const { api, editor } = useEditorPlugin(BlockMenuPlugin);
@@ -120,5 +131,7 @@ const BlockContextMenu = ({ children }: { children: React.ReactNode }) => {
     </ContextMenu>
   );
 };
+
+
 
 export { BlockContextMenu };

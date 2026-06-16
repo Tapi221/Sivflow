@@ -1,9 +1,16 @@
 "use client";
+
 import { AIChatPlugin } from "@platejs/ai/react";
+
 import { BlockSelectionPlugin } from "@platejs/selection/react";
+
 import { BlockSelection } from "@web-renderer/chip/ui/plate/block-selection";
+
 import { getPluginTypes, isHotkey, KEYS } from "platejs";
+
 import type { PlateElementProps } from "platejs/react";
+
+
 
 const BlockSelectionKit = [
   BlockSelectionPlugin.configure(({ editor }) => ({
@@ -24,5 +31,7 @@ const BlockSelectionKit = [
     },
   })),
 ];
+
+
 
 export { BlockSelectionKit };

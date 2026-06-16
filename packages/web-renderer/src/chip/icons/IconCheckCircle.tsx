@@ -1,9 +1,13 @@
 import { cn } from "@web-renderer/lib/utils";
 import type { SVGProps } from "react";
 
+
+
 type IconCheckCircleProps = SVGProps<SVGSVGElement> & {
   title?: string;
 };
+
+
 
 const IconCheckCircle = ({ className, title, ...props }: IconCheckCircleProps) => {
   return (
@@ -15,5 +19,7 @@ const IconCheckCircle = ({ className, title, ...props }: IconCheckCircleProps) =
     </svg>
   );
 };
+
+
 
 export { IconCheckCircle };

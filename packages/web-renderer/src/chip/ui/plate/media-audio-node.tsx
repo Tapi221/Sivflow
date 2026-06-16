@@ -1,13 +1,22 @@
 "use client";
 
 import * as React from "react";
+
 import { useMediaState } from "@platejs/media/react";
+
 import { ResizableProvider } from "@platejs/resizable";
-import { Caption, CaptionTextarea } from "@web-renderer/chip/ui/plate/caption";
+
+import { Caption, CaptionTextarea } from "./caption";
+
 import { cn } from "@web-renderer/lib/utils";
+
 import type { TAudioElement } from "platejs";
+
 import type { PlateElementProps } from "platejs/react";
+
 import { PlateElement, withHOC } from "platejs/react";
+
+
 
 const AudioElement = withHOC(ResizableProvider, (props: PlateElementProps<TAudioElement>) => {
   const { align = "center", readOnly, unsafeUrl } = useMediaState();
@@ -32,5 +41,7 @@ const AudioElement = withHOC(ResizableProvider, (props: PlateElementProps<TAudio
     </PlateElement>
   );
 });
+
+
 
 export { AudioElement };

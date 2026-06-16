@@ -3,6 +3,8 @@ import type { TImageElement } from "platejs";
 import type { SlateElementProps } from "platejs/static";
 import { SlateElement } from "platejs/static";
 
+
+
 const ImageElementStatic = (props: SlateElementProps<TImageElement>) => {
   const { element } = props;
   const caption = (element as any).caption?.[0]?.children?.[0]?.text;
@@ -20,5 +22,7 @@ const ImageElementStatic = (props: SlateElementProps<TImageElement>) => {
     </SlateElement>
   );
 };
+
+
 
 export { ImageElementStatic };

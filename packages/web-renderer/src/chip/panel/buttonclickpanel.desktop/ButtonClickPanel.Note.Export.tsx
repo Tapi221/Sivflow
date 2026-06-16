@@ -1,21 +1,38 @@
 "use client";
 
 import * as React from "react";
+
 import { exportToDocx } from "@platejs/docx-io";
+
 import { MarkdownPlugin } from "@platejs/markdown";
+
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@web-renderer/chip/panel/dropdown-menu";
+
 import { EditorStatic } from "@web-renderer/chip/ui/plate/editor-static";
+
 import { ToolbarButton } from "@web-renderer/chip/ui/plate/toolbar";
+
 import { BaseEditorKit } from "@web-renderer/components/editor/editor-base-kit";
+
 import { DocxExportKit } from "@web-renderer/components/editor/plugins/docx-export-kit";
+
 import { ArrowDownToLineIcon } from "lucide-react";
+
 import type { SlatePlugin } from "platejs";
+
 import { createSlateEditor } from "platejs";
+
 import { useEditorRef } from "platejs/react";
+
 import { serializeHtml } from "platejs/static";
 
+
+
 const siteUrl = "https://platejs.org";
+
+
 
 const ButtonClickPanelNoteExport = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
@@ -124,5 +141,7 @@ const ButtonClickPanelNoteExport = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
+
+
 
 export { ButtonClickPanelNoteExport };

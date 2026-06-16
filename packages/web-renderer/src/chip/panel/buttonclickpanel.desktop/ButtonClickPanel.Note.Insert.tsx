@@ -1,14 +1,24 @@
 "use client";
 
 import * as React from "react";
+
 import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@web-renderer/chip/panel/dropdown-menu";
+
 import { ToolbarButton, ToolbarMenuGroup } from "@web-renderer/chip/ui/plate/toolbar";
+
 import { insertBlock, insertInlineElement } from "@web-renderer/components/editor/transforms";
+
 import { AudioLines, CalendarIcon, ChevronRightIcon, Code2, Columns3Icon, FileCodeIcon, FileUp, FilmIcon, Heading1Icon, Heading2Icon, Heading3Icon, ImageIcon, Link2Icon, ListIcon, ListOrderedIcon, MinusIcon, PenToolIcon, PilcrowIcon, PlusIcon, QuoteIcon, RadicalIcon, SquareIcon, SuperscriptIcon, TableIcon, TableOfContentsIcon } from "lucide-react";
+
 import { KEYS } from "platejs";
+
 import type { PlateEditor } from "platejs/react";
+
 import { useEditorRef } from "platejs/react";
+
+
 
 type Item = {
   focusEditor?: boolean;
@@ -17,10 +27,13 @@ type Item = {
   onSelect: (editor: PlateEditor, value: string) => void;
   value: string;
 };
+
 type Group = {
   group: string;
   items: Item[];
 };
+
+
 
 const createBlockItems = (items: Omit<Item, "onSelect">[]): Item[] => items.map((item) => ({
   ...item,
@@ -28,12 +41,15 @@ const createBlockItems = (items: Omit<Item, "onSelect">[]): Item[] => items.map(
     insertBlock(editor, value);
   },
 }));
+
 const createInlineItems = (items: Omit<Item, "onSelect">[]): Item[] => items.map((item) => ({
   ...item,
   onSelect: (editor, value) => {
     insertInlineElement(editor, value);
   },
 }));
+
+
 
 const groups: Group[] = [
   {
@@ -89,6 +105,8 @@ const groups: Group[] = [
   },
 ];
 
+
+
 const ButtonClickPanelNoteInsert = (props: DropdownMenuProps) => {
   const editor = useEditorRef();
   const [open, setOpen] = React.useState(false);
@@ -121,5 +139,7 @@ const ButtonClickPanelNoteInsert = (props: DropdownMenuProps) => {
     </DropdownMenu>
   );
 };
+
+
 
 export { ButtonClickPanelNoteInsert };

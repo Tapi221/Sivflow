@@ -1,14 +1,22 @@
 "use client";
 
 import { memo } from "react";
+
 import { useAIChatEditor } from "@platejs/ai/react";
-import { EditorStatic } from "@web-renderer/chip/ui/plate/editor-static";
+
+import { EditorStatic } from "./editor-static";
+
 import { BaseEditorKit } from "@web-renderer/components/editor/editor-base-kit";
+
 import { usePlateEditor } from "platejs/react";
+
+
 
 type AIChatEditorProps = {
   content: string;
 };
+
+
 
 const AIChatEditor = memo(({ content }: AIChatEditorProps) => {
   const aiEditor = usePlateEditor({
@@ -17,7 +25,11 @@ const AIChatEditor = memo(({ content }: AIChatEditorProps) => {
   const value = useAIChatEditor(aiEditor, content);
   return <EditorStatic variant="aiChat" editor={aiEditor} value={value} />;
 });
+
 AIChatEditor.displayName = "AIChatEditor";
 
 export { AIChatEditor };
+
+
+
 export type { AIChatEditorProps };

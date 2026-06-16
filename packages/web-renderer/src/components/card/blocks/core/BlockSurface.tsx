@@ -3,6 +3,8 @@ import { RuledLayer } from "@web-renderer/components/card/frame/RuledLayer";
 import type { RuledStyleKind } from "@web-renderer/components/card/frame/ruledStyles";
 import { cn } from "@web-renderer/lib/utils";
 
+
+
 type CSSVarStyle = React.CSSProperties &
   Partial<Record<`--${string}`, string | number>>;
 type BlockSurfaceProps = {
@@ -23,6 +25,8 @@ type BlockSurfaceProps = {
   bleedX?: boolean;
   children: React.ReactNode;
 };
+
+
 
 const BlockSurface = ({ className, contentClassName, style, padTopRows = 0, padBottomRows = 0, padLeftRows = 0, padRightRows = 0, ruled = true, ruledKind = "repeat-only", ruledRowPx = 24, ruledOpacity, ruledOffsetPx = 0, ruledBottomOffsetPx = 0, background, bleedX = false, children }: BlockSurfaceProps) => {
   const topRows = padTopRows ?? 0;
@@ -72,5 +76,7 @@ const BlockSurface = ({ className, contentClassName, style, padTopRows = 0, padB
     </div>
   );
 };
+
+
 
 export { BlockSurface };

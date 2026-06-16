@@ -2,10 +2,12 @@ import { useCallback, useEffect, useState } from "react";
 import type { CalendarTimetableColorKey, CalendarTimetableCourse, CalendarTimetableCourseDraft, CalendarTimetablePeriod, CalendarTimetableSlot, CalendarTimetableVisibleDayCount, CalendarTimetableWeekdayIndex } from "@core/domain/calendar/timetable/timetable.types";
 import { TAG_COLOR_KEYS } from "@shared/design-tokens/color/Color.Tag";
 import { getTagColorStyle } from "@web-renderer/chip/budge/tag/tagColor";
-import { DialogDesktopPanel } from "@web-renderer/chip/panel/dialog.desktop/DialogDesktopPanel";
+import { DialogDesktopPanel } from "./DialogDesktopPanel";
 import { cn } from "@web-renderer/lib/utils";
 import type { ComponentType, SVGProps } from "react";
 import * as stratisIcons from "stratis-ui-icons";
+
+
 
 type CalendarTimetableCourseEditorDialogProps = {
   course: CalendarTimetableCourse | null;
@@ -19,6 +21,8 @@ type CalendarTimetableCourseEditorDialogProps = {
 };
 type StratisIconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
+
+
 const STRATIS_ICON_COMPONENTS = stratisIcons as unknown as Record<string, StratisIconComponent | undefined>;
 const STRATIS_CHECK_ICON_NAMES = ["StratisCheckIcon", "StratisCheck01Icon", "StratisCheckCircleContainedIcon"] as const;
 const StratisCheckIcon = STRATIS_CHECK_ICON_NAMES.map((name) => STRATIS_ICON_COMPONENTS[name]).find((Icon): Icon is StratisIconComponent => Boolean(Icon)) ?? null;
@@ -26,9 +30,13 @@ const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] a
 const DEFAULT_COURSE_COLOR_KEY: CalendarTimetableColorKey = "blue";
 const EMPTY_SLOT_LIST: CalendarTimetableSlot[] = [];
 
+
+
 const isSameTimetableSlot = (left: CalendarTimetableSlot, right: CalendarTimetableSlot): boolean => left.dayIndex === right.dayIndex && left.periodId === right.periodId;
 const createEditorSlots = (course: CalendarTimetableCourse | null, initialSlot: CalendarTimetableSlot | null): CalendarTimetableSlot[] => course?.slots ?? (initialSlot ? [initialSlot] : EMPTY_SLOT_LIST);
 const getTimetableEntryStyle = (colorKey: CalendarTimetableColorKey) => getTagColorStyle(colorKey);
+
+
 
 const CalendarTimetableCourseEditorDialog = ({ course, semesterId, initialSlot, periods, visibleDayCount, onSave, onDelete, onClose }: CalendarTimetableCourseEditorDialogProps) => {
   const [title, setTitle] = useState(course?.title ?? "");
@@ -96,5 +104,7 @@ const CalendarTimetableCourseEditorDialog = ({ course, semesterId, initialSlot, 
     </DialogDesktopPanel>
   );
 };
+
+
 
 export { CalendarTimetableCourseEditorDialog };

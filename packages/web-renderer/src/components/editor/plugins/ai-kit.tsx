@@ -1,15 +1,26 @@
 "use client";
 
 import { BaseAIPlugin, withAIBatch } from "@platejs/ai";
+
 import { AIChatPlugin, AIPlugin, applyAISuggestions, getInsertPreviewStart, streamInsertChunk, useChatChunk } from "@platejs/ai/react";
+
 import { ButtonClickPanelNoteAiDialog, ButtonClickPanelNoteAiLoadingBar } from "@web-renderer/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.AiDialog";
+
 import { AIAnchorElement, AILeaf } from "@web-renderer/chip/ui/plate/ai-node";
-import { CursorOverlayKit } from "@web-renderer/components/editor/plugins/cursor-overlay-kit";
-import { MarkdownKit } from "@web-renderer/components/editor/plugins/markdown-kit";
+
+import { CursorOverlayKit } from "./cursor-overlay-kit";
+
+import { MarkdownKit } from "./markdown-kit";
+
 import { useChat } from "@web-renderer/components/editor/use-chat";
+
 import cloneDeep from "lodash/cloneDeep.js";
+
 import { ElementApi, getPluginType, KEYS, PathApi } from "platejs";
+
 import { usePluginOption } from "platejs/react";
+
+
 
 const aiChatPlugin = AIChatPlugin.extend({
   options: {
@@ -84,11 +95,14 @@ const aiChatPlugin = AIChatPlugin.extend({
     });
   },
 });
+
 const AIKit = [
   ...CursorOverlayKit,
   ...MarkdownKit,
   AIPlugin.withComponent(AILeaf),
   aiChatPlugin,
 ];
+
+
 
 export { AIKit, aiChatPlugin };

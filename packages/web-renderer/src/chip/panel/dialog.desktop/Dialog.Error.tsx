@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { AlertCircle, ChevronDown } from "@web-renderer/chip/icons/icons";
-import { DialogDesktopPanel } from "@web-renderer/chip/panel/dialog.desktop/DialogDesktopPanel";
+import { DialogDesktopPanel } from "./DialogDesktopPanel";
 import type { Notification } from "@/types/notification";
+
+
 
 type ErrorDialogProps = {
   notification: Notification;
   onDismiss?: () => void;
 };
+
+
 
 const ErrorDialog = ({ notification, onDismiss }: ErrorDialogProps) => {
   const [showDetails, setShowDetails] = useState(false);
@@ -65,5 +69,7 @@ const ErrorDialog = ({ notification, onDismiss }: ErrorDialogProps) => {
     </DialogDesktopPanel>
   );
 };
+
+
 
 export { ErrorDialog };

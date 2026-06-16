@@ -1,8 +1,12 @@
 "use client";
 
 import { cn } from "@web-renderer/lib/utils";
+
 import type { PlateElementProps, PlateTextProps } from "platejs/react";
+
 import { PlateElement, PlateText } from "platejs/react";
+
+
 
 const AILeaf = (props: PlateTextProps) => {
   return (
@@ -12,6 +16,7 @@ const AILeaf = (props: PlateTextProps) => {
     />
   );
 };
+
 const AIAnchorElement = (props: PlateElementProps) => {
   return (
     <PlateElement {...props}>
@@ -19,5 +24,7 @@ const AIAnchorElement = (props: PlateElementProps) => {
     </PlateElement>
   );
 };
+
+
 
 export { AILeaf, AIAnchorElement };

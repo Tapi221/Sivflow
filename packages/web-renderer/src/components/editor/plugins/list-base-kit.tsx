@@ -1,7 +1,9 @@
 import { BaseListPlugin, isOrderedList } from "@platejs/list";
 import { BlockListStatic } from "@web-renderer/chip/ui/plate/block-list-static";
-import { BaseIndentKit } from "@web-renderer/components/editor/plugins/indent-base-kit";
+import { BaseIndentKit } from "./indent-base-kit";
 import { KEYS } from "platejs";
+
+
 
 const BaseListKit = [
   ...BaseIndentKit,
@@ -35,5 +37,7 @@ const BaseListKit = [
     },
   }),
 ];
+
+
 
 export { BaseListKit };

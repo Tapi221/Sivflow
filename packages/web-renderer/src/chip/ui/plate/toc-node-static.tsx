@@ -7,6 +7,8 @@ import { NodeApi } from "platejs";
 import type { SlateElementProps } from "platejs/static";
 import { SlateElement } from "platejs/static";
 
+
+
 const headingItemVariants = cva(
   "block h-auto w-full cursor-pointer truncate rounded-none px-0.5 py-1.5 text-left font-medium text-muted-foreground underline decoration-[0.5px] underline-offset-4 hover:bg-accent hover:text-muted-foreground",
   {
@@ -27,6 +29,8 @@ const headingDepth: Record<string, number> = {
   h5: 5,
   h6: 6,
 };
+
+
 
 const getHeadingList = (editor?: SlateEditor) => {
   if (!editor) {
@@ -55,6 +59,8 @@ const getHeadingList = (editor?: SlateEditor) => {
   });
   return headingList;
 };
+
+
 
 const TocElementStatic = (props: SlateElementProps) => {
   const { editor } = props;
@@ -128,5 +134,7 @@ const TocElementDocx = (props: SlateElementProps) => {
     </SlateElement>
   );
 };
+
+
 
 export { TocElementDocx, TocElementStatic };

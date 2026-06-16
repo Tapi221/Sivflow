@@ -1,10 +1,16 @@
 "use client";
 
 import { insertInlineEquation } from "@platejs/math";
-import type { ToolbarButtonProps } from "@web-renderer/chip/ui/plate/toolbar";
-import { ToolbarButton } from "@web-renderer/chip/ui/plate/toolbar";
+
+import type { ToolbarButtonProps } from "./toolbar";
+
+import { ToolbarButton } from "./toolbar";
+
 import { RadicalIcon } from "lucide-react";
+
 import { useEditorRef } from "platejs/react";
+
+
 
 const InlineEquationToolbarButton = (props: ToolbarButtonProps) => {
   const editor = useEditorRef();
@@ -20,5 +26,7 @@ const InlineEquationToolbarButton = (props: ToolbarButtonProps) => {
     </ToolbarButton>
   );
 };
+
+
 
 export { InlineEquationToolbarButton };

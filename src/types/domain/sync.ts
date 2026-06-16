@@ -1,10 +1,12 @@
 import type { Timestamp } from "firebase/firestore";
-import type { AssetRecord } from "@/types/domain/assets";
-import type { Card } from "@/types/domain/card";
-import type { CardSet } from "@/types/domain/cardSet";
-import type { Document } from "@/types/domain/document";
-import type { Folder } from "@/types/domain/folder";
-import type { UserSettings } from "@/types/domain/user";
+import type { AssetRecord } from "./assets";
+import type { Card } from "./card";
+import type { CardSet } from "./cardSet";
+import type { Document } from "./document";
+import type { Folder } from "./folder";
+import type { UserSettings } from "./user";
+
+
 
 /**
  * 同期システムの型定義
@@ -153,7 +155,13 @@ interface SyncResult {
   errors: string[];
 }
 
+
+
 const DEFAULT_SYNC_SETTINGS: SyncSettings = { id: "default", autoSync: true, intervalMinutes: 5, wifiOnly: false, autoCleanupDevices: true };
 
+
+
 export { DEFAULT_SYNC_SETTINGS };
+
+
 export type { SyncMetadata, SyncError, SyncHistory, SyncSettings, SyncEntity, SyncOperationType, SyncDirection, SyncPriority, SyncQueueStatus, AssetSyncPayload, ProjectMapSyncPayload, TagSyncPayload, SyncPayloadByEntity, SyncDeletePayload, SyncQueueItem, SyncConflict, DiffResult, SyncResult };

@@ -3,12 +3,16 @@ import { SuggestionLeafStatic, VoidRemoveSuggestionOverlayStatic } from "@web-re
 import type { TElement, TInlineSuggestionData, TSuggestionData, TSuggestionText } from "platejs";
 import { KEYS, TextApi } from "platejs";
 
+
+
 const INLINE_SUGGESTION_TARGET_PLUGINS = [
   KEYS.date,
   KEYS.inlineEquation,
   KEYS.link,
   KEYS.mention,
 ];
+
+
 
 const getInlineSuggestionData = (editor: any, element: TElement) => {
   const suggestionApi = editor.getApi(BaseSuggestionPlugin).suggestion;
@@ -29,6 +33,8 @@ const getInlineSuggestionData = (editor: any, element: TElement) => {
     }
   }
 };
+
+
 
 const BaseSuggestionKit = [
   BaseSuggestionPlugin.configure({
@@ -60,5 +66,7 @@ const BaseSuggestionKit = [
     },
   }),
 ];
+
+
 
 export { BaseSuggestionKit };

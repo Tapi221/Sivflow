@@ -1,12 +1,20 @@
 "use client";
 
 import { BlockquoteRules, HeadingRules, HorizontalRuleRules } from "@platejs/basic-nodes";
+
 import { BlockquotePlugin, H1Plugin, H2Plugin, H3Plugin, H4Plugin, H5Plugin, H6Plugin, HorizontalRulePlugin } from "@platejs/basic-nodes/react";
+
 import { BlockquoteElement } from "@web-renderer/chip/ui/plate/blockquote-node";
+
 import { H1Element, H2Element, H3Element, H4Element, H5Element, H6Element } from "@web-renderer/chip/ui/plate/heading-node";
+
 import { HrElement } from "@web-renderer/chip/ui/plate/hr-node";
+
 import { ParagraphElement } from "@web-renderer/chip/ui/plate/paragraph-node";
+
 import { ParagraphPlugin } from "platejs/react";
+
+
 
 const BasicBlocksKit = [
   ParagraphPlugin.configure({
@@ -61,5 +69,7 @@ const BasicBlocksKit = [
     node: { component: HrElement },
   }),
 ];
+
+
 
 export { BasicBlocksKit };

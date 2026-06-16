@@ -2,6 +2,8 @@ import { cn } from "@web-renderer/lib/utils";
 import type { SlateElementProps } from "platejs/static";
 import { SlateElement } from "platejs/static";
 
+
+
 const HrElementStatic = (props: SlateElementProps) => {
   return (
     <SlateElement {...props}>
@@ -12,5 +14,7 @@ const HrElementStatic = (props: SlateElementProps) => {
     </SlateElement>
   );
 };
+
+
 
 export { HrElementStatic };

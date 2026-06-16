@@ -5,6 +5,8 @@ import type { RenderStaticNodeWrapper, TListElement } from "platejs";
 import type { SlateRenderElementProps } from "platejs/static";
 import type * as React from "react";
 
+
+
 type ListConfig = Record<
   string,
   {
@@ -13,7 +15,11 @@ type ListConfig = Record<
   }
 >;
 
+
+
 const TODO_CHECKBOX_CLASSNAME = "peer pointer-events-none absolute top-1 -left-6 size-4 shrink-0 rounded border border-input bg-background shadow-xs ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 data-[state=checked]:border-neutral-900 data-[state=checked]:bg-neutral-900 data-[state=checked]:text-neutral-50 dark:bg-input/30 dark:data-[state=checked]:border-neutral-100 dark:data-[state=checked]:bg-neutral-100 dark:data-[state=checked]:text-neutral-900";
+
+
 
 const TodoMarkerStatic = (props: SlateRenderElementProps) => {
   const checked = props.element.checked as boolean;
@@ -44,12 +50,16 @@ const TodoLiStatic = (props: SlateRenderElementProps) => {
   );
 };
 
+
+
 const LIST_CONFIG: ListConfig = {
   todo: {
     Li: TodoLiStatic,
     Marker: TodoMarkerStatic,
   },
 };
+
+
 
 const List = (props: SlateRenderElementProps) => {
   const { indent, listStart, listStyleType } = props.element as TListElement & {
@@ -74,5 +84,7 @@ const BlockListStatic: RenderStaticNodeWrapper = (props) => {
   if (!isOrderedList(props.element)) return;
   return (nextProps) => <List {...nextProps} />;
 };
+
+
 
 export { BlockListStatic };

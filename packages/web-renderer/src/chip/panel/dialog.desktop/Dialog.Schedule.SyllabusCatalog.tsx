@@ -3,8 +3,10 @@ import { isValidCalendarTimetableWeekdayIndex } from "@core/domain/calendar/time
 import type { CalendarTimetableColorKey, CalendarTimetableInstitution, CalendarTimetableInstitutionKind, CalendarTimetablePeriod, CalendarTimetableSyllabusCourse, CalendarTimetableSyllabusCourseDisplay, CalendarTimetableSyllabusCourseDraft, CalendarTimetableWeekdayIndex } from "@core/domain/calendar/timetable/timetable.types";
 import { TAG_COLOR_KEYS } from "@shared/design-tokens/color/Color.Tag";
 import { getTagColorStyle } from "@web-renderer/chip/budge/tag/tagColor";
-import { DialogDesktopPanel } from "@web-renderer/chip/panel/dialog.desktop/DialogDesktopPanel";
+import { DialogDesktopPanel } from "./DialogDesktopPanel";
 import { cn } from "@web-renderer/lib/utils";
+
+
 
 type ScheduleSyllabusCatalogDialogProps = {
   activeSemesterId: string;
@@ -21,10 +23,14 @@ type SyllabusSlotDraft = {
   periodLabel: string;
 };
 
+
+
 const TIMETABLE_DAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] as const;
 const DEFAULT_COURSE_COLOR_KEY: CalendarTimetableColorKey = "blue";
 const DEFAULT_INSTITUTION_KIND: CalendarTimetableInstitutionKind = "university";
 const EMPTY_SLOT_DRAFTS: SyllabusSlotDraft[] = [];
+
+
 
 const createInitialSlotDraft = (periods: CalendarTimetablePeriod[]): SyllabusSlotDraft[] => periods[0] ? [{ dayIndex: 0, periodLabel: periods[0].label }] : EMPTY_SLOT_DRAFTS;
 const formatSyllabusCourseSlots = (course: CalendarTimetableSyllabusCourse): string => course.slots.map((slot) => `${TIMETABLE_DAY_LABELS[slot.dayIndex]}${slot.periodLabel}`).join(" / ");
@@ -32,6 +38,8 @@ const getSyllabusCourseSlotsLabel = (course: CalendarTimetableSyllabusCourse): s
   const slotsLabel = formatSyllabusCourseSlots(course);
   return slotsLabel.trim() === "" ? "時限未設定" : slotsLabel;
 };
+
+
 
 const ScheduleSyllabusCatalogDialog = ({ activeSemesterId, institutions, periods, syllabusCourses, onSearch, onSaveSyllabusCourse, onAddCourseFromSyllabus, onClose }: ScheduleSyllabusCatalogDialogProps) => {
   const [query, setQuery] = useState("");
@@ -126,5 +134,7 @@ const ScheduleSyllabusCatalogDialog = ({ activeSemesterId, institutions, periods
     </DialogDesktopPanel>
   );
 };
+
+
 
 export { ScheduleSyllabusCatalogDialog };

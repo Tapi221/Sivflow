@@ -1,6 +1,8 @@
 import { Timestamp } from "firebase/firestore";
-import type { UploadedFile } from "@/types/domain/assets";
-import type { BaseEntity } from "@/types/domain/base";
+import type { UploadedFile } from "./assets";
+import type { BaseEntity } from "./base";
+
+
 
 type Folder = BaseEntity & { parentFolderId?: string | null;
   folderId: string;

@@ -1,13 +1,19 @@
 import "@/features/settings/Dialog.Settings.css";
-import { DialogDesktopPanel } from "@web-renderer/chip/panel/dialog.desktop/DialogDesktopPanel";
+import { DialogDesktopPanel } from "./DialogDesktopPanel";
 import { SettingsWorkspaceRootScreen } from "@/features/settings/SettingsWorkspaceRootScreen";
+
+
 
 type SettingsWorkspaceDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
+
+
 const SettingsWorkspaceRootContent = SettingsWorkspaceRootScreen;
+
+
 
 const SettingsWorkspaceDialog = ({ open, onOpenChange }: SettingsWorkspaceDialogProps) => {
   const handleClose = () => onOpenChange(false);
@@ -19,5 +25,9 @@ const SettingsWorkspaceDialog = ({ open, onOpenChange }: SettingsWorkspaceDialog
   );
 };
 
+
+
 export { SettingsWorkspaceDialog };
+
+
 export type { SettingsWorkspaceDialogProps };

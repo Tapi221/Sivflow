@@ -8,6 +8,8 @@ type WorkspaceTabColor = {
   closeIconHoverBackground: string;
 };
 
+
+
 const WORKSPACE_TAB_COLOR = {
   activeSurface: "#fff",
   inactiveText: "#b7b7b7",
@@ -18,5 +20,9 @@ const WORKSPACE_TAB_COLOR = {
   closeIconHoverBackground: "rgba(0, 0, 0, 0.05)",
 } as const satisfies WorkspaceTabColor;
 
+
+
 export { WORKSPACE_TAB_COLOR };
+
+
 export type { WorkspaceTabColor };

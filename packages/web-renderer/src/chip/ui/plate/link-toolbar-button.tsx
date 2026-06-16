@@ -1,9 +1,13 @@
 import { useLinkToolbarButton, useLinkToolbarButtonState } from "@platejs/link/react";
-import type { ToolbarButtonProps } from "@web-renderer/chip/ui/plate/toolbar";
-import { ToolbarButton } from "@web-renderer/chip/ui/plate/toolbar";
+import type { ToolbarButtonProps } from "./toolbar";
+import { ToolbarButton } from "./toolbar";
 import { LinkIcon } from "lucide-react";
 
+
+
 type LinkToolbarButtonProps = ToolbarButtonProps;
+
+
 
 const LinkToolbarButton = ({ children, ...props }: LinkToolbarButtonProps) => {
   const state = useLinkToolbarButtonState();
@@ -15,5 +19,9 @@ const LinkToolbarButton = ({ children, ...props }: LinkToolbarButtonProps) => {
   );
 };
 
+
+
 export { LinkToolbarButton };
+
+
 export type { LinkToolbarButtonProps };

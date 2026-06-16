@@ -1,28 +1,49 @@
 "use client";
 
 import * as React from "react";
+
 import { getDraftCommentKey } from "@platejs/comment";
+
 import { CommentPlugin } from "@platejs/comment/react";
+
 import { getTransientSuggestionKey } from "@platejs/suggestion";
+
 import { SuggestionPlugin } from "@platejs/suggestion/react";
+
 import { Button } from "@web-renderer/chip/button/button/button";
-import { BlockSuggestionCard, isResolvedSuggestion } from "@web-renderer/chip/ui/plate/block-suggestion";
-import { Comment, CommentCreateForm } from "@web-renderer/chip/ui/plate/comment";
+
+import { BlockSuggestionCard, isResolvedSuggestion } from "./block-suggestion";
+
+import { Comment, CommentCreateForm } from "./comment";
+
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "@web-renderer/chip/ui/popover";
+
 import { commentPlugin } from "@web-renderer/components/editor/plugins/comment-kit";
+
 import type { TDiscussion } from "@web-renderer/components/editor/plugins/discussion-kit";
+
 import { suggestionPlugin } from "@web-renderer/components/editor/plugins/suggestion-kit";
+
 import { MessageSquareTextIcon, MessagesSquareIcon, PencilLineIcon } from "lucide-react";
+
 import type { AnyPluginConfig, NodeEntry } from "platejs";
+
 import { PathApi } from "platejs";
+
 import type { PlateElementProps, RenderNodeWrapper } from "platejs/react";
+
 import { useEditorRef, usePluginOption } from "platejs/react";
+
 import { useBlockDiscussionItems } from "@/lib/block-discussion-index";
+
+
 
 type BlockCommentProps = {
   discussion: TDiscussion;
   isLast: boolean;
 };
+
+
 
 const BlockComment = ({ discussion, isLast }: BlockCommentProps) => {
   const [editingId, setEditingId] = React.useState<string | null>(null);
@@ -47,6 +68,7 @@ const BlockComment = ({ discussion, isLast }: BlockCommentProps) => {
     </>
   );
 };
+
 const BlockCommentContent = ({ children, element }: PlateElementProps) => {
   const editor = useEditorRef();
   const commentsApi = editor.getApi(CommentPlugin).comment;
@@ -179,6 +201,9 @@ const BlockCommentContent = ({ children, element }: PlateElementProps) => {
     </div>
   );
 };
+
 const BlockDiscussion: RenderNodeWrapper<AnyPluginConfig> = (_props) => (props) => <BlockCommentContent {...props} />;
+
+
 
 export { BlockDiscussion };

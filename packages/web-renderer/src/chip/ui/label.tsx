@@ -3,9 +3,13 @@ import * as LabelPrimitive from "@radix-ui/react-label";
 import { cn } from "@web-renderer/lib/utils";
 import { cva } from "class-variance-authority";
 
+
+
 const labelVariants = cva(
   "ds-label text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
 );
+
+
 
 const Label = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
@@ -17,6 +21,8 @@ const Label = React.forwardRef<
     {...props}
   />
 ));
+
+
 
 Label.displayName = LabelPrimitive.Root.displayName;
 

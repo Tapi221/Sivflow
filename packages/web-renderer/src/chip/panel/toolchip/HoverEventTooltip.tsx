@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { emitHoverTooltipOpen, subscribeHoverTooltipOpen } from "@web-renderer/chip/panel/toolchip/hoverTooltipEvents";
+import { emitHoverTooltipOpen, subscribeHoverTooltipOpen } from "./hoverTooltipEvents";
 import { cn } from "@web-renderer/lib/utils";
 import type { ReactNode } from "react";
+
+
 
 type TooltipSide = "top" | "bottom";
 type TooltipPosition = {
@@ -29,6 +31,8 @@ type HoverEventTooltipProps = {
   onEdit?: () => void;
 };
 
+
+
 const TOOLTIP_SURFACE_CLASS_NAME = "relative flex max-w-64 flex-col gap-1.5 overflow-visible rounded-2xl border border-white/70 bg-white/85 px-3 py-2.5 text-slate-600 shadow-xl backdrop-blur-2xl";
 const TOOLTIP_BACKDROP_FADE_CLASS_NAME = "pointer-events-none absolute -inset-x-7 -inset-y-5 rounded-3xl bg-white/70 blur-md";
 const TOOLTIP_EDIT_BUTTON_CLASS_NAME = "-mr-1 -mt-1 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-transparent text-slate-600 opacity-70 transition hover:bg-white/65 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300/40";
@@ -37,6 +41,8 @@ const TOOLTIP_VIEWPORT_MARGIN = 12;
 const TOOLTIP_BOUNDARY_GAP = 8;
 const TOOLTIP_ARROW_MARGIN = 18;
 const TOOLTIP_CLOSE_DELAY_MS = 120;
+
+
 
 const clampNumber = (value: number, min: number, max: number) => {
   if (max < min) return min;
@@ -120,6 +126,8 @@ const getArrowClassName = (side: TooltipSide) => {
   if (side === "bottom") return "-top-1 -translate-x-1/2 border-l border-t";
   return "-bottom-1 -translate-x-1/2 border-b border-r";
 };
+
+
 
 const HoverEventTooltip = ({
   title,
@@ -290,6 +298,8 @@ const HoverEventTooltip = ({
     </>
   );
 };
+
+
 
 HoverEventTooltip.displayName = "HoverEventTooltip";
 

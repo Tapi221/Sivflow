@@ -9,7 +9,11 @@ import { useStartupTasks } from "@/application/startup/useStartupTasks";
 import { AccountLockedScreen } from "@/components/security/AccountLockedScreen";
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 
+
+
 const MOBILE_LOGIN_VIEWPORT_MAX_WIDTH = 767;
+
+
 
 const getIsMobileLoginViewport = (): boolean => {
   if (typeof window === "undefined") {
@@ -39,6 +43,8 @@ const useIsMobileLoginViewport = (): boolean => {
   return isMobileLoginViewport;
 };
 
+
+
 const AppContent = () => {
   const { currentUser, loading } = useAuthSession();
   const isMobileLoginViewport = useIsMobileLoginViewport();
@@ -66,5 +72,7 @@ const AppContent = () => {
     </>
   );
 };
+
+
 
 export { AppContent };

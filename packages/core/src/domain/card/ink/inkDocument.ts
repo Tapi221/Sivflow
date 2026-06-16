@@ -23,9 +23,13 @@ type InkDocument = {
   deletedStrokeIds?: string[];
 };
 
+
+
 const INK_DOCUMENT_VERSION = 2;
 const INK_PAPER_W = 1000;
 const INK_PAPER_H = 1414;
+
+
 
 const isFiniteNumber = (value: unknown): value is number =>
   typeof value === "number" && Number.isFinite(value);
@@ -113,5 +117,9 @@ const normalizeInkDocument = (value: unknown): InkDocument => {
 };
 const cloneInkDocument = (doc: InkDocument): InkDocument => ({ version: doc.version, updatedAt: doc.updatedAt, deletedStrokeIds: doc.deletedStrokeIds ? [...doc.deletedStrokeIds] : undefined, strokes: doc.strokes.map((stroke) => ({ ...stroke, points: stroke.points.map((point) => ({ ...point })) })) });
 
+
+
 export { INK_DOCUMENT_VERSION, INK_PAPER_W, INK_PAPER_H, createEmptyInkDocument, normalizeInkDocument, cloneInkDocument };
+
+
 export type { InkSide, InkTool, InkEditTool, InkPoint, InkStroke, InkDocument };

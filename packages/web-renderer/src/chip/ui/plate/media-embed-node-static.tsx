@@ -3,7 +3,11 @@ import type { TMediaEmbedElement } from "platejs";
 import type { SlateElementProps } from "platejs/static";
 import { SlateElement } from "platejs/static";
 
+
+
 type MediaEmbedNodeStaticProps = SlateElementProps<TMediaEmbedElement>;
+
+
 
 const MediaEmbedNodeStatic = ({ children, className, element, ...props }: MediaEmbedNodeStaticProps) => {
   return (
@@ -13,7 +17,13 @@ const MediaEmbedNodeStatic = ({ children, className, element, ...props }: MediaE
   );
 };
 
+
+
 const MediaEmbedElementStatic = MediaEmbedNodeStatic;
 
+
+
 export { MediaEmbedElementStatic, MediaEmbedNodeStatic };
+
+
 export type { MediaEmbedNodeStaticProps };

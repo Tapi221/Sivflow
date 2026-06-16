@@ -1,19 +1,34 @@
 "use client";
 
 import * as React from "react";
+
 import { acceptSuggestion, rejectSuggestion } from "@platejs/suggestion";
+
 import { SuggestionPlugin } from "@platejs/suggestion/react";
+
 import { Button } from "@web-renderer/chip/button/button/button";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@web-renderer/chip/ui/avatar";
-import { Comment, CommentCreateForm, formatCommentDate } from "@web-renderer/chip/ui/plate/comment";
+
+import { Comment, CommentCreateForm, formatCommentDate } from "./comment";
+
 import type { TDiscussion } from "@web-renderer/components/editor/plugins/discussion-kit";
+
 import { discussionPlugin } from "@web-renderer/components/editor/plugins/discussion-kit";
+
 import { CheckIcon, XIcon } from "lucide-react";
+
 import { useEditorPlugin, usePluginOption } from "platejs/react";
+
 import type { ResolvedSuggestion } from "@/lib/block-discussion-index";
+
 import { BLOCK_SUGGESTION_TOKEN } from "@/lib/block-discussion-index";
 
+
+
 const isResolvedSuggestion = (suggestion: ResolvedSuggestion | TDiscussion): suggestion is ResolvedSuggestion => "suggestionId" in suggestion;
+
+
 
 const BlockSuggestionCard = ({
   idx,
@@ -169,5 +184,7 @@ const BlockSuggestionCard = ({
     </div>
   );
 };
+
+
 
 export { BlockSuggestionCard, isResolvedSuggestion };
