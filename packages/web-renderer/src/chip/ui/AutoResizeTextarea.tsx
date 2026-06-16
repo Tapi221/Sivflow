@@ -52,16 +52,8 @@ const AutoResizeTextarea = ({
   }, [value, maxHeight, minHeight, lineHeight, allowInternalScroll]);
   useLayoutEffect(() => {
     if (!allowInternalScroll && textareaRef.current) {
-      textareaRef.current.style.setProperty(
-        "overflow-y",
-        "hidden",
-        "important",
-      );
-      textareaRef.current.style.setProperty(
-        "overflow-x",
-        "hidden",
-        "important",
-      );
+      textareaRef.current.style.setProperty("overflow-y", "hidden", "important");
+      textareaRef.current.style.setProperty("overflow-x", "hidden", "important");
     }
   }, [allowInternalScroll]);
   return (
@@ -90,4 +82,3 @@ const AutoResizeTextarea = ({
 
 export { AutoResizeTextarea };
 export type { AutoResizeTextareaProps };
-export default AutoResizeTextarea;
