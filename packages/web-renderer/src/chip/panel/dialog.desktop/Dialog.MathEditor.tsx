@@ -1,5 +1,5 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@web-renderer/chip/panel/dialog.desktop/dialog/dialog";
-import AutoResizeTextarea from "@web-renderer/chip/ui/AutoResizeTextarea";
+import { AutoResizeTextarea } from "@web-renderer/chip/ui/AutoResizeTextarea";
 import { cn } from "@web-renderer/lib/utils";
 import type { CSSProperties, FC } from "react";
 import { MathRenderer } from "@/components/card/blocks/math/MathBlockContent";
