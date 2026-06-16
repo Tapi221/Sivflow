@@ -5,11 +5,11 @@ import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
 import { DropdownMenuItemIndicator } from "@radix-ui/react-dropdown-menu";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioItem, DropdownMenuTrigger } from "@web-renderer/chip/panel/dropdown-menu";
 import { ToolbarButton, ToolbarMenuGroup } from "@web-renderer/chip/ui/plate/toolbar";
+import { getBlockType, setBlockType } from "@web-renderer/components/editor/transforms";
 import { CheckIcon, ChevronRightIcon, Code2, Columns3Icon, FileCodeIcon, Heading1Icon, Heading2Icon, Heading3Icon, Heading4Icon, Heading5Icon, Heading6Icon, ListIcon, ListOrderedIcon, PilcrowIcon, QuoteIcon, SquareIcon } from "lucide-react";
 import type { TElement } from "platejs";
 import { KEYS } from "platejs";
 import { useEditorRef, useSelectionFragmentProp } from "platejs/react";
-import { getBlockType, setBlockType } from "@/components/editor/transforms";
 
 const TURN_INTO_MENU_ITEM_CLASS_NAME = "dropdown-menu__radio-item--check-end min-w-44";
 const turnIntoItems = [

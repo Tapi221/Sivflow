@@ -5,9 +5,9 @@ import { AIChatPlugin } from "@platejs/ai/react";
 import { BLOCK_CONTEXT_MENU_ID, BlockMenuPlugin, BlockSelectionPlugin } from "@platejs/selection/react";
 import { ContextMenu, ContextMenuContent, ContextMenuGroup, ContextMenuItem, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuTrigger } from "@web-renderer/chip/panel/buttonclickpanel.desktop/ButtonClickPanel.Note.ContextMenu";
 import { useIsTouchDevice } from "@web-renderer/chip/ui/hooks/useIsTouchDevice";
+import { setBlockType } from "@web-renderer/components/editor/transforms";
 import { KEYS } from "platejs";
 import { useEditorPlugin, useEditorReadOnly, usePluginOption } from "platejs/react";
-import { setBlockType } from "@/components/editor/transforms";
 
 type Value = "askAI" | null;
 

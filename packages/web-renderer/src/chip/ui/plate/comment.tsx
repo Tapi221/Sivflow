@@ -8,15 +8,15 @@ import { ButtonClickPanelNoteComment } from "@web-renderer/chip/panel/buttonclic
 import { Avatar, AvatarFallback, AvatarImage } from "@web-renderer/chip/ui/avatar";
 import { CommentMoreDropdown } from "@web-renderer/chip/ui/plate/comment-more-dropdown";
 import { Editor, EditorContainer } from "@web-renderer/chip/ui/plate/editor";
+import { BasicMarksKit } from "@web-renderer/components/editor/plugins/basic-marks-kit";
+import type { TDiscussion } from "@web-renderer/components/editor/plugins/discussion-kit";
+import { discussionPlugin } from "@web-renderer/components/editor/plugins/discussion-kit";
 import { differenceInDays, differenceInHours, differenceInMinutes, format } from "date-fns";
 import { CheckIcon, XIcon } from "lucide-react";
 import type { NodeEntry, TCommentText, Value } from "platejs";
 import { KEYS, nanoid, NodeApi } from "platejs";
 import type { CreatePlateEditorOptions } from "platejs/react";
 import { Plate, useEditorPlugin, useEditorRef, usePlateEditor, usePluginOption } from "platejs/react";
-import { BasicMarksKit } from "@/components/editor/plugins/basic-marks-kit";
-import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
-import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 
 type TComment = {
   id: string;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildRuledTextareaStyle } from "@/components/card/blocks/core/ruledTextareaStyle";
+import { buildRuledTextareaStyle } from "@web-renderer/components/card/blocks/core/ruledTextareaStyle";
 
 describe("buildRuledTextareaStyle", () => {
   it("builds textarea ruled lines from the shared ruled style generator", () => {

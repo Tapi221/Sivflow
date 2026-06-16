@@ -3,10 +3,10 @@
 import * as React from "react";
 import { Button } from "@web-renderer/chip/button/button/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@web-renderer/chip/panel/dropdown-menu";
+import { discussionPlugin } from "@web-renderer/components/editor/plugins/discussion-kit";
 import { cn } from "@web-renderer/lib/utils";
 import { MoreHorizontalIcon, PencilIcon, TrashIcon } from "lucide-react";
 import { useEditorRef } from "platejs/react";
-import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 
 type CommentMoreDropdownComment = {
   id: string;

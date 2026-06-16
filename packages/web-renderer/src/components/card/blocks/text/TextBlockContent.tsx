@@ -1,9 +1,9 @@
 import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/Typography";
 import AutoResizeTextarea from "@web-renderer/chip/ui/AutoResizeTextarea";
-import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
-import { buildRuledTextareaStyle } from "@/components/card/blocks/core/ruledTextareaStyle";
-import { TEXT_BLOCK_CONTENT_CLASS, TEXT_BLOCK_LINE_HEIGHT_PX } from "@/components/card/blocks/text/textBlockStyles";
-import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@/components/card/common/cardSetViewZoom";
+import { BlockSurface } from "@web-renderer/components/card/blocks/core/BlockSurface";
+import { buildRuledTextareaStyle } from "@web-renderer/components/card/blocks/core/ruledTextareaStyle";
+import { TEXT_BLOCK_CONTENT_CLASS, TEXT_BLOCK_LINE_HEIGHT_PX } from "@web-renderer/components/card/blocks/text/textBlockStyles";
+import { buildTypographyStyle, mergeStyles, scaleTypographyNumberPx } from "@web-renderer/components/card/common/cardSetViewZoom";
 
 type TextBlockContentProps =
   | {

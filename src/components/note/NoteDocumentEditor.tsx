@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { PlateEditor } from "@web-renderer/components/editor/plate-editor";
 import { nanoid } from "nanoid";
 import type { Value } from "platejs";
-import { PlateEditor } from "@/components/editor/plate-editor";
 import type { Note, NoteBlockContent } from "@/types";
 
 type NoteDocumentEditorProps = {

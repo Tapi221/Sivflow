@@ -1,7 +1,7 @@
 import React from "react";
+import { buildTypographyStyle, mergeStyles, normalizeCardSetViewZoom } from "@web-renderer/components/card/common/cardSetViewZoom";
 import { cn } from "@web-renderer/lib/utils";
 import { BlockInset } from "@/components/card/blocks/editor/BlockInset";
-import { buildTypographyStyle, mergeStyles, normalizeCardSetViewZoom } from "@/components/card/common/cardSetViewZoom";
 
 type DivDataAttributes = {
   [key: `data-${string}`]: string | number | boolean | undefined;

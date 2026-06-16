@@ -1,6 +1,6 @@
 import React from "react";
+import { BlockSurface } from "@web-renderer/components/card/blocks/core/BlockSurface";
 import { cn } from "@web-renderer/lib/utils";
-import { BlockSurface } from "@/components/card/blocks/core/BlockSurface";
 import { MarkdownBlockDisplay } from "@/components/card/blocks/markdown/MarkdownBlockDisplay";
 
 interface MarkdownBlockViewProps {

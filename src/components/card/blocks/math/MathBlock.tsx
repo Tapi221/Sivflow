@@ -1,8 +1,8 @@
 import React, { useCallback, useState } from "react";
 import { Sigma } from "@web-renderer/chip/icons";
 import { MathEditorDialog } from "@web-renderer/chip/panel/dialog.desktop/Dialog.MathEditor";
+import { BlockWrapper } from "@web-renderer/components/card/blocks/core/BlockWrapper";
 import { cn } from "@web-renderer/lib/utils";
-import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { MathBlockPreviewPane } from "@/components/card/blocks/math/MathBlockPreviewPane";
 import type { MathBlockData } from "@/types";
 

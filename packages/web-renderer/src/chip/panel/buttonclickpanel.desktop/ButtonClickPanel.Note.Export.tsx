@@ -7,13 +7,13 @@ import type { DropdownMenuProps } from "@radix-ui/react-dropdown-menu";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@web-renderer/chip/panel/dropdown-menu";
 import { EditorStatic } from "@web-renderer/chip/ui/plate/editor-static";
 import { ToolbarButton } from "@web-renderer/chip/ui/plate/toolbar";
+import { BaseEditorKit } from "@web-renderer/components/editor/editor-base-kit";
+import { DocxExportKit } from "@web-renderer/components/editor/plugins/docx-export-kit";
 import { ArrowDownToLineIcon } from "lucide-react";
 import type { SlatePlugin } from "platejs";
 import { createSlateEditor } from "platejs";
 import { useEditorRef } from "platejs/react";
 import { serializeHtml } from "platejs/static";
-import { BaseEditorKit } from "@/components/editor/editor-base-kit";
-import { DocxExportKit } from "@/components/editor/plugins/docx-export-kit";
 
 const siteUrl = "https://platejs.org";
 

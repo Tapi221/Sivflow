@@ -1,7 +1,7 @@
 import React from "react";
 import { NotebookPen } from "@web-renderer/chip/icons";
+import { BlockWrapper } from "@web-renderer/components/card/blocks/core/BlockWrapper";
 import { cn } from "@web-renderer/lib/utils";
-import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import type { MarkdownReplaceBlock, MarkdownReplaceFocus } from "@/components/card/blocks/markdown/MarkdownBlockContent";
 import { MarkdownBlockContent } from "@/components/card/blocks/markdown/MarkdownBlockContent";
 

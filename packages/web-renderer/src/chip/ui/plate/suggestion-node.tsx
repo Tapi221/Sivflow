@@ -3,6 +3,7 @@
 import * as React from "react";
 import { SuggestionPlugin } from "@platejs/suggestion/react";
 import { voidRemoveSuggestionOverlayVariants } from "@web-renderer/chip/ui/plate/suggestion-node-static";
+import type { SuggestionConfig } from "@web-renderer/components/editor/plugins/suggestion-kit";
 import { cn } from "@web-renderer/lib/utils";
 import { cva } from "class-variance-authority";
 import { CornerDownLeftIcon } from "lucide-react";
@@ -10,7 +11,6 @@ import type { AnyPluginConfig, TElement, TSuggestionData, TSuggestionText, WithR
 import { KEYS } from "platejs";
 import type { PlateEditor, PlateLeafProps, RenderNodeWrapper } from "platejs/react";
 import { PlateLeaf, useEditorPlugin, usePluginOption } from "platejs/react";
-import type { SuggestionConfig } from "@/components/editor/plugins/suggestion-kit";
 
 type BlockSuggestionWrapperOptions = {
   elementType?: string;
