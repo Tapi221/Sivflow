@@ -88,6 +88,7 @@ export { useStore };
   it("export 文の前に空行を1行入れる", () => {
     const formatted = runFormatterOnSource(`const Component = () => null;
 Component.displayName = "Component";
+
 export { Component };
 `);
 

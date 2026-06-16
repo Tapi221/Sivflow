@@ -1,8 +1,8 @@
 import React from "react";
 import { Code } from "@web-renderer/chip/icons";
+import { BlockWrapper } from "@web-renderer/components/card/blocks/core/BlockWrapper";
 import { cn } from "@web-renderer/lib/utils";
 import { CodeBlockEditor } from "@/components/card/blocks/code/CodeBlockEditor";
-import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import type { CodeBlockData } from "@/types/core/code-block";
 
 interface CodeBlockItemProps {

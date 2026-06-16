@@ -9,14 +9,14 @@ import { Button } from "@web-renderer/chip/button/button/button";
 import { BlockSuggestionCard, isResolvedSuggestion } from "@web-renderer/chip/ui/plate/block-suggestion";
 import { Comment, CommentCreateForm } from "@web-renderer/chip/ui/plate/comment";
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "@web-renderer/chip/ui/popover";
+import { commentPlugin } from "@web-renderer/components/editor/plugins/comment-kit";
+import type { TDiscussion } from "@web-renderer/components/editor/plugins/discussion-kit";
+import { suggestionPlugin } from "@web-renderer/components/editor/plugins/suggestion-kit";
 import { MessageSquareTextIcon, MessagesSquareIcon, PencilLineIcon } from "lucide-react";
 import type { AnyPluginConfig, NodeEntry } from "platejs";
 import { PathApi } from "platejs";
 import type { PlateElementProps, RenderNodeWrapper } from "platejs/react";
 import { useEditorRef, usePluginOption } from "platejs/react";
-import { commentPlugin } from "@/components/editor/plugins/comment-kit";
-import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
-import { suggestionPlugin } from "@/components/editor/plugins/suggestion-kit";
 import { useBlockDiscussionItems } from "@/lib/block-discussion-index";
 
 type BlockCommentProps = {

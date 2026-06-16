@@ -6,10 +6,10 @@ import { SuggestionPlugin } from "@platejs/suggestion/react";
 import { Button } from "@web-renderer/chip/button/button/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@web-renderer/chip/ui/avatar";
 import { Comment, CommentCreateForm, formatCommentDate } from "@web-renderer/chip/ui/plate/comment";
+import type { TDiscussion } from "@web-renderer/components/editor/plugins/discussion-kit";
+import { discussionPlugin } from "@web-renderer/components/editor/plugins/discussion-kit";
 import { CheckIcon, XIcon } from "lucide-react";
 import { useEditorPlugin, usePluginOption } from "platejs/react";
-import type { TDiscussion } from "@/components/editor/plugins/discussion-kit";
-import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 import type { ResolvedSuggestion } from "@/lib/block-discussion-index";
 import { BLOCK_SUGGESTION_TOKEN } from "@/lib/block-discussion-index";
 

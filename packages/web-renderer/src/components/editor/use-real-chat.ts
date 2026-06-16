@@ -8,13 +8,13 @@ import { AIChatPlugin, aiCommentToRange, applyTableCellSuggestion } from "@plate
 import { getCommentKey, getTransientCommentKey } from "@platejs/comment";
 import { deserializeMd } from "@platejs/markdown";
 import { BlockSelectionPlugin } from "@platejs/selection/react";
+import { discussionPlugin } from "@web-renderer/components/editor/plugins/discussion-kit";
 import type { UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
 import type { TNode } from "platejs";
 import { KEYS, nanoid, NodeApi, TextApi } from "platejs";
 import type { PlateEditor } from "platejs/react";
 import { useEditorRef } from "platejs/react";
-import { discussionPlugin } from "@/components/editor/plugins/discussion-kit";
 
 type ToolName = "comment" | "edit" | "generate";
 type TComment = {

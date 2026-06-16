@@ -1,7 +1,7 @@
 import React from "react";
+import type { RuledStyleKind } from "@web-renderer/components/card/frame/ruledStyles";
+import { getRuledStyle } from "@web-renderer/components/card/frame/ruledStyles";
 import { cn } from "@web-renderer/lib/utils";
-import type { RuledStyleKind } from "@/components/card/frame/ruledStyles";
-import { getRuledStyle } from "@/components/card/frame/ruledStyles";
 
 type CSSVars = React.CSSProperties & Record<`--${string}`, string>;
 type RuledLayerProps = {

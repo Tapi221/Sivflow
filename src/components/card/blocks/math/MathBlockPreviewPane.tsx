@@ -1,7 +1,7 @@
 import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/Typography";
+import { buildTypographyStyle, mergeStyles } from "@web-renderer/components/card/common/cardSetViewZoom";
 import { cn } from "@web-renderer/lib/utils";
 import { MathRenderer } from "@/components/card/blocks/math/MathBlockContent";
-import { buildTypographyStyle, mergeStyles } from "@/components/card/common/cardSetViewZoom";
 
 type MathBlockPreviewPaneProps = {
   latex: string;

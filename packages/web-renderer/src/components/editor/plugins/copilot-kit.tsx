@@ -4,8 +4,8 @@ import { faker } from "@faker-js/faker";
 import { CopilotPlugin } from "@platejs/ai/react";
 import { serializeMd, stripMarkdown } from "@platejs/markdown";
 import { GhostText } from "@web-renderer/chip/ui/plate/ghost-text";
+import { MarkdownKit } from "@web-renderer/components/editor/plugins/markdown-kit";
 import type { TElement } from "platejs";
-import { MarkdownKit } from "@/components/editor/plugins/markdown-kit";
 
 const COPILOT_SYSTEM_PROMPT = `You are an advanced AI writing assistant, similar to VSCode Copilot but for general text. Your task is to predict and generate the next part of the text based on the given context.
   

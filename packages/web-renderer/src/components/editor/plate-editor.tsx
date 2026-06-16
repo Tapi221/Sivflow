@@ -1,9 +1,9 @@
 "use client";
 
 import { Editor, EditorContainer } from "@web-renderer/chip/ui/plate/editor";
+import { EditorKit } from "@web-renderer/components/editor/editor-kit";
 import type { Value } from "platejs";
 import { Plate, usePlateEditor } from "platejs/react";
-import { EditorKit } from "@/components/editor/editor-kit";
 
 type PlateEditorProps = {
   initialValue: Value;

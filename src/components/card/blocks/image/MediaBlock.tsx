@@ -1,7 +1,7 @@
 import React from "react";
 import { Image as ImageIcon } from "@web-renderer/chip/icons";
+import { BlockWrapper } from "@web-renderer/components/card/blocks/core/BlockWrapper";
 import { cn } from "@web-renderer/lib/utils";
-import { BlockWrapper } from "@/components/card/blocks/core/BlockWrapper";
 import { ImageBlockContent } from "@/components/card/blocks/image/ImageBlockContent";
 import { ImageBlockShell } from "@/components/card/blocks/image/ImageBlockShell";
 import type { UploadedImage } from "@/types/domain/assets";

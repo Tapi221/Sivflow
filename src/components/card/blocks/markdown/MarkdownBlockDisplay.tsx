@@ -1,9 +1,9 @@
 import { TYPOGRAPHY_FONT_SIZE_PX } from "@shared/design-tokens/Typography";
+import { TEXT_BLOCK_CONTENT_CLASS } from "@web-renderer/components/card/blocks/text/textBlockStyles";
+import { buildTypographyStyle, mergeStyles } from "@web-renderer/components/card/common/cardSetViewZoom";
 import { cn } from "@web-renderer/lib/utils";
 import type { CSSProperties, KeyboardEventHandler, MouseEventHandler } from "react";
 import { MarkdownBlockView } from "@/components/card/blocks/markdown/MarkdownBlockPreview";
-import { TEXT_BLOCK_CONTENT_CLASS } from "@/components/card/blocks/text/textBlockStyles";
-import { buildTypographyStyle, mergeStyles } from "@/components/card/common/cardSetViewZoom";
 
 type MarkdownBlockDisplayProps = {
   markdown: string;

@@ -1,5 +1,5 @@
+import { getRuledStyle } from "@web-renderer/components/card/frame/ruledStyles";
 import type { CSSProperties } from "react";
-import { getRuledStyle } from "@/components/card/frame/ruledStyles";
 
 type RuledTextareaStyleParams = Readonly<{
   rowPx: number;

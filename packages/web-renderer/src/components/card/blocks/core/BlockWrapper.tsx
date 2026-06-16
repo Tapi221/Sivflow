@@ -1,7 +1,7 @@
 import React from "react";
 import { Copy, GripVertical, Trash2 } from "@web-renderer/chip/icons/icons";
+import { BlockFrame } from "@web-renderer/components/card/blocks/core/BlockFrame";
 import { cn } from "@web-renderer/lib/utils";
-import { BlockFrame } from "@/components/card/blocks/core/BlockFrame";
 
 interface BlockWrapperProps {
   children: React.ReactNode;

@@ -3,8 +3,8 @@
 import { BulletedListRules, isOrderedList, OrderedListRules, TaskListRules } from "@platejs/list";
 import { ListPlugin } from "@platejs/list/react";
 import { BlockList } from "@web-renderer/chip/ui/plate/block-list";
+import { IndentKit } from "@web-renderer/components/editor/plugins/indent-kit";
 import { KEYS } from "platejs";
-import { IndentKit } from "@/components/editor/plugins/indent-kit";
 
 const ListKit = [
   ...IndentKit,

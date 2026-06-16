@@ -1,7 +1,7 @@
 import React from "react";
+import { RuledLayer } from "@web-renderer/components/card/frame/RuledLayer";
+import type { RuledStyleKind } from "@web-renderer/components/card/frame/ruledStyles";
 import { cn } from "@web-renderer/lib/utils";
-import { RuledLayer } from "@/components/card/frame/RuledLayer";
-import type { RuledStyleKind } from "@/components/card/frame/ruledStyles";
 
 type CSSVarStyle = React.CSSProperties &
   Partial<Record<`--${string}`, string | number>>;

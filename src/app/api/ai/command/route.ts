@@ -1,4 +1,5 @@
 import { createGateway } from "@ai-sdk/gateway";
+import { BaseEditorKit } from "@web-renderer/components/editor/editor-base-kit";
 import type { LanguageModel, UIMessageStreamWriter } from "ai";
 import { createUIMessageStream, createUIMessageStreamResponse, generateText, Output, streamText, tool } from "ai";
 import type { SlateEditor, Value } from "platejs";
@@ -6,7 +7,6 @@ import { createSlateEditor, nanoid } from "platejs";
 import { z } from "zod";
 import { buildEditTableMultiCellPrompt, getChooseToolPrompt, getCommentPrompt, getEditPrompt, getGeneratePrompt } from "@/app/api/ai/command/prompt";
 import type { ChatMessage, ToolName } from "@/app/api/ai/command/types";
-import { BaseEditorKit } from "@/components/editor/editor-base-kit";
 import { markdownJoinerTransform } from "@/lib/markdown-joiner-transform";
 
 type CommandContext = {

@@ -7,4 +7,4 @@ const App = () => (
   </AppProviders>
 );
 
-export default App;
+export { App };
