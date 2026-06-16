@@ -265,7 +265,7 @@ export default defineConfig(({ command }) => ({
   build: {
     outDir: resolveFromRoot(distOutputPath),
     emptyOutDir: false,
-    sourcemap: false,
+    sourcemap: true,
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       onwarn(warning, warn) {
