@@ -4,6 +4,8 @@ import { nanoid } from "nanoid";
 import type { Value } from "platejs";
 import type { Note, NoteBlockContent } from "@/types";
 
+
+
 type NoteDocumentEditorProps = {
   note: Note;
   onChange: (changes: Pick<Note, "content" | "contentText" | "contentVersion" | "editor">) => void | Promise<void>;
@@ -23,12 +25,16 @@ type PlateChangePayload = unknown[] | {
   value?: unknown;
 };
 
+
+
 const EMPTY_NOTE_TITLE_LABEL = "無題";
 const NOTE_SAVE_DEBOUNCE_MS = 500;
 const NOTE_CONTENT_VERSION = 2;
 const NOTE_EDITOR_SHELL_CLASS_NAME = "h-full min-h-0 w-full bg-white text-zinc-900";
 const NOTE_EDITOR_CONTENT_CLASS_NAME = "mx-auto flex h-full min-h-0 w-full max-w-5xl flex-col px-6 py-10 sm:px-8 lg:px-10";
 const NOTE_TITLE_CLASS_NAME = "mx-auto mb-7 w-full max-w-3xl truncate px-6 text-3xl font-semibold leading-tight tracking-tight text-zinc-900 sm:px-16";
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === "object" && !Array.isArray(value);
 const isPlateTextNode = (value: unknown): value is PlateTextNode => isRecord(value) && typeof value.text === "string";
@@ -67,6 +73,8 @@ const getChangeValue = (change: PlateChangePayload): unknown[] | null => {
   if (isRecord(change) && Array.isArray(change.value)) return change.value;
   return null;
 };
+
+
 
 const NoteDocumentEditor = ({ note, onChange }: NoteDocumentEditorProps) => {
   const initialValue = useMemo(() => toInitialValue(note.content), [note.content]);
@@ -108,5 +116,7 @@ const NoteDocumentEditor = ({ note, onChange }: NoteDocumentEditorProps) => {
     </div>
   );
 };
+
+
 
 export { NoteDocumentEditor };

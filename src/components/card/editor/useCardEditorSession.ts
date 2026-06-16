@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { SetStateAction } from "react";
-import type { PersistOperation, PersistResult } from "@/components/card/editor/cardEditorSessionCore";
-import { AUTOSAVE_DELAY_MS, buildCardPatchForToggle, buildDraftFromCard, buildSavePayload, createPanelCard, draftSignature, extractCreatedCardId, hasMeaningfulDraft, NEW_SENTINEL, snapshotDraft, toDateOrNull } from "@/components/card/editor/cardEditorSessionCore";
-import type { EditorDraft } from "@/components/card/editor/cardEditorUtils";
-import { makeNewDraft, normalizeSelectedCardId, shouldAutoOpenEditorForCard } from "@/components/card/editor/cardEditorUtils";
+import type { PersistOperation, PersistResult } from "./cardEditorSessionCore";
+import { AUTOSAVE_DELAY_MS, buildCardPatchForToggle, buildDraftFromCard, buildSavePayload, createPanelCard, draftSignature, extractCreatedCardId, hasMeaningfulDraft, NEW_SENTINEL, snapshotDraft, toDateOrNull } from "./cardEditorSessionCore";
+import type { EditorDraft } from "./cardEditorUtils";
+import { makeNewDraft, normalizeSelectedCardId, shouldAutoOpenEditorForCard } from "./cardEditorUtils";
 import { useCardEntity } from "@/components/card/hooks/useCardEntity";
 import type { Card, CardPatch } from "@/types/domain/card";
+
+
 
 type CreateCardPayload = CardPatch & {
   folderId: string;
@@ -41,6 +43,8 @@ type FlushDraftOptions = {
   exitEditing?: boolean;
   showSuccessToast?: boolean;
 };
+
+
 
 const useCardEditorSession = ({ selectedCardId, selectedCardSnapshot = null, resolveCardFromEntity = true, folderId, cardSetId, autoEdit, updateCard, createCard, addTag, tagById, toastSuccess, toastError, onCardUpdated, onSelectCardId, resetDialogs }: UseCardEditorSessionParams) => {
   const [localSelectedCardId, setLocalSelectedCardId] = useState<string | null>(null);
@@ -709,5 +713,7 @@ const useCardEditorSession = ({ selectedCardId, selectedCardSnapshot = null, res
     panelCard,
   };
 };
+
+
 
 export { useCardEditorSession };

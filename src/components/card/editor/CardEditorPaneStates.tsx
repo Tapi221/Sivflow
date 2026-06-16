@@ -2,10 +2,14 @@ import { Button } from "@web-renderer/chip/button/button/button";
 import { Plus } from "@web-renderer/chip/icons";
 import { LoadingSpinner } from "@web-renderer/components/common/LoadingSpinner";
 
+
+
 type NewCardIdleStateProps = {
   onStartEditing: () => void;
   onCancel: () => void;
 };
+
+
 
 const NewCardIdleState = ({
   onStartEditing,
@@ -43,5 +47,7 @@ const NewCardIdleState = ({
 const CardEditorLoadingState = () => {
   return <LoadingSpinner className="h-full min-h-96 text-slate-400" label="カードを読み込み中" />;
 };
+
+
 
 export { CardEditorLoadingState, NewCardIdleState };

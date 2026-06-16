@@ -1,11 +1,13 @@
 import { Fragment } from "react";
 import { cn } from "@web-renderer/lib/utils";
 import type { HTMLAttributes, ReactNode, Ref } from "react";
-import { shouldRenderInterBlockSeparator } from "@/components/card/blocks/core/blockDisplayPolicy";
-import { BlockSeparator } from "@/components/card/blocks/core/BlockSeparator";
+import { shouldRenderInterBlockSeparator } from "./blockDisplayPolicy";
+import { BlockSeparator } from "./BlockSeparator";
 import { getNormalizedGridOffsetRows, getNormalizedRowOffset, getRowOffsetStyle, isGridOffsetType, isRowPositionableType } from "@/components/card/frame/rowOffset";
 import { CARD_ROW_PX } from "@/domain/card/cardGeometry.constants";
 import type { CardBlock } from "@/types/domain/card";
+
+
 
 type BlockListRowMeta = {
   index: number;
@@ -30,6 +32,8 @@ interface BlockListProps {
   ) => HTMLAttributes<HTMLDivElement> | undefined;
   renderBlock: (block: CardBlock, meta: BlockListRowMeta) => ReactNode;
 }
+
+
 
 const BlockList = ({ blocks, className, rowClassName, getRowRef, getRowContainerProps, renderBlock }: BlockListProps) => {
   return (<div className={cn("w-full max-w-full", className)}> {blocks.map((block, index) => {
@@ -102,5 +106,9 @@ const BlockList = ({ blocks, className, rowClassName, getRowRef, getRowContainer
   );
 };
 
+
+
 export { BlockList };
+
+
 export type { BlockListRowMeta };

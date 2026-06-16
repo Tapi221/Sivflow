@@ -8,8 +8,12 @@ import { useServerStoredGoogleAccountBootstrap } from "@/integration/googlecalen
 import { useGoogleTaskLists } from "@/integration/googletask-integration/useGoogleTaskLists";
 import { useGoogleTasks } from "@/integration/googletask-integration/useGoogleTasks";
 
+
+
 const RECURRENCE_REFRESH_FUTURE_DAYS = 366;
 const GOOGLE_CALENDAR_EVENT_FALLBACK_ACCENT_COLOR = SCHEDULE_EVENT_COLOR.fallbackAccent;
+
+
 
 const resolveExternalEventId = (accountId: string, calendarId: string, eventId: string): string => {
   const accountPrefix = `${accountId}:${calendarId}:`;
@@ -195,5 +199,9 @@ const useGoogleCalendarLayer = () => {
   };
 };
 
+
+
 export { useGoogleCalendarLayer };
+
+
 export type { GoogleAccountEntry };

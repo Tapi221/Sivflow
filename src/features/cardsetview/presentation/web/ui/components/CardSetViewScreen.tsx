@@ -3,22 +3,28 @@ import type { JSX } from "react";
 import { CardWorkspaceShell } from "@/components/card/shell/CardWorkspaceShell";
 import { overlayGlassPillClassName } from "@/components/card/shell/overlaySurfaceClassNames";
 import { useCardSetViewScreenController } from "@/features/cardsetview/presentation/web/hooks/useCardSetViewScreenController";
-import type { CardSetViewContentProps } from "@/features/cardsetview/presentation/web/ui/components/cardSetViewContentProps";
-import { CardSetViewDesktopContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewDesktopContent";
-import { CardSetViewMobileContent } from "@/features/cardsetview/presentation/web/ui/components/CardSetViewMobileContent";
-import { CardViewCompactToolbar } from "@/features/cardsetview/presentation/web/ui/components/CardViewCompactToolbar";
+import type { CardSetViewContentProps } from "./cardSetViewContentProps";
+import { CardSetViewDesktopContent } from "./CardSetViewDesktopContent";
+import { CardSetViewMobileContent } from "./CardSetViewMobileContent";
+import { CardViewCompactToolbar } from "./CardViewCompactToolbar";
 import type { PresentationTarget } from "@/platform/presentation/getPresentationTarget";
 import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
+
+
 
 type CardSetViewScreenProps = {
   cardSetId?: string | null;
 };
 
+
+
 const CARD_SET_VIEW_CONTENT_COMPONENTS = {
   desktop: CardSetViewDesktopContent,
   mobile: CardSetViewMobileContent,
 } satisfies Record<PresentationTarget, (props: CardSetViewContentProps) => JSX.Element>;
+
+
 
 const CardSetViewScreen = ({ cardSetId: controlledCardSetId = null }: CardSetViewScreenProps) => {
   const controller = useCardSetViewScreenController({ cardSetId: controlledCardSetId });
@@ -76,5 +82,7 @@ const CardSetViewScreen = ({ cardSetId: controlledCardSetId = null }: CardSetVie
     </CardWorkspaceShell>
   );
 };
+
+
 
 export { CardSetViewScreen };

@@ -4,7 +4,11 @@ import { toArrayOr, toBoolOr, toFiniteNumber, toOptionalString, toStringOr } fro
 import { makeFallbackId } from "@/utils/fallbackId";
 import { asRecord, pick } from "@/utils/records";
 
+
+
 type NotePdf = NonNullable<Folder["notePdfs"]>[number];
+
+
 
 const isNotePdf = (value: unknown): value is NotePdf => {
   const record = asRecord(value);
@@ -94,5 +98,7 @@ const normalizeFolderWithSilent = (raw: unknown) => {
 
   return normalizeFolder(normalizedInput);
 };
+
+
 
 export { normalizeFolder, normalizeFolderWithSilent };

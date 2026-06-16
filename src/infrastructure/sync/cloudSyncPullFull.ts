@@ -1,6 +1,8 @@
-import { lookupCloudSyncEntityById } from "@/infrastructure/sync/cloudSyncEntityLookup";
-import { requireCloudSyncFirestore } from "@/infrastructure/sync/cloudSyncFirestoreRefs";
+import { lookupCloudSyncEntityById } from "./cloudSyncEntityLookup";
+import { requireCloudSyncFirestore } from "./cloudSyncFirestoreRefs";
 import type { SyncChange } from "@/services/interfaces/ISyncService";
+
+
 
 const pullCloudSyncFull = async (userId: string, entityIds: string[]): Promise<SyncChange[]> => {
   const results: SyncChange[] = [];
@@ -15,5 +17,7 @@ const pullCloudSyncFull = async (userId: string, entityIds: string[]): Promise<S
 
   return results;
 };
+
+
 
 export { pullCloudSyncFull };

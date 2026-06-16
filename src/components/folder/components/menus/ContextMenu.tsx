@@ -2,7 +2,9 @@ import { Fragment, useMemo, useRef } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@web-renderer/chip/panel/dropdown-menu";
 import { cn } from "@web-renderer/lib/utils";
 import type { ComponentProps, ReactNode } from "react";
-import type { MenuAction } from "@/components/folder/components/menus/menuActions";
+import type { MenuAction } from "./menuActions";
+
+
 
 type ContextMenuVariant = "default" | "compact" | "create" | "toolbar";
 type ContextMenuAnchorPoint = {
@@ -20,16 +22,22 @@ interface ContextMenuProps {
   variant?: ContextMenuVariant;
 }
 
+
+
 const CONTEXT_MENU_COLLISION_PADDING_PX = 8;
 const CONTEXT_MENU_VARIANT_CLASS_NAMES: Record<ContextMenuVariant, string> = {
-  default: "min-w-[168px]",
-  compact: "min-w-[144px]",
-  create: "min-w-[190px]",
-  toolbar: "min-w-[168px]",
+  default: "min-w-40",
+  compact: "min-w-36",
+  create: "min-w-48",
+  toolbar: "min-w-40",
 };
+
+
 
 const isVisibleMenuAction = (action: MenuAction) => action.hidden !== true;
 const getContextMenuVariantClassName = (variant: ContextMenuVariant) => CONTEXT_MENU_VARIANT_CLASS_NAMES[variant];
+
+
 
 const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions, className, variant = "default" }: ContextMenuProps) => {
   const suppressCloseAutoFocusRef = useRef(false);
@@ -99,5 +107,9 @@ const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions, class
   );
 };
 
+
+
 export { ContextMenu };
+
+
 export type { ContextMenuVariant };

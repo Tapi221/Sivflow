@@ -1,14 +1,20 @@
 import type { JsonFileExportPort } from "@/application/ports/JsonFileExportPort";
-import { createCreateSnapshotUseCase } from "@/application/snapshot/CreateSnapshot";
+import { createCreateSnapshotUseCase } from "./CreateSnapshot";
 import { localGenerationCounterStore } from "@/infrastructure/browser-storage/LocalGenerationCounterStore";
+
+
 
 interface ExportSnapshotDependencies {
   fileExporter: JsonFileExportPort;
 }
 
+
+
 const createSnapshotUseCase = createCreateSnapshotUseCase({
   generationCounterStore: localGenerationCounterStore,
 });
+
+
 
 const createExportSnapshotUseCase = ({ fileExporter }: ExportSnapshotDependencies) => {
   const execute = async (userId: string, folderName?: string): Promise<void> => {
@@ -29,5 +35,9 @@ const createExportSnapshotUseCase = ({ fileExporter }: ExportSnapshotDependencie
   };
 };
 
+
+
 export { createExportSnapshotUseCase };
+
+
 export type { ExportSnapshotDependencies };

@@ -2,8 +2,10 @@ import { auth } from "@platform/firebase/client";
 import type { QueueItem } from "@/application/usecases/persistentOfflineQueueModels";
 import { makeAssetRecord, toAssetLikeRecord } from "@/application/usecases/persistentOfflineQueueModels";
 import { getLocalDb } from "@/infrastructure/localdb/client";
-import { cleanupQueuedAssetSyncItems } from "@/infrastructure/offlineQueue/effects/cleanupQueuedAssetSyncItems";
+import { cleanupQueuedAssetSyncItems } from "./cleanupQueuedAssetSyncItems";
 import type { UploadedImage } from "@/types";
+
+
 
 const handleQueuedAssetUploadSuccess = async (item: QueueItem, updatedImage: UploadedImage): Promise<void> => {
   const localDb = await getLocalDb();
@@ -42,5 +44,7 @@ const handleQueuedAssetUploadSuccess = async (item: QueueItem, updatedImage: Upl
     });
   }
 };
+
+
 
 export { handleQueuedAssetUploadSuccess };

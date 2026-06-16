@@ -4,6 +4,8 @@ import { cn } from "@web-renderer/lib/utils";
 import { cardHeightPxToLayoutRows, layoutRowsToCardHeightPx, snapMinCardHeightPx } from "@/domain/card/cardGeometry.constants";
 import type { CssVars } from "@/types/style";
 
+
+
 interface CardShellProps extends React.HTMLAttributes<HTMLDivElement> {
   actions?: React.ReactNode;
   actionsTopLeft?: React.ReactNode;
@@ -21,6 +23,8 @@ interface CardShellProps extends React.HTMLAttributes<HTMLDivElement> {
   showResizeHandle?: boolean;
   lockHeight?: boolean;
 }
+
+
 
 const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
   (
@@ -408,6 +412,8 @@ const CardShell = React.forwardRef<HTMLDivElement, CardShellProps>(
     );
   },
 );
+
+
 
 CardShell.displayName = "CardShell";
 

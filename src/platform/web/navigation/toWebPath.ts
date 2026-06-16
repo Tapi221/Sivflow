@@ -4,7 +4,11 @@ type LegacyDestination = {
   params?: LegacyDestinationParams;
 };
 
+
+
 const SCHEDULE_PATH = "/schedule";
+
+
 
 const appendSearchParams = (path: string, params?: LegacyDestinationParams): string => {
   const searchParams = new URLSearchParams();
@@ -30,5 +34,7 @@ const createPageUrl = (page: string | LegacyDestination): string => {
 const createAppDestination = (screen: string, params?: LegacyDestinationParams): LegacyDestination => {
   return { screen, params };
 };
+
+
 
 export { toWebPath, createPageUrl, createAppDestination };

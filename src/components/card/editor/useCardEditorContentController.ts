@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo } from "react";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
-import { useCardMediaDialogs } from "@/components/card/editor/useCardMediaDialogs";
+import { useCardMediaDialogs } from "./useCardMediaDialogs";
 import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
+
+
 
 type DraftShape = {
   frontBlocks: CardBlock[];
@@ -15,6 +17,8 @@ type UseCardEditorContentControllerParams<TDraft extends DraftShape | null> = {
   allowAutoMinHeightSyncRef: MutableRefObject<boolean>;
   resetDialogsRef: MutableRefObject<() => void>;
 };
+
+
 
 const useCardEditorContentController = <TDraft extends DraftShape | null>({ draft, setDraft, allowAutoMinHeightSyncRef, resetDialogsRef }: UseCardEditorContentControllerParams<TDraft>) => {
   const reindexBlocks = useCallback((blocks: CardBlock[]): CardBlock[] => {
@@ -95,5 +99,7 @@ const useCardEditorContentController = <TDraft extends DraftShape | null>({ draf
     [mediaDialogs, setSideBlocks],
   );
 };
+
+
 
 export { useCardEditorContentController };

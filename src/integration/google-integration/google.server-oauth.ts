@@ -1,8 +1,10 @@
 import { auth, functionsClient } from "@platform/firebase/client";
 import { httpsCallable } from "firebase/functions";
-import type { GoogleCalendarAccess } from "@/integration/google-integration/google.oauth";
-import { consumeGoogleCalendarServerCodeVerifier } from "@/integration/google-integration/google.oauth";
+import type { GoogleCalendarAccess } from "./google.oauth";
+import { consumeGoogleCalendarServerCodeVerifier } from "./google.oauth";
 import { isDesktopLikeRuntime } from "@/platform/runtimeKind";
+
+
 
 type GoogleOAuthReconnectDiagnosis = {
   cause: string; reconnectRequired: boolean; action: string; };
@@ -31,6 +33,8 @@ type DisconnectGoogleCalendarAccountInput = {
   accountId: string;
 };
 
+
+
 const AUTO_RECOVERY_PENDING_ERROR_CODE = "auto-recovery-pending";
 const AUTO_RECOVERY_PENDING_MESSAGE = "Google 連携の自動復旧を待機中です。しばらくしてからもう一度同期します。";
 const SERVER_OAUTH_CONFIGURATION_ERROR_CODE = "server-oauth-configuration-error";
@@ -57,6 +61,8 @@ const disconnectGoogleCalendarAccountCallable =
     functionsClient,
     "disconnectGoogleCalendarAccount",
   );
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
 const normalizeCallableErrorCode = (error: unknown): string | undefined => error instanceof Error ? (error as Error & { code?: string; }).code?.replace(/^functions\//, "") : undefined;
@@ -190,5 +196,9 @@ const disconnectServerStoredGoogleCalendarAccount = async (input: DisconnectGoog
   await disconnectGoogleCalendarAccountCallable(input);
 };
 
+
+
 export { readGoogleOAuthCallableErrorDetails, getGoogleOAuthCallableErrorReason, diagnoseGoogleOAuthReconnectCause, isGoogleOAuthDeterministicErrorReason, toUserTransparentAutoRecoveryError, isServerStoredGoogleOAuthEnabled, exchangeGoogleCalendarCode, exchangeGoogleConnectedServiceCode, getServerStoredGoogleCalendarAccessToken, getServerStoredGoogleConnectedServiceAccessToken, disconnectServerStoredGoogleCalendarAccount };
+
+
 export type { GoogleOAuthCallableErrorReason };

@@ -1,17 +1,19 @@
-import "@/features/pdf/PdfPane.css";
+import "./PdfPane.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LoadingSpinner } from "@web-renderer/components/common/LoadingSpinner";
 import { cn } from "@web-renderer/lib/utils";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
 import type { ChangeEvent, KeyboardEvent as ReactKeyboardEvent } from "react";
-import type { PdfDocumentSource } from "@/features/pdf/pdfDocumentSource";
-import { releasePdfDocumentSourceSoon, retainPdfDocumentSource, toPdfDocumentLoadSource } from "@/features/pdf/pdfDocumentSource";
-import { waitForPdfLoadingTask } from "@/features/pdf/pdfLoadingTaskTimeout";
-import { getSafePdfPageNumber } from "@/features/pdf/pdfPageWindow";
-import { PDF_TRACKPAD_ZOOM_SENSITIVITY, PDF_ZOOM_BUTTON_SCALE_FACTOR, PDF_ZOOM_MAX_SCALE, PDF_ZOOM_MIN_SCALE, PDF_ZOOM_SCALE_EPSILON } from "@/features/pdf/pdfZoom.constants";
-import { clampScale, computeNextScaleFromGesture, normalizeScale } from "@/features/pdf/pdfZoom.utils";
+import type { PdfDocumentSource } from "./pdfDocumentSource";
+import { releasePdfDocumentSourceSoon, retainPdfDocumentSource, toPdfDocumentLoadSource } from "./pdfDocumentSource";
+import { waitForPdfLoadingTask } from "./pdfLoadingTaskTimeout";
+import { getSafePdfPageNumber } from "./pdfPageWindow";
+import { PDF_TRACKPAD_ZOOM_SENSITIVITY, PDF_ZOOM_BUTTON_SCALE_FACTOR, PDF_ZOOM_MAX_SCALE, PDF_ZOOM_MIN_SCALE, PDF_ZOOM_SCALE_EPSILON } from "./pdfZoom.constants";
+import { clampScale, computeNextScaleFromGesture, normalizeScale } from "./pdfZoom.utils";
 import type { PdfViewerState } from "@/types";
+
+
 
 type PdfViewerStateChangePersistence = "immediate" | "deferred" | "none";
 type PdfViewerStateChangeOptions = {
@@ -64,6 +66,8 @@ type PdfZoomAnchor = {
   clientY: number;
 };
 
+
+
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 640;
 const PDF_FALLBACK_PAGE_SIZE: PdfPageSize = { width: 612, height: 792 };
 const PDF_HISTORY_LIMIT = 80;
@@ -83,6 +87,8 @@ const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
+
+
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 const createDefaultToolbarState = (): PdfToolbarState => ({
@@ -225,6 +231,8 @@ const restorePdfZoomAnchor = (container: HTMLElement, anchor: PdfZoomAnchor, pre
     container.scrollTop = contentTop * scaleRatio - anchorTop;
   });
 };
+
+
 
 const PdfPageCanvas = ({ pdfDocument, pageNumber, pageSize, registerPageElement, scale, scrollRoot, onPageSizeChange }: PdfPageCanvasProps) => {
   const pageElementRef = useRef<HTMLDivElement | null>(null);
@@ -704,5 +712,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     </section>
   );
 };
+
+
 
 export { PdfPane };

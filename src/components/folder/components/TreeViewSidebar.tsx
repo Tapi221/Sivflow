@@ -1,6 +1,8 @@
 import React from "react";
 import { cn } from "@web-renderer/lib/utils";
 
+
+
 interface TreeViewSidebarProps {
   sidebarRef: React.RefObject<HTMLDivElement | null>;
   contentScrollRef: React.RefObject<HTMLDivElement | null>;
@@ -26,9 +28,13 @@ interface TreeViewSidebarProps {
   integratedChrome?: boolean;
 }
 
+
+
 const EXPLORER_SIDEBAR_TITLEBAR_OFFSET_VAR =
   "--mf-explorer-sidebar-titlebar-offset";
 const INTEGRATED_CHROME_SIDEBAR_GAP_PX = 20;
+
+
 
 const TreeViewSidebar = ({ sidebarRef, contentScrollRef, isSidebarOpen, renderedSidebarWidth, isResizing, showMobileDetail, allTags, onCreateRootFolder, onCreateCardSet, onAddDocument, onBulkImport, onStartResizing, children, canCreateCardSet = false, canCreateCard = false, canAddDocuments = false, canBulkImport = false, preferDirectRootFolderCreate = false, collapseContent = false, collapsedContent, rightGapPx = 0, integratedChrome = false }: TreeViewSidebarProps) => {
   void allTags;
@@ -128,5 +134,7 @@ const TreeViewSidebar = ({ sidebarRef, contentScrollRef, isSidebarOpen, rendered
     </div>
   );
 };
+
+
 
 export { TreeViewSidebar };

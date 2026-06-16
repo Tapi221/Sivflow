@@ -3,13 +3,19 @@ import { doc, getDoc } from "firebase/firestore";
 import { imageDocPathSegments } from "@/infrastructure/firebase/firestore/paths";
 import type { UploadedImage } from "@/types";
 
+
+
 type GetImageFromFirestoreOptions = {
   imageId: string;
   userId?: string;
   inFlightTouchMigrations?: Set<string>;
 };
 
+
+
 const FIRESTORE_DIAGNOSTIC_FLAG = "flashcard.firestore.diagnostics";
+
+
 
 const isImageFirestoreDiagnosticsEnabled = (): boolean => {
   if (import.meta.env.DEV) return true;
@@ -68,5 +74,7 @@ const getImageFromFirestore = async ({ imageId, userId, inFlightTouchMigrations:
     throw error;
   }
 };
+
+
 
 export { getImageFromFirestore };

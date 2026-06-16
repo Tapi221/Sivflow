@@ -7,6 +7,8 @@ import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { getLocalDb } from "@/services/localdb";
 import type { TagRecord } from "@/services/localdb/types";
 
+
+
 type Tag = TagRecord;
 type UseCardEditorTagsResult = {
   tags: Tag[];
@@ -18,7 +20,11 @@ type TagWriteCapableDb = Awaited<ReturnType<typeof getLocalDb>> & {
   updateItem: (table: "tagRecords", id: string, changes: Record<string, unknown>) => Promise<number>;
 };
 
+
+
 const DEFAULT_TAG_COLOR_KEY: TagColorKey = TAG_COLOR_KEYS[0];
+
+
 
 const genId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -95,5 +101,7 @@ const useCardEditorTags = (): UseCardEditorTagsResult => {
     addTag,
   };
 };
+
+
 
 export { useCardEditorTags };
