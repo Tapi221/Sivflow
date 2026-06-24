@@ -2,13 +2,7 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import type { ChangeEvent, TextareaHTMLAttributes } from "react";
 import { cn } from "@web-renderer/lib/utils";
 
-<<<<<<< HEAD
-
-
-interface AutoResizeTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-=======
 interface AutoResizeTextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
->>>>>>> c06f65dcf83503eeadd66a314bd7f052edc70c72
   value: string;
   onChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
   placeholder?: string;
@@ -87,12 +81,5 @@ const AutoResizeTextarea = ({
     />
   );
 };
-
-<<<<<<< HEAD
-
-
-export default AutoResizeTextarea;
-=======
 export { AutoResizeTextarea };
 export type { AutoResizeTextareaProps };
->>>>>>> c06f65dcf83503eeadd66a314bd7f052edc70c72
