@@ -53,23 +53,6 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-const missingFirebaseEnvVars = firebaseEnvStatus.missingEnvVars;
-
-const isFirebaseClientAvailable = firebaseEnvStatus.isAvailable;
-
-const firebaseApp = firebaseClientState.app;
-
-const auth = firebaseClientState.auth as Auth;
-
-const storage = firebaseClientState.storage as FirebaseStorage;
-
-const functionsClient = firebaseClientState.functionsClient as Functions;
-
-const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
-
-const db: Firestore | null = firebaseClientState.firestoreDb;
-
-
 
 const getFirebaseEnvValue = (key: (typeof REQUIRED_FIREBASE_ENV_KEYS)[number]) => {
   return import.meta.env[key];
@@ -195,6 +178,22 @@ const debugFirebase = (): void => {
 const firebaseEnvStatus = createFirebaseEnvStatus();
 
 const firebaseClientState = initializeFirebaseClient(firebaseEnvStatus);
+
+const missingFirebaseEnvVars = firebaseEnvStatus.missingEnvVars;
+
+const isFirebaseClientAvailable = firebaseEnvStatus.isAvailable;
+
+const firebaseApp = firebaseClientState.app;
+
+const auth = firebaseClientState.auth as Auth;
+
+const storage = firebaseClientState.storage as FirebaseStorage;
+
+const functionsClient = firebaseClientState.functionsClient as Functions;
+
+const firestoreDb: Firestore | null = firebaseClientState.firestoreDb;
+
+const db: Firestore | null = firebaseClientState.firestoreDb;
 
 
 
