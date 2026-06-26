@@ -17,6 +17,10 @@
   },
   "scripts": {
     "npmize": "node scripts/npmize-workspace-protocols.mjs",
+    "db:up": "docker compose -f docker-compose.postgres.yml up -d",
+    "db:down": "docker compose -f docker-compose.postgres.yml down",
+    "db:reset": "docker compose -f docker-compose.postgres.yml down -v && docker compose -f docker-compose.postgres.yml up -d",
+    "db:psql": "docker compose -f docker-compose.postgres.yml exec postgres psql -U sivflow -d sivflow",
     "dev": "npm --workspace @affine/web run dev",
     "dev:web": "npm --workspace @affine/web run dev",
     "dev:frontend": "npm --workspace @affine/web run dev",
