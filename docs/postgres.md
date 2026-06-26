@@ -44,9 +44,12 @@ Postgres 化では、認証やファイル保存はFirebase側に残し、アプ
 
 ```txt
 Firebase Hosting
-  -> Cloud Run / Cloud Functions
+  -> Cloud Run
   -> Cloud SQL for PostgreSQL
 ```
 
 Firebase Hosting から直接Postgresへ接続することはできません。
-必ず Functions / Cloud Run などのサーバーを間に置きます。
+必ず Cloud Run などのサーバーを間に置きます。
+
+Cloud Run の build / deploy / Hosting rewrite は `docs/cloudrun.md` を参照してください。
+既存の Firebase Cloud Functions は、Google Calendar 連携と crawler API を Cloud Run に移すまで互換用として残します。

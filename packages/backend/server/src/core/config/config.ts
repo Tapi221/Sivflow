@@ -22,6 +22,14 @@ declare global {
   }
 }
 
+const readDefaultServerPort = (): number => {
+  const rawPort = process.env.PORT;
+  if (!rawPort) return 3010;
+
+  const port = Number.parseInt(rawPort, 10);
+  return Number.isInteger(port) && port > 0 && port <= 65_535 ? port : 3010;
+};
+
 defineModuleConfig('server', {
   name: {
     desc: 'A recognizable name for the server. Will be shown when connected with AFFiNE Desktop.',
@@ -66,7 +74,7 @@ Default to be \`[server.protocol]://[server.host][:server.port]\` if not specifi
   },
   port: {
     desc: 'Which port the server will listen on.',
-    default: 3010,
+    default: readDefaultServerPort(),
     env: ['AFFINE_SERVER_PORT', 'integer'],
   },
   path: {

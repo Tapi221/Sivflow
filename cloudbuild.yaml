@@ -1,0 +1,50 @@
+substitutions:
+  _REGION: asia-northeast1
+  _SERVICE: sivflow-api
+  _AR_REPOSITORY: sivflow
+  _DATABASE_URL_SECRET: DATABASE_URL
+  _CLOUD_SQL_INSTANCE: PROJECT_ID:asia-northeast1:INSTANCE_NAME
+
+steps:
+  - id: build-cloud-run-image
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - Dockerfile.cloudrun
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_SERVICE}:$SHORT_SHA
+      - .
+
+  - id: push-cloud-run-image
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_SERVICE}:$SHORT_SHA
+
+  - id: deploy-cloud-run
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_SERVICE}:$SHORT_SHA
+      - --region
+      - ${_REGION}
+      - --platform
+      - managed
+      - --allow-unauthenticated
+      - --set-env-vars
+      - NODE_ENV=production
+      - --set-secrets
+      - DATABASE_URL=${_DATABASE_URL_SECRET}:latest
+      - --add-cloudsql-instances
+      - ${_CLOUD_SQL_INSTANCE}
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_SERVICE}:$SHORT_SHA
+
+options:
+  logging: CLOUD_LOGGING_ONLY
