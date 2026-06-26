@@ -1,11 +1,11 @@
-/* Sivflow Brand Theme Definition */
+/* Sivflow ブランドテーマ定義 */
 
 :root,
 html[data-theme='light'],
 html[data-theme='light'] body,
 html[data-theme='dark'],
 html[data-theme='dark'] body {
-  /* Sivflow Accent Color Tokens */
+  /* Sivflow アクセントカラートークン */
   --sivflow-accent-color: #1e96eb !important;
   --sivflow-second-accent-color: #e0f2fe !important;
   --sivflow-accent-color-04: color-mix(
@@ -15,7 +15,7 @@ html[data-theme='dark'] body {
   ) !important;
   --sivflow-accent-color-30: rgba(30, 150, 235, 0.3) !important;
 
-  /* Override Primary/Brand Colors to match Sivflow Accent Color */
+  /* プライマリ/ブランドカラーを Sivflow のアクセントカラーに上書き */
   --affine-secondary-color: var(--sivflow-second-accent-color) !important;
   --affine-brand-color: var(--sivflow-accent-color) !important;
   --affine-text-emphasis-color: var(--sivflow-accent-color) !important;
@@ -37,11 +37,11 @@ html[data-theme='dark'] body {
 :root,
 html[data-theme='light'],
 html[data-theme='light'] body {
-  /* Sivflow Color Palette (Light) */
+  /* Sivflow カラーパレット（ライト） */
   --sivflow-icon-primary: rgb(138, 138, 138);
   --sivflow-icon-secondary: rgb(183, 183, 183);
 
-  /* Override Global Icon Colors */
+  /* グローバルアイコンカラーを上書き */
   --affine-icon-color: var(--sivflow-icon-secondary) !important;
   --affine-icon-secondary: var(--sivflow-icon-secondary) !important;
   --affine-v2-icon-primary: var(--sivflow-icon-secondary) !important;
@@ -50,11 +50,11 @@ html[data-theme='light'] body {
 
 html[data-theme='dark'],
 html[data-theme='dark'] body {
-  /* Sivflow Color Palette (Dark) */
+  /* Sivflow カラーパレット（ダーク） */
   --sivflow-icon-primary: rgb(168, 168, 160);
   --sivflow-icon-secondary: rgba(168, 168, 160, 0.6);
 
-  /* Override Global Icon Colors */
+  /* グローバルアイコンカラーを上書き */
   --affine-icon-color: var(--sivflow-icon-secondary) !important;
   --affine-icon-secondary: var(--sivflow-icon-secondary) !important;
   --affine-v2-icon-primary: var(--sivflow-icon-secondary) !important;
@@ -66,10 +66,10 @@ html[data-theme='dark'] body {
 }
 
 /* ========================================================
-   Component Specific Overrides (Sivflow Theme)
+   コンポーネント別の上書き（Sivflow テーマ）
    ======================================================== */
 
-/* App Sidebar & Settings Sidebar */
+/* アプリサイドバー・設定サイドバー */
 nav[data-testid="app-sidebar"] [data-active="true"] svg,
 aside[data-testid="app-sidebar"] [data-active="true"] svg,
 .affine-app-sidebar [data-active="true"] svg,
@@ -90,7 +90,7 @@ aside[data-testid="app-sidebar"] button:hover svg,
   color: var(--sivflow-icon-primary) !important;
 }
 
-/* Global Menus & Dropdowns (excluding .danger to preserve red icons like Trash) */
+/* グローバルメニュー・ドロップダウン（Trash などの赤アイコンを維持するため .danger は除外） */
 [role="menuitem"]:not(.danger):hover svg,
 [role="menuitem"]:not(.danger)[data-highlighted] svg,
 [role="menuitem"]:not(.danger)[data-active="true"] svg,
@@ -98,7 +98,7 @@ aside[data-testid="app-sidebar"] button:hover svg,
   color: var(--sivflow-icon-primary) !important;
 }
 
-/* Page List & All Docs */
+/* ページ一覧・すべてのドキュメント */
 [data-testid="doc-list-item"]:hover svg,
 [data-testid="doc-list-item"][data-selected="true"] svg,
 [data-testid="collection-list-item"]:hover svg,
@@ -108,12 +108,12 @@ aside[data-testid="app-sidebar"] button:hover svg,
   color: var(--sivflow-icon-primary) !important;
 }
 
-/* New Page Block Cards */
+/* 新規ページブロックカード */
 [data-testid*="-button-in-all-page"]:hover svg {
   color: var(--sivflow-icon-primary) !important;
 }
 
-/* Header & Toolbars */
+/* ヘッダー・ツールバー */
 header button:hover svg,
 [role="toolbar"] button:hover svg,
 .affine-header button:hover svg,
@@ -121,7 +121,7 @@ header a:hover svg {
   color: var(--sivflow-icon-primary) !important;
 }
 
-/* Generic Buttons and Links */
+/* 汎用ボタン・リンク */
 button:hover svg,
 a:hover svg,
 .icon-container:hover svg {
