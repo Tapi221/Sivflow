@@ -1,10 +1,9 @@
 import { InformationIcon } from '@blocksuite/icons/lit';
 import type { PropertyValues, TemplateResult } from 'lit';
 import { css, html, LitElement } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 
 const TIP_HEIGHT = 24;
-@customElement('ai-chat-composer-tip')
 export class AIChatComposerTip extends LitElement {
   static override styles = css`
     :host {
@@ -31,11 +30,15 @@ export class AIChatComposerTip extends LitElement {
     }
   `;
 
-  @property({ attribute: false })
-  accessor tips: TemplateResult[] = [];
+  static override get properties() {
+    return {
+      tips: { attribute: false },
+      loop: { attribute: false },
+    };
+  }
 
-  @property({ attribute: false })
-  accessor loop: boolean = true;
+  tips: TemplateResult[] = [];
+  loop: boolean = true;
 
   private readonly _interval = 5000;
   private readonly _animDuration = 500;
@@ -153,3 +156,5 @@ export class AIChatComposerTip extends LitElement {
     `;
   }
 }
+
+customElement('ai-chat-composer-tip')(AIChatComposerTip);
