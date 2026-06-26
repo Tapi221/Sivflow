@@ -92,7 +92,7 @@ class IndexedDBMetadataService {
       "recomputeMetadata",
     );
 
-    console.log("[HealthCheck] healthcheck_metadata_recomputed", {
+    console.log("[HealthCheck] 健全性チェック用メタデータを再計算しました", {
       userId: this.userId,
       reason,
       counts: next.expectedEntityCounts,
@@ -126,9 +126,9 @@ class IndexedDBMetadataService {
     );
 
     const saved = await this.db.metadata.get("main");
-    console.log(`[Metadata:${this.userId}] Marked CLEAN`);
+    console.log(`[Metadata:${this.userId}] CLEAN としてマークしました`);
     console.log(
-      `[Metadata:${this.userId}] Verification - saved metadata:`,
+      `[Metadata:${this.userId}] 検証 - 保存済みメタデータ:`,
       saved,
     );
   };
@@ -147,7 +147,7 @@ class IndexedDBMetadataService {
       "markDirty",
     );
 
-    console.log(`[Metadata:${this.userId}] Marked DIRTY`);
+    console.log(`[Metadata:${this.userId}] DIRTY としてマークしました`);
   };
 
   public readonly checkHealth = async (): Promise<{
@@ -164,7 +164,7 @@ class IndexedDBMetadataService {
       try {
         await this.markClean();
         const created = await this.db.metadata.get("main");
-        console.log(`[Metadata:${this.userId}] Created metadata:`, created);
+        console.log(`[Metadata:${this.userId}] メタデータを作成しました:`, created);
         return { healthy: true };
       } catch (error) {
         console.error(
@@ -220,7 +220,7 @@ class IndexedDBMetadataService {
 
       if (diff <= 10) {
         console.log(
-          "[HealthCheck] Mismatch is within tolerance. Auto-correcting metadata...",
+          "[HealthCheck] 差分は許容範囲内です。メタデータを自動補正しています...",
         );
 
         try {
