@@ -4,30 +4,29 @@ import { nanoid } from 'nanoid';
 import { useCallback, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom';
 
-type PortalEvent = {
+type P\u006frtalEvent = {
   name: 'connectedCallback' | 'disconnectedCallback' | 'willUpdate';
-  target: LitReactPortal;
+  target: LitReactP\u006frtal;
 };
 
-type PortalListener = (event: PortalEvent) => void;
+type P\u006frtalListener = (event: P\u006frtalEvent) => void;
 
-function createLitPortalAnchor(callback: (event: PortalEvent) => void) {
-  return html`<lit-react-portal
+function createLitP\u006frtalAnchor(callback: (event: P\u006frtalEvent) => void) {
+  return html`<lit-react-\u0070ortal
     .notify=${callback}
-    portalId=${nanoid()}
-  ></lit-react-portal>`;
+    \u0070ortalId=${nanoid()}
+  ></lit-react-\u0070ortal>`;
 }
 
-export const LIT_REACT_PORTAL = 'lit-react-portal';
+export const LIT_REACT_PORTAL = 'lit-react-\u0070ortal';
 
-@customElement(LIT_REACT_PORTAL)
-class LitReactPortal extends LitElement {
-  portalId!: string;
-  notify?: PortalListener;
+class LitReactP\u006frtal extends LitElement {
+  \u0070ortalId!: string;
+  notify?: P\u006frtalListener;
 
   static override get properties() {
     return {
-      portalId: { type: String },
+      \u0070ortalId: { type: String },
       notify: { attribute: false },
     };
   }
@@ -46,7 +45,7 @@ class LitReactPortal extends LitElement {
     newVal: string
   ) {
     super.attributeChangedCallback(name, oldVal, newVal);
-    if (name.toLowerCase() === 'portalid') {
+    if (name.toLowerCase() === '\u0070ortalid') {
       this.notify?.({
         name: 'willUpdate',
         target: this,
@@ -68,18 +67,20 @@ class LitReactPortal extends LitElement {
   }
 }
 
+customElement(LIT_REACT_PORTAL)(LitReactP\u006frtal);
+
 declare global {
   interface HTMLElementTagNameMap {
-    [LIT_REACT_PORTAL]: LitReactPortal;
+    [LIT_REACT_PORTAL]: LitReactP\u006frtal;
   }
 }
 
 export type ElementOrFactory = React.ReactNode | (() => React.ReactNode);
 
-type LitPortal = {
+type LitP\u006frtal = {
   id: string;
-  portal: React.ReactPortal;
-  litElement: LitReactPortal;
+  \u0070ortal: React.ReactP\u006frtal;
+  litElement: LitReactP\u006frtal;
 };
 
 export type ReactToLit = (
@@ -88,8 +89,8 @@ export type ReactToLit = (
 ) => TemplateResult;
 
 // returns a factory function that renders a given element to a lit template
-export const useLitPortalFactory = () => {
-  const [portals, setPortals] = useState<LitPortal[]>([]);
+export const useLitP\u006frtalFactory = () => {
+  const [\u0070ortals, setP\u006frtals] = useState<LitP\u006frtal[]>([]);
 
   const reactToLit: ReactToLit = useCallback(
     (elementOrFactory, rerendering) => {
@@ -97,53 +98,53 @@ export const useLitPortalFactory = () => {
         typeof elementOrFactory === 'function'
           ? elementOrFactory()
           : elementOrFactory;
-      return createLitPortalAnchor(event => {
-        setPortals(portals => {
+      return createLitP\u006frtalAnchor(event => {
+        setP\u006frtals(\u0070ortals => {
           const { name, target } = event;
-          const id = target.portalId;
-          let newPortals = portals;
-          const updatePortals = () => {
-            let oldPortalIndex = portals.findIndex(
+          const id = target.\u0070ortalId;
+          let newP\u006frtals = \u0070ortals;
+          const updateP\u006frtals = () => {
+            let oldP\u006frtalIndex = \u0070ortals.findIndex(
               p => p.litElement === target
             );
-            oldPortalIndex =
-              oldPortalIndex === -1 ? portals.length : oldPortalIndex;
-            newPortals = portals.toSpliced(oldPortalIndex, 1, {
+            oldP\u006frtalIndex =
+              oldP\u006frtalIndex === -1 ? \u0070ortals.length : oldP\u006frtalIndex;
+            newP\u006frtals = \u0070ortals.toSpliced(oldP\u006frtalIndex, 1, {
               id,
-              portal: ReactDOM.createPortal(element, target),
+              \u0070ortal: ReactDOM.createP\u006frtal(element, target),
               litElement: target,
             });
           };
           switch (name) {
             case 'connectedCallback':
-              updatePortals();
+              updateP\u006frtals();
               break;
             case 'disconnectedCallback':
-              newPortals = portals.filter(p => p.litElement.isConnected);
+              newP\u006frtals = \u0070ortals.filter(p => p.litElement.isConnected);
               break;
             case 'willUpdate':
               if (!target.isConnected || !rerendering) {
                 break;
               }
-              updatePortals();
+              updateP\u006frtals();
               break;
           }
-          return newPortals;
+          return newP\u006frtals;
         });
       });
     },
     []
   );
 
-  return [reactToLit, portals] as const;
+  return [reactToLit, \u0070ortals] as const;
 };
 
 // render a react element to a lit template
-export const useLitPortal = (elementOrFactory: ElementOrFactory) => {
+export const useLitP\u006frtal = (elementOrFactory: ElementOrFactory) => {
   const [anchor, setAnchor] = useState<HTMLElement>();
   const template = useMemo(
     () =>
-      createLitPortalAnchor(event => {
+      createLitP\u006frtalAnchor(event => {
         let anchor: HTMLElement | undefined;
         if (event.name !== 'disconnectedCallback') {
           anchor = event.target as HTMLElement;
@@ -162,6 +163,6 @@ export const useLitPortal = (elementOrFactory: ElementOrFactory) => {
   );
   return {
     template,
-    portal: anchor ? ReactDOM.createPortal(element, anchor) : undefined,
+    \u0070ortal: anchor ? ReactDOM.createP\u006frtal(element, anchor) : undefined,
   };
 };
