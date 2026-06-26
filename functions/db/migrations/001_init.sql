@@ -1,4 +1,5 @@
 create extension if not exists pgcrypto;
+create extension if not exists vector;
 
 create table if not exists google_calendar_accounts (
   uid text not null,
