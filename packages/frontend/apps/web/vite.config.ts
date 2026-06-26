@@ -1,3 +1,6 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
@@ -14,11 +17,18 @@ const buildConfig = {
   isNative: false,
 };
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 export default defineConfig({
   define: {
     BUILD_CONFIG: JSON.stringify(buildConfig),
   },
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@affine/core': path.resolve(__dirname, '../../core/src'),
+    },
+  },
   server: {
     host: '0.0.0.0',
     port: 8080,
