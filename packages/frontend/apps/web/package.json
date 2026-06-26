@@ -1,12 +1,12 @@
 {
   "name": "@affine/web",
   "version": "0.26.3",
-  "description": "AFFiNE Desktop Web application",
+  "description": "Sivflow Web application",
   "private": true,
   "browser": "src/index.tsx",
   "scripts": {
-    "build": "affine bundle",
-    "dev": "affine bundle --dev"
+    "build": "vite build",
+    "dev": "vite"
   },
   "dependencies": {
     "@affine/component": "workspace:*",
@@ -23,6 +23,8 @@
   "devDependencies": {
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.2",
-    "typescript": "^5.9.3"
+    "@vitejs/plugin-react": "^5.1.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.0"
   }
 }
