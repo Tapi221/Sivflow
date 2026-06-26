@@ -68,7 +68,7 @@ const toHistoryEvent = (value: unknown): HistoryEvent | null => {
 class HistoryCompressionService {
   public readonly compress = async (userId: string): Promise<void> => {
     if (StorageStateManager.isReadOnly(userId)) {
-      console.log(`[Compression:${userId}] Skipped (READ_ONLY mode)`);
+      console.log(`[Compression:${userId}] スキップしました（READ_ONLY モード）`);
       return;
     }
 
@@ -84,14 +84,14 @@ class HistoryCompressionService {
         .toArray();
 
       if (oldEvents.length === 0) {
-        console.log(`[Compression:${userId}] No old events to compress`);
+        console.log(`[Compression:${userId}] 圧縮対象の古いイベントはありません`);
         return;
       }
 
       const compressed = this.compressByDay(oldEvents, userId);
 
       console.log(
-        `[Compression:${userId}] Compressed ${oldEvents.length} events into ${compressed.length} daily summaries`,
+        `[Compression:${userId}] ${oldEvents.length} 件のイベントを ${compressed.length} 件の日次サマリーに圧縮しました`,
       );
     } catch (error) {
       console.error(`[Compression:${userId}] Failed:`, error);
