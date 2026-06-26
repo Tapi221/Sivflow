@@ -32,7 +32,6 @@
     "make-nsis": "node ./scripts/make-nsis.ts"
   },
   "devDependencies": {
-    "@affine-tools/utils": "workspace:*",
     "@affine/i18n": "workspace:*",
     "@affine/native": "workspace:*",
     "@affine/nbstore": "workspace:*",
