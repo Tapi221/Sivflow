@@ -17,14 +17,14 @@
     { "path": "../../common/nbstore" },
     { "path": "../../common/reader" },
     { "path": "../track" },
-    { "path": "../../../blocksuite/affine/all" },
-    { "path": "../../../blocksuite/affine/blocks/root" },
-    { "path": "../../../blocksuite/affine/components" },
-    { "path": "../../../blocksuite/affine/shared" },
-    { "path": "../../../blocksuite/affine/data-view" },
+    { "path": "../../../blocksuite/sivflow/all" },
+    { "path": "../../../blocksuite/sivflow/blocks/root" },
+    { "path": "../../../blocksuite/sivflow/components" },
+    { "path": "../../../blocksuite/sivflow/shared" },
+    { "path": "../../../blocksuite/sivflow/data-view" },
     { "path": "../../../blocksuite/framework/global" },
     { "path": "../../../blocksuite/framework/std" },
     { "path": "../../common/infra" },
-    { "path": "../../../blocksuite/affine/ext-loader" }
+    { "path": "../../../blocksuite/sivflow/ext-loader" }
   ]
 }
