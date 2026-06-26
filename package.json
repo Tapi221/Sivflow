@@ -3,7 +3,6 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "packageManager": "yarn@4.13.0+sha512.5c20ba010c99815433e5c8453112165e673f1c7948d8d2b267f4b5e52097538658388ebc9f9580656d9b75c5cc996f990f611f99304a2197d4c56d21eea370e7",
   "workspaces": [
     "packages/frontend/*",
     "packages/frontend/apps/*",
@@ -17,17 +16,18 @@
     "node": ">=20.19.0"
   },
   "scripts": {
-    "dev": "yarn workspace @affine/web dev",
-    "dev:web": "yarn workspace @affine/web dev",
-    "dev:frontend": "yarn workspace @affine/web dev",
-    "dev:backend": "yarn workspace @affine/server dev",
-    "dev:server": "yarn workspace @affine/server dev",
-    "build": "yarn workspace @affine/web build",
-    "build:web": "yarn workspace @affine/web build",
-    "build:frontend": "yarn workspace @affine/web build",
-    "build:backend": "yarn workspace @affine/server build",
-    "admin:dev": "yarn workspace @affine/admin dev",
-    "admin:build": "yarn workspace @affine/admin build"
+    "npmize": "node scripts/npmize-workspace-protocols.mjs",
+    "dev": "npm --workspace @affine/web run dev",
+    "dev:web": "npm --workspace @affine/web run dev",
+    "dev:frontend": "npm --workspace @affine/web run dev",
+    "dev:backend": "npm --workspace @affine/server run dev",
+    "dev:server": "npm --workspace @affine/server run dev",
+    "build": "npm --workspace @affine/web run build",
+    "build:web": "npm --workspace @affine/web run build",
+    "build:frontend": "npm --workspace @affine/web run build",
+    "build:backend": "npm --workspace @affine/server run build",
+    "admin:dev": "npm --workspace @affine/admin run dev",
+    "admin:build": "npm --workspace @affine/admin run build"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.1.1",
