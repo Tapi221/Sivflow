@@ -17,7 +17,7 @@ const BlobUrlManager = class {
     this.activeUrls.add(url);
 
     console.log(
-      `[BlobUrlManager] Created: ${url.substring(0, 50)}... (Total: ${this.activeUrls.size})`,
+      `[BlobUrlManager] 作成: ${url.substring(0, 50)}... (合計: ${this.activeUrls.size})`,
     );
     return url;
   }
@@ -27,7 +27,7 @@ const BlobUrlManager = class {
       URL.revokeObjectURL(url);
       this.activeUrls.delete(url);
       console.log(
-        `[BlobUrlManager] Revoked: ${url.substring(0, 50)}... (Remaining: ${this.activeUrls.size})`,
+        `[BlobUrlManager] 解放: ${url.substring(0, 50)}... (残り: ${this.activeUrls.size})`,
       );
     }
   }
@@ -37,7 +37,7 @@ const BlobUrlManager = class {
       URL.revokeObjectURL(url);
     }
     this.activeUrls.clear();
-    console.log("[BlobUrlManager] All URLs revoked");
+    console.log("[BlobUrlManager] すべてのURLを解放しました");
   }
 
   getActiveCount(): number {
