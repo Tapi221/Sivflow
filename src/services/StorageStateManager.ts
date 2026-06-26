@@ -69,7 +69,7 @@ class StorageStateManager {
     // TODO: レイヤーC（高コスト生成）のキャッシュを削除
     // - 検索用インデックス
     // - 複雑な並び替え用キャッシュ
-      console.log(`[Storage:${userId}] Clearing high-cost cache...`);
+      console.log(`[Storage:${userId}] 高コストキャッシュを削除しています...`);
     } catch (error) {
       console.error(`[Storage:${userId}] Failed to clear cache:`, error);
     }
