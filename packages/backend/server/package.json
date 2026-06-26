@@ -17,10 +17,10 @@
     "test:copilot:coverage": "c8 ava --timeout=5m \"src/__tests__/copilot-*.spec.ts\"",
     "e2e": "cross-env TEST_MODE=e2e ava --serial",
     "e2e:coverage": "cross-env TEST_MODE=e2e c8 ava --serial",
-    "data-migration": "cross-env NODE_ENV=development SERVER_FLAVOR=script r ./src/index.ts",
+    "data-migration": "cross-env NODE_ENV=development SERVER_FLAVOR=script tsx ./src/index.ts",
     "init": "yarn prisma migrate dev && yarn data-migration run",
-    "seed": "r ./src/seed/index.ts",
-    "genconfig": "r ./scripts/genconfig.ts",
+    "seed": "tsx ./src/seed/index.ts",
+    "genconfig": "tsx ./scripts/genconfig.ts",
     "cli": "cross-env SERVER_FLAVOR=script node ./dist/main.js",
     "predeploy": "yarn prisma migrate deploy && yarn cli run",
     "postinstall": "prisma generate"
@@ -148,11 +148,12 @@
     "sinon": "^21.0.1",
     "socket.io-client": "^4.8.3",
     "supertest": "^7.1.4",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "why-is-node-running": "^3.2.2"
   },
   "nodemonConfig": {
-    "exec": "node",
+    "exec": "tsx",
     "ignore": [
       "**/__tests__/**",
       "**/dist/**",
