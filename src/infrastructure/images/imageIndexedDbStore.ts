@@ -10,7 +10,7 @@ const saveImageToIndexedDb = async (image: UploadedImage): Promise<void> => {
   try {
     const db = await getLocalDb();
     await db.images.put(image);
-    console.log(`[ImageDB] Saved to IndexedDB: ${image.id}`);
+    console.log(`[ImageDB] IndexedDB に保存しました: ${image.id}`);
   } catch (error) {
     console.error("[ImageDB] Failed to save to IndexedDB", error);
     throw error;
