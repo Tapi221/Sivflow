@@ -3,7 +3,7 @@ substitutions:
   _SERVICE: sivflow-api
   _AR_REPOSITORY: sivflow
   _DATABASE_URL_SECRET: DATABASE_URL
-  _CLOUD_SQL_INSTANCE: ""
+  _CLOUD_SQL_INSTANCE: PROJECT_ID:asia-northeast1:INSTANCE_NAME
 
 steps:
   - id: build-cloud-run-image
@@ -24,26 +24,24 @@ steps:
 
   - id: deploy-cloud-run
     name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
-    entrypoint: bash
+    entrypoint: gcloud
     args:
-      - -ceu
-      - |
-        image="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_SERVICE}:$SHORT_SHA"
-        deploy_args=(
-          run deploy "${_SERVICE}"
-          --image "$image"
-          --region "${_REGION}"
-          --platform managed
-          --allow-unauthenticated
-          --set-env-vars "NODE_ENV=production"
-          --set-secrets "DATABASE_URL=${_DATABASE_URL_SECRET}:latest"
-        )
-
-        if [[ -n "${_CLOUD_SQL_INSTANCE}" ]]; then
-          deploy_args+=(--add-cloudsql-instances "${_CLOUD_SQL_INSTANCE}")
-        fi
-
-        gcloud "${deploy_args[@]}"
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_SERVICE}:$SHORT_SHA
+      - --region
+      - ${_REGION}
+      - --platform
+      - managed
+      - --allow-unauthenticated
+      - --set-env-vars
+      - NODE_ENV=production
+      - --set-secrets
+      - DATABASE_URL=${_DATABASE_URL_SECRET}:latest
+      - --add-cloudsql-instances
+      - ${_CLOUD_SQL_INSTANCE}
 
 images:
   - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_SERVICE}:$SHORT_SHA
