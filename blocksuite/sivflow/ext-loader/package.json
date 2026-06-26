@@ -10,8 +10,8 @@
   "author": "toeverything",
   "license": "MIT",
   "dependencies": {
-    "@blocksuite/global": "workspace:*",
-    "@blocksuite/store": "workspace:*",
+    "@blocksuite/global": "*",
+    "@blocksuite/store": "*",
     "zod": "^3.25.76"
   },
   "devDependencies": {

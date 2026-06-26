@@ -26,8 +26,8 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@affine/s3-compat": "workspace:*",
-    "@affine/server-native": "workspace:*",
+    "@affine/s3-compat": "*",
+    "@affine/server-native": "*",
     "@ai-sdk/anthropic": "^2.0.54",
     "@ai-sdk/google": "^2.0.45",
     "@ai-sdk/google-vertex": "^3.0.88",
@@ -120,7 +120,7 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@affine/graphql": "workspace:*",
+    "@affine/graphql": "*",
     "@faker-js/faker": "^10.1.0",
     "@nestjs/swagger": "^11.2.0",
     "@nestjs/testing": "^11.1.14",

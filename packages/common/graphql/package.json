@@ -23,8 +23,8 @@
     "build": "gql-gen --errors-only"
   },
   "dependencies": {
-    "@affine/debug": "workspace:*",
-    "@affine/error": "workspace:*",
+    "@affine/debug": "*",
+    "@affine/error": "*",
     "graphql": "^16.9.0",
     "lodash": "^4.18.1",
     "lodash-es": "^4.17.23"

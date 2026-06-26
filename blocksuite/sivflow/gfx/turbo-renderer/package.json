@@ -10,9 +10,9 @@
   "author": "toeverything",
   "license": "MIT",
   "dependencies": {
-    "@blocksuite/global": "workspace:*",
-    "@blocksuite/std": "workspace:*",
-    "@blocksuite/store": "workspace:*",
+    "@blocksuite/global": "*",
+    "@blocksuite/std": "*",
+    "@blocksuite/store": "*",
     "rxjs": "^7.8.2"
   },
   "exports": {

@@ -32,9 +32,9 @@
     "make-nsis": "node ./scripts/make-nsis.ts"
   },
   "devDependencies": {
-    "@affine/i18n": "workspace:*",
-    "@affine/native": "workspace:*",
-    "@affine/nbstore": "workspace:*",
+    "@affine/i18n": "*",
+    "@affine/native": "*",
+    "@affine/nbstore": "*",
     "@electron-forge/cli": "^7.11.1",
     "@electron-forge/core": "^7.11.1",
     "@electron-forge/maker-deb": "^7.11.1",
@@ -48,7 +48,7 @@
     "@reforged/maker-appimage": "^5.2.0",
     "@sentry/electron": "^7.13.0",
     "@sentry/esbuild-plugin": "^5.3.0",
-    "@toeverything/infra": "workspace:*",
+    "@toeverything/infra": "*",
     "@types/set-cookie-parser": "^2.4.10",
     "app-builder-lib": "^26.8.1",
     "builder-util-runtime": "^9.5.1",

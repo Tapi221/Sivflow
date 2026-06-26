@@ -10,13 +10,13 @@
   "author": "toeverything",
   "license": "MIT",
   "dependencies": {
-    "@blocksuite/affine-components": "workspace:*",
-    "@blocksuite/affine-ext-loader": "workspace:*",
-    "@blocksuite/affine-rich-text": "workspace:*",
-    "@blocksuite/affine-shared": "workspace:*",
-    "@blocksuite/data-view": "workspace:*",
-    "@blocksuite/std": "workspace:*",
-    "@blocksuite/store": "workspace:*",
+    "@blocksuite/affine-components": "*",
+    "@blocksuite/affine-ext-loader": "*",
+    "@blocksuite/affine-rich-text": "*",
+    "@blocksuite/affine-shared": "*",
+    "@blocksuite/data-view": "*",
+    "@blocksuite/std": "*",
+    "@blocksuite/store": "*",
     "zod": "^3.25.76"
   },
   "exports": {

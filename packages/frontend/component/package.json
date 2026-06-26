@@ -20,10 +20,10 @@
     "react-dom": "^19.2.1"
   },
   "dependencies": {
-    "@affine/debug": "workspace:*",
-    "@affine/error": "workspace:*",
-    "@affine/graphql": "workspace:*",
-    "@affine/i18n": "workspace:*",
+    "@affine/debug": "*",
+    "@affine/error": "*",
+    "@affine/graphql": "*",
+    "@affine/i18n": "*",
     "@atlaskit/pragmatic-drag-and-drop": "^1.7.7",
     "@atlaskit/pragmatic-drag-and-drop-hitbox": "^1.1.0",
     "@blocksuite/icons": "^2.2.17",

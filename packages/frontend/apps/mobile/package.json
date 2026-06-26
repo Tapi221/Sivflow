@@ -9,13 +9,13 @@
     "dev": "affine bundle --dev"
   },
   "dependencies": {
-    "@affine/component": "workspace:*",
-    "@affine/core": "workspace:*",
-    "@affine/env": "workspace:*",
-    "@affine/nbstore": "workspace:*",
-    "@affine/track": "workspace:*",
-    "@blocksuite/affine": "workspace:*",
-    "@toeverything/infra": "workspace:*",
+    "@affine/component": "*",
+    "@affine/core": "*",
+    "@affine/env": "*",
+    "@affine/nbstore": "*",
+    "@affine/track": "*",
+    "@blocksuite/affine": "*",
+    "@toeverything/infra": "*",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-router-dom": "^6.30.3"

@@ -9,7 +9,7 @@
     "./nbstore/payload": "./src/nbstore/payload.ts"
   },
   "dependencies": {
-    "@affine/core": "workspace:*",
+    "@affine/core": "*",
     "@capacitor/core": "^7.0.0"
   },
   "devDependencies": {

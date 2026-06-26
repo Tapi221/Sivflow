@@ -10,14 +10,14 @@
   "author": "toeverything",
   "license": "MIT",
   "dependencies": {
-    "@blocksuite/affine-block-bookmark": "workspace:*",
-    "@blocksuite/affine-block-embed": "workspace:*",
-    "@blocksuite/affine-block-surface": "workspace:*",
-    "@blocksuite/affine-components": "workspace:*",
-    "@blocksuite/affine-ext-loader": "workspace:*",
-    "@blocksuite/affine-shared": "workspace:*",
-    "@blocksuite/affine-widget-edgeless-toolbar": "workspace:*",
-    "@blocksuite/std": "workspace:*",
+    "@blocksuite/affine-block-bookmark": "*",
+    "@blocksuite/affine-block-embed": "*",
+    "@blocksuite/affine-block-surface": "*",
+    "@blocksuite/affine-components": "*",
+    "@blocksuite/affine-ext-loader": "*",
+    "@blocksuite/affine-shared": "*",
+    "@blocksuite/affine-widget-edgeless-toolbar": "*",
+    "@blocksuite/std": "*",
     "lit": "^3.2.0"
   },
   "exports": {

@@ -10,9 +10,9 @@
   "author": "toeverything",
   "license": "MIT",
   "dependencies": {
-    "@blocksuite/affine-ext-loader": "workspace:*",
-    "@blocksuite/affine-model": "workspace:*",
-    "@blocksuite/std": "workspace:*",
+    "@blocksuite/affine-ext-loader": "*",
+    "@blocksuite/affine-model": "*",
+    "@blocksuite/std": "*",
     "lit": "^3.2.0"
   },
   "exports": {

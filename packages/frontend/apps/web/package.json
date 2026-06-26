@@ -9,13 +9,13 @@
     "dev": "vite"
   },
   "dependencies": {
-    "@affine/component": "workspace:*",
-    "@affine/core": "workspace:*",
-    "@affine/env": "workspace:*",
-    "@affine/nbstore": "workspace:*",
-    "@affine/track": "workspace:*",
+    "@affine/component": "*",
+    "@affine/core": "*",
+    "@affine/env": "*",
+    "@affine/nbstore": "*",
+    "@affine/track": "*",
     "@emotion/react": "^11.14.0",
-    "@toeverything/infra": "workspace:*",
+    "@toeverything/infra": "*",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-router-dom": "^6.30.3"

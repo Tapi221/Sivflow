@@ -9,7 +9,7 @@
     "dev:server": "node --env-file-if-exists=.env --watch server/main.ts"
   },
   "dependencies": {
-    "@affine/native": "workspace:*",
+    "@affine/native": "*",
     "@google/generative-ai": "^0.24.0",
     "@types/express": "^5.0.0",
     "@types/lodash-es": "^4.17.12",
