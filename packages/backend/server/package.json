@@ -120,8 +120,6 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@affine-tools/cli": "workspace:*",
-    "@affine-tools/utils": "workspace:*",
     "@affine/graphql": "workspace:*",
     "@faker-js/faker": "^10.1.0",
     "@nestjs/swagger": "^11.2.0",
