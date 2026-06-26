@@ -108,7 +108,7 @@ const server = http.createServer((req, res) => {
 });
 
 const shutdown = (signal: NodeJS.Signals): void => {
-  console.log(`[cloudrun] ${signal} received. shutting down.`);
+  console.log(`[cloudrun] ${signal} を受信しました。シャットダウンします。`);
   server.close(() => {
     void pool?.end().finally(() => {
       pool = null;
@@ -123,5 +123,5 @@ process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
 server.listen(getPort(), DEFAULT_HOST, () => {
-  console.log(`[cloudrun] ${SERVICE_NAME} listening on ${DEFAULT_HOST}:${getPort()}`);
+  console.log(`[cloudrun] ${SERVICE_NAME} は ${DEFAULT_HOST}:${getPort()} で待ち受けています`);
 });
