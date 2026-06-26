@@ -20,6 +20,7 @@ const buildConfig = {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  assetsInclude: ['**/*.zip'],
   define: {
     BUILD_CONFIG: JSON.stringify(buildConfig),
   },
