@@ -4,7 +4,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: sivflow
-      POSTGRES_PASSWORD: sivflow_pass
+      POSTGRES_PASSWORD: sivflow
       POSTGRES_DB: sivflow
     ports:
       - "5432:5432"
