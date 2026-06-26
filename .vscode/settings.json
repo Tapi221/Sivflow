@@ -16,5 +16,6 @@
   },
   "search.exclude": {
     "package": true
-  }
+  },
+  "deepscan.ignoreConfirmWarning": true
 }

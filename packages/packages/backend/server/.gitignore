@@ -1,0 +1,4 @@
+config.json
+.env
+static/
+sivflow-firebase-adminsdk.json
