@@ -4,9 +4,7 @@ import React, { createElement, type ReactNode } from 'react';
 
 import { createComponent } from './create-component';
 
-export
-@customElement('affine-lit-template-wrapper')
-class LitTemplateWrapper extends LitElement {
+export class LitTemplateWrapper extends LitElement {
   static override get properties() {
     return {
       template: { type: Object },
@@ -22,6 +20,8 @@ class LitTemplateWrapper extends LitElement {
     return this.template;
   }
 }
+
+customElement('affine-lit-template-wrapper')(LitTemplateWrapper);
 
 const TemplateWrapper = createComponent({
   elementClass: LitTemplateWrapper,
