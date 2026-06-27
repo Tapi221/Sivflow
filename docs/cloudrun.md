@@ -15,7 +15,7 @@ Cloud Run: sivflow-api
 
 Cloud Run 用の Node.js サーバーは `functions/src/cloudRunServer.ts` です。
 
-- `GET /api/healthz`: Cloud Run コンテナの起動確認
+- `GET /api/healthz`: Cloud Run の起動確認
 - `GET /api/readyz`: `DATABASE_URL` の Postgres へ `select 1` を投げる疎通確認
 - `GET /api`: サービス状態の簡易確認
 - `GET /api/google-calendar/accounts`: Firebase ID token のユーザーに紐づく Google Calendar アカウント一覧
@@ -42,55 +42,38 @@ npm run deploy:cloudrun
 npm run deploy:hosting
 ```
 
+`build:cloudrun` は `functions` の TypeScript build だけを実行します。
+`deploy:cloudrun` は `cloudbuild.yaml` から Cloud Run のソースデプロイを実行します。
+
 ## 事前準備
 
-Artifact Registry の Docker repository を作ります。
+Cloud Run が使う値は Secret Manager または Cloud Run の環境変数で設定します。
 
-```bash
-gcloud artifacts repositories create sivflow \
-  --repository-format=docker \
-  --location=asia-northeast1
-```
-
-Cloud Run が使う値は Secret Manager に入れます。
-
-```bash
-printf '%s' 'postgresql://USER:PASSWORD@HOST:5432/DATABASE' | \
-  gcloud secrets create DATABASE_URL --data-file=-
-```
-
-PowerShell の場合は次の形で入れます。
-
-```powershell
-'postgresql://USER:PASSWORD@HOST:5432/DATABASE' | gcloud secrets create DATABASE_URL --data-file=-
-```
-
-Google OAuth 用の Secret Manager secret も Cloud Run に渡します。
+必要な値:
 
 ```txt
+DATABASE_URL
 GOOGLE_OAUTH_CLIENT_ID
 GOOGLE_OAUTH_CLIENT_SECRET
 GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY
 ```
 
-Cloud SQL の Unix socket を使う場合は、`DATABASE_URL` を Cloud SQL 接続方式に合わせて作り、deploy 時に `_CLOUD_SQL_INSTANCE` を渡します。
+Cloud SQL の Unix socket を使う場合は、`DATABASE_URL` を Cloud SQL 接続方式に合わせて作り、Cloud Run サービスに Cloud SQL instance を接続してください。
 
 ## Cloud Run へデプロイ
 
-Cloud Build で image build、push、Cloud Run deploy をまとめて実行します。
+ソースから Cloud Run にデプロイします。
 
 ```bash
 npm run deploy:cloudrun
 ```
 
-Cloud SQL instance を明示する場合は、npm の `--` 以降に Cloud Build の substitutions を渡します。
+リージョンやサービス名を変える場合は、npm の `--` 以降に Cloud Build の substitutions を渡します。
 
 ```bash
 npm run deploy:cloudrun -- \
-  --substitutions _REGION=asia-northeast1,_SERVICE=sivflow-api,_AR_REPOSITORY=sivflow,_DATABASE_URL_SECRET=DATABASE_URL,_CLOUD_SQL_INSTANCE=PROJECT_ID:asia-northeast1:INSTANCE_NAME
+  --substitutions _REGION=asia-northeast1,_SERVICE=sivflow-api,_SOURCE=functions
 ```
-
-Cloud SQL を使わない疎通確認だけなら `_CLOUD_SQL_INSTANCE` は空のままで構いません。`cloudbuild.yaml` は未指定の場合、`--add-cloudsql-instances` を付けずに deploy します。
 
 ## Hosting へ反映
 
