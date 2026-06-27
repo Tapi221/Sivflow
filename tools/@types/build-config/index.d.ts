@@ -3,9 +3,9 @@ declare interface BUILD_CONFIG_TYPE {
   distribution: 'web' | 'desktop' | 'admin' | 'mobile' | 'ios' | 'android';
   /**
    * ローカル開発で本物のバックエンドへ接続するかどうか。
-   * false の場合、Web はローカルワークスペース中心で動き、/api や /graphql へ常時接続しない。
+   * false / 未指定の場合、Web はローカルワークスペース中心で動き、/api や /graphql へ常時接続しない。
    */
-  backendEnabled: boolean;
+  backendEnabled?: boolean;
   /**
    * 'web' | 'desktop' | 'admin'
    */
