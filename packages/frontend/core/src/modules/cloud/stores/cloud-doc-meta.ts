@@ -24,6 +24,14 @@ export class CloudDocMetaStore extends Store {
         signal: abortSignal,
       },
     });
-    return serverConfigData.workspace.doc.meta;
+    const workspace = serverConfigData.workspace as {
+      pageMeta?: CloudDocMetaType;
+      doc?: { meta: CloudDocMetaType };
+    };
+    const meta = workspace.doc?.meta ?? workspace.pageMeta;
+    if (!meta) {
+      throw new Error('Cloud doc meta not found');
+    }
+    return meta;
   }
 }
