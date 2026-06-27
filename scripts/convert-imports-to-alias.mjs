@@ -125,4 +125,4 @@ for (const file of files) {
   }
 }
 
-console.log(`Updated ${changedCount} import path(s).`);
+console.log(`${changedCount} 件の import パスを更新しました。`);
