@@ -19,7 +19,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
-    "types": ["vite/client"]
+    "types": ["vite/client", "build-config", "affine__env"]
   },
   "exclude": [
     "node_modules",
