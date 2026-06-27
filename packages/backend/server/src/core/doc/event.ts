@@ -7,6 +7,7 @@ import { PgWorkspaceDocStorageAdapter } from './adapters/workspace';
 import { DocReader } from './reader';
 
 const IGNORED_PRISMA_CODES = new Set(['P2003', 'P2025', 'P2028']);
+const USER_WORKSPACE_DELETE_CONCURRENCY = 8;
 
 function isIgnorableDocEventError(error: unknown) {
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -75,9 +76,35 @@ export class DocEventsListener {
 
   @OnEvent('user.deleted')
   async clearUserWorkspaces(payload: Events['user.deleted']) {
-    for (const workspace of payload.ownedWorkspaces) {
-      await this.models.workspace.delete(workspace);
-      await this.workspace.deleteSpace(workspace);
+    const ownedWorkspaces = Array.from(
+      new Set(
+        Array.isArray(payload.ownedWorkspaces) ? payload.ownedWorkspaces : []
+      )
+    );
+
+    if (!ownedWorkspaces.length) {
+      this.logger.debug(
+        `Skip workspace cleanup for deleted user ${payload.id}: no owned workspaces`
+      );
+      return;
+    }
+
+    for (
+      let offset = 0;
+      offset < ownedWorkspaces.length;
+      offset += USER_WORKSPACE_DELETE_CONCURRENCY
+    ) {
+      const batch = ownedWorkspaces.slice(
+        offset,
+        offset + USER_WORKSPACE_DELETE_CONCURRENCY
+      );
+
+      await Promise.all(
+        batch.map(async workspace => {
+          await this.models.workspace.delete(workspace);
+          await this.workspace.deleteSpace(workspace);
+        })
+      );
     }
   }
 }
