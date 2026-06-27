@@ -664,7 +664,7 @@ type RecordingEventArgs = {
 };
 
 type ApplyModelArgs = {
-  /*  ​​User's complete instruction */
+  /* User's complete instruction */
   instruction?: string;
   /* Split individual semantic change requests */
   operation?: string;
@@ -864,14 +864,22 @@ export type EventArgs = {
   };
   editComment: { type: 'root' | 'node' };
   deleteComment: { type: 'root' | 'node' };
+  acceptAll: ApplyModelArgs;
+  rejectAll: ApplyModelArgs;
   accept: ApplyModelArgs;
   reject: ApplyModelArgs;
   apply: ApplyModelArgs;
+  copy: ApplyModelArgs;
 };
+
+type MissingApplyModelEventArgs = Exclude<ApplyModelEvents, keyof EventArgs>;
 
 // for type checking
 // if it complains, check the definition of [EventArgs] to make sure it's key is a subset of [UserEvents]
 export const YOU_MUST_DEFINE_ARGS_WITH_WRONG_EVENT_NAME: keyof EventArgs extends UserEvents
+  ? true
+  : false = true;
+export const YOU_MUST_DEFINE_ARGS_FOR_ALL_APPLY_MODEL_EVENTS: MissingApplyModelEventArgs extends never
   ? true
   : false = true;
 

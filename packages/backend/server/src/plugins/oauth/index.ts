@@ -5,7 +5,7 @@ import { Module } from '@nestjs/common';
 import { ServerConfigModule } from '../../core';
 import { AUTH_OAUTH_PROVIDER_READER, AuthModule } from '../../core/auth';
 import { UserModule } from '../../core/user';
-import { OAuthController } from './controller';
+import { OAuthController, OAuthWebCallbackController } from './controller';
 import { OAuthProviderFactory } from './factory';
 import { OAuthProviders } from './providers';
 import { OAuthResolver } from './resolver';
@@ -20,6 +20,6 @@ import { OAuthService } from './service';
     OAuthResolver,
     ...OAuthProviders,
   ],
-  controllers: [OAuthController],
+  controllers: [OAuthController, OAuthWebCallbackController],
 })
 export class OAuthModule {}

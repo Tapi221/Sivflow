@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
+  Query,
   type RawBodyRequest,
   Req,
   Res,
@@ -27,6 +29,84 @@ import {
 import { OAuthProviderName } from './config';
 import { OAuthProviderFactory } from './factory';
 import { OAuthService } from './service';
+
+type OAuthCallbackStatePayload = {
+  state?: string;
+  client?: string;
+  provider?: string;
+};
+
+function parseCallbackState(stateStr: string): OAuthCallbackStatePayload | null {
+  try {
+    const parsed = JSON.parse(stateStr) as Record<string, unknown>;
+    if (!parsed || typeof parsed !== 'object') {
+      return null;
+    }
+
+    return {
+      state: typeof parsed.state === 'string' ? parsed.state : undefined,
+      client: typeof parsed.client === 'string' ? parsed.client : undefined,
+      provider:
+        typeof parsed.provider === 'string' ? parsed.provider : undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function getQueryValue(value: unknown) {
+  if (Array.isArray(value)) {
+    value = value[0];
+  }
+
+  return typeof value === 'string' && value.length > 0 ? value : undefined;
+}
+
+@Controller('/oauth')
+export class OAuthWebCallbackController {
+  constructor(private readonly url: URLHelper) {}
+
+  @Public()
+  @Get('/callback')
+  callback(
+    @Res() res: Response,
+    @Query('code') rawCode?: unknown,
+    @Query('state') rawState?: unknown
+  ) {
+    const code = getQueryValue(rawCode);
+    const stateStr = getQueryValue(rawState);
+
+    if (!code) {
+      throw new MissingOauthQueryParameter({ name: 'code' });
+    }
+    if (!stateStr) {
+      throw new MissingOauthQueryParameter({ name: 'state' });
+    }
+
+    const state = parseCallbackState(stateStr);
+    if (!state?.state) {
+      throw new MissingOauthQueryParameter({ name: 'state' });
+    }
+
+    if (!state.client || state.client === 'web') {
+      throw new ActionForbidden();
+    }
+
+    const clientUrl = new URL(`${state.client}://authentication`);
+    clientUrl.searchParams.set('method', 'oauth');
+    clientUrl.searchParams.set(
+      'payload',
+      JSON.stringify({
+        state: state.state,
+        code,
+        provider: state.provider,
+      })
+    );
+    clientUrl.searchParams.set('server', this.url.requestOrigin);
+
+    return res.redirect(clientUrl.toString());
+  }
+}
 
 @Controller('/api/oauth')
 export class OAuthController {

@@ -30,11 +30,24 @@ const TRUSTED_REDIRECT_DOMAINS = [
 ].map(d => d.toLowerCase());
 
 function normalizeHostname(hostname: string) {
-  return hostname.toLowerCase().replace(/\.$/, '');
+  return hostname.toLowerCase().replace(/^\[/, '').replace(/\]$/, '').replace(/\.$/, '');
 }
 
 function hostnameMatchesDomain(hostname: string, domain: string) {
   return hostname === domain;
+}
+
+function hostnameFromHost(host: string) {
+  try {
+    return normalizeHostname(new URL(`http://${host}`).hostname);
+  } catch {
+    return normalizeHostname(host.split(':')[0] ?? host);
+  }
+}
+
+function isDevLoopbackHost(host: string) {
+  const hostname = hostnameFromHost(host);
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
 }
 
 @Injectable()
@@ -83,12 +96,21 @@ export class URLHelper {
   }
 
   get requestOrigin() {
+    const requestHost = this.cls?.get<string | undefined>(CLS_REQUEST_HOST);
+
+    if (!this.config.server.externalUrl && requestHost && env.dev) {
+      // Vite の開発プロキシ経由では、OAuth の戻り先を Vite 側に戻す必要がある。
+      // ループバックホストだけに限定し、本番や外部ホストでは設定値を優先する。
+      if (isDevLoopbackHost(requestHost)) {
+        return this.convertHostToOrigin(requestHost);
+      }
+    }
+
     if (this.config.server.hosts.length === 0) {
       return this.origin;
     }
 
     // support multiple hosts
-    const requestHost = this.cls?.get<string | undefined>(CLS_REQUEST_HOST);
     if (!requestHost || !this.config.server.hosts.includes(requestHost)) {
       return this.origin;
     }

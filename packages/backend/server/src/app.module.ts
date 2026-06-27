@@ -63,6 +63,10 @@ import { OAuthModule } from './plugins/oauth';
 import { PaymentModule } from './plugins/payment';
 import { WorkerModule } from './plugins/worker';
 
+function getRequestHost(req: Request) {
+  return req.get('host') ?? req.hostname;
+}
+
 export const FunctionalityModules = [
   ClsModule.forRoot({
     global: true,
@@ -76,7 +80,7 @@ export const FunctionalityModules = [
       },
       setup(cls, req: Request, res: Response) {
         res.setHeader('X-Request-Id', cls.getId());
-        cls.set(CLS_REQUEST_HOST, req.hostname);
+        cls.set(CLS_REQUEST_HOST, getRequestHost(req));
       },
     },
     // for websocket connection
@@ -90,7 +94,7 @@ export const FunctionalityModules = [
       },
       setup(cls, context: ExecutionContext) {
         const req = getRequestFromHost(context);
-        cls.set(CLS_REQUEST_HOST, req.hostname);
+        cls.set(CLS_REQUEST_HOST, getRequestHost(req));
       },
     },
     plugins: [
