@@ -158,4 +158,4 @@ if (!/["']?networkTimeoutSeconds["']?\s*:\s*3/.test(sw)) {
   fail("NetworkFirst route must keep networkTimeoutSeconds:3.");
 }
 
-console.log("[verify-sw] OK");
+console.log("[verify-sw] OK: Service Worker 検証が完了しました");
