@@ -20,6 +20,7 @@
     "npmize": "node scripts/npmize-workspace-protocols.mjs",
     "lint": "npm run typecheck",
     "typecheck": "tsc --build packages/frontend/apps/web/tsconfig.json --pretty false",
+    "test:backend": "npm --workspace @affine/server run test",
     "test:blocksuite": "npm --workspace @blocksuite/integration-test run test:unit",
     "test:blocksuite:debug": "npm --workspace @blocksuite/integration-test run test:debug",
     "db:check": "node scripts/check-local-services.mjs",

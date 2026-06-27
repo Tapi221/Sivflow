@@ -1,5 +1,9 @@
 const newE2E = process.env.TEST_MODE === 'e2e';
-const newE2ETests = './src/__tests__/e2e/**/*.spec.ts';
+const externalTestsRoot = '../../../tests/backend/server/src';
+const newE2ETests = [
+  './src/__tests__/e2e/**/*.spec.ts',
+  `${externalTestsRoot}/__tests__/e2e/**/*.spec.ts`,
+];
 
 const preludes = ['./src/prelude.ts'];
 
@@ -16,8 +20,14 @@ export default {
     ignoreChanges: ['**/*.gen.*'],
   },
   files: newE2E
-    ? [newE2ETests]
-    : ['**/*.spec.ts', '**/*.e2e.ts', '!' + newE2ETests],
+    ? newE2ETests
+    : [
+        '**/*.spec.ts',
+        '**/*.e2e.ts',
+        `${externalTestsRoot}/**/*.spec.ts`,
+        `${externalTestsRoot}/**/*.e2e.ts`,
+        ...newE2ETests.map(pattern => '!' + pattern),
+      ],
   require: preludes,
   environmentVariables: {
     NODE_ENV: 'test',
