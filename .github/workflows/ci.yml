@@ -16,3 +16,4 @@ jobs:
       - run: npm run verify:source-conventions
       - run: npm run typecheck
       - run: npm run build
+      - run: npm run check:nbstore-worker
