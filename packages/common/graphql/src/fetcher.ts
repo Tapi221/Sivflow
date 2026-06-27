@@ -11,6 +11,13 @@ export type NotArray<T> = T extends Array<unknown> ? never : T;
 type UnknownRecord = Record<string, unknown>;
 type GraphQLResponseError = NonNullable<ExecutionResult['errors']>[number];
 
+type GraphQLErrorContext = {
+  operationName?: string;
+  status?: number;
+  statusText?: string;
+  responseBody?: unknown;
+};
+
 export type FetchInit = RequestInit & { timeout?: number };
 
 export type _QueryVariables<Q extends GraphQLQuery> =
@@ -129,18 +136,16 @@ function filterEmptyValue(vars: unknown): unknown {
 export function transformToForm(body: RequestBody) {
   const form = new FormData();
   const gqlBody: {
-    name?: string;
+    operationName?: string;
     query: string;
     variables: unknown;
-    map: Record<string, string[]>;
   } = {
     query: body.query,
     variables: body.variables,
-    map: {},
   };
 
   if (body.operationName) {
-    gqlBody.name = body.operationName;
+    gqlBody.operationName = body.operationName;
   }
   const map: Record<string, string[]> = {};
   const files: File[] = [];
@@ -202,10 +207,56 @@ function serializeGraphQLError(error: GraphQLResponseError) {
   };
 }
 
-function createGraphQLError(errors: readonly GraphQLResponseError[]) {
+function pickString(value: unknown, fallback: string) {
+  return typeof value === 'string' && value.length ? value : fallback;
+}
+
+function pickNumber(value: unknown, fallback: number) {
+  return typeof value === 'number' ? value : fallback;
+}
+
+function createErrorExtensions(
+  message: string,
+  errors: readonly GraphQLResponseError[],
+  context: GraphQLErrorContext,
+  extensions: GraphQLResponseError['extensions'] = {}
+) {
+  const baseExtensions = isRecordValue(extensions) ? extensions : {};
+  const status = pickNumber(baseExtensions.status, context.status ?? 500);
+  const code = pickString(
+    baseExtensions.code,
+    status >= 400 && status < 500 ? 'GRAPHQL_BAD_REQUEST' : 'INTERNAL_SERVER_ERROR'
+  );
+
+  return {
+    ...baseExtensions,
+    status,
+    code,
+    type: pickString(baseExtensions.type, code),
+    name: pickString(baseExtensions.name, code),
+    message: pickString(baseExtensions.message, message),
+    graphQLErrors: errors.map(serializeGraphQLError),
+    operationName: context.operationName,
+    statusText: context.statusText,
+    responseBody: context.responseBody,
+  };
+}
+
+function createGraphQLError(
+  errors: readonly GraphQLResponseError[],
+  context: GraphQLErrorContext = {}
+) {
   const firstError = errors[0];
+  const fallbackMessage = context.status
+    ? `GraphQL request failed with status ${context.status}${
+        context.statusText ? ` ${context.statusText}` : ''
+      }`
+    : 'Empty GraphQL error body';
+
   if (!firstError) {
-    return new GraphQLError('Empty GraphQL error body');
+    return new GraphQLError(fallbackMessage, {
+      extensions: createErrorExtensions(fallbackMessage, errors, context),
+    });
   }
 
   const message =
@@ -219,10 +270,12 @@ function createGraphQLError(errors: readonly GraphQLResponseError[]) {
     positions: firstError.positions,
     path: firstError.path,
     originalError: firstError.originalError,
-    extensions: {
-      ...firstError.extensions,
-      graphQLErrors: errors.map(serializeGraphQLError),
-    },
+    extensions: createErrorExtensions(
+      message,
+      errors,
+      context,
+      firstError.extensions
+    ),
   });
 }
 
@@ -252,28 +305,45 @@ export const gqlFetcherFactory = (
     if (!isFormData) {
       headers['content-type'] = 'application/json';
     }
-    const ret = fetcher(
-      endpoint,
-      merge(options.context, {
-        method: 'POST',
-        headers,
-        body: isFormData ? body : JSON.stringify(body),
-        timeout: options.timeout,
-        signal: options.signal,
-      })
-    ).then(async res => {
+
+    const requestInit = merge({}, options.context, {
+      method: 'POST',
+      headers,
+      body: isFormData ? body : JSON.stringify(body),
+      timeout: options.timeout,
+      signal: options.signal,
+    });
+
+    const ret = fetcher(endpoint, requestInit).then(async res => {
+      const errorContext: GraphQLErrorContext = {
+        operationName: options.query.op,
+        status: res.status,
+        statusText: res.statusText,
+      };
+
       if (res.headers.get('content-type')?.startsWith('application/json')) {
         const result = (await res.json()) as ExecutionResult;
+        errorContext.responseBody = result;
         if (res.status >= 400 || result.errors) {
-          throw createGraphQLError(result.errors ?? []);
+          throw createGraphQLError(result.errors ?? [], errorContext);
         } else if (result.data) {
           // we have to cast here because the type of result.data is a union type
           return result.data as QueryResponse<Query>;
         }
+      } else if (res.status >= 400) {
+        errorContext.responseBody = await res.text().catch(() => undefined);
+        throw createGraphQLError([], errorContext);
       }
 
       throw new GraphQLError(
-        'GraphQL query responds unexpected result, query ' + options.query.op
+        'GraphQL query responds unexpected result, query ' + options.query.op,
+        {
+          extensions: createErrorExtensions(
+            'GraphQL query responds unexpected result, query ' + options.query.op,
+            [],
+            errorContext
+          ),
+        }
       );
     });
 
