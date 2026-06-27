@@ -26,7 +26,7 @@ class NetworkMonitor implements INetworkMonitor {
   };
 
   private handleOnline = () => {
-    console.log("[NetworkMonitor] Network is online");
+    console.log("[NetworkMonitor] ネットワークはオンラインです");
     this.updateStatus();
     // 復帰時に即座にgoodに戻す試み（updateStatus内でのロジックに依存）
     if (this._status === "offline") {
@@ -36,7 +36,7 @@ class NetworkMonitor implements INetworkMonitor {
   };
 
   private handleOffline = () => {
-    console.log("[NetworkMonitor] Network is offline");
+    console.log("[NetworkMonitor] ネットワークはオフラインです");
     this._status = "offline";
     this.notifyListeners();
   };
@@ -161,7 +161,7 @@ class NetworkMonitor implements INetworkMonitor {
     // 状態変化があればリスナーに通知
     if (oldStatus !== this._status) {
       console.log(
-        `[NetworkMonitor] Status changed: ${oldStatus} -> ${this._status}`,
+        `[NetworkMonitor] 状態が変わりました: ${oldStatus} -> ${this._status}`,
       );
       this.notifyListeners();
     }
