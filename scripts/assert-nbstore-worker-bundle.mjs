@@ -42,9 +42,8 @@ const sourceChecks = [
       /import\s+["']\.\/iterator-helpers["'];?/,
       /import\s+["']\.\/promise-with-resolvers["'];?/,
       /import\s+["']\.\/request-idle-callback["'];?/,
-      /import\s+["']\.\/html-element["'];?/,
     ],
-    forbidden: [/resize-observer/, /\.\/browser/],
+    forbidden: [/resize-observer/, /\.\/browser/, /\.\/html-element/],
   },
 ];
 
@@ -53,6 +52,8 @@ const bundleForbiddenSignatures = [
   /react-router-dom/,
   /reactRouterV6BrowserTracingIntegration/,
   /bootstrap\/browser/,
+  /documentStub/,
+  /createTreeWalker/,
 ];
 
 const findFiles = dir =>
