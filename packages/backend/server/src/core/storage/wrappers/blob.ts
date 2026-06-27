@@ -198,10 +198,13 @@ export class WorkspaceBlobStorage {
       return { ok: false, reason: 'checksum_mismatch' };
     }
 
-    const base64 = checksum.digest('base64');
-    const base64urlWithPadding = base64.replace(/\+/g, '-').replace(/\//g, '_');
+    const base64url = checksum
+      .digest('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
 
-    if (base64urlWithPadding !== key) {
+    if (base64url !== key) {
       try {
         await this.provider.delete(`${workspaceId}/${key}`);
       } catch (e) {
