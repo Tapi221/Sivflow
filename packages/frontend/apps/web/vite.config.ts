@@ -47,6 +47,28 @@ const stripPrivateAccessorPlugin = {
   },
 };
 
+const viteFsPrefix = '/@fs/';
+const vanillaExtractVirtualCssSuffix = '.vanilla.css';
+
+const normalizeVanillaExtractFsVirtualCssPlugin = {
+  name: 'sivflow-normalize-vanilla-extract-fs-virtual-css',
+  enforce: 'pre' as const,
+  resolveId(source: string) {
+    const [validId, query] = source.split('?');
+
+    if (
+      !validId.startsWith(viteFsPrefix) ||
+      !validId.endsWith(vanillaExtractVirtualCssSuffix)
+    ) {
+      return null;
+    }
+
+    const normalizedId = validId.slice(viteFsPrefix.length);
+
+    return query ? `${normalizedId}?${query}` : normalizedId;
+  },
+};
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
@@ -60,7 +82,12 @@ export default defineConfig({
   esbuild: {
     target: rollupCompatibleTarget,
   },
-  plugins: [stripPrivateAccessorPlugin, vanillaExtractPlugin(), react()],
+  plugins: [
+    stripPrivateAccessorPlugin,
+    normalizeVanillaExtractFsVirtualCssPlugin,
+    vanillaExtractPlugin(),
+    react(),
+  ],
   resolve: {
     alias: {
       '@affine/core': path.resolve(__dirname, '../../core/src'),
