@@ -3,7 +3,6 @@ mutation resumeSubscription(
   $workspaceId: String
 ) {
   resumeSubscription(plan: $plan, workspaceId: $workspaceId) {
-    id
     status
     nextBillAt
     start
