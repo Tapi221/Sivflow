@@ -24,19 +24,23 @@ const sourceChecks = [
   {
     label: "Worker bootstrap",
     relativePath: "packages/frontend/core/src/bootstrap/worker.ts",
-    required: [/import\s+["']\.\/env["'];?/, /import\s+["']\.\/public-path["'];?/, /import\s+["']\.\/polyfill\/worker["'];?/],
+    required: [
+      /import\s+["']\.\/env["'];?/,
+      /import\s+["']\.\/public-path["'];?/,
+      /import\s+["']\.\/polyfill\/worker["'];?/,
+    ],
     forbidden: [/\.\/telemetry/, /\.\/polyfill\/browser/],
   },
   {
     label: "Worker polyfill",
     relativePath: "packages/frontend/core/src/bootstrap/polyfill/worker.ts",
     required: [
-      /import\s+["']\.\/array["'];?/, 
-      /import\s+["']\.\/set["'];?/, 
-      /import\s+["']\.\/dispose["'];?/, 
-      /import\s+["']\.\/iterator-helpers["'];?/, 
-      /import\s+["']\.\/promise-with-resolvers["'];?/, 
-      /import\s+["']\.\/request-idle-callback["'];?/
+      /import\s+["']\.\/array["'];?/,
+      /import\s+["']\.\/set["'];?/,
+      /import\s+["']\.\/dispose["'];?/,
+      /import\s+["']\.\/iterator-helpers["'];?/,
+      /import\s+["']\.\/promise-with-resolvers["'];?/,
+      /import\s+["']\.\/request-idle-callback["'];?/,
     ],
     forbidden: [/resize-observer/, /\.\/browser/],
   },
