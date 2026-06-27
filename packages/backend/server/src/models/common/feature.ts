@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { OneDay, OneGB, OneMB } from '../../base';
+import { createGlobalEnv } from '../../env';
 
 const UserPlanQuotaConfig = z.object({
   // quota name
@@ -148,7 +149,10 @@ export const FeatureConfigs: {
   };
 } = {
   get free_plan_v1() {
-    return env.selfhosted ? ProFeature : FreeFeature;
+    if (!globalThis.env) {
+      createGlobalEnv();
+    }
+    return globalThis.env.selfhosted ? ProFeature : FreeFeature;
   },
   pro_plan_v1: ProFeature,
   lifetime_pro_plan_v1: LifetimeProFeature,
