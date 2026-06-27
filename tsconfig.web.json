@@ -19,8 +19,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
-    "typeRoots": ["./types", "./node_modules/@types"],
-    "types": ["vite/client", "sivflow-globals"]
+    "types": ["vite/client"]
   },
   "exclude": [
     "node_modules",
