@@ -72,7 +72,15 @@ export class Server extends Entity<{
   readonly revalidateConfig = effect(
     exhaustMap(() => {
       if (!BUILD_CONFIG.backendEnabled) {
-        return fromPromise(async () => this.config$.value);
+        return fromPromise(async () => {
+          const config = this.serverListStore.getServerConfig(
+            this.serverMetadata.id
+          );
+          if (!config) {
+            throw new Error('Failed to load local server config');
+          }
+          return config;
+        });
       }
 
       return fromPromise(signal =>
