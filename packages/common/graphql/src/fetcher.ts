@@ -8,6 +8,8 @@ import type { Mutations, Queries } from './schema';
 
 export type NotArray<T> = T extends Array<unknown> ? never : T;
 
+type UnknownRecord = Record<string, unknown>;
+
 export type FetchInit = RequestInit & { timeout?: number };
 
 export type _QueryVariables<Q extends GraphQLQuery> =
@@ -52,7 +54,7 @@ type AllowedRequestContext = Omit<RequestInit, 'method' | 'body'>;
 
 export interface RequestBody {
   operationName?: string;
-  variables: any;
+  variables: unknown;
   query: string;
   form?: FormData;
 }
@@ -95,17 +97,29 @@ export type MutationOptions<M extends GraphQLQuery> = RequestOptions<M> & {
   mutation: M;
 };
 
-function filterEmptyValue(vars: any) {
-  const newVars: Record<string, any> = {};
+function isFileValue(value: unknown): value is File {
+  return typeof File !== 'undefined' && value instanceof File;
+}
+
+function isRecordValue(value: unknown): value is UnknownRecord {
+  return isObject(value) && !Array.isArray(value) && !isFileValue(value);
+}
+
+function filterEmptyValue(vars: unknown): unknown {
+  if (Array.isArray(vars)) {
+    return vars.map(value => filterEmptyValue(value));
+  }
+
+  if (!isRecordValue(vars)) {
+    return vars;
+  }
+
+  const newVars: UnknownRecord = {};
   Object.entries(vars).forEach(([key, value]) => {
     if (isNil(value)) {
       return;
     }
-    if (isObject(value) && !(value instanceof File)) {
-      newVars[key] = filterEmptyValue(value);
-      return;
-    }
-    newVars[key] = value;
+    newVars[key] = filterEmptyValue(value);
   });
 
   return newVars;
@@ -116,8 +130,8 @@ export function transformToForm(body: RequestBody) {
   const gqlBody: {
     name?: string;
     query: string;
-    variables: any;
-    map: any;
+    variables: unknown;
+    map: Record<string, string[]>;
   } = {
     query: body.query,
     variables: body.variables,
@@ -131,8 +145,8 @@ export function transformToForm(body: RequestBody) {
   const files: File[] = [];
   if (body.variables) {
     let i = 0;
-    const buildMap = (key: string, value: any) => {
-      if (value instanceof File) {
+    const buildMap = (key: string, value: unknown) => {
+      if (isFileValue(value)) {
         map['' + i] = [key];
         files[i] = value;
         i++;
@@ -140,7 +154,7 @@ export function transformToForm(body: RequestBody) {
         value.forEach((v, index) => {
           buildMap(`${key}.${index}`, v);
         });
-      } else if (isObject(value)) {
+      } else if (isRecordValue(value)) {
         Object.entries(value).forEach(([k, v]) => {
           buildMap(`${key}.${k}`, v);
         });
@@ -226,7 +240,7 @@ export const gqlFetcherFactory = (
           }
         } else if (result.data) {
           // we have to cast here because the type of result.data is a union type
-          return result.data as any;
+          return result.data as QueryResponse<Query>;
         }
       }
 
