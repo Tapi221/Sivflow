@@ -99,7 +99,7 @@ const cleanupBeforeDocumentUpdate = async (db: DocDbCtx, id: string, changes: un
         await deleteDocumentBlob(previousLocalBlobId, { userId: db.userId });
         removeDocumentBlobUrl(previousLocalBlobId, { userId: db.userId });
       } else {
-        console.info("[LocalDB] Skip deleting shared document blob", {
+        console.info("[LocalDB] 共有中のドキュメント blob のため削除をスキップしました", {
           documentId: id,
           localBlobId: previousLocalBlobId,
         });
@@ -107,7 +107,7 @@ const cleanupBeforeDocumentUpdate = async (db: DocDbCtx, id: string, changes: un
     }
   } catch (err) {
     console.warn(
-      "[LocalDB] updateItem documents blob replace cleanup failed",
+      "[LocalDB] updateItem のドキュメント blob 置換クリーンアップに失敗しました",
       err,
     );
   }
@@ -130,14 +130,14 @@ const cleanupBeforeDocumentDelete = async (db: DocDbCtx, id: string) => {
         await deleteDocumentBlob(localBlobId, { userId: db.userId });
         removeDocumentBlobUrl(localBlobId, { userId: db.userId });
       } else {
-        console.info("[LocalDB] Skip deleting shared document blob", {
+        console.info("[LocalDB] 共有中のドキュメント blob のため削除をスキップしました", {
           documentId: id,
           localBlobId,
         });
       }
     }
   } catch (err) {
-    console.warn("[LocalDB] deleteItem documents blob cleanup failed", err);
+    console.warn("[LocalDB] deleteItem のドキュメント blob クリーンアップに失敗しました", err);
   }
 };
 const cleanupBeforeDocumentSoftDelete = async (db: DocDbCtx, id: string) => {
@@ -158,14 +158,14 @@ const cleanupBeforeDocumentSoftDelete = async (db: DocDbCtx, id: string) => {
         await deleteDocumentBlob(localBlobId, { userId: db.userId });
         removeDocumentBlobUrl(localBlobId, { userId: db.userId });
       } else {
-        console.info("[LocalDB] Skip deleting shared document blob", {
+        console.info("[LocalDB] 共有中のドキュメント blob のため削除をスキップしました", {
           documentId: id,
           localBlobId,
         });
       }
     }
   } catch (err) {
-    console.warn("[LocalDB] softDelete documents blob cleanup failed", err);
+    console.warn("[LocalDB] softDelete のドキュメント blob クリーンアップに失敗しました", err);
   }
 };
 
