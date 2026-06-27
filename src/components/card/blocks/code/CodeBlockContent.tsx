@@ -82,34 +82,25 @@ const getEditorSelectionRange = (root: HTMLElement): EditorTextSelection | null 
     end: Math.max(anchorOffset, focusOffset),
   };
 };
-const createEditorTextWalker = (root: HTMLElement): TreeWalker | null => {
-  const ownerDocument = root.ownerDocument ?? document;
-
-  if (typeof ownerDocument.createTreeWalker !== "function") {
-    return null;
+const collectTextNodes = (root: Node, result: Text[] = []) => {
+  if (root.nodeType === Node.TEXT_NODE) {
+    result.push(root as Text);
+    return result;
   }
 
-  try {
-    return ownerDocument.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-  } catch (error) {
-    console.warn("コードブロックのテキスト走査を作成できませんでした", error);
-    return null;
+  for (const child of Array.from(root.childNodes)) {
+    collectTextNodes(child, result);
   }
+
+  return result;
 };
 const getTextPositionAtOffset = (root: HTMLElement, offset: number) => {
   const safeOffset = clampTextOffset(offset, root.textContent?.length ?? 0);
-  const walker = createEditorTextWalker(root);
-
-  if (!walker) {
-    return { node: root, offset: 0 };
-  }
-
+  const textNodes = collectTextNodes(root);
   let remaining = safeOffset;
   let lastTextNode: Text | null = null;
-  let currentNode = walker.nextNode();
 
-  while (currentNode) {
-    const textNode = currentNode as Text;
+  for (const textNode of textNodes) {
     const textLength = textNode.data.length;
 
     if (remaining <= textLength) {
@@ -118,7 +109,6 @@ const getTextPositionAtOffset = (root: HTMLElement, offset: number) => {
 
     remaining -= textLength;
     lastTextNode = textNode;
-    currentNode = walker.nextNode();
   }
 
   if (lastTextNode) {
