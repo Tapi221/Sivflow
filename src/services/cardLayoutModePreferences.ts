@@ -47,7 +47,7 @@ const writeStorageValue = (key: string, value: string) => {
   try {
     window.localStorage.setItem(key, value);
   } catch {
-    // Ignore local persistence failures and keep the in-memory override path working.
+    // ローカル保存に失敗しても、メモリ上の上書き経路は動き続けるため無視します。
   }
 };
 const getCardLayoutModePreference = (scope: CardLayoutModePreferenceScope): CardLayoutMode | null => {
