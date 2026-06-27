@@ -130,4 +130,4 @@ const updateFile = (filePath) => {
 
 const updatedFiles = SOURCE_DIRECTORIES.flatMap(walkSourceFiles).filter(updateFile);
 
-console.log(`Updated ${updatedFiles.length} file(s) to alias import paths.`);
+console.log(`${updatedFiles.length} 件のファイルをエイリアス import パスへ更新しました。`);
