@@ -27,7 +27,7 @@ export const UsingHook = () => {
       children: 'Are you sure you want to confirm?',
       onConfirm,
       onCancel: () => {
-        console.log('Cancelled');
+        console.log('キャンセルしました');
       },
     });
   };
@@ -44,9 +44,9 @@ export const AutoClose = () => {
       confirmText: 'Confirm',
       title: 'Confirm Modal',
       children: 'Are you sure you want to confirm?',
-      onConfirm: () => console.log('Confirmed'),
+      onConfirm: () => console.log('確認しました'),
       onCancel: () => {
-        console.log('Cancelled');
+        console.log('キャンセルしました');
       },
     });
   };
