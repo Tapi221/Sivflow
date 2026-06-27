@@ -64,7 +64,7 @@ function spawnOrReloadElectron() {
   // Stops the watch script when the application has quit
   spawnProcess.on('exit', code => {
     if (code && code !== 0) {
-      console.log(`Electron exited with code ${code}`);
+      console.log(`Electron はコード ${code} で終了しました`);
     }
   });
 }
@@ -83,7 +83,7 @@ async function watchLayers() {
           setup(build) {
             build.onEnd(() => {
               if (initialBuild) {
-                console.log(`[layers] has changed, [re]launching electron...`);
+                console.log(`[layers] 変更を検出しました。Electron を再起動しています...`);
                 spawnOrReloadElectron();
               } else {
                 buildContextPromise.then(resolve).catch(e => {
@@ -109,9 +109,9 @@ async function watchLayers() {
 await watchLayers();
 
 if (watchMode) {
-  console.log(`Watching for changes...`);
+  console.log(`変更を監視しています...`);
 } else {
-  console.log('Starting electron...');
+  console.log('Electron を起動しています...');
   spawnOrReloadElectron();
-  console.log(`Electron is started, watching for changes...`);
+  console.log(`Electron を起動しました。変更を監視しています...`);
 }
