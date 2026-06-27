@@ -2,8 +2,14 @@ import { PlaygroundChat } from './chat';
 import { PlaygroundContent } from './content';
 import { PlaygroundModal } from './modal';
 
+function defineElement(tagName: string, elementClass: CustomElementConstructor) {
+  if (!customElements.get(tagName)) {
+    customElements.define(tagName, elementClass);
+  }
+}
+
 export function effects() {
-  customElements.define('playground-chat', PlaygroundChat);
-  customElements.define('playground-content', PlaygroundContent);
-  customElements.define('playground-modal', PlaygroundModal);
+  defineElement('playground-chat', PlaygroundChat);
+  defineElement('playground-content', PlaygroundContent);
+  defineElement('playground-modal', PlaygroundModal);
 }
