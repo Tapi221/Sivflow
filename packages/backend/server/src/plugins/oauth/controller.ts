@@ -104,11 +104,7 @@ export class OAuthWebCallbackController {
     );
     clientUrl.searchParams.set('server', this.url.requestOrigin);
 
-    return res.redirect(
-      this.url.link('/open-app/url?', {
-        url: clientUrl.toString(),
-      })
-    );
+    return res.redirect(clientUrl.toString());
   }
 }
 
