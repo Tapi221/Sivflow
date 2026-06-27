@@ -1,25 +1,30 @@
+type BuildChannel = 'stable' | 'beta' | 'internal' | 'canary';
+
 type TrackBuildConfig = Pick<
   BUILD_CONFIG_TYPE,
   | 'SENTRY_DSN'
-  | 'appBuildType'
   | 'appVersion'
   | 'distribution'
   | 'editorVersion'
   | 'isElectron'
   | 'isMobileEdition'
->;
+> & {
+  appBuildType: string;
+  channel: BuildChannel;
+};
 
 const fallbackBuildConfig: TrackBuildConfig = {
   SENTRY_DSN: '',
   appBuildType: 'stable',
   appVersion: '',
+  channel: 'stable',
   distribution: 'web',
   editorVersion: '',
   isElectron: false,
   isMobileEdition: false,
 };
 
-const buildChannels = new Set<BUILD_CONFIG_TYPE['appBuildType']>([
+const buildChannels = new Set<BuildChannel>([
   'stable',
   'beta',
   'internal',
@@ -35,7 +40,15 @@ const distributions = new Set<BUILD_CONFIG_TYPE['distribution']>([
   'android',
 ]);
 
-function readGlobalBuildConfig() {
+function readGlobalBuildConfig(): Partial<BUILD_CONFIG_TYPE> | undefined {
+  try {
+    if (typeof BUILD_CONFIG !== 'undefined') {
+      return BUILD_CONFIG;
+    }
+  } catch {
+    // BUILD_CONFIG が未注入の環境では globalThis 側の確認に進む
+  }
+
   return (globalThis as { BUILD_CONFIG?: Partial<BUILD_CONFIG_TYPE> })
     .BUILD_CONFIG;
 }
@@ -48,10 +61,10 @@ function readBoolean(value: unknown, fallback = false) {
   return typeof value === 'boolean' ? value : fallback;
 }
 
-function readBuildChannel(value: unknown) {
-  return buildChannels.has(value as BUILD_CONFIG_TYPE['appBuildType'])
-    ? (value as BUILD_CONFIG_TYPE['appBuildType'])
-    : fallbackBuildConfig.appBuildType;
+function readBuildChannel(value: unknown): BuildChannel {
+  return buildChannels.has(value as BuildChannel)
+    ? (value as BuildChannel)
+    : fallbackBuildConfig.channel;
 }
 
 function readDistribution(value: unknown) {
@@ -65,8 +78,12 @@ export function getBuildConfig(): TrackBuildConfig {
 
   return {
     SENTRY_DSN: readString(buildConfig?.SENTRY_DSN),
-    appBuildType: readBuildChannel(buildConfig?.appBuildType),
+    appBuildType: readString(
+      buildConfig?.appBuildType,
+      fallbackBuildConfig.appBuildType
+    ),
     appVersion: readString(buildConfig?.appVersion),
+    channel: readBuildChannel(buildConfig?.appBuildType),
     distribution: readDistribution(buildConfig?.distribution),
     editorVersion: readString(buildConfig?.editorVersion),
     isElectron: readBoolean(buildConfig?.isElectron),
@@ -75,5 +92,5 @@ export function getBuildConfig(): TrackBuildConfig {
 }
 
 export function getBuildChannel() {
-  return getBuildConfig().appBuildType;
+  return getBuildConfig().channel;
 }
