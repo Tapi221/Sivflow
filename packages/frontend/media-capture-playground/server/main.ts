@@ -30,7 +30,7 @@ const PORT = process.env.PORT || 6544;
 
 // Ensure recordings directory exists
 fs.ensureDirSync(RECORDING_DIR);
-console.log(`📁 Ensuring recordings directory exists at ${RECORDING_DIR}`);
+console.log(`📁 録音ディレクトリを確認しました: ${RECORDING_DIR}`);
 
 // Types
 interface Recording {
@@ -198,25 +198,25 @@ async function saveRecording(
     const expectedSamples = recordingDuration * actualSampleRate;
 
     if (recording.isGlobal) {
-      console.log('💾 Saving global recording:');
+      console.log('💾 グローバル録音を保存しています:');
     } else {
       const appName = getAppName(app);
       const processId = getAppProcessId(app);
       const bundleId = getAppBundleIdentifier(app);
-      console.log(`💾 Saving recording for ${appName}:`);
+      console.log(`💾 ${appName} の録音を保存しています:`);
       if (app) {
-        console.log(`- Process ID: ${processId}`);
-        console.log(`- Bundle ID: ${bundleId}`);
+        console.log(`- プロセスID: ${processId}`);
+        console.log(`- バンドルID: ${bundleId}`);
       }
     }
 
-    console.log(`- Actual duration: ${recordingDuration.toFixed(2)}s`);
-    console.log(`- Sample rate: ${actualSampleRate}Hz`);
-    console.log(`- Channels: ${channelCount}`);
-    console.log(`- Expected samples: ${Math.floor(expectedSamples)}`);
-    console.log(`- Actual samples: ${totalSamples}`);
+    console.log(`- 実際の長さ: ${recordingDuration.toFixed(2)}s`);
+    console.log(`- サンプルレート: ${actualSampleRate}Hz`);
+    console.log(`- チャンネル数: ${channelCount}`);
+    console.log(`- 想定サンプル数: ${Math.floor(expectedSamples)}`);
+    console.log(`- 実サンプル数: ${totalSamples}`);
     console.log(
-      `- Sample ratio: ${(totalSamples / expectedSamples).toFixed(2)}`
+      `- サンプル比: ${(totalSamples / expectedSamples).toFixed(2)}`
     );
 
     // Create a buffer for the audio
@@ -251,7 +251,7 @@ async function saveRecording(
     const metadataFilename = path.join(recordingDir, 'metadata.json');
     const iconFilename = path.join(recordingDir, 'icon.png');
 
-    console.log(`📝 Muxing Wav buffer ${wavFilename}`);
+    console.log(`📝 Wav バッファを生成しています: ${wavFilename}`);
     const wavBuffer = new Uint8Array(
       createWavBuffer(buffer, {
         sampleRate: actualSampleRate,
@@ -260,27 +260,27 @@ async function saveRecording(
     );
 
     // Save Wav file with the actual sample rate from the stream
-    console.log(`📝 Writing Wav file to ${wavFilename}`);
+    console.log(`📝 Wav ファイルを書き込んでいます: ${wavFilename}`);
     await fs.writeFile(wavFilename, wavBuffer);
-    console.log('✅ Wav file written successfully');
+    console.log('✅ Wav ファイルを書き込みました');
 
     // Save low-quality Wav file for transcription (8kHz)
     console.log(
-      `📝 Writing transcription wav file to ${transcriptionWavFilename}`
+      `📝 文字起こし用 Wav ファイルを書き込んでいます: ${transcriptionWavFilename}`
     );
 
     await fs.writeFile(transcriptionWavFilename, wavBuffer);
-    console.log('✅ Transcription Wav file written successfully');
+    console.log('✅ 文字起こし用 Wav ファイルを書き込みました');
 
     // Save app icon if available
     const appIcon = getAppIcon(app);
     if (appIcon) {
-      console.log(`📝 Writing app icon to ${iconFilename}`);
+      console.log(`📝 アプリアイコンを書き込んでいます: ${iconFilename}`);
       await fs.writeFile(iconFilename, appIcon);
-      console.log('✅ App icon written successfully');
+      console.log('✅ アプリアイコンを書き込みました');
     }
 
-    console.log(`📝 Writing metadata to ${metadataFilename}`);
+    console.log(`📝 メタデータを書き込んでいます: ${metadataFilename}`);
     // Save metadata with the actual sample rate from the stream
     const metadata: RecordingMetadata = {
       appName: getAppName(app),
@@ -296,7 +296,7 @@ async function saveRecording(
     };
 
     await fs.writeJson(metadataFilename, metadata, { spaces: 2 });
-    console.log('✅ Metadata file written successfully');
+    console.log('✅ メタデータファイルを書き込みました');
 
     return baseFilename;
   } catch (error) {
@@ -326,14 +326,14 @@ async function startRecording(app: ApplicationInfo) {
 
   if (recordingMap.has(appProcessId)) {
     console.log(
-      `⚠️ Recording already in progress for ${appName} (PID: ${appProcessId})`
+      `⚠️ ${appName} の録音はすでに進行中です (PID: ${appProcessId})`
     );
     return;
   }
 
   try {
     console.log(
-      `🎙️ Starting recording for ${appName} (Bundle: ${appBundleId}, PID: ${appProcessId})`
+      `🎙️ ${appName} の録音を開始しています (Bundle: ${appBundleId}, PID: ${appProcessId})`
     );
 
     const processGroupId = app.processGroupId;
@@ -347,7 +347,7 @@ async function startRecording(app: ApplicationInfo) {
     }
 
     console.log(
-      `🎙️ Recording from ${rootApp.name} (PID: ${rootApp.processId})`
+      `🎙️ ${rootApp.name} から録音しています (PID: ${rootApp.processId})`
     );
 
     const buffers: Float32Array[] = [];
@@ -374,7 +374,7 @@ async function startRecording(app: ApplicationInfo) {
       isWriting: false,
     });
 
-    console.log(`✅ Recording started successfully for ${rootApp.name}`);
+    console.log(`✅ ${rootApp.name} の録音を開始しました`);
     emitRecordingStatus();
   } catch (error) {
     console.error(`❌ Error starting recording for ${appName}:`, error);
@@ -384,7 +384,7 @@ async function startRecording(app: ApplicationInfo) {
 async function stopRecording(processId: number) {
   const recording = recordingMap.get(processId);
   if (!recording) {
-    console.log(`ℹ️ No active recording found for process ID ${processId}`);
+    console.log(`ℹ️ プロセスID ${processId} のアクティブな録音はありません`);
     return;
   }
 
@@ -394,9 +394,9 @@ async function stopRecording(processId: number) {
     : getAppName(app) || 'Unknown App';
   const appPid = getAppProcessId(app);
 
-  console.log(`⏹️ Stopping recording for ${appName} (PID: ${appPid})`);
+  console.log(`⏹️ ${appName} の録音を停止しています (PID: ${appPid})`);
   console.log(
-    `⏱️ Recording duration: ${((Date.now() - recording.startTime) / 1000).toFixed(2)}s`
+    `⏱️ 録音時間: ${((Date.now() - recording.startTime) / 1000).toFixed(2)}s`
   );
 
   let sampleRate = 0;
@@ -418,7 +418,7 @@ async function stopRecording(processId: number) {
   recordingMap.delete(processId);
 
   if (filename) {
-    console.log(`✅ Recording saved successfully to ${filename}`);
+    console.log(`✅ 録音を保存しました: ${filename}`);
   } else {
     console.error(`❌ Failed to save recording for ${appName}`);
   }
@@ -513,14 +513,14 @@ async function getRecordings(): Promise<
 
 async function setupRecordingsWatcher() {
   if (fsWatcher) {
-    console.log('🔄 Closing existing recordings watcher');
+    console.log('🔄 既存の録音ウォッチャーを閉じています');
     await fsWatcher.close();
   }
 
   try {
-    console.log('👀 Setting up recordings watcher...');
+    console.log('👀 録音ウォッチャーを設定しています...');
     const files = await getRecordings();
-    console.log(`📊 Found ${files.length} existing recordings`);
+    console.log(`📊 既存の録音が ${files.length} 件見つかりました`);
     io.emit('apps:saved', { recordings: files });
 
     fsWatcher = chokidar.watch(RECORDING_DIR, {
@@ -537,21 +537,21 @@ async function setupRecordingsWatcher() {
     fsWatcher
       .on('add', async path => {
         if (path.endsWith('.wav') || path.endsWith('.json')) {
-          console.log(`📝 File added: ${path}`);
+          console.log(`📝 ファイルが追加されました: ${path}`);
           const files = await getRecordings();
           io.emit('apps:saved', { recordings: files });
         }
       })
       .on('change', async path => {
         if (path.endsWith('.wav') || path.endsWith('.json')) {
-          console.log(`📝 File changed: ${path}`);
+          console.log(`📝 ファイルが変更されました: ${path}`);
           const files = await getRecordings();
           io.emit('apps:saved', { recordings: files });
         }
       })
       .on('unlink', async path => {
         if (path.endsWith('.wav') || path.endsWith('.json')) {
-          console.log(`🗑️ File removed: ${path}`);
+          console.log(`🗑️ ファイルが削除されました: ${path}`);
           const files = await getRecordings();
           io.emit('apps:saved', { recordings: files });
         }
@@ -560,7 +560,7 @@ async function setupRecordingsWatcher() {
         console.error('❌ Error watching recordings directory:', error);
       })
       .on('ready', () => {
-        console.log('✅ Recordings watcher setup complete');
+        console.log('✅ 録音ウォッチャーの設定が完了しました');
       });
   } catch (error) {
     console.error('❌ Error setting up recordings watcher:', error);
@@ -613,7 +613,7 @@ async function getAllApps(): Promise<AppInfo[]> {
     bundleGroups.get(bundleId)?.push(app);
   }
 
-  console.log(`📦 Found ${bundleGroups.size} unique bundle identifiers`);
+  console.log(`📦 一意のバンドル識別子が ${bundleGroups.size} 件見つかりました`);
 
   // For each bundle group, select the best representative
   const groupedApps: AppInfo[] = [];
@@ -669,9 +669,9 @@ function listenToAppStateChanges(apps: AppInfo[]) {
           ShareableContent.isUsingMicrophone(appProcessId);
 
         console.log(
-          `🔄 Application state changed: ${appName} (PID: ${appProcessId}) is now ${
-            currentIsRunning ? '▶️ running' : '⏹️ stopped'
-          }`
+          `🔄 アプリ状態が変わりました: ${appName} (PID: ${appProcessId}) は現在 ${
+            currentIsRunning ? '▶️ 実行中' : '⏹️ 停止中'
+          } です`
         );
 
         // Emit state change to all clients
@@ -714,21 +714,21 @@ function listenToAppStateChanges(apps: AppInfo[]) {
 
 // Socket.IO setup
 io.on('connection', async socket => {
-  console.log('🔌 New client connected');
+  console.log('🔌 新しいクライアントが接続しました');
   const initialApps = await getAllApps();
-  console.log(`📤 Sending ${initialApps.length} applications to new client`);
+  console.log(`📤 新しいクライアントへ ${initialApps.length} 件のアプリを送信しています`);
   socket.emit('apps:all', { apps: initialApps });
   socket.emit('apps:recording', { recordings: getRecordingStatus() });
 
   const files = await getRecordings();
-  console.log(`📤 Sending ${files.length} saved recordings to new client`);
+  console.log(`📤 新しいクライアントへ保存済み録音 ${files.length} 件を送信しています`);
   socket.emit('apps:saved', { recordings: files });
 
   // Set up state listeners for the current apps
   listenToAppStateChanges(initialApps.filter(appInfo => appInfo.app != null));
 
   socket.on('disconnect', () => {
-    console.log('🔌 Client disconnected');
+    console.log('🔌 クライアントが切断しました');
   });
 });
 
@@ -736,9 +736,9 @@ io.on('connection', async socket => {
 ShareableContent.onApplicationListChanged(() => {
   (async () => {
     try {
-      console.log('🔄 Application list changed, updating clients...');
+      console.log('🔄 アプリ一覧が変更されました。クライアントを更新しています...');
       const apps = await getAllApps();
-      console.log(`📢 Broadcasting ${apps.length} applications to all clients`);
+      console.log(`📢 すべてのクライアントへ ${apps.length} 件のアプリを配信しています`);
       io.emit('apps:all', { apps });
 
       // Set up state listeners for the updated apps
@@ -819,9 +819,9 @@ app.delete('/recordings/:foldername', rateLimiter, (async (
       return;
     }
 
-    console.log(`🗑️ Deleting recording folder: ${foldername}`);
+    console.log(`🗑️ 録音フォルダを削除しています: ${foldername}`);
     await fs.remove(recordingDir);
-    console.log('✅ Recording folder deleted successfully');
+    console.log('✅ 録音フォルダを削除しました');
     res.status(200).json({ success: true });
   } catch (error) {
     const typedError = error as NodeJS.ErrnoException;
@@ -1007,12 +1007,12 @@ app.post(
 async function startGlobalRecording() {
   const GLOBAL_RECORDING_ID = -1;
   if (recordingMap.has(GLOBAL_RECORDING_ID)) {
-    console.log('⚠️ Global recording already in progress');
+    console.log('⚠️ グローバル録音はすでに進行中です');
     return;
   }
 
   try {
-    console.log('🎙️ Starting global recording');
+    console.log('🎙️ グローバル録音を開始しています');
 
     const buffers: Float32Array[] = [];
     const session = ShareableContent.tapGlobalAudio(
@@ -1039,7 +1039,7 @@ async function startGlobalRecording() {
       isGlobal: true,
     });
 
-    console.log('✅ Global recording started successfully');
+    console.log('✅ グローバル録音を開始しました');
     emitRecordingStatus();
   } catch (error) {
     console.error('❌ Error starting global recording:', error);
@@ -1066,9 +1066,9 @@ app.post('/global/stop', async (_req, res) => {
 // Start server
 httpServer.listen(PORT, () => {
   console.log(`
-🎙️  Media Capture Server started successfully:
-- Port: ${PORT}
-- Recordings directory: ${path.join(process.cwd(), RECORDING_DIR)}
+ 🎙️  Media Capture Server を起動しました:
+- ポート: ${PORT}
+- 録音ディレクトリ: ${path.join(process.cwd(), RECORDING_DIR)}
 `);
 });
 
