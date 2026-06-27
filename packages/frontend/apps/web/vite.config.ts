@@ -60,4 +60,9 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 8080,
   },
+  worker: {
+    // nbstore.worker は SharedWorker/Worker ともに module として起動しているため、
+    // 分割出力に対応できない既定の iife ではなく ES module で出力する。
+    format: 'es',
+  },
 });
