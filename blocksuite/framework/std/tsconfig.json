@@ -6,5 +6,6 @@
     "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
   },
   "include": ["./src"],
+  "exclude": ["./src/utils/gfx.ts"],
   "references": [{ "path": "../global" }, { "path": "../store" }]
 }
