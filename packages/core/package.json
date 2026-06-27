@@ -1,1 +1,6 @@
-{"name":"sivflow-core","private":true,"version":"0.0.0","type":"module"}
+{
+  "name": "@sivflow/core",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module"
+}
