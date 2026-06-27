@@ -167,10 +167,13 @@ export class JobExecutor implements OnModuleDestroy {
   async handleJobReturn(job: Job, result: JOB_SIGNAL) {
     if (result === JOB_SIGNAL.Repeat || result === JOB_SIGNAL.Retry) {
       try {
+        const opts = { ...job.opts };
+        delete opts.jobId;
+
         await this.getQueue(namespace(job.name as JobName)).add(
           job.name,
           job.data,
-          job.opts
+          opts
         );
         this.logger.debug(`Added job [${job.name}] to queue, signal=${result}`);
       } catch (e) {
