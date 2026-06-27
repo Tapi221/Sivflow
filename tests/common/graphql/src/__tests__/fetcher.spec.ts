@@ -103,4 +103,34 @@ describe('GraphQL fetcher', () => {
       gql({ query, variables: void 0 })
     ).rejects.toMatchInlineSnapshot(`[GraphQLError: error]`);
   });
+
+  it('should preserve all graphql errors', async () => {
+    fetch.mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: null,
+          errors: [
+            { message: 'first error', path: ['field'] },
+            { message: 'second error', path: ['otherField'] },
+          ],
+        }),
+        {
+          headers: {
+            'content-type': 'application/json',
+          },
+          status: 400,
+        }
+      )
+    );
+
+    await expect(gql({ query, variables: void 0 })).rejects.toMatchObject({
+      message: '1. first error\n2. second error',
+      extensions: {
+        graphQLErrors: [
+          { message: 'first error', path: ['field'] },
+          { message: 'second error', path: ['otherField'] },
+        ],
+      },
+    });
+  });
 });
