@@ -1,0 +1,1 @@
+export { ServerService } from '../../../../../../packages/backend/server/src/core/config/service';

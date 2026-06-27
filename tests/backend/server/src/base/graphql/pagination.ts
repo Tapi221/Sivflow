@@ -1,1 +1,1 @@
-export * from '../../../../../packages/backend/server/src/base/graphql/pagination';
+export * from '../../../../../../packages/backend/server/src/base/graphql/pagination';

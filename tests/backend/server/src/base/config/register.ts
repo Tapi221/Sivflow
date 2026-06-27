@@ -1,1 +1,1 @@
-export * from '../../../../../packages/backend/server/src/base/config/register';
+export * from '../../../../../../packages/backend/server/src/base/config/register';
