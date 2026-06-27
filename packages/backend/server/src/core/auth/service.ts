@@ -18,6 +18,11 @@ import {
 } from './input';
 import type { CurrentUser } from './session';
 
+export type SessionUser = CurrentUser & {
+  emailVerified: boolean;
+  hasPassword: boolean;
+};
+
 export function sessionUser(
   user: Pick<
     User,
@@ -29,7 +34,7 @@ export function sessionUser(
     | 'emailVerifiedAt'
     | 'password'
   >
-): CurrentUser {
+): SessionUser {
   // use pick to avoid unexpected fields
   return assign(pick(user, 'id', 'email', 'avatarUrl', 'name', 'disabled'), {
     emailVerified: !!user.emailVerifiedAt,
