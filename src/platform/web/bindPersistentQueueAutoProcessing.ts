@@ -15,9 +15,9 @@ const triggerAssetQueueProcessing = (
   persistentQueue: AssetQueueProcessor,
   reason: "load" | "online",
 ): void => {
-  console.log(`[PersistentQueue] アセットキュー処理を開始します: ${getAssetQueueProcessingReasonLabel(reason)}`);
+  console.log(`[永続キュー] アセットキュー処理を開始します: ${getAssetQueueProcessingReasonLabel(reason)}`);
   void persistentQueue.processAssetQueue().catch((error) => {
-    console.error("[PersistentQueue] 自動処理に失敗しました", {
+    console.error("[永続キュー] 自動処理に失敗しました", {
       reason: getAssetQueueProcessingReasonLabel(reason),
       error,
     });
