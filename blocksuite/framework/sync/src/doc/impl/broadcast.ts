@@ -35,13 +35,14 @@ export class BroadcastChannelDocSource implements DocSource {
     }
   };
 
-  channel = new BroadcastChannel(this.channelName);
+  channel: BroadcastChannel;
 
   docMap = new Map<string, Uint8Array>();
 
   name = 'broadcast-channel';
 
   constructor(readonly channelName: string = 'blocksuite:doc') {
+    this.channel = new BroadcastChannel(this.channelName);
     this.channel.addEventListener('message', this._onMessage);
 
     this.channel.postMessage({
