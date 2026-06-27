@@ -41,7 +41,7 @@ const simulateCardScenario = (card: Card, scenario: Array<"success" | "fail" | "
           .toDate?.()
           .toISOString() ?? new Date(nextReviewDate).toISOString());
     console.log(
-      `Event: ${event}, S: ${S.toFixed(2)}, state: ${state}, I: ${I.toFixed(2)}, nextReviewDate: ${nextReviewStr}`,
+      `イベント: ${event}, S: ${S.toFixed(2)}, 状態: ${state}, I: ${I.toFixed(2)}, 次回レビュー日: ${nextReviewStr}`,
     );
   }
 };
