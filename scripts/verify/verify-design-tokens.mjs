@@ -51,4 +51,4 @@ for (const relativePath of filesThatMustBeTokenDriven) {
   }
 }
 
-console.log("[verify-design-tokens] OK");
+console.log("[verify-design-tokens] OK: デザイントークン検証が完了しました");
