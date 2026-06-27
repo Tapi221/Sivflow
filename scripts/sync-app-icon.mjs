@@ -23,14 +23,14 @@ try {
 }
 
 if (normalizeSvg(sourceIcon) === normalizeSvg(publicIcon)) {
-  console.log("public/icon.svg is in sync with shared/assets/icons/app-icon.svg.");
+  console.log("public/icon.svg は shared/assets/icons/app-icon.svg と同期済みです。");
   process.exit(0);
 }
 
 if (shouldCheck) {
-  console.error("public/icon.svg is out of sync with shared/assets/icons/app-icon.svg. Run npm run sync:app-icon.");
+  console.error("public/icon.svg は shared/assets/icons/app-icon.svg と同期していません。npm run sync:app-icon を実行してください。");
   process.exit(1);
 }
 
 await writeFile(publicIconPath, sourceIcon, "utf8");
-console.log("Synced public/icon.svg from shared/assets/icons/app-icon.svg.");
+console.log("shared/assets/icons/app-icon.svg から public/icon.svg を同期しました。");
