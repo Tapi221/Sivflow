@@ -56,7 +56,7 @@ export function makeTracker(trackFn: TrackFn): CallableEventsChain {
  *
  * ```html
  * <button
- *   data-event-chain='$.cmdk.settings.changeLanguage'
+ *   data-event-props='$.cmdk.settings.changeLanguage'
  *   data-event-arg='cn'
  *   <!-- or -->
  *   data-event-args-foo='bar'
@@ -65,8 +65,12 @@ export function makeTracker(trackFn: TrackFn): CallableEventsChain {
  */
 export function enableAutoTrack(root: HTMLElement, trackFn: TrackFn) {
   const listener = (e: Event) => {
-    const el = e.target as HTMLElement | null;
-    if (!el) {
+    const target = e.target;
+    const el =
+      target instanceof Element
+        ? (target.closest('[data-event-props]') as HTMLElement | null)
+        : null;
+    if (!el || !root.contains(el)) {
       return;
     }
     const dataset = el.dataset;
