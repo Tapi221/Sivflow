@@ -42,3 +42,7 @@ declare interface BUILD_CONFIG_TYPE {
 }
 
 declare var BUILD_CONFIG: BUILD_CONFIG_TYPE;
+
+declare module 'lit/directives/guard.js' {
+  export function guard<T>(value: T, f: () => unknown): unknown;
+}
