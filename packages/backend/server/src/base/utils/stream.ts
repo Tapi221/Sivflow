@@ -10,6 +10,18 @@ export type CheckExceededResult =
     }
   | undefined;
 
+function toQuotaError(result: CheckExceededResult) {
+  if (result?.blobQuotaExceeded) {
+    return new BlobQuotaExceeded();
+  }
+
+  if (result?.storageQuotaExceeded) {
+    return new StorageQuotaExceeded();
+  }
+
+  return undefined;
+}
+
 export async function readBuffer(
   readable: Readable,
   checkExceeded: (recvSize: number) => CheckExceededResult
@@ -17,35 +29,49 @@ export async function readBuffer(
   return new Promise<Buffer>((resolve, reject) => {
     const chunks: Uint8Array[] = [];
     let totalSize = 0;
-    let result: CheckExceededResult;
+    let settled = false;
+
+    const fail = (error: Error, destroy = true) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      if (destroy) {
+        readable.destroy(error);
+      }
+      reject(error);
+    };
 
     readable.on('data', chunk => {
+      if (settled) {
+        return;
+      }
+
       totalSize += chunk.length;
 
       // check size after receive each chunk to avoid unnecessary memory usage
-      result = checkExceeded(totalSize);
-      if (result?.blobQuotaExceeded) {
-        reject(new BlobQuotaExceeded());
-      } else if (result?.storageQuotaExceeded) {
-        reject(new StorageQuotaExceeded());
-      }
-
-      if (checkExceeded(totalSize)) {
-        reject(new BlobQuotaExceeded());
-        readable.destroy(new BlobQuotaExceeded());
+      const error = toQuotaError(checkExceeded(totalSize));
+      if (error) {
+        fail(error);
         return;
       }
+
       chunks.push(chunk);
     });
 
-    readable.on('error', reject);
+    readable.on('error', error => fail(error, false));
     readable.on('end', () => {
-      const buffer = Buffer.concat(chunks, totalSize);
+      if (settled) {
+        return;
+      }
 
-      if (checkExceeded(buffer.length)) {
-        reject(new BlobQuotaExceeded());
+      const error = toQuotaError(checkExceeded(totalSize));
+      if (error) {
+        fail(error, false);
       } else {
-        resolve(buffer);
+        settled = true;
+        resolve(Buffer.concat(chunks, totalSize));
       }
     });
   });
