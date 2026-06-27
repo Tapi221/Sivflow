@@ -1,4 +1,4 @@
-import 'electron-updater'; // Prevent BaseUpdater is undefined.
+import 'electron-updater'; // BaseUpdater が undefined になるのを防ぎます。
 
 import { randomBytes } from 'node:crypto';
 
@@ -12,7 +12,7 @@ import { BaseUpdater } from 'electron-updater/out/BaseUpdater';
 import { MockedHttpExecutor } from './http-executor';
 
 /**
- * For testing, like:
+ * test 用です。次の実装に近い mock です:
  * https://github.com/electron-userland/electron-builder/blob/master/packages/electron-updater/src/MacUpdater.ts
  */
 export class MockedUpdater extends BaseUpdater {
