@@ -1,13 +1,5 @@
 const globalObject = globalThis as any;
 
-if (typeof globalObject.window === 'undefined') {
-  globalObject.window = globalObject;
-}
-
-if (typeof globalObject.self === 'undefined') {
-  globalObject.self = globalObject;
-}
-
 if (typeof globalObject.HTMLElement === 'undefined') {
   globalObject.HTMLElement = class HTMLElement {};
 }
@@ -49,7 +41,7 @@ if (typeof globalObject.document === 'undefined') {
       },
       insertBefore(item: any, referenceNode?: any) {
         item.parentNode = node;
-        const index = referenceNode ? node.childNodes.indexOf(referenceNode) : -1;
+        const index = referenceNode ? node.childNodes.indexOf(item) : -1;
         if (index === -1) {
           node.childNodes.push(item);
         } else {
@@ -111,7 +103,6 @@ if (typeof globalObject.document === 'undefined') {
     },
   };
 
-  documentStub.defaultView = globalObject.window;
   documentStub.documentElement = documentStub.createElement('html');
   documentStub.body = documentStub.createElement('body');
 
