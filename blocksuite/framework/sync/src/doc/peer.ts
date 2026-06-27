@@ -125,13 +125,6 @@ export class SyncPeer {
     }>;
     subdocLoading: boolean;
     subdocsLoadQueue: PriorityAsyncQueue<{ id: string; doc: Doc }>;
-  } = {
-    connectedDocs: new Map(),
-    pushUpdatesQueue: new PriorityAsyncQueue([], this.priorityTarget),
-    pushingUpdate: false,
-    pullUpdatesQueue: new PriorityAsyncQueue([], this.priorityTarget),
-    subdocLoading: false,
-    subdocsLoadQueue: new PriorityAsyncQueue([], this.priorityTarget),
   };
 
   get name() {
@@ -156,6 +149,15 @@ export class SyncPeer {
     readonly priorityTarget = new SharedPriorityTarget(),
     readonly logger: Logger
   ) {
+    this.state = {
+      connectedDocs: new Map(),
+      pushUpdatesQueue: new PriorityAsyncQueue([], this.priorityTarget),
+      pushingUpdate: false,
+      pullUpdatesQueue: new PriorityAsyncQueue([], this.priorityTarget),
+      subdocLoading: false,
+      subdocsLoadQueue: new PriorityAsyncQueue([], this.priorityTarget),
+    };
+
     this.logger.debug(`doc-peer:${this.name} start`);
 
     this.syncRetryLoop(this.abort.signal).catch(err => {
