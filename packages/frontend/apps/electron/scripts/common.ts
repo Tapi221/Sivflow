@@ -1,8 +1,7 @@
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { getBuildConfig } from '@affine-tools/utils/build-config';
-import { Package } from '@affine-tools/utils/workspace';
 import { sentryEsbuildPlugin } from '@sentry/esbuild-plugin';
 import type { BuildOptions, Plugin } from 'esbuild';
 
@@ -15,6 +14,25 @@ export const NODE_MAJOR_VERSION = 22;
 export const mode = (process.env.NODE_ENV =
   process.env.NODE_ENV || 'development');
 
+const packageJson = JSON.parse(
+  readFileSync(resolve(electronDir, 'package.json'), 'utf-8')
+) as { version?: string };
+
+const appVersion = packageJson.version ?? '0.0.0';
+
+const buildConfig = {
+  SENTRY_DSN: process.env.SENTRY_DSN ?? '',
+  appBuildType: process.env.BUILD_TYPE ?? 'local',
+  appVersion,
+  debug: process.env.NODE_ENV !== 'production',
+  distribution: 'desktop',
+  editorVersion: appVersion,
+  isElectron: true,
+  isIOS: false,
+  isMobileEdition: false,
+  isNative: false,
+};
+
 export const config = (): BuildOptions => {
   const define = {
     'process.env.GITHUB_SHA': process.env.GITHUB_SHA,
@@ -23,13 +41,7 @@ export const config = (): BuildOptions => {
     'process.env.DEV_SERVER_URL': process.env.DEV_SERVER_URL,
     'process.env.NODE_ENV': process.env.NODE_ENV,
     REPLACE_ME_BUILD_ENV: process.env.BUILD_TYPE ?? 'stable',
-    ...Object.entries(
-      getBuildConfig(new Package('@affine/electron'), {
-        mode:
-          process.env.NODE_ENV === 'production' ? 'production' : 'development',
-        channel: (process.env.BUILD_TYPE as any) ?? 'canary',
-      })
-    ).reduce(
+    ...Object.entries(buildConfig).reduce(
       (def, [key, val]) => {
         def[`BUILD_CONFIG.${key}`] = val;
         return def;
@@ -58,14 +70,12 @@ export const config = (): BuildOptions => {
     name: 'no-side-effects',
     setup(build) {
       build.onResolve({ filter: /\.js/ }, async args => {
-        if (args.pluginData) return; // Ignore this if we called ourselves
+        if (args.pluginData) return;
 
         const { path, ...rest } = args;
 
-        // mark all blocksuite packages as side-effect free
-        // because they will include a lot of files that are not used in node_modules
         if (rest.resolveDir.includes('blocksuite')) {
-          rest.pluginData = true; // Avoid infinite recursion
+          rest.pluginData = true;
           const result = await build.resolve(path, rest);
 
           result.sideEffects = false;
@@ -94,11 +104,7 @@ export const config = (): BuildOptions => {
     },
     define: Object.entries(define).reduce(
       (def, [key, val]) => {
-        def[key] =
-          JSON.stringify(val) ??
-          String(
-            val
-          ) /* JSON.stringify(undefined) == undefined, but we need 'undefined' */;
+        def[key] = JSON.stringify(val) ?? String(val);
         return def;
       },
       {} as Record<string, string>
