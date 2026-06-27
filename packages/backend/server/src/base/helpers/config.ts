@@ -1,9 +1,12 @@
+import { z } from 'zod';
+
 import { defineModuleConfig } from '../config';
 
 declare global {
   interface AppConfigSchema {
     crypto: {
       privateKey: string;
+      previousPrivateKeys: string[];
     };
   }
 }
@@ -14,5 +17,11 @@ defineModuleConfig('crypto', {
     env: 'AFFINE_PRIVATE_KEY',
     default: '',
     schema: { type: 'string' },
+  },
+  previousPrivateKeys: {
+    desc: 'Previous private keys used to verify signatures and decrypt data after key rotation.',
+    default: [],
+    schema: { type: 'array', items: { type: 'string' } },
+    shape: z.array(z.string()),
   },
 });
