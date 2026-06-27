@@ -148,7 +148,7 @@ class StoreConsumer {
       if (!this.syncPaused) {
         this.indexerSync.pauseSync();
         this.syncPaused = true;
-        console.log('[IndexerSync] paused');
+        console.log('[IndexerSync] 一時停止しました');
       }
     }, this.ENABLE_BATTERY_SAVE_MODE_DELAY);
   }
@@ -161,17 +161,17 @@ class StoreConsumer {
     if (this.syncPaused) {
       this.indexerSync.resumeSync();
       this.syncPaused = false;
-      console.log('[IndexerSync] resumed');
+      console.log('[IndexerSync] 再開しました');
     }
   }
 
   private enableBatterySaveMode() {
-    console.log('[IndexerSync] enable battery save mode');
+    console.log('[IndexerSync] バッテリー節約モードを有効にします');
     this.indexerSync.enableBatterySaveMode();
   }
 
   private disableBatterySaveMode() {
-    console.log('[IndexerSync] disable battery save mode');
+    console.log('[IndexerSync] バッテリー節約モードを無効にします');
     this.indexerSync.disableBatterySaveMode();
   }
 
