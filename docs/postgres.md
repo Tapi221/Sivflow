@@ -1,6 +1,6 @@
 # Sivflow Postgres setup
 
-Sivflow の永続データを Postgres へ寄せるための準備メモです。
+Sivflow の永続データは Postgres を正とします。
 
 ## ローカルでPostgresを起動
 
@@ -30,15 +30,18 @@ Dockerコンテナ内のNode.jsから接続する場合は、hostを `postgres` 
 
 例は `functions/.env.example` に置いています。
 
-## 移行方針
+## 保存先
 
-Firebase Hosting は静的フロント配信として残します。
-Postgres 化では、認証やファイル保存はFirebase側に残し、アプリ固有データを段階的にPostgresへ移します。
+次の領域は Postgres に保存します。
 
-優先順:
+- AFFiNE / Sivflow backend の Prisma モデル
+- Google Calendar 連携アカウント: `google_calendar_accounts`
+- シラバスクローラーのソース: `timetable_syllabus_sources`
+- シラバスクローラーのカタログ: `timetable_syllabus_catalog`
+- シラバスクローラーのジョブ: `timetable_syllabus_crawl_jobs`
+- ジョブごとの保存コース: `timetable_syllabus_crawl_job_courses`
 
-1. Google Calendar アカウント保存先を `google_calendar_accounts` へ移す
-2. シラバスクローラーの保存先を `timetable_syllabus_*` 系テーブルへ移す
+Google OAuth のプロフィール画像キャッシュや Firebase Auth のユーザー情報など、Firebase の認証・ストレージ機能そのものは引き続き Firebase 側を使います。アプリ固有データの正は Postgres です。
 
 ## 本番構成
 
@@ -52,4 +55,3 @@ Firebase Hosting から直接Postgresへ接続することはできません。
 必ず Cloud Run などのサーバーを間に置きます。
 
 Cloud Run の build / deploy / Hosting rewrite は `docs/cloudrun.md` を参照してください。
-既存の Firebase Cloud Functions は、Google Calendar 連携と crawler API を Cloud Run に移すまで互換用として残します。
