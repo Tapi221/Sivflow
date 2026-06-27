@@ -161,5 +161,5 @@ const updateFile = (filePath) => {
 const updatedFiles = SOURCE_DIRECTORIES.flatMap(walkSourceFiles).filter(updateFile);
 
 if (updatedFiles.length > 0) {
-  console.log(`const arrow 関数規約の整形を ${updatedFiles.length} file(s) 修正しました。`);
+  console.log(`const arrow 関数規約の整形を ${updatedFiles.length} 件のファイルで修正しました。`);
 }
