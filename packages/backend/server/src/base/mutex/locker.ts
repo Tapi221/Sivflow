@@ -43,7 +43,9 @@ export class Locker {
     );
 
     if (success === 2) {
-      return new Lock(async () => {});
+      return new Lock(async () => {
+        /* noop */
+      });
     }
 
     if (success === 1) {
