@@ -52,18 +52,26 @@ export class IndexerEvent {
       return;
     }
 
-    for (const workspace of payload.ownedWorkspaces) {
-      await this.queue.add(
-        'indexer.deleteWorkspace',
-        {
-          workspaceId: workspace,
-        },
-        {
-          jobId: `deleteWorkspace/${workspace}`,
-          priority: 0,
-        }
-      );
-    }
+    const ownedWorkspaces = Array.from(
+      new Set(
+        Array.isArray(payload.ownedWorkspaces) ? payload.ownedWorkspaces : []
+      )
+    );
+
+    await Promise.all(
+      ownedWorkspaces.map(workspace =>
+        this.queue.add(
+          'indexer.deleteWorkspace',
+          {
+            workspaceId: workspace,
+          },
+          {
+            jobId: `deleteWorkspace/${workspace}`,
+            priority: 0,
+          }
+        )
+      )
+    );
   }
 
   @Cron(CronExpression.EVERY_30_SECONDS)
