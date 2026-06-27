@@ -24,39 +24,52 @@ const FOREIGN_OBJECT_HTML_SANITIZE_CONFIG: Config = {
   USE_PROFILES: { html: true },
 };
 
-function sanitizeForeignObjects(root: ParentNode) {
-  root.querySelectorAll('foreignObject, foreignobject').forEach(element => {
-    element.innerHTML = DOMPurify.sanitize(
-      element.innerHTML,
-      FOREIGN_OBJECT_HTML_SANITIZE_CONFIG
-    );
-  });
-}
-
-export function sanitizeSvg(svg: string): string {
-  if (
-    typeof DOMParser === 'undefined' ||
-    typeof XMLSerializer === 'undefined'
-  ) {
+function sanitizeSvgMarkup(svg: string) {
+  try {
     const sanitized = DOMPurify.sanitize(svg, MERMAID_SVG_SANITIZE_CONFIG);
     if (typeof sanitized !== 'string' || !/^\s*<svg[\s>]/i.test(sanitized)) {
       return '';
     }
     return sanitized.trim();
+  } catch (error) {
+    console.warn('Mermaid SVGのサニタイズに失敗しました', error);
+    return '';
+  }
+}
+
+function sanitizeForeignObjects(root: ParentNode) {
+  root.querySelectorAll('foreignObject, foreignobject').forEach(element => {
+    try {
+      element.innerHTML = DOMPurify.sanitize(
+        element.innerHTML,
+        FOREIGN_OBJECT_HTML_SANITIZE_CONFIG
+      );
+    } catch (error) {
+      console.warn('Mermaid foreignObjectのサニタイズに失敗しました', error);
+      element.textContent = '';
+    }
+  });
+}
+
+export function sanitizeSvg(svg: string): string {
+  const sanitized = sanitizeSvgMarkup(svg);
+  if (!sanitized) {
+    return '';
+  }
+
+  if (
+    typeof DOMParser === 'undefined' ||
+    typeof XMLSerializer === 'undefined'
+  ) {
+    return sanitized;
   }
 
   const parser = new DOMParser();
-  const parsed = parser.parseFromString(svg, 'image/svg+xml');
-  const root = parsed.documentElement;
-  if (!root || root.tagName.toLowerCase() !== 'svg') return '';
-
-  const sanitized = DOMPurify.sanitize(root, MERMAID_SVG_SANITIZE_CONFIG);
-  if (typeof sanitized !== 'string') return '';
-
   const sanitizedDoc = parser.parseFromString(sanitized, 'image/svg+xml');
   const sanitizedRoot = sanitizedDoc.documentElement;
-  if (!sanitizedRoot || sanitizedRoot.tagName.toLowerCase() !== 'svg')
+  if (!sanitizedRoot || sanitizedRoot.tagName.toLowerCase() !== 'svg') {
     return '';
+  }
 
   sanitizeForeignObjects(sanitizedRoot);
   return new XMLSerializer().serializeToString(sanitizedRoot).trim();
