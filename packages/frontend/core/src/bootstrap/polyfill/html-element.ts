@@ -1,8 +1,22 @@
-if (typeof globalThis.HTMLElement === 'undefined') {
-  (globalThis as any).HTMLElement = class HTMLElement {};
+const globalObject = globalThis as any;
+
+if (typeof globalObject.window === 'undefined') {
+  globalObject.window = globalObject;
 }
 
-if (typeof globalThis.document === 'undefined') {
+if (typeof globalObject.self === 'undefined') {
+  globalObject.self = globalObject;
+}
+
+if (typeof globalObject.HTMLElement === 'undefined') {
+  globalObject.HTMLElement = class HTMLElement {};
+}
+
+if (typeof globalObject.Element === 'undefined') {
+  globalObject.Element = globalObject.HTMLElement;
+}
+
+if (typeof globalObject.document === 'undefined') {
   const createNode = (nodeType = 1) => {
     const node: any = {
       style: {},
@@ -97,8 +111,9 @@ if (typeof globalThis.document === 'undefined') {
     },
   };
 
+  documentStub.defaultView = globalObject.window;
   documentStub.documentElement = documentStub.createElement('html');
   documentStub.body = documentStub.createElement('body');
 
-  (globalThis as any).document = documentStub;
+  globalObject.document = documentStub;
 }
