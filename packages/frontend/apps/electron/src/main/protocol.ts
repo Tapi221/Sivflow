@@ -32,12 +32,12 @@ function buildRequestInit(
 ): ElectronRequestInit {
   const init: ElectronRequestInit = {
     method: request.method,
-    headers: request.headers,
     redirect: request.redirect,
     bypassCustomProtocolHandlers: options.bypassCustomProtocolHandlers ?? true,
   };
 
   if (request.method !== 'GET' && request.method !== 'HEAD') {
+    init.headers = request.headers;
     init.body = request.body;
   }
 
@@ -95,6 +95,11 @@ function proxyRequest(
 ) {
   const { bypassCustomProtocolHandlers = true } = options;
   const targetUrl = buildTargetUrl(base, urlObject);
+
+  if (request.method === 'GET' || request.method === 'HEAD') {
+    return net.fetch(targetUrl, { bypassCustomProtocolHandlers });
+  }
+
   const proxiedRequest = buildRequestInit(request, {
     bypassCustomProtocolHandlers,
   });
