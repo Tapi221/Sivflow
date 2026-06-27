@@ -1,1 +1,1 @@
-export * from '../../../../../packages/backend/server/src/__tests__/mocks';
+export * from './mocks/index';

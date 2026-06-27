@@ -1,14 +1,11 @@
 const newE2E = process.env.TEST_MODE === 'e2e';
 const externalTestsRoot = '../../../tests/backend/server/src';
-const newE2ETests = [
-  './src/__tests__/e2e/**/*.spec.ts',
-  `${externalTestsRoot}/__tests__/e2e/**/*.spec.ts`,
-];
+const newE2ETests = [`${externalTestsRoot}/__tests__/e2e/**/*.spec.ts`];
 
 const preludes = ['./src/prelude.ts'];
 
 if (newE2E) {
-  preludes.push('./src/__tests__/e2e/prelude.ts');
+  preludes.push(`${externalTestsRoot}/__tests__/e2e/prelude.ts`);
 }
 
 export default {
