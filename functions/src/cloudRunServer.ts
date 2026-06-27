@@ -110,7 +110,6 @@ const handleGoogleCalendarApi = async (req: IncomingMessage, res: ServerResponse
   if (!pathname.startsWith("/api/google-calendar")) return false;
 
   const uid = await requireAuth(req);
-  const secrets = readCloudRunGoogleOAuthSecrets();
 
   if (req.method === "GET" && pathname === "/api/google-calendar/accounts") {
     writeJson(res, 200, await listGoogleCalendarAccountsForUser(uid));
@@ -118,7 +117,7 @@ const handleGoogleCalendarApi = async (req: IncomingMessage, res: ServerResponse
   }
 
   if (req.method === "POST" && pathname === "/api/google-calendar/connect") {
-    const response = await connectGoogleCalendarAccountForUser(uid, await readJsonBody(req), secrets);
+    const response = await connectGoogleCalendarAccountForUser(uid, await readJsonBody(req), readCloudRunGoogleOAuthSecrets());
     await (await getAdminAuth()).updateUser(uid, {
       email: response.accountEmail,
       displayName: response.accountName ?? undefined,
@@ -129,7 +128,7 @@ const handleGoogleCalendarApi = async (req: IncomingMessage, res: ServerResponse
   }
 
   if (req.method === "POST" && (pathname === "/api/google-calendar/token" || pathname === "/api/google-calendar/access-token")) {
-    writeJson(res, 200, await refreshGoogleCalendarAccessTokenForUser(uid, await readJsonBody(req), secrets));
+    writeJson(res, 200, await refreshGoogleCalendarAccessTokenForUser(uid, await readJsonBody(req), readCloudRunGoogleOAuthSecrets()));
     return true;
   }
 
@@ -202,6 +201,8 @@ const getStatusCodeFromError = (error: unknown): number => {
       return 403;
     case "not-found":
       return 404;
+    case "resource-exhausted":
+      return 429;
     case "failed-precondition":
       return 412;
     case "unavailable":
