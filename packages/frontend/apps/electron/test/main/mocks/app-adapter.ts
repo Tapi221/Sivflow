@@ -1,7 +1,7 @@
 import type { AppAdapter } from 'electron-updater/out/AppAdapter';
 
 /**
- * For testing and same as:
+ * test 用です。次と同等の実装です:
  * https://github.com/electron-userland/electron-builder/blob/master/packages/electron-updater/src/ElectronAppAdapter.ts
  */
 export class MockedAppAdapter implements AppAdapter {
