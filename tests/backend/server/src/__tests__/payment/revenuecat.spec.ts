@@ -1,8 +1,8 @@
-import { PrismaClient, type User } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
+import type { User } from '@prisma/client';
 import ava, { TestFn } from 'ava';
 import { omit } from 'lodash-es';
 import Sinon from 'sinon';
-
 import {
   EventBus,
   ManagedByAppStoreOrPlay,
@@ -15,14 +15,8 @@ import { PaymentModule } from '../../plugins/payment';
 import { SubscriptionCronJobs } from '../../plugins/payment/cron';
 import { UserSubscriptionManager } from '../../plugins/payment/manager';
 import { UserSubscriptionResolver } from '../../plugins/payment/resolver';
-import {
-  RcEvent,
-  resolveProductMapping,
-  RevenueCatService,
-  RevenueCatWebhookController,
-  RevenueCatWebhookHandler,
-  type Subscription,
-} from '../../plugins/payment/revenuecat';
+import { RcEvent, resolveProductMapping, RevenueCatService, RevenueCatWebhookController, RevenueCatWebhookHandler } from '../../plugins/payment/revenuecat';
+import type { Subscription } from '../../plugins/payment/revenuecat';
 import { SubscriptionService } from '../../plugins/payment/service';
 import {
   SubscriptionPlan,

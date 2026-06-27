@@ -5,10 +5,7 @@ import type {
 } from '../../core/notification/types';
 import type { TestingApp } from './testing-app';
 
-export async function listNotifications(
-  app: TestingApp,
-  pagination: PaginationInput
-): Promise<PaginatedNotificationObjectType> {
+export const listNotifications = async (app: TestingApp, pagination: PaginationInput): Promise<PaginatedNotificationObjectType> => {
   const res = await app.gql(
     `
     query listNotifications($pagination: PaginationInput!) {
@@ -40,12 +37,9 @@ export async function listNotifications(
     { pagination }
   );
   return res.currentUser.notifications;
-}
+};
 
-export async function mentionUser(
-  app: TestingApp,
-  input: MentionInput
-): Promise<string> {
+export const mentionUser = async (app: TestingApp, input: MentionInput): Promise<string> => {
   const res = await app.gql(
     `
     mutation mentionUser($input: MentionInput!) {
@@ -55,12 +49,9 @@ export async function mentionUser(
     { input }
   );
   return res.mentionUser;
-}
+};
 
-export async function readNotification(
-  app: TestingApp,
-  id: string
-): Promise<boolean> {
+export const readNotification = async (app: TestingApp, id: string): Promise<boolean> => {
   const res = await app.gql(
     `
     mutation readNotification($id: String!) {
@@ -70,4 +61,4 @@ export async function readNotification(
     { id }
   );
   return res.readNotification;
-}
+};

@@ -4,26 +4,22 @@ import type {
   RealtimeRequestName,
   RealtimeRequestOutputOf,
 } from '@affine/realtime';
-import { io, type Socket as SocketIOClient } from 'socket.io-client';
+import { io } from 'socket.io-client';
+import type { Socket as SocketIOClient } from 'socket.io-client';
 import type { Response } from 'supertest';
-
 import type { MockedUser } from '../mocks';
 import type { TestingApp } from './create-app';
 
 const REALTIME_CLIENT_VERSION = '0.26.0';
 const WS_TIMEOUT_MS = 5_000;
 
-function cookieHeader(res: Response) {
+const cookieHeader = (res: Response) => {
   return (res.get('Set-Cookie') ?? [])
     .map(cookie => cookie.split(';')[0])
     .join('; ');
-}
+};
 
-async function withTimeout<T>(
-  promise: Promise<T>,
-  timeoutMs: number,
-  label: string
-) {
+const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, label: string) => {
   let timer: NodeJS.Timeout | undefined;
   const timeout = new Promise<never>((_, reject) => {
     timer = setTimeout(() => {
@@ -36,9 +32,9 @@ async function withTimeout<T>(
   } finally {
     if (timer) clearTimeout(timer);
   }
-}
+};
 
-async function waitForConnect(socket: SocketIOClient) {
+const waitForConnect = async (socket: SocketIOClient) => {
   if (socket.connected) {
     return;
   }
@@ -51,9 +47,9 @@ async function waitForConnect(socket: SocketIOClient) {
     WS_TIMEOUT_MS,
     'realtime socket connect'
   );
-}
+};
 
-export async function createRealtimeClient(app: TestingApp, user: MockedUser) {
+export const createRealtimeClient = async (app: TestingApp, user: MockedUser) => {
   await app.login(user);
   
   const cookies = app.getCookies();
@@ -71,13 +67,9 @@ export async function createRealtimeClient(app: TestingApp, user: MockedUser) {
   });
   await waitForConnect(socket);
   return socket;
-}
+};
 
-export async function realtimeRequest<Op extends RealtimeRequestName>(
-  socket: SocketIOClient,
-  op: Op,
-  input: RealtimeRequestInputOf<Op>
-): Promise<RealtimeRequestOutputOf<Op>> {
+export const realtimeRequest = async <Op extends RealtimeRequestName>(socket: SocketIOClient, op: Op, input: RealtimeRequestInputOf<Op>): Promise<RealtimeRequestOutputOf<Op>> => {
   const ack = await withTimeout(
     new Promise<RealtimeAck<RealtimeRequestOutputOf<Op>>>(resolve => {
       socket.emit(
@@ -95,4 +87,4 @@ export async function realtimeRequest<Op extends RealtimeRequestName>(
   }
 
   return ack.data;
-}
+};

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { ClsServiceManager } from 'nestjs-cls';
-
 import { genRequestId, OnEvent } from '../../base';
 
 declare global {

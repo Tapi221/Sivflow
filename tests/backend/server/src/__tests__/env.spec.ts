@@ -1,5 +1,4 @@
 import test from 'ava';
-
 import { Env } from '../env';
 
 const envs = { ...process.env };

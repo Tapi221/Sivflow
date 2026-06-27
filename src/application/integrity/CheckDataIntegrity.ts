@@ -8,8 +8,6 @@ import type { Folder } from "@/types/domain/folder";
 import { normalizeDate } from "@/utils/codec/date";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
-
-
 const TIMESTAMP_KEYS = [
   "createdAt",
   "updatedAt",
@@ -17,8 +15,6 @@ const TIMESTAMP_KEYS = [
   "nextReviewDate",
   "lastReviewAt",
 ] as const;
-
-
 
 const isMissingFolderId = (folderId: unknown): boolean => {
   return (
@@ -215,7 +211,5 @@ const createCheckDataIntegrityUseCase = () => {
     execute,
   };
 };
-
-
 
 export { createCheckDataIntegrityUseCase };

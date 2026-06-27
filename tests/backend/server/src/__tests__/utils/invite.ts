@@ -1,11 +1,7 @@
 import type { InvitationType } from '../../core/workspaces';
 import type { TestingApp } from './testing-app';
 
-export async function inviteUser(
-  app: TestingApp,
-  workspaceId: string,
-  email: string
-): Promise<string> {
+export const inviteUser = async (app: TestingApp, workspaceId: string, email: string): Promise<string> => {
   const res = await app.gql(`
     mutation {
       inviteMembers(workspaceId: "${workspaceId}", emails: ["${email}"]) {
@@ -15,13 +11,9 @@ export async function inviteUser(
   `);
 
   return res.inviteMembers[0].inviteId;
-}
+};
 
-export async function inviteUsers(
-  app: TestingApp,
-  workspaceId: string,
-  emails: string[]
-): Promise<Array<{ email: string; inviteId?: string }>> {
+export const inviteUsers = async (app: TestingApp, workspaceId: string, emails: string[]): Promise<Array<{ email: string; inviteId?: string }>> => {
   const res = await app.gql(
     `
     mutation inviteMembers($workspaceId: String!, $emails: [String!]!) {
@@ -38,12 +30,9 @@ export async function inviteUsers(
   );
 
   return res.inviteMembers;
-}
+};
 
-export async function getInviteLink(
-  app: TestingApp,
-  workspaceId: string
-): Promise<{ link: string; expireTime: string }> {
+export const getInviteLink = async (app: TestingApp, workspaceId: string): Promise<{ link: string; expireTime: string }> => {
   const res = await app.gql(`
     query {
       workspace(id: "${workspaceId}") {
@@ -56,13 +45,9 @@ export async function getInviteLink(
   `);
 
   return res.workspace.inviteLink;
-}
+};
 
-export async function createInviteLink(
-  app: TestingApp,
-  workspaceId: string,
-  expireTime: 'OneDay' | 'ThreeDays' | 'OneWeek' | 'OneMonth'
-): Promise<{ link: string; expireTime: string }> {
+export const createInviteLink = async (app: TestingApp, workspaceId: string, expireTime: 'OneDay' | 'ThreeDays' | 'OneWeek' | 'OneMonth'): Promise<{ link: string; expireTime: string }> => {
   const res = await app.gql(`
     mutation {
       createInviteLink(workspaceId: "${workspaceId}", expireTime: ${expireTime}) {
@@ -73,12 +58,9 @@ export async function createInviteLink(
   `);
 
   return res.createInviteLink;
-}
+};
 
-export async function revokeInviteLink(
-  app: TestingApp,
-  workspaceId: string
-): Promise<boolean> {
+export const revokeInviteLink = async (app: TestingApp, workspaceId: string): Promise<boolean> => {
   const res = await app.gql(`
     mutation {
       revokeInviteLink(workspaceId: "${workspaceId}")
@@ -86,14 +68,9 @@ export async function revokeInviteLink(
   `);
 
   return res.revokeInviteLink;
-}
+};
 
-export async function acceptInviteById(
-  app: TestingApp,
-  workspaceId: string,
-  inviteId: string,
-  sendAcceptMail = false
-): Promise<boolean> {
+export const acceptInviteById = async (app: TestingApp, workspaceId: string, inviteId: string, sendAcceptMail = false): Promise<boolean> => {
   const res = await app.gql(`
     mutation {
       acceptInviteById(workspaceId: "${workspaceId}", inviteId: "${inviteId}", sendAcceptMail: ${sendAcceptMail})
@@ -101,13 +78,9 @@ export async function acceptInviteById(
   `);
 
   return res.acceptInviteById;
-}
+};
 
-export async function approveMember(
-  app: TestingApp,
-  workspaceId: string,
-  userId: string
-): Promise<string> {
+export const approveMember = async (app: TestingApp, workspaceId: string, userId: string): Promise<string> => {
   const res = await app.gql(`
     mutation {
       approveMember(workspaceId: "${workspaceId}", userId: "${userId}")
@@ -115,13 +88,9 @@ export async function approveMember(
   `);
 
   return res.approveMember;
-}
+};
 
-export async function leaveWorkspace(
-  app: TestingApp,
-  workspaceId: string,
-  sendLeaveMail = false
-): Promise<boolean> {
+export const leaveWorkspace = async (app: TestingApp, workspaceId: string, sendLeaveMail = false): Promise<boolean> => {
   const res = await app.gql(`
     mutation {
       leaveWorkspace(workspaceId: "${workspaceId}", sendLeaveMail: ${sendLeaveMail})
@@ -129,13 +98,9 @@ export async function leaveWorkspace(
   `);
 
   return res.leaveWorkspace;
-}
+};
 
-export async function revokeUser(
-  app: TestingApp,
-  workspaceId: string,
-  userId: string
-): Promise<boolean> {
+export const revokeUser = async (app: TestingApp, workspaceId: string, userId: string): Promise<boolean> => {
   const res = await app.gql(`
     mutation {
       revokeMember(workspaceId: "${workspaceId}", userId: "${userId}")
@@ -143,12 +108,9 @@ export async function revokeUser(
   `);
 
   return res.revokeMember;
-}
+};
 
-export async function getInviteInfo(
-  app: TestingApp,
-  inviteId: string
-): Promise<InvitationType> {
+export const getInviteInfo = async (app: TestingApp, inviteId: string): Promise<InvitationType> => {
   const res = await app.gql(`
     query {
       getInviteInfo(inviteId: "${inviteId}") {
@@ -168,4 +130,4 @@ export async function getInviteInfo(
   `);
 
   return res.getInviteInfo;
-}
+};

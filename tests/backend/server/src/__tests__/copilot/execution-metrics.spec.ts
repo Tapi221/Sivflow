@@ -1,5 +1,4 @@
 import test from 'ava';
-
 import { summarizePreparedRoutes } from '../../plugins/copilot/runtime/execution-metrics';
 
 test('summarizePreparedRoutes should report none when no route is prepared', t => {

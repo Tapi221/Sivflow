@@ -1,5 +1,4 @@
 import assert from 'node:assert';
-
 import { gqlFetcherFactory } from '@affine/graphql';
 import { INestApplication, ModuleMetadata } from '@nestjs/common';
 import { NestApplication } from '@nestjs/core';
@@ -8,7 +7,6 @@ import { PrismaClient } from '@prisma/client';
 import cookieParser from 'cookie-parser';
 import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs';
 import supertest from 'supertest';
-
 import {
   AFFiNELogger,
   CacheInterceptor,
@@ -232,9 +230,7 @@ export class TestingApp extends NestApplication {
   }
 }
 
-export async function createApp(
-  metadata: TestingAppMetadata = {}
-): Promise<TestingApp> {
+export const createApp = async (metadata: TestingAppMetadata = {}): Promise<TestingApp> => {
   const { buildAppModule } = await import('../../app.module');
   const { tapModule, tapApp } = metadata;
 
@@ -287,4 +283,4 @@ export async function createApp(
   await app.init();
 
   return app;
-}
+};

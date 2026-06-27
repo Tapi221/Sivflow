@@ -7,7 +7,6 @@ import {
   WorkspaceMemberStatus,
 } from '@affine/graphql';
 import { PrismaClient } from '@prisma/client';
-
 import { QuotaService } from '../../../core/quota/service';
 import { WorkspaceRole } from '../../../models';
 import {

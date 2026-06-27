@@ -1,6 +1,5 @@
 import test from 'ava';
 import Sinon from 'sinon';
-
 import { Mockers } from '../../../__tests__/mocks';
 import { createTestingModule } from '../../../__tests__/utils';
 import { Cache } from '../../../base';

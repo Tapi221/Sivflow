@@ -1,11 +1,7 @@
 import { randomUUID } from 'node:crypto';
-
 import ava, { TestFn } from 'ava';
-
-import {
-  createTestingModule,
-  type TestingModule,
-} from '../../../__tests__/utils';
+import { createTestingModule } from '../../../__tests__/utils';
+import type { TestingModule } from '../../../__tests__/utils';
 import { DocRole, Models, User, Workspace } from '../../../models';
 import { EventsListener } from '../event';
 import { PermissionModule } from '../index';

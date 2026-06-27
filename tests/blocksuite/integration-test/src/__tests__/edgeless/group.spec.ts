@@ -4,7 +4,6 @@ import type { GroupElementModel } from '@blocksuite/affine/model';
 import type { MindmapElementModel } from '@blocksuite/affine-model';
 import { beforeEach, describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
-
 import { wait } from '../utils/common.js';
 import { addNote, getDocRootBlock } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';

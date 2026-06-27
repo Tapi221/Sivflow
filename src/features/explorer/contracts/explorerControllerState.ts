@@ -1,8 +1,6 @@
 import type { ExplorerBreadcrumbContext } from "./explorerBreadcrumbContext";
 import type { SelectedExplorerItem } from "@/types";
 
-
-
 type ExplorerControllerState = {
   isHomeOnlyMode: boolean;
   isSectionListMode: boolean;

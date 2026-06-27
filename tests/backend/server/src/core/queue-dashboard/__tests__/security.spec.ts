@@ -1,6 +1,6 @@
 import ava, { TestFn } from 'ava';
-
-import { createTestingApp, type TestingApp } from '../../../__tests__/utils';
+import { createTestingApp } from '../../../__tests__/utils';
+import type { TestingApp } from '../../../__tests__/utils';
 import { buildAppModule } from '../../../app.module';
 import { Models } from '../../../models';
 

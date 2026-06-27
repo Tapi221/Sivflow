@@ -2,11 +2,11 @@ import type { Snapshot } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 import test from 'ava';
 import * as Sinon from 'sinon';
-
 import { DocStorageModule, PgWorkspaceDocStorageAdapter } from '../../core/doc';
 import { DocStorageOptions } from '../../core/doc/options';
 import { DocRecord } from '../../core/doc/storage';
-import { createTestingModule, type TestingModule } from '../utils';
+import { createTestingModule } from '../utils';
+import type { TestingModule } from '../utils';
 
 let m: TestingModule;
 let adapter: PgWorkspaceDocStorageAdapter;
@@ -48,14 +48,14 @@ const snapshot: Snapshot = {
   updatedBy: null,
 };
 
-function getSnapshot(timestamp: number = Date.now()): DocRecord {
+const getSnapshot = (timestamp: number = Date.now()): DocRecord => {
   return {
     spaceId: snapshot.workspaceId,
     docId: snapshot.id,
     bin: snapshot.blob,
     timestamp,
   };
-}
+};
 
 test('history max age converts quota seconds to milliseconds', async t => {
   Sinon.restore();

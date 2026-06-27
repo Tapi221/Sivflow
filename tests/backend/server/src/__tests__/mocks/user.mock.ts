@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker';
 import { hashSync } from '@node-rs/argon2';
 import type { Prisma, User } from '@prisma/client';
-
-import { FeatureConfigs, type UserFeatureName } from '../../models';
+import { FeatureConfigs } from '../../models';
+import type { UserFeatureName } from '../../models';
 import { Mocker } from './factory';
 
 export type MockUserInput = Prisma.UserCreateInput & {

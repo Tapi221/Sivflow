@@ -1,5 +1,4 @@
 import { randomUUID } from 'node:crypto';
-
 import {
   acceptInviteByInviteIdMutation,
   approveWorkspaceTeamMemberMutation,
@@ -16,7 +15,6 @@ import {
   WorkspaceMemberSource,
   WorkspaceMemberStatus as PrismaWorkspaceMemberStatus,
 } from '@prisma/client';
-
 import { EntitlementService } from '../../../core/entitlement';
 import { WorkspacePolicyService } from '../../../core/permission';
 import { Models, WorkspaceRole as ModelWorkspaceRole } from '../../../models';
@@ -31,7 +29,7 @@ import { app, e2e } from '../test';
 
 const TWO_BILLION_BYTES = 2_000_000_000;
 
-async function createWorkspace() {
+const createWorkspace = async () => {
   const owner = await app.create(Mockers.User);
   const workspace = await app.create(Mockers.Workspace, {
     owner: { id: owner.id },
@@ -41,9 +39,9 @@ async function createWorkspace() {
     owner,
     workspace,
   };
-}
+};
 
-async function grantTeamPlan(workspaceId: string, quantity: number) {
+const grantTeamPlan = async (workspaceId: string, quantity: number) => {
   await app.get(EntitlementService).upsertFromCloudSubscription({
     targetId: workspaceId,
     plan: SubscriptionPlan.Team,
@@ -51,14 +49,14 @@ async function grantTeamPlan(workspaceId: string, quantity: number) {
     status: SubscriptionStatus.Active,
     quantity,
   });
-}
+};
 
-async function revokeTeamPlan(workspaceId: string) {
+const revokeTeamPlan = async (workspaceId: string) => {
   await app.get(EntitlementService).revokeCloudSubscription({
     targetId: workspaceId,
     plan: SubscriptionPlan.Team,
   });
-}
+};
 
 e2e('should invite a user', async t => {
   const { owner, workspace } = await createWorkspace();

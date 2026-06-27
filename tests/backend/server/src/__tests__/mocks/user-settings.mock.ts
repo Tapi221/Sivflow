@@ -1,6 +1,5 @@
 import type { UserSettings } from '@prisma/client';
 import { omit } from 'lodash-es';
-
 import { UserSettingsInput } from '../../models';
 import { Mocker } from './factory';
 

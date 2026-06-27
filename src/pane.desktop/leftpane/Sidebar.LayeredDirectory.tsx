@@ -28,8 +28,6 @@ import { useFolderTagModeStore } from "@/pane.desktop/leftpane/folder/useFolderT
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceTab } from "@/pane.desktop/tab.desktopnative/Tab";
 
-
-
 type IconProps = {
   className?: string;
 };
@@ -90,8 +88,6 @@ type SidebarLayeredDirectoryCopy = {
   projectAddMenuAriaLabel: string;
   libraryTabTitle: string;
 };
-
-
 
 const WORKSPACE_OWNER_FALLBACK_NAME = "Akari T";
 const WORKSPACE_AVATAR_FALLBACK = "A";
@@ -209,8 +205,6 @@ const ADD_BUTTON_CLASS_NAME = "flex h-5 min-h-5 w-5 min-w-5 items-center justify
 const EMPTY_MESSAGE_CLASS_NAME = "m-0 pr-3 text-xs font-bold leading-4 tracking-normal text-stone-500";
 const PROJECT_ADD_MENU_ITEM_CLASS_NAME = "flex min-h-8 w-full items-center px-3 text-left text-sm font-medium text-stone-700 transition-colors hover:bg-stone-100 focus-visible:bg-stone-100 focus-visible:outline-none";
 
-
-
 const buildProjectAddMenuItemDefinitions = (copy: SidebarLayeredDirectoryCopy): ProjectAddMenuItemDefinition[] => [
   { id: "create-note", label: copy.defaultNewNoteName },
   { id: "create-card-set", label: copy.defaultNewCardSetName },
@@ -277,8 +271,6 @@ const getNavActionClassName = (isActive: boolean): string => cn(
   "flex h-7 min-h-7 w-7 min-w-7 items-center justify-center rounded-lg border-0 bg-transparent p-0 text-stone-500 outline-none transition-[background-color,color,transform] duration-150 hover:bg-stone-100 hover:text-stone-800 focus-visible:bg-stone-100 focus-visible:text-stone-800 active:scale-95 disabled:cursor-default",
   isActive && "bg-stone-100 text-stone-800",
 );
-
-
 
 const IconPlus = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M8 3.5V12.5M3.5 8H12.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>);
 const IconChevronDown = ({ className }: IconProps) => (<svg viewBox="0 0 16 16" fill="none" className={className}><path d="M4 6.25L8 10.25L12 6.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>);
@@ -506,7 +498,5 @@ const SidebarLayeredDirectory = ({ calendarContent, onToggleLeftPanel, onOpenSet
     </div>
   );
 };
-
-
 
 export { LibraryHierarchySidebar, ProjectListSidebar, SidebarLayeredDirectory, TagTreeSidebar };

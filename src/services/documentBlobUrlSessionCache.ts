@@ -8,12 +8,8 @@ type CacheEntry = {
   staleUrls: string[];
 };
 
-
-
 const MAX_CACHE_ENTRIES = 40;
 const cache = new Map<string, CacheEntry>();
-
-
 
 const makeScopedId = (id: string, options?: BlobScopeOptions): string => {
   const userId = options?.userId?.trim();
@@ -137,7 +133,5 @@ const invalidateDocumentBlobUrl = (id: string | null | undefined, url: string | 
   revokeBlobUrl(entry.url);
   cache.delete(key);
 };
-
-
 
 export { getCachedDocumentBlobUrl, cacheDocumentBlobUrl, pinDocumentBlobUrl, unpinDocumentBlobUrl, removeDocumentBlobUrl, invalidateDocumentBlobUrl };

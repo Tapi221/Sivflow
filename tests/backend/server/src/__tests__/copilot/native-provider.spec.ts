@@ -1,38 +1,19 @@
 import serverNativeModule from '@affine/server-native';
 import test from 'ava';
 import { z } from 'zod';
-
 import { CopilotPromptInvalid, CopilotProviderSideError } from '../../base';
-import {
-  type LlmBackendConfig,
-  type LlmEmbeddingRequest,
-  type LlmRequest,
-  type LlmRerankRequest,
-  type LlmStructuredRequest,
-  type LlmStructuredResponse,
-  type LlmToolLoopStreamEvent,
-  parseNativeStructuredOutput,
-} from '../../native';
-import {
-  type NodeTextMiddleware,
-  ProviderMiddlewareConfig,
-} from '../../plugins/copilot/config';
+import { parseNativeStructuredOutput } from '../../native';
+import type { LlmBackendConfig, LlmEmbeddingRequest, LlmRequest, LlmRerankRequest, LlmStructuredRequest, LlmStructuredResponse, LlmToolLoopStreamEvent } from '../../native';
+import { ProviderMiddlewareConfig } from '../../plugins/copilot/config';
+import type { NodeTextMiddleware } from '../../plugins/copilot/config';
 import { GeminiProvider } from '../../plugins/copilot/providers/gemini/gemini';
 import { GeminiVertexProvider } from '../../plugins/copilot/providers/gemini/vertex';
 import { OpenAIProvider } from '../../plugins/copilot/providers/openai';
-import {
-  CopilotProviderType,
-  type PromptMessage,
-  type StreamObject,
-} from '../../plugins/copilot/providers/types';
+import { CopilotProviderType } from '../../plugins/copilot/providers/types';
+import type { PromptMessage, StreamObject } from '../../plugins/copilot/providers/types';
 import { getVertexGoogleBaseUrl } from '../../plugins/copilot/providers/utils';
-import {
-  buildPromptStructuredResponseFromFields,
-  buildStructuredResponseContract,
-  buildToolContracts,
-  type RequiredStructuredOutputContract,
-  requireStructuredOutputContract,
-} from '../../plugins/copilot/runtime/contracts';
+import { buildPromptStructuredResponseFromFields, buildStructuredResponseContract, buildToolContracts, requireStructuredOutputContract } from '../../plugins/copilot/runtime/contracts';
+import type { RequiredStructuredOutputContract } from '../../plugins/copilot/runtime/contracts';
 import {
   buildCanonicalNativeRequest,
   buildCanonicalNativeStructuredRequest,
@@ -65,28 +46,23 @@ const mockDispatch = () =>
     yield { type: 'done', finish_reason: 'stop' };
   })();
 
-function stream(
-  factory: () => LlmToolLoopStreamEvent[]
-): AsyncIterableIterator<LlmToolLoopStreamEvent> {
+const stream = (factory: () => LlmToolLoopStreamEvent[]): AsyncIterableIterator<LlmToolLoopStreamEvent> => {
   return (async function* () {
     for (const event of factory()) {
       yield event;
     }
   })();
-}
+};
 
-async function collectChunks<T>(iterable: AsyncIterable<T>) {
+const collectChunks = async <T>(iterable: AsyncIterable<T>) => {
   const chunks: T[] = [];
   for await (const chunk of iterable) {
     chunks.push(chunk);
   }
   return chunks;
-}
+};
 
-function structuredOptions(
-  schema: z.ZodTypeAny,
-  extra?: Record<string, unknown>
-) {
+const structuredOptions = (schema: z.ZodTypeAny, extra?: Record<string, unknown>) => {
   const { responseSchemaJson, schemaHash } =
     buildStructuredResponseContract(schema);
   return {
@@ -94,11 +70,9 @@ function structuredOptions(
     schemaHash,
     ...extra,
   };
-}
+};
 
-function structuredContract(
-  schema: z.ZodTypeAny
-): RequiredStructuredOutputContract {
+const structuredContract = (schema: z.ZodTypeAny): RequiredStructuredOutputContract => {
   const contract = buildStructuredResponseContract(schema);
   const requiredContract = requireStructuredOutputContract(contract);
   if (!requiredContract) {
@@ -106,12 +80,9 @@ function structuredContract(
   }
 
   return requiredContract;
-}
+};
 
-function normalizeToolExecuteOptions(
-  signalOrOptions?: AbortSignal | CopilotToolExecuteOptions,
-  maybeMessages?: PromptMessage[]
-): CopilotToolExecuteOptions {
+const normalizeToolExecuteOptions = (signalOrOptions?: AbortSignal | CopilotToolExecuteOptions, maybeMessages?: PromptMessage[]): CopilotToolExecuteOptions => {
   if (
     signalOrOptions &&
     typeof signalOrOptions === 'object' &&
@@ -132,16 +103,12 @@ function normalizeToolExecuteOptions(
     signal: signalOrOptions.signal,
     messages: signalOrOptions.messages ?? maybeMessages,
   };
-}
+};
 
-function createTestToolLoopBridge(
-  dispatch: (
+const createTestToolLoopBridge = (dispatch: (
     request: LlmRequest,
     signal?: AbortSignal
-  ) => AsyncIterableIterator<LlmToolLoopStreamEvent>,
-  tools: CopilotToolSet,
-  maxSteps = 20
-) {
+  ) => AsyncIterableIterator<LlmToolLoopStreamEvent>, tools: CopilotToolSet, maxSteps = 20) => {
   return async function* (
     request: LlmRequest,
     signalOrOptions?: AbortSignal | CopilotToolExecuteOptions,
@@ -243,10 +210,9 @@ function createTestToolLoopBridge(
       }
     }
   };
-}
+};
 
-function installNativeDispatchRecorder(
-  owner: Partial<{
+const installNativeDispatchRecorder = (owner: Partial<{
     structuredRequests: LlmStructuredRequest[];
     structuredFactory: (request: LlmStructuredRequest) => LlmStructuredResponse;
     embeddingRequests: LlmEmbeddingRequest[];
@@ -263,8 +229,7 @@ function installNativeDispatchRecorder(
       model: string;
       scores: number[];
     };
-  }>
-) {
+  }>) => {
   const originalStructured = (serverNativeModule as any).llmStructuredDispatch;
   const originalEmbedding = (serverNativeModule as any).llmEmbeddingDispatch;
   const originalRerank = (serverNativeModule as any).llmRerankDispatch;
@@ -310,13 +275,13 @@ function installNativeDispatchRecorder(
     (serverNativeModule as any).llmEmbeddingDispatch = originalEmbedding;
     (serverNativeModule as any).llmRerankDispatch = originalRerank;
   };
-}
+};
 
-function installRemoteAttachmentMaterializer(owner: {
+const installRemoteAttachmentMaterializer = (owner: {
   remoteAttachmentRequests: string[];
   remoteAttachmentSignals: Array<AbortSignal | undefined>;
   remoteAttachmentResponses: Map<string, { data: string; mimeType: string }>;
-}) {
+}) => {
   return {
     fetchRemoteAttachment: async (
       url: string,
@@ -331,9 +296,10 @@ function installRemoteAttachmentMaterializer(owner: {
       return response;
     },
   };
-}
+};
 
-class TestGeminiProvider extends GeminiProvider<{ apiKey: string }> {
+class TestGeminiProvider extends GeminiProvider<{
+  apiKey: string }> {
   override readonly type = CopilotProviderType.Gemini;
   readonly dispatchRequests: LlmRequest[] = [];
   readonly structuredRequests: LlmStructuredRequest[] = [];

@@ -1,10 +1,10 @@
 import ava, { TestFn } from 'ava';
 import Sinon from 'sinon';
-
 import { EmailAlreadyUsed, EventBus } from '../../base';
 import { Models } from '../../models';
 import { UserModel } from '../../models/user';
-import { createTestingModule, sleep, type TestingModule } from '../utils';
+import { createTestingModule, sleep } from '../utils';
+import type { TestingModule } from '../utils';
 
 interface Context {
   module: TestingModule;
@@ -55,8 +55,6 @@ test('should trigger user.created event', async t => {
   t.true(spy.calledOnceWithExactly(user));
 });
 
-
-
 test('should update an user', async t => {
   const user = await t.context.user.create({
     email: 'test@affine.pro',
@@ -68,8 +66,6 @@ test('should update an user', async t => {
 
   t.is(user2.email, 'test2@affine.pro');
 });
-
-
 
 test('should not update email to an existing one', async t => {
   const user = await t.context.user.create({

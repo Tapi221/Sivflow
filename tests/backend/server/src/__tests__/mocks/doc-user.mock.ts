@@ -1,6 +1,5 @@
 import type { WorkspaceDocUserRole } from '@prisma/client';
 import { Prisma } from '@prisma/client';
-
 import { Mocker } from './factory';
 
 export type MockDocUserInput = Prisma.WorkspaceDocUserRoleUncheckedCreateInput;

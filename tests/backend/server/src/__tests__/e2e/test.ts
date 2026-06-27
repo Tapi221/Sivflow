@@ -1,7 +1,6 @@
 import test, { registerCompletionHandler } from 'ava';
-
 import { Env } from '../../env';
-import { type TestingApp } from './create-app';
+import type { TestingApp } from './create-app';
 
 export const e2e = test;
 // @ts-expect-error created in prelude.ts
@@ -11,9 +10,9 @@ registerCompletionHandler(async () => {
   await app.close();
 });
 
-export function refreshEnv() {
+export const refreshEnv = () => {
   globalThis.env = new Env();
-}
+};
 
 export * from '../mocks';
 export { createApp } from './create-app';

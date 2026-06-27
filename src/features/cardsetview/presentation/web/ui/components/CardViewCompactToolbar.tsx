@@ -12,8 +12,6 @@ import { CARD_LAYOUT_MODE_LABELS } from "@/features/cardsetview/domain/cardLayou
 import { CARD_VIEW_ZOOM_SLIDER_STEP_PERCENT } from "@/features/cardsetview/domain/cardSetView.constants";
 import type { CardDisplayMode } from "@/types/domain/cardSet";
 
-
-
 type ZoomControlProps = {
   value: number;
   min: number;
@@ -45,8 +43,6 @@ type ModeButtonProps = {
   children: React.ReactNode;
 };
 
-
-
 const CARD_VIEW_COMPACT_TOOLBAR_CLASS_NAME = "gap-1.5 rounded-2xl border border-[#e6e4e1] bg-[#f7f7f6] px-1.5 py-1 text-[#85827e] shadow-none backdrop-blur-0";
 const CARD_VIEW_COMPACT_MODE_BUTTON_CLASS_NAME = "h-7 w-7 border-0 bg-transparent text-[#85827e] shadow-none transition-colors hover:bg-slate-100 hover:text-[#2f343b] disabled:bg-transparent disabled:text-[#b7b7b7] disabled:opacity-50";
 const CARD_VIEW_COMPACT_MODE_BUTTON_ACTIVE_CLASS_NAME = "bg-slate-100 text-[#2f343b]";
@@ -59,8 +55,6 @@ const CARD_VIEW_COMPACT_ZOOM_TRACK_CLASS_NAME = "bg-[#dedbd7]";
 const CARD_VIEW_COMPACT_ZOOM_RANGE_CLASS_NAME = "bg-[#8c8c8c]";
 const CARD_VIEW_COMPACT_ZOOM_THUMB_CLASS_NAME = "[&::-webkit-slider-thumb]:border-[#c7c2bc] [&::-webkit-slider-thumb]:bg-[#f7f7f6] [&::-webkit-slider-thumb]:shadow-none [&::-moz-range-thumb]:border-[#c7c2bc] [&::-moz-range-thumb]:bg-[#f7f7f6] [&::-moz-range-thumb]:shadow-none";
 const CARD_VIEW_COMPACT_ZOOM_VALUE_CLASS_NAME = "text-[#85827e]";
-
-
 
 const ModeButton = ({
   isActive,
@@ -204,7 +198,5 @@ const CardViewCompactToolbar = ({
     </OverlayToolbar>
   );
 };
-
-
 
 export { CardViewCompactToolbar };

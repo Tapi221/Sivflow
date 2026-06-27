@@ -1,5 +1,4 @@
 import { cpus } from 'node:os';
-
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import { defineConfig } from 'vite';
 import wasm from 'vite-plugin-wasm';

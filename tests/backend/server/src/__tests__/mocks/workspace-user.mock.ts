@@ -1,5 +1,4 @@
 import type { Prisma, WorkspaceUserRole } from '@prisma/client';
-
 import { WorkspaceMemberStatus, WorkspaceRole } from '../../models';
 import { Mocker } from './factory';
 

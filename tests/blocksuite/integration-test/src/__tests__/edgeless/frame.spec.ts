@@ -5,7 +5,6 @@ import type { AffineFrameTitleWidget } from '@blocksuite/affine/widgets/frame-ti
 import { assertType } from '@blocksuite/global/utils';
 import { Text } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
-
 import { wait } from '../utils/common.js';
 import { getDocRootBlock } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';

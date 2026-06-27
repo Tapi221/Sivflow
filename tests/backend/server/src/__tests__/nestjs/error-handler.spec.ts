@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-
 import {
   applyDecorators,
   Body,
@@ -21,7 +20,6 @@ import testFn, { TestFn } from 'ava';
 import Sinon from 'sinon';
 import request from 'supertest';
 import { z } from 'zod';
-
 import {
   AccessDenied,
   GatewayErrorWrapper,
@@ -128,7 +126,7 @@ const test = testFn as TestFn<{
   logger: Sinon.SinonStubbedInstance<LoggerService>;
 }>;
 
-function gql(app: INestApplication, query: string) {
+const gql = (app: INestApplication, query: string) => {
   return request(app.getHttpServer())
     .post('/graphql')
     .send({ query })
@@ -138,7 +136,7 @@ function gql(app: INestApplication, query: string) {
         'GraphQL query should return 200 or 400'
       );
     });
-}
+};
 
 test.before(async ({ context }) => {
   const app = await createTestingApp({

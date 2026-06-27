@@ -1,6 +1,5 @@
 import test from 'ava';
 import Sinon from 'sinon';
-
 import {
   exponentialBackoffDelay,
   ExponentialBackoffScheduler,

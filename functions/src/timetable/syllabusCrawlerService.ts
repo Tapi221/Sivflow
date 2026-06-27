@@ -1,15 +1,12 @@
 import crypto from "node:crypto";
 import { lookup } from "node:dns/promises";
-
 import { HttpsError } from "firebase-functions/v2/https";
-
 import { getPostgresPool } from "#src/postgres.js";
 
 type TimetableSyllabusSlot = {
   dayIndex: number;
   periodLabel: string;
 };
-
 type TimetableSyllabusCourseRecord = {
   id: string;
   sourceUrl: string;
@@ -30,7 +27,6 @@ type TimetableSyllabusCourseRecord = {
   createdAt: unknown;
   updatedAt: unknown;
 };
-
 type CrawlSource = {
   sourceId: string | null;
   seedUrl: string;
@@ -39,14 +35,12 @@ type CrawlSource = {
   departmentName: string;
   maxPages: number;
 };
-
 type CrawlResult = {
   jobId: string;
   scannedPageCount: number;
   savedCourseCount: number;
   skippedUrlCount: number;
 };
-
 type RobotsRuleGroup = {
   applies: boolean;
   disallow: string[];
@@ -254,7 +248,6 @@ const extractCandidateLinks = (html: string, baseUrl: URL): URL[] => {
 
   return links.filter((link, index) => links.findIndex((candidate) => candidate.toString() === link.toString()) === index);
 };
-
 const upsertTimetableSyllabusSourceRecord = async (input: Record<string, unknown>) => {
   const seedUrl = getStringValue(input.seedUrl);
   if (!seedUrl) throw new HttpsError("invalid-argument", "seedUrl is required.");
@@ -293,7 +286,6 @@ const upsertTimetableSyllabusSourceRecord = async (input: Record<string, unknown
   );
   return { ok: true, sourceId };
 };
-
 const createCrawlSourceFromInput = (input: Record<string, unknown>): CrawlSource => ({
   sourceId: null,
   seedUrl: getStringValue(input.seedUrl),
@@ -302,7 +294,6 @@ const createCrawlSourceFromInput = (input: Record<string, unknown>): CrawlSource
   departmentName: getStringValue(input.departmentName),
   maxPages: clampMaxPages(input.maxPages),
 });
-
 const saveCrawlResult = async (
   jobId: string,
   uid: string | null,
@@ -442,7 +433,6 @@ const saveCrawlResult = async (
     client.release();
   }
 };
-
 const crawlSyllabusSource = async (source: CrawlSource, uid: string | null): Promise<CrawlResult> => {
   const seedUrl = await assertFetchableUrl(source.seedUrl);
   const jobId = createHashId(`${source.sourceId ?? uid ?? "scheduled"}:${seedUrl.toString()}:${Date.now()}`);
@@ -478,13 +468,11 @@ const crawlSyllabusSource = async (source: CrawlSource, uid: string | null): Pro
 
   return await saveCrawlResult(jobId, uid, source, courses, seen.size, skippedUrlCount);
 };
-
 const crawlTimetableSyllabusUrlForUser = async (input: Record<string, unknown>, uid: string): Promise<CrawlResult> => {
   const source = createCrawlSourceFromInput(input);
   if (!source.seedUrl) throw new HttpsError("invalid-argument", "seedUrl is required.");
   return await crawlSyllabusSource(source, uid);
 };
-
 const runTimetableSyllabusCatalogCrawlJob = async (): Promise<{ ok: true; jobs: CrawlResult[] }> => {
   const result = await getPostgresPool().query(
     `select source_id, seed_url, institution_name, faculty_name, department_name, max_pages

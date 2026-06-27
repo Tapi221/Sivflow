@@ -13,6 +13,7 @@ const REDIRECT_TO_SCHEDULE_ROUTES = ["calendar/*", "CardEdit/*", "CardSetView/*"
 const withRouteFallback = (element: ReactNode) => {
   return <Suspense fallback={null}>{element}</Suspense>;
 };
+
 const DefaultRedirect = () => {
   return <Navigate to="/schedule" replace />;
 };

@@ -1,6 +1,5 @@
 import { indexerSearchDocsQuery, SearchTable } from '@affine/graphql';
 import { omit } from 'lodash-es';
-
 import { IndexerService } from '../../../plugins/indexer/service';
 import { Mockers } from '../../mocks';
 import { app, e2e } from '../test';

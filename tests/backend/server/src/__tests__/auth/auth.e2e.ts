@@ -1,9 +1,7 @@
 import { randomBytes } from 'node:crypto';
-
 import type { TestFn } from 'ava';
 import ava from 'ava';
 import supertest from 'supertest';
-
 import {
   changeEmail,
   changePassword,
@@ -102,8 +100,6 @@ test('change email', async t => {
   t.not(me, null, 'failed to get current user');
   t.is(me?.email, u2Email, 'failed to get current user');
 });
-
-
 
 test('should forbid graphql callbackUrl to external origin', async t => {
   const { app } = t.context;

@@ -101,7 +101,7 @@ abstract class PopupWindow {
     await app.dock?.show();
 
     // required to make the window transparent
-    browserWindow.setBackgroundColor('#00000000');
+    browserWindow.setBackgroundColor('#0000');
     browserWindow.setVisibleOnAllWorkspaces(true, {
       visibleOnFullScreen: true,
     });

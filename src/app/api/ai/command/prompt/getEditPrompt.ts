@@ -5,8 +5,6 @@ import { buildEditTableMultiCellPrompt } from "./getEditTablePrompt";
 import type { ChatMessage } from "@/app/api/ai/command/types";
 import { addSelection, buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction, getMarkdownWithSelection, isMultiBlocks, isSelectionInTable, isSingleCellSelection } from "@/app/api/ai/command/utils";
 
-
-
 const buildEditMultiBlockPrompt = (editor: SlateEditor, messages: ChatMessage[]) => {
   const selectingMarkdown = getMarkdownWithSelection(editor);
 
@@ -214,7 +212,5 @@ const getEditPrompt = (editor: SlateEditor, { isSelecting, messages }: { isSelec
 
   return [buildEditSelectionPrompt(editor, messages), "selection"];
 };
-
-
 
 export { getEditPrompt };

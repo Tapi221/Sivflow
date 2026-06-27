@@ -5,7 +5,7 @@ import whywhywhy from 'why-is-node-running';
 export const TEST_LOG_LEVEL: LogLevel =
   (process.env.TEST_LOG_LEVEL as LogLevel) ?? 'fatal';
 
-async function flushDB(client: PrismaClient) {
+const flushDB = async (client: PrismaClient) => {
   const result: { tablename: string }[] =
     await client.$queryRaw`SELECT tablename
                            FROM pg_catalog.pg_tables
@@ -28,9 +28,9 @@ async function flushDB(client: PrismaClient) {
       await sleep((attempt + 1) * 50);
     }
   }
-}
+};
 
-function isDeadlockError(error: unknown) {
+const isDeadlockError = (error: unknown) => {
   if (typeof error !== 'object' || error === null || !('code' in error)) {
     return false;
   }
@@ -45,18 +45,18 @@ function isDeadlockError(error: unknown) {
     (prismaError.meta?.code === '40P01' ||
       /deadlock detected/i.test(prismaError.meta?.message ?? ''))
   );
-}
+};
 
-export async function initTestingDB(context: INestApplicationContext) {
+export const initTestingDB = async (context: INestApplicationContext) => {
   const db = context.get(PrismaClient, { strict: false });
   await flushDB(db);
-}
+};
 
-export async function sleep(ms: number) {
+export const sleep = async (ms: number) => {
   return new Promise(resolve => setTimeout(resolve, ms));
-}
+};
 
-export function debugProcessHolding(ignorePrismaStack = true) {
+export const debugProcessHolding = (ignorePrismaStack = true) => {
   setImmediate(() => {
     whywhywhy({
       error: message => {
@@ -72,4 +72,4 @@ export function debugProcessHolding(ignorePrismaStack = true) {
       },
     });
   });
-}
+};

@@ -2,8 +2,7 @@ import { Controller, Get, HttpStatus, UseGuards } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import ava, { TestFn } from 'ava';
 import Sinon from 'sinon';
-import { type Response } from 'supertest';
-
+import type { Response } from 'supertest';
 import { AppModule } from '../../app.module';
 import { ConfigModule } from '../../base/config';
 import {
@@ -133,14 +132,14 @@ test.after.always(async t => {
   await t.context.app.close();
 });
 
-function rateLimitHeaders(res: Response) {
+const rateLimitHeaders = (res: Response) => {
   return {
     limit: res.header['x-ratelimit-limit'],
     remaining: res.header['x-ratelimit-remaining'],
     reset: res.header['x-ratelimit-reset'],
     retryAfter: res.header['retry-after'],
   };
-}
+};
 
 test('should be able to prevent requests if limit is reached', async t => {
   const { app } = t.context;

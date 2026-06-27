@@ -1,8 +1,6 @@
 import type { BatchConstraint, INetworkMonitor } from "@/services/interfaces/ISyncService";
 import type { NetworkStatus, SyncContextSource } from "@/types/domain/telemetry";
 
-
-
 /**
  * NetworkMonitor: ネットワーク状態を監視し、実測値ベースで健全性を判断
  * 状態遷移にヒステリシス（履歴効果）を持たせ、頻繁な揺れを防ぐ
@@ -189,7 +187,5 @@ class NetworkMonitor implements INetworkMonitor {
     this.listeners.forEach((listener) => listener(this._status));
   }
 }
-
-
 
 export { NetworkMonitor };

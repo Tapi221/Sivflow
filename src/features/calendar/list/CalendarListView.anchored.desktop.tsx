@@ -4,8 +4,6 @@ import type { ScheduleVirtualRail } from "@/features/calendar/grid/ScheduleColum
 import { CalendarListView } from "./CalendarListView.desktop";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
-
-
 type CalendarListViewAnchoredProps = {
   days: Date[];
   virtualRail?: ScheduleVirtualRail;
@@ -25,12 +23,8 @@ type ListViewportAnchor = {
   viewportTop: number;
 };
 
-
-
 const LIST_SCROLL_RESTORE_EPSILON_PX = 0.5;
 const WEEKDAY_SUFFIX = "曜日";
-
-
 
 const getDateLabelPrefix = (label: string): string | null => {
   const weekdayEnd = label.indexOf(WEEKDAY_SUFFIX);
@@ -64,8 +58,6 @@ const restoreViewportAnchor = (element: HTMLDivElement, anchor: ListViewportAnch
   return true;
 };
 
-
-
 const CalendarListViewAnchoredComponent = ({ scrollViewportRef: externalRef, onScrollTopChange, events, ...props }: CalendarListViewAnchoredProps) => {
   const localRef = useRef<HTMLDivElement | null>(null);
   const scrollViewportRef = externalRef ?? localRef;
@@ -94,8 +86,6 @@ const CalendarListViewAnchoredComponent = ({ scrollViewportRef: externalRef, onS
   });
   return <CalendarListView {...props} events={events} scrollViewportRef={scrollViewportRef} onScrollTopChange={handleScrollTopChange} />;
 };
-
-
 
 const CalendarListViewAnchored = memo(CalendarListViewAnchoredComponent);
 CalendarListViewAnchored.displayName = "CalendarListViewAnchored";

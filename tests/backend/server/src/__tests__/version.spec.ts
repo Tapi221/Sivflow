@@ -1,7 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import test from 'ava';
 import Sinon from 'sinon';
-
 import { AppModule } from '../app.module';
 import {
   CANARY_CLIENT_VERSION_MAX_AGE_DAYS,

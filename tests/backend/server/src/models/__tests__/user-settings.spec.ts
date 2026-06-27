@@ -1,6 +1,5 @@
 import test from 'ava';
 import { ZodError } from 'zod';
-
 import { createModule } from '../../__tests__/create-module';
 import { Mockers } from '../../__tests__/mocks';
 import { Models } from '../index';

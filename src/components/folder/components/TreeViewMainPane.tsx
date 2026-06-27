@@ -2,8 +2,6 @@ import { cn } from "@web-renderer/lib/utils";
 import { RightPane } from "@/components/folder/panes/RightPane";
 import type { Card, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
-
-
 type TreeViewMainPaneProps = {
   showMobileDetail: boolean;
   hideOnSectionList?: boolean;
@@ -27,8 +25,6 @@ type TreeViewMainPaneProps = {
   folderSelectionNonce: number;
 };
 
-
-
 const TreeViewMainPane = ({ showMobileDetail, hideOnSectionList = false, selectedItem, selectedCardId, selectedDocument, selectedFolderId, selectedFolderName, folderCards, onCardUpdated, onDocumentUpdated, onRenameFolder, handlers, folderSelectionNonce }: TreeViewMainPaneProps) => {
   const shouldHidePane = hideOnSectionList && !showMobileDetail;
 
@@ -38,7 +34,5 @@ const TreeViewMainPane = ({ showMobileDetail, hideOnSectionList = false, selecte
     </section>
   );
 };
-
-
 
 export { TreeViewMainPane };

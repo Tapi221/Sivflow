@@ -5,14 +5,10 @@ import { Input } from "@web-renderer/chip/input-field/input";
 import { cn } from "@web-renderer/lib/utils";
 import type { ReferenceBlockData } from "@/types";
 
-
-
 type LinkEditorProps = {
   items: ReferenceBlockData[];
   onChange: (items: ReferenceBlockData[]) => void;
 };
-
-
 
 const LinkEditor = ({ items, onChange }: LinkEditorProps) => {
   const refs = items ?? [];
@@ -100,7 +96,5 @@ const LinkEditor = ({ items, onChange }: LinkEditorProps) => {
     </div>
   );
 };
-
-
 
 export { LinkEditor };

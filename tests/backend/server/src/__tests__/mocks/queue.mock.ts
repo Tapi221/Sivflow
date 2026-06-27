@@ -1,6 +1,5 @@
 import { interval, map, take, takeUntil } from 'rxjs';
 import Sinon from 'sinon';
-
 import { JobQueue } from '../../base';
 
 export class MockJobQueue {

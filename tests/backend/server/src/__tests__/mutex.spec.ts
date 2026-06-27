@@ -1,9 +1,7 @@
 import { randomUUID } from 'node:crypto';
-
 import { TestingModule } from '@nestjs/testing';
 import ava, { TestFn } from 'ava';
 import Sinon from 'sinon';
-
 import { Locker, Mutex } from '../base/mutex';
 import { SessionRedis } from '../base/redis';
 import { createTestingModule, sleep } from './utils';

@@ -1,6 +1,5 @@
 import test from 'ava';
 import Sinon from 'sinon';
-
 import { createModule } from '../../../__tests__/create-module';
 import { Config } from '../../../base';
 import { ConfigModule } from '../../../base/config';

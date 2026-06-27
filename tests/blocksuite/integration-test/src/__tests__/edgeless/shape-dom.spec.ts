@@ -1,6 +1,5 @@
 import { DomRenderer } from '@blocksuite/affine-block-surface';
 import { beforeEach, describe, expect, test } from 'vitest';
-
 import { wait } from '../utils/common.js';
 import { getSurface } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';
@@ -52,8 +51,8 @@ describe('Shape rendering with DOM renderer', () => {
       type: 'shape',
       subType: 'rectangle',
       xywh: '[150, 150, 80, 60]',
-      fill: '#ff0000',
-      stroke: '#000000',
+      fill: '#f00',
+      stroke: '#000',
     };
     const shapeId = surfaceModel.addElement(shapeProps);
 
@@ -71,8 +70,8 @@ describe('Shape rendering with DOM renderer', () => {
       subType: 'rectangle',
       xywh: '[150, 150, 80, 60]', // width: 80, height: 60
       radius: 0.1, // 10% of min(width, height) = 10% of 60 = 6
-      fill: '#ff0000',
-      stroke: '#000000',
+      fill: '#f00',
+      stroke: '#000',
     };
     const shapeId = surfaceModel.addElement(shapeProps);
     const shapeElement = await waitForShapeElement(surfaceView, shapeId);
@@ -115,8 +114,8 @@ describe('Shape rendering with DOM renderer', () => {
       type: 'shape',
       subType: 'diamond',
       xywh: '[150, 150, 80, 60]',
-      fillColor: '#ff0000',
-      strokeColor: '#000000',
+      fillColor: '#f00',
+      strokeColor: '#000',
       filled: true,
     };
     const shapeId = surfaceModel.addElement(shapeProps);
@@ -135,8 +134,8 @@ describe('Shape rendering with DOM renderer', () => {
       type: 'shape',
       subType: 'triangle',
       xywh: '[150, 150, 80, 60]',
-      fillColor: '#ff0000',
-      strokeColor: '#000000',
+      fillColor: '#f00',
+      strokeColor: '#000',
       filled: true,
     };
     const shapeId = surfaceModel.addElement(shapeProps);

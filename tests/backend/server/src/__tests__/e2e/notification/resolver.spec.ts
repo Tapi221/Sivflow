@@ -1,5 +1,4 @@
 import { randomUUID } from 'node:crypto';
-
 import {
   DocMode,
   listNotificationsQuery,
@@ -10,12 +9,11 @@ import {
   readAllNotificationsMutation,
   readNotificationMutation,
 } from '@affine/graphql';
-
 import { Mockers } from '../../mocks';
 import { createRealtimeClient, realtimeRequest } from '../realtime';
 import { app, e2e } from '../test';
 
-async function init() {
+const init = async () => {
   const member = await app.create(Mockers.User);
   const owner = await app.create(Mockers.User);
   const workspace = await app.create(Mockers.Workspace, {
@@ -34,7 +32,7 @@ async function init() {
     owner,
     workspace,
   };
-}
+};
 
 e2e('should mention user in a doc', async t => {
   const { member, owner, workspace } = await init();

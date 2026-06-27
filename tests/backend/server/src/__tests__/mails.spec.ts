@@ -1,5 +1,4 @@
 import test from 'ava';
-
 import { normalizeSMTPHeloHostname } from '../core/mail/utils';
 import { Renderers } from '../mails';
 import { TEST_DOC, TEST_USER } from '../mails/common';

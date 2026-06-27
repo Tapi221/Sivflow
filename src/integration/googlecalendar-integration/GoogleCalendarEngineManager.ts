@@ -3,8 +3,6 @@ import type { GCalForceSyncOptions, GCalWritableEventDeleteInput, GCalWritableEv
 import { GoogleCalendarSyncEngine } from "@/sync/googlecalendar-sync/GoogleCalendarSyncEngine";
 import { GoogleCalendarWatchManager } from "@/sync/googlecalendar-sync/GoogleCalendarWatchManager";
 
-
-
 type EngineContext = {
   accessToken: string;
   selectedCalendarIds: Set<string>;
@@ -19,8 +17,6 @@ type WatchRegistrationResult = {
   action: "add" | "remove";
   calendarId: string;
 };
-
-
 
 class GoogleCalendarEngineManager {
   private engines = new Map<string, GoogleCalendarSyncEngine>();
@@ -346,7 +342,5 @@ class GoogleCalendarEngineManager {
       .join(",");
   }
 }
-
-
 
 export { GoogleCalendarEngineManager };

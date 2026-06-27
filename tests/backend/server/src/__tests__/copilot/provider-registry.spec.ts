@@ -1,5 +1,4 @@
 import test from 'ava';
-
 import { OpenAIProvider } from '../../plugins/copilot/providers';
 import { CopilotProviderLifecycleService } from '../../plugins/copilot/providers/lifecycle-service';
 import {

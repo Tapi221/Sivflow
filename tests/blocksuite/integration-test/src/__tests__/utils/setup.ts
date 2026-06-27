@@ -1,6 +1,5 @@
 import '@toeverything/theme/style.css';
 import '@toeverything/theme/fonts.css';
-
 import type { DocMode } from '@blocksuite/affine/model';
 import { AffineSchemas } from '@blocksuite/affine/schemas';
 import {
@@ -16,7 +15,6 @@ import {
   createAutoIncrementIdGenerator,
   TestWorkspace,
 } from '@blocksuite/store/test';
-
 import { effects } from '../../effects.js';
 import { TestAffineEditorContainer } from '../../index.js';
 import { getTestStoreManager } from '../../store.js';

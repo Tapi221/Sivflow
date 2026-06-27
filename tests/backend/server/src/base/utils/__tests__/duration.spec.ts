@@ -1,5 +1,4 @@
 import test from 'ava';
-
 import { Due } from '../duration';
 
 test('should parse duration strings correctly', t => {

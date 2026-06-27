@@ -1,5 +1,4 @@
 import test from 'ava';
-
 import { resolveProviderMiddleware } from '../../plugins/copilot/providers/provider-middleware';
 import { buildProviderRegistry } from '../../plugins/copilot/providers/provider-registry';
 import { CopilotProviderType } from '../../plugins/copilot/providers/types';

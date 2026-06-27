@@ -1,5 +1,4 @@
 import ava from 'ava';
-
 import { verifyEmailDomainRecords } from '../../core/auth/email-domain';
 
 const test = ava;

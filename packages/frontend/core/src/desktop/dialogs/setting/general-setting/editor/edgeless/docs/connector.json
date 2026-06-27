@@ -35,8 +35,8 @@
               },
               "labelStyle": {
                 "color": {
-                  "dark": "#ffffff",
-                  "light": "#000000"
+                  "dark": "#fff",
+                  "light": "#000"
                 },
                 "fontSize": 16,
                 "fontFamily": "blocksuite:surface:Inter",

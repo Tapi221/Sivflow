@@ -2,7 +2,6 @@ import type { EdgelessRootBlockComponent } from '@blocksuite/affine/blocks/root'
 import { DefaultTool } from '@blocksuite/affine/blocks/surface';
 import type { SurfaceBlockComponent } from '@blocksuite/affine/blocks/surface';
 import { beforeEach, describe, expect, test } from 'vitest';
-
 import { click, drag, wait } from '../utils/common.js';
 import { addNote, getDocRootBlock, getSurface } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';

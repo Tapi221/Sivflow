@@ -4,7 +4,6 @@ import type {
 } from '@blocksuite/affine/blocks/root';
 import type { SurfaceBlockComponent } from '@blocksuite/affine/blocks/surface';
 import type { Store } from '@blocksuite/store';
-
 import type { TestAffineEditorContainer } from '../../index.js';
 
 export const getSurface = (doc: Store, editor: TestAffineEditorContainer) => {

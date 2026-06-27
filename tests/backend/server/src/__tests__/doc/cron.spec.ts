@@ -1,10 +1,10 @@
 import { ScheduleModule } from '@nestjs/schedule';
 import { PrismaClient } from '@prisma/client';
 import ava, { TestFn } from 'ava';
-
 import { DocStorageModule } from '../../core/doc';
 import { DocStorageCronJob } from '../../core/doc/job';
-import { createTestingModule, type TestingModule } from '../utils';
+import { createTestingModule } from '../utils';
+import type { TestingModule } from '../utils';
 
 interface Context {
   module: TestingModule;

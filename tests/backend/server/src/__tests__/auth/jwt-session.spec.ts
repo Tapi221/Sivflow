@@ -1,14 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import ava, { TestFn } from 'ava';
 import jwt from 'jsonwebtoken';
-
 import { CryptoHelper } from '../../base/helpers';
-import {
-  AuthModule,
-  AuthService,
-  type CurrentUser,
-  JwtSessionService,
-} from '../../core/auth';
+import { AuthModule, AuthService, JwtSessionService } from '../../core/auth';
+import type { CurrentUser } from '../../core/auth';
 import { Models } from '../../models';
 import { createTestingApp, TestingApp } from '../utils';
 
@@ -48,12 +43,12 @@ test.after.always(async t => {
   await t.context.app.close();
 });
 
-function currentJwtKey(crypto: CryptoHelper) {
+const currentJwtKey = (crypto: CryptoHelper) => {
   return Buffer.concat([
     Buffer.from('affine:user-session-jwt:v1:'),
     crypto.keyPair.sha256.privateKey,
   ]);
-}
+};
 
 test('should sign and verify a user session jwt', async t => {
   const signed = t.context.jwtSession.sign(

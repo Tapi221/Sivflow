@@ -1,6 +1,5 @@
 import { getUserQuery } from '@affine/graphql';
 import Sinon from 'sinon';
-
 import { ThrottlerStorage } from '../../../base/throttler';
 import { app, e2e, Mockers } from '../test';
 

@@ -1,7 +1,6 @@
 import { EdgelessTemplatePanel } from '@blocksuite/affine/gfx/template';
 import type { Template, TemplateManager } from '@blocksuite/affine/gfx/template';
 import { beforeEach, expect, test } from 'vitest';
-
 import { setupEditor } from '../utils/setup.js';
 
 beforeEach(async () => {

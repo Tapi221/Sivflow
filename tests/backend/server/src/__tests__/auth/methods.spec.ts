@@ -1,5 +1,4 @@
 import ava, { TestFn } from 'ava';
-
 import { AuthMethodsService, AuthModule } from '../../core/auth';
 import { Models } from '../../models';
 import { createTestingApp, TestingApp } from '../utils';

@@ -1,17 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-
 import { installLicenseMutation, SubscriptionVariant } from '@affine/graphql';
-
 import { Workspace, WorkspaceRole } from '../../../models';
-import {
-  createApp,
-  e2e,
-  MockedUser,
-  Mockers,
-  refreshEnv,
-  type TestingApp,
-} from '../test';
+import { createApp, e2e, MockedUser, Mockers, refreshEnv } from '../test';
+import type { TestingApp } from '../test';
 
 const testWorkspaceId = 'd6f52bc7-d62a-4822-804a-335fa7dfe5a6';
 const testPublicKey = `-----BEGIN PUBLIC KEY-----
@@ -21,11 +13,11 @@ Hc3w7v4FGmoA5MNzzhrkho1ckDYw2wrX6zBnehFzcivURv80HherE2GQjg==
 const testTestLicenseAESKey = 'TEST_LICENSE_AES_KEY';
 
 const fixturesDir = join(import.meta.dirname, '__fixtures__');
-function getLicense(file: string) {
+const getLicense = (file: string) => {
   return new File([readFileSync(join(fixturesDir, file))], 'test-license.lic', {
     type: 'application/octet-stream',
   });
-}
+};
 
 const licenses = {
   valid: getLicense('valid.license'),

@@ -21,14 +21,10 @@ import { usePresentationTarget } from "@/platform/presentation/usePresentationTa
 import { resolveSplitFallbackLayoutModePreference } from "@/services/cardLayoutFallbackPreferences";
 import { getCardSetViewNavigationPreference, setCardSetViewNavigationPreference } from "@/services/cardSetViewNavigationPreferences";
 
-
-
 type ScrollAnchorFace = "question" | "answer";
 type UseCardSetViewScreenControllerParams = {
   cardSetId?: string | null;
 };
-
-
 
 const buildNavigationScopeKey = ({ deviceScope, cardSetId }: { deviceScope: string; cardSetId: string | null; }) => {
   if (!cardSetId) return null;
@@ -245,7 +241,5 @@ const useCardSetViewScreenController = (params: UseCardSetViewScreenControllerPa
     splitFallbackLayoutMode,
   };
 };
-
-
 
 export { useCardSetViewScreenController };

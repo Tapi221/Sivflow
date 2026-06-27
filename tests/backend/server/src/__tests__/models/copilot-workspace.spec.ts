@@ -1,15 +1,14 @@
 import { randomUUID } from 'node:crypto';
-
 import { PrismaClient, User, Workspace } from '@prisma/client';
 import ava, { TestFn } from 'ava';
-
 import { Config } from '../../base';
 import { CopilotContextModel } from '../../models/copilot-context';
 import { CopilotWorkspaceConfigModel } from '../../models/copilot-workspace';
 import { DocModel } from '../../models/doc';
 import { UserModel } from '../../models/user';
 import { WorkspaceModel } from '../../models/workspace';
-import { createTestingModule, type TestingModule } from '../utils';
+import { createTestingModule } from '../utils';
+import type { TestingModule } from '../utils';
 import { cleanObject } from '../utils/copilot';
 
 interface Context {

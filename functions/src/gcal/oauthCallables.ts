@@ -1,6 +1,5 @@
 import { defineSecret } from "firebase-functions/params";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
-
 import { getAdminAuth } from "#src/firebaseAdmin.js";
 import {
   connectGoogleCalendarAccountForUser,
@@ -21,7 +20,6 @@ const requireUid = (request: { auth?: { uid?: string } }) => {
   if (!uid) throw new HttpsError("unauthenticated", "Authentication required.");
   return uid;
 };
-
 const readSecretValue = (secret: { value: () => string }, name: string): string => {
   try {
     return secret.value();
@@ -37,7 +35,6 @@ const readSecretValue = (secret: { value: () => string }, name: string): string 
     });
   }
 };
-
 const readCallableSecrets = (): GoogleOAuthSecrets =>
   loadGoogleOAuthSecrets({
     clientId: readSecretValue(GOOGLE_OAUTH_CLIENT_ID, "GOOGLE_OAUTH_CLIENT_ID"),
@@ -49,17 +46,14 @@ const disconnectGoogleCalendarAccount = onCall({ region: REGION }, async (reques
   const uid = requireUid(request);
   return await disconnectGoogleCalendarAccountForUser(uid, request.data ?? {});
 });
-
 const createGoogleCalendarCustomToken = onCall({ region: REGION }, async (request) => {
   const uid = requireUid(request);
   return { customToken: await (await getAdminAuth()).createCustomToken(uid) };
 });
-
 const listGoogleCalendarAccounts = onCall({ region: REGION }, async (request) => {
   const uid = requireUid(request);
   return await listGoogleCalendarAccountsForUser(uid);
 });
-
 const connectGoogleCalendarAccount = onCall(
   { region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] },
   async (request) => {
@@ -73,7 +67,6 @@ const connectGoogleCalendarAccount = onCall(
     return response;
   },
 );
-
 const refreshGoogleCalendarAccessToken = onCall(
   { region: REGION, secrets: [GOOGLE_OAUTH_CLIENT_ID, GOOGLE_OAUTH_CLIENT_SECRET, GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY] },
   async (request) => {
@@ -81,18 +74,9 @@ const refreshGoogleCalendarAccessToken = onCall(
     return await refreshGoogleCalendarAccessTokenForUser(uid, request.data ?? {}, readCallableSecrets());
   },
 );
-
 const exchangeGoogleCalendarCode = connectGoogleCalendarAccount;
 const getGoogleCalendarAccessToken = refreshGoogleCalendarAccessToken;
 
 export { googleCalendarWebhook } from "#src/gcal/googleCalendarWebhook.js";
 export { renewExpiredWatchChannels } from "#src/gcal/renewWatchChannels.js";
-export {
-  connectGoogleCalendarAccount,
-  createGoogleCalendarCustomToken,
-  disconnectGoogleCalendarAccount,
-  exchangeGoogleCalendarCode,
-  getGoogleCalendarAccessToken,
-  listGoogleCalendarAccounts,
-  refreshGoogleCalendarAccessToken,
-};
+export { connectGoogleCalendarAccount, createGoogleCalendarCustomToken, disconnectGoogleCalendarAccount, exchangeGoogleCalendarCode, getGoogleCalendarAccessToken, listGoogleCalendarAccounts, refreshGoogleCalendarAccessToken };

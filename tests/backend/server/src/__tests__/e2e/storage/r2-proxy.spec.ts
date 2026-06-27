@@ -1,6 +1,5 @@
 import { createHash } from 'node:crypto';
 import { mock } from 'node:test';
-
 import {
   Config,
   ConfigFactory,
@@ -162,7 +161,7 @@ e2e.afterEach.always(async () => {
   mock.reset();
 });
 
-async function setBlobStorage(storage: StorageProviderConfig) {
+const setBlobStorage = async (storage: StorageProviderConfig) => {
   provider?.destroy();
   provider = null;
   const configFactory = app.get(ConfigFactory);
@@ -174,11 +173,9 @@ async function setBlobStorage(storage: StorageProviderConfig) {
   const controller = app.get(R2UploadController);
   // reset cached provider in controller
   (controller as any).provider = null;
-}
+};
 
-async function useR2Storage(
-  overrides?: Partial<R2StorageConfig['usePresignedURL']>
-) {
+const useR2Storage = async (overrides?: Partial<R2StorageConfig['usePresignedURL']>) => {
   const storage = structuredClone(baseR2Storage) as StorageProviderConfig;
   const usePresignedURL = {
     ...(structuredClone(
@@ -191,21 +188,16 @@ async function useR2Storage(
     usePresignedURL as R2StorageConfig['usePresignedURL'];
   await setBlobStorage(storage);
   return storage;
-}
+};
 
-function getProvider(): MockR2Provider {
+const getProvider = (): MockR2Provider => {
   if (!provider) {
     throw new Error('R2 provider is not initialized');
   }
   return provider;
-}
+};
 
-async function createBlobUpload(
-  workspaceId: string,
-  key: string,
-  size: number,
-  mime: string
-) {
+const createBlobUpload = async (workspaceId: string, key: string, size: number, mime: string) => {
   const data = await gql(
     `
       mutation createBlobUpload($workspaceId: String!, $key: String!, $size: Int!, $mime: String!) {
@@ -228,14 +220,9 @@ async function createBlobUpload(
   );
 
   return data.createBlobUpload;
-}
+};
 
-async function getBlobUploadPartUrl(
-  workspaceId: string,
-  key: string,
-  uploadId: string,
-  partNumber: number
-) {
+const getBlobUploadPartUrl = async (workspaceId: string, key: string, uploadId: string, partNumber: number) => {
   const data = await gql(
     `
       query getBlobUploadPartUrl($workspaceId: String!, $key: String!, $uploadId: String!, $partNumber: Int!) {
@@ -253,9 +240,9 @@ async function getBlobUploadPartUrl(
   );
 
   return data.workspace.blobUploadPartUrl;
-}
+};
 
-async function setupWorkspace() {
+const setupWorkspace = async () => {
   const owner = await app.signup();
   await app.get(EntitlementService).upsertFromCloudSubscription({
     targetId: owner.id,
@@ -265,13 +252,9 @@ async function setupWorkspace() {
   });
   const workspace = await app.create(Mockers.Workspace, { owner });
   return { owner, workspace };
-}
+};
 
-async function gql<QueryData = any>(
-  query: string,
-  variables: Record<string, any>,
-  operationName: string
-): Promise<QueryData> {
+const gql = async <QueryData = any>(query: string, variables: Record<string, any>, operationName: string): Promise<QueryData> => {
   const res = await app
     .POST('/graphql')
     .set({ 'x-request-id': 'test', 'x-operation-name': operationName })
@@ -283,7 +266,7 @@ async function gql<QueryData = any>(
   }
 
   return res.body.data;
-}
+};
 
 e2e('should proxy single upload with valid signature', async t => {
   const { workspace } = await setupWorkspace();
@@ -473,10 +456,10 @@ e2e(
   }
 );
 
-function sha256Base64urlWithPadding(buffer: Buffer) {
+const sha256Base64urlWithPadding = (buffer: Buffer) => {
   return createHash('sha256')
     .update(buffer)
     .digest('base64')
     .replace(/\+/g, '-')
     .replace(/\//g, '_');
-}
+};

@@ -9,14 +9,10 @@ import { hydrateServerStoredGoogleCalendarAccounts } from "@/integration/googlec
 import { initializeDB, resetLocalDBForLogout } from "@/services/localdb";
 import { SyncServiceFactory } from "@/services/SyncServiceFactory";
 
-
-
 const refreshAuthProfile = async (user: FirebaseUser): Promise<FirebaseUser> => {
   await user.reload();
   return auth?.currentUser ?? user;
 };
-
-
 
 const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
@@ -115,9 +111,5 @@ const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
   );
 };
 
-
-
 export { AuthSessionProvider };
-
-
 export type { AuthSessionProviderProps };

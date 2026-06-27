@@ -1,16 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import { mock } from 'node:test';
-
-import {
-  Config,
-  ConfigFactory,
-  type StorageProviderConfig,
-} from '../../../base';
+import { Config, ConfigFactory } from '../../../base';
+import type { StorageProviderConfig } from '../../../base';
 import { CommentAttachmentStorage } from '../../../core/storage';
 import { Mockers } from '../../mocks';
 import { app, e2e } from '../test';
 
-async function createWorkspace() {
+const createWorkspace = async () => {
   const owner = await app.create(Mockers.User);
   const workspace = await app.create(Mockers.Workspace, {
     owner,
@@ -20,16 +16,16 @@ async function createWorkspace() {
     owner,
     workspace,
   };
-}
+};
 
 e2e.afterEach.always(() => {
   mock.reset();
 });
 
-async function useCommentAttachmentBlobStorage(storage: StorageProviderConfig) {
+const useCommentAttachmentBlobStorage = async (storage: StorageProviderConfig) => {
   app.get(ConfigFactory).override({ storages: { blob: { storage } } });
   await app.get(CommentAttachmentStorage).onConfigInit();
-}
+};
 
 // #region comment attachment
 

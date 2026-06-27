@@ -1,5 +1,4 @@
 import test from 'ava';
-
 import { resolveEntitlementV1 } from '../native';
 
 test('native entitlement wrapper maps schema errors to invalid argument', t => {

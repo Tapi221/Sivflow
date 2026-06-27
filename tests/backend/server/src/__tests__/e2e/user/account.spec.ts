@@ -4,7 +4,6 @@ import {
   getCurrentUserQuery,
   getWorkspaceQuery,
 } from '@affine/graphql';
-
 import { app, e2e, Mockers } from '../test';
 
 const admin = await app.create(Mockers.User, {

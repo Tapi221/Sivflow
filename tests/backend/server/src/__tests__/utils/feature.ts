@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClient, WorkspaceMemberStatus } from '@prisma/client';
-
 import { WorkspaceRole } from '../../core/permission';
 import { UserType } from '../../core/user/types';
 

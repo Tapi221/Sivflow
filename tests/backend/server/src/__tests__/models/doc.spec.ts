@@ -1,13 +1,14 @@
 import { randomUUID } from 'node:crypto';
-
 import ava, { TestFn } from 'ava';
-
 import { Config } from '../../base/config';
 import { HistoryModel, PublicDocMode } from '../../models';
 import { DocModel } from '../../models/doc';
-import { type User, UserModel } from '../../models/user';
-import { type Workspace, WorkspaceModel } from '../../models/workspace';
-import { createTestingModule, type TestingModule } from '../utils';
+import { UserModel } from '../../models/user';
+import type { User } from '../../models/user';
+import { WorkspaceModel } from '../../models/workspace';
+import type { Workspace } from '../../models/workspace';
+import { createTestingModule } from '../utils';
+import type { TestingModule } from '../utils';
 
 interface Context {
   config: Config;

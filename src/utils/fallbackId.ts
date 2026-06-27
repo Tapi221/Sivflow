@@ -1,7 +1,5 @@
 import { asRecord } from "./records";
 
-
-
 const makeFallbackId = () => {
   try {
     const cryptoObject = asRecord(globalThis.crypto as unknown);
@@ -14,7 +12,5 @@ const makeFallbackId = () => {
   }
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 };
-
-
 
 export { makeFallbackId };

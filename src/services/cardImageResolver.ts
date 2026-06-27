@@ -5,8 +5,6 @@ import { getCachedRemoteUrl, setCachedRemoteUrl } from "./imagePreloadCache";
 import { getLocalDb } from "@/services/localdb";
 import type { AssetRecord, ResolvableImageRef, UploadedImage } from "@/types";
 
-
-
 type ImageRecordLike =
   | {
     remoteUrlCache?: string | null;
@@ -26,8 +24,6 @@ type ResolvedCardImage = ResolvableImageRef & { url: string | null;
   source: "local_blob" | "cache" | "storage" | "none";
   status: "pending" | "uploading" | "ready" | "failed";
 };
-
-
 
 const isNonEmptyString = (value: unknown): value is string => typeof value === "string" && value.trim().length > 0;
 const getRemoteUrlFromRecord = (record: ImageRecordLike): string | null => {
@@ -204,9 +200,5 @@ const resolveCardImageUrl = async (image: ResolvableImageRef, userId?: string | 
   };
 };
 
-
-
 export { resolveCardImageUrl };
-
-
 export type { ResolvedCardImage };

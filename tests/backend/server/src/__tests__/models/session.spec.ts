@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import ava, { TestFn } from 'ava';
-
 import { Config } from '../../base/config';
 import { SessionModel } from '../../models/session';
 import { UserModel } from '../../models/user';
-import { createTestingModule, type TestingModule } from '../utils';
+import { createTestingModule } from '../utils';
+import type { TestingModule } from '../utils';
 
 interface Context {
   config: Config;

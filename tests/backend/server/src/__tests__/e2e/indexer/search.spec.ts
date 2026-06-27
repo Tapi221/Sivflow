@@ -4,7 +4,6 @@ import {
   SearchQueryType,
   SearchTable,
 } from '@affine/graphql';
-
 import { DocRole } from '../../../models';
 import { IndexerService } from '../../../plugins/indexer/service';
 import { Mockers } from '../../mocks';

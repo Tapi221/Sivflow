@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker';
-
 import { Feature, FeatureType } from '../../models';
 import { Mocker } from './factory';
 

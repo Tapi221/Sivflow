@@ -7,7 +7,6 @@ import {
   TestingModuleBuilder,
 } from '@nestjs/testing';
 import { PrismaClient } from '@prisma/client';
-
 import { buildAppModule, FunctionalityModules } from '../../app.module';
 import { AFFiNELogger, JobQueue } from '../../base';
 import { GqlModule } from '../../base/graphql';
@@ -34,7 +33,7 @@ export interface TestingModule extends BaseTestingModule {
   [Symbol.asyncDispose](): Promise<void>;
 }
 
-function dedupeModules(modules: NonNullable<ModuleMetadata['imports']>) {
+const dedupeModules = (modules: NonNullable<ModuleMetadata['imports']>) => {
   const map = new Map();
 
   modules.forEach(m => {
@@ -46,7 +45,7 @@ function dedupeModules(modules: NonNullable<ModuleMetadata['imports']>) {
   });
 
   return Array.from(map.values());
-}
+};
 
 @Resolver(() => String)
 class MockResolver {
@@ -59,10 +58,7 @@ class MockResolver {
 /**
  * @deprecated use {@link createModule} instead
  */
-export async function createTestingModule(
-  moduleDef: TestingModuleMetadata = {},
-  autoInitialize = true
-): Promise<TestingModule> {
+export const createTestingModule = async (moduleDef: TestingModuleMetadata = {}, autoInitialize = true): Promise<TestingModule> => {
   // setting up
   let imports = moduleDef.imports ?? [buildAppModule(globalThis.env)];
   imports =
@@ -128,4 +124,4 @@ export async function createTestingModule(
     await testingModule.init();
   }
   return testingModule;
-}
+};

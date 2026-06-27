@@ -1,30 +1,15 @@
 import { randomBytes } from 'node:crypto';
-
 import serverNativeModule from '@affine/server-native';
-
 import type { ProviderMiddlewareConfig } from '../../plugins/copilot/config';
-import {
-  CopilotChatOptions,
-  CopilotEmbeddingOptions,
-  type CopilotProviderModel,
-  CopilotProviderType,
-  CopilotStructuredOptions,
-  ModelConditions,
-  ModelFullConditions,
-  ModelOutputType,
-  PromptMessage,
-  StreamObject,
-} from '../../plugins/copilot/providers';
+import { CopilotChatOptions, CopilotEmbeddingOptions, CopilotProviderType, CopilotStructuredOptions, ModelConditions, ModelFullConditions, ModelOutputType, PromptMessage, StreamObject } from '../../plugins/copilot/providers';
+import type { CopilotProviderModel } from '../../plugins/copilot/providers';
 import {
   DEFAULT_DIMENSIONS,
   OpenAIProvider,
 } from '../../plugins/copilot/providers/openai';
 import type { ProviderModelRuntimeContext } from '../../plugins/copilot/providers/provider-model-runtime';
-import {
-  type CopilotProviderExecution,
-  createNativeExecutionDriverSpec,
-  type ProviderDriverSpec,
-} from '../../plugins/copilot/providers/provider-runtime-contract';
+import { createNativeExecutionDriverSpec } from '../../plugins/copilot/providers/provider-runtime-contract';
+import type { CopilotProviderExecution, ProviderDriverSpec } from '../../plugins/copilot/providers/provider-runtime-contract';
 import type { ProviderRuntimeContexts } from '../../plugins/copilot/runtime/provider-runtime-context';
 import { sleep } from '../utils/utils';
 
@@ -32,15 +17,15 @@ const LLM_STREAM_END_MARKER = '__AFFINE_LLM_STREAM_END__';
 const MOCK_NATIVE_TEXT = 'generate text to text';
 const MOCK_NATIVE_STREAM_TEXT = 'generate text to text stream';
 
-function mockUsage() {
+const mockUsage = () => {
   return {
     prompt_tokens: 1,
     completion_tokens: 1,
     total_tokens: 2,
   };
-}
+};
 
-function buildMockDispatchResponse(model: string, text: string) {
+const buildMockDispatchResponse = (model: string, text: string) => {
   return {
     id: 'mock-dispatch',
     model,
@@ -51,9 +36,9 @@ function buildMockDispatchResponse(model: string, text: string) {
     usage: mockUsage(),
     finish_reason: 'stop',
   };
-}
+};
 
-function buildMockStructuredValue(schema: any, key?: string): any {
+const buildMockStructuredValue = (schema: any, key?: string): any => {
   if (!schema || typeof schema !== 'object') {
     return key === 'title' ? 'Weekly Sync' : MOCK_NATIVE_TEXT;
   }
@@ -139,9 +124,9 @@ function buildMockStructuredValue(schema: any, key?: string): any {
           return MOCK_NATIVE_TEXT;
       }
   }
-}
+};
 
-function parseFirstRoute(routesJson: string) {
+const parseFirstRoute = (routesJson: string) => {
   const routes = JSON.parse(routesJson) as Array<{
     provider_id?: string;
     model?: string;
@@ -153,9 +138,9 @@ function parseFirstRoute(routesJson: string) {
     };
   }>;
   return routes[0];
-}
+};
 
-function buildMockStructuredResponse(model: string, schema: unknown) {
+const buildMockStructuredResponse = (model: string, schema: unknown) => {
   const output_json = buildMockStructuredValue(schema);
   return {
     id: 'mock-structured-dispatch',
@@ -165,12 +150,9 @@ function buildMockStructuredResponse(model: string, schema: unknown) {
     usage: mockUsage(),
     finish_reason: 'stop',
   };
-}
+};
 
-function emitMockTextStream(
-  model: string,
-  callback: (error: Error | null, eventJson: string) => void
-) {
+const emitMockTextStream = (model: string, callback: (error: Error | null, eventJson: string) => void) => {
   callback(null, JSON.stringify({ type: 'message_start', model }));
   for (const text of MOCK_NATIVE_STREAM_TEXT) {
     callback(null, JSON.stringify({ type: 'text_delta', text }));
@@ -184,9 +166,9 @@ function emitMockTextStream(
     })
   );
   callback(null, LLM_STREAM_END_MARKER);
-}
+};
 
-export function installMockCopilotRuntime() {
+export const installMockCopilotRuntime = () => {
   const native = serverNativeModule as Record<string, any>;
   const original = {
     llmDispatchPrepared: native.llmDispatchPrepared,
@@ -420,7 +402,7 @@ export function installMockCopilotRuntime() {
   return () => {
     Object.assign(native, original);
   };
-}
+};
 
 export class MockCopilotProvider extends OpenAIProvider {
   private runtimeHostOverride?: ProviderRuntimeContexts;

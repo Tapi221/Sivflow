@@ -1,5 +1,4 @@
 import test from 'ava';
-
 import { S3StorageProvider } from '../providers/s3';
 import { SIGNED_URL_EXPIRED } from '../providers/utils';
 

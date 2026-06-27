@@ -3,8 +3,6 @@ import { AddDocumentIcon, BulkImportIcon, CreateCardIcon, CreateCardSetIcon, Cre
 import { beginInlineRename } from "./explorerMenuStateHelpers";
 import type { MenuAction } from "./menuActions";
 
-
-
 interface BuildFolderMenuActionsParams {
   onCreateSubfolder?: () => void;
   onCreateCardSet?: () => void;
@@ -42,8 +40,6 @@ interface BuildExplorerCreateMenuActionsParams {
   onAddDocument?: () => void | Promise<void>;
   onBulkImport?: () => void | Promise<void>;
 }
-
-
 
 const buildRenameDeleteMenuActions = ({ renameLabel = "名前を変更", deleteLabel = "削除", onRename, onDelete }: BuildRenameDeleteMenuActionsParams): MenuAction[] => {
   const actions: MenuAction[] = [];
@@ -170,7 +166,5 @@ const buildExplorerCreateMenuActions = ({ canCreateCardSet = false, canCreateCar
   }
   return actions;
 };
-
-
 
 export { buildRenameDeleteMenuActions, buildEntityRenameDeleteMenuActions, buildFolderMenuActions, buildExplorerCreateMenuActions };

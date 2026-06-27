@@ -1,5 +1,4 @@
 import { serverConfigQuery, ServerFeature } from '@affine/graphql';
-
 import { app, e2e } from '../test';
 
 e2e('should indexer feature enabled by default', async t => {

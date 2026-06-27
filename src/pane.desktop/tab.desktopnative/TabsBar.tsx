@@ -13,8 +13,6 @@ import { WorkspaceTabDndItem, WorkspaceTabDndList } from "@/features/dnd/tab/Wor
 import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/useTabsStore";
 import type { WorkspaceSidebarSection, WorkspaceTab } from "./Tab";
 
-
-
 type TabsBarVariant = "workspace" | "titlebar";
 type TabsBarProps = {
   variant?: TabsBarVariant;
@@ -39,8 +37,6 @@ type TabContextMenuState = {
   y: number;
 };
 type TabContextMenuTriggerEvent = ReactMouseEvent<HTMLElement> | ReactPointerEvent<HTMLElement>;
-
-
 
 const TABS_NO_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "no-drag",
@@ -110,8 +106,6 @@ const SIDEBAR_ROUTE_TAB_ICONS = {
   settings: SettingIcon,
 } satisfies Partial<Record<WorkspaceSidebarSection, TabIconComponent>>;
 
-
-
 const resolveTabsSurfaceStyle = (isTitlebar: boolean): CSSProperties => ({
   background: isTitlebar ? "var(--app-titlebar-bg, var(--app-sidebar-bg))" : "var(--app-sidebar-bg)",
 });
@@ -170,8 +164,6 @@ const resolveTabIcon = (tab: WorkspaceTab): TabIconComponent => {
 
   return FileText;
 };
-
-
 
 const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps) => {
   const tabs = useWorkspaceTabsStore((state) => state.tabs);
@@ -438,7 +430,5 @@ const TabsBar = ({ variant = "workspace", className, noDragStyle }: TabsBarProps
     </>
   );
 };
-
-
 
 export { TabsBar };

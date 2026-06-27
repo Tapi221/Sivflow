@@ -42,8 +42,6 @@ type ScheduleEventColor = {
   darkTextMixAmount: number;
 };
 
-
-
 const SCHEDULE_CONTENT_COLOR = {
   surface: "#fff",
   monthSurface: "rgba(255, 255, 255, 0.92)",
@@ -83,9 +81,5 @@ const SCHEDULE_EVENT_COLOR = {
   darkTextMixAmount: 0.32,
 } as const satisfies ScheduleEventColor;
 
-
-
 export { SCHEDULE_CONTENT_COLOR, SCHEDULE_DATE_COLOR, SCHEDULE_EVENT_COLOR, SCHEDULE_LIST_COLOR, SCHEDULE_PIE_CHART_COLOR, SCHEDULE_SOURCE_COLOR };
-
-
 export type { ScheduleContentColor, ScheduleDateColor, ScheduleEventColor, ScheduleListColor, SchedulePieChartColor, ScheduleRgbColor, ScheduleSourceColor };

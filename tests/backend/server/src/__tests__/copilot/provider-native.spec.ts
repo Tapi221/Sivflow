@@ -2,28 +2,13 @@ import serverNativeModule from '@affine/server-native';
 import test from 'ava';
 import Sinon from 'sinon';
 import { z } from 'zod';
-
 import {
   CopilotPromptInvalid,
   CopilotQuotaExceeded,
   NoCopilotProviderAvailable,
 } from '../../base';
-import {
-  type LlmBackendConfig,
-  type LlmEmbeddingRequest,
-  type LlmImageRequest,
-  llmMatchModelCapabilities,
-  type LlmPreparedDispatchRoute,
-  type LlmPreparedEmbeddingDispatchRoute,
-  type LlmPreparedImageDispatchRoute,
-  type LlmPreparedRerankDispatchRoute,
-  type LlmPreparedStructuredDispatchRoute,
-  type LlmProtocol,
-  type LlmRequest,
-  type LlmRerankRequest,
-  llmResolveRequestedModelMatch,
-  type LlmStructuredRequest,
-} from '../../native';
+import { llmMatchModelCapabilities, llmResolveRequestedModelMatch } from '../../native';
+import type { LlmBackendConfig, LlmEmbeddingRequest, LlmImageRequest, LlmPreparedDispatchRoute, LlmPreparedEmbeddingDispatchRoute, LlmPreparedImageDispatchRoute, LlmPreparedRerankDispatchRoute, LlmPreparedStructuredDispatchRoute, LlmProtocol, LlmRequest, LlmRerankRequest, LlmStructuredRequest } from '../../native';
 import type {
   CopilotProviderProfile,
   ProviderMiddlewareConfig,
@@ -32,28 +17,12 @@ import { CopilotProviderFactory } from '../../plugins/copilot/providers/factory'
 import { OpenAIProvider } from '../../plugins/copilot/providers/openai';
 import { CopilotProvider } from '../../plugins/copilot/providers/provider';
 import { buildProviderRegistry } from '../../plugins/copilot/providers/provider-registry';
-import {
-  type CopilotProviderExecution,
-  type NativeExecutionRoute,
-  type ProviderDriverSpec,
-} from '../../plugins/copilot/providers/provider-runtime-contract';
-import {
-  type CopilotProviderModel,
-  CopilotProviderType,
-  type ModelFullConditions,
-  ModelInputType,
-  ModelOutputType,
-} from '../../plugins/copilot/providers/types';
+import type { CopilotProviderExecution, NativeExecutionRoute, ProviderDriverSpec } from '../../plugins/copilot/providers/provider-runtime-contract';
+import { CopilotProviderType, ModelInputType, ModelOutputType } from '../../plugins/copilot/providers/types';
+import type { CopilotProviderModel, ModelFullConditions } from '../../plugins/copilot/providers/types';
 import { CapabilityRuntime } from '../../plugins/copilot/runtime/capability-runtime';
-import {
-  buildStructuredResponseContract,
-  parseCapabilityMatchRequest,
-  parseExecutionPlan,
-  parseProviderDriverSpec,
-  parseRequestedModelMatchRequest,
-  type RequiredStructuredOutputContract,
-  requireStructuredOutputContract,
-} from '../../plugins/copilot/runtime/contracts';
+import { buildStructuredResponseContract, parseCapabilityMatchRequest, parseExecutionPlan, parseProviderDriverSpec, parseRequestedModelMatchRequest, requireStructuredOutputContract } from '../../plugins/copilot/runtime/contracts';
+import type { RequiredStructuredOutputContract } from '../../plugins/copilot/runtime/contracts';
 import { ExecutionPlanBuilder } from '../../plugins/copilot/runtime/execution-plan';
 import { NativeExecutionEngine } from '../../plugins/copilot/runtime/native-execution-engine';
 import { buildNativeRequest } from '../../plugins/copilot/runtime/native-request-runtime';
@@ -68,17 +37,14 @@ import {
   userPrompt,
 } from './prompt-test-helper';
 
-function createNativeExecutionEngine() {
+const createNativeExecutionEngine = () => {
   return new NativeExecutionEngine({
     recordUsage: Sinon.stub().resolves(),
     recordProviderFailure: Sinon.stub().resolves(),
   } as never);
-}
+};
 
-function structuredOptions(
-  schema: z.ZodTypeAny,
-  extra?: Record<string, unknown>
-) {
+const structuredOptions = (schema: z.ZodTypeAny, extra?: Record<string, unknown>) => {
   const { responseSchemaJson, schemaHash } =
     buildStructuredResponseContract(schema);
   return {
@@ -86,11 +52,9 @@ function structuredOptions(
     schemaHash,
     ...extra,
   };
-}
+};
 
-function structuredContract(
-  schema: z.ZodTypeAny
-): RequiredStructuredOutputContract {
+const structuredContract = (schema: z.ZodTypeAny): RequiredStructuredOutputContract => {
   const contract = buildStructuredResponseContract(schema);
   const requiredContract = requireStructuredOutputContract(contract);
   if (!requiredContract) {
@@ -98,9 +62,10 @@ function structuredContract(
   }
 
   return requiredContract;
-}
+};
 
-class TestOpenAIProvider extends CopilotProvider<{ apiKey: string }> {
+class TestOpenAIProvider extends CopilotProvider<{
+  apiKey: string }> {
   readonly type = CopilotProviderType.OpenAI;
   protected resolveModelBackendKind() {
     return 'openai_responses' as const;
@@ -127,7 +92,8 @@ class TestOpenAIProvider extends CopilotProvider<{ apiKey: string }> {
   }
 }
 
-class DriverOnlyProvider extends CopilotProvider<{ apiKey: string }> {
+class DriverOnlyProvider extends CopilotProvider<{
+  apiKey: string }> {
   readonly type = CopilotProviderType.OpenAI;
   protected resolveModelBackendKind() {
     return 'openai_responses' as const;
@@ -152,18 +118,18 @@ class DriverOnlyProvider extends CopilotProvider<{ apiKey: string }> {
   }
 }
 
-async function collectAsync<T>(iterable: AsyncIterable<T>) {
+const collectAsync = async <T>(iterable: AsyncIterable<T>) => {
   const items: T[] = [];
   for await (const item of iterable) {
     items.push(item);
   }
   return items;
-}
+};
 
 const OPENAI_BASE_URL = 'https://api.openai.com';
 const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com';
 
-function summarizePreparedDispatchRoutes(routes: unknown) {
+const summarizePreparedDispatchRoutes = (routes: unknown) => {
   if (!Array.isArray(routes)) {
     return routes;
   }
@@ -215,14 +181,11 @@ function summarizePreparedDispatchRoutes(routes: unknown) {
       requestShape,
     };
   });
-}
+};
 
-function nativeBackendConfig(
-  authToken: string,
-  baseUrl: string = OPENAI_BASE_URL
-): LlmBackendConfig {
+const nativeBackendConfig = (authToken: string, baseUrl: string = OPENAI_BASE_URL): LlmBackendConfig => {
   return { base_url: baseUrl, auth_token: authToken };
-}
+};
 
 type NativeRouteOptions<TRequest> = {
   providerId: string;
@@ -248,7 +211,7 @@ function nativeRoute(
 function nativeRoute(
   options: NativeRouteOptions<LlmImageRequest>
 ): LlmPreparedImageDispatchRoute;
-function nativeRoute({
+const nativeRoute = ({
   providerId,
   request,
   authToken,
@@ -261,7 +224,7 @@ function nativeRoute({
   | LlmEmbeddingRequest
   | LlmRerankRequest
   | LlmImageRequest
->) {
+>) => {
   return {
     provider_id: providerId,
     protocol,
@@ -269,9 +232,9 @@ function nativeRoute({
     config: nativeBackendConfig(authToken, baseUrl),
     request,
   };
-}
+};
 
-function preparedRoute({
+const preparedRoute = ({
   providerId,
   authToken,
   protocol = 'openai_chat',
@@ -283,53 +246,36 @@ function preparedRoute({
   protocol?: LlmProtocol;
   model?: string;
   baseUrl?: string;
-}): NativeExecutionRoute & { providerId: string } {
+}): NativeExecutionRoute & { providerId: string } => {
   return {
     providerId,
     protocol,
     model,
     backendConfig: nativeBackendConfig(authToken, baseUrl),
   };
-}
+};
 
-function nativeTextRequest(
-  text: string,
-  model: string = 'gpt-5-mini'
-): LlmRequest {
+const nativeTextRequest = (text: string, model: string = 'gpt-5-mini'): LlmRequest => {
   return { model, messages: nativeMessages(nativeUserText(text)) };
-}
+};
 
-function nativeStructuredRequest(
-  text: string,
-  schema: Record<string, unknown>,
-  model: string = 'gpt-5-mini'
-): LlmStructuredRequest {
+const nativeStructuredRequest = (text: string, schema: Record<string, unknown>, model: string = 'gpt-5-mini'): LlmStructuredRequest => {
   return { ...nativeTextRequest(text, model), schema };
-}
+};
 
-function nativeEmbeddingRequest(
-  input: string,
-  model: string = 'text-embedding-3-small'
-): LlmEmbeddingRequest {
+const nativeEmbeddingRequest = (input: string, model: string = 'text-embedding-3-small'): LlmEmbeddingRequest => {
   return { model, inputs: [input] };
-}
+};
 
-function nativeRerankRequest(
-  query: string,
-  candidates: Array<{ id?: string; text: string }>,
-  model: string = 'gpt-4o-mini'
-): LlmRerankRequest {
+const nativeRerankRequest = (query: string, candidates: Array<{ id?: string; text: string }>, model: string = 'gpt-4o-mini'): LlmRerankRequest => {
   return { model, query, candidates };
-}
+};
 
-function nativeImageRequest(
-  prompt: string,
-  model: string = 'gpt-image-1'
-): LlmImageRequest {
+const nativeImageRequest = (prompt: string, model: string = 'gpt-image-1'): LlmImageRequest => {
   return { model, prompt, operation: 'generate', images: [] };
-}
+};
 
-function createProvider(profileMiddleware?: ProviderMiddlewareConfig) {
+const createProvider = (profileMiddleware?: ProviderMiddlewareConfig) => {
   const provider = new TestOpenAIProvider();
   (provider as any).AFFiNEConfig = {
     copilot: {
@@ -348,11 +294,9 @@ function createProvider(profileMiddleware?: ProviderMiddlewareConfig) {
     },
   };
   return provider;
-}
+};
 
-function createExecution(
-  provider: TestOpenAIProvider
-): CopilotProviderExecution {
+const createExecution = (provider: TestOpenAIProvider): CopilotProviderExecution => {
   const registry = buildProviderRegistry(
     (provider as any).AFFiNEConfig.copilot.providers
   );
@@ -364,7 +308,7 @@ function createExecution(
     providerId: 'openai-main',
     profile,
   };
-}
+};
 
 test('metricLabels should include active provider id', t => {
   const provider = createProvider();
@@ -1510,13 +1454,13 @@ const BYOK_FAL_PROFILE: CopilotProviderProfile = {
   config: { apiKey: 'byok-key' },
 };
 
-function createProviderFactoryWithByokRoutes({
+const createProviderFactoryWithByokRoutes = ({
   byokProfiles = [BYOK_OPENAI_PROFILE],
   hasQuota = true,
 }: {
   byokProfiles?: CopilotProviderProfile[];
   hasQuota?: boolean;
-} = {}) {
+} = {}) => {
   const provider = createProvider();
   const registryService = {
     getRegistry: () =>
@@ -1553,7 +1497,7 @@ function createProviderFactoryWithByokRoutes({
   factory.register('openai-main', provider);
 
   return { factory, byok };
-}
+};
 
 test('CopilotProviderFactory should use matching BYOK routes before quota-backed routes', async t => {
   const { factory } = createProviderFactoryWithByokRoutes();

@@ -6,12 +6,12 @@ import {
   Workspace,
 } from '@prisma/client';
 import ava, { TestFn } from 'ava';
-
 import { Config } from '../../base';
 import { CopilotJobModel } from '../../models';
 import { UserModel } from '../../models/user';
 import { WorkspaceModel } from '../../models/workspace';
-import { createTestingModule, type TestingModule } from '../utils';
+import { createTestingModule } from '../utils';
+import type { TestingModule } from '../utils';
 
 interface Context {
   config: Config;

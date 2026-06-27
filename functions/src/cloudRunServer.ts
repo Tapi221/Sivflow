@@ -1,8 +1,6 @@
 import http from "node:http";
 import type { IncomingMessage, ServerResponse } from "node:http";
-
 import { HttpsError } from "firebase-functions/v2/https";
-
 import { getAdminAuth } from "#src/firebaseAdmin.js";
 import {
   connectGoogleCalendarAccountForUser,
@@ -30,9 +28,7 @@ const getPort = (): number => {
 
   return port;
 };
-
 const isDatabaseConfigured = (): boolean => Boolean(process.env.DATABASE_URL?.trim());
-
 const writeJson = (res: ServerResponse, statusCode: number, body: Record<string, unknown>): void => {
   res.writeHead(statusCode, {
     "Access-Control-Allow-Headers": "Authorization, Content-Type",
@@ -43,12 +39,10 @@ const writeJson = (res: ServerResponse, statusCode: number, body: Record<string,
   });
   res.end(JSON.stringify(body));
 };
-
 const readUrl = (req: IncomingMessage): URL => {
   const baseUrl = `http://${req.headers.host ?? "localhost"}`;
   return new URL(req.url ?? "/", baseUrl);
 };
-
 const readJsonBody = async (req: IncomingMessage): Promise<Record<string, unknown>> => {
   const chunks: Buffer[] = [];
   let size = 0;
@@ -75,7 +69,6 @@ const readJsonBody = async (req: IncomingMessage): Promise<Record<string, unknow
     throw new HttpsError("invalid-argument", "Invalid JSON body.");
   }
 };
-
 const requireAuth = async (req: IncomingMessage): Promise<string> => {
   const header = req.headers.authorization;
   const authorization = Array.isArray(header) ? header[0] : header;
@@ -85,19 +78,16 @@ const requireAuth = async (req: IncomingMessage): Promise<string> => {
   const decoded = await (await getAdminAuth()).verifyIdToken(token);
   return decoded.uid;
 };
-
 const requireAdmin = async (uid: string): Promise<void> => {
   const user = await (await getAdminAuth()).getUser(uid);
   if (user.customClaims?.admin !== true) throw new HttpsError("permission-denied", "Admin access is required.");
 };
-
 const readCloudRunGoogleOAuthSecrets = () =>
   loadGoogleOAuthSecrets({
     clientId: process.env.GOOGLE_OAUTH_CLIENT_ID,
     clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET,
     tokenEncryptionKey: process.env.GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY,
   });
-
 const handleReadyCheck = async (res: ServerResponse): Promise<void> => {
   await getPostgresPool().query("select 1");
   writeJson(res, 200, {
@@ -106,7 +96,6 @@ const handleReadyCheck = async (res: ServerResponse): Promise<void> => {
     service: SERVICE_NAME,
   });
 };
-
 const handleGoogleCalendarApi = async (req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> => {
   if (!pathname.startsWith("/api/google-calendar")) return false;
 
@@ -158,7 +147,6 @@ const handleGoogleCalendarApi = async (req: IncomingMessage, res: ServerResponse
   });
   return true;
 };
-
 const handleTimetableApi = async (req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> => {
   if (!pathname.startsWith("/api/timetable")) return false;
 
@@ -189,7 +177,6 @@ const handleTimetableApi = async (req: IncomingMessage, res: ServerResponse, pat
   });
   return true;
 };
-
 const getStatusCodeFromError = (error: unknown): number => {
   if (!(error instanceof HttpsError)) return 500;
 
@@ -212,7 +199,6 @@ const getStatusCodeFromError = (error: unknown): number => {
       return 500;
   }
 };
-
 const writeError = (res: ServerResponse, error: unknown): void => {
   const statusCode = getStatusCodeFromError(error);
   const body: Record<string, unknown> = {
@@ -228,7 +214,6 @@ const writeError = (res: ServerResponse, error: unknown): void => {
 
   writeJson(res, statusCode, body);
 };
-
 const handleRequest = async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
   if (req.method === "OPTIONS") {
     writeJson(res, 204, {});
@@ -293,10 +278,8 @@ const shutdown = (signal: NodeJS.Signals): void => {
 
   setTimeout(() => process.exit(1), 10_000).unref();
 };
-
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
-
 server.listen(getPort(), DEFAULT_HOST, () => {
   console.log(`[cloudrun] ${SERVICE_NAME} は ${DEFAULT_HOST}:${getPort()} で待ち受けています`);
 });

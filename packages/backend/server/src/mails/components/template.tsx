@@ -127,8 +127,8 @@ export function Button(
 ) {
   const style = {
     ...BasicTextStyle,
-    backgroundColor: props.type === 'secondary' ? '#FFFFFF' : '#1E96EB',
-    color: props.type === 'secondary' ? '#141414' : '#FFFFFF',
+    backgroundColor: props.type === 'secondary' ? '#fff' : '#1E96EB',
+    color: props.type === 'secondary' ? '#141414' : '#fff',
     textDecoration: 'none',
     fontWeight: '600',
     padding: '8px 18px',

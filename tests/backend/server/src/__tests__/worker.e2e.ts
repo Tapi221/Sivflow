@@ -3,7 +3,6 @@ import type { ExecutionContext, TestFn } from 'ava';
 import ava from 'ava';
 import Sinon from 'sinon';
 import type { Response } from 'supertest';
-
 import type { TestingApp } from './utils';
 
 type TestContext = {

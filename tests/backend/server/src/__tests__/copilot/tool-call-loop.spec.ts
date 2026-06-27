@@ -1,17 +1,11 @@
 import serverNativeModule from '@affine/server-native';
 import test from 'ava';
 import { z } from 'zod';
-
 import type { DocReader } from '../../core/doc';
 import type { PermissionAccess } from '../../core/permission';
 import type { Models } from '../../models';
-import {
-  LlmRequest,
-  type LlmToolCallbackRequest,
-  type LlmToolCallbackResponse,
-  type LlmToolLoopStreamEvent,
-  llmValidateContract,
-} from '../../native';
+import { LlmRequest, llmValidateContract } from '../../native';
+import type { LlmToolCallbackRequest, LlmToolCallbackResponse, LlmToolLoopStreamEvent } from '../../native';
 import {
   buildToolContracts,
   parseToolContract,

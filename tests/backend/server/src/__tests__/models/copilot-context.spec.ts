@@ -1,9 +1,7 @@
 import { randomUUID } from 'node:crypto';
-
 import { PrismaClient, User, Workspace } from '@prisma/client';
 import ava, { TestFn } from 'ava';
 import Sinon from 'sinon';
-
 import { Config } from '../../base';
 import {
   ContextEmbedStatus,
@@ -13,7 +11,8 @@ import {
   UserModel,
   WorkspaceModel,
 } from '../../models';
-import { createTestingModule, type TestingModule } from '../utils';
+import { createTestingModule } from '../utils';
+import type { TestingModule } from '../utils';
 import { cleanObject } from '../utils/copilot';
 
 interface Context {

@@ -1,6 +1,5 @@
 import { User } from '@prisma/client';
 import ava, { TestFn } from 'ava';
-
 import { AdminFeatureManagementResolver } from '../../core/features/resolver';
 import { AvailableUserFeatureConfig } from '../../core/features/types';
 import { FeatureType, Models, UserFeatureModel, UserModel } from '../../models';

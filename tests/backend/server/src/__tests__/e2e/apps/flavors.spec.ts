@@ -1,5 +1,4 @@
 import { getCurrentUserQuery } from '@affine/graphql';
-
 import { JobExecutor } from '../../../base/job/queue/executor';
 import { DatabaseDocReader, DocReader } from '../../../core/doc';
 import { createApp } from '../create-app';

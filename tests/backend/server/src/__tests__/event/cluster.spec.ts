@@ -2,7 +2,6 @@ import { INestApplication } from '@nestjs/common';
 import ava, { TestFn } from 'ava';
 import { CLS_ID, ClsServiceManager } from 'nestjs-cls';
 import Sinon from 'sinon';
-
 import { EventBus } from '../../base';
 import { SocketIoAdapter } from '../../base/websocket';
 import { createTestingModule } from '../utils';
@@ -13,7 +12,7 @@ const test = ava as TestFn<{
   app2: INestApplication;
 }>;
 
-async function createApp() {
+const createApp = async () => {
   const m = await createTestingModule(
     {
       providers: [Listeners],
@@ -27,7 +26,7 @@ async function createApp() {
   await app.init();
 
   return app;
-}
+};
 
 test.before(async t => {
   t.context.app1 = await createApp();

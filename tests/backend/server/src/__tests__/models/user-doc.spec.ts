@@ -1,11 +1,11 @@
 import { randomUUID } from 'node:crypto';
-
 import ava, { TestFn } from 'ava';
-
 import { Config } from '../../base/config';
-import { type User, UserModel } from '../../models/user';
+import { UserModel } from '../../models/user';
+import type { User } from '../../models/user';
 import { UserDocModel } from '../../models/user-doc';
-import { createTestingModule, type TestingModule } from '../utils';
+import { createTestingModule } from '../utils';
+import type { TestingModule } from '../utils';
 
 interface Context {
   config: Config;

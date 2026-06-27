@@ -1,14 +1,14 @@
 import { randomUUID } from 'node:crypto';
-
 import ava, { TestFn } from 'ava';
 import { applyUpdate, Doc as YDoc } from 'yjs';
-
 import {
   DocStorageModule,
   PgUserspaceDocStorageAdapter as Adapter,
 } from '../../core/doc';
-import { Models, type User } from '../../models';
-import { createTestingModule, type TestingModule } from '../utils';
+import { Models } from '../../models';
+import type { User } from '../../models';
+import { createTestingModule } from '../utils';
+import type { TestingModule } from '../utils';
 
 interface Context {
   module: TestingModule;

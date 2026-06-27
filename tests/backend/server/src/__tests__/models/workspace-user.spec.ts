@@ -1,9 +1,7 @@
 import { randomBytes } from 'node:crypto';
-
 import { PrismaClient } from '@prisma/client';
 import test from 'ava';
 import Sinon from 'sinon';
-
 import { EventBus, NewOwnerIsNotActiveMember } from '../../base';
 import { Models, WorkspaceMemberStatus, WorkspaceRole } from '../../models';
 import { createModule, TestingModule } from '../create-module';

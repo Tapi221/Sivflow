@@ -1,8 +1,6 @@
 import { randomUUID } from 'node:crypto';
-
 import { PrismaClient, User, Workspace } from '@prisma/client';
 import ava, { ExecutionContext, TestFn } from 'ava';
-
 import { CopilotPromptInvalid, CopilotSessionInvalidInput } from '../../base';
 import {
   CopilotSessionModel,
@@ -11,7 +9,8 @@ import {
   UserModel,
   WorkspaceModel,
 } from '../../models';
-import { createTestingModule, type TestingModule } from '../utils';
+import { createTestingModule } from '../utils';
+import type { TestingModule } from '../utils';
 import { cleanObject } from '../utils/copilot';
 
 interface Context {

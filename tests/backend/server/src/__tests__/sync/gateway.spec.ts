@@ -1,8 +1,9 @@
 import { PrismaClient } from '@prisma/client';
-import test, { type ExecutionContext } from 'ava';
-import { io, type Socket as SocketIOClient } from 'socket.io-client';
+import test from 'ava';
+import type { ExecutionContext } from 'ava';
+import { io } from 'socket.io-client';
+import type { Socket as SocketIOClient } from 'socket.io-client';
 import { Doc, encodeStateAsUpdate } from 'yjs';
-
 import { CANARY_CLIENT_VERSION_MAX_AGE_DAYS } from '../../base';
 import {
   DocRole,
@@ -20,34 +21,27 @@ type WebsocketResponse<T> =
 
 const WS_TIMEOUT_MS = 5_000;
 
-function makeCanaryDateVersion(date: Date, build = '015') {
+const makeCanaryDateVersion = (date: Date, build = '015') => {
   return `${date.getUTCFullYear()}.${date.getUTCMonth() + 1}.${date.getUTCDate()}-canary.${build}`;
-}
+};
 
-function unwrapResponse<T>(t: ExecutionContext, res: WebsocketResponse<T>): T {
+const unwrapResponse = <T>(t: ExecutionContext, res: WebsocketResponse<T>): T => {
   if ('data' in res) {
     return res.data;
   }
 
   t.log(res);
   throw new Error(`Websocket error: ${res.error.name}: ${res.error.message}`);
-}
+};
 
-function getErrorResponse<T>(
-  t: ExecutionContext,
-  res: WebsocketResponse<T>
-): { name: string; message: string } {
+const getErrorResponse = <T>(t: ExecutionContext, res: WebsocketResponse<T>): { name: string; message: string } => {
   if ('error' in res) return res.error;
 
   t.log(res);
   throw new Error(`Expected websocket error response, got data instead`);
-}
+};
 
-async function withTimeout<T>(
-  promise: Promise<T>,
-  timeoutMs: number,
-  label: string
-) {
+const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, label: string) => {
   let timer: NodeJS.Timeout | undefined;
   const timeout = new Promise<never>((_, reject) => {
     timer = setTimeout(() => {
@@ -60,13 +54,9 @@ async function withTimeout<T>(
   } finally {
     if (timer) clearTimeout(timer);
   }
-}
+};
 
-function createClient(
-  url: string,
-  cookie?: string,
-  auth?: Record<string, unknown>
-): SocketIOClient {
+const createClient = (url: string, cookie?: string, auth?: Record<string, unknown>): SocketIOClient => {
   return io(url, {
     transports: ['websocket'],
     reconnection: false,
@@ -74,9 +64,9 @@ function createClient(
     ...(cookie ? { extraHeaders: { cookie } } : {}),
     ...(auth ? { auth } : {}),
   });
-}
+};
 
-function waitForConnect(socket: SocketIOClient) {
+const waitForConnect = (socket: SocketIOClient) => {
   if (socket.connected) {
     return Promise.resolve();
   }
@@ -88,9 +78,9 @@ function waitForConnect(socket: SocketIOClient) {
     WS_TIMEOUT_MS,
     'socket connect'
   );
-}
+};
 
-function waitForDisconnect(socket: SocketIOClient) {
+const waitForDisconnect = (socket: SocketIOClient) => {
   if (socket.disconnected) {
     return Promise.resolve();
   }
@@ -101,9 +91,9 @@ function waitForDisconnect(socket: SocketIOClient) {
     WS_TIMEOUT_MS,
     'socket disconnect'
   );
-}
+};
 
-function emitWithAck<T>(socket: SocketIOClient, event: string, data: unknown) {
+const emitWithAck = <T>(socket: SocketIOClient, event: string, data: unknown) => {
   return withTimeout(
     new Promise<WebsocketResponse<T>>(resolve => {
       socket.emit(event, data, (res: WebsocketResponse<T>) => resolve(res));
@@ -111,9 +101,9 @@ function emitWithAck<T>(socket: SocketIOClient, event: string, data: unknown) {
     WS_TIMEOUT_MS,
     `ack ${event}`
   );
-}
+};
 
-function waitForEvent<T>(socket: SocketIOClient, event: string) {
+const waitForEvent = <T>(socket: SocketIOClient, event: string) => {
   return withTimeout(
     new Promise<T>(resolve => {
       socket.once(event, (payload: T) => resolve(payload));
@@ -121,13 +111,9 @@ function waitForEvent<T>(socket: SocketIOClient, event: string) {
     WS_TIMEOUT_MS,
     `event ${event}`
   );
-}
+};
 
-function expectNoEvent(
-  socket: SocketIOClient,
-  event: string,
-  durationMs = 200
-) {
+const expectNoEvent = (socket: SocketIOClient, event: string, durationMs = 200) => {
   return withTimeout(
     new Promise<void>((resolve, reject) => {
       let timer: NodeJS.Timeout;
@@ -147,9 +133,9 @@ function expectNoEvent(
     WS_TIMEOUT_MS,
     `expect no event ${event}`
   );
-}
+};
 
-async function login(app: TestingApp) {
+const login = async (app: TestingApp) => {
   const user = await app.createUser();
   const authService = app.get(AuthService, { strict: false });
   const jwtSessionService = app.get(JwtSessionService, { strict: false });
@@ -159,16 +145,16 @@ async function login(app: TestingApp) {
   const token = await jwtSessionService.sign(user.id, session.id);
 
   return { user, cookieHeader, token: token.token as string };
-}
+};
 
-function createYjsUpdateBase64() {
+const createYjsUpdateBase64 = () => {
   const doc = new Doc();
   doc.getMap('m').set('k', 'v');
   const update = encodeStateAsUpdate(doc);
   return Buffer.from(update).toString('base64');
-}
+};
 
-async function ensureSyncActiveUsersTable(db: PrismaClient) {
+const ensureSyncActiveUsersTable = async (db: PrismaClient) => {
   await db.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS sync_active_users_minutely (
       minute_ts TIMESTAMPTZ(3) NOT NULL PRIMARY KEY,
@@ -176,9 +162,9 @@ async function ensureSyncActiveUsersTable(db: PrismaClient) {
       updated_at TIMESTAMPTZ(3) NOT NULL DEFAULT NOW()
     )
   `);
-}
+};
 
-async function latestActiveUsers(db: PrismaClient) {
+const latestActiveUsers = async (db: PrismaClient) => {
   const rows = await db.$queryRaw<{ activeUsers: number }[]>`
     SELECT active_users::integer AS "activeUsers"
     FROM sync_active_users_minutely
@@ -191,9 +177,9 @@ async function latestActiveUsers(db: PrismaClient) {
   }
 
   return Number(rows[0].activeUsers);
-}
+};
 
-async function waitForActiveUsers(db: PrismaClient, expected: number) {
+const waitForActiveUsers = async (db: PrismaClient, expected: number) => {
   const deadline = Date.now() + WS_TIMEOUT_MS;
   while (Date.now() < deadline) {
     const current = await latestActiveUsers(db);
@@ -204,7 +190,7 @@ async function waitForActiveUsers(db: PrismaClient, expected: number) {
   }
 
   throw new Error(`Timed out waiting active users=${expected}`);
-}
+};
 
 let app: TestingApp;
 let url: string;

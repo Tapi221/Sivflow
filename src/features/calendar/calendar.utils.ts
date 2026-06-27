@@ -3,19 +3,13 @@ import { format } from "date-fns";
 import type { CalendarStudyLogLike, CalendarTimestampLike, CalendarWeekStartDay } from "./calendar.types";
 import { normalizeDate } from "@/utils/codec/date";
 
-
-
 type CalendarArrowKey = "ArrowLeft" | "ArrowRight" | "ArrowUp" | "ArrowDown";
 type CalendarWeekDayLabel = "SUN" | "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT";
-
-
 
 const CALENDAR_WEEK_DAYS_SUNDAY: CalendarWeekDayLabel[] = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const CALENDAR_WEEK_DAYS_MONDAY: CalendarWeekDayLabel[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 const CALENDAR_ARROW_DIFF_MAP: Record<CalendarArrowKey, number> = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
 const DEFAULT_TODAY_DESCRIPTION_LABELS: Pick<Translations, "todayDescriptionEmpty" | "todayDescriptionDue"> = { todayDescriptionEmpty: "今日の復習はありません", todayDescriptionDue: "今日の復習があります" };
-
-
 
 const toDate = (value: CalendarTimestampLike): Date | null => normalizeDate(value);
 const toDateKey = (value: Date) => format(value, "yyyy-MM-dd");
@@ -47,7 +41,5 @@ const getStreakFromLogs = (logs: CalendarStudyLogLike[]) => {
   }
   return count;
 };
-
-
 
 export { buildStudyDateSet, getArrowDayDiff, getCalendarIntensity, getLogDate, getStreakFromLogs, getTodayDescription, getWeekDays, isFocusableInputTarget, normalizeDateOnly, toDate, toDateKey };

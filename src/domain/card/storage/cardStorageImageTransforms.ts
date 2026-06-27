@@ -1,8 +1,6 @@
 import { sanitizeCardStorageImageRef } from "./cardStorageImageRefTransforms";
 import { isStorageRecord } from "@/domain/shared/storage/storageRecordUtils";
 
-
-
 const sanitizeCardStorageBlockImages = (blocks: unknown[] | undefined) => {
   if (!Array.isArray(blocks)) return blocks;
 
@@ -15,8 +13,6 @@ const sanitizeCardStorageBlockImages = (blocks: unknown[] | undefined) => {
     };
   });
 };
-
-
 
 export { sanitizeCardStorageImageRef } from "./cardStorageImageRefTransforms";
 export { sanitizeCardStorageLayout } from "./cardStorageLayoutTransforms";

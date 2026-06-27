@@ -1,11 +1,9 @@
 import { randomUUID } from 'node:crypto';
-
 import type { Prisma } from '@prisma/client';
 import type { ExecutionContext, TestFn } from 'ava';
 import ava from 'ava';
 import Sinon from 'sinon';
 import { z } from 'zod';
-
 import { ServerFeature, ServerService } from '../../core';
 import { AuthService } from '../../core/auth';
 import { QuotaModule } from '../../core/quota';
@@ -743,9 +741,7 @@ for (const {
 
 // ==================== action recipes ====================
 
-function actionRunRecord(
-  input: Parameters<Models['copilotActionRun']['create']>[0]
-) {
+const actionRunRecord = (input: Parameters<Models['copilotActionRun']['create']>[0]) => {
   return {
     id: `action-run-${randomUUID()}`,
     userId: input.userId,
@@ -769,11 +765,9 @@ function actionRunRecord(
     createdAt: new Date(),
     updatedAt: new Date(),
   };
-}
+};
 
-async function installActionSessionMock(
-  t: ExecutionContext<Tester>,
-  {
+const installActionSessionMock = async (t: ExecutionContext<Tester>, {
     actionId,
     actionPrompt,
     content,
@@ -781,8 +775,7 @@ async function installActionSessionMock(
     actionId: string;
     actionPrompt: Awaited<ReturnType<TestingPromptService['get']>>;
     content: string;
-  }
-) {
+  }) => {
   const { models, session } = t.context;
   const sandbox = Sinon.createSandbox();
   const sessionId = `copilot-provider-action-${actionId}-${randomUUID()}`;
@@ -854,7 +847,7 @@ async function installActionSessionMock(
   );
 
   return { sandbox, sessionId, userId, savedTurns };
-}
+};
 
 const actionRecipeCases = [
   {

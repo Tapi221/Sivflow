@@ -1,12 +1,10 @@
 import { randomUUID } from 'node:crypto';
-
 import serverNativeModule from '@affine/server-native';
 import { ProjectRoot } from '@affine-tools/utils/path';
 import { PrismaClient } from '@prisma/client';
 import type { TestFn } from 'ava';
 import ava from 'ava';
 import Sinon from 'sinon';
-
 import { AppModule } from '../../app.module';
 import { JobQueue } from '../../base';
 import { ConfigModule } from '../../base/config';

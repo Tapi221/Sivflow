@@ -5,7 +5,6 @@ import type { MindmapElementModel, ShapeElementModel } from '@blocksuite/affine-
 import { Bound, deserializeXYWH } from '@blocksuite/global/gfx';
 import type { GfxController } from '@blocksuite/std/gfx';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-
 import { click, pointermove, wait } from '../utils/common.js';
 import { getDocRootBlock } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';

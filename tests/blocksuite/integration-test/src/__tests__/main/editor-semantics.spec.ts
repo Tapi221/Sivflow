@@ -11,7 +11,6 @@ import { TextSelection } from '@blocksuite/std';
 import type { InlineMarkdownMatch } from '@blocksuite/std/inline';
 import { Text } from '@blocksuite/store';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-
 import { defaultSlashMenuConfig } from '../../../../affine/widgets/slash-menu/src/config.js';
 import type {
   SlashMenuActionItem,

@@ -51,11 +51,11 @@ async function createOnboardingWindow(additionalArguments: string[]) {
   // workaround for the phantom title bar on windows when losing focus
   // see https://github.com/electron/electron/issues/39959#issuecomment-1758736966
   browserWindow.on('focus', () => {
-    browserWindow.setBackgroundColor('#00000000');
+    browserWindow.setBackgroundColor('#0000');
   });
 
   browserWindow.on('blur', () => {
-    browserWindow.setBackgroundColor('#00000000');
+    browserWindow.setBackgroundColor('#0000');
   });
 
   browserWindow.on('ready-to-show', () => {

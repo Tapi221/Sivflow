@@ -3,7 +3,6 @@ import { PrismaClient } from '@prisma/client';
 import ava, { TestFn } from 'ava';
 import Sinon from 'sinon';
 import request from 'supertest';
-
 import { CANARY_CLIENT_VERSION_MAX_AGE_DAYS, ConfigFactory } from '../../base';
 import {
   AuthModule,
@@ -35,9 +34,9 @@ class TestController {
   }
 }
 
-function makeCanaryDateVersion(date: Date, build = '015') {
+const makeCanaryDateVersion = (date: Date, build = '015') => {
   return `${date.getUTCFullYear()}.${date.getUTCMonth() + 1}.${date.getUTCDate()}-canary.${build}`;
-}
+};
 
 const test = ava as TestFn<{
   app: TestingApp;

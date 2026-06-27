@@ -1,5 +1,4 @@
 import test from 'ava';
-
 import { R2StorageProvider } from '../providers/r2';
 
 const endpointOf = (provider: R2StorageProvider) => {

@@ -1,5 +1,4 @@
 import { getCurrentUserQuery } from '@affine/graphql';
-
 import { Mockers } from '../../mocks';
 import { app, e2e } from '../test';
 

@@ -2,7 +2,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { TestingModule } from '@nestjs/testing';
 import { PrismaClient } from '@prisma/client';
 import test from 'ava';
-
 import { AuthModule, AuthService } from '../../core/auth';
 import { AuthCronJob } from '../../core/auth/job';
 import { createTestingModule } from '../utils';

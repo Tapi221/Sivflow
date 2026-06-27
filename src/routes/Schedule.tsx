@@ -6,20 +6,14 @@ import { useWorkspaceTabsStore } from "@/pane.desktop/tab.desktopnative/hooks/us
 import { ScheduleScreen as DesktopScheduleScreen } from "@/pane.desktop/view/Screen.Schedule.desktop";
 import { WorkspaceScreen } from "@/pane.desktop/view/WorkspaceScreen";
 
-
-
 type CardSetNavigationTarget = {
   cardSetId: string;
   folderId: string | null;
 };
 
-
-
 const MOBILE_SCHEDULE_MEDIA_QUERY = "(max-width: 767px)";
 const DesktopNativeScheduleScreen = lazy(() => import("@/pane.desktop/tab.desktopnative/ScheduleScreen.desktopnative").then(({ ScheduleScreenDesktopNative }) => ({ default: ScheduleScreenDesktopNative })));
 const MobileScheduleScreen = lazy(() => import("@/pane.desktop/view/ScheduleScreen.mobile").then(({ ScheduleScreen }) => ({ default: ScheduleScreen })));
-
-
 
 const parseCardSetNavigationTarget = (search: string): CardSetNavigationTarget | null => {
   const params = new URLSearchParams(search);
@@ -58,8 +52,6 @@ const useIsMobileSchedule = () => {
   return isMobile;
 };
 
-
-
 const ScheduleRoute = () => {
   const isMobile = useIsMobileSchedule();
   const { search } = useLocation();
@@ -93,7 +85,5 @@ const ScheduleRoute = () => {
     </div>
   );
 };
-
-
 
 export { ScheduleRoute };

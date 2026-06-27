@@ -1,8 +1,6 @@
 import { randomUUID } from 'node:crypto';
-
 import type { TestFn } from 'ava';
 import ava from 'ava';
-
 import {
   createBmp,
   createTestingApp,

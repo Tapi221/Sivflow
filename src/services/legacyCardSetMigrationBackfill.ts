@@ -1,8 +1,6 @@
 import { getLocalDb } from "@/services/localdb";
 import type { Card, CardSet, Folder } from "@/types";
 
-
-
 type LocalFirstBackfillDb = Awaited<ReturnType<typeof getLocalDb>> & {
   addItem: (table: "cardSets", item: Record<string, unknown>) => Promise<string>;
   updateItem: (table: "cards" | "cardSets", id: string, changes: Record<string, unknown>) => Promise<number>;
@@ -19,13 +17,9 @@ type LegacyCard = Omit<Card, "cardSetId"> & {
   cardSetId?: string | null;
 };
 
-
-
 const backfillPromiseByUserId = new Map<string, Promise<void>>();
 const LEGACY_IMPORTED_CARD_FOLDER_NAME = "インポート済みカード";
 const LEGACY_IMPORTED_CARD_SET_SUFFIX = " セット";
-
-
 
 const createId = (): string => {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -300,7 +294,5 @@ const ensureLegacyCardsBackfilled = async (userId: string) => {
   backfillPromiseByUserId.set(userId, promise);
   await promise;
 };
-
-
 
 export { backfillLegacyCardsToCardSets, ensureLegacyCardsBackfilled };

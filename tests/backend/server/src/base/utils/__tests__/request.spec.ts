@@ -1,6 +1,5 @@
 import test from 'ava';
 import { Request } from 'express';
-
 import { getClientVersionFromRequest } from '../request';
 
 test('should get client version from x-affine-version header', t => {

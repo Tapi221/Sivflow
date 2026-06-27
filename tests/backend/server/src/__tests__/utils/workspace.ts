@@ -2,7 +2,7 @@ import { WorkspaceRole } from '../../core/permission/types';
 import type { WorkspaceType } from '../../core/workspaces';
 import { TestingApp } from './testing-app';
 
-export async function createWorkspace(app: TestingApp): Promise<WorkspaceType> {
+export const createWorkspace = async (app: TestingApp): Promise<WorkspaceType> => {
   const res = await app
     .POST('/graphql')
     .set({
@@ -25,12 +25,9 @@ export async function createWorkspace(app: TestingApp): Promise<WorkspaceType> {
     .attach('0', Buffer.from([0, 0]), 'init.data');
 
   return res.body.data.createWorkspace;
-}
+};
 
-export async function getWorkspacePublicDocs(
-  app: TestingApp,
-  workspaceId: string
-) {
+export const getWorkspacePublicDocs = async (app: TestingApp, workspaceId: string) => {
   const res = await app.gql(
     `
       query {
@@ -45,14 +42,9 @@ export async function getWorkspacePublicDocs(
   );
 
   return res.workspace.publicDocs;
-}
+};
 
-export async function getWorkspace(
-  app: TestingApp,
-  workspaceId: string,
-  skip = 0,
-  take = 8
-): Promise<WorkspaceType> {
+export const getWorkspace = async (app: TestingApp, workspaceId: string, skip = 0, take = 8): Promise<WorkspaceType> => {
   const res = await app.gql(
     `
       query {
@@ -65,13 +57,9 @@ export async function getWorkspace(
   );
 
   return res.workspace;
-}
+};
 
-export async function updateWorkspace(
-  app: TestingApp,
-  workspaceId: string,
-  isPublic: boolean
-): Promise<boolean> {
+export const updateWorkspace = async (app: TestingApp, workspaceId: string, isPublic: boolean): Promise<boolean> => {
   const res = await app.gql(
     `
       mutation {
@@ -83,13 +71,9 @@ export async function updateWorkspace(
   );
 
   return res.updateWorkspace.public;
-}
+};
 
-export async function setWorkspaceSharing(
-  app: TestingApp,
-  workspaceId: string,
-  enableSharing: boolean
-) {
+export const setWorkspaceSharing = async (app: TestingApp, workspaceId: string, enableSharing: boolean) => {
   const res = await app.gql(
     `
       mutation {
@@ -103,12 +87,9 @@ export async function setWorkspaceSharing(
   );
 
   return res.updateWorkspace.enableSharing as boolean;
-}
+};
 
-export async function deleteWorkspace(
-  app: TestingApp,
-  workspaceId: string
-): Promise<boolean> {
+export const deleteWorkspace = async (app: TestingApp, workspaceId: string): Promise<boolean> => {
   const res = await app.gql(
     `
       mutation {
@@ -118,13 +99,9 @@ export async function deleteWorkspace(
   );
 
   return res.deleteWorkspace;
-}
+};
 
-export async function publishDoc(
-  app: TestingApp,
-  workspaceId: string,
-  docId: string
-) {
+export const publishDoc = async (app: TestingApp, workspaceId: string, docId: string) => {
   const res = await app.gql(
     `
       mutation {
@@ -137,13 +114,9 @@ export async function publishDoc(
   );
 
   return res.publishDoc;
-}
+};
 
-export async function revokePublicDoc(
-  app: TestingApp,
-  workspaceId: string,
-  docId: string
-) {
+export const revokePublicDoc = async (app: TestingApp, workspaceId: string, docId: string) => {
   const res = await app.gql(
     `
       mutation {
@@ -157,14 +130,9 @@ export async function revokePublicDoc(
   );
 
   return res.revokePublicDoc;
-}
+};
 
-export async function grantMember(
-  app: TestingApp,
-  workspaceId: string,
-  userId: string,
-  permission: WorkspaceRole
-) {
+export const grantMember = async (app: TestingApp, workspaceId: string, userId: string, permission: WorkspaceRole) => {
   const res = await app.gql(
     `
       mutation {
@@ -178,13 +146,9 @@ export async function grantMember(
   );
 
   return res.grantMember;
-}
+};
 
-export async function revokeMember(
-  app: TestingApp,
-  workspaceId: string,
-  userId: string
-) {
+export const revokeMember = async (app: TestingApp, workspaceId: string, userId: string) => {
   const res = await app.gql(
     `
       mutation {
@@ -194,4 +158,4 @@ export async function revokeMember(
   );
 
   return res.revokeMember;
-}
+};

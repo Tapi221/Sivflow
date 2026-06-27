@@ -53,7 +53,7 @@ export const description = style({
 
 export const button = style({
   background: '#0f172a',
-  color: '#ffffff',
+  color: '#fff',
   border: 'none',
   borderRadius: '8px',
   padding: '8px 0',

@@ -1,7 +1,6 @@
 import test from 'ava';
 import Sinon from 'sinon';
-
-import { type Models } from '../../models';
+import type { Models } from '../../models';
 import { CopilotAccessPolicy } from '../../plugins/copilot/access';
 import type { ByokFeatureKind } from '../../plugins/copilot/byok/types';
 import { HistoryAttachmentUrlProjector } from '../../plugins/copilot/compat/history-attachment-url-projector';
@@ -39,15 +38,13 @@ import { ResponsePostprocessor } from '../../plugins/copilot/runtime/hosts/respo
 import { TurnPersistence } from '../../plugins/copilot/runtime/hosts/turn-persistence';
 import { ToolRuntime } from '../../plugins/copilot/runtime/tool-runtime';
 
-function stubTurnPersistence(
-  persistProjectedResult: Sinon.SinonStub = Sinon.stub().resolves(null)
-) {
+const stubTurnPersistence = (persistProjectedResult: Sinon.SinonStub = Sinon.stub().resolves(null)) => {
   return {
     persistProjectedResult,
   } as unknown as TurnPersistence;
-}
+};
 
-function stubConversationSession(latestUserTurn?: unknown) {
+const stubConversationSession = (latestUserTurn?: unknown) => {
   return {
     config: {
       sessionId: 'session-1',
@@ -59,7 +56,7 @@ function stubConversationSession(latestUserTurn?: unknown) {
     latestUserTurn,
     revertLatestMessage: Sinon.stub(),
   };
-}
+};
 
 test('ConversationPolicy should treat zero quota limit as exhausted', async t => {
   const policy = new ConversationPolicy(

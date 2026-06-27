@@ -9,8 +9,6 @@ import type { UploadedImage } from "@/types/domain/assets";
 import type { Card, CardBlock, CardFaceAttachments, CardPatch } from "@/types/domain/card";
 import { sanitizeUploadedImages } from "@/utils/uploaded-image/sanitizer";
 
-
-
 type BuildSavePayloadParams = {
   draft: EditorDraft;
   addTag: (name: string) => Promise<{ id: string; }>;
@@ -26,12 +24,8 @@ type PersistOperation = "created" | "updated" | "noop";
 type PersistResult = | { ok: true; operation: PersistOperation; saved: boolean; }
   | { ok: false; message: string; };
 
-
-
 const NEW_SENTINEL = "__new__" as const;
 const AUTOSAVE_DELAY_MS = 700;
-
-
 
 const createDraftPanelBaseCard = (): Card => {
   const now = new Date();
@@ -277,10 +271,6 @@ const createPanelCard = ({ selectedCard, draft, isEditing }: CreatePanelCardPara
   };
 };
 
-
-
 export { toDateOrNull } from "@/utils/toMillis";
 export { NEW_SENTINEL, AUTOSAVE_DELAY_MS, cloneBlock, cloneAttachments, snapshotDraft, draftSignature, sanitizeBlocksForSave, sanitizeAttachmentsForSave, hasMeaningfulBlock, hasMeaningfulAttachments, hasMeaningfulDraft, extractCreatedCardId, buildDraftFromCard, buildPatchFromDraft, prepareDraftForPersist, buildSavePayload, buildCardPatchForToggle, createPanelCard };
-
-
 export type { TagNameLookup, PersistOperation, PersistResult };

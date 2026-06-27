@@ -1,8 +1,6 @@
 import { SCHEDULE_EVENT_COLOR } from "@shared/design-tokens/color/Color.Schedule";
 import { eventChipDesign } from "@web-renderer/chip/eventchip/eventChipDesign.generated";
 
-
-
 type CalendarColorTokens = {
   bg: string;
   border: string;
@@ -14,16 +12,12 @@ type RgbColor = {
   blue: number;
 };
 
-
-
 const FALLBACK_ACCENT_COLOR = SCHEDULE_EVENT_COLOR.fallbackAccent;
 const LIGHT_ACCENT_LUMINANCE_THRESHOLD = SCHEDULE_EVENT_COLOR.lightAccentLuminanceThreshold;
 const LIGHT_ACCENT_BORDER_MIX_AMOUNT = SCHEDULE_EVENT_COLOR.lightAccentBorderMixAmount;
 const colorTokensCache = new Map<string, CalendarColorTokens>();
 const COLOR_MIX_TARGET: RgbColor = { ...SCHEDULE_EVENT_COLOR.textMixTarget };
 const HEX_DIGITS = "0123456789abcdefABCDEF";
-
-
 
 const clampChannel = (value: number) => Math.max(0, Math.min(255, value));
 const toHexChannel = (value: number) =>
@@ -100,9 +94,5 @@ const generateColorTokens = (hex: string): CalendarColorTokens => {
   return tokens;
 };
 
-
-
 export { generateColorTokens };
-
-
 export type { CalendarColorTokens };

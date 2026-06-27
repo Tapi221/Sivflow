@@ -90,7 +90,7 @@ const OverlayModalTemplate: StoryFn<OverlayModalProps> = () => {
             style={{
               width: '400px',
               height: '300px',
-              background: '#66ccff',
+              background: '#6cf',
               opacity: 0.1,
               color: '#fff',
             }}

@@ -1,5 +1,4 @@
 import test from 'ava';
-
 import { CitationFootnoteFormatter } from '../../plugins/copilot/providers/utils';
 
 test('CitationFootnoteFormatter should format sorted footnotes from citation events', t => {

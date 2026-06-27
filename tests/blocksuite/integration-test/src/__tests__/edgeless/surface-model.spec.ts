@@ -6,7 +6,6 @@ import type {
 } from '@blocksuite/affine/model';
 import { serializeXYWH } from '@blocksuite/global/gfx';
 import { beforeEach, describe, expect, test } from 'vitest';
-
 import { wait } from '../utils/common.js';
 import { setupEditor } from '../utils/setup.js';
 

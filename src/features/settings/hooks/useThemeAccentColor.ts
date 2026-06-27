@@ -2,16 +2,12 @@ import { useEffect } from "react";
 import { INTERACTION_COLOR } from "@shared/design-tokens/color/Color.Interaction";
 import { normalizeThemeAccentColor, useUserSettings } from "./useUserSettings";
 
-
-
 type RgbColor = {
   red: number;
   green: number;
   blue: number;
 };
 type ThemeAccentRuntimeVariables = Record<string, string>;
-
-
 
 const RGB_MAX_VALUE = 255;
 const HSL_MAX_HUE = 360;
@@ -27,8 +23,6 @@ const PRIMARY_DARK_MIXES = {
   600: 0.1,
   700: 0.24,
 } as const;
-
-
 
 const clampColorChannel = (value: number): number => Math.max(0, Math.min(RGB_MAX_VALUE, Math.round(value)));
 const toHexChannel = (value: number): string => clampColorChannel(value).toString(16).padStart(2, "0");
@@ -115,7 +109,5 @@ const useThemeAccentColor = () => {
     };
   }, [accentColor]);
 };
-
-
 
 export { useThemeAccentColor };

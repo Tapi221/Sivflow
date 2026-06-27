@@ -1,13 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 import ava, { TestFn } from 'ava';
-
 import { CurrentUser } from '../../core/auth';
 import { AuthService } from '../../core/auth/service';
 import { FeatureModule } from '../../core/features';
 import { QuotaModule } from '../../core/quota';
 import { UserModule } from '../../core/user';
 import { Models } from '../../models';
-import { createTestingModule, type TestingModule } from '../utils';
+import { createTestingModule } from '../utils';
+import type { TestingModule } from '../utils';
 
 const test = ava as TestFn<{
   auth: AuthService;

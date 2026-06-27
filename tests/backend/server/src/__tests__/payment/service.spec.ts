@@ -1,10 +1,8 @@
 import '../../plugins/payment';
-
 import { PrismaClient } from '@prisma/client';
 import ava, { TestFn } from 'ava';
 import Sinon from 'sinon';
 import Stripe from 'stripe';
-
 import { AppModule } from '../../app.module';
 import { EventBus } from '../../base';
 import { ConfigFactory, ConfigModule } from '../../base/config';
@@ -20,7 +18,8 @@ import {
   SubscriptionRecurring,
   SubscriptionStatus,
 } from '../../plugins/payment/types';
-import { createTestingApp, type TestingApp } from '../utils';
+import { createTestingApp } from '../utils';
+import type { TestingApp } from '../utils';
 
 const unixNow = () => {
   return Math.floor(Date.now() / 1000);
@@ -150,19 +149,19 @@ const test = ava as TestFn<{
   };
 }>;
 
-function getLastCheckoutPrice(checkoutStub: Sinon.SinonStub) {
+const getLastCheckoutPrice = (checkoutStub: Sinon.SinonStub) => {
   const call = checkoutStub.getCall(checkoutStub.callCount - 1);
   const arg = call.args[0] as Stripe.Checkout.SessionCreateParams;
   return {
     price: arg.line_items?.[0]?.price,
     coupon: arg.discounts?.[0]?.coupon,
   };
-}
+};
 
-function getLastCheckoutParams(checkoutStub: Sinon.SinonStub) {
+const getLastCheckoutParams = (checkoutStub: Sinon.SinonStub) => {
   const call = checkoutStub.getCall(checkoutStub.callCount - 1);
   return call.args[0] as Stripe.Checkout.SessionCreateParams;
-}
+};
 
 test.before(async t => {
   const app = await createTestingApp({

@@ -1,26 +1,22 @@
 import { createHash, randomUUID } from 'node:crypto';
-
 import { PrismaClient, WorkspaceMemberStatus } from '@prisma/client';
-import ava, { type ExecutionContext, type TestFn } from 'ava';
+import ava from 'ava';
+import type { ExecutionContext, TestFn } from 'ava';
 import Sinon from 'sinon';
-
 import { Cache, CryptoHelper } from '../../base';
 import { EntitlementService } from '../../core/entitlement';
 import { Models, WorkspaceRole } from '../../models';
 import { CopilotAccessPolicy } from '../../plugins/copilot/access';
 import { ByokService } from '../../plugins/copilot/byok';
-import {
-  type ByokFeatureKind,
-  ByokKeyStorage,
-  ByokKeyTestStatus,
-  ByokProvider,
-} from '../../plugins/copilot/byok/types';
+import { ByokKeyStorage, ByokKeyTestStatus, ByokProvider } from '../../plugins/copilot/byok/types';
+import type { ByokFeatureKind } from '../../plugins/copilot/byok/types';
 import {
   SubscriptionPlan,
   SubscriptionRecurring,
   SubscriptionStatus,
 } from '../../plugins/payment/types';
-import { createTestingModule, type TestingModule } from '../utils';
+import { createTestingModule } from '../utils';
+import type { TestingModule } from '../utils';
 
 interface Context {
   module: TestingModule;
@@ -65,23 +61,19 @@ test.after.always(async t => {
   });
 });
 
-async function createUserWorkspace(t: ExecutionContext<Context>) {
+const createUserWorkspace = async (t: ExecutionContext<Context>) => {
   const user = await t.context.models.user.create({
     email: `${randomUUID()}@affine.pro`,
   });
   const workspace = await t.context.models.workspace.create(user.id);
   return { user, workspace };
-}
+};
 
-function workspaceHash(workspaceId: string) {
+const workspaceHash = (workspaceId: string) => {
   return createHash('sha256').update(workspaceId).digest('hex').slice(0, 12);
-}
+};
 
-async function grantUserPlan(
-  t: ExecutionContext<Context>,
-  userId: string,
-  feature: ByokUserPlanFeature = 'pro_plan_v1'
-) {
+const grantUserPlan = async (t: ExecutionContext<Context>, userId: string, feature: ByokUserPlanFeature = 'pro_plan_v1') => {
   if (feature === 'unlimited_copilot') {
     await t.context.entitlement.upsertFromCloudSubscription({
       targetId: userId,
@@ -101,13 +93,9 @@ async function grantUserPlan(
         : SubscriptionRecurring.Monthly,
     status: SubscriptionStatus.Active,
   });
-}
+};
 
-async function revokeUserPlan(
-  t: ExecutionContext<Context>,
-  userId: string,
-  feature: ByokUserPlanFeature = 'pro_plan_v1'
-) {
+const revokeUserPlan = async (t: ExecutionContext<Context>, userId: string, feature: ByokUserPlanFeature = 'pro_plan_v1') => {
   if (feature === 'unlimited_copilot') {
     await t.context.entitlement.revokeCloudSubscription({
       targetId: userId,
@@ -120,29 +108,23 @@ async function revokeUserPlan(
     targetId: userId,
     plan: SubscriptionPlan.Pro,
   });
-}
+};
 
-async function grantTeamPlan(
-  t: ExecutionContext<Context>,
-  workspaceId: string
-) {
+const grantTeamPlan = async (t: ExecutionContext<Context>, workspaceId: string) => {
   await t.context.entitlement.upsertFromCloudSubscription({
     targetId: workspaceId,
     plan: SubscriptionPlan.Team,
     recurring: SubscriptionRecurring.Yearly,
     status: SubscriptionStatus.Active,
   });
-}
+};
 
-async function revokeTeamPlan(
-  t: ExecutionContext<Context>,
-  workspaceId: string
-) {
+const revokeTeamPlan = async (t: ExecutionContext<Context>, workspaceId: string) => {
   await t.context.entitlement.revokeCloudSubscription({
     targetId: workspaceId,
     plan: SubscriptionPlan.Team,
   });
-}
+};
 
 type ByokMatrixCase = {
   name: string;
@@ -166,9 +148,7 @@ type ByokUserPlanFeature =
   | 'lifetime_pro_plan_v1'
   | 'unlimited_copilot';
 
-async function createByokMatrixWorkspace(
-  t: ExecutionContext<Context>,
-  input: Pick<
+const createByokMatrixWorkspace = async (t: ExecutionContext<Context>, input: Pick<
     ByokMatrixCase,
     | 'role'
     | 'team'
@@ -176,8 +156,7 @@ async function createByokMatrixWorkspace(
     | 'ownerPlanFeature'
     | 'actorPlan'
     | 'actorPlanFeature'
-  >
-) {
+  >) => {
   const { user: owner, workspace } = await createUserWorkspace(t);
   const actor =
     input.role === WorkspaceRole.Owner
@@ -205,7 +184,7 @@ async function createByokMatrixWorkspace(
   }
 
   return { owner, actor, workspace };
-}
+};
 
 const byokManagementMatrix: ByokMatrixCase[] = [
   {

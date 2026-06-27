@@ -5,7 +5,6 @@ import {
   TestingModuleBuilder,
 } from '@nestjs/testing';
 import { PrismaClient } from '@prisma/client';
-
 import { FunctionalityModules } from '../app.module';
 import { AFFiNELogger, EventBus, JobQueue } from '../base';
 import { createFactory, MockEventBus, MockJobQueue } from './mocks';
@@ -22,9 +21,7 @@ export interface TestingModule extends NestjsTestingModule {
   event: MockEventBus;
 }
 
-export async function createModule(
-  metadata: TestingModuleMetadata = {}
-): Promise<TestingModule> {
+export const createModule = async (metadata: TestingModuleMetadata = {}): Promise<TestingModule> => {
   const { tapModule, ...meta } = metadata;
 
   const builder = Test.createTestingModule({
@@ -60,4 +57,4 @@ export async function createModule(
   module.event = module.get(EventBus);
 
   return module;
-}
+};

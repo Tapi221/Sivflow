@@ -2,7 +2,6 @@ import { TestingModule } from '@nestjs/testing';
 import ava, { TestFn } from 'ava';
 import { CLS_ID, ClsServiceManager } from 'nestjs-cls';
 import Sinon from 'sinon';
-
 import { EventBus, metrics } from '../../base';
 import { createTestingModule, sleep } from '../utils';
 import { Listeners } from './provider';

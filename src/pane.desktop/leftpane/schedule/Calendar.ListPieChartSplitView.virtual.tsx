@@ -13,8 +13,6 @@ import { generateColorTokens } from "@/features/calendar/schedule.color-tokens";
 import type { AppCalendarItem, GoogleAccountDisplay } from "@/features/calendar/scheduleScreen.types";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
-
-
 type CalendarListPieChartSplitViewProps = {
   days: Date[];
   virtualRail?: ScheduleVirtualRail;
@@ -73,8 +71,6 @@ type SplitDayDateButtonStyle = CSSProperties & {
   "--schedule-date-focus-ring": string;
 };
 
-
-
 const SPLIT_DAY_MIN_HEIGHT_PX = LIST_DAY_SECTION_MIN_HEIGHT_PX;
 const SPLIT_DAY_GAP_PX = LIST_DAY_GAP_PX;
 const SPLIT_DAY_BLOCK_BASE_HEIGHT_PX = SPLIT_DAY_MIN_HEIGHT_PX + SPLIT_DAY_GAP_PX;
@@ -94,8 +90,6 @@ const DAY_WEEKDAY_STYLE: CSSProperties = { color: SCHEDULE_DATE_COLOR.weekdayTex
 const EMPTY_DAY_CARD_STYLE: CSSProperties = { backgroundColor: SCHEDULE_CONTENT_COLOR.surface, borderColor: SCHEDULE_DATE_COLOR.emptyDayBorder };
 const PIE_CHART_INNER_STYLE: CSSProperties = { backgroundColor: SCHEDULE_CONTENT_COLOR.surface };
 const SPLIT_DAY_DATE_BUTTON_STYLE: SplitDayDateButtonStyle = { "--schedule-date-focus-ring": SCHEDULE_DATE_COLOR.todayFocusRing };
-
-
 
 const createRail = (selectedDate: Date): ScheduleVirtualRail => ({ startDate: subDays(startOfMonth(selectedDate), LOCAL_DAYS), anchorIndex: LOCAL_DAYS, totalDayCount: LOCAL_DAYS * 2 + getDaysInMonth(selectedDate) });
 const getIndexForDate = (rail: ScheduleVirtualRail, date: Date) => differenceInCalendarDays(date, rail.startDate);
@@ -318,8 +312,6 @@ const createSplitDayDateNumberStyle = (day: SplitDay): CSSProperties => {
   return {};
 };
 
-
-
 const EmptyDayCard = () => <div className="flex h-8 items-center rounded-xl border border-dashed px-3 text-xs font-semibold text-zinc-500" style={EMPTY_DAY_CARD_STYLE}>{EMPTY_DAY_LABEL}</div>;
 const SplitDayDateButton = ({ day, onSelectDate }: SplitDayDateButtonProps) => (
   <button type="button" className="mt-0.5 flex h-8 items-center justify-end gap-1 rounded-xl pr-0.5 text-right transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--schedule-date-focus-ring)]" style={SPLIT_DAY_DATE_BUTTON_STYLE} onClick={() => onSelectDate?.(day.date)}>
@@ -447,8 +439,6 @@ const CalendarListPieChartSplitViewComponent = ({ virtualRail, selectedDate, eve
     </div>
   );
 };
-
-
 
 const SplitDaySection = memo(SplitDaySectionComponent);
 SplitDaySection.displayName = "SplitDaySection";

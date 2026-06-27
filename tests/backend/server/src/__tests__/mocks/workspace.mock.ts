@@ -1,10 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-
 import { faker } from '@faker-js/faker';
 import type { Prisma, Workspace } from '@prisma/client';
 import { omit } from 'lodash-es';
-
 import { WorkspaceRole } from '../../models';
 import { Mocker } from './factory';
 

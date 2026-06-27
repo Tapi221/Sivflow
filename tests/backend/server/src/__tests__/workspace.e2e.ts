@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import type { TestFn } from 'ava';
 import ava from 'ava';
-
 import { addDocToRootDoc, readAllDocIdsFromRootDoc } from '../native';
 import {
   acceptInviteById,

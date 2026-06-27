@@ -1,7 +1,6 @@
 import { faker } from '@faker-js/faker';
 import type { AccessToken } from '@prisma/client';
 import { Prisma } from '@prisma/client';
-
 import { Mocker } from './factory';
 
 export type MockAccessTokenInput = Omit<

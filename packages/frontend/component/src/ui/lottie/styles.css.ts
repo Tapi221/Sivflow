@@ -21,7 +21,7 @@ const iconPrimaryColors = [
 const backgroundPrimaryColors = [
   // --affine-v2-background-primary
   'rgb(255,255,255)',
-  '#ffffff',
+  '#fff',
 ];
 
 const backgroundSecondaryColors = [

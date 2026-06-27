@@ -1,17 +1,16 @@
 import { PrismaClient } from '@prisma/client';
 import Sinon from 'sinon';
-
 import { app, e2e, Mockers } from '../test';
 
-async function gql(query: string, variables?: Record<string, unknown>) {
+const gql = async (query: string, variables?: Record<string, unknown>) => {
   const res = await app.POST('/graphql').send({ query, variables }).expect(200);
   return res.body as {
     data?: Record<string, any>;
     errors?: Array<{ message: string; extensions: Record<string, any> }>;
   };
-}
+};
 
-async function ensureAnalyticsTables(db: PrismaClient) {
+const ensureAnalyticsTables = async (db: PrismaClient) => {
   await db.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS workspace_admin_stats_daily (
       workspace_id VARCHAR NOT NULL,
@@ -56,15 +55,15 @@ async function ensureAnalyticsTables(db: PrismaClient) {
       PRIMARY KEY (workspace_id, user_id)
     );
   `);
-}
+};
 
-async function createPublicDoc(input: {
+const createPublicDoc = async (input: {
   workspaceId: string;
   ownerId: string;
   title: string;
   updatedAt: Date;
   publishedAt: Date;
-}) {
+}) => {
   const snapshot = await app.create(Mockers.DocSnapshot, {
     workspaceId: input.workspaceId,
     user: { id: input.ownerId },
@@ -93,7 +92,7 @@ async function createPublicDoc(input: {
   });
 
   return snapshot.id;
-}
+};
 
 e2e(
   'adminAllSharedLinks should support stable pagination and includeTotal',

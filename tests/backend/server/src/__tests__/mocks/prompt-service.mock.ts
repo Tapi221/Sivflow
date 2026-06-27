@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-
 import { CopilotPromptInvalid } from '../../base';
 import { llmGetBuiltInPromptSpec, llmRenderBuiltInPrompt } from '../../native';
 import { PromptService } from '../../plugins/copilot/prompt';

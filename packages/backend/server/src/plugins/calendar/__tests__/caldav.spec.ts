@@ -105,7 +105,7 @@ const calendarListResponse = `<?xml version="1.0" encoding="UTF-8"?>
           <calendar xmlns="urn:ietf:params:xml:ns:caldav" />
         </resourcetype>
         <calendar-timezone>BEGIN:VTIMEZONE\nTZID:UTC\nEND:VTIMEZONE</calendar-timezone>
-        <calendar-color xmlns="http://apple.com/ns/ical/">#ff0000</calendar-color>
+        <calendar-color xmlns="http://apple.com/ns/ical/">#f00</calendar-color>
       </prop>
       <status>HTTP/1.1 200 OK</status>
     </propstat>

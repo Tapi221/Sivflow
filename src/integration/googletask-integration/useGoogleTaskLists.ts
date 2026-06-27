@@ -5,8 +5,6 @@ import type { GoogleConnectedServiceAccountEntry, GoogleConnectedServiceAccountT
 import { fetchGoogleTaskLists } from "./gtask.api";
 import type { GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
 
-
-
 type GoogleTaskListAccountState = {
   taskLists: GoogleTaskListItem[];
   isLoading: boolean;
@@ -25,15 +23,11 @@ type AccountTokenSnapshot = {
   connectionStatus: GoogleConnectedServiceAccountEntry["connectionStatus"];
 };
 
-
-
 const EMPTY_ACCOUNT_STATE: GoogleTaskListAccountState = {
   taskLists: [],
   isLoading: false,
   error: null,
 };
-
-
 
 const shouldHideAuthRecoveryError = (error: unknown): boolean => {
   if (!(error instanceof Error)) return false;
@@ -260,9 +254,5 @@ const useGoogleTaskLists = (accounts: GoogleConnectedServiceAccountEntry[], onAc
   return state;
 };
 
-
-
 export { useGoogleTaskLists };
-
-
 export type { GoogleTaskListAccountState };

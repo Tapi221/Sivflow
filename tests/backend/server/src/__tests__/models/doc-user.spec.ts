@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import test from 'ava';
 import Sinon from 'sinon';
-
 import { EventBus } from '../../base';
 import { DocRole, Models } from '../../models';
 import { createTestingModule, TestingModule } from '../utils';

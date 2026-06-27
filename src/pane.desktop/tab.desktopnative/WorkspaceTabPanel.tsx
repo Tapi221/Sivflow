@@ -5,8 +5,6 @@ import { PdfDocumentPane } from "@/features/pdf/PdfDocumentPane";
 import type { WorkspaceEntityTab } from "./Tab";
 import type { Card, DocumentItem } from "@/types";
 
-
-
 type WorkspaceTabPanelProps = {
   activeTab: WorkspaceEntityTab;
   cards: Card[];
@@ -16,17 +14,11 @@ type WorkspaceTabPanelProps = {
   onCardUpdated: () => void;
 };
 
-
-
 const workspaceTabPanelTextClassName = "text-lg leading-6";
-
-
 
 const buildMapById = <TEntity extends { id: string; },>(entities: TEntity[]) => {
   return new Map(entities.map((entity) => [entity.id, entity]));
 };
-
-
 
 const WorkspacePanelStatus = ({ title }: { title: string; }) => {
   return (
@@ -86,7 +78,5 @@ const WorkspaceTabPanel = ({
 
   return null;
 };
-
-
 
 export { WorkspaceTabPanel };

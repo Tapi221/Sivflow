@@ -1,8 +1,8 @@
 import { ModuleRef } from '@nestjs/core';
 import { PrismaClient } from '@prisma/client';
 import ava, { TestFn } from 'ava';
-
-import { createTestingModule, type TestingModule } from '../../__tests__/utils';
+import { createTestingModule } from '../../__tests__/utils';
+import type { TestingModule } from '../../__tests__/utils';
 import { Models } from '../../models';
 import { BackfillPermissionProjection1765500000000 } from '../migrations/1765500000000-backfill-permission-projection';
 

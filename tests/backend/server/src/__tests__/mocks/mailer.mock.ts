@@ -1,6 +1,5 @@
 import { interval, map, take, takeUntil } from 'rxjs';
 import Sinon from 'sinon';
-
 import { Mailer } from '../../core/mail';
 import { MailName } from '../../mails';
 

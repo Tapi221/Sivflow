@@ -1,6 +1,5 @@
 import ava, { TestFn } from 'ava';
 import Sinon from 'sinon';
-
 import { SessionCache } from '../../base';
 import { AuthChallengeStore, AuthModule } from '../../core/auth';
 import { createTestingApp, TestingApp } from '../utils';

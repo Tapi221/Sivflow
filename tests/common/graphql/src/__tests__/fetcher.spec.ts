@@ -1,6 +1,5 @@
 import type { Mock } from 'vitest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { gqlFetcherFactory } from '../fetcher';
 import type { GraphQLQuery } from '../graphql';
 

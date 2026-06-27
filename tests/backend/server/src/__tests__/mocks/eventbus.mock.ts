@@ -1,5 +1,4 @@
 import Sinon from 'sinon';
-
 import { EventBus } from '../../base';
 import { EventName } from '../../base/event/def';
 

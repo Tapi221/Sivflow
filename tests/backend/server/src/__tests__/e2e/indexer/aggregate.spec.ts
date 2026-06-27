@@ -1,5 +1,4 @@
 import { indexerAggregateQuery, SearchTable } from '@affine/graphql';
-
 import { IndexerService } from '../../../plugins/indexer/service';
 import { Mockers } from '../../mocks';
 import { app, e2e } from '../test';

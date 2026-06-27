@@ -9,7 +9,6 @@ import {
 } from '@blocksuite/affine-gfx-turbo-renderer';
 import { firstValueFrom } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
-
 import { wait } from '../utils/common.js';
 import { addSampleNotes } from '../utils/doc-generator.js';
 import {

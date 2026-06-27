@@ -1,9 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-
 import { PrismaClient } from '@prisma/client';
 import test from 'ava';
-
 import { PermissionProjectionChecker } from '../../core/permission/projection-checker';
 import {
   DocRole,
@@ -61,7 +59,7 @@ class TestPermissionProjectionModel extends PermissionProjectionModel {
 }
 
 let appliedPermissionProjectionTriggerFunctionUpdates = false;
-async function applyPermissionProjectionTriggerFunctionUpdates() {
+const applyPermissionProjectionTriggerFunctionUpdates = async () => {
   if (appliedPermissionProjectionTriggerFunctionUpdates) {
     return;
   }
@@ -89,9 +87,9 @@ async function applyPermissionProjectionTriggerFunctionUpdates() {
     await db.$executeRawUnsafe(sql);
   }
   appliedPermissionProjectionTriggerFunctionUpdates = true;
-}
+};
 
-async function hasCurrentWorkspaceInvitationColumns() {
+const hasCurrentWorkspaceInvitationColumns = async () => {
   const rows = await db.$queryRaw<{ columnName: string }[]>`
     SELECT column_name AS "columnName"
     FROM information_schema.columns
@@ -99,7 +97,7 @@ async function hasCurrentWorkspaceInvitationColumns() {
       AND column_name IN ('requested_role', 'status', 'kind')
   `;
   return rows.length === 3;
-}
+};
 
 test('PermissionProjectionModel checker returns mismatch and dirty-row counts', async t => {
   const queryResults = [
@@ -271,7 +269,7 @@ test('permission projection trigger maps legacy doc policy rows', async t => {
   t.is(policy.memberDefaultRole, 'reader');
 });
 
-async function hasDocGrantLegacyProjectionColumns() {
+const hasDocGrantLegacyProjectionColumns = async () => {
   const rows = await db.$queryRaw<{ columnName: string }[]>`
     SELECT column_name AS "columnName"
     FROM information_schema.columns
@@ -283,7 +281,7 @@ async function hasDocGrantLegacyProjectionColumns() {
       )
   `;
   return rows.length === 3;
-}
+};
 
 test('permission projection trigger maps legacy doc grants and drops dirty rows', async t => {
   if (!(await hasDocGrantLegacyProjectionColumns())) {

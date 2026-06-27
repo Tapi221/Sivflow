@@ -18,8 +18,6 @@ interface LocalDBTelemetrySnapshot {
   localdb_reset_failed: boolean;
 }
 
-
-
 const RESET_FAILED_REASON_KEY = "sivflow.localdb.resetFailedReason";
 const LEGACY_RESET_FAILED_REASON_KEY = "flashcard.localdb.resetFailedReason";
 const listeners = new Set<(status: LocalDBRuntimeStatus) => void>();
@@ -42,8 +40,6 @@ let currentStatus: LocalDBRuntimeStatus = {
   })(),
   updatedAt: Date.now(),
 };
-
-
 
 const readLocalStorage = (key: string): string | null => {
   if (typeof window === "undefined") return null;
@@ -124,9 +120,5 @@ const getLocalDBTelemetrySnapshot = (): LocalDBTelemetrySnapshot => {
   return { localdb_mode: currentStatus.mode, localdb_reason_code: currentStatus.fallbackReasonCode, localdb_fallback_reason: toShortReason(currentStatus.fallbackReason), localdb_generation_bumped: currentStatus.generationBumped, localdb_reset_failed: Boolean(currentStatus.resetFailedReason) };
 };
 
-
-
 export { getLocalDBRuntimeStatus, subscribeLocalDBRuntimeStatus, updateLocalDBRuntimeStatus, warnOncePerSession, telemetryOncePerSession, markLocalDBGenerationBumped, saveLocalDBResetFailureReason, clearLocalDBResetFailureReason, getStoredLocalDBResetFailureReason, getLocalDBTelemetrySnapshot };
-
-
 export type { LocalDBMode, LocalDBFallbackReasonCode, LocalDBRuntimeStatus, LocalDBTelemetrySnapshot };

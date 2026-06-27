@@ -1,10 +1,8 @@
 import { randomUUID } from 'node:crypto';
-
 import { HttpStatus } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import ava, { TestFn } from 'ava';
 import Sinon from 'sinon';
-
 import { AppModule } from '../../app.module';
 import { ConfigFactory, InvalidOauthResponse, URLHelper } from '../../base';
 import { SessionCache } from '../../base/cache';
@@ -439,11 +437,7 @@ test('should throw if provider is invalid in callback uri', async t => {
   t.pass();
 });
 
-function mockOAuthProvider(
-  app: TestingApp,
-  email: string,
-  clientNonce: string = randomUUID()
-) {
+const mockOAuthProvider = (app: TestingApp, email: string, clientNonce: string = randomUUID()) => {
   const provider = app.get(GoogleOAuthProvider);
   const oauth = app.get(OAuthService);
 
@@ -461,12 +455,9 @@ function mockOAuthProvider(
   });
 
   return clientNonce;
-}
+};
 
-function mockGithubOAuthProvider(
-  app: TestingApp,
-  clientNonce: string = randomUUID()
-) {
+const mockGithubOAuthProvider = (app: TestingApp, clientNonce: string = randomUUID()) => {
   const provider = app.get(GithubOAuthProvider);
   const oauth = app.get(OAuthService);
 
@@ -479,11 +470,9 @@ function mockGithubOAuthProvider(
   Sinon.stub(provider, 'getToken').resolves({ accessToken: '1' });
 
   return { provider, clientNonce };
-}
+};
 
-function mockOidcProvider(
-  provider: OIDCProvider,
-  {
+const mockOidcProvider = (provider: OIDCProvider, {
     args = {},
     idTokenClaims,
     userinfo,
@@ -491,8 +480,7 @@ function mockOidcProvider(
     args?: Record<string, string>;
     idTokenClaims: Record<string, unknown>;
     userinfo: Record<string, unknown>;
-  }
-) {
+  }) => {
   Sinon.stub(provider, 'config').get(() => ({
     clientId: '',
     clientSecret: '',
@@ -513,13 +501,13 @@ function mockOidcProvider(
     provider as unknown as { fetchJson: () => unknown },
     'fetchJson'
   ).resolves(userinfo);
-}
+};
 
-function createOidcRegistrationHarness(config?: {
+const createOidcRegistrationHarness = (config?: {
   clientId?: string;
   clientSecret?: string;
   issuer?: string;
-}) {
+}) => {
   const server = {
     enableFeature: Sinon.spy(),
     disableFeature: Sinon.spy(),
@@ -554,13 +542,13 @@ function createOidcRegistrationHarness(config?: {
     factory,
     server,
   };
-}
+};
 
-async function flushAsyncWork(iterations = 5) {
+const flushAsyncWork = async (iterations = 5) => {
   for (let i = 0; i < iterations; i++) {
     await new Promise(resolve => setImmediate(resolve));
   }
-}
+};
 
 test('should be able to sign up with oauth', async t => {
   const { app, db } = t.context;

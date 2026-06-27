@@ -1,5 +1,4 @@
 import { randomUUID } from 'node:crypto';
-
 import type {
   GraphQLQuery,
   QueryOptions,
@@ -13,7 +12,6 @@ import { PrismaClient, User } from '@prisma/client';
 import cookieParser from 'cookie-parser';
 import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs';
 import supertest from 'supertest';
-
 import {
   AFFiNELogger,
   ApplyType,
@@ -44,9 +42,7 @@ export type TestUser = User;
 
 const OneMB = 1024 * 1024;
 
-export async function createTestingApp(
-  moduleDef: TestingAppMetadata = {}
-): Promise<TestingApp> {
+export const createTestingApp = async (moduleDef: TestingAppMetadata = {}): Promise<TestingApp> => {
   const module = await createTestingModule(moduleDef, false);
   const logger = new AFFiNELogger();
   logger.setLogLevels([TEST_LOG_LEVEL]);
@@ -78,9 +74,9 @@ export async function createTestingApp(
   await app.init();
 
   return makeTestingApp(app);
-}
+};
 
-export function parseCookies(res: supertest.Response) {
+export const parseCookies = (res: supertest.Response) => {
   const cookies = res.get('Set-Cookie') ?? [];
   const sessionCookie = cookies.reduce(
     (cookies, cookie) => {
@@ -92,7 +88,7 @@ export function parseCookies(res: supertest.Response) {
   );
 
   return sessionCookie;
-}
+};
 
 export class TestingApp extends ApplyType<INestApplication>() {
   private sessionCookie: string | null = null;
@@ -366,7 +362,7 @@ export class TestingApp extends ApplyType<INestApplication>() {
   }
 }
 
-function makeTestingApp(app: INestApplication): TestingApp {
+const makeTestingApp = (app: INestApplication): TestingApp => {
   const testingApp = new TestingApp();
 
   // @ts-expect-error allow
@@ -382,4 +378,4 @@ function makeTestingApp(app: INestApplication): TestingApp {
       return target[prop] ?? app[prop];
     },
   });
-}
+};

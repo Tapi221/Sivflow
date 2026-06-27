@@ -4,8 +4,6 @@ import { commonGenerateRules } from "./common";
 import type { ChatMessage } from "@/app/api/ai/command/types";
 import { addSelection, buildStructuredPrompt, formatTextFromMessages, getLastUserInstruction, getMarkdownWithSelection, isMultiBlocks } from "@/app/api/ai/command/utils";
 
-
-
 const buildGenerateFreeformPrompt = (messages: ChatMessage[]) => {
   return buildStructuredPrompt({
     examples: [
@@ -141,7 +139,5 @@ const getGeneratePrompt = (editor: SlateEditor, { isSelecting, messages }: { isS
 
   return buildGenerateContextPrompt(editor, messages);
 };
-
-
 
 export { getGeneratePrompt };

@@ -3,8 +3,6 @@ import type { QueueItem } from "@/application/usecases/persistentOfflineQueueMod
 import { makeAssetRecord, toAssetLikeRecord } from "@/application/usecases/persistentOfflineQueueModels";
 import { getLocalDb } from "@/infrastructure/localdb/client";
 
-
-
 const handleQueuedAssetUploadFailure = async (item: QueueItem): Promise<void> => {
   try {
     const localDb = await getLocalDb();
@@ -36,7 +34,5 @@ const handleQueuedAssetUploadFailure = async (item: QueueItem): Promise<void> =>
     console.warn("[PersistentQueue] Failed to update asset status", assetErr);
   }
 };
-
-
 
 export { handleQueuedAssetUploadFailure };

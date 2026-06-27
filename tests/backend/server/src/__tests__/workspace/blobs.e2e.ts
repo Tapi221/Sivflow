@@ -1,8 +1,6 @@
 import { createHash } from 'node:crypto';
-
 import test from 'ava';
 import Sinon from 'sinon';
-
 import { Config, ConfigFactory, StorageProviderFactory } from '../../base';
 import { QuotaStateService } from '../../core/quota/state';
 import { WorkspaceBlobStorage } from '../../core/storage/wrappers/blob';
@@ -58,7 +56,7 @@ test.after.always(async () => {
   await app.close();
 });
 
-async function withRestrictedWorkspaceQuota(workspaceId: string) {
+const withRestrictedWorkspaceQuota = async (workspaceId: string) => {
   const quotaState = app.get(QuotaStateService);
   const blobModel = app.get(BlobModel);
   const base = await quotaState.reconcileWorkspaceQuotaState(workspaceId);
@@ -76,7 +74,7 @@ async function withRestrictedWorkspaceQuota(workspaceId: string) {
       };
     }
   );
-}
+};
 
 test('should set blobs', async t => {
   await app.signupV1('u1@affine.pro');
@@ -316,10 +314,10 @@ test('should throw error when blob size large than max file size', async t => {
   });
 });
 
-function sha256Base64urlWithPadding(buffer: Buffer) {
+const sha256Base64urlWithPadding = (buffer: Buffer) => {
   return createHash('sha256')
     .update(buffer)
     .digest('base64')
     .replace(/\+/g, '-')
     .replace(/\//g, '_');
-}
+};

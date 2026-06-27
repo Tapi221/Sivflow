@@ -1,7 +1,7 @@
 import { PublicUserType } from '../../core/user';
 import { TestingApp } from './testing-app';
 
-export async function currentUser(app: TestingApp) {
+export const currentUser = async (app: TestingApp) => {
   const res = await app.gql(`
       query {
         currentUser {
@@ -11,12 +11,9 @@ export async function currentUser(app: TestingApp) {
       }
     `);
   return res.currentUser;
-}
+};
 
-export async function getPublicUserById(
-  app: TestingApp,
-  id: string
-): Promise<PublicUserType | null> {
+export const getPublicUserById = async (app: TestingApp, id: string): Promise<PublicUserType | null> => {
   const res = await app.gql(
     `
     query getPublicUserById($id: String!) {
@@ -30,12 +27,9 @@ export async function getPublicUserById(
     { id }
   );
   return res.publicUserById;
-}
+};
 
-export async function sendChangeEmail(
-  app: TestingApp,
-  callbackUrl: string
-): Promise<boolean> {
+export const sendChangeEmail = async (app: TestingApp, callbackUrl: string): Promise<boolean> => {
   const res = await app.gql(`
     mutation {
       sendChangeEmail(callbackUrl: "${callbackUrl}")
@@ -43,13 +37,9 @@ export async function sendChangeEmail(
   `);
 
   return res.sendChangeEmail;
-}
+};
 
-export async function sendSetPasswordEmail(
-  app: TestingApp,
-  email: string,
-  callbackUrl: string
-): Promise<boolean> {
+export const sendSetPasswordEmail = async (app: TestingApp, email: string, callbackUrl: string): Promise<boolean> => {
   const res = await app.gql(`
     mutation {
       sendSetPasswordEmail(email: "${email}", callbackUrl: "${callbackUrl}")
@@ -57,14 +47,9 @@ export async function sendSetPasswordEmail(
   `);
 
   return res.sendSetPasswordEmail;
-}
+};
 
-export async function changePassword(
-  app: TestingApp,
-  userId: string,
-  token: string,
-  password: string
-): Promise<string> {
+export const changePassword = async (app: TestingApp, userId: string, token: string, password: string): Promise<string> => {
   const res = await app.gql(`
     mutation {
       changePassword(token: "${token}", userId: "${userId}", newPassword: "${password}")
@@ -72,14 +57,9 @@ export async function changePassword(
   `);
 
   return res.changePassword;
-}
+};
 
-export async function sendVerifyChangeEmail(
-  app: TestingApp,
-  token: string,
-  email: string,
-  callbackUrl: string
-): Promise<boolean> {
+export const sendVerifyChangeEmail = async (app: TestingApp, token: string, email: string, callbackUrl: string): Promise<boolean> => {
   const res = await app.gql(`
     mutation {
       sendVerifyChangeEmail(token: "${token}", email: "${email}", callbackUrl: "${callbackUrl}")
@@ -87,13 +67,9 @@ export async function sendVerifyChangeEmail(
   `);
 
   return res.sendVerifyChangeEmail;
-}
+};
 
-export async function changeEmail(
-  app: TestingApp,
-  token: string,
-  email: string
-) {
+export const changeEmail = async (app: TestingApp, token: string, email: string) => {
   const res = await app.gql(`
     mutation {
       changeEmail(token: "${token}", email: "${email}") {
@@ -106,9 +82,9 @@ export async function changeEmail(
   `);
 
   return res.changeEmail;
-}
+};
 
-export async function deleteAccount(app: TestingApp) {
+export const deleteAccount = async (app: TestingApp) => {
   const res = await app.gql(`
     mutation {
       deleteAccount {
@@ -118,13 +94,9 @@ export async function deleteAccount(app: TestingApp) {
   `);
 
   return res.deleteAccount.success;
-}
+};
 
-export async function updateAvatar(
-  app: TestingApp,
-  avatar: Buffer,
-  options: { filename?: string; contentType?: string } = {}
-) {
+export const updateAvatar = async (app: TestingApp, avatar: Buffer, options: { filename?: string; contentType?: string } = {}) => {
   return app
     .POST('/graphql')
     .field(
@@ -144,4 +116,4 @@ export async function updateAvatar(
       filename: options.filename || 'test.png',
       contentType: options.contentType || 'image/png',
     });
-}
+};

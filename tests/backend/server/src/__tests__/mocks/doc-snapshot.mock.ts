@@ -1,9 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-
 import { faker } from '@faker-js/faker';
 import type { Snapshot } from '@prisma/client';
-
 import { Mocker } from './factory';
 
 export type MockDocSnapshotInput = {

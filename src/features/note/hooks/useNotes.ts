@@ -5,8 +5,6 @@ import { useEffectiveLocalUserId } from "@/contexts/auth/useEffectiveLocalUserId
 import { getLocalDb } from "@/services/localdb";
 import type { Note, NoteBlockContent } from "@/types";
 
-
-
 type UseNotesOptions = {
   enabled?: boolean;
 };
@@ -19,11 +17,7 @@ type DateLike = Date | {
   toDate?: () => Date;
 } | null | undefined;
 
-
-
 const DEFAULT_NOTE_CONTENT: NoteBlockContent = [];
-
-
 
 const createId = (): string => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
@@ -113,7 +107,5 @@ const useNotes = (folderId?: string | null, options?: UseNotesOptions) => {
     deleteNote,
   };
 };
-
-
 
 export { useNotes };

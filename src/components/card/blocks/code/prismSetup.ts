@@ -1,12 +1,8 @@
 import Prism from "prismjs";
 
-
-
 type PrismGlobal = typeof globalThis & {
   Prism?: typeof Prism;
 };
-
-
 
 (globalThis as PrismGlobal).Prism = Prism;
 await import("prismjs/components/prism-clike");
@@ -28,7 +24,5 @@ await import("prismjs/components/prism-python");
 await import("prismjs/components/prism-rust");
 await import("prismjs/components/prism-sql");
 await import("prismjs/components/prism-yaml");
-
-
 
 export { Prism };

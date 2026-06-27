@@ -1,6 +1,5 @@
 import { DomRenderer } from '@blocksuite/affine-block-surface';
 import { beforeEach, describe, expect, test } from 'vitest';
-
 import { wait } from '../utils/common.js';
 import { getSurface } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';
@@ -89,7 +88,7 @@ describe('Connector rendering with DOM renderer', () => {
       type: 'connector',
       source: { id: shape1Id },
       target: { id: shape2Id },
-      stroke: '#000000',
+      stroke: '#000',
       strokeWidth: 2,
     };
     const connectorId = surfaceModel.addElement(connectorProps);
@@ -117,7 +116,7 @@ describe('Connector rendering with DOM renderer', () => {
       source: { position: [100, 100] },
       target: { position: [200, 200] },
       strokeStyle: 'dash',
-      stroke: '#ff0000',
+      stroke: '#f00',
       strokeWidth: 4,
     };
     const connectorId = surfaceModel.addElement(connectorProps);

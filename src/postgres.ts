@@ -1,7 +1,6 @@
 import pg from "pg";
 
 const { Pool } = pg;
-
 let pool: pg.Pool | null = null;
 
 const getDatabaseUrl = (): string => {
@@ -12,7 +11,6 @@ const getDatabaseUrl = (): string => {
 
   return databaseUrl;
 };
-
 const getPostgresPool = (): pg.Pool => {
   pool ??= new Pool({
     connectionString: getDatabaseUrl(),
@@ -20,12 +18,10 @@ const getPostgresPool = (): pg.Pool => {
 
   return pool;
 };
-
 const postgresQuery = async <T extends pg.QueryResultRow = pg.QueryResultRow>(
   text: string,
   values: readonly unknown[] = []
 ): Promise<pg.QueryResult<T>> => await getPostgresPool().query<T>(text, values);
-
 const closePostgresPool = async (): Promise<void> => {
   if (!pool) return;
 

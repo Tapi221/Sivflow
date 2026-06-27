@@ -1,7 +1,6 @@
 import { Args, Field, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import test from 'ava';
 import Sinon from 'sinon';
-
 import { createTestingApp } from '../../../__tests__/utils';
 import { Public } from '../../../core/auth';
 import {

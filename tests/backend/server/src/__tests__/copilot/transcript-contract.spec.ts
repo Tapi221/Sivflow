@@ -1,7 +1,6 @@
 import { AiJobStatus } from '@prisma/client';
 import test from 'ava';
 import Sinon from 'sinon';
-
 import { buildLegacyProjection } from '../../plugins/copilot/transcript/projection';
 import { TranscriptPayloadSchema } from '../../plugins/copilot/transcript/schema';
 import { CopilotTranscriptionService } from '../../plugins/copilot/transcript/service';
@@ -60,7 +59,7 @@ test('TranscriptPayloadSchema rejects empty payloads', t => {
   t.truthy(unknownOnlyError);
 });
 
-function createTranscriptPromptService() {
+const createTranscriptPromptService = () => {
   return {
     get: Sinon.stub().resolves({ name: 'Transcript audio structured' }),
     finish: Sinon.stub().callsFake((_prompt, params) => [
@@ -70,9 +69,9 @@ function createTranscriptPromptService() {
       },
     ]),
   };
-}
+};
 
-async function buildNativeTranscriptResult(input: any, runId: string) {
+const buildNativeTranscriptResult = async (input: any, runId: string) => {
   await input.onRunCreated?.({ runId, attempt: 1 });
   const nativeInput = input.nativeInput;
   return {
@@ -108,12 +107,9 @@ async function buildNativeTranscriptResult(input: any, runId: string) {
       strategy: 'gemini',
     },
   };
-}
+};
 
-function createSuccessfulTranscriptBridge(
-  runId: string,
-  bridgeInputs: unknown[]
-) {
+const createSuccessfulTranscriptBridge = (runId: string, bridgeInputs: unknown[]) => {
   return {
     runStream: (input: unknown) =>
       (async function* () {
@@ -135,9 +131,9 @@ function createSuccessfulTranscriptBridge(
         };
       })(),
   };
-}
+};
 
-function createCopilotTranscriptionService(...deps: unknown[]) {
+const createCopilotTranscriptionService = (...deps: unknown[]) => {
   return new CopilotTranscriptionService(
     deps[0] as never,
     deps[1] as never,
@@ -150,7 +146,7 @@ function createCopilotTranscriptionService(...deps: unknown[]) {
     }) as never,
     (deps[7] ?? { publish: Sinon.stub() }) as never
   );
-}
+};
 
 test('queryTask hides ready transcript task result until settlement', async t => {
   const payload = TranscriptPayloadSchema.parse({

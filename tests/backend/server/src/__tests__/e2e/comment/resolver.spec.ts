@@ -1,5 +1,4 @@
 import { randomUUID } from 'node:crypto';
-
 import {
   CommentChangeAction,
   createCommentMutation,
@@ -13,12 +12,11 @@ import {
   updateCommentMutation,
   updateReplyMutation,
 } from '@affine/graphql';
-
 import { DocRole } from '../../../models';
 import { Mockers } from '../../mocks';
 import { app, e2e } from '../test';
 
-async function init() {
+const init = async () => {
   const other = await app.create(Mockers.User);
   const member = await app.create(Mockers.User);
   const owner = await app.create(Mockers.User);
@@ -49,7 +47,7 @@ async function init() {
     workspace,
     teamWorkspace,
   };
-}
+};
 
 const { owner, workspace, member, other, teamWorkspace } = await init();
 

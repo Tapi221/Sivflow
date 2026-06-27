@@ -1,16 +1,15 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-
 import { Controller, Post, RawBody } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import type { TestFn } from 'ava';
 import ava from 'ava';
 import request from 'supertest';
-
 import { buildAppModule } from '../../app.module';
 import { Public } from '../../core/auth';
 import { ServerService } from '../../core/config';
-import { createTestingApp, type TestingApp } from '../utils';
+import { createTestingApp } from '../utils';
+import type { TestingApp } from '../utils';
 
 const test = ava as TestFn<{
   app: TestingApp;
@@ -20,7 +19,7 @@ const test = ava as TestFn<{
 const mobileUAString =
   'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36';
 
-function initTestStaticFiles(staticPath: string) {
+const initTestStaticFiles = (staticPath: string) => {
   const files = {
     'selfhost.html': `<!DOCTYPE html><html><body>AFFiNE</body><script src="main.a.js"/></html>`,
     'main.a.js': `const name = 'affine'`,
@@ -35,7 +34,7 @@ function initTestStaticFiles(staticPath: string) {
     mkdirSync(path.dirname(filePath), { recursive: true });
     writeFileSync(filePath, content);
   }
-}
+};
 
 @Controller('/')
 export class TestResolver {

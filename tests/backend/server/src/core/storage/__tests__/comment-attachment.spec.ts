@@ -1,8 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { Readable } from 'node:stream';
-
 import test from 'ava';
-
 import { createModule } from '../../../__tests__/create-module';
 import { Mockers } from '../../../__tests__/mocks';
 import { Models } from '../../../models';
@@ -138,11 +136,11 @@ test('should handle workspace.deleted event', async t => {
   t.is(module.event.count('comment.attachment.delete'), count + 2);
 });
 
-async function readableToBytes(stream: Readable) {
+const readableToBytes = async (stream: Readable) => {
   const chunks: Buffer[] = [];
   let chunk: Buffer;
   for await (chunk of stream) {
     chunks.push(chunk);
   }
   return Buffer.concat(chunks);
-}
+};

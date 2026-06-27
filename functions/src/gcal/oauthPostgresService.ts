@@ -1,7 +1,5 @@
 import crypto from "node:crypto";
-
 import { HttpsError } from "firebase-functions/v2/https";
-
 import { postgresQuery } from "#src/postgres.js";
 import { cacheGoogleProfileImageUrl } from "#src/gcal/profileImageCache.js";
 import { classifyGoogleTokenEndpointFailure } from "#src/gcal/tokenErrors.js";
@@ -15,19 +13,16 @@ type StoredGoogleCalendarAccount = {
   createdAt: unknown;
   updatedAt: unknown;
 };
-
 type GoogleOAuthProfile = {
   accountEmail: string;
   accountName: string | null;
   accountPhotoUrl: string | null;
 };
-
 type GoogleOAuthSecrets = {
   clientId: string;
   clientSecret: string;
   tokenEncryptionKey: string;
 };
-
 type GoogleCalendarAccessResponse = {
   accessToken: string;
   expiresIn: number | null;
@@ -64,7 +59,6 @@ const classifiedPrecondition = (
     adminAction?: string;
   },
 ): HttpsError => new HttpsError("failed-precondition", message, details);
-
 const requireConfiguredSecret = (
   value: unknown,
   name: string,
@@ -81,7 +75,6 @@ const requireConfiguredSecret = (
         : "check GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY and redeploy",
   });
 };
-
 const getKey = (secrets: GoogleOAuthSecrets): Buffer => {
   let key: Buffer;
   try {
@@ -109,7 +102,6 @@ const getKey = (secrets: GoogleOAuthSecrets): Buffer => {
 
   return key;
 };
-
 const encryptRefreshToken = (refreshToken: string, secrets: GoogleOAuthSecrets): string => {
   const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv("aes-256-gcm", getKey(secrets), iv);
@@ -117,7 +109,6 @@ const encryptRefreshToken = (refreshToken: string, secrets: GoogleOAuthSecrets):
   const authTag = cipher.getAuthTag();
   return Buffer.concat([iv, authTag, encrypted]).toString("base64");
 };
-
 const decryptRefreshToken = (payload: string, secrets: GoogleOAuthSecrets): string => {
   try {
     const raw = Buffer.from(payload, "base64");
@@ -136,7 +127,6 @@ const decryptRefreshToken = (payload: string, secrets: GoogleOAuthSecrets): stri
     });
   }
 };
-
 const exchangeToken = async (params: URLSearchParams, context: "authorization_code" | "refresh_token") => {
   let response: Response;
   try {
@@ -163,12 +153,10 @@ const exchangeToken = async (params: URLSearchParams, context: "authorization_co
 
   return data;
 };
-
 const getTokenString = (data: Record<string, unknown>, key: string): string | null =>
   typeof data[key] === "string" ? data[key] : null;
 const getTokenNumber = (data: Record<string, unknown>, key: string): number | null =>
   typeof data[key] === "number" && Number.isFinite(data[key]) ? data[key] : null;
-
 const fetchGoogleJson = async (url: string, accessToken: string, context: "tokeninfo" | "userinfo") => {
   const options: RequestInit = context === "tokeninfo" ? {} : { headers: { Authorization: `Bearer ${accessToken}` } };
   const response = await fetch(url, options);
@@ -182,7 +170,6 @@ const fetchGoogleJson = async (url: string, accessToken: string, context: "token
   }
   return data;
 };
-
 const readGoogleProfile = async (accessToken: string): Promise<GoogleOAuthProfile> => {
   const userInfo = await fetchGoogleJson(GOOGLE_USERINFO_ENDPOINT, accessToken, "userinfo");
   const email = typeof userInfo.email === "string" ? userInfo.email : "";
@@ -200,7 +187,6 @@ const readGoogleProfile = async (accessToken: string): Promise<GoogleOAuthProfil
     accountPhotoUrl: typeof userInfo.picture === "string" ? userInfo.picture : null,
   };
 };
-
 const verifyGoogleScopes = async (accessToken: string): Promise<void> => {
   const tokenInfoUrl = `${GOOGLE_TOKENINFO_ENDPOINT}?access_token=${encodeURIComponent(accessToken)}`;
   const tokenInfo = await fetchGoogleJson(tokenInfoUrl, accessToken, "tokeninfo");
@@ -215,13 +201,11 @@ const verifyGoogleScopes = async (accessToken: string): Promise<void> => {
     });
   }
 };
-
 const isReusableCachedPhotoUrl = (photoUrl: unknown): photoUrl is string =>
   typeof photoUrl === "string" &&
   (photoUrl.startsWith("https://firebasestorage.googleapis.com/") || photoUrl.startsWith("https://storage.googleapis.com/"));
 const getExistingAccountPhotoUrl = (account: Partial<StoredGoogleCalendarAccount> | null): string | null =>
   isReusableCachedPhotoUrl(account?.photoUrl) ? account.photoUrl : null;
-
 const mapAccountRow = (row: Record<string, unknown>): StoredGoogleCalendarAccount => ({
   email: typeof row.account_email === "string" ? row.account_email : "",
   name: typeof row.name === "string" ? row.name : null,
@@ -230,7 +214,6 @@ const mapAccountRow = (row: Record<string, unknown>): StoredGoogleCalendarAccoun
   createdAt: row.created_at ?? null,
   updatedAt: row.updated_at ?? null,
 });
-
 const loadStoredAccountRow = async (uid: string, accountId: string): Promise<StoredGoogleCalendarAccount | null> => {
   const result = await postgresQuery(
     `select account_email, name, photo_url, encrypted_refresh_token, created_at, updated_at
@@ -242,7 +225,6 @@ const loadStoredAccountRow = async (uid: string, accountId: string): Promise<Sto
   if (result.rowCount === 0) return null;
   return mapAccountRow(result.rows[0]);
 };
-
 const storeGoogleAccount = async (
   uid: string,
   refreshToken: string,
@@ -274,7 +256,6 @@ const storeGoogleAccount = async (
 
   return mapAccountRow(result.rows[0]);
 };
-
 const toAccessResponse = (
   accessToken: string,
   account: StoredGoogleCalendarAccount,
@@ -288,7 +269,6 @@ const toAccessResponse = (
   accountPhotoUrl: account.photoUrl,
   refreshTokenStored: true,
 });
-
 const getStoredAccount = async (uid: string, accountId: string): Promise<StoredGoogleCalendarAccount> => {
   if (!accountId) throw new HttpsError("invalid-argument", "accountId is required.");
   const account = await loadStoredAccountRow(uid, accountId);
@@ -308,7 +288,6 @@ const getStoredAccount = async (uid: string, accountId: string): Promise<StoredG
   }
   return account;
 };
-
 const loadGoogleOAuthSecrets = (values: {
   clientId?: unknown;
   clientSecret?: unknown;
@@ -322,7 +301,6 @@ const loadGoogleOAuthSecrets = (values: {
     "token_encryption_key_invalid",
   ),
 });
-
 const listGoogleCalendarAccountsForUser = async (uid: string) => {
   const result = await postgresQuery(
     `select account_email, name, photo_url, encrypted_refresh_token, created_at, updated_at
@@ -344,14 +322,12 @@ const listGoogleCalendarAccountsForUser = async (uid: string) => {
     }),
   };
 };
-
 const disconnectGoogleCalendarAccountForUser = async (uid: string, input: { accountId?: unknown; accountEmail?: unknown }) => {
   const accountId = getStringValue(input.accountId) || getStringValue(input.accountEmail);
   if (!accountId) throw new HttpsError("invalid-argument", "accountId is required.");
   await postgresQuery(`delete from google_calendar_accounts where uid = $1 and account_email = $2`, [uid, accountId]);
   return { ok: true };
 };
-
 const connectGoogleCalendarAccountForUser = async (
   uid: string,
   input: { code?: unknown; codeVerifier?: unknown; redirectUri?: unknown },
@@ -389,7 +365,6 @@ const connectGoogleCalendarAccountForUser = async (
   const account = await storeGoogleAccount(uid, refreshToken, profile, secrets);
   return toAccessResponse(accessToken, account, getTokenNumber(data, "expires_in"));
 };
-
 const refreshGoogleCalendarAccessTokenForUser = async (
   uid: string,
   input: { accountId?: unknown; accountEmail?: unknown },
@@ -419,11 +394,5 @@ const refreshGoogleCalendarAccessTokenForUser = async (
   return toAccessResponse(accessToken, account, getTokenNumber(data, "expires_in"));
 };
 
-export {
-  connectGoogleCalendarAccountForUser,
-  disconnectGoogleCalendarAccountForUser,
-  listGoogleCalendarAccountsForUser,
-  loadGoogleOAuthSecrets,
-  refreshGoogleCalendarAccessTokenForUser,
-};
+export { connectGoogleCalendarAccountForUser, disconnectGoogleCalendarAccountForUser, listGoogleCalendarAccountsForUser, loadGoogleOAuthSecrets, refreshGoogleCalendarAccessTokenForUser };
 export type { GoogleCalendarAccessResponse, GoogleOAuthSecrets };

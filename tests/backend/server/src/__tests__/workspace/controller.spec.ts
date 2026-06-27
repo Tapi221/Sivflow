@@ -1,12 +1,10 @@
 import { Readable } from 'node:stream';
-
 import { HttpStatus } from '@nestjs/common';
 import { PrismaClient, WorkspaceMemberStatus } from '@prisma/client';
 import ava, { TestFn } from 'ava';
 import Sinon from 'sinon';
 import supertest from 'supertest';
 import { applyUpdate, Doc as YDoc, Map as YMap } from 'yjs';
-
 import { ConfigFactory } from '../../base';
 import { PgWorkspaceDocStorageAdapter } from '../../core/doc';
 import { PermissionReadModel } from '../../core/permission/config';
@@ -91,10 +89,10 @@ test.after.always(async t => {
   await t.context.app.close();
 });
 
-function blob() {
-  function stream() {
+const blob = () => {
+  const stream = () => {
     return Readable.from(Buffer.from('blob'));
-  }
+  };
 
   const init = stream();
   const ret = {
@@ -111,7 +109,7 @@ function blob() {
   });
 
   return ret;
-}
+};
 
 // blob
 test('should be able to get blob from public workspace', async t => {

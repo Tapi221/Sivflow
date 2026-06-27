@@ -1,12 +1,6 @@
 import { randomUUID } from 'node:crypto';
-
-import {
-  getRecentlyUpdatedDocsQuery,
-  getWorkspacePageByIdQuery,
-  type GraphQLQuery,
-  publishPageMutation,
-} from '@affine/graphql';
-
+import { getRecentlyUpdatedDocsQuery, getWorkspacePageByIdQuery, publishPageMutation } from '@affine/graphql';
+import type { GraphQLQuery } from '@affine/graphql';
 import { DocRole, WorkspaceRole } from '../../../models';
 import { Mockers } from '../../mocks';
 import { app, e2e } from '../test';

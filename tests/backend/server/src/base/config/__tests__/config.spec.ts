@@ -1,5 +1,4 @@
 import test from 'ava';
-
 import { createModule } from '../../../__tests__/create-module';
 import { InvalidAppConfig } from '../../error';
 import { Config } from '../config';

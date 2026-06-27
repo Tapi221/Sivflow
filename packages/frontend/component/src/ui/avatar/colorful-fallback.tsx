@@ -11,7 +11,7 @@ import {
 } from './style.css';
 
 const colorsSchema = [
-  ['#FF0000', '#FF00E5', '#FFAE73'],
+  ['#f00', '#FF00E5', '#FFAE73'],
   ['#FF5C00', '#FFC700', '#FFE073'],
   ['#FFDA16', '#FFFBA6', '#FFBE73'],
   ['#8CD317', '#FCFF5C', '#67CAE9'],

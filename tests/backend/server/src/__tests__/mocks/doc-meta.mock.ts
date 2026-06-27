@@ -1,6 +1,5 @@
 import type { WorkspaceDoc } from '@prisma/client';
 import { Prisma } from '@prisma/client';
-
 import { Mocker } from './factory';
 
 export type MockDocMetaInput = Prisma.WorkspaceDocUncheckedCreateInput;

@@ -1,12 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { IncomingMessage } from 'node:http';
-
 import { HttpStatus } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import ava, { ExecutionContext, TestFn } from 'ava';
 import Sinon from 'sinon';
 import supertest from 'supertest';
-
 import { ConfigFactory } from '../../base';
 import {
   getRequestCookie,
@@ -52,8 +50,6 @@ test.after.always(async t => {
   await t.context.app.close();
 });
 
-
-
 test('should not cache auth session response', async t => {
   const { app } = t.context;
 
@@ -62,18 +58,15 @@ test('should not cache auth session response', async t => {
   t.is(res.headers['cache-control'], 'no-store');
 });
 
-async function exchangeSession(app: TestingApp, code: string) {
+const exchangeSession = async (app: TestingApp, code: string) => {
   return await supertest(app.getHttpServer())
     .post('/api/auth/native/exchange')
     .set('x-affine-client-kind', 'native')
     .send({ code })
     .expect(201);
-}
+};
 
-function assertClearsNativeAuthCookies(
-  t: ExecutionContext,
-  res: supertest.Response
-) {
+const assertClearsNativeAuthCookies = (t: ExecutionContext, res: supertest.Response) => {
   const setCookies = res.get('Set-Cookie') ?? [];
   for (const name of [
     AuthService.sessionCookieName,
@@ -88,15 +81,7 @@ function assertClearsNativeAuthCookies(
       )
     );
   }
-}
-
-
-
-
-
-
-
-
+};
 
 test('should return method-oriented preflight for registered password users', async t => {
   const { app } = t.context;

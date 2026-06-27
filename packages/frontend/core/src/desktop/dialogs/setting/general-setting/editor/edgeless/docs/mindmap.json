@@ -61,12 +61,12 @@
               "index": "a0",
               "seed": 819595867,
               "color": {
-                "dark": "#ffffff",
-                "light": "#000000"
+                "dark": "#fff",
+                "light": "#000"
               },
               "fillColor": {
-                "dark": "#000000",
-                "light": "#ffffff"
+                "dark": "#000",
+                "light": "#fff"
               },
               "filled": true,
               "fontFamily": "blocksuite:surface:Poppins",
@@ -105,12 +105,12 @@
               "index": "a0",
               "seed": 557026939,
               "color": {
-                "dark": "#ffffff",
-                "light": "#000000"
+                "dark": "#fff",
+                "light": "#000"
               },
               "fillColor": {
-                "dark": "#000000",
-                "light": "#ffffff"
+                "dark": "#000",
+                "light": "#fff"
               },
               "filled": true,
               "fontFamily": "blocksuite:surface:Poppins",
@@ -149,12 +149,12 @@
               "index": "a0",
               "seed": 205695803,
               "color": {
-                "dark": "#ffffff",
-                "light": "#000000"
+                "dark": "#fff",
+                "light": "#000"
               },
               "fillColor": {
-                "dark": "#000000",
-                "light": "#ffffff"
+                "dark": "#000",
+                "light": "#fff"
               },
               "filled": true,
               "fontFamily": "blocksuite:surface:Poppins",
@@ -193,12 +193,12 @@
               "index": "a0",
               "seed": 585656351,
               "color": {
-                "dark": "#ffffff",
-                "light": "#000000"
+                "dark": "#fff",
+                "light": "#000"
               },
               "fillColor": {
-                "dark": "#000000",
-                "light": "#ffffff"
+                "dark": "#000",
+                "light": "#fff"
               },
               "filled": true,
               "fontFamily": "blocksuite:surface:Poppins",

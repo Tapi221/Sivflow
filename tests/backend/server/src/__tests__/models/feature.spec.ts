@@ -1,7 +1,7 @@
 import ava, { TestFn } from 'ava';
-
 import { FeatureModel } from '../../models/feature';
-import { createTestingModule, type TestingModule } from '../utils';
+import { createTestingModule } from '../utils';
+import type { TestingModule } from '../utils';
 
 interface Context {
   module: TestingModule;

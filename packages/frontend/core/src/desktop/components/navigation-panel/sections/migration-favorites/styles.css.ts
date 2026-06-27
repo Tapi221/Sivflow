@@ -12,7 +12,7 @@ export const container = style({
       width: '6px',
       height: '100%',
       background:
-        'repeating-linear-gradient(30deg, #F5CC47, #F5CC47 8px, #000000 8px, #000000 14px)',
+        'repeating-linear-gradient(30deg, #F5CC47, #F5CC47 8px, #000 8px, #000 14px)',
     },
   },
 });

@@ -1,7 +1,6 @@
 import { faker } from '@faker-js/faker';
 import test from 'ava';
 import Sinon from 'sinon';
-
 import { createModule } from '../../../__tests__/create-module';
 import { Mockers } from '../../../__tests__/mocks';
 import { InvalidAppConfigInput } from '../../../base';

@@ -23,10 +23,7 @@ interface FactoryOptions {
   logger: ((val: any) => void) | boolean;
 }
 
-export function createFactory(
-  db: PrismaClient,
-  opts: FactoryOptions = { logger: false }
-) {
+export const createFactory = (db: PrismaClient, opts: FactoryOptions = { logger: false }) => {
   const log = (val: any) => {
     if (typeof opts.logger === 'function') {
       opts.logger(val);
@@ -87,4 +84,4 @@ export function createFactory(
   }
 
   return Inner.create;
-}
+};

@@ -1,9 +1,7 @@
 import { promises as fs } from 'node:fs';
 import { join } from 'node:path';
-
 import test from 'ava';
 import { getStreamAsBuffer } from 'get-stream';
-
 import { ListObjectsMetadata } from '../providers';
 import { FsStorageProvider } from '../providers/fs';
 

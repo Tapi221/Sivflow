@@ -1,12 +1,10 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-
 import { Package } from '@affine-tools/utils/workspace';
 import type { INestApplication } from '@nestjs/common';
 import type { TestFn } from 'ava';
 import ava from 'ava';
 import request from 'supertest';
-
 import { createTestingApp } from '../utils';
 
 const test = ava as TestFn<{
@@ -16,7 +14,7 @@ const test = ava as TestFn<{
 const mobileUAString =
   'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36';
 
-function initTestStaticFiles(staticPath: string) {
+const initTestStaticFiles = (staticPath: string) => {
   const files = {
     'main.a.js': `const name = 'affine'`,
     'assets-manifest.json': JSON.stringify({
@@ -42,7 +40,7 @@ function initTestStaticFiles(staticPath: string) {
     mkdirSync(path.dirname(filePath), { recursive: true });
     writeFileSync(filePath, content);
   }
-}
+};
 
 test.before(async t => {
   const staticPath = new Package('@affine/server').join('static').value;

@@ -1,5 +1,4 @@
 import '@blocksuite/affine/effects';
-
 import { TestAffineEditorContainer } from './editors/index.js';
 
 export const effects = () => {

@@ -1,7 +1,6 @@
 import serverNativeModule from '@affine/server-native';
 import test from 'ava';
 import { z } from 'zod';
-
 import type {
   LlmEmbeddingRequest,
   LlmRerankRequest,
@@ -10,23 +9,18 @@ import type {
 import { CopilotProvider } from '../../plugins/copilot/providers/provider';
 import type { ProviderDriverSpec } from '../../plugins/copilot/providers/provider-runtime-contract';
 import { CopilotProviderType } from '../../plugins/copilot/providers/types';
-import {
-  buildStructuredResponseContract,
-  type RequiredStructuredOutputContract,
-  requireStructuredOutputContract,
-} from '../../plugins/copilot/runtime/contracts';
+import { buildStructuredResponseContract, requireStructuredOutputContract } from '../../plugins/copilot/runtime/contracts';
+import type { RequiredStructuredOutputContract } from '../../plugins/copilot/runtime/contracts';
 import { getProviderRuntimeHost } from '../../plugins/copilot/runtime/provider-runtime-context';
 import { nativeUserText, singleUserPromptMessages } from './prompt-test-helper';
 
-function structuredOptions(schema: z.ZodTypeAny) {
+const structuredOptions = (schema: z.ZodTypeAny) => {
   const { responseSchemaJson, schemaHash } =
     buildStructuredResponseContract(schema);
   return { responseSchemaJson, schemaHash };
-}
+};
 
-function structuredContract(
-  schema: z.ZodTypeAny
-): RequiredStructuredOutputContract {
+const structuredContract = (schema: z.ZodTypeAny): RequiredStructuredOutputContract => {
   const contract = buildStructuredResponseContract(schema);
   const requiredContract = requireStructuredOutputContract(contract);
   if (!requiredContract) {
@@ -34,9 +28,10 @@ function structuredContract(
   }
 
   return requiredContract;
-}
+};
 
-class TemplateOnlyProvider extends CopilotProvider<{ apiKey: string }> {
+class TemplateOnlyProvider extends CopilotProvider<{
+  apiKey: string }> {
   readonly type = CopilotProviderType.OpenAI;
   protected resolveModelBackendKind() {
     return 'openai_responses' as const;
