@@ -49,7 +49,7 @@ const markBrandMigrationComplete = (userId: string): void => {
   try {
     window.localStorage.setItem(getMigrationStorageKey(userId), "done");
   } catch {
-    // ignore localStorage write failures
+    // localStorage への書き込み失敗は無視します。
   }
 };
 const databaseExists = async (name: string): Promise<boolean> => {
@@ -125,7 +125,7 @@ const migrateLegacyLocalDbBrandIfNeeded = async (userId: string, destinationData
   } catch (error) {
     warnOncePerSession(
       "localdb:brand-migration-failed",
-      `[LocalDB] Failed to migrate legacy local database brand for user=${userId}. Keeping legacy database untouched.`,
+      `[LocalDB] user=${userId} の旧ブランド local database 移行に失敗しました。旧 database は変更せずに残します。`,
       error,
     );
   } finally {
