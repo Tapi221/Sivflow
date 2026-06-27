@@ -2,33 +2,42 @@
 
 Sivflow の永続データは Postgres を正とします。
 
-## ローカルでPostgresを起動
+## ローカルでPostgres / Redisを用意
 
-```bash
-docker compose -f docker-compose.postgres.yml up -d
+ローカル開発では、PostgreSQL 16 + pgvector と Redis をOS側で起動します。
+
+必要な接続先:
+
+```txt
+PostgreSQL: localhost:5432 / database=sivflow / user=sivflow
+Redis:      localhost:6379
 ```
 
 接続確認:
 
 ```bash
-docker compose -f docker-compose.postgres.yml exec postgres psql -U sivflow -d sivflow -c "select version();"
+npm run db:check
 ```
 
-初回起動時に `functions/db/migrations/001_init.sql` が実行されます。
-同じDocker volumeを使い続ける場合、migration SQLを編集しても自動では再実行されません。
-作り直す場合:
+PostgreSQLの初期化SQLは `functions/db/migrations/*.sql` に置きます。
+初回セットアップ後、次でSQLを適用します。
 
 ```bash
-docker compose -f docker-compose.postgres.yml down -v
-docker compose -f docker-compose.postgres.yml up -d
+npm run db:migrate
+```
+
+psqlで直接入る場合:
+
+```bash
+npm run db:psql
 ```
 
 ## 環境変数
 
 ローカルのNode.jsプロセスから接続する場合は、`DATABASE_URL` をlocalhost向けに設定します。
-Dockerコンテナ内のNode.jsから接続する場合は、hostを `postgres` にします。
+認証情報は各自のローカルPostgreSQL設定に合わせてください。
 
-例は `functions/.env.example` に置いています。
+例は `functions/.env.example` と `packages/backend/server/.env.example` に置いています。
 
 ## 保存先
 
