@@ -4,26 +4,18 @@ import { Command } from 'ioredis';
 import { SessionRedis } from '../redis';
 import { Lock } from './lock';
 
-// === atomic mutex lock ===
-// acquire lock
-// return 1 if lock is acquired
-// return 0 if lock is not acquired
 const lockScript = `local key = KEYS[1]
 local owner = ARGV[1]
 
--- if lock is not exists then set lock to the owner and return 1, otherwise return 0
--- if the lock is not released correctly due to unexpected reasons
--- lock will be released after 60 seconds
 if redis.call("get", key) == owner then
-  return 0
+  redis.call("expire", key, 60)
+  return 2
 elseif redis.call("set", key, owner, "NX", "EX", 60) then
   return 1
 else
   return 0
 end`;
-// release lock
-// return 1 if lock is released or lock is not exists
-// return 0 if lock is not owned by the owner
+
 const unlockScript = `local key = KEYS[1]
 local owner = ARGV[1]
 
@@ -49,6 +41,10 @@ export class Locker {
     const success = await this.redis.sendCommand(
       new Command('EVAL', [lockScript, '1', lockKey, owner])
     );
+
+    if (success === 2) {
+      return new Lock(async () => {});
+    }
 
     if (success === 1) {
       return new Lock(async () => {
