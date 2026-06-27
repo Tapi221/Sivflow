@@ -8,9 +8,10 @@ import { OpenInAppPage } from './open-in-app-page';
  * Web only guard to open the URL in desktop app for different conditions
  */
 const WebOpenInAppGuard = ({ children }: { children: React.ReactNode }) => {
-  if (BUILD_CONFIG.isWeb === undefined || BUILD_CONFIG.isWeb === null) {
-    throw new Error('WebOpenInAppGuard should only be used in web');
+  if (BUILD_CONFIG.isWeb !== true) {
+    return <>{children}</>;
   }
+
   const service = useService(OpenInAppService);
   const shouldOpenInApp = useLiveData(service.showOpenInAppPage$);
 
@@ -37,6 +38,6 @@ const WebOpenInAppGuard = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export const OpenInAppGuard = environment.isMobile
-  ? Fragment
-  : WebOpenInAppGuard;
+export const OpenInAppGuard = BUILD_CONFIG.isWeb === true && !environment.isMobile
+  ? WebOpenInAppGuard
+  : Fragment;
