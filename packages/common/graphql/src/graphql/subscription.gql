@@ -2,7 +2,6 @@ query subscription {
   currentUser {
     id
     subscriptions {
-      id
       status
       plan
       recurring
