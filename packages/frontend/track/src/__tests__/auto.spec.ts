@@ -89,6 +89,10 @@ describe('auto track with dom dataset', () => {
     return enableAutoTrack(root, call);
   });
 
+  beforeEach(() => {
+    call.mockClear();
+  });
+
   test('should ignore if data-event-props not set', () => {
     const nonTrackBtn = document.createElement('button');
     root.append(nonTrackBtn);
@@ -104,6 +108,22 @@ describe('auto track with dom dataset', () => {
     root.append(btn);
 
     btn.click();
+
+    expect(call).toBeCalledWith('createDoc', {
+      page: 'allDocs',
+      segment: 'header',
+      module: 'actions',
+    });
+  });
+
+  test('should track event from child element click', () => {
+    const btn = document.createElement('button');
+    const label = document.createElement('span');
+    btn.dataset.eventProps = 'allDocs.header.actions.createDoc';
+    btn.append(label);
+    root.append(btn);
+
+    label.click();
 
     expect(call).toBeCalledWith('createDoc', {
       page: 'allDocs',
