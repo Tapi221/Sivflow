@@ -31,6 +31,8 @@ type LegacyWorkspaceRuntimeStateRow = {
   staleAt: Date | null;
 };
 
+let supportsCurrentRuntimeStateColumnsCache: Promise<boolean> | undefined;
+
 function isMissingRuntimeStateColumn(error: unknown) {
   const meta = (error as { meta?: { code?: string } })?.meta;
   return meta?.code === '42703';
@@ -38,8 +40,6 @@ function isMissingRuntimeStateColumn(error: unknown) {
 
 @Injectable()
 export class WorkspaceRuntimeStateModel extends BaseModel {
-  private hasCurrentColumns?: Promise<boolean>;
-
   async get(workspaceId: string): Promise<WorkspaceRuntimeState> {
     const rows = await this.loadRows(workspaceId);
     const row = rows[0];
@@ -115,7 +115,9 @@ export class WorkspaceRuntimeStateModel extends BaseModel {
   }
 
   private async supportsCurrentRuntimeStateColumns() {
-    this.hasCurrentColumns ??= this.db.$queryRaw<Array<{ exists: boolean }>>`
+    supportsCurrentRuntimeStateColumnsCache ??= this.db.$queryRaw<
+      Array<{ exists: boolean }>
+    >`
         SELECT EXISTS (
           SELECT 1
           FROM information_schema.columns
@@ -123,7 +125,7 @@ export class WorkspaceRuntimeStateModel extends BaseModel {
             AND column_name = 'known'
         ) AS "exists"
       `.then(rows => rows[0]?.exists ?? false);
-    return await this.hasCurrentColumns;
+    return await supportsCurrentRuntimeStateColumnsCache;
   }
 
   private async loadLegacyRows(workspaceId: string) {
