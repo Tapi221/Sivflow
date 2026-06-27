@@ -34,5 +34,5 @@ const updateFile = (filePath) => {
 
 const updatedFiles = SOURCE_DIRECTORIES.flatMap((directory) => walkSourceFiles(directory)).filter(updateFile);
 if (updatedFiles.length > 0) {
-  console.log(`Fixed import specifier casing in ${updatedFiles.length} file(s).`);
+  console.log(`import specifier の大文字小文字を ${updatedFiles.length} 件のファイルで修正しました。`);
 }
