@@ -1,7 +1,6 @@
 query getWorkspaceSubscription($workspaceId: String!) {
   workspace(id: $workspaceId) {
     subscription {
-      id
       status
       plan
       recurring
