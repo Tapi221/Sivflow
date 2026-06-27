@@ -1,23 +1,20 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
+# プロジェクト固有の ProGuard ルールをここに追加します。
+# 適用する設定ファイルの一覧は、build.gradle の proguardFiles 設定で制御できます。
 #
-# For more details, see
+# 詳細は次を参照してください。
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
+# project が JS 付き WebView を使う場合は、次をコメント解除して、
+# JavaScript interface class の完全修飾名を指定してください。
 # class:
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
+# stack trace の debug 用に line number 情報を残す場合は、これをコメント解除します。
 #-keepattributes SourceFile,LineNumberTable
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
+# line number 情報を残す場合に、元の source file 名を隠すにはこれをコメント解除します。
 #-renamesourcefileattribute SourceFile
 
 -keep class com.sun.jna.** { *; }
@@ -27,14 +24,14 @@
 -dontwarn java.awt.HeadlessException
 -dontwarn java.awt.Window
 
-# Keep `Companion` object fields of serializable classes.
-# This avoids serializer lookup through `getDeclaredClasses` as done for named companion objects.
+# serializable class の `Companion` object field を残します。
+# named companion object と同じように `getDeclaredClasses` 経由の serializer lookup を避けるためです。
 -if @kotlinx.serialization.Serializable class **
 -keepclassmembers class <1> {
     static <1>$Companion Companion;
 }
 
-# Keep `serializer()` on companion objects (both default and named) of serializable classes.
+# serializable class の companion object（default / named の両方）にある `serializer()` を残します。
 -if @kotlinx.serialization.Serializable class ** {
     static **$* *;
 }
@@ -42,7 +39,7 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
-# Keep `INSTANCE.serializer()` of serializable objects.
+# serializable object の `INSTANCE.serializer()` を残します。
 -if @kotlinx.serialization.Serializable class ** {
     public static ** INSTANCE;
 }
@@ -51,25 +48,25 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
-# @Serializable and @Polymorphic are used at runtime for polymorphic serialization.
+# @Serializable と @Polymorphic は polymorphic serialization の runtime で使われます。
 -keepattributes RuntimeVisibleAnnotations,AnnotationDefault
 
-# Don't print notes about potential mistakes or omissions in the configuration for kotlinx-serialization classes
-# See also https://github.com/Kotlin/kotlinx.serialization/issues/1900
+# kotlinx-serialization class の設定ミスや省略候補に関する note は出力しません。
+# 関連: https://github.com/Kotlin/kotlinx.serialization/issues/1900
 -dontnote kotlinx.serialization.**
 
-# Serialization core uses `java.lang.ClassValue` for caching inside these specified classes.
-# If there is no `java.lang.ClassValue` (for example, in Android), then R8/ProGuard will print a warning.
-# However, since in this case they will not be used, we can disable these warnings
+# Serialization core は指定 class 内の cache に `java.lang.ClassValue` を使います。
+# `java.lang.ClassValue` がない場合（Android など）は R8/ProGuard が warning を出します。
+# ただし、この場合は使われないため warning を無効化します。
 -dontwarn kotlinx.serialization.internal.ClassValueReferences
 
-# disable optimisation for descriptor field because in some versions of ProGuard, optimization generates incorrect bytecode that causes a verification error
-# see https://github.com/Kotlin/kotlinx.serialization/issues/2719
+# ProGuard の一部 version では descriptor field の最適化で verification error を起こす誤った bytecode が生成されるため、最適化を無効化します。
+# 関連: https://github.com/Kotlin/kotlinx.serialization/issues/2719
 -keepclassmembers public class **$$serializer {
     private ** descriptor;
 }
 
-# Keep file names and line numbers.
+# file 名と line number を残します。
 -keepattributes SourceFile,LineNumberTable
-# Keep custom exceptions.
+# custom exception を残します。
 -keep public class * extends java.lang.Exception
