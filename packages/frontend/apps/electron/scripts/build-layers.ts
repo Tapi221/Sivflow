@@ -36,4 +36,4 @@ async function buildLayers() {
 }
 
 await buildLayers();
-console.log('Build layers done');
+console.log('Build layers が完了しました');
