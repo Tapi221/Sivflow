@@ -241,7 +241,7 @@ export default defineConfig(({ command }) => ({
       { find: "@/nouse", replacement: resolveFromRoot("nouse") },
       { find: "@core", replacement: resolveFromRoot("packages/core/src") },
       { find: "@platform", replacement: resolveFromRoot("packages/platform/src") },
-      { find: "@web-renderer", replacement: resolveFromRoot("packages/web-renderer/src") },
+      { find: "@web-renderer", replacement: resolveFromRoot("nouse/web-renderer/src") },
       { find: "@web", replacement: resolveFromRoot("apps/web/src") },
       { find: "@shared", replacement: resolveFromRoot("shared") },
       { find: "@", replacement: resolveFromRoot("src") },
