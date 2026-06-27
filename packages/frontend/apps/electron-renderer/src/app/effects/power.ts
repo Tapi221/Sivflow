@@ -1,3 +1,4 @@
+import { events } from '@affine/electron-api';
 import { useSyncExternalStore } from 'react';
 
 type Listener = () => void;
@@ -20,7 +21,7 @@ function ensureSubscribed() {
   if (teardown) return;
   if (typeof window === 'undefined') return;
 
-  const subscribePowerSource = window.__apis?.events?.power?.['power-source'];
+  const subscribePowerSource = events?.power?.['power-source'];
   if (typeof subscribePowerSource !== 'function') return;
 
   const unsubscribe = subscribePowerSource(handlePowerSourceChange);
