@@ -29,7 +29,7 @@ const writeGenerationToStorage = (userId: string, generation: number): void => {
     window.localStorage.setItem(getLocalDbGenerationStorageKey(userId), String(Math.min(Math.max(0, Math.floor(generation)), LOCALDB_GENERATION_MAX)));
     window.localStorage.removeItem(getLegacyLocalDbGenerationStorageKey(userId));
   } catch {
-    // ignore localStorage write failures
+    // localStorage への書き込み失敗は無視します。
   }
 };
 const getGenerationForUser = (userId: string) => {
@@ -69,7 +69,7 @@ const listUserPersistentDbNames = async (userId: string) => {
     } catch (error) {
       warnOncePerSession(
         "localdb:list-user-db-names-failed",
-        `[LocalDB] Failed to enumerate user DB names during reset. Continuing with known generations for user=${userId}.`,
+        `[LocalDB] reset 中に user=${userId} の DB 名列挙に失敗しました。既知の generation を使って続行します。`,
         error,
       );
     }
