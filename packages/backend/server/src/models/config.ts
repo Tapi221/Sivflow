@@ -10,13 +10,13 @@ export class AppConfigModel extends BaseModel {
   }
 
   @Transactional()
-  async save(user: string, updates: Array<{ key: string; value: any }>) {
+  async save(actorId: string | null, updates: Array<{ key: string; value: any }>) {
     return await Promise.allSettled(
       updates.map(async update => {
         return this.db.appConfig.upsert({
           where: { id: update.key },
-          update: { value: update.value, lastUpdatedBy: user },
-          create: { id: update.key, value: update.value, lastUpdatedBy: user },
+          update: { value: update.value, lastUpdatedBy: actorId },
+          create: { id: update.key, value: update.value, lastUpdatedBy: actorId },
         });
       })
     );
