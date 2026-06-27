@@ -28,6 +28,8 @@ apps/desktop/src-tauri/target/
 logs/
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 debug_*.txt
@@ -77,3 +79,133 @@ public/sw.js
 packages/frontend/core/public/static/templates/
 packages/frontend/templates/edgeless/
 packages/frontend/templates/edgeless-templates.gen.ts
+
+# 下位 .gitignore からルートへ集約した除外ルール
+
+# blocksuite playground
+blocksuite/playground/apps/starter/data/snapshots/*.zip
+
+# 旧 Android アプリ
+apps/android/android/build/
+apps/android/android/.gradle/
+apps/android/android/local.properties
+apps/android/android/*.iml
+apps/android/android/*.hprof
+apps/android/android/.cxx/
+apps/android/android/*.jsbundle
+
+# バックエンドサーバー
+packages/backend/server/config.json
+packages/backend/server/static/
+packages/backend/server/*adminsdk*.json
+
+# i18n
+packages/frontend/i18n/lib/
+packages/frontend/i18n/i18n-generated.ts
+
+# フロントエンド native
+packages/frontend/native/**/*.fixture
+packages/frontend/native/lib/
+packages/frontend/native/**/*.bin
+
+# フロントエンド public
+packages/frontend/core/public/**/*.js
+packages/frontend/core/public/**/*.map
+packages/frontend/core/public/plugins/
+
+# Electron アプリ
+packages/frontend/apps/electron/*.autogen.*
+packages/frontend/apps/electron/e2e-dist-*/
+packages/frontend/apps/electron/resources/web-static/
+packages/frontend/apps/electron/.pnp.*
+packages/frontend/apps/electron/.yarn/*
+!packages/frontend/apps/electron/.yarn/patches/
+!packages/frontend/apps/electron/.yarn/plugins/
+!packages/frontend/apps/electron/.yarn/releases/
+!packages/frontend/apps/electron/.yarn/sdks/
+!packages/frontend/apps/electron/.yarn/versions/
+packages/frontend/apps/electron/dev.json
+packages/frontend/apps/electron/zip-out/
+
+# iOS アプリ
+packages/frontend/apps/ios/App/build/
+packages/frontend/apps/ios/App/Pods/
+packages/frontend/apps/ios/App/output/
+packages/frontend/apps/ios/App/App/public/
+packages/frontend/apps/ios/**/DerivedData/
+packages/frontend/apps/ios/**/xcuserdata/
+packages/frontend/apps/ios/**/capacitor-cordova-ios-plugins/
+packages/frontend/apps/ios/App/App/capacitor.config.json
+packages/frontend/apps/ios/App/App/config.xml
+packages/frontend/apps/ios/App/**/*.p8
+packages/frontend/apps/ios/**/*.mobileprovision
+packages/frontend/apps/ios/**/*.ipa
+packages/frontend/apps/ios/**/*.zip
+packages/frontend/apps/ios/**/*.cer
+packages/frontend/apps/ios/App/fastlane/report.xml
+packages/frontend/apps/ios/App/*.a
+
+# Android アプリ (Capacitor)
+packages/frontend/apps/android/App/build/
+packages/frontend/apps/android/App/Pods/
+packages/frontend/apps/android/App/output/
+packages/frontend/apps/android/App/App/public/
+packages/frontend/apps/android/**/DerivedData/
+packages/frontend/apps/android/**/xcuserdata/
+packages/frontend/apps/android/**/capacitor-cordova-ios-plugins/
+packages/frontend/apps/android/App/App/capacitor.config.json
+packages/frontend/apps/android/App/App/config.xml
+packages/frontend/apps/android/App/**/*.p8
+packages/frontend/apps/android/**/*.mobileprovision
+packages/frontend/apps/android/**/*.ipa
+packages/frontend/apps/android/**/*.zip
+packages/frontend/apps/android/**/*.cer
+packages/frontend/apps/android/App/fastlane/report.xml
+packages/frontend/apps/android/affine.keystore
+
+# Android Gradle プロジェクト
+packages/frontend/apps/android/App/**/*.apk
+packages/frontend/apps/android/App/**/*.aar
+packages/frontend/apps/android/App/**/*.ap_
+packages/frontend/apps/android/App/**/*.aab
+packages/frontend/apps/android/App/**/*.dex
+packages/frontend/apps/android/App/**/*.class
+packages/frontend/apps/android/App/**/bin/
+packages/frontend/apps/android/App/**/gen/
+packages/frontend/apps/android/App/**/out/
+packages/frontend/apps/android/App/**/.gradle/
+packages/frontend/apps/android/App/**/build/
+packages/frontend/apps/android/App/**/local.properties
+packages/frontend/apps/android/App/**/proguard/
+packages/frontend/apps/android/App/**/.navigation/
+packages/frontend/apps/android/App/**/captures/
+packages/frontend/apps/android/App/**/.kotlin/
+packages/frontend/apps/android/App/**/.externalNativeBuild/
+packages/frontend/apps/android/App/**/.cxx/
+packages/frontend/apps/android/App/**/freeline.py
+packages/frontend/apps/android/App/**/freeline/
+packages/frontend/apps/android/App/**/freeline_project_description.json
+packages/frontend/apps/android/App/**/fastlane/report.xml
+packages/frontend/apps/android/App/**/fastlane/Preview.html
+packages/frontend/apps/android/App/**/fastlane/screenshots/
+packages/frontend/apps/android/App/**/fastlane/test_output/
+packages/frontend/apps/android/App/**/fastlane/readme.md
+packages/frontend/apps/android/App/**/vcs.xml
+packages/frontend/apps/android/App/**/lint/intermediates/
+packages/frontend/apps/android/App/**/lint/generated/
+packages/frontend/apps/android/App/**/lint/outputs/
+packages/frontend/apps/android/App/**/lint/tmp/
+packages/frontend/apps/android/App/**/*.hprof
+packages/frontend/apps/android/App/app/src/main/assets/public/
+packages/frontend/apps/android/App/app/src/main/assets/capacitor.config.json
+packages/frontend/apps/android/App/app/src/main/assets/capacitor.plugins.json
+packages/frontend/apps/android/App/app/src/main/res/xml/config.xml
+packages/frontend/apps/android/App/app/build/*
+!packages/frontend/apps/android/App/app/build/.npmkeep
+packages/frontend/apps/android/App/app/*services*.json
+
+# y-octo fuzz
+packages/common/y-octo/utils/fuzz/target/
+packages/common/y-octo/utils/fuzz/corpus/
+packages/common/y-octo/utils/fuzz/artifacts/
+packages/common/y-octo/utils/fuzz/coverage/
