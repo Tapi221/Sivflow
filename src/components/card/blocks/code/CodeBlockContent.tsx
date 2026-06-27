@@ -218,7 +218,7 @@ const CodeBlockContent = (props: CodeBlockContentProps) => {
       const nextCode = `${editorCode.slice(0, selection.start)}${insertedText}${editorCode.slice(selection.end)}`;
       const nextOffset = selection.start + insertedText.length;
       editorSelectionRef.current = { start: nextOffset, end: nextOffset };
-      onCodeChange(nextCode);
+      onEditorCodeChange(nextCode);
     },
     [editorCode, onEditorCodeChange],
   );
