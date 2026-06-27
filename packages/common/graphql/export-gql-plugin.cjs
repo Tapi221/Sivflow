@@ -1,17 +1,33 @@
+// @ts-check
+
 const fs = require('node:fs');
 const path = require('node:path');
 
-const { Kind, print, visit, TypeInfo, visitWithTypeInfo } = require('graphql');
+const {
+  Kind,
+  getNamedType,
+  isInputObjectType,
+  isInterfaceType,
+  isObjectType,
+  print,
+  visit,
+  TypeInfo,
+  visitWithTypeInfo,
+} = require('graphql');
 const { upperFirst, lowerFirst } = require('lodash');
+
+/**
+ * @typedef {{ name: string; reason: string }} FieldDeprecation
+ */
 
 /**
  * return exported name used in runtime.
  *
- * @param {import('graphql').ExecutableDefinitionNode} def
+ * @param {import('graphql').OperationDefinitionNode | import('graphql').FragmentDefinitionNode} def
  * @returns {string}
  */
 function getExportedName(def) {
-  const name = lowerFirst(def.name?.value);
+  const name = lowerFirst(def.name?.value ?? '');
   const suffix =
     def.kind === Kind.OPERATION_DEFINITION
       ? upperFirst(def.operation)
@@ -25,12 +41,12 @@ function getExportedName(def) {
  * @param {import('graphql').GraphQLSchema} schema
  * @param {string} typeName
  * @param {string} fieldName
- * @returns {boolean}
+ * @returns {FieldDeprecation | null}
  */
 function fieldDeprecation(schema, typeName, fieldName) {
   const type = schema.getType(typeName);
-  if (!type || !type.getFields) {
-    return false;
+  if (!type || (!isObjectType(type) && !isInterfaceType(type))) {
+    return null;
   }
 
   const fields = type.getFields();
@@ -49,9 +65,10 @@ function fieldDeprecation(schema, typeName, fieldName) {
  *
  * @param {import('graphql').GraphQLSchema} schema
  * @param {import('graphql').DocumentNode} document
- * @returns {boolean}
+ * @returns {string[]}
  */
 function parseDeprecations(schema, document) {
+  /** @type {FieldDeprecation[]} */
   const deprecations = [];
 
   const typeInfo = new TypeInfo(schema);
@@ -64,15 +81,10 @@ function parseDeprecations(schema, document) {
           const parentType = typeInfo.getParentType();
           if (parentType && node.name) {
             const fieldName = node.name.value;
-            let deprecation;
-            if (
-              parentType.name &&
-              (deprecation = fieldDeprecation(
-                schema,
-                parentType.name,
-                fieldName
-              ))
-            ) {
+            const deprecation = parentType.name
+              ? fieldDeprecation(schema, parentType.name, fieldName)
+              : null;
+            if (deprecation) {
               deprecations.push(deprecation);
             }
           }
@@ -84,6 +96,55 @@ function parseDeprecations(schema, document) {
   return deprecations.map(
     ({ name, reason }) => `'${name}' is deprecated: ${reason}`
   );
+}
+
+/**
+ * @param {import('graphql').TypeNode} typeNode
+ * @returns {string}
+ */
+function getTypeNodeName(typeNode) {
+  if (typeNode.kind === Kind.NAMED_TYPE) {
+    return typeNode.name.value;
+  }
+
+  return getTypeNodeName(typeNode.type);
+}
+
+/**
+ * @param {import('graphql').GraphQLSchema} schema
+ * @param {string} typeName
+ * @param {Set<string>} [visited]
+ * @returns {boolean}
+ */
+function checkContainFile(schema, typeName, visited = new Set()) {
+  if (schema.getType(typeName)?.name === 'Upload') {
+    return true;
+  }
+
+  if (visited.has(typeName)) {
+    return false;
+  }
+  visited.add(typeName);
+
+  const typeDef = schema.getType(typeName);
+  if (!typeDef || !isInputObjectType(typeDef)) {
+    return false;
+  }
+
+  const fields = typeDef.getFields();
+  for (const field of Object.values(fields)) {
+    const namedType = getNamedType(field.type);
+    if (namedType.name === 'Upload') {
+      return true;
+    }
+    if (isInputObjectType(namedType)) {
+      if (checkContainFile(schema, namedType.name, visited)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 /**
@@ -102,6 +163,10 @@ module.exports = {
         .map(source => [source.location, source])
     );
 
+    /**
+     * @param {string} exportedName
+     * @param {string} location
+     */
     function addDef(exportedName, location) {
       if (nameLocationMap.has(exportedName)) {
         throw new Error(
@@ -112,6 +177,10 @@ module.exports = {
       nameLocationMap.set(exportedName, location);
     }
 
+    /**
+     * @param {string | null | undefined} location
+     * @returns {string}
+     */
     function parseImports(location) {
       if (!location) {
         return '';
@@ -162,29 +231,11 @@ module.exports = {
             addDef(exportedName, location);
 
             // parse 'file' fields
-            const containsFile = node.variableDefinitions.some(def => {
-              const varType =
-                def.type.kind === 'NamedType'
-                  ? def.type.name.value
-                  : def?.type?.type?.name?.value;
-              const checkContainFile = type => {
-                if (schema.getType(type)?.name === 'Upload') return true;
-                const typeDef = schema.getType(type);
-                const fields = typeDef.getFields?.();
-                if (!fields || typeof fields !== 'object') return false;
-                for (let field of Object.values(fields)) {
-                  let type = field.type;
-                  while (type.ofType) {
-                    type = type.ofType;
-                  }
-                  if (type.name === 'Upload') {
-                    return true;
-                  }
-                }
-                return false;
-              };
-              return varType ? checkContainFile(varType) : false;
-            });
+            const containsFile =
+              node.variableDefinitions?.some(def => {
+                const varType = getTypeNodeName(def.type);
+                return checkContainFile(schema, varType);
+              }) ?? false;
 
             // Check if the query uses deprecated fields
             const deprecations = parseDeprecations(schema, source.document);
@@ -245,7 +296,7 @@ module.exports = {
   id: '${def.name}' as const,
   op: '${def.operationName}',
   query: \`${def.query}\`,
-`;
+ `;
         if (def.containsFile) {
           item += '  file: true,\n';
         }
