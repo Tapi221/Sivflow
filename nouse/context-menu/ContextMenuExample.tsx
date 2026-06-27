@@ -16,8 +16,8 @@ export function ContextMenuExample() {
       ContextMenuBuilder.build((menu) =>
         menu
           .header("File")
-          .action("New File", action("new-file", "⌘N", () => console.log("new file")))
-          .action("Open File", action("open-file", "⌘O", () => console.log("open file")))
+          .action("New File", action("new-file", "⌘N", () => console.log("新規ファイル")))
+          .action("Open File", action("open-file", "⌘O", () => console.log("ファイルを開く")))
           .separator()
           .toggleableEntry("Show Hidden Files", checked, "start", null, () =>
             setChecked((value) => !value),
@@ -29,7 +29,7 @@ export function ContextMenuExample() {
                 .entry("project-b", null, () => console.log("project-b"))
                 .submenu("Nested", () =>
                   ContextMenuBuilder.build((nested) =>
-                    nested.entry("deep item", null, () => console.log("deep")),
+                    nested.entry("deep item", null, () => console.log("深い項目")),
                   ),
                 ),
             ),
