@@ -265,6 +265,10 @@ impl MobileBlobCache {
     let _ = std::fs::remove_file(path);
   }
 
+  fn sanitize_io_error(err: std::io::Error, message: &'static str) -> std::io::Error {
+    std::io::Error::new(err.kind(), message)
+  }
+
   fn cleanup_cache_dir(cache_dir: &Path) -> std::io::Result<()> {
     for entry in std::fs::read_dir(cache_dir)? {
       let entry = entry?;
@@ -287,7 +291,8 @@ impl MobileBlobCache {
       .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::InvalidInput, "invalid mobile file token"))?;
 
     let path = path.strip_prefix("file://").unwrap_or(path);
-    let canonical = std::fs::canonicalize(path)?;
+    let canonical = std::fs::canonicalize(path)
+      .map_err(|err| Self::sanitize_io_error(err, "mobile file token could not be resolved"))?;
     let workspace_dir = {
       self
         .workspace_dirs
@@ -297,7 +302,8 @@ impl MobileBlobCache {
         .cloned()
     }
     .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "workspace cache directory not registered"))?;
-    let workspace_dir = std::fs::canonicalize(workspace_dir)?;
+    let workspace_dir = std::fs::canonicalize(workspace_dir)
+      .map_err(|err| Self::sanitize_io_error(err, "workspace cache directory could not be resolved"))?;
 
     if !is_valid_mobile_cache_path(&canonical, &workspace_dir) {
       return Err(std::io::Error::new(
@@ -306,7 +312,8 @@ impl MobileBlobCache {
       ));
     }
 
-    let metadata = std::fs::metadata(&canonical)?;
+    let metadata = std::fs::metadata(&canonical)
+      .map_err(|err| Self::sanitize_io_error(err, "mobile file token metadata could not be read"))?;
     if !metadata.is_file() {
       return Err(std::io::Error::new(
         std::io::ErrorKind::InvalidInput,
@@ -324,7 +331,7 @@ impl MobileBlobCache {
       ));
     }
 
-    std::fs::read(canonical)
+    std::fs::read(canonical).map_err(|err| Self::sanitize_io_error(err, "mobile file token could not be read"))
   }
 }
 
