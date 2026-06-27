@@ -1,7 +1,6 @@
+import { gqlFetcherFactory, type GraphQLQuery } from '@affine/graphql';
 import type { Mock } from 'vitest';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { gqlFetcherFactory } from '../fetcher';
-import type { GraphQLQuery } from '../graphql';
 
 const query: GraphQLQuery = {
   id: 'query',
@@ -60,6 +59,73 @@ describe('GraphQL fetcher', () => {
     );
   });
 
+  it('should not mutate request context', async () => {
+    const context = {
+      headers: {
+        authorization: 'Bearer token',
+      },
+    } satisfies RequestInit;
+
+    await gql({
+      query,
+      variables: void 0,
+      context,
+    });
+
+    expect(context).toEqual({
+      headers: {
+        authorization: 'Bearer token',
+      },
+    });
+    expect(fetch.mock.lastCall?.[1]).toEqual(
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          authorization: 'Bearer token',
+          'content-type': 'application/json',
+          'x-operation-name': 'query',
+        }),
+      })
+    );
+  });
+
+  it('should send multipart upload with normalized operations body', async () => {
+    const uploadQuery: GraphQLQuery = {
+      id: 'uploadMutation',
+      query: 'mutation upload($file: Upload!, $items: [Upload!]!) { upload(file: $file, items: $items) }',
+      op: 'upload',
+      file: true,
+    };
+    const file = new File(['hello'], 'hello.txt');
+    const nestedFile = new File(['nested'], 'nested.txt');
+
+    await gql({
+      query: uploadQuery,
+      // @ts-expect-error forgive the fake variables
+      variables: { file, items: [nestedFile] },
+    });
+
+    const ctx = fetch.mock.lastCall?.[1] as RequestInit;
+    const body = ctx.body as FormData;
+
+    expect(ctx.headers).toEqual(
+      expect.objectContaining({
+        'x-operation-name': 'upload',
+      })
+    );
+    expect(JSON.parse(body.get('operations') as string)).toEqual({
+      query:
+        'mutation upload($file: Upload!, $items: [Upload!]!) { upload(file: $file, items: $items) }',
+      variables: { file: null, items: [null] },
+      operationName: 'upload',
+    });
+    expect(JSON.parse(body.get('map') as string)).toEqual({
+      '0': ['variables.file'],
+      '1': ['variables.items.0'],
+    });
+    expect(body.get('0')).toBe(file);
+    expect(body.get('1')).toBe(nestedFile);
+  });
+
   it('should correctly ignore nil variables', async () => {
     await gql({
       query,
@@ -68,7 +134,7 @@ describe('GraphQL fetcher', () => {
     });
 
     expect(fetch.mock.lastCall?.[1].body).toMatchInlineSnapshot(
-      `"{"query":"query { field }","variables":{"a":false,"b":null},"operationName":"query"}"`
+      `"{\"query\":\"query { field }\",\"variables\":{\"a\":false,\"b\":null},\"operationName\":\"query\"}"`
     );
 
     await gql({
@@ -79,7 +145,7 @@ describe('GraphQL fetcher', () => {
     });
 
     expect(fetch.mock.lastCall?.[1].body).toMatchInlineSnapshot(
-      `"{"query":"query { field }","variables":{"a":false},"operationName":"query"}"`
+      `"{\"query\":\"query { field }\",\"variables\":{\"a\":false},\"operationName\":\"query\"}"`
     );
   });
 
@@ -130,6 +196,29 @@ describe('GraphQL fetcher', () => {
           { message: 'first error', path: ['field'] },
           { message: 'second error', path: ['otherField'] },
         ],
+      },
+    });
+  });
+
+  it('should include response status when graphql error body is empty', async () => {
+    fetch.mockResolvedValue(
+      new Response(JSON.stringify({ data: null }), {
+        headers: {
+          'content-type': 'application/json',
+        },
+        status: 500,
+        statusText: 'Internal Server Error',
+      })
+    );
+
+    await expect(gql({ query, variables: void 0 })).rejects.toMatchObject({
+      message: 'GraphQL request failed with status 500 Internal Server Error',
+      extensions: {
+        status: 500,
+        code: 'INTERNAL_SERVER_ERROR',
+        operationName: 'query',
+        statusText: 'Internal Server Error',
+        responseBody: { data: null },
       },
     });
   });
