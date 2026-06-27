@@ -72,3 +72,8 @@ functions/.env*
 
 # サービスワーカー (ビルド時に自動生成される場合のみ除外)
 public/sw.js
+
+# 生成されたテンプレート静的アセット
+packages/frontend/core/public/static/templates/
+packages/frontend/templates/edgeless/
+packages/frontend/templates/edgeless-templates.gen.ts
