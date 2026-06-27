@@ -17,14 +17,19 @@ export const shellViewUrl = `${mainWindowOrigin}/shell.html`;
 export const backgroundWorkerViewUrl = `${mainWindowOrigin}/background-worker.html`;
 export const customThemeViewUrl = `${mainWindowOrigin}/theme-editor`;
 
-// mitigate the issue that popup window share the same zoom level of the main window
-// Notes from electron official docs:
-// "The zoom policy at the Chromium level is same-origin, meaning that the zoom level for a specific domain propagates across all instances of windows with the same domain. Differentiating the window URLs will make zoom work per-window."
+// ポップアップウィンドウがメインウィンドウと同じズーム倍率を共有する問題を避ける。
+// Electron 公式ドキュメントより:
+// 「Chromium レベルのズームポリシーは同一オリジン単位なので、特定ドメインのズーム倍率は同じドメインを使うすべてのウィンドウへ伝播する。ウィンドウ URL を分けることで、ウィンドウごとにズームを扱えるようになる。」
 export const popupViewUrl = `${anotherOrigin}/popup.html`;
 
 export const isInternalUrl = (url: string) => {
   try {
     const parsed = new URL(url);
+
+    if (useDevServer) {
+      return normalizeOrigin(parsed.origin) === mainWindowOrigin;
+    }
+
     return parsed.protocol === 'assets:' && internalHosts.has(parsed.hostname);
   } catch {
     return false;
