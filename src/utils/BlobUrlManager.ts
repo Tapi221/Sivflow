@@ -5,7 +5,7 @@ const BlobUrlManager = class {
   create(blob: Blob): string {
     if (this.activeUrls.size >= this.MAX_ACTIVE_URLS) {
       console.warn(
-        `[BlobUrlManager] Max URLs reached (${this.MAX_ACTIVE_URLS}). Revoking oldest...`,
+        `[BlobUrlManager] URL の上限に達しました (${this.MAX_ACTIVE_URLS})。最も古い URL を解放します...`,
       );
       const oldest = this.activeUrls.values().next().value;
       if (oldest) {
