@@ -108,7 +108,15 @@ export class RunCommand {
           id: record.id,
         },
       });
-      await migration.down(this.db, this.injector);
+
+      try {
+        await migration.down(this.db, this.injector);
+      } catch (e2) {
+        this.logger.error('Failed to revert data migration', e2);
+        this.logger.error('Failed to run data migration', e);
+        throw e2;
+      }
+
       this.logger.error('Failed to run data migration', e);
       throw e;
     }
