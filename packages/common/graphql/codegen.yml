@@ -20,6 +20,7 @@ config:
     UUID: string
     ID: string
     JSON: Record<string, string>
+    JSONObject: Record<string, unknown>
     Upload: File
     SafeInt: number
 overwrite: true
