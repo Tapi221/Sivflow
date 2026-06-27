@@ -47,7 +47,6 @@ class ListLayoutPainter implements BlockLayoutPainter {
 
   static {
     if (ListLayoutPainter.supportFontFace && ListLayoutPainter.font) {
-      // @ts-expect-error worker fonts API
       self.fonts.add(ListLayoutPainter.font);
 
       ListLayoutPainter.font
