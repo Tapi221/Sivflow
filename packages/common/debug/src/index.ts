@@ -2,6 +2,8 @@ import debug from 'debug';
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 type ConsoleNoticeLevel = 'log' | 'info' | 'warn';
 
+declare const BUILD_CONFIG: { readonly debug?: boolean } | undefined;
+
 const SESSION_KEY = 'affine:debug';
 
 const HIDDEN_DEVELOPMENT_CONSOLE_NOTICES = [
@@ -96,7 +98,7 @@ if (typeof window !== 'undefined') {
     debug.enable('*');
     console.warn('デバッグログが有効です');
   }
-  if (BUILD_CONFIG.debug) {
+  if (typeof BUILD_CONFIG !== 'undefined' && BUILD_CONFIG?.debug) {
     debug.enable('*,-micromark');
     console.warn('デバッグログが有効です');
   }
@@ -136,10 +138,5 @@ export class DebugLogger {
   log(level: LogLevel, message: string, ...args: any[]) {
     this._debug.log = console[level].bind(console);
     this._debug(`[${level.toUpperCase()}] ${localizeDebugLogMessage(message)}`, ...args);
-  }
-
-  namespace(extra: string) {
-    const currentNamespace = this._debug.namespace;
-    return new DebugLogger(`${currentNamespace}:${extra}`);
   }
 }
