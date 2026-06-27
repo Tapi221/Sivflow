@@ -1,12 +1,19 @@
 export const TRUSTED_REDIRECT_DOMAINS = [
   'google.com',
+  'accounts.google.com',
   'stripe.com',
+  'checkout.stripe.com',
+  'billing.stripe.com',
   'github.com',
   'twitter.com',
   'discord.gg',
   'youtube.com',
+  'www.youtube.com',
+  'm.youtube.com',
   't.me',
   'reddit.com',
+  'www.reddit.com',
+  'old.reddit.com',
   'affine.pro',
 ].map(d => d.toLowerCase());
 
