@@ -37,7 +37,7 @@ const buildDeleteTombstone = (id: string, data: unknown): Record<string, unknown
 };
 const pushCloudSyncBatch = async (userId: string, changes: SyncChange[]): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown; }> => {
   console.log(
-    `[CloudSyncAdapter] pushBatch START. Count: ${changes.length}`,
+    `[CloudSyncAdapter] pushBatch を開始しました。件数: ${changes.length}`,
   );
 
   const successIds: string[] = [];
@@ -62,7 +62,7 @@ const pushCloudSyncBatch = async (userId: string, changes: SyncChange[]): Promis
         const documentRef = getPushDocumentRef(firestore, userId, type, id);
 
         if (isDeleteSyncChange(change)) {
-          console.log(`   - Writing delete tombstone to batch: ${type}/${id}`);
+          console.log(`   - 削除 tombstone をバッチに書き込みます: ${type}/${id}`);
           const tombstone = sanitizeSyncDataForCloud(type, buildDeleteTombstone(id, data));
           if (!tombstone || typeof tombstone !== "object") {
             throw new Error(`Invalid delete payload for ${type}/${id}: expected object`);
@@ -81,7 +81,7 @@ const pushCloudSyncBatch = async (userId: string, changes: SyncChange[]): Promis
           continue;
         }
 
-        console.log(`   - Adding to batch: ${type}/${id}`);
+        console.log(`   - バッチに追加します: ${type}/${id}`);
 
         const sanitized = sanitizeSyncDataForCloud(type, data);
         if (!sanitized || typeof sanitized !== "object") {
@@ -101,7 +101,7 @@ const pushCloudSyncBatch = async (userId: string, changes: SyncChange[]): Promis
       }
 
       try {
-        console.log(`   - Committing batch... (ops=${chunkIds.length})`);
+        console.log(`   - バッチをコミットしています... (操作数=${chunkIds.length})`);
         await batch.commit();
         successIds.push(...chunkIds);
       } catch (error) {
@@ -118,7 +118,7 @@ const pushCloudSyncBatch = async (userId: string, changes: SyncChange[]): Promis
       return { successIds, failedIds, error: firstError };
     }
 
-    console.log("[CloudSyncAdapter] pushBatch SUCCESS");
+    console.log("[CloudSyncAdapter] pushBatch が成功しました");
     return { successIds, failedIds };
   } catch (error) {
     console.error("[CloudSyncAdapter] pushBatch ERROR:", error);
