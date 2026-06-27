@@ -6,6 +6,43 @@ import {
 
 import type { ServerConfig, ServerMetadata } from './types';
 
+const localServerBaseUrl = BUILD_CONFIG.isElectron
+  ? 'http://localhost:8080'
+  : location.origin;
+
+const localServerConfig: ServerConfig = BUILD_CONFIG.backendEnabled
+  ? {
+      serverName: 'Sivflow Cloud',
+      features: [
+        ServerFeature.Indexer,
+        ServerFeature.Copilot,
+        ServerFeature.CopilotEmbedding,
+        ServerFeature.OAuth,
+        ServerFeature.Payment,
+        ServerFeature.LocalWorkspace,
+      ],
+      oauthProviders: [OAuthProviderType.Google, OAuthProviderType.Apple],
+      type: ServerDeploymentType.Affine,
+      credentialsRequirement: {
+        password: {
+          minLength: 8,
+          maxLength: 32,
+        },
+      },
+    }
+  : {
+      serverName: 'Sivflow Local',
+      features: [ServerFeature.LocalWorkspace],
+      oauthProviders: [],
+      type: ServerDeploymentType.Selfhosted,
+      credentialsRequirement: {
+        password: {
+          minLength: 8,
+          maxLength: 32,
+        },
+      },
+    };
+
 export const BUILD_IN_SERVERS: (ServerMetadata & { config: ServerConfig })[] =
   environment.isSelfHosted
     ? [
@@ -33,31 +70,8 @@ export const BUILD_IN_SERVERS: (ServerMetadata & { config: ServerConfig })[] =
       ? [
           {
             id: 'affine-cloud',
-            baseUrl: BUILD_CONFIG.isElectron
-              ? 'http://localhost:8080'
-              : location.origin,
-            config: {
-              serverName: 'Sivflow Cloud',
-              features: [
-                ServerFeature.Indexer,
-                ServerFeature.Copilot,
-                ServerFeature.CopilotEmbedding,
-                ServerFeature.OAuth,
-                ServerFeature.Payment,
-                ServerFeature.LocalWorkspace,
-              ],
-              oauthProviders: [
-                OAuthProviderType.Google,
-                OAuthProviderType.Apple,
-              ],
-              type: ServerDeploymentType.Affine,
-              credentialsRequirement: {
-                password: {
-                  minLength: 8,
-                  maxLength: 32,
-                },
-              },
-            },
+            baseUrl: localServerBaseUrl,
+            config: localServerConfig,
           },
         ]
       : BUILD_CONFIG.appBuildType === 'stable'
