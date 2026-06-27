@@ -25,7 +25,7 @@ class StorageStateManager {
       lastError: new Date(),
     });
 
-    console.error(`[Storage:${userId}] Entered READ_ONLY mode:`, reason);
+    console.error(`[Storage:${userId}] READ_ONLY モードに移行しました:`, reason);
 
     // ログ記録（後で分析）
     this.logStorageEvent(userId, "quota_exceeded", { reason });
@@ -71,7 +71,7 @@ class StorageStateManager {
     // - 複雑な並び替え用キャッシュ
       console.log(`[Storage:${userId}] 高コストキャッシュを削除しています...`);
     } catch (error) {
-      console.error(`[Storage:${userId}] Failed to clear cache:`, error);
+      console.error(`[Storage:${userId}] キャッシュの削除に失敗しました:`, error);
     }
   }
 
