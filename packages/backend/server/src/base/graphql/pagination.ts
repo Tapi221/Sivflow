@@ -89,7 +89,15 @@ export function encodeWithJson(input: unknown) {
 
 export function decodeWithJson<T>(base64String?: string | null): T | null {
   const str = decode(base64String);
-  return str ? (JSON.parse(str) as T) : null;
+  if (!str) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(str) as T;
+  } catch {
+    throw new BadRequest('Invalid pagination cursor');
+  }
 }
 
 export function paginate<T>(
