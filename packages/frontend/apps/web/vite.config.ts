@@ -10,6 +10,10 @@ dns.setDefaultResultOrder('verbatim');
 
 const devServerPort = 8080;
 const devServerHost = '127.0.0.1';
+const backendProxyTarget =
+  process.env.SIVFLOW_BACKEND_URL ??
+  process.env.AFFINE_BACKEND_URL ??
+  'http://127.0.0.1:3010';
 
 const buildConfig = {
   SENTRY_DSN: '',
@@ -102,6 +106,30 @@ export default defineConfig({
       host: devServerHost,
       clientPort: devServerPort,
       protocol: 'ws',
+    },
+    proxy: {
+      '/api': {
+        target: backendProxyTarget,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/graphql': {
+        target: backendProxyTarget,
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+      },
+      '/oauth': {
+        target: backendProxyTarget,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/socket.io': {
+        target: backendProxyTarget,
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+      },
     },
   },
   worker: {
