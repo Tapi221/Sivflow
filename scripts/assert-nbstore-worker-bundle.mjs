@@ -42,6 +42,7 @@ const sourceChecks = [
       /import\s+["']\.\/iterator-helpers["'];?/,
       /import\s+["']\.\/promise-with-resolvers["'];?/,
       /import\s+["']\.\/request-idle-callback["'];?/,
+      /import\s+["']\.\/html-element["'];?/,
     ],
     forbidden: [/resize-observer/, /\.\/browser/],
   },
