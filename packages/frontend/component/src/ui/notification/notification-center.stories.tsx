@@ -185,7 +185,7 @@ export const WithAction: StoryFn = () => {
                           {
                             key: 'undo',
                             label: 'UNDO',
-                            onClick: () => console.log('undo'),
+                            onClick: () => console.log('取り消し'),
                           },
                         ],
                       })
@@ -211,7 +211,7 @@ export const WithAction: StoryFn = () => {
                 {
                   key: 'undo',
                   label: 'UNDO',
-                  onClick: () => console.log('undo'),
+                  onClick: () => console.log('取り消し'),
                   autoClose: false,
                 },
               ],
