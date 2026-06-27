@@ -2,7 +2,6 @@ import type { TranscriptionBlockModel } from '@affine/core/blocksuite/ai/blocks/
 import { BlockComponent, BlockViewExtension } from '@blocksuite/affine/std';
 import type { ExtensionType } from '@blocksuite/affine/store';
 import { css, type PropertyValues } from 'lit';
-import { property } from 'lit/decorators.js';
 import { literal } from 'lit/static-html.js';
 
 export class LitTranscriptionBlock extends BlockComponent<TranscriptionBlockModel> {
@@ -20,9 +19,6 @@ export class LitTranscriptionBlock extends BlockComponent<TranscriptionBlockMode
   override render() {
     return this.std.host.renderChildren(this.model);
   }
-
-  @property({ type: String, attribute: 'data-block-id' })
-  override accessor blockId!: string;
 
   constructor() {
     super();
