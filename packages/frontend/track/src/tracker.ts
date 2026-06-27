@@ -1,6 +1,7 @@
 import { DebugLogger } from '@affine/debug';
 import { nanoid } from 'nanoid';
 
+import { getBuildConfig } from './build-config';
 import { type Middleware, trackerState, type TrackProperties } from './state';
 import type { TelemetryEvent } from './telemetry';
 import { sendTelemetryEvent, setTelemetryContext } from './telemetry';
@@ -8,6 +9,10 @@ import { sendTelemetryEvent, setTelemetryContext } from './telemetry';
 const logger = new DebugLogger('telemetry');
 
 type RawTrackProperties = Record<string, unknown> | object | undefined;
+type BrowserContext = Pick<
+  NonNullable<TelemetryEvent['context']>,
+  'locale' | 'timezone'
+>;
 
 const SESSION_ID_KEY = 'affine_telemetry_session_id';
 const SESSION_NUMBER_KEY = 'affine_telemetry_session_number';
@@ -15,15 +20,19 @@ const SESSION_NUMBER_CURRENT_KEY = 'affine_telemetry_session_number_current';
 const LAST_ACTIVITY_KEY = 'affine_telemetry_last_activity_ms';
 const SESSION_TIMEOUT_MS = 30 * 60 * 1000;
 
+let cachedBrowserContext: BrowserContext | null = null;
+
 export const tracker = {
   init() {
+    const buildConfig = getBuildConfig();
+
     this.register({
-      appVersion: BUILD_CONFIG.appVersion,
-      environment: BUILD_CONFIG.appBuildType,
-      editorVersion: BUILD_CONFIG.editorVersion,
-      isDesktop: BUILD_CONFIG.isElectron,
-      isMobile: BUILD_CONFIG.isMobileEdition,
-      distribution: BUILD_CONFIG.distribution,
+      appVersion: buildConfig.appVersion,
+      environment: buildConfig.appBuildType,
+      editorVersion: buildConfig.editorVersion,
+      isDesktop: buildConfig.isElectron,
+      isMobile: buildConfig.isMobileEdition,
+      distribution: buildConfig.distribution,
     });
   },
 
@@ -96,6 +105,7 @@ export const tracker = {
 
   opt_out_tracking() {
     trackerState.enabled = false;
+    stopEngagementTracking();
   },
 
   opt_in_tracking() {
@@ -321,6 +331,24 @@ function initEngagementTracking(now: number) {
   }
 }
 
+function stopEngagementTracking() {
+  if (trackerState.visibilityChangeHandler && typeof document !== 'undefined') {
+    document.removeEventListener(
+      'visibilitychange',
+      trackerState.visibilityChangeHandler
+    );
+  }
+  if (trackerState.pageHideHandler && typeof window !== 'undefined') {
+    window.removeEventListener('pagehide', trackerState.pageHideHandler);
+  }
+
+  trackerState.engagementTrackingEnabled = false;
+  trackerState.visibilityChangeHandler = null;
+  trackerState.pageHideHandler = null;
+  trackerState.visibleSinceMs = null;
+  trackerState.pendingEngagementMs = 0;
+}
+
 function dispatchUserEngagement(now: number) {
   if (!trackerState.enabled) {
     return;
@@ -432,21 +460,30 @@ function buildEvent(
 }
 
 function buildContext(): TelemetryEvent['context'] {
+  const buildConfig = getBuildConfig();
+
   return {
-    appVersion: BUILD_CONFIG.appVersion,
-    editorVersion: BUILD_CONFIG.editorVersion,
-    environment: BUILD_CONFIG.appBuildType,
-    distribution: BUILD_CONFIG.distribution,
-    channel: BUILD_CONFIG.appBuildType as NonNullable<
-      TelemetryEvent['context']
-    >['channel'],
-    isDesktop: BUILD_CONFIG.isElectron,
-    isMobile: BUILD_CONFIG.isMobileEdition,
-    locale: getLocale(),
-    timezone: getTimezone(),
+    appVersion: buildConfig.appVersion,
+    editorVersion: buildConfig.editorVersion,
+    environment: buildConfig.appBuildType,
+    distribution: buildConfig.distribution,
+    channel: buildConfig.appBuildType,
+    isDesktop: buildConfig.isElectron,
+    isMobile: buildConfig.isMobileEdition,
+    ...getBrowserContext(),
     url: getLocationHref(),
     referrer: getReferrer(),
   };
+}
+
+function getBrowserContext(): BrowserContext {
+  if (!cachedBrowserContext) {
+    cachedBrowserContext = {
+      locale: getLocale(),
+      timezone: getTimezone(),
+    };
+  }
+  return cachedBrowserContext;
 }
 
 function normalizeProperties(properties?: RawTrackProperties): TrackProperties {
