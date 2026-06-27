@@ -17,6 +17,8 @@ const buildConfig = {
   isNative: false,
 };
 
+const rollupCompatibleTarget = 'es2021' as const;
+
 const stripPrivateAccessorPlugin = {
   name: 'sivflow-strip-private-accessor',
   enforce: 'pre' as const,
@@ -30,7 +32,7 @@ const stripPrivateAccessorPlugin = {
     }
 
     // Rollup が TypeScript の private accessor をそのまま読むと落ちるため、
-    // ビルド時だけ JavaScript の auto-accessor として読める形にそろえる。
+    // 先に private を外し、esbuild の ES2021 変換で auto-accessor を通常構文へ下げる。
     return code.replace(/\bprivate\s+accessor\b/g, 'accessor');
   },
 };
@@ -39,8 +41,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   assetsInclude: ['**/*.zip'],
+  build: {
+    target: rollupCompatibleTarget,
+  },
   define: {
     BUILD_CONFIG: JSON.stringify(buildConfig),
+  },
+  esbuild: {
+    target: rollupCompatibleTarget,
   },
   plugins: [stripPrivateAccessorPlugin, react()],
   resolve: {
