@@ -37,12 +37,20 @@ describe("nbstore Worker の bootstrap 境界", () => {
     expect(source).not.toContain("development-diagnostics");
   });
 
-  it("worker polyfill は ResizeObserver を含めない", () => {
+  it("worker polyfill は必要な DOM スタブを含む", () => {
     const source = readRepoFile(
       "packages/frontend/core/src/bootstrap/polyfill/worker.ts",
     );
 
     expect(source).toContain("import './request-idle-callback';");
+    expect(source).toContain("import './html-element';");
+  });
+
+  it("worker polyfill は ResizeObserver を含めない", () => {
+    const source = readRepoFile(
+      "packages/frontend/core/src/bootstrap/polyfill/worker.ts",
+    );
+
     expect(source).not.toContain("resize-observer");
     expect(source).not.toContain("ResizeObserver");
   });
