@@ -5,7 +5,7 @@ mod tool_loop;
 
 pub(crate) use error::{
   STREAM_ABORTED_REASON, STREAM_CALLBACK_DISPATCH_FAILED_REASON, STREAM_END_MARKER, callback_dispatch_failed_reason,
-  invalid_arg,
+  invalid_arg, is_stream_aborted, is_stream_callback_dispatch_failed,
 };
 pub(crate) use stream::{emit_error_event, emit_provider_selected_event};
 pub use stream::{
