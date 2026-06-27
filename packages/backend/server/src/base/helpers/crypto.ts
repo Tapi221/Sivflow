@@ -77,6 +77,7 @@ export class CryptoHelper implements OnModuleInit {
   };
 
   private previousPublicKeys: KeyObject[] = [];
+  private previousAESKeys: Buffer[] = [];
 
   AFFiNEProPublicKey: Buffer | null = null;
   AFFiNEProLicenseAESKey: Buffer | null = null;
@@ -104,11 +105,13 @@ export class CryptoHelper implements OnModuleInit {
 
   private setup() {
     const prevPublicKey = this.keyPair?.publicKey;
+    const prevAESKey = this.keyPair?.sha256.privateKey;
     const privateKey = this.config.crypto.privateKey || generatePrivateKey();
     const { priv, pub } = parseKey(privateKey);
     const publicKey = pub
       .export({ format: 'pem', type: 'spki' })
       .toString('utf8');
+    const privateAESKey = this.sha256(privateKey);
 
     if (prevPublicKey) {
       const prevPem = prevPublicKey
@@ -117,15 +120,23 @@ export class CryptoHelper implements OnModuleInit {
       if (prevPem !== publicKey) {
         this.previousPublicKeys.unshift(prevPublicKey);
         this.previousPublicKeys = this.previousPublicKeys.slice(0, 2);
+        if (prevAESKey) {
+          this.previousAESKeys.unshift(prevAESKey);
+          this.previousAESKeys = this.previousAESKeys.slice(0, 2);
+        }
       }
     }
+
+    this.previousAESKeys = this.previousAESKeys.filter(
+      key => !key.equals(privateAESKey)
+    );
 
     this.keyPair = {
       publicKey: pub,
       privateKey: priv,
       sha256: {
         publicKey: this.sha256(publicKey),
-        privateKey: this.sha256(privateKey),
+        privateKey: privateAESKey,
       },
     };
   }
@@ -257,15 +268,32 @@ export class CryptoHelper implements OnModuleInit {
     const iv = buf.subarray(0, NONCE_LENGTH);
     const authTag = buf.subarray(NONCE_LENGTH, NONCE_LENGTH + AUTH_TAG_LENGTH);
     const encryptedToken = buf.subarray(NONCE_LENGTH + AUTH_TAG_LENGTH);
-    const decipher = createDecipheriv(
-      'aes-256-gcm',
-      this.keyPair.sha256.privateKey,
-      iv,
-      { authTagLength: AUTH_TAG_LENGTH }
-    );
+    const keys = [this.keyPair.sha256.privateKey, ...this.previousAESKeys];
+    let lastError: unknown;
+
+    for (const key of keys) {
+      try {
+        return this.decryptWithAESKey(key, iv, authTag, encryptedToken);
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError;
+  }
+
+  private decryptWithAESKey(
+    key: Buffer,
+    iv: Buffer,
+    authTag: Buffer,
+    encryptedToken: Buffer
+  ) {
+    const decipher = createDecipheriv('aes-256-gcm', key, iv, {
+      authTagLength: AUTH_TAG_LENGTH,
+    });
     decipher.setAuthTag(authTag);
-    const decrepted = decipher.update(encryptedToken, void 0, 'utf8');
-    return decrepted + decipher.final('utf8');
+    const decrypted = decipher.update(encryptedToken, void 0, 'utf8');
+    return decrypted + decipher.final('utf8');
   }
 
   encryptPassword(password: string) {
