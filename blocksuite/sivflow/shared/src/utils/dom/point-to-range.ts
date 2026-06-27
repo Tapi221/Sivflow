@@ -107,16 +107,32 @@ export function handleNativeRangeAtPoint(x: number, y: number) {
   }
 }
 
-function lastMeaningfulTextNode(node: Node) {
-  const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, {
+function createTextNodeWalker(node: Node): TreeWalker | null {
+  const ownerDocument =
+    node.nodeType === Node.DOCUMENT_NODE
+      ? (node as Document)
+      : (node.ownerDocument ?? document);
+
+  if (typeof ownerDocument.createTreeWalker !== 'function') {
+    return null;
+  }
+
+  return ownerDocument.createTreeWalker(node, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       return node.textContent && node.textContent?.trim().length > 0
         ? NodeFilter.FILTER_ACCEPT
         : NodeFilter.FILTER_REJECT;
     },
   });
+}
 
-  let last = null;
+function lastMeaningfulTextNode(node: Node) {
+  const walker = createTextNodeWalker(node);
+  if (!walker) {
+    return null;
+  }
+
+  let last: Node | null = null;
   while (walker.nextNode()) {
     last = walker.currentNode;
   }
