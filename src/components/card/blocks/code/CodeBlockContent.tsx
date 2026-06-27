@@ -89,7 +89,12 @@ const createEditorTextWalker = (root: HTMLElement): TreeWalker | null => {
     return null;
   }
 
-  return ownerDocument.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  try {
+    return ownerDocument.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  } catch (error) {
+    console.warn("コードブロックのテキスト走査を作成できませんでした", error);
+    return null;
+  }
 };
 const getTextPositionAtOffset = (root: HTMLElement, offset: number) => {
   const safeOffset = clampTextOffset(offset, root.textContent?.length ?? 0);
@@ -213,7 +218,7 @@ const CodeBlockContent = (props: CodeBlockContentProps) => {
       const nextCode = `${editorCode.slice(0, selection.start)}${insertedText}${editorCode.slice(selection.end)}`;
       const nextOffset = selection.start + insertedText.length;
       editorSelectionRef.current = { start: nextOffset, end: nextOffset };
-      onEditorCodeChange(nextCode);
+      onCodeChange(nextCode);
     },
     [editorCode, onEditorCodeChange],
   );
