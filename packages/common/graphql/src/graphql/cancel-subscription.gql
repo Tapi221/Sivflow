@@ -3,7 +3,6 @@ mutation cancelSubscription(
   $workspaceId: String
 ) {
   cancelSubscription(plan: $plan, workspaceId: $workspaceId) {
-    id
     status
     nextBillAt
     canceledAt
