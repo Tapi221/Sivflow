@@ -9,6 +9,7 @@
     "packages/backend/*",
     "packages/common/*",
     "blocksuite/**",
+    "tests/**",
     "apps/*",
     "packages/*"
   ],
@@ -19,6 +20,8 @@
     "npmize": "node scripts/npmize-workspace-protocols.mjs",
     "lint": "npm run typecheck",
     "typecheck": "tsc --build packages/frontend/apps/web/tsconfig.json --pretty false",
+    "test:blocksuite": "npm --workspace @blocksuite/integration-test run test:unit",
+    "test:blocksuite:debug": "npm --workspace @blocksuite/integration-test run test:debug",
     "db:check": "node scripts/check-local-services.mjs",
     "db:migrate": "node scripts/apply-postgres-migrations.mjs",
     "db:psql": "psql -h localhost -p 5432 -U sivflow -d sivflow",
