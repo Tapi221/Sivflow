@@ -1,1 +1,81 @@
-test
+import dns from 'node:dns';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+
+dns.setDefaultResultOrder('verbatim');
+
+const devServerPort = 8080;
+const devServerHost = '127.0.0.1';
+
+const buildConfig = {
+  SENTRY_DSN: '',
+  appBuildType: 'local',
+  appVersion: '0.26.3',
+  debug: true,
+  distribution: 'web',
+  editorVersion: '0.26.3',
+  isElectron: false,
+  isIOS: false,
+  isMobileEdition: false,
+  isNative: false,
+};
+
+const rollupCompatibleTarget = 'es2021' as const;
+const privateAccessorText = ['private', 'accessor'].join(' ');
+const privateAccessorPattern = new RegExp(
+  `\\b${privateAccessorText.replace(' ', '\\s+')}\\b`,
+  'g'
+);
+
+const stripPrivateAccessorPlugin = {
+  name: 'sivflow-strip-private-accessor',
+  enforce: 'pre' as const,
+  transform(code: string, id: string) {
+    if (!id.match(/\.[cm]?[tj]sx?(?:\?|$)/)) {
+      return null;
+    }
+
+    if (!code.includes(privateAccessorText)) {
+      return null;
+    }
+
+    return code.replace(privateAccessorPattern, 'accessor');
+  },
+};
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export default defineConfig({
+  assetsInclude: ['**/*.zip'],
+  build: {
+    target: rollupCompatibleTarget,
+  },
+  define: {
+    BUILD_CONFIG: JSON.stringify(buildConfig),
+  },
+  esbuild: {
+    target: rollupCompatibleTarget,
+  },
+  plugins: [stripPrivateAccessorPlugin, react()],
+  resolve: {
+    alias: {
+      '@affine/core': path.resolve(__dirname, '../../core/src'),
+    },
+  },
+  server: {
+    host: devServerHost,
+    port: devServerPort,
+    strictPort: true,
+    hmr: {
+      host: devServerHost,
+      clientPort: devServerPort,
+      protocol: 'ws',
+    },
+  },
+  worker: {
+    format: 'es',
+  },
+});
