@@ -36,7 +36,7 @@ export type DataViewRendererConfig = {
     toast: (message: string) => void;
   };
   i18n?: {
-    t: (key: string) => string;
+    t: (key: string, options?: Record<string, unknown>) => string;
   };
   virtualPadding$: ReadonlySignal<number>;
   headerWidget: DataViewWidget | undefined;
