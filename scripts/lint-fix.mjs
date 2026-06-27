@@ -51,7 +51,7 @@ const runNodeScript = (scriptPath, args = []) => {
   }
   return result.status ?? 0;
 };
-const runImportedScript = async scriptPath => {
+const runImportedScript = async (scriptPath) => {
   const previousExitCode = process.exitCode;
   process.exitCode = 0;
   try {
@@ -70,7 +70,7 @@ const runSourceConventionFixes = async () => {
   for (const fixerScriptPath of FIXER_SCRIPT_PATHS) {
     statuses.push(await runImportedScript(fixerScriptPath));
   }
-  return statuses.find(status => status !== 0) ?? 0;
+  return statuses.find((status) => status !== 0) ?? 0;
 };
 const runSourceConventionVerification = () => {
   const statuses = [
@@ -88,7 +88,7 @@ const runSourceConventionVerification = () => {
     runNodeScript(NODE_SCRIPT_PATHS.verifyPdfZoomConstants),
     runNodeScript(NODE_SCRIPT_PATHS.verifyModuleConstantNames),
   ];
-  return statuses.find(status => status !== 0) ?? 0;
+  return statuses.find((status) => status !== 0) ?? 0;
 };
 
 const fixStatus = isCheckOnly ? 0 : await runSourceConventionFixes();
@@ -100,5 +100,5 @@ if (isFixersOnly) {
     isCheckOnly ? [] : ["--fix"],
   );
   const verifyStatus = runSourceConventionVerification();
-  process.exitCode = [fixStatus, lintStatus, verifyStatus].find(status => status !== 0) ?? 0;
+  process.exitCode = [fixStatus, lintStatus, verifyStatus].find((status) => status !== 0) ?? 0;
 }
