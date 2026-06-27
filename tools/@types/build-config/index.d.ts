@@ -2,6 +2,11 @@ declare interface BUILD_CONFIG_TYPE {
   debug: boolean;
   distribution: 'web' | 'desktop' | 'admin' | 'mobile' | 'ios' | 'android';
   /**
+   * ローカル開発で本物のバックエンドへ接続するかどうか。
+   * false の場合、Web はローカルワークスペース中心で動き、/api や /graphql へ常時接続しない。
+   */
+  backendEnabled: boolean;
+  /**
    * 'web' | 'desktop' | 'admin'
    */
   isDesktopEdition: boolean;
@@ -23,7 +28,7 @@ declare interface BUILD_CONFIG_TYPE {
 
   appVersion: string;
   editorVersion: string;
-  appBuildType: 'stable' | 'beta' | 'internal' | 'canary';
+  appBuildType: 'stable' | 'beta' | 'internal' | 'canary' | 'local';
 
   githubUrl: string;
   changelogUrl: string;
