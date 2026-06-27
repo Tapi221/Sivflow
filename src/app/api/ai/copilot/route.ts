@@ -25,7 +25,7 @@ const POST = async (req: Request) => {
     const { apiKey, model, prompt, system } = await req.json() as CopilotRequestPayload;
     const credential = apiKey ?? process.env.AI_GATEWAY_API_KEY;
     if (!credential) {
-      return createErrorResponse(401, "Missing AI credential.");
+      return createErrorResponse(401, "AI 認証情報が未設定です。");
     }
     const gatewayProvider = createGateway({ apiKey: credential });
     const result = streamText({
@@ -35,7 +35,7 @@ const POST = async (req: Request) => {
     });
     return result.toTextStreamResponse();
   } catch {
-    return createErrorResponse(500, "Failed to process copilot request.");
+    return createErrorResponse(500, "copilot request の処理に失敗しました。");
   }
 };
 
