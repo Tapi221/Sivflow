@@ -117,7 +117,7 @@ class IndexedDBRebuildOrchestrator {
 
     try {
       console.log(
-        `[Rebuild:${userId}] Starting rebuild... Reason: ${reason || "unknown"}`,
+        `[Rebuild:${userId}] 再構築を開始しています... 理由: ${reason || "不明"}`,
       );
       onProgress?.("クラウドからデータを取得しています...");
 
@@ -127,7 +127,7 @@ class IndexedDBRebuildOrchestrator {
 
       if (changes.length === 0) {
         console.log(
-          `[Rebuild:${userId}] No data found in cloud. Skipping destructive rebuild.`,
+          `[Rebuild:${userId}] クラウドにデータがないため、破壊的な再構築をスキップします。`,
         );
         onProgress?.("クラウドにデータはありませんでした。");
         return {
@@ -151,10 +151,10 @@ class IndexedDBRebuildOrchestrator {
           ? LocalDBClass.getDatabaseNameForUser(userId)
           : `SivflowDB_${userId}`;
 
-      console.log(`[Rebuild] Deleting database: ${dbName}`);
+      console.log(`[Rebuild] データベースを削除しています: ${dbName}`);
       await Dexie.delete(dbName);
 
-      console.log("[Rebuild] Creating new DB instance...");
+      console.log("[Rebuild] 新しいDBインスタンスを作成しています...");
       const newDb = await getLocalDb(userId);
 
       onProgress?.(`${changes.length} 件のデータを復元中...`);
@@ -164,7 +164,7 @@ class IndexedDBRebuildOrchestrator {
 
       await newDb.runSyncTransaction(async () => {
         console.log(
-          `[Rebuild] Inserting ${changes.length} items to fresh DB...`,
+          `[Rebuild] 新しいDBへ ${changes.length} 件の項目を挿入しています...`,
         );
 
         for (const rawChange of changes) {
