@@ -86,6 +86,15 @@ const appElements = {
   'chat-panel-split-view': ChatPanelSplitView,
 } satisfies Record<AppEffectElementTag, CustomElementConstructor>;
 
+function defineAppElement(
+  tagName: AppEffectElementTag,
+  elementClass: CustomElementConstructor
+) {
+  if (!customElements.get(tagName)) {
+    customElements.define(tagName, elementClass);
+  }
+}
+
 export function registerAIAppEffects() {
   const registry = customElements;
   if (appRegistries.has(registry)) return;
@@ -95,6 +104,6 @@ export function registerAIAppEffects() {
   componentPlaygroundEffects();
 
   for (const tag of appEffectElementTags) {
-    customElements.define(tag, appElements[tag]);
+    defineAppElement(tag, appElements[tag]);
   }
 }
