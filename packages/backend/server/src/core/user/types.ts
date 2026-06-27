@@ -26,10 +26,17 @@ export class UserType implements CurrentUser {
   @Field({ description: 'User email' })
   email!: string;
 
+  @Field(() => Boolean, { description: 'User email verified' })
+  emailVerified!: boolean;
+
+  @Field(() => Boolean, {
+    description: 'User has password',
+    nullable: true,
+  })
+  hasPassword!: boolean | null;
+
   @Field(() => String, { description: 'User avatar url', nullable: true })
   avatarUrl!: string | null;
-
-
 
   @Field(() => Date, {
     deprecationReason: 'useless',
@@ -76,6 +83,11 @@ export class LimitedUserType implements Partial<User> {
   @Field({ description: 'User email' })
   email!: string;
 
+  @Field(() => Boolean, {
+    description: 'User has password',
+    nullable: true,
+  })
+  hasPassword?: boolean | null;
 }
 
 export const UserOrLimitedUser = createUnionType({
