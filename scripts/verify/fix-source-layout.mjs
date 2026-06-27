@@ -165,5 +165,5 @@ const updateFile = (filePath) => {
 const updatedFiles = SOURCE_DIRECTORIES.flatMap(walkSourceFiles).filter(updateFile);
 
 if (updatedFiles.length > 0) {
-  console.log(`source layout を ${updatedFiles.length} file(s) 修正しました。`);
+  console.log(`source layout を ${updatedFiles.length} 件のファイルで修正しました。`);
 }
