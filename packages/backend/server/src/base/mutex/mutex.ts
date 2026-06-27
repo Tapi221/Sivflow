@@ -20,22 +20,22 @@ export class Mutex {
   constructor(protected readonly locker: Locker) {}
 
   /**
-   * lock an resource and return a lock guard, which will release the lock when disposed
+   * resource を lock し、dispose 時に lock を解放する lock guard を返します。
    *
-   * if the lock is not available, it will retry for [MUTEX_RETRY] times
+   * lock を取得できない場合は [MUTEX_RETRY] 回 retry します。
    *
-   * usage:
+   * 使い方:
    * ```typescript
    * {
-   *   // lock is acquired here
+   *   // ここで lock を取得します。
    *   await using lock = await mutex.acquire('resource-key');
    *   if (lock) {
-   *     // do something
+   *     // 何らかの処理を実行します。
    *   } else {
-   *     // failed to lock
+   *     // lock の取得に失敗しました。
    *   }
    * }
-   * // lock is released here
+   * // ここで lock が解放されます。
    * ```
    * @param key resource key
    * @returns LockGuard
@@ -52,7 +52,7 @@ export class Mutex {
       );
     } catch (e) {
       this.logger.error(
-        `Failed to lock resource [${key}] after retry ${MUTEX_RETRY} times`,
+        `retry ${MUTEX_RETRY} 回後も resource [${key}] の lock に失敗しました`,
         e
       );
       return undefined;
@@ -66,13 +66,13 @@ export class RequestMutex extends Mutex {
     @Inject(REQUEST) private readonly request: Request | GraphqlContext,
     ref: ModuleRef
   ) {
-    // nestjs will always find and injecting the locker from local module
-    // so the RedisLocker implemented by the plugin mechanism will not be able to overwrite the internal locker
-    // we need to use find and get the locker from the `ModuleRef` manually
+    // nestjs は常に local module から locker を探して inject します。
+    // そのため plugin mechanism で実装された RedisLocker は internal locker を上書きできません。
+    // `ModuleRef` から手動で locker を探して取得する必要があります。
     //
-    // NOTE: when a `constructor` execute in normal service, the Locker module we expect may not have been initialized
-    //       but in the Service with `Scope.REQUEST`, we will create a separate Service instance for each request
-    //       at this time, all modules have been initialized, so we able to get the correct Locker instance in `constructor`
+    // NOTE: 通常 service の `constructor` 実行時は、期待する Locker module がまだ初期化されていない可能性があります。
+    //       ただし `Scope.REQUEST` の Service では request ごとに個別の Service instance を作成します。
+    //       この時点ではすべての module が初期化済みなので、`constructor` 内で正しい Locker instance を取得できます。
     super(ref.get(Locker));
   }
 
