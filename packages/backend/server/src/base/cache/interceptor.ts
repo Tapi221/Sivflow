@@ -79,9 +79,10 @@ export class CacheInterceptor implements NestInterceptor {
     config: CacheConfig
   ): Promise<string | null> {
     const [key, params] = config;
+    const handlerKey = [ctx.getClass().name, ctx.getHandler().name, ...key];
 
     if (!params) {
-      return key.join(':');
+      return handlerKey.join(':');
     } else if (ctx.getType<GqlContextType>() === 'graphql') {
       const args = GqlExecutionContext.create(ctx).getArgs();
       const cacheKey = params
@@ -89,9 +90,9 @@ export class CacheInterceptor implements NestInterceptor {
         .filter(v => v)
         .join(':');
       if (cacheKey) {
-        return [...key, cacheKey].join(':');
+        return [...handlerKey, cacheKey].join(':');
       } else {
-        return key.join(':');
+        return handlerKey.join(':');
       }
     }
     return null;
