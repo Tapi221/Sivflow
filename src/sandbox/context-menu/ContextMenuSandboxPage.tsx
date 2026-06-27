@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties, MouseEvent } from "react";
-import { ContextMenu, ContextMenuBuilder } from "@/../nouse/context-menu/ContextMenu";
+import { ContextMenu, ContextMenuBuilder } from "@/nouse/context-menu/ContextMenu";
 
 type MenuPosition = {
   x: number;
