@@ -36,9 +36,9 @@ class Redis extends IORedis implements OnModuleInit, OnModuleDestroy {
   assertValidDBIndex(db: number) {
     if (db && db > 15) {
       throw new Error(
-        // Redis allows [0..16) by default
-        // we separate the db for different usages by `this.options.db + [0..4]`
-        `Invalid database index: ${db}, must be between 0 and 11`
+        // Redis は既定で [0..16) を許可します。
+        // 用途ごとに `this.options.db + [0..4]` で db を分けます。
+        `database index が不正です: ${db}。0 から 11 の間にしてください`
       );
     }
   }
@@ -80,7 +80,7 @@ export class QueueRedis extends Redis {
       ...config.redis,
       ...config.redis.ioredis,
       db: (config.redis.db ?? 0) + 4,
-      // required explicitly set to `null` by bullmq
+      // bullmq では明示的に `null` を設定する必要があります。
       maxRetriesPerRequest: null,
     });
   }
