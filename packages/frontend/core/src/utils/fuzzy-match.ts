@@ -1,5 +1,5 @@
 /**
- * Checks if the name is a fuzzy match of the query.
+ * name が query に fuzzy match するかどうかを確認します。
  *
  * @example
  * ```ts
@@ -9,7 +9,7 @@
  * // isMatch: true
  * ```
  *
- * if initialMatch = true, the first char must match as well
+ * initialMatch = true の場合は、先頭文字も一致している必要があります。
  */
 export function fuzzyMatch(
   name: string,
@@ -36,6 +36,6 @@ export function fuzzyMatch(
 }
 
 function escapeRegExp(input: string) {
-  // escape regex characters in the input string to prevent regex format errors
+  // regex format error を防ぐため、input string 内の regex 文字を escape します。
   return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
