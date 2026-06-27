@@ -64,19 +64,19 @@ function extractPageIcon(doc: Document): PageIcon | undefined {
   // Look for Notion page icon in the HTML
   // Notion export format: <div class="page-header-icon undefined"><span class="icon">✅</span></div>
 
-  console.log('=== Extracting page icon ===');
+  console.log('=== ページアイコンを抽出しています ===');
 
   // Check if there's a head section with title for debugging
   const headTitle = doc.querySelector('head title');
   if (headTitle) {
-    console.log('Page title from head:', headTitle.textContent);
+    console.log('head から取得したページタイトル:', headTitle.textContent);
   }
 
   // Look for the exact Notion export structure: .page-header-icon .icon
   const notionIconSpan = doc.querySelector('.page-header-icon .icon');
   if (notionIconSpan && notionIconSpan.textContent) {
     const iconContent = notionIconSpan.textContent.trim();
-    console.log('Found Notion icon (.page-header-icon .icon):', iconContent);
+    console.log('Notion アイコンを検出しました (.page-header-icon .icon):', iconContent);
     if (/\p{Emoji}/u.test(iconContent)) {
       return {
         type: 'emoji',
@@ -89,7 +89,7 @@ function extractPageIcon(doc: Document): PageIcon | undefined {
   const pageHeader = doc.querySelector('.page-header-icon');
   if (pageHeader) {
     console.log(
-      'Found .page-header-icon:',
+      '.page-header-icon を検出しました:',
       pageHeader.outerHTML.substring(0, 300) + '...'
     );
   }
@@ -98,7 +98,7 @@ function extractPageIcon(doc: Document): PageIcon | undefined {
   const emojiIcon = doc.querySelector('.page-header-icon .notion-emoji');
   if (emojiIcon && emojiIcon.textContent) {
     console.log(
-      'Found emoji icon (.page-header-icon .notion-emoji):',
+      'emoji アイコンを検出しました (.page-header-icon .notion-emoji):',
       emojiIcon.textContent
     );
     return {
@@ -115,7 +115,7 @@ function extractPageIcon(doc: Document): PageIcon | undefined {
     /\p{Emoji}/u.test(altEmojiIcon.textContent)
   ) {
     console.log(
-      'Found emoji icon ([role="img"][aria-label]):',
+      'emoji アイコンを検出しました ([role="img"][aria-label]):',
       altEmojiIcon.textContent
     );
     return {
@@ -128,7 +128,7 @@ function extractPageIcon(doc: Document): PageIcon | undefined {
   const imageIcon = doc.querySelector('.page-header-icon img');
   if (imageIcon) {
     const src = imageIcon.getAttribute('src');
-    console.log('Found image icon (.page-header-icon img):', src);
+    console.log('画像アイコンを検出しました (.page-header-icon img):', src);
     if (src) {
       return {
         type: 'image',
@@ -143,9 +143,9 @@ function extractPageIcon(doc: Document): PageIcon | undefined {
     if (span.textContent && /\p{Emoji}/u.test(span.textContent.trim())) {
       const parent = span.parentElement;
       console.log(
-        'Found emoji in span.icon:',
+        'span.icon の emoji を検出しました:',
         span.textContent,
-        'parent classes:',
+        '親クラス:',
         parent?.className
       );
       // Check if this is in a page header context
@@ -155,7 +155,7 @@ function extractPageIcon(doc: Document): PageIcon | undefined {
           parent.closest('.page-header-icon'))
       ) {
         console.log(
-          'Using emoji from span.icon in page header:',
+          'ページヘッダーの span.icon から emoji を使用します:',
           span.textContent
         );
         return {
@@ -169,12 +169,12 @@ function extractPageIcon(doc: Document): PageIcon | undefined {
   // Fallback: Try to find icons in the page title area that might contain emoji
   const pageTitle = doc.querySelector('.page-title, h1');
   if (pageTitle && pageTitle.textContent) {
-    console.log('Page title element found:', pageTitle.textContent);
+    console.log('ページタイトル要素を検出しました:', pageTitle.textContent);
     const text = pageTitle.textContent.trim();
     // Check if the title starts with an emoji
     const emojiMatch = text.match(/^(\p{Emoji}+)/u);
     if (emojiMatch) {
-      console.log('Found emoji in title:', emojiMatch[1]);
+      console.log('タイトル内の emoji を検出しました:', emojiMatch[1]);
       return {
         type: 'emoji',
         content: emojiMatch[1],
@@ -182,7 +182,7 @@ function extractPageIcon(doc: Document): PageIcon | undefined {
     }
   }
 
-  console.log('No page icon found');
+  console.log('ページアイコンは見つかりませんでした');
   return undefined;
 }
 
