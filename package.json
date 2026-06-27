@@ -27,6 +27,8 @@
     "dev:web": "npm --workspace @affine/web run dev",
     "dev:frontend": "npm --workspace @affine/web run dev",
     "dev:backend": "npm --workspace @affine/server run dev",
+    "dev:backend:local": "powershell -File scripts/dev-backend-local.ps1",
+    "dev:local": "powershell -File scripts/dev-backend-local.ps1",
     "dev:server": "npm --workspace @affine/server run dev",
     "build": "npm --workspace @affine/web run build",
     "build:web": "npm --workspace @affine/web run build",
