@@ -139,17 +139,26 @@ export class ComponentCachePool {
 }
 
 class Resolver extends FrameworkProvider {
+  public readonly provider: BasicFrameworkProvider;
+  public readonly depth: number;
+  public readonly stack: IdentifierValue[];
+  scope: FrameworkScopeStack;
+  collection: Framework;
+  eventBus: EventBus;
+
   constructor(
-    public readonly provider: BasicFrameworkProvider,
-    public readonly depth = 0,
-    public readonly stack: IdentifierValue[] = []
+    provider: BasicFrameworkProvider,
+    depth = 0,
+    stack: IdentifierValue[] = []
   ) {
     super();
+    this.provider = provider;
+    this.depth = depth;
+    this.stack = stack;
+    this.scope = provider.scope;
+    this.collection = provider.collection;
+    this.eventBus = provider.eventBus;
   }
-
-  scope = this.provider.scope;
-  collection = this.provider.collection;
-  eventBus = this.provider.eventBus;
 
   getRaw(
     identifier: IdentifierValue,
