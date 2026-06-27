@@ -5,6 +5,17 @@ import type { GlobalStateService } from '../../storage';
 import { BUILD_IN_SERVERS } from '../constant';
 import type { ServerConfig, ServerMetadata } from '../types';
 
+function fillLocalServerVersion(config?: ServerConfig) {
+  if (!config || BUILD_CONFIG.backendEnabled || config.version) {
+    return config;
+  }
+
+  return {
+    ...config,
+    version: BUILD_CONFIG.appVersion,
+  };
+}
+
 export class ServerListStore extends Store {
   constructor(private readonly globalStateService: GlobalStateService) {
     super();
@@ -65,17 +76,18 @@ export class ServerListStore extends Store {
       .pipe(
         map(config => {
           if (!config) {
-            return BUILD_IN_SERVERS.find(server => server.id === serverId)
-              ?.config;
+            return fillLocalServerVersion(
+              BUILD_IN_SERVERS.find(server => server.id === serverId)?.config
+            );
           } else {
-            return config;
+            return fillLocalServerVersion(config);
           }
         })
       );
   }
 
   getServerConfig(serverId: string) {
-    return (
+    return fillLocalServerVersion(
       this.globalStateService.globalState.get<ServerConfig>(
         `serverConfig:${serverId}`
       ) ?? BUILD_IN_SERVERS.find(server => server.id === serverId)?.config
