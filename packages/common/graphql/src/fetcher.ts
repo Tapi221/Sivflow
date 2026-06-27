@@ -9,6 +9,7 @@ import type { Mutations, Queries } from './schema';
 export type NotArray<T> = T extends Array<unknown> ? never : T;
 
 type UnknownRecord = Record<string, unknown>;
+type GraphQLResponseError = NonNullable<ExecutionResult['errors']>[number];
 
 export type FetchInit = RequestInit & { timeout?: number };
 
@@ -192,6 +193,39 @@ function formatRequestBody<Q extends GraphQLQuery>({
   return body;
 }
 
+function serializeGraphQLError(error: GraphQLResponseError) {
+  return {
+    message: error.message,
+    locations: error.locations,
+    path: error.path,
+    extensions: error.extensions,
+  };
+}
+
+function createGraphQLError(errors: readonly GraphQLResponseError[]) {
+  const firstError = errors[0];
+  if (!firstError) {
+    return new GraphQLError('Empty GraphQL error body');
+  }
+
+  const message =
+    errors.length === 1
+      ? firstError.message
+      : errors.map((error, index) => `${index + 1}. ${error.message}`).join('\n');
+
+  return new GraphQLError(message, {
+    nodes: firstError.nodes,
+    source: firstError.source,
+    positions: firstError.positions,
+    path: firstError.path,
+    originalError: firstError.originalError,
+    extensions: {
+      ...firstError.extensions,
+      graphQLErrors: errors.map(serializeGraphQLError),
+    },
+  });
+}
+
 export const gqlFetcherFactory = (
   endpoint: string,
   fetcher: (input: string, init?: FetchInit) => Promise<Response> = fetch
@@ -231,13 +265,7 @@ export const gqlFetcherFactory = (
       if (res.headers.get('content-type')?.startsWith('application/json')) {
         const result = (await res.json()) as ExecutionResult;
         if (res.status >= 400 || result.errors) {
-          if (result.errors && result.errors.length > 0) {
-            // throw the first error is enough
-            const firstError = result.errors[0];
-            throw new GraphQLError(firstError.message, firstError);
-          } else {
-            throw new GraphQLError('Empty GraphQL error body');
-          }
+          throw createGraphQLError(result.errors ?? []);
         } else if (result.data) {
           // we have to cast here because the type of result.data is a union type
           return result.data as QueryResponse<Query>;
