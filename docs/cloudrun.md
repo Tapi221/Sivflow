@@ -51,8 +51,7 @@ printf '%s' 'postgresql://USER:PASSWORD@HOST:5432/DATABASE' | \
 PowerShell の場合は次の形で入れます。
 
 ```powershell
-'postgresql://USER:PASSWORD@HOST:5432/DATABASE' | \
-  gcloud secrets create DATABASE_URL --data-file=-
+'postgresql://USER:PASSWORD@HOST:5432/DATABASE' | gcloud secrets create DATABASE_URL --data-file=-
 ```
 
 Cloud SQL の Unix socket を使う場合は、`DATABASE_URL` を Cloud SQL 接続方式に合わせて作り、deploy 時に `_CLOUD_SQL_INSTANCE` を渡します。
