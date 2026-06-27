@@ -14,7 +14,9 @@ use napi::{
   threadsafe_function::{ThreadsafeFunction, ThreadsafeFunctionCallMode},
 };
 
-use super::{STREAM_CALLBACK_DISPATCH_FAILED_REASON, STREAM_END_MARKER, callback_dispatch_failed_reason, tool_loop};
+use super::{
+  STREAM_END_MARKER, callback_dispatch_failed_reason, is_stream_aborted, is_stream_callback_dispatch_failed, tool_loop,
+};
 use crate::llm::{
   LlmDispatchPayload, LlmRoutedBackendPayload, LlmStreamHandle, STREAM_ABORTED_REASON, StreamPipeline,
   backend_transport_error, map_json_error, parse_prepared_chat_routes_with_middleware,
@@ -100,33 +102,40 @@ fn spawn_prepared_stream(
 
   std::thread::spawn(move || {
     let result = dispatch_prepared_stream_with_fallback(&routes, &callback, &aborted_in_worker);
-    let callback_dispatch_failed = matches!(
-      &result,
-      Err(BackendError::Transport { message: reason })
-        if reason.starts_with(STREAM_CALLBACK_DISPATCH_FAILED_REASON)
-    );
-
-    if let Err(error) = &result
-      && !aborted_in_worker.load(Ordering::Relaxed)
-      && !callback_dispatch_failed
-      && !is_abort_error(error)
-    {
-      emit_error_event(&callback, error.to_string(), "dispatch_error");
-    }
-
-    if let Ok(provider_id) = result {
-      emit_provider_selected_event(&callback, provider_id);
-    }
-
-    if !callback_dispatch_failed {
-      let _ = callback.call(
-        Ok(STREAM_END_MARKER.to_string()),
-        ThreadsafeFunctionCallMode::NonBlocking,
-      );
-    }
+    finish_prepared_stream(result, &callback, &aborted_in_worker);
   });
 
   LlmStreamHandle { aborted }
+}
+
+fn finish_prepared_stream(
+  result: std::result::Result<String, BackendError>,
+  callback: &ThreadsafeFunction<String, ()>,
+  aborted: &AtomicBool,
+) {
+  let callback_dispatch_failed = result
+    .as_ref()
+    .err()
+    .is_some_and(is_stream_callback_dispatch_failed);
+
+  if let Err(error) = &result
+    && !aborted.load(Ordering::Relaxed)
+    && !callback_dispatch_failed
+    && !is_stream_aborted(error)
+  {
+    emit_error_event(callback, error.to_string(), "dispatch_error");
+  }
+
+  if let Ok(provider_id) = result {
+    emit_provider_selected_event(callback, provider_id);
+  }
+
+  if !callback_dispatch_failed {
+    let _ = callback.call(
+      Ok(STREAM_END_MARKER.to_string()),
+      ThreadsafeFunctionCallMode::NonBlocking,
+    );
+  }
 }
 
 fn dispatch_prepared_stream_with_fallback(
@@ -234,11 +243,4 @@ fn parse_routed_backends(routes_json: &str) -> Result<Vec<RoutedBackend>> {
       })
     })
     .collect()
-}
-
-fn is_abort_error(error: &BackendError) -> bool {
-  matches!(
-    error,
-    BackendError::Transport { message: reason } if reason == STREAM_ABORTED_REASON
-  )
 }
