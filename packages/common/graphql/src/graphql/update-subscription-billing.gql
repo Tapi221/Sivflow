@@ -8,7 +8,6 @@ mutation updateSubscription(
     recurring: $recurring
     workspaceId: $workspaceId
   ) {
-    id
     plan
     recurring
     nextBillAt
