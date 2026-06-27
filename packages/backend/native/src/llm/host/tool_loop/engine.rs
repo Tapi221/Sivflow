@@ -15,13 +15,12 @@ use napi::{
 };
 
 use super::{
-  super::emit_provider_selected_event,
+  super::{emit_provider_selected_event, is_stream_aborted, is_stream_callback_dispatch_failed},
   callback::{NapiEventSink, NapiToolExecutor, emit_tool_loop_event},
 };
 use crate::llm::{
-  LlmDispatchPayload, LlmMiddlewarePayload, LlmStreamHandle, STREAM_ABORTED_REASON,
-  STREAM_CALLBACK_DISPATCH_FAILED_REASON, STREAM_END_MARKER, StreamPipeline, apply_request_middlewares,
-  backend_transport_error, emit_error_event, resolve_stream_chain,
+  LlmDispatchPayload, LlmMiddlewarePayload, LlmStreamHandle, STREAM_ABORTED_REASON, STREAM_END_MARKER, StreamPipeline,
+  apply_request_middlewares, backend_transport_error, emit_error_event, resolve_stream_chain,
 };
 
 pub(crate) type PreparedToolLoopRoute = (PreparedChatRoute, LlmMiddlewarePayload);
@@ -236,6 +235,32 @@ pub(crate) fn run_native_prepared_tool_loop(
   )
 }
 
+fn finish_tool_loop_stream(
+  result: std::result::Result<(), BackendError>,
+  callback: &ThreadsafeFunction<String, ()>,
+  aborted: &AtomicBool,
+) {
+  let callback_dispatch_failed = result
+    .as_ref()
+    .err()
+    .is_some_and(is_stream_callback_dispatch_failed);
+
+  if let Err(error) = result
+    && !aborted.load(Ordering::Relaxed)
+    && !is_stream_aborted(&error)
+    && !callback_dispatch_failed
+  {
+    emit_error_event(callback, error.to_string(), "dispatch_error");
+  }
+
+  if !aborted.load(Ordering::Relaxed) && !callback_dispatch_failed {
+    let _ = callback.call(
+      Ok(STREAM_END_MARKER.to_string()),
+      ThreadsafeFunctionCallMode::NonBlocking,
+    );
+  }
+}
+
 pub(crate) fn spawn_tool_loop_stream(
   protocol: ChatProtocol,
   config: BackendConfig,
@@ -263,26 +288,7 @@ pub(crate) fn spawn_tool_loop_stream(
       aborted_in_worker.clone(),
       &emitted,
     );
-    let callback_dispatch_failed = matches!(
-      &result,
-      Err(BackendError::Transport { message: reason })
-        if reason.starts_with(STREAM_CALLBACK_DISPATCH_FAILED_REASON)
-    );
-
-    if let Err(error) = result
-      && !aborted_in_worker.load(Ordering::Relaxed)
-      && !matches!(&error, BackendError::Transport { message: reason } if reason == STREAM_ABORTED_REASON)
-      && !callback_dispatch_failed
-    {
-      emit_error_event(&callback, error.to_string(), "dispatch_error");
-    }
-
-    if !aborted_in_worker.load(Ordering::Relaxed) && !callback_dispatch_failed {
-      let _ = callback.call(
-        Ok(STREAM_END_MARKER.to_string()),
-        ThreadsafeFunctionCallMode::NonBlocking,
-      );
-    }
+    finish_tool_loop_stream(result, &callback, &aborted_in_worker);
   });
 
   LlmStreamHandle { aborted }
@@ -309,26 +315,7 @@ pub(crate) fn spawn_routed_tool_loop_stream(
       aborted_in_worker.clone(),
       &emitted,
     );
-    let callback_dispatch_failed = matches!(
-      &result,
-      Err(BackendError::Transport { message: reason })
-        if reason.starts_with(STREAM_CALLBACK_DISPATCH_FAILED_REASON)
-    );
-
-    if let Err(error) = result
-      && !aborted_in_worker.load(Ordering::Relaxed)
-      && !matches!(&error, BackendError::Transport { message: reason } if reason == STREAM_ABORTED_REASON)
-      && !callback_dispatch_failed
-    {
-      emit_error_event(&callback, error.to_string(), "dispatch_error");
-    }
-
-    if !aborted_in_worker.load(Ordering::Relaxed) && !callback_dispatch_failed {
-      let _ = callback.call(
-        Ok(STREAM_END_MARKER.to_string()),
-        ThreadsafeFunctionCallMode::NonBlocking,
-      );
-    }
+    finish_tool_loop_stream(result, &callback, &aborted_in_worker);
   });
 
   LlmStreamHandle { aborted }
@@ -345,26 +332,7 @@ pub(crate) fn spawn_prepared_tool_loop_stream(
 
   std::thread::spawn(move || {
     let result = run_native_prepared_tool_loop(routes, max_steps, &callback, &tool_callback, aborted_in_worker.clone());
-    let callback_dispatch_failed = matches!(
-      &result,
-      Err(BackendError::Transport { message: reason })
-        if reason.starts_with(STREAM_CALLBACK_DISPATCH_FAILED_REASON)
-    );
-
-    if let Err(error) = result
-      && !aborted_in_worker.load(Ordering::Relaxed)
-      && !matches!(&error, BackendError::Transport { message: reason } if reason == STREAM_ABORTED_REASON)
-      && !callback_dispatch_failed
-    {
-      emit_error_event(&callback, error.to_string(), "dispatch_error");
-    }
-
-    if !aborted_in_worker.load(Ordering::Relaxed) && !callback_dispatch_failed {
-      let _ = callback.call(
-        Ok(STREAM_END_MARKER.to_string()),
-        ThreadsafeFunctionCallMode::NonBlocking,
-      );
-    }
+    finish_tool_loop_stream(result, &callback, &aborted_in_worker);
   });
 
   LlmStreamHandle { aborted }
