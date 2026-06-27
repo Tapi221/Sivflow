@@ -16,20 +16,19 @@
     "./preload/electron-api": "./src/preload/electron-api.ts",
     "./preload/shared-storage": "./src/preload/shared-storage.ts",
     "./main/shared-state-schema": "./src/main/shared-state-schema.ts",
-    "./main/updater/event": "./src/main/updater/event.ts",
     "./main/windows-manager": "./src/main/windows-manager/index.ts"
   },
   "scripts": {
     "start": "electron .",
-    "dev": "cross-env DEV_SERVER_URL=http://localhost:8080 node ./scripts/dev.ts",
-    "dev:prod": "node ./scripts/dev.ts",
-    "build": "cross-env NODE_ENV=production node ./scripts/build-layers.ts",
-    "build:dev": "node ./scripts/build-layers.ts",
-    "generate-assets": "node ./scripts/generate-assets.ts",
+    "dev": "cross-env DEV_SERVER_URL=http://localhost:8080 tsx ./scripts/dev.ts",
+    "dev:prod": "tsx ./scripts/dev.ts",
+    "build": "cross-env NODE_ENV=production tsx ./scripts/build-layers.ts",
+    "build:dev": "tsx ./scripts/build-layers.ts",
+    "generate-assets": "tsx ./scripts/generate-assets.ts",
     "package": "electron-forge package",
     "make": "electron-forge make",
-    "make-squirrel": "node ./scripts/make-squirrel.ts",
-    "make-nsis": "node ./scripts/make-nsis.ts"
+    "make-squirrel": "tsx ./scripts/make-squirrel.ts",
+    "make-nsis": "tsx ./scripts/make-nsis.ts"
   },
   "devDependencies": {
     "@affine/i18n": "*",
@@ -67,6 +66,7 @@
     "rxjs": "^7.8.2",
     "semver": "^7.7.3",
     "tree-kill": "^1.2.2",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "uuid": "^14.0.0",
     "vitest": "^4.1.8",
