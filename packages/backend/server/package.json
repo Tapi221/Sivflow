@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "affine bundle -p @affine/server",
-    "dev": "nodemon ./src/index.ts",
+    "dev": "nodemon --exec tsx ./src/index.ts",
     "dev:mail": "email dev -d src/mails",
     "test": "ava --concurrency 1 --serial",
     "test:copilot": "ava \"src/__tests__/copilot-*.spec.ts\"",
