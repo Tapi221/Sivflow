@@ -71,6 +71,10 @@ export class Server extends Entity<{
 
   readonly revalidateConfig = effect(
     exhaustMap(() => {
+      if (!BUILD_CONFIG.backendEnabled) {
+        return fromPromise(async () => this.config$.value);
+      }
+
       return fromPromise(signal =>
         this.serverConfigStore.fetchServerConfig(this.baseUrl, signal)
       ).pipe(
