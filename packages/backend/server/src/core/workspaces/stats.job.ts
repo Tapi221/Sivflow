@@ -166,18 +166,14 @@ export class WorkspaceStatsJob {
     return await this.prisma.$transaction(
       async tx => {
         const [lock] = await tx.$queryRaw<{ locked: boolean }[]>`
-          SELECT pg_try_advisory_lock(${lockIdSql}) AS locked
+          SELECT pg_try_advisory_xact_lock(${lockIdSql}) AS locked
         `;
 
         if (!lock?.locked) {
           return null;
         }
 
-        try {
-          return await callback(tx);
-        } finally {
-          await tx.$executeRaw`SELECT pg_advisory_unlock(${lockIdSql})`;
-        }
+        return await callback(tx);
       },
       {
         maxWait: 5_000,
