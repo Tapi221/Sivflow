@@ -1,6 +1,5 @@
 mutation refreshSubscription {
   refreshUserSubscriptions {
-    id
     status
     plan
     recurring
