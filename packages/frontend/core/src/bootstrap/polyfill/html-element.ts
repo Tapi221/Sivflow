@@ -41,7 +41,7 @@ if (typeof globalObject.document === 'undefined') {
       },
       insertBefore(item: any, referenceNode?: any) {
         item.parentNode = node;
-        const index = referenceNode ? node.childNodes.indexOf(item) : -1;
+        const index = referenceNode ? node.childNodes.indexOf(referenceNode) : -1;
         if (index === -1) {
           node.childNodes.push(item);
         } else {
