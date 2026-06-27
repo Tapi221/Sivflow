@@ -8,6 +8,12 @@ if (newE2E) {
   preludes.push(`${externalTestsRoot}/__tests__/e2e/prelude.ts`);
 }
 
+const backendTests = [
+  `${externalTestsRoot}/**/*.spec.ts`,
+  `${externalTestsRoot}/**/*.e2e.ts`,
+  ...newE2ETests.map(pattern => '!' + pattern),
+];
+
 export default {
   timeout: '1m',
   extensions: {
@@ -16,15 +22,7 @@ export default {
   watchMode: {
     ignoreChanges: ['**/*.gen.*'],
   },
-  files: newE2E
-    ? newE2ETests
-    : [
-        '**/*.spec.ts',
-        '**/*.e2e.ts',
-        `${externalTestsRoot}/**/*.spec.ts`,
-        `${externalTestsRoot}/**/*.e2e.ts`,
-        ...newE2ETests.map(pattern => '!' + pattern),
-      ],
+  files: newE2E ? newE2ETests : backendTests,
   require: preludes,
   environmentVariables: {
     NODE_ENV: 'test',
