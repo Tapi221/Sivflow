@@ -22,6 +22,28 @@ const localWhiteListDirs = [
   path.resolve(app.getPath('temp')),
 ];
 
+type ElectronRequestInit = RequestInit & {
+  bypassCustomProtocolHandlers?: boolean;
+};
+
+function buildRequestInit(
+  request: Request,
+  options: { bypassCustomProtocolHandlers?: boolean } = {}
+): ElectronRequestInit {
+  const init: ElectronRequestInit = {
+    method: request.method,
+    headers: request.headers,
+    redirect: request.redirect,
+    bypassCustomProtocolHandlers: options.bypassCustomProtocolHandlers ?? true,
+  };
+
+  if (request.method !== 'GET' && request.method !== 'HEAD') {
+    init.body = request.body;
+  }
+
+  return init;
+}
+
 function isPathInWhiteList(filepath: string) {
   return localWhiteListDirs.some(whitelistDir =>
     isPathInsideBase(whitelistDir, filepath, {
@@ -61,7 +83,8 @@ function resolveApiBaseUrl() {
 }
 
 function buildTargetUrl(base: string, urlObject: URL) {
-  return new URL(`${urlObject.pathname}${urlObject.search}`, base).toString();
+  const pathname = urlObject.pathname || '/';
+  return new URL(`${pathname}${urlObject.search}`, base).toString();
 }
 
 function proxyRequest(
@@ -72,11 +95,9 @@ function proxyRequest(
 ) {
   const { bypassCustomProtocolHandlers = true } = options;
   const targetUrl = buildTargetUrl(base, urlObject);
-  const proxiedRequest = bypassCustomProtocolHandlers
-    ? Object.assign(request.clone(), {
-        bypassCustomProtocolHandlers: true,
-      })
-    : request;
+  const proxiedRequest = buildRequestInit(request, {
+    bypassCustomProtocolHandlers,
+  });
 
   return net.fetch(targetUrl, proxiedRequest);
 }
@@ -108,7 +129,7 @@ async function handleFileRequest(request: Request) {
       bypassCustomProtocolHandlers: false,
     });
   }
-  const clonedRequest = Object.assign(request.clone(), {
+  const fileRequest = buildRequestInit(request, {
     bypassCustomProtocolHandlers: true,
   });
   // this will be file types (in the web-static folder)
@@ -140,7 +161,7 @@ async function handleFileRequest(request: Request) {
     }
     filepath = await resolveWhitelistedLocalPath(filepath);
   }
-  return net.fetch(pathToFileURL(filepath).toString(), clonedRequest);
+  return net.fetch(pathToFileURL(filepath).toString(), fileRequest);
 }
 
 const needRefererDomains = [
@@ -180,7 +201,6 @@ function ensureFrameAncestors(
     headers['Content-Security-Policy'] = [`frame-ancestors ${directive}`];
     return;
   }
-
   const values = headers[cspHeaderKey];
   headers[cspHeaderKey] = values.map(val => {
     if (typeof val !== 'string') return val as any;
@@ -263,22 +283,18 @@ export function registerProtocol() {
         }
       }
 
-      const hostname = url.hostname;
-      const needReferer = needRefererDomains.some(regex =>
-        regex.test(hostname)
-      );
-      if (needReferer && !details.requestHeaders['Referer']) {
-        details.requestHeaders['Referer'] = defaultReferer;
+      if (
+        needRefererDomains.some(domain => domain.test(url.hostname)) &&
+        !details.requestHeaders.Referer &&
+        !details.requestHeaders.referer
+      ) {
+        details.requestHeaders.Referer = defaultReferer;
       }
-    })()
-      .catch(err => {
-        logger.error('error handling before send headers', err);
-      })
-      .finally(() => {
-        callback({
-          cancel: false,
-          requestHeaders: details.requestHeaders,
-        });
-      });
+
+      callback({ requestHeaders: details.requestHeaders });
+    })().catch(err => {
+      logger.error('error handling before send headers', err);
+      callback({ requestHeaders: details.requestHeaders });
+    });
   });
 }
