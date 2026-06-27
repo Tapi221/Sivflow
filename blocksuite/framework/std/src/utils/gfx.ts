@@ -6,11 +6,11 @@ import { SurfaceBlockModel } from '../gfx/model/surface/surface-model.js';
 export function onSurfaceAdded(
   doc: Store,
   callback: (model: SurfaceBlockModel | null) => void
-) {
+): () => void {
   let found = false;
   let foundId = '';
 
-  const dispose = effect(() => {
+  const dispose: () => void = effect(() => {
     // if the surface is already found, no need to search again
     if (found && doc.getBlock(foundId)) {
       return;
