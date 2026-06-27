@@ -130,7 +130,7 @@ export class ResourceController implements Disposable {
     this.state$.value = { ...this.state$.value, ...state };
   }
 
-  subscribe() {
+  subscribe(): () => void {
     return effect(() => {
       const blobId = this.blobId$.value;
       if (!blobId) return;
