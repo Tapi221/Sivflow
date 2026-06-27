@@ -44,12 +44,13 @@ export class AuthMethodsService {
     const disabledUser =
       userWithDisabled?.disabled && !user ? userWithDisabled : null;
     const providers = this.oauthProviders();
+    const hasStoredPassword = Boolean(user?.password);
 
     return {
       registered: !!user,
       methods: {
         password: {
-          available: false,
+          available: hasStoredPassword,
         },
         magicLink: {
           available: await this.canMagicLinkSignIn(email, user, disabledUser),
@@ -67,19 +68,20 @@ export class AuthMethodsService {
   }
 
   async boundMethods(userId: string): Promise<BoundAuthMethods> {
-    const [user, authAccounts] = await Promise.all([
+    const [user, connectedAccounts] = await Promise.all([
       this.models.user.get(userId),
-      this.db.authAccount.findMany({
+      this.db.connectedAccount.findMany({
         select: { provider: true },
         where: { userId },
       }),
     ]);
     const providers = Array.from(
-      new Set(authAccounts.map((account: { provider: string }) => account.provider))
+      new Set(connectedAccounts.map(account => account.provider))
     );
+    const hasStoredPassword = Boolean(user?.password);
 
     return {
-      password: { bound: false },
+      password: { bound: hasStoredPassword },
       oauth: { bound: providers.length > 0, providers },
       passkey: { bound: false, count: 0 },
     };
