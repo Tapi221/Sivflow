@@ -203,14 +203,62 @@ const OFFICIAL_TELEMETRY_ENDPOINTS: Record<TelemetryChannel, string> = {
   local: 'http://localhost:8080',
 };
 
-export function getOfficialTelemetryEndpoint(
-  channel = BUILD_CONFIG.appBuildType
-): string {
-  if (BUILD_CONFIG.debug) {
-    return BUILD_CONFIG.isNative
+const OFFICIAL_TELEMETRY_CHANNELS = [
+  'stable',
+  'beta',
+  'internal',
+  'canary',
+] as const;
+
+type OfficialTelemetryChannel = (typeof OFFICIAL_TELEMETRY_CHANNELS)[number];
+
+type GlobalWithBuildConfig = typeof globalThis & {
+  BUILD_CONFIG?: Partial<BUILD_CONFIG_TYPE>;
+};
+
+function readGlobalBuildConfig(): Partial<BUILD_CONFIG_TYPE> | undefined {
+  try {
+    if (typeof BUILD_CONFIG !== 'undefined') {
+      return BUILD_CONFIG;
+    }
+  } catch {
+    // BUILD_CONFIG が未注入の環境では globalThis 側の確認に進む
+  }
+
+  return (globalThis as GlobalWithBuildConfig).BUILD_CONFIG;
+}
+
+function isOfficialTelemetryChannel(
+  channel: unknown
+): channel is OfficialTelemetryChannel {
+  return (
+    typeof channel === 'string' &&
+    (OFFICIAL_TELEMETRY_CHANNELS as readonly string[]).includes(channel)
+  );
+}
+
+function getLocationOrigin() {
+  try {
+    return typeof location === 'undefined'
       ? OFFICIAL_TELEMETRY_ENDPOINTS.local
       : location.origin;
-  } else if (['beta', 'internal', 'canary', 'stable'].includes(channel)) {
+  } catch {
+    return OFFICIAL_TELEMETRY_ENDPOINTS.local;
+  }
+}
+
+export function getOfficialTelemetryEndpoint(
+  channel = readGlobalBuildConfig()?.appBuildType
+): string {
+  const buildConfig = readGlobalBuildConfig();
+
+  if (buildConfig?.debug) {
+    return buildConfig.isNative
+      ? OFFICIAL_TELEMETRY_ENDPOINTS.local
+      : getLocationOrigin();
+  }
+
+  if (isOfficialTelemetryChannel(channel)) {
     return OFFICIAL_TELEMETRY_ENDPOINTS[channel];
   }
 
