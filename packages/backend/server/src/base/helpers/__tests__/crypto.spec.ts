@@ -24,13 +24,22 @@ function generateTestPrivateKey(): string {
 const privateKey = generateTestPrivateKey();
 const privateKey2 = generateTestPrivateKey();
 
-test.beforeEach(async t => {
-  t.context.crypto = new CryptoHelper({
+function createCrypto(
+  currentPrivateKey: string,
+  previousPrivateKeys: string[] = []
+) {
+  const crypto = new CryptoHelper({
     crypto: {
-      privateKey,
+      privateKey: currentPrivateKey,
+      previousPrivateKeys,
     },
   } as any);
-  t.context.crypto.onConfigInit();
+  crypto.onConfigInit();
+  return crypto;
+}
+
+test.beforeEach(async t => {
+  t.context.crypto = createCrypto(privateKey);
 });
 
 test('should be able to sign and verify', t => {
@@ -54,6 +63,15 @@ test('should verify signatures across key rotation', t => {
   const signatureV2 = t.context.crypto.sign(data);
   t.true(t.context.crypto.verify(signatureV1));
   t.true(t.context.crypto.verify(signatureV2));
+});
+
+test('should verify signatures with configured previous private keys', t => {
+  const data = 'hello world';
+  const cryptoV1 = createCrypto(privateKey);
+  const signatureV1 = cryptoV1.sign(data);
+  const cryptoV2 = createCrypto(privateKey2, [privateKey]);
+
+  t.true(cryptoV2.verify(signatureV1));
 });
 
 test('should same data should get different signature', t => {
@@ -81,6 +99,27 @@ test('should be able to encrypt and decrypt', t => {
   t.is(decrypted, data);
 
   stub.restore();
+});
+
+test('should decrypt data across key rotation', t => {
+  const data = 'top secret';
+  const encrypted = t.context.crypto.encrypt(data);
+
+  (t.context.crypto as any).config.crypto.privateKey = privateKey2;
+  t.context.crypto.onConfigChanged({
+    updates: { crypto: { privateKey: privateKey2 } },
+  } as any);
+
+  t.is(t.context.crypto.decrypt(encrypted), data);
+});
+
+test('should decrypt data with configured previous private keys', t => {
+  const data = 'top secret';
+  const cryptoV1 = createCrypto(privateKey);
+  const encrypted = cryptoV1.encrypt(data);
+  const cryptoV2 = createCrypto(privateKey2, [privateKey]);
+
+  t.is(cryptoV2.decrypt(encrypted), data);
 });
 
 test('should be able to get random bytes', t => {
