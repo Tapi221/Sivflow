@@ -15,7 +15,8 @@ use napi::{
 };
 
 use super::{
-  STREAM_END_MARKER, callback_dispatch_failed_reason, is_stream_aborted, is_stream_callback_dispatch_failed, tool_loop,
+  STREAM_CALLBACK_DISPATCH_FAILED_REASON, STREAM_END_MARKER, callback_dispatch_failed_reason, is_stream_aborted,
+  is_stream_callback_dispatch_failed, tool_loop,
 };
 use crate::llm::{
   LlmDispatchPayload, LlmRoutedBackendPayload, LlmStreamHandle, STREAM_ABORTED_REASON, StreamPipeline,
