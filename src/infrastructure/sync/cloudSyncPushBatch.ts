@@ -37,7 +37,7 @@ const buildDeleteTombstone = (id: string, data: unknown): Record<string, unknown
 };
 const pushCloudSyncBatch = async (userId: string, changes: SyncChange[]): Promise<{ successIds: string[]; failedIds: string[]; error?: unknown; }> => {
   console.log(
-    `[CloudSyncAdapter] pushBatch を開始しました。件数: ${changes.length}`,
+    `[クラウド同期アダプター] pushBatch を開始しました。件数: ${changes.length}`,
   );
 
   const successIds: string[] = [];
@@ -55,17 +55,17 @@ const pushCloudSyncBatch = async (userId: string, changes: SyncChange[]): Promis
       for (const change of chunk) {
         const parts = getChangeParts(change);
         if (!parts) {
-          throw new Error("Invalid sync change payload");
+          throw new Error("同期変更データの形式が不正です");
         }
 
         const { type, id, data } = parts;
         const documentRef = getPushDocumentRef(firestore, userId, type, id);
 
         if (isDeleteSyncChange(change)) {
-          console.log(`   - 削除 tombstone をバッチに書き込みます: ${type}/${id}`);
+          console.log(`   - 削除マーカーをバッチに書き込みます: ${type}/${id}`);
           const tombstone = sanitizeSyncDataForCloud(type, buildDeleteTombstone(id, data));
           if (!tombstone || typeof tombstone !== "object") {
-            throw new Error(`Invalid delete payload for ${type}/${id}: expected object`);
+            throw new Error(`削除データの形式が不正です: ${type}/${id} はオブジェクトである必要があります`);
           }
           batch.set(
             documentRef,
@@ -85,7 +85,7 @@ const pushCloudSyncBatch = async (userId: string, changes: SyncChange[]): Promis
 
         const sanitized = sanitizeSyncDataForCloud(type, data);
         if (!sanitized || typeof sanitized !== "object") {
-          throw new Error(`Invalid payload for ${type}/${id}: expected object`);
+          throw new Error(`同期データの形式が不正です: ${type}/${id} はオブジェクトである必要があります`);
         }
 
         batch.set(
@@ -106,7 +106,7 @@ const pushCloudSyncBatch = async (userId: string, changes: SyncChange[]): Promis
         successIds.push(...chunkIds);
       } catch (error) {
         console.error(
-          "[CloudSyncAdapter] pushBatch chunk commit ERROR:",
+          "[クラウド同期アダプター] pushBatch チャンクのコミットに失敗しました:",
           error,
         );
         failedIds.push(...chunkIds);
@@ -118,10 +118,10 @@ const pushCloudSyncBatch = async (userId: string, changes: SyncChange[]): Promis
       return { successIds, failedIds, error: firstError };
     }
 
-    console.log("[CloudSyncAdapter] pushBatch が成功しました");
+    console.log("[クラウド同期アダプター] pushBatch が成功しました");
     return { successIds, failedIds };
   } catch (error) {
-    console.error("[CloudSyncAdapter] pushBatch ERROR:", error);
+    console.error("[クラウド同期アダプター] pushBatch に失敗しました:", error);
     return {
       successIds: [],
       failedIds: changes
