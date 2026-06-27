@@ -14,7 +14,7 @@
     "./stickers": "./stickers-templates.gen.ts",
     "./build-edgeless": "./build-edgeless.mjs"
   },
-  "devDependencies": {
+  "dependencies": {
     "jszip": "^3.10.1"
   }
 }
