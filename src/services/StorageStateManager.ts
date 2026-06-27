@@ -5,7 +5,7 @@
  *
  * 状態遷移:
  * NORMAL → QUOTA_EXCEEDED → READ_ONLY
- * READ_ONLY → (cache cleared) → NORMAL
+ * READ_ONLY →（cache 削除後）→ NORMAL
  */
 class StorageStateManager {
   private static states = new Map<string, { state: "NORMAL" | "READ_ONLY";
