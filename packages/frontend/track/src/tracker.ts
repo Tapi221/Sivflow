@@ -467,7 +467,7 @@ function buildContext(): TelemetryEvent['context'] {
     editorVersion: buildConfig.editorVersion,
     environment: buildConfig.appBuildType,
     distribution: buildConfig.distribution,
-    channel: buildConfig.appBuildType,
+    channel: buildConfig.channel,
     isDesktop: buildConfig.isElectron,
     isMobile: buildConfig.isMobileEdition,
     ...getBrowserContext(),
