@@ -60,8 +60,6 @@ export type { ConnectedAccount, User };
 
 @Injectable()
 export class UserModel extends BaseModel {
-
-
   async get(id: string, filter: UserFilter = {}) {
     return this.db.user.findUnique({
       where: { id, disabled: filter.withDisabled ? undefined : false },
@@ -114,7 +112,16 @@ export class UserModel extends BaseModel {
     filter: UserFilter = {}
   ): Promise<User | null> {
     const rows = await this.db.$queryRaw<User[]>`
-      SELECT id, name, email, avatar_url as "avatarUrl", created_at as "createdAt", disabled
+      SELECT
+        id,
+        name,
+        email,
+        email_verified as "emailVerifiedAt",
+        avatar_url as "avatarUrl",
+        created_at as "createdAt",
+        password,
+        registered,
+        disabled
       FROM "users"
       WHERE lower("email") = lower(${email})
       ${Prisma.raw(filter.withDisabled ? '' : 'AND disabled = false')}
@@ -122,8 +129,6 @@ export class UserModel extends BaseModel {
 
     return rows[0] ?? null;
   }
-
-
 
   async getPublicUserByEmail(email: string): Promise<PublicUser | null> {
     const rows = await this.db.$queryRaw<PublicUser[]>`
@@ -171,7 +176,6 @@ export class UserModel extends BaseModel {
 
   @Transactional()
   async update(id: string, data: UpdateUserInput) {
-
     if (data.email) {
       const user = await this.getUserByEmail(data.email, {
         withDisabled: true,
@@ -198,23 +202,24 @@ export class UserModel extends BaseModel {
    */
   async fulfill(email: string, data: Omit<UpdateUserInput, 'email'> = {}) {
     const user = await this.getUserByEmail(email, { withDisabled: true });
+    const verifiedData: Omit<UpdateUserInput, 'email'> = {
+      ...data,
+      registered: true,
+      emailVerifiedAt: data.emailVerifiedAt ?? new Date(),
+    };
 
     if (!user) {
       return this.create({
         email,
-        ...data,
+        ...verifiedData,
       });
     } else {
       if (user.disabled) {
         throw new UserNotFound();
       }
 
-      if (Object.keys(data).length) {
-        return await this.update(user.id, data);
-      }
+      return await this.update(user.id, verifiedData);
     }
-
-    return user;
   }
 
   async ownedWorkspaces(id: string) {
