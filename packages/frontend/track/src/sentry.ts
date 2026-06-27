@@ -7,15 +7,26 @@ import {
   useNavigationType,
 } from 'react-router-dom';
 
+import { getBuildConfig } from './build-config';
+
+type GlobalWithSentryRelease = typeof globalThis & {
+  SENTRY_RELEASE?: unknown;
+};
+
+function hasExistingSentryRelease() {
+  return Boolean((globalThis as GlobalWithSentryRelease).SENTRY_RELEASE);
+}
+
 function createSentry() {
   let client: Sentry.BrowserClient | undefined;
   const wrapped = {
     init() {
-      if (globalThis.SENTRY_RELEASE) {
+      if (hasExistingSentryRelease()) {
         return;
       }
 
-      const dsn = BUILD_CONFIG.SENTRY_DSN?.trim();
+      const buildConfig = getBuildConfig();
+      const dsn = buildConfig.SENTRY_DSN.trim();
       if (!dsn) {
         return;
       }
@@ -24,7 +35,7 @@ function createSentry() {
       client = Sentry.init({
         dsn,
         debug: false,
-        environment: BUILD_CONFIG.appBuildType,
+        environment: buildConfig.appBuildType,
         integrations: [
           Sentry.reactRouterV6BrowserTracingIntegration({
             useEffect,
@@ -37,9 +48,9 @@ function createSentry() {
       }) as Sentry.BrowserClient;
 
       Sentry.setTags({
-        distribution: BUILD_CONFIG.distribution,
-        appVersion: BUILD_CONFIG.appVersion,
-        editorVersion: BUILD_CONFIG.editorVersion,
+        distribution: buildConfig.distribution,
+        appVersion: buildConfig.appVersion,
+        editorVersion: buildConfig.editorVersion,
       });
     },
     enable() {
