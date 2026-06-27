@@ -1,14 +1,26 @@
 import http, { type IncomingMessage, type ServerResponse } from "node:http";
 
-import pg from "pg";
+import { HttpsError } from "firebase-functions/v2/https";
 
-const { Pool } = pg;
+import { getAdminAuth } from "#src/firebaseAdmin.js";
+import {
+  connectGoogleCalendarAccountForUser,
+  disconnectGoogleCalendarAccountForUser,
+  listGoogleCalendarAccountsForUser,
+  loadGoogleOAuthSecrets,
+  refreshGoogleCalendarAccessTokenForUser,
+} from "#src/gcal/oauthPostgresService.js";
+import { closePostgresPool, getPostgresPool } from "#src/postgres.js";
+import {
+  crawlTimetableSyllabusUrlForUser,
+  runTimetableSyllabusCatalogCrawlJob,
+  upsertTimetableSyllabusSourceRecord,
+} from "#src/timetable/syllabusCrawlerService.js";
 
 const DEFAULT_HOST = "0.0.0.0";
 const DEFAULT_PORT = 8080;
 const SERVICE_NAME = "sivflow-api";
-
-let pool: pg.Pool | null = null;
+const MAX_JSON_BODY_BYTES = 1_000_000;
 
 const getPort = (): number => {
   const rawPort = process.env.PORT ?? `${DEFAULT_PORT}`;
@@ -18,25 +30,12 @@ const getPort = (): number => {
   return port;
 };
 
-const getDatabaseUrl = (): string | null => {
-  const databaseUrl = process.env.DATABASE_URL?.trim();
-  return databaseUrl ? databaseUrl : null;
-};
-
-const getPostgresPool = (): pg.Pool => {
-  const databaseUrl = getDatabaseUrl();
-  if (!databaseUrl) {
-    throw new Error("DATABASE_URL is not set.");
-  }
-
-  pool ??= new Pool({ connectionString: databaseUrl });
-  return pool;
-};
+const isDatabaseConfigured = (): boolean => Boolean(process.env.DATABASE_URL?.trim());
 
 const writeJson = (res: ServerResponse, statusCode: number, body: Record<string, unknown>): void => {
   res.writeHead(statusCode, {
     "Access-Control-Allow-Headers": "Authorization, Content-Type",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
     "Access-Control-Allow-Origin": "*",
     "Cache-Control": "no-store",
     "Content-Type": "application/json; charset=utf-8",
@@ -44,10 +43,59 @@ const writeJson = (res: ServerResponse, statusCode: number, body: Record<string,
   res.end(JSON.stringify(body));
 };
 
-const readPathname = (req: IncomingMessage): string => {
+const readUrl = (req: IncomingMessage): URL => {
   const baseUrl = `http://${req.headers.host ?? "localhost"}`;
-  return new URL(req.url ?? "/", baseUrl).pathname;
+  return new URL(req.url ?? "/", baseUrl);
 };
+
+const readJsonBody = async (req: IncomingMessage): Promise<Record<string, unknown>> => {
+  const chunks: Buffer[] = [];
+  let size = 0;
+
+  for await (const chunk of req) {
+    const buffer = typeof chunk === "string" ? Buffer.from(chunk) : chunk;
+    size += buffer.byteLength;
+    if (size > MAX_JSON_BODY_BYTES) throw new HttpsError("invalid-argument", "Request body is too large.");
+    chunks.push(buffer);
+  }
+
+  if (chunks.length === 0) return {};
+  const rawBody = Buffer.concat(chunks).toString("utf8").trim();
+  if (!rawBody) return {};
+
+  try {
+    const body = JSON.parse(rawBody) as unknown;
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      throw new HttpsError("invalid-argument", "JSON body must be an object.");
+    }
+    return body as Record<string, unknown>;
+  } catch (error) {
+    if (error instanceof HttpsError) throw error;
+    throw new HttpsError("invalid-argument", "Invalid JSON body.");
+  }
+};
+
+const requireAuth = async (req: IncomingMessage): Promise<string> => {
+  const header = req.headers.authorization;
+  const authorization = Array.isArray(header) ? header[0] : header;
+  const token = authorization?.startsWith("Bearer ") ? authorization.slice("Bearer ".length).trim() : "";
+  if (!token) throw new HttpsError("unauthenticated", "Authorization bearer token is required.");
+
+  const decoded = await (await getAdminAuth()).verifyIdToken(token);
+  return decoded.uid;
+};
+
+const requireAdmin = async (uid: string): Promise<void> => {
+  const user = await (await getAdminAuth()).getUser(uid);
+  if (user.customClaims?.admin !== true) throw new HttpsError("permission-denied", "Admin access is required.");
+};
+
+const readCloudRunGoogleOAuthSecrets = () =>
+  loadGoogleOAuthSecrets({
+    clientId: process.env.GOOGLE_OAUTH_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET,
+    tokenEncryptionKey: process.env.GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY,
+  });
 
 const handleReadyCheck = async (res: ServerResponse): Promise<void> => {
   await getPostgresPool().query("select 1");
@@ -58,17 +106,144 @@ const handleReadyCheck = async (res: ServerResponse): Promise<void> => {
   });
 };
 
+const handleGoogleCalendarApi = async (req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> => {
+  if (!pathname.startsWith("/api/google-calendar")) return false;
+
+  const uid = await requireAuth(req);
+  const secrets = readCloudRunGoogleOAuthSecrets();
+
+  if (req.method === "GET" && pathname === "/api/google-calendar/accounts") {
+    writeJson(res, 200, await listGoogleCalendarAccountsForUser(uid));
+    return true;
+  }
+
+  if (req.method === "POST" && pathname === "/api/google-calendar/connect") {
+    const response = await connectGoogleCalendarAccountForUser(uid, await readJsonBody(req), secrets);
+    await (await getAdminAuth()).updateUser(uid, {
+      email: response.accountEmail,
+      displayName: response.accountName ?? undefined,
+      photoURL: response.accountPhotoUrl ?? undefined,
+    });
+    writeJson(res, 200, response);
+    return true;
+  }
+
+  if (req.method === "POST" && (pathname === "/api/google-calendar/token" || pathname === "/api/google-calendar/access-token")) {
+    writeJson(res, 200, await refreshGoogleCalendarAccessTokenForUser(uid, await readJsonBody(req), secrets));
+    return true;
+  }
+
+  if (req.method === "POST" && pathname === "/api/google-calendar/disconnect") {
+    writeJson(res, 200, await disconnectGoogleCalendarAccountForUser(uid, await readJsonBody(req)));
+    return true;
+  }
+
+  const accountPathPrefix = "/api/google-calendar/accounts/";
+  if (req.method === "DELETE" && pathname.startsWith(accountPathPrefix)) {
+    const accountId = decodeURIComponent(pathname.slice(accountPathPrefix.length));
+    writeJson(res, 200, await disconnectGoogleCalendarAccountForUser(uid, { accountId }));
+    return true;
+  }
+
+  if (req.method === "POST" && pathname === "/api/google-calendar/custom-token") {
+    writeJson(res, 200, { customToken: await (await getAdminAuth()).createCustomToken(uid) });
+    return true;
+  }
+
+  writeJson(res, 404, {
+    error: "not_found",
+    ok: false,
+    path: pathname,
+    service: SERVICE_NAME,
+  });
+  return true;
+};
+
+const handleTimetableApi = async (req: IncomingMessage, res: ServerResponse, pathname: string): Promise<boolean> => {
+  if (!pathname.startsWith("/api/timetable")) return false;
+
+  const uid = await requireAuth(req);
+
+  if (req.method === "POST" && pathname === "/api/timetable/syllabus/crawl") {
+    writeJson(res, 200, await crawlTimetableSyllabusUrlForUser(await readJsonBody(req), uid));
+    return true;
+  }
+
+  if (req.method === "POST" && pathname === "/api/timetable/syllabus/sources") {
+    await requireAdmin(uid);
+    writeJson(res, 200, await upsertTimetableSyllabusSourceRecord(await readJsonBody(req)));
+    return true;
+  }
+
+  if (req.method === "POST" && pathname === "/api/timetable/syllabus/run-catalog-crawl") {
+    await requireAdmin(uid);
+    writeJson(res, 200, await runTimetableSyllabusCatalogCrawlJob());
+    return true;
+  }
+
+  writeJson(res, 404, {
+    error: "not_found",
+    ok: false,
+    path: pathname,
+    service: SERVICE_NAME,
+  });
+  return true;
+};
+
+const getStatusCodeFromError = (error: unknown): number => {
+  if (!(error instanceof HttpsError)) return 500;
+
+  switch (error.code) {
+    case "invalid-argument":
+      return 400;
+    case "unauthenticated":
+      return 401;
+    case "permission-denied":
+      return 403;
+    case "not-found":
+      return 404;
+    case "failed-precondition":
+      return 412;
+    case "unavailable":
+      return 503;
+    default:
+      return 500;
+  }
+};
+
+const writeError = (res: ServerResponse, error: unknown): void => {
+  const statusCode = getStatusCodeFromError(error);
+  const body: Record<string, unknown> = {
+    error: error instanceof Error ? error.message : "internal_error",
+    ok: false,
+    service: SERVICE_NAME,
+  };
+
+  if (error instanceof HttpsError) {
+    body.code = error.code;
+    body.details = error.details;
+  }
+
+  writeJson(res, statusCode, body);
+};
+
 const handleRequest = async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
   if (req.method === "OPTIONS") {
     writeJson(res, 204, {});
     return;
   }
 
-  const pathname = readPathname(req);
+  const url = readUrl(req);
+  const pathname = url.pathname;
 
   if (pathname === "/" || pathname === "/api") {
     writeJson(res, 200, {
-      databaseConfigured: Boolean(getDatabaseUrl()),
+      databaseConfigured: isDatabaseConfigured(),
+      googleOAuthConfigured: Boolean(
+        process.env.GOOGLE_OAUTH_CLIENT_ID?.trim() &&
+          process.env.GOOGLE_OAUTH_CLIENT_SECRET?.trim() &&
+          process.env.GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY?.trim(),
+      ),
       ok: true,
       service: SERVICE_NAME,
     });
@@ -88,6 +263,9 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse): Promise
     return;
   }
 
+  if (await handleGoogleCalendarApi(req, res, pathname)) return;
+  if (await handleTimetableApi(req, res, pathname)) return;
+
   writeJson(res, 404, {
     error: "not_found",
     ok: false,
@@ -99,19 +277,14 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse): Promise
 const server = http.createServer((req, res) => {
   void handleRequest(req, res).catch((error: unknown) => {
     console.error("[cloudrun] request failed", error);
-    writeJson(res, 500, {
-      error: error instanceof Error ? error.message : "internal_error",
-      ok: false,
-      service: SERVICE_NAME,
-    });
+    writeError(res, error);
   });
 });
 
 const shutdown = (signal: NodeJS.Signals): void => {
   console.log(`[cloudrun] ${signal} を受信しました。シャットダウンします。`);
   server.close(() => {
-    void pool?.end().finally(() => {
-      pool = null;
+    void closePostgresPool().finally(() => {
       process.exit(0);
     });
   });
