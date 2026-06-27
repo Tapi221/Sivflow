@@ -147,8 +147,8 @@ export class UserRealtimeProvider
       id: current.id,
       name: current.name,
       email: current.email,
-      emailVerified: true,
-      hasPassword: false,
+      emailVerified: current.emailVerified,
+      hasPassword: current.hasPassword,
       avatarUrl: current.avatarUrl ?? null,
       features: (await this.models.userFeature.list(userId))
         .filter(feature => this.availableUserFeatures().has(feature))
