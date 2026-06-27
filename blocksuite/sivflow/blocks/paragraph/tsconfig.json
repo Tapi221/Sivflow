@@ -6,6 +6,7 @@
     "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo"
   },
   "include": ["./src"],
+  "exclude": ["./src/turbo/paragraph-painter.worker.ts"],
   "references": [
     { "path": "../../components" },
     { "path": "../../ext-loader" },
