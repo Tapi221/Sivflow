@@ -23,7 +23,7 @@ const getPostgresPool = (): pg.Pool => {
 
 const postgresQuery = async <T extends pg.QueryResultRow = pg.QueryResultRow>(
   text: string,
-  values: readonly unknown[] = [],
+  values: unknown[] = [],
 ): Promise<pg.QueryResult<T>> => await getPostgresPool().query<T>(text, values);
 
 const closePostgresPool = async (): Promise<void> => {
