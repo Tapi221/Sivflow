@@ -117,13 +117,18 @@ function createTextNodeWalker(node: Node): TreeWalker | null {
     return null;
   }
 
-  return ownerDocument.createTreeWalker(node, NodeFilter.SHOW_TEXT, {
-    acceptNode(node) {
-      return node.textContent && node.textContent?.trim().length > 0
-        ? NodeFilter.FILTER_ACCEPT
-        : NodeFilter.FILTER_REJECT;
-    },
-  });
+  try {
+    return ownerDocument.createTreeWalker(node, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        return node.textContent && node.textContent?.trim().length > 0
+          ? NodeFilter.FILTER_ACCEPT
+          : NodeFilter.FILTER_REJECT;
+      },
+    });
+  } catch (error) {
+    console.warn('Failed to create text node walker', error);
+    return null;
+  }
 }
 
 function lastMeaningfulTextNode(node: Node) {
