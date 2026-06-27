@@ -22,6 +22,7 @@ const buildConfig = {
   isIOS: false,
   isMobileEdition: false,
   isNative: false,
+  isWeb: true,
 };
 
 const rollupCompatibleTarget = 'es2021' as const;
