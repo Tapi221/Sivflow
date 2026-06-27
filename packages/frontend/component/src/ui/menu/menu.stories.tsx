@@ -115,7 +115,7 @@ export const Default: StoryFn<MenuProps> = Template.bind(undefined);
 
 const ItemRender = ({ label, divider, subItems, ...otherProps }: Items) => {
   const onSelect = useCallback(() => {
-    console.log('value', label);
+    console.log('値', label);
   }, [label]);
 
   if (subItems) {
