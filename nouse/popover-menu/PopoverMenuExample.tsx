@@ -6,14 +6,14 @@ const PopoverMenuExample = () => {
   const menu = useMemo(
     () => () => (
       <div className="pm-zed-menu" role="menu">
-        <button className="pm-zed-menu-item" type="button" role="menuitem" onClick={() => console.log("New File")}>
+        <button className="pm-zed-menu-item" type="button" role="menuitem" onClick={() => console.log("新規ファイル")}>
           <span className="pm-zed-menu-item-label">New File</span>
         </button>
-        <button className="pm-zed-menu-item" type="button" role="menuitem" onClick={() => console.log("Open File")}>
+        <button className="pm-zed-menu-item" type="button" role="menuitem" onClick={() => console.log("ファイルを開く")}>
           <span className="pm-zed-menu-item-label">Open File</span>
         </button>
         <div className="pm-zed-menu-separator" />
-        <button className="pm-zed-menu-item" type="button" role="menuitem" onClick={() => console.log("New Terminal")}>
+        <button className="pm-zed-menu-item" type="button" role="menuitem" onClick={() => console.log("新規ターミナル")}>
           <span className="pm-zed-menu-item-label">New Terminal</span>
         </button>
       </div>
@@ -27,7 +27,7 @@ const PopoverMenuExample = () => {
         handle={handle}
         anchor="top-right"
         menu={menu}
-        onOpen={() => console.log("opened")}
+        onOpen={() => console.log("開きました")}
       >
         {({ open, triggerProps }) => (
           <button
