@@ -3,13 +3,16 @@ import { createStore, del, get, keys, set } from 'idb-keyval';
 import type { BlobSource } from '../source.js';
 
 export class IndexedDBBlobSource implements BlobSource {
-  readonly mimeTypeStore = createStore(`${this.name}_blob_mime`, 'blob_mime');
+  readonly mimeTypeStore: ReturnType<typeof createStore>;
 
   readonly = false;
 
-  readonly store = createStore(`${this.name}_blob`, 'blob');
+  readonly store: ReturnType<typeof createStore>;
 
-  constructor(readonly name: string) {}
+  constructor(readonly name: string) {
+    this.mimeTypeStore = createStore(`${this.name}_blob_mime`, 'blob_mime');
+    this.store = createStore(`${this.name}_blob`, 'blob');
+  }
 
   async delete(key: string) {
     await del(key, this.store);
