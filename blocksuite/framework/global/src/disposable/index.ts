@@ -57,19 +57,29 @@ export class DisposableGroup {
     handler: (e: VisualViewportEventMap[N]) => void,
     eventOptions?: boolean | AddEventListenerOptions
   ): void;
+  addFromEvent(
+    element: EventTarget | null | undefined,
+    eventName: string,
+    handler: (e: any) => void,
+    eventOptions?: boolean | AddEventListenerOptions
+  ): void;
 
   addFromEvent(
-    target: HTMLElement | Window | Document | VisualViewport,
+    target: EventTarget | null | undefined,
     type: string,
     handler: (e: Event) => void,
     eventOptions?: boolean | AddEventListenerOptions
   ) {
+    if (!target) {
+      return;
+    }
+
     this.add({
       dispose: () => {
-        target.removeEventListener(type, handler as () => void, eventOptions);
+        target.removeEventListener(type, handler as EventListener, eventOptions);
       },
     });
-    target.addEventListener(type, handler as () => void, eventOptions);
+    target.addEventListener(type, handler as EventListener, eventOptions);
   }
 
   dispose() {
