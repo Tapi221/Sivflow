@@ -24,6 +24,6 @@ export class CloudDocMetaStore extends Store {
         signal: abortSignal,
       },
     });
-    return serverConfigData.workspace.pageMeta;
+    return serverConfigData.workspace.doc.meta;
   }
 }
