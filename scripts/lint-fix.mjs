@@ -6,6 +6,7 @@ const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPOSITORY_ROOT = path.resolve(SCRIPT_DIR, "..");
 const CHECK_ONLY_ARGUMENT = "--check-only";
 const FIXERS_ONLY_ARGUMENT = "--fixers-only";
+const SOURCE_CONVENTION_TARGETS = ["src", "apps/web/src", "apps/android/src", "packages/core/src", "packages/platform/src", "packages/web-renderer/src", "packages/android-renderer/src", "shared", "functions/src", "scripts/dev", "scripts/verify"].join(path.delimiter);
 const FIXER_SCRIPT_PATHS = [
   path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-type-only-imports.mjs"),
   path.resolve(REPOSITORY_ROOT, "scripts/verify/fix-const-arrow-functions.mjs"),
@@ -40,9 +41,10 @@ const isFixersOnly = process.argv.includes(FIXERS_ONLY_ARGUMENT);
 
 process.chdir(REPOSITORY_ROOT);
 
-const runNodeScript = (scriptPath, args = []) => {
+const runNodeScript = (scriptPath, args = [], options = {}) => {
   const result = spawnSync(process.execPath, [scriptPath, ...args], {
     cwd: REPOSITORY_ROOT,
+    env: { ...process.env, ...(options.env ?? {}) },
     stdio: "inherit",
   });
   if (result.error) {
@@ -82,7 +84,7 @@ const runSourceConventionVerification = () => {
     runNodeScript(NODE_SCRIPT_PATHS.verifyShortHexColors),
     runNodeScript(NODE_SCRIPT_PATHS.verifyNullishFallback),
     runNodeScript(NODE_SCRIPT_PATHS.verifyStrictEquality),
-    runNodeScript(NODE_SCRIPT_PATHS.verifySourceConventions),
+    runNodeScript(NODE_SCRIPT_PATHS.verifySourceConventions, [], { env: { SOURCE_CONVENTION_TARGETS } }),
     runNodeScript(NODE_SCRIPT_PATHS.verifyJsxChildSpacing),
     runNodeScript(NODE_SCRIPT_PATHS.verifyConstArrowFunctions),
     runNodeScript(NODE_SCRIPT_PATHS.verifyPdfZoomConstants),
