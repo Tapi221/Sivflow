@@ -80,6 +80,10 @@ export class AuthStore extends Store {
   }
 
   async fetchSession() {
+    if (!BUILD_CONFIG.backendEnabled) {
+      return { user: null };
+    }
+
     const session = await this.fetchAuthSession();
     if (!session.user) return { user: null };
 
@@ -137,7 +141,9 @@ export class AuthStore extends Store {
   }
 
   async signOut() {
-    await this.authProvider.signOut();
+    if (BUILD_CONFIG.backendEnabled) {
+      await this.authProvider.signOut();
+    }
     await this.nbstoreService.realtime.configure({
       endpoint: this.serverService.server.baseUrl,
       authenticated: false,
