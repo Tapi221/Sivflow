@@ -101,7 +101,7 @@ export async function gemini(
         mimeType: 'audio/wav',
         displayName: 'audio_transcription.wav',
       });
-      console.log('File uploaded:', uploadResult.file.uri);
+      console.log('ファイルをアップロードしました:', uploadResult.file.uri);
 
       // Initialize a Gemini model appropriate for your use case.
       const model = genAI.getGenerativeModel({
@@ -191,7 +191,7 @@ export async function gemini(
     ...transcription,
     ...summary,
   };
-  console.log('Processing completed:', {
+  console.log('処理が完了しました:', {
     title: result.title,
     segmentsCount: result.segments?.length,
   });
