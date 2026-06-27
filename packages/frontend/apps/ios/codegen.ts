@@ -11,12 +11,12 @@ console.log('[*] PackageRoot', PackageRoot);
 
 const version = process.argv[2] || '1.25.4'; // Default to 1.25.4 if no version provided
 
-console.log('[*] graphql...');
+console.log('[*] graphql を生成しています...');
 execSync(`${PackageRoot}/apollo-codegen-chore.sh "${version}"`, {
   stdio: 'inherit',
 });
 
-console.log('[*] rust...');
+console.log('[*] rust をビルドしています...');
 execSync(
   'cargo build -p affine_mobile_native --features use-as-lib --lib --release --target aarch64-apple-ios',
   {
@@ -32,4 +32,4 @@ execSync(
   { stdio: 'inherit' }
 );
 
-console.log('[+] codegen complete');
+console.log('[+] codegen が完了しました');
