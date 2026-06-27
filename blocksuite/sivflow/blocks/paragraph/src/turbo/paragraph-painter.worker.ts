@@ -43,7 +43,6 @@ class ParagraphLayoutPainter implements BlockLayoutPainter {
 
   static {
     if (ParagraphLayoutPainter.supportFontFace && ParagraphLayoutPainter.font) {
-      // @ts-expect-error worker fonts API
       self.fonts.add(ParagraphLayoutPainter.font);
 
       ParagraphLayoutPainter.font
@@ -81,35 +80,30 @@ class ParagraphLayoutPainter implements BlockLayoutPainter {
       return;
     }
 
-    const renderedPositions = new Set<string>();
+    ctx.save();
+    ctx.translate(layoutBaseX, layoutBaseY);
+
+    ctx.font = `${layout.sentences[0]?.fontSize ?? 16}px Inter`;
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = 'black';
+
+    if (debugSentenceBorder) {
+      ctx.strokeStyle = 'red';
+      ctx.lineWidth = 1;
+    }
+
     layout.sentences.forEach(sentence => {
-      const fontSize = sentence.fontSize;
-      const baselineY = getBaseline(fontSize);
-      if (fontSize !== 15) return; // TODO: fine-tune for heading font sizes
-
-      ctx.font = `${fontSize}px Inter`;
-      ctx.strokeStyle = 'yellow';
-      sentence.rects.forEach(textRect => {
-        const x = textRect.rect.x - layoutBaseX;
-        const y = textRect.rect.y - layoutBaseY;
-
-        const posKey = `${x},${y}`;
-        // Only render if we haven't rendered at this position before
-        if (renderedPositions.has(posKey)) return;
-
+      const baseline = getBaseline(sentence.fontSize);
+      sentence.rects.forEach(rect => {
         if (debugSentenceBorder) {
-          ctx.strokeRect(x, y, textRect.rect.w, textRect.rect.h);
+          ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
         }
-        ctx.fillStyle = 'black';
-        ctx.fillText(textRect.text, x, y + baselineY);
-
-        renderedPositions.add(posKey);
+        ctx.fillText(sentence.text, rect.x, rect.y + baseline);
       });
     });
+
+    ctx.restore();
   }
 }
 
-export const ParagraphLayoutPainterExtension = BlockLayoutPainterExtension(
-  'affine:paragraph',
-  ParagraphLayoutPainter
-);
+BlockLayoutPainterExtension(ParagraphLayoutPainter);
