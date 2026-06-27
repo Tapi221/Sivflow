@@ -3,41 +3,56 @@ if (typeof globalThis.HTMLElement === 'undefined') {
 }
 
 if (typeof globalThis.document === 'undefined') {
-  const createNode = () => {
+  const createNode = (nodeType = 1) => {
     const node: any = {
       style: {},
       childNodes: [],
-      nodeType: 1,
+      nodeType,
       parentNode: null,
       ownerDocument: null,
-      appendChild(child: any) {
-        child.parentNode = node;
-        node.childNodes.push(child);
-        return child;
+      appendChild(item: any) {
+        item.parentNode = node;
+        node.childNodes.push(item);
+        return item;
       },
-      cloneNode() {
-        return createNode();
+      cloneNode(copyChildren = false) {
+        const clone = createNode(node.nodeType);
+        clone.data = node.data;
+        clone.tagName = node.tagName;
+        clone.ownerDocument = node.ownerDocument;
+        clone.content = node.content ? createNode(11) : undefined;
+        clone.style = { ...node.style };
+
+        if (copyChildren) {
+          node.childNodes.forEach((item: any) => {
+            clone.appendChild(
+              typeof item?.cloneNode === 'function' ? item.cloneNode(true) : item
+            );
+          });
+        }
+
+        return clone;
       },
-      insertBefore(child: any, referenceNode?: any) {
-        child.parentNode = node;
+      insertBefore(item: any, referenceNode?: any) {
+        item.parentNode = node;
         const index = referenceNode ? node.childNodes.indexOf(referenceNode) : -1;
         if (index === -1) {
-          node.childNodes.push(child);
+          node.childNodes.push(item);
         } else {
-          node.childNodes.splice(index, 0, child);
+          node.childNodes.splice(index, 0, item);
         }
-        return child;
+        return item;
       },
       remove() {
         node.parentNode?.removeChild?.(node);
       },
-      removeChild(child: any) {
-        const index = node.childNodes.indexOf(child);
+      removeChild(item: any) {
+        const index = node.childNodes.indexOf(item);
         if (index !== -1) {
           node.childNodes.splice(index, 1);
         }
-        child.parentNode = null;
-        return child;
+        item.parentNode = null;
+        return item;
       },
       setAttribute() {},
       removeAttribute() {},
@@ -52,30 +67,24 @@ if (typeof globalThis.document === 'undefined') {
     addEventListener() {},
     removeEventListener() {},
     createComment(data = '') {
-      return {
-        ...createNode(),
-        data,
-        nodeType: 8,
-        ownerDocument: documentStub,
-      };
+      const comment = createNode(8);
+      comment.data = data;
+      comment.ownerDocument = documentStub;
+      return comment;
     },
     createElement(tagName = 'div') {
-      const element = {
-        ...createNode(),
-        tagName: tagName.toUpperCase(),
-        content: createNode(),
-        ownerDocument: documentStub,
-      };
+      const element = createNode(1);
+      element.tagName = tagName.toUpperCase();
+      element.content = createNode(11);
+      element.ownerDocument = documentStub;
       element.content.ownerDocument = documentStub;
       return element;
     },
     createTextNode(data = '') {
-      return {
-        ...createNode(),
-        data,
-        nodeType: 3,
-        ownerDocument: documentStub,
-      };
+      const text = createNode(3);
+      text.data = data;
+      text.ownerDocument = documentStub;
+      return text;
     },
     createTreeWalker(root: any) {
       return {
