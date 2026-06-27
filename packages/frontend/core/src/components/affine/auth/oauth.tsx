@@ -97,6 +97,26 @@ async function getFirebaseAuth() {
   return getAuth(app);
 }
 
+function isFirebaseConfigError(error: unknown) {
+  return (
+    error instanceof Error &&
+    error.message.includes('Firebase Auth config is missing')
+  );
+}
+
+function notifyOAuthError(error: unknown) {
+  if (isFirebaseConfigError(error)) {
+    notify.error({
+      title: 'Google login is not configured',
+      message:
+        'Set BUILD_CONFIG.firebaseAuth or VITE_FIREBASE_* env vars before using Google sign-in.',
+    });
+    return;
+  }
+
+  notify.error(UserFriendlyError.fromAny(error));
+}
+
 export function OAuth({ redirectUrl }: { redirectUrl?: string }) {
   const serverService = useService(ServerService);
   const urlService = useService(UrlService);
@@ -112,6 +132,17 @@ export function OAuth({ redirectUrl }: { redirectUrl?: string }) {
       track.$.$.auth.signIn({ method: 'oauth', provider });
 
       try {
+        const nativeClient = urlService.getClientScheme();
+        if (nativeClient) {
+          const { url } = await auth.oauthPreflight(
+            provider,
+            nativeClient,
+            redirectUrl
+          );
+          urlService.openExternal(url);
+          return;
+        }
+
         const { GoogleAuthProvider, signInWithPopup } = await import(
           'firebase/auth'
         );
@@ -140,7 +171,7 @@ export function OAuth({ redirectUrl }: { redirectUrl?: string }) {
           });
         }
       } catch (e) {
-        notify.error(UserFriendlyError.fromAny(e));
+        notifyOAuthError(e);
       }
     },
     [auth, fetchService, urlService, redirectUrl]
