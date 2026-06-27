@@ -13,7 +13,7 @@ type ResettableLocalDb = {
 const rebuildIndexedDb = async (userId: string, reason?: string): Promise<{ degraded: boolean;
   failures: Array<{ type: string; id: string; error: string; }>;
 }> => {
-  console.log(`[AppInit:${userId}] Rebuilding IndexedDB...`);
+  console.log(`[AppInit:${userId}] IndexedDB を再構築しています...`);
 
   const db = await getLocalDb(userId);
   let metaService = new IndexedDBMetadataService(db, userId);
