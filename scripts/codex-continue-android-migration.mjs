@@ -60,7 +60,7 @@ const main = () => {
   }
   const pathsAreValid = printPathStatus();
   if (failedCommands.length === 0 && pathsAreValid) {
-    console.log("Codex Android migration continuation completed.");
+    console.log("Codex Android 移行の継続処理が完了しました。");
     return;
   }
   console.error("Codex Android migration continuation did not complete cleanly.");
