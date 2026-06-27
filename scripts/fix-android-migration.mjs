@@ -22,7 +22,11 @@ const TEXT_EXTENSIONS = new Set([".cjs", ".gradle", ".js", ".json", ".jsx", ".kt
 const EXCLUDED_DIRECTORY_NAMES = new Set([".git", ".gradle", ".next", ".nuxt", "build", "coverage", "dist", "node_modules", "target"]);
 const CONTENT_REPLACEMENTS = [[LEGACY_RENDERER_ALIAS, ANDROID_RENDERER_ALIAS], [LEGACY_APP_ALIAS, ANDROID_APP_ALIAS], [LEGACY_RENDERER_DIR, ANDROID_RENDERER_DIR], [LEGACY_APP_DIR, ANDROID_APP_DIR], [`${LEGACY_PLATFORM_NAME}-renderer`, `${ANDROID_PLATFORM_NAME}-renderer`], [LEGACY_PACKAGE_NAME, ANDROID_PACKAGE_NAME]];
 const LEGACY_TOKENS = [LEGACY_RENDERER_ALIAS, LEGACY_APP_ALIAS, LEGACY_RENDERER_DIR, LEGACY_APP_DIR, LEGACY_PACKAGE_NAME, `${LEGACY_PLATFORM_NAME}-renderer`];
-const ANDROID_ENTRY_CONTENT = `import { registerRootComponent } from "expo";\nimport { App } from "${ANDROID_RENDERER_ALIAS}/App";\n\nregisterRootComponent(App);\n`;
+const ANDROID_ENTRY_CONTENT = `import { registerRootComponent } from "expo";
+import { App } from "${ANDROID_RENDERER_ALIAS}/App";
+
+registerRootComponent(App);
+`;
 const REQUIRED_ANDROID_FILES = [`${ANDROID_APP_DIR}/package.json`, `${ANDROID_APP_DIR}/app.json`, `${ANDROID_APP_DIR}/index.ts`, `${ANDROID_APP_DIR}/tsconfig.json`, `${ANDROID_RENDERER_DIR}/package.json`, `${ANDROID_RENDERER_DIR}/src/App.tsx`];
 
 const toAbsolutePath = (filePath) => path.join(ROOT_DIR, filePath);
@@ -177,11 +181,11 @@ const main = async () => {
   await removePath(toAbsolutePath(LEGACY_RENDERER_DIR));
   const violations = await collectRemainingLegacyReferences();
   if (changedFiles.length > 0) {
-    console.log("Android migration rewrote files:");
+    console.log("Android 移行で書き換えたファイル:");
     for (const changedFile of changedFiles) console.log(`- ${changedFile}`);
   }
   if (violations.length === 0) {
-    console.log(IS_CHECK ? "Android migration check passed." : "Android migration cleanup completed.");
+    console.log(IS_CHECK ? "Android 移行チェックに合格しました。" : "Android 移行のクリーンアップが完了しました。");
     return;
   }
   console.error("Android migration still has unresolved items:");
