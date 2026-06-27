@@ -7,6 +7,7 @@
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
     "strict": true,
+    "strictNullChecks": false,
     "strictPropertyInitialization": false,
     "composite": true,
     "declaration": true,
@@ -19,6 +20,9 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
+    "paths": {
+      "lit/directives/guard.js": ["./tools/ts-shims/lit-cache-directive.d.ts"]
+    },
     "types": ["vite/client", "build-config", "affine__env"],
     "typeRoots": ["./tools/@types", "./node_modules/@types", "./node_modules"]
   },
