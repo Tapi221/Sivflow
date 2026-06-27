@@ -4,7 +4,8 @@
   "sideEffect": false,
   "version": "0.26.3",
   "scripts": {
-    "build": "node ./build-edgeless.mjs && node ./build-stickers.mjs"
+    "build": "node ./build-edgeless.mjs && node ./build-stickers.mjs",
+    "postinstall": "npm run build"
   },
   "type": "module",
   "exports": {
