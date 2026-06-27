@@ -301,7 +301,7 @@ const WorkspacePage = ({ meta }: { meta: WorkspaceMetadata }) => {
               blob
             );
             console.log(
-              'imported docs',
+              'インポートした docs',
               newDocs
                 .filter(doc => !!doc)
                 .map(doc => ({
