@@ -10,7 +10,7 @@ const sourceIconPath = resolve(repositoryRoot, "shared/assets/icons/app-icon.svg
 const outputIconPath = resolve(repositoryRoot, "apps/desktop/src-tauri/icons");
 
 if (!existsSync(sourceIconPath)) {
-  throw new Error(`Missing source icon: ${sourceIconPath}`);
+  throw new Error(`元アイコンが見つかりません: ${sourceIconPath}`);
 }
 
 const result = spawnSync("npm", ["exec", "tauri", "--", "icon", sourceIconPath, "--output", outputIconPath], {
@@ -24,5 +24,5 @@ if (result.error) {
 }
 
 if (result.status !== 0) {
-  throw new Error(`Failed to generate desktop icons. Exit code: ${result.status ?? "unknown"}`);
+  throw new Error(`デスクトップアイコンの生成に失敗しました。終了コード: ${result.status ?? "unknown"}`);
 }
