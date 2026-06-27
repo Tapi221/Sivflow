@@ -8,6 +8,47 @@ const repoRoot = path.resolve(
 );
 const webDistDir = path.resolve(repoRoot, "packages/frontend/apps/web/dist");
 
+const sourceChecks = [
+  {
+    label: "Web nbstore worker entry",
+    relativePath: "packages/frontend/apps/web/src/nbstore.worker.ts",
+    required: [/import\s+["']@affine\/core\/bootstrap\/worker["'];?/],
+    forbidden: [/@affine\/core\/bootstrap\/browser/],
+  },
+  {
+    label: "Mobile nbstore worker entry",
+    relativePath: "packages/frontend/apps/mobile/src/nbstore.worker.ts",
+    required: [/import\s+["']@affine\/core\/bootstrap\/worker["'];?/],
+    forbidden: [/@affine\/core\/bootstrap\/browser/],
+  },
+  {
+    label: "Worker bootstrap",
+    relativePath: "packages/frontend/core/src/bootstrap/worker.ts",
+    required: [/import\s+["']\.\/env["'];?/, /import\s+["']\.\/public-path["'];?/, /import\s+["']\.\/polyfill\/worker["'];?/],
+    forbidden: [/\.\/telemetry/, /\.\/polyfill\/browser/],
+  },
+  {
+    label: "Worker polyfill",
+    relativePath: "packages/frontend/core/src/bootstrap/polyfill/worker.ts",
+    required: [
+      /import\s+["']\.\/array["'];?/, 
+      /import\s+["']\.\/set["'];?/, 
+      /import\s+["']\.\/dispose["'];?/, 
+      /import\s+["']\.\/iterator-helpers["'];?/, 
+      /import\s+["']\.\/promise-with-resolvers["'];?/, 
+      /import\s+["']\.\/request-idle-callback["'];?/
+    ],
+    forbidden: [/resize-observer/, /\.\/browser/],
+  },
+];
+
+const bundleForbiddenSignatures = [
+  /@sentry\/react/,
+  /react-router-dom/,
+  /reactRouterV6BrowserTracingIntegration/,
+  /bootstrap\/browser/,
+];
+
 const findFiles = dir =>
   readdirSync(dir, { withFileTypes: true }).flatMap(entry => {
     const entryPath = path.join(dir, entry.name);
@@ -19,6 +60,43 @@ const findFiles = dir =>
     }
     return [];
   });
+
+const fail = message => {
+  console.error(message);
+  process.exitCode = 1;
+};
+
+for (const check of sourceChecks) {
+  const absolutePath = path.resolve(repoRoot, check.relativePath);
+  if (!existsSync(absolutePath)) {
+    fail(`${check.label} が見つかりません: ${check.relativePath}`);
+    continue;
+  }
+
+  const source = readFileSync(absolutePath, "utf8");
+
+  for (const required of check.required) {
+    if (!required.test(source)) {
+      fail(
+        `${check.label} に必須 import がありません: ${check.relativePath} (${required})`,
+      );
+    }
+  }
+
+  for (const forbidden of check.forbidden) {
+    if (forbidden.test(source)) {
+      fail(
+        `${check.label} に Worker 禁止依存が残っています: ${check.relativePath} (${forbidden})`,
+      );
+    }
+  }
+}
+
+if (process.exitCode) {
+  process.exit(process.exitCode);
+}
+
+console.log("nbstore worker のソース境界を確認しました。");
 
 if (!existsSync(webDistDir) || !statSync(webDistDir).isDirectory()) {
   console.error(
@@ -36,18 +114,11 @@ if (workerFiles.length === 0) {
   process.exit(1);
 }
 
-const forbiddenSignatures = [
-  /@sentry\/react/,
-  /react-router-dom/,
-  /reactRouterV6BrowserTracingIntegration/,
-  /bootstrap\/browser/,
-];
-
 let hasLeak = false;
 
 for (const workerFile of workerFiles) {
   const source = readFileSync(workerFile, "utf8");
-  const leakedSignature = forbiddenSignatures.find(signature =>
+  const leakedSignature = bundleForbiddenSignatures.find(signature =>
     signature.test(source),
   );
 
