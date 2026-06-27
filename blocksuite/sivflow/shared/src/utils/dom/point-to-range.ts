@@ -107,41 +107,19 @@ export function handleNativeRangeAtPoint(x: number, y: number) {
   }
 }
 
-function createTextNodeWalker(node: Node): TreeWalker | null {
-  const ownerDocument =
-    node.nodeType === Node.DOCUMENT_NODE
-      ? (node as Document)
-      : (node.ownerDocument ?? document);
-
-  if (typeof ownerDocument.createTreeWalker !== 'function') {
-    return null;
+function lastMeaningfulTextNode(node: Node): Node | null {
+  if (node.nodeType === Node.TEXT_NODE) {
+    return node.textContent && node.textContent.trim().length > 0 ? node : null;
   }
 
-  try {
-    return ownerDocument.createTreeWalker(node, NodeFilter.SHOW_TEXT, {
-      acceptNode(node) {
-        return node.textContent && node.textContent?.trim().length > 0
-          ? NodeFilter.FILTER_ACCEPT
-          : NodeFilter.FILTER_REJECT;
-      },
-    });
-  } catch (error) {
-    console.warn('Failed to create text node walker', error);
-    return null;
-  }
-}
-
-function lastMeaningfulTextNode(node: Node) {
-  const walker = createTextNodeWalker(node);
-  if (!walker) {
-    return null;
+  for (let index = node.childNodes.length - 1; index >= 0; index -= 1) {
+    const text = lastMeaningfulTextNode(node.childNodes[index]);
+    if (text) {
+      return text;
+    }
   }
 
-  let last: Node | null = null;
-  while (walker.nextNode()) {
-    last = walker.currentNode;
-  }
-  return last;
+  return null;
 }
 
 function normalizeCaretRange(range: Range) {
