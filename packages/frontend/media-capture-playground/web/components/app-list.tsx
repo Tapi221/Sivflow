@@ -24,7 +24,7 @@ export function AppList() {
     });
     socket.on('apps:state-changed', data => {
       const index = apps.findIndex(a => a.processId === data.processId);
-      console.log('apps:state-changed', data, index);
+      console.log('アプリ状態変更を受信しました', data, index);
       if (index !== -1) {
         next(
           null,

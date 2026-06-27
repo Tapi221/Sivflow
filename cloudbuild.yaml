@@ -1,56 +1,25 @@
 substitutions:
   _REGION: asia-northeast1
   _SERVICE: sivflow-api
-  _AR_REPOSITORY: sivflow
-  _DATABASE_URL_SECRET: DATABASE_URL
-  _GOOGLE_OAUTH_CLIENT_ID_SECRET: GOOGLE_OAUTH_CLIENT_ID
-  _GOOGLE_OAUTH_CLIENT_SECRET_SECRET: GOOGLE_OAUTH_CLIENT_SECRET
-  _GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY_SECRET: GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY
-  _CLOUD_SQL_INSTANCE: ""
+  _SOURCE: functions
 
 steps:
-  - id: build-cloud-run-image
-    name: gcr.io/cloud-builders/docker
-    args:
-      - build
-      - -f
-      - Dockerfile.cloudrun
-      - -t
-      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_SERVICE}:$SHORT_SHA
-      - .
-
-  - id: push-cloud-run-image
-    name: gcr.io/cloud-builders/docker
-    args:
-      - push
-      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_SERVICE}:$SHORT_SHA
-
-  - id: deploy-cloud-run
+  - id: deploy-cloud-run-from-source
     name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
-    entrypoint: bash
+    entrypoint: gcloud
     args:
-      - -c
-      - |
-        set -eu
-
-        deploy_args=(
-          run deploy "${_SERVICE}"
-          --image "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_SERVICE}:$SHORT_SHA"
-          --region "${_REGION}"
-          --platform managed
-          --allow-unauthenticated
-          --set-env-vars NODE_ENV=production
-          --set-secrets "DATABASE_URL=${_DATABASE_URL_SECRET}:latest,GOOGLE_OAUTH_CLIENT_ID=${_GOOGLE_OAUTH_CLIENT_ID_SECRET}:latest,GOOGLE_OAUTH_CLIENT_SECRET=${_GOOGLE_OAUTH_CLIENT_SECRET_SECRET}:latest,GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY=${_GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY_SECRET}:latest"
-        )
-
-        if [ -n "${_CLOUD_SQL_INSTANCE}" ]; then
-          deploy_args+=(--add-cloudsql-instances "${_CLOUD_SQL_INSTANCE}")
-        fi
-
-        gcloud "${deploy_args[@]}"
-
-images:
-  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPOSITORY}/${_SERVICE}:$SHORT_SHA
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --source
+      - ${_SOURCE}
+      - --region
+      - ${_REGION}
+      - --platform
+      - managed
+      - --allow-unauthenticated
+      - --set-env-vars
+      - NODE_ENV=production
 
 options:
   logging: CLOUD_LOGGING_ONLY

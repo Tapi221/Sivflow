@@ -1,4 +1,4 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+// すべてのサブプロジェクト / モジュールで共通して使う設定を追加できるトップレベルのビルドファイルです。
 
 buildscript {
   repositories {
