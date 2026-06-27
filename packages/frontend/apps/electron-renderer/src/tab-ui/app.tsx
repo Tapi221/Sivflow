@@ -3,7 +3,7 @@ import { WindowsAppControls } from '@affine/core/components/pure/header/windows-
 import { ThemeProvider } from '@affine/core/components/theme-provider';
 import { configureElectronStateStorageImpls } from '@affine/core/desktop/storage';
 import { configureAppSidebarModule } from '@affine/core/modules/app-sidebar';
-import * as appSidebarViews from '@affine/core/modules/app-sidebar/views';
+import { ShellAppSidebarFallback } from '@affine/core/modules/app-sidebar/views';
 import {
   AppTabsHeader,
   configureAppTabsHeaderModule,
@@ -13,7 +13,6 @@ import { configureI18nModule, I18nProvider } from '@affine/core/modules/i18n';
 import { configureStorageModule } from '@affine/core/modules/storage';
 import { configureAppThemeModule } from '@affine/core/modules/theme';
 import { Framework, FrameworkRoot } from '@toeverything/infra';
-import type { ComponentType } from 'react';
 
 import * as styles from './app.css';
 
@@ -27,12 +26,6 @@ configureDesktopApiModule(framework);
 configureAppThemeModule(framework);
 const frameworkProvider = framework.provider();
 
-const sidebarFallbackName = ['Sh', 'ellAppSidebarFallback'].join(
-  ''
-) as keyof typeof appSidebarViews;
-const SidebarFallback = appSidebarViews[sidebarFallbackName] as ComponentType;
-const headerMode = ['sh', 'ell'].join('') as 'shell';
-
 export function App() {
   const { appSettings } = useAppSettingHelper();
   const translucent =
@@ -45,9 +38,9 @@ export function App() {
       <ThemeProvider>
         <I18nProvider>
           <div className={styles.root} data-translucent={translucent}>
-            <AppTabsHeader mode={headerMode} className={styles.appTabsHeader} />
+            <AppTabsHeader mode="shell" className={styles.appTabsHeader} />
             <div className={styles.body}>
-              <SidebarFallback />
+              <ShellAppSidebarFallback />
             </div>
             {environment.isWindows && (
               <div style={{ position: 'fixed', right: 0, top: 0, zIndex: 5 }}>
