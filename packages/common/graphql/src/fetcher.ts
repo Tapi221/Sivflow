@@ -135,38 +135,44 @@ function filterEmptyValue(vars: unknown): unknown {
 
 export function transformToForm(body: RequestBody) {
   const form = new FormData();
+  const map: Record<string, string[]> = {};
+  const files: File[] = [];
+  let i = 0;
+
+  const normalizeVariables = (key: string, value: unknown): unknown => {
+    if (isFileValue(value)) {
+      map['' + i] = [key];
+      files[i] = value;
+      i++;
+      return null;
+    }
+
+    if (Array.isArray(value)) {
+      return value.map((v, index) => normalizeVariables(`${key}.${index}`, v));
+    }
+
+    if (isRecordValue(value)) {
+      const normalized: UnknownRecord = {};
+      Object.entries(value).forEach(([k, v]) => {
+        normalized[k] = normalizeVariables(`${key}.${k}`, v);
+      });
+      return normalized;
+    }
+
+    return value;
+  };
+
   const gqlBody: {
     operationName?: string;
     query: string;
     variables: unknown;
   } = {
     query: body.query,
-    variables: body.variables,
+    variables: normalizeVariables('variables', body.variables),
   };
 
   if (body.operationName) {
     gqlBody.operationName = body.operationName;
-  }
-  const map: Record<string, string[]> = {};
-  const files: File[] = [];
-  if (body.variables) {
-    let i = 0;
-    const buildMap = (key: string, value: unknown) => {
-      if (isFileValue(value)) {
-        map['' + i] = [key];
-        files[i] = value;
-        i++;
-      } else if (Array.isArray(value)) {
-        value.forEach((v, index) => {
-          buildMap(`${key}.${index}`, v);
-        });
-      } else if (isRecordValue(value)) {
-        Object.entries(value).forEach(([k, v]) => {
-          buildMap(`${key}.${k}`, v);
-        });
-      }
-    };
-    buildMap('variables', body.variables);
   }
 
   form.set('operations', JSON.stringify(gqlBody));
@@ -312,7 +318,7 @@ export const gqlFetcherFactory = (
       body: isFormData ? body : JSON.stringify(body),
       timeout: options.timeout,
       signal: options.signal,
-    });
+    }) as FetchInit;
 
     const ret = fetcher(endpoint, requestInit).then(async res => {
       const errorContext: GraphQLErrorContext = {
