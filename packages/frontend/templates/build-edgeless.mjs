@@ -12,6 +12,13 @@ const ASSETS_PATH = join(__dirname, '../core/public/', ASSETS_PREFIX);
 const TEMPLATE_PATH = join(__dirname, './edgeless');
 
 const getZipFilesInCategroies = () => {
+  if (!existsSync(ZIP_PATH)) {
+    console.warn(
+      `Edgelessテンプレートのスナップショットがないため、組み込みテンプレート生成をスキップします: ${ZIP_PATH}`
+    );
+    return Promise.resolve([]);
+  }
+
   return fs.readdir(ZIP_PATH).then(folders => {
     return Promise.all(
       folders
@@ -55,7 +62,7 @@ const convertSourceId = (block, assetsExtMap) => {
   if (block.props?.sourceId) {
     const extname = assetsExtMap[block.props.sourceId];
     if (!extname) {
-      console.warn(`No extname found for ${block.props.sourceId}`);
+      console.warn(`sourceIdの拡張子が見つかりません: ${block.props.sourceId}`);
     }
     block.props.sourceId = `${ASSETS_PREFIX}/${block.props.sourceId}${
       extname ?? ''
@@ -71,7 +78,7 @@ const parseSnapshot = async () => {
   const filesInCategroies = await getZipFilesInCategroies();
   await setupFolder();
   /**
-   * @type {Array<{ category: string, templates: string[] }}>}
+   * @type {Array<{ category: string, templates: Array<object> }>}
    */
   const templatesInCategory = [];
 
@@ -144,7 +151,7 @@ const parseSnapshot = async () => {
               .replace(/\s+/g, ' ')
               .replace('fill="white"', 'fill="currentColor"');
           } else {
-            console.warn(`No preview found for ${templateName}`);
+            console.warn(`テンプレートのプレビューが見つかりません: ${templateName}`);
           }
 
           convertSourceId(snapshotContent.blocks, assetsExtentionMap);
@@ -161,7 +168,7 @@ const parseSnapshot = async () => {
             JSON.stringify(template, undefined, 2)
           );
 
-          templates.push(templateName);
+          templates.push(template);
         })
       );
     }
@@ -175,77 +182,26 @@ const parseSnapshot = async () => {
   return templatesInCategory;
 };
 
-function numberToWords(n) {
-  const ones = [
-    'Zero',
-    'One',
-    'Two',
-    'Three',
-    'Four',
-    'Five',
-    'Six',
-    'Seven',
-    'Eight',
-    'Nine',
-  ];
-
-  if (n < 10) {
-    return ones[n];
-  } else {
-    throw new Error(`Not implemented: ${n}`);
-  }
-}
-
-const camelCaseNumber = variable => {
-  const words = variable.split(' ');
-  return words
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join('');
-};
-
-const toVariableName = name => {
-  const converted = Array.from(name).reduce((pre, char) => {
-    if (char >= '0' && char <= '9') {
-      return pre + numberToWords(char - '0');
-    }
-
-    return pre + char;
-  }, '');
-
-  return camelCaseNumber(converted);
+const serializeTemplate = template => {
+  return JSON.stringify(template, undefined, 2)
+    .split('\n')
+    .map(line => `    ${line}`)
+    .join('\n');
 };
 
 /**
  *
- * @param {Array<{category: string, templates: string[]}} templatesInGroup
+ * @param {Array<{category: string, templates: Array<object>}>} templatesInGroup
  */
 const buildScript = async templatesInGroup => {
-  const templates = [];
-  const templateVariableMap = {};
-
-  templatesInGroup.forEach(group => {
-    group.templates.forEach(template => {
-      templates.push(template);
-      templateVariableMap[template] = toVariableName(template);
-    });
-  });
-
-  const importStatements = templates
-    .map(template => {
-      return `import ${toVariableName(
-        template
-      )} from './edgeless/${template}.json';`;
-    })
-    .join('\n');
   const templatesDeclaration = templatesInGroup.map(group => {
-    return `'${group.category}': [
-    ${group.templates
-      .map(template => templateVariableMap[template])
-      .join(',\n    ')}
+    return `${JSON.stringify(group.category)}: [
+${group.templates.map(serializeTemplate).join(',\n')}
   ]`;
   });
 
-  const code = `${importStatements}
+  const code = `/* eslint-disable */
+// @ts-nocheck
 
 const templates = {
   ${templatesDeclaration.join(',\n  ')}
@@ -271,7 +227,6 @@ function lcs(text1: string, text2: string) {
 
 export const builtInTemplates = {
   list: async (category: string) => {
-    // @ts-expect-error type should be asserted when using
     return templates[category] ?? []
   },
 
@@ -286,7 +241,6 @@ export const builtInTemplates = {
     query = query.toLowerCase();
 
     for(let cate of cates) {
-      // @ts-expect-error type should be asserted when using
       const templatesOfCate = templates[cate];
 
       for(let temp of templatesOfCate) {

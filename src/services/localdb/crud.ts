@@ -292,12 +292,12 @@ const addItem: AddItem = async (db: DbLike, table: string, item: unknown, skipSy
   }
 
   console.log(
-    `[Diagnostic] localDb.addItem START. Table=${table}, ItemID=${getId(payload) ?? "<generated>"
-    }, localDb instance type=${getConstructorName(db)}`,
+    `[Diagnostic] localDb.addItem 開始。Table=${table}, ItemID=${getId(payload) ?? "<generated>"
+    }, localDb インスタンス種別=${getConstructorName(db)}`,
   );
 
   console.log(
-    `[LocalDB] addItem START -> table=${table} id=${getId(payload) ?? "<generated>"
+    `[LocalDB] addItem 開始 -> table=${table} id=${getId(payload) ?? "<generated>"
     } skipSync=${skipSync}`,
   );
 
@@ -311,7 +311,7 @@ const addItem: AddItem = async (db: DbLike, table: string, item: unknown, skipSy
       : 0;
 
     console.log(
-      `[LocalDB] addItem CARD_CONTENT -> Q_Blocks=${questionBlocksLen}, A_Blocks=${answerBlocksLen}`,
+      `[LocalDB] addItem カード内容 -> 質問Blocks=${questionBlocksLen}, 回答Blocks=${answerBlocksLen}`,
     );
   }
 
@@ -355,7 +355,7 @@ const addItem: AddItem = async (db: DbLike, table: string, item: unknown, skipSy
     const savedItem: AnyRow = { ...payload, id: resolvedId };
 
     console.log(
-      `[LocalDB] addItem AFTER_DEXIE_ADD -> table=${table} returnedId=${returnedId} resolvedId=${resolvedId}`,
+      `[LocalDB] addItem Dexie追加後 -> table=${table} returnedId=${returnedId} resolvedId=${resolvedId}`,
     );
 
     if (!skipSync) {
@@ -368,7 +368,7 @@ const addItem: AddItem = async (db: DbLike, table: string, item: unknown, skipSy
           enqueueSync,
         );
         console.log(
-          `[LocalDB] addItem ENQUEUED_SYNC -> table=${table} id=${resolvedId}`,
+          `[LocalDB] addItem 同期キューに登録しました -> table=${table} id=${resolvedId}`,
         );
       } catch (enqueueError: unknown) {
         console.error("[LocalDB] addItem enqueueSync ERROR", {
@@ -379,7 +379,7 @@ const addItem: AddItem = async (db: DbLike, table: string, item: unknown, skipSy
       }
     }
 
-    console.log(`[LocalDB] addItem SUCCESS -> table=${table} id=${resolvedId}`);
+    console.log(`[LocalDB] addItem 成功 -> table=${table} id=${resolvedId}`);
     return resolvedId;
   } catch (error: unknown) {
     const code = errorCode(error);
@@ -411,7 +411,7 @@ const updateItem: UpdateItem = async (db: DbLike, table: string, id: string, cha
   }
 
   console.log(
-    `[LocalDB] updateItem -> table=${table} id=${id} skipSync=${skipSync} changesKeys=${recordKeys(
+    `[LocalDB] updateItem 更新 -> table=${table} id=${id} skipSync=${skipSync} changesKeys=${recordKeys(
       changes,
     ).join(",")}`,
   );
@@ -426,7 +426,7 @@ const updateItem: UpdateItem = async (db: DbLike, table: string, id: string, cha
       : undefined;
 
     console.log(
-      `[LocalDB] updateItem CARD_CHANGES -> Q_Blocks=${questionBlocksLen}, A_Blocks=${answerBlocksLen}`,
+      `[LocalDB] updateItem カード変更 -> 質問Blocks=${questionBlocksLen}, 回答Blocks=${answerBlocksLen}`,
     );
   }
 
@@ -463,7 +463,7 @@ const deleteItem: DeleteItem = async (db: DbLike, table: string, id: string): Pr
 const softDelete = async (db: DbLike, table: string, id: string, updateItemFn: (table: string, id: string, changes: Record<string, unknown>) => Promise<number>): Promise<number> => {
   const now = new Date();
 
-  console.log(`[LocalDB] softDelete -> table=${table} id=${id}`);
+  console.log(`[LocalDB] ソフト削除 -> table=${table} id=${id}`);
 
   if (table === "documents") {
     if (!isDocDbCtx(db)) {
