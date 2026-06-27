@@ -47,6 +47,11 @@ class CustomOptionsFactory implements ThrottlerOptionsFactory {
 
 @Injectable()
 export class CloudThrottlerGuard extends ThrottlerGuard {
+  private readonly specifiedThrottlers = new WeakMap<
+    ExecutionContext,
+    ThrottlerType | undefined
+  >();
+
   constructor(
     @InjectThrottlerOptions() options: ThrottlerModuleOptions,
     @InjectThrottlerStorage() storageService: ThrottlerStorage,
@@ -93,7 +98,10 @@ export class CloudThrottlerGuard extends ThrottlerGuard {
     // give it 'default' if no throttler is specified,
     // so the unauthenticated users visits will always hit default throttler
     // authenticated users will directly bypass unprotected APIs in [CloudThrottlerGuard.canActivate]
-    const throttler = this.getSpecifiedThrottler(context) ?? 'default';
+    const throttler =
+      (this.specifiedThrottlers.has(context)
+        ? this.specifiedThrottlers.get(context)
+        : this.getSpecifiedThrottler(context)) ?? 'default';
 
     // by pass unmatched throttlers
     if (throttlerOptions.name !== throttler) {
@@ -158,13 +166,18 @@ export class CloudThrottlerGuard extends ThrottlerGuard {
     const { req } = this.getRequestResponse(context);
 
     const throttler = this.getSpecifiedThrottler(context);
+    this.specifiedThrottlers.set(context, throttler);
 
-    // if user is logged in, bypass non-protected handlers
-    if (!throttler && req.session?.user) {
-      return true;
+    try {
+      // if user is logged in, bypass non-protected handlers
+      if (!throttler && req.session?.user) {
+        return true;
+      }
+
+      return await super.canActivate(context);
+    } finally {
+      this.specifiedThrottlers.delete(context);
     }
-
-    return super.canActivate(context);
   }
 
   getSpecifiedThrottler(context: ExecutionContext): ThrottlerType | undefined {
