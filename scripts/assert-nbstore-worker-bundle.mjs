@@ -7,6 +7,7 @@ const repoRoot = path.resolve(
   "..",
 );
 const webDistDir = path.resolve(repoRoot, "packages/frontend/apps/web/dist");
+const sourceOnly = process.argv.includes("--source-only");
 
 const sourceChecks = [
   {
@@ -101,6 +102,10 @@ if (process.exitCode) {
 }
 
 console.log("nbstore worker のソース境界を確認しました。");
+
+if (sourceOnly) {
+  process.exit(0);
+}
 
 if (!existsSync(webDistDir) || !statSync(webDistDir).isDirectory()) {
   console.error(

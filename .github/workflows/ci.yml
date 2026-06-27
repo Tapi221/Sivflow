@@ -14,6 +14,7 @@ jobs:
       - run: npm install
       - run: npm run verify:design-tokens
       - run: npm run verify:source-conventions
+      - run: npm run check:nbstore-worker:source
       - run: npm run typecheck
       - run: npm run build
       - run: npm run check:nbstore-worker
