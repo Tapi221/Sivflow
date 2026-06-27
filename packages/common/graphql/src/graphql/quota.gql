@@ -5,18 +5,17 @@ query quota {
       name
       blobLimit
       storageQuota
+      usedStorageQuota
       historyPeriod
       memberLimit
       humanReadable {
         name
         blobLimit
         storageQuota
+        usedStorageQuota
         historyPeriod
         memberLimit
       }
-    }
-    quotaUsage {
-      storageQuota
     }
   }
 }
