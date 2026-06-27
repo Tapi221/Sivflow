@@ -7,8 +7,17 @@ export { MindmapRootBlock } from './mindmap-root-block.js';
 export { MindmapService } from './mindmap-service.js';
 export { MindmapSurfaceBlock } from './surface-block.js';
 
+function defineMiniMindmapElement(
+  tagName: string,
+  elementClass: CustomElementConstructor
+) {
+  if (!customElements.get(tagName)) {
+    customElements.define(tagName, elementClass);
+  }
+}
+
 export function registerMiniMindmapBlocks() {
-  customElements.define('mini-mindmap-root-block', MindmapRootBlock);
-  customElements.define('mini-mindmap-preview', MiniMindmapPreview);
-  customElements.define('mini-mindmap-surface-block', MindmapSurfaceBlock);
+  defineMiniMindmapElement('mini-mindmap-root-block', MindmapRootBlock);
+  defineMiniMindmapElement('mini-mindmap-preview', MiniMindmapPreview);
+  defineMiniMindmapElement('mini-mindmap-surface-block', MindmapSurfaceBlock);
 }
