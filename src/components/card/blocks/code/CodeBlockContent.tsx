@@ -50,7 +50,7 @@ const isNodeInside = (parent: HTMLElement, node: Node | null) => {
   return node !== null && (node === parent || parent.contains(node));
 };
 const getNodeTextOffset = (root: HTMLElement, node: Node, offset: number) => {
-  const range = document.createRange();
+  const range = root.ownerDocument.createRange();
   range.selectNodeContents(root);
 
   try {
@@ -61,7 +61,7 @@ const getNodeTextOffset = (root: HTMLElement, node: Node, offset: number) => {
   }
 };
 const getEditorSelectionRange = (root: HTMLElement): EditorTextSelection | null => {
-  const selection = window.getSelection();
+  const selection = root.ownerDocument.getSelection();
   if (!selection || selection.rangeCount === 0) return null;
   if (!isNodeInside(root, selection.anchorNode)) return null;
   if (!isNodeInside(root, selection.focusNode)) return null;
@@ -82,9 +82,23 @@ const getEditorSelectionRange = (root: HTMLElement): EditorTextSelection | null 
     end: Math.max(anchorOffset, focusOffset),
   };
 };
+const createEditorTextWalker = (root: HTMLElement): TreeWalker | null => {
+  const ownerDocument = root.ownerDocument ?? document;
+
+  if (typeof ownerDocument.createTreeWalker !== "function") {
+    return null;
+  }
+
+  return ownerDocument.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+};
 const getTextPositionAtOffset = (root: HTMLElement, offset: number) => {
   const safeOffset = clampTextOffset(offset, root.textContent?.length ?? 0);
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const walker = createEditorTextWalker(root);
+
+  if (!walker) {
+    return { node: root, offset: 0 };
+  }
+
   let remaining = safeOffset;
   let lastTextNode: Text | null = null;
   let currentNode = walker.nextNode();
@@ -114,7 +128,7 @@ const restoreEditorSelection = (root: HTMLElement, selectionRange: EditorTextSel
 
   const startPosition = getTextPositionAtOffset(root, selectionRange.start);
   const endPosition = getTextPositionAtOffset(root, selectionRange.end);
-  const range = document.createRange();
+  const range = root.ownerDocument.createRange();
   range.setStart(startPosition.node, startPosition.offset);
   range.setEnd(endPosition.node, endPosition.offset);
   selection.removeAllRanges();
@@ -176,7 +190,7 @@ const CodeBlockContent = (props: CodeBlockContentProps) => {
     const selection = editorSelectionRef.current ?? getEditorSelectionRange(editor);
     setHighlightedEditorCode(editor, editorCode, editorGrammar, editorLanguage);
 
-    if (document.activeElement === editor && selection) {
+    if (editor.ownerDocument.activeElement === editor && selection) {
       restoreEditorSelection(editor, selection);
     }
   }, [props.mode, editorCode, editorGrammar, editorLanguage]);
