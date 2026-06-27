@@ -23,21 +23,21 @@ const timeUnitCode = {
 
 /**
  * ```ts
- * // timestamp to string
+ * // timestamp を文字列に変換
  * i18nTime(1728538228000) -> 'Oct 10, 2024, 1:30:28 PM'
  *
- * // absolute time string
+ * // 絶対時刻の文字列
  * i18nTime('2024-10-10 13:30:28', { absolute: { accuracy: 'minute' } }) -> '2024-10-10 13:30 PM'
  * i18nTime('2024-10-10 13:30:28', { absolute: { accuracy: 'minute', noDate: true } }) -> '13:30 PM'
  * i18nTime('2024-10-10 13:30:28', { absolute: { accuracy: 'minute', noYear: true } }) -> 'Oct 10, 13:30 PM'
  * i18nTime('2024-10-10 13:30:28', { absolute: { accuracy: 'day' } }) -> 'Oct 10, 2024'
  *
- * // relative time string
+ * // 相対時刻の文字列
  * i18nTime('2024-10-10 13:30:30', { relative: true }) -> 'now'
  * i18nTime('2024-10-10 13:30:00', { relative: true }) -> '30s ago'
  * i18nTime('2024-10-10 13:30:30', { relative: { accuracy: 'minute' } }) -> '2m ago'
  *
- * // show absolute time string if time is pass 1 day
+ * // 1 日を過ぎたら絶対時刻の文字列を表示
  * i18nTime('2024-10-9 14:30:30', { relative: { max: [1, 'day'] } }) -> '23h ago'
  * i18nTime('2024-10-9 13:30:30', { relative: { max: [1, 'day'] } }) -> 'Oct 9, 2024, 1:30:30 PM'
  * ```
@@ -45,28 +45,28 @@ const timeUnitCode = {
 export function i18nTime(
   time: dayjs.ConfigType,
   options: {
-    // override i18n instance, default is global I18n instance
+    // i18n instance を上書きします。既定では global I18n instance を使います。
     i18n?: I18nInstance;
-    // override now time, default is current time
+    // 現在時刻を上書きします。既定では現在時刻を使います。
     now?: dayjs.ConfigType;
     relative?:
       | {
-          // max time to show relative time, if time is pass this time, show absolute time
+          // 相対時刻として表示する最大時間です。この時間を過ぎたら絶対時刻で表示します。
           max?: [number, TimeUnit];
-          // show time with this accuracy
+          // この精度で時刻を表示します。
           accuracy?: TimeUnit;
-          // show weekday, e.g. 'Monday', 'Tuesday', etc.
+          // 曜日を表示します。例: 'Monday', 'Tuesday' など。
           weekday?: boolean;
-          // show 'yesterday' or 'tomorrow' if time is
+          // 時刻が昨日または明日の場合に 'yesterday' / 'tomorrow' を表示します。
           yesterdayAndTomorrow?: boolean;
         }
-      | true; // use default relative option
+      | true; // 既定の relative option を使います。
     absolute?: {
-      // show time with this accuracy
+      // この精度で時刻を表示します。
       accuracy?: TimeUnit;
-      // hide year
+      // 年を非表示にします。
       noYear?: boolean;
-      // hide date (year, month, day)
+      // 日付（年・月・日）を非表示にします。
       noDate?: boolean;
     };
   } = {}
@@ -74,7 +74,7 @@ export function i18nTime(
   const i18n = options.i18n ?? I18n;
   time = dayjs(time);
   if (!time.isValid()) {
-    return ''; // invalid time, return empty string
+    return ''; // 無効な時刻の場合は空文字を返します。
   }
 
   const now = dayjs(options.now);
@@ -107,7 +107,7 @@ export function i18nTime(
   };
 
   if (relativeOption) {
-    // show relative
+    // 相対表示
 
     const formatter = new Intl.RelativeTimeFormat(i18n.language, {
       style: 'narrow',
@@ -253,7 +253,7 @@ export function i18nTime(
     }
   }
 
-  // show absolute
+  // 絶対表示
   const formatter = new Intl.DateTimeFormat(i18n.language, {
     year:
       !absoluteOption.noYear && !absoluteOption.noDate ? 'numeric' : undefined,
