@@ -1,13 +1,43 @@
 import { type Container, createIdentifier } from '@blocksuite/global/di';
 import { BlockSuiteError, ErrorCode } from '@blocksuite/global/exceptions';
-import { Extension } from '@blocksuite/store';
+import { Extension, type Store } from '@blocksuite/store';
+import { effect } from '@preact/signals-core';
 
 import { LifeCycleWatcher } from '../extension/lifecycle-watcher.js';
 import { StdIdentifier } from '../identifier.js';
 import type { BlockStdScope } from '../scope/std-scope.js';
-import { onSurfaceAdded } from '../utils/gfx.js';
 import { GfxControllerIdentifier } from './identifiers.js';
-import type { SurfaceMiddleware } from './model/surface/surface-model.js';
+import {
+  SurfaceBlockModel,
+  type SurfaceMiddleware,
+} from './model/surface/surface-model.js';
+
+function onSurfaceAdded(
+  doc: Store,
+  callback: (model: SurfaceBlockModel | null) => void
+): () => void {
+  let found = false;
+  let foundId = '';
+
+  const dispose = effect(() => {
+    if (found && doc.getBlock(foundId)) {
+      return;
+    }
+
+    for (const block of Object.values(doc.blocks.value)) {
+      if (block.model instanceof SurfaceBlockModel) {
+        callback(block.model);
+        found = true;
+        foundId = block.id;
+        return;
+      }
+    }
+
+    callback(null);
+  });
+
+  return dispose;
+}
 
 export abstract class SurfaceMiddlewareBuilder extends Extension {
   static key: string = '';
