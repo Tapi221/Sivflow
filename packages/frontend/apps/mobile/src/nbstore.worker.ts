@@ -1,4 +1,4 @@
-import '@affine/core/bootstrap/browser';
+import '@affine/core/bootstrap/worker';
 
 import { broadcastChannelStorages } from '@affine/nbstore/broadcast-channel';
 import { cloudStorages } from '@affine/nbstore/cloud';
