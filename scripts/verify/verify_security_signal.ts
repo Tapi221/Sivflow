@@ -47,7 +47,7 @@ const writeSecurityLog = async (
 
 const verifySecuritySignal = async () => {
   const testUserId = "test_signal_user_" + Date.now();
-  console.log(`[Verify] Starting verification for User: ${testUserId}`);
+  console.log(`[Verify] 検証を開始します。User: ${testUserId}`);
 
   // 1. Create initial user document
   await db.doc(`users/${testUserId}`).set({
@@ -57,15 +57,15 @@ const verifySecuritySignal = async () => {
     isAccountLocked: false,
     requires2FA: false,
   });
-  console.log("[Verify] User created.");
+  console.log("[Verify] ユーザーを作成しました。");
 
   // 2. Set up listener on user document to catch the lock signal
   const userRef = db.doc(`users/${testUserId}`);
   userRef.onSnapshot((snap) => {
     const data = snap.data();
     if (data?.isAccountLocked) {
-      console.log("[SUCCESS] Account lock signal received!");
-      console.log("   Data:", JSON.stringify(data, null, 2));
+      console.log("[SUCCESS] アカウントロックシグナルを受信しました。");
+      console.log("   データ:", JSON.stringify(data, null, 2));
       process.exit(0);
     }
   });
@@ -73,13 +73,13 @@ const verifySecuritySignal = async () => {
   for (const [index, eventType] of CRITICAL_LOCK_SEQUENCE.entries()) {
     const attempt = index + 1;
     console.log(
-      `[Verify] Writing ${eventType} (${attempt}/${CRITICAL_LOCK_SEQUENCE.length})...`,
+      `[Verify] ${eventType} を書き込んでいます (${attempt}/${CRITICAL_LOCK_SEQUENCE.length})...`,
     );
     await writeSecurityLog(testUserId, eventType, attempt);
     await wait(500);
   }
 
-  console.log("[Verify] Waiting for trigger...");
+  console.log("[Verify] トリガーを待機しています...");
   await wait(5000);
   console.error("[FAIL] Timeout waiting for lock signal");
   process.exit(1);
