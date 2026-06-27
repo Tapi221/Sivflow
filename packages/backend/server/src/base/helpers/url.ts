@@ -12,13 +12,20 @@ const ALLOWED_REDIRECT_PROTOCOLS = new Set(['http:', 'https:']);
 // Keep in sync with frontend /redirect-proxy allowlist.
 const TRUSTED_REDIRECT_DOMAINS = [
   'google.com',
+  'accounts.google.com',
   'stripe.com',
+  'checkout.stripe.com',
+  'billing.stripe.com',
   'github.com',
   'twitter.com',
   'discord.gg',
   'youtube.com',
+  'www.youtube.com',
+  'm.youtube.com',
   't.me',
   'reddit.com',
+  'www.reddit.com',
+  'old.reddit.com',
   'affine.pro',
 ].map(d => d.toLowerCase());
 
@@ -27,7 +34,7 @@ function normalizeHostname(hostname: string) {
 }
 
 function hostnameMatchesDomain(hostname: string, domain: string) {
-  return hostname === domain || hostname.endsWith(`.${domain}`);
+  return hostname === domain;
 }
 
 @Injectable()
@@ -214,7 +221,6 @@ export class URLHelper {
         }
       }
 
-      // Allow known trusted domains (for redirect-proxy).
       return TRUSTED_REDIRECT_DOMAINS.some(domain =>
         hostnameMatchesDomain(hostname, domain)
       );
