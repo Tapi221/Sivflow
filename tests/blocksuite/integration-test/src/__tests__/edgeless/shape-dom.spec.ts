@@ -5,19 +5,11 @@ import { wait } from '../utils/common.js';
 import { getSurface } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';
 
-function expectPxCloseTo(
-  value: string,
-  expected: number,
-  precision: number = 2
-) {
+const expectPxCloseTo = (value: string, expected: number, precision: number = 2) => {
   expect(Number.parseFloat(value)).toBeCloseTo(expected, precision);
-}
+};
 
-async function waitForShapeElement(
-  surfaceView: ReturnType<typeof getSurface>,
-  shapeId: string,
-  timeout = 5000
-) {
+const waitForShapeElement = async (surfaceView: ReturnType<typeof getSurface>, shapeId: string, timeout = 5000) => {
   const startedAt = Date.now();
 
   while (Date.now() - startedAt < timeout) {
@@ -36,7 +28,7 @@ async function waitForShapeElement(
   }
 
   return null;
-}
+};
 
 describe('Shape rendering with DOM renderer', () => {
   beforeEach(async () => {

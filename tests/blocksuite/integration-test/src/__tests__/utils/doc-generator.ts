@@ -1,11 +1,12 @@
-import { type Store, Text } from '@blocksuite/store';
+import { Text } from '@blocksuite/store';
+import type { Store } from '@blocksuite/store';
 
-function addParagraph(doc: Store, noteId: string, content: string) {
+const addParagraph = (doc: Store, noteId: string, content: string) => {
   const props = { text: new Text(content) };
   doc.addBlock('affine:paragraph', props, noteId);
-}
+};
 
-function addSampleNote(doc: Store, noteId: string, i: number) {
+const addSampleNote = (doc: Store, noteId: string, i: number) => {
   addParagraph(doc, noteId, `Note ${i + 1}`);
   addParagraph(doc, noteId, 'Hello World!');
   addParagraph(
@@ -18,9 +19,9 @@ function addSampleNote(doc: Store, noteId: string, i: number) {
     noteId,
     '你好这是测试，这是一个为了换行而写的中文段落。这个段落会自动换行。'
   );
-}
+};
 
-export function addSampleNotes(doc: Store, n: number) {
+export const addSampleNotes = (doc: Store, n: number) => {
   const cols = Math.ceil(Math.sqrt(n));
   const NOTE_WIDTH = 500;
   const NOTE_HEIGHT = 250;
@@ -38,4 +39,4 @@ export function addSampleNotes(doc: Store, n: number) {
     const noteId = doc.addBlock('affine:note', { xywh }, rootId);
     addSampleNote(doc, noteId, i);
   }
-}
+};

@@ -8,10 +8,8 @@ import {
   FeatureFlagService,
   FontConfigExtension,
 } from '@blocksuite/affine/shared/services';
-import {
-  type ViewportTurboRendererExtension,
-  ViewportTurboRendererIdentifier,
-} from '@blocksuite/affine-gfx-turbo-renderer';
+import { ViewportTurboRendererIdentifier } from '@blocksuite/affine-gfx-turbo-renderer';
+import type { ViewportTurboRendererExtension } from '@blocksuite/affine-gfx-turbo-renderer';
 import type { ExtensionType, Store, Transformer } from '@blocksuite/store';
 import { Schema, Text } from '@blocksuite/store';
 import {
@@ -31,13 +29,13 @@ effects();
 const storeExtensions = storeManager.get('store');
 const painterWorkers = new Set<Worker>();
 
-export function getRenderer() {
+export const getRenderer = () => {
   return editor.std.get(
     ViewportTurboRendererIdentifier
   ) as ViewportTurboRendererExtension;
-}
+};
 
-function createCollectionOptions() {
+const createCollectionOptions = () => {
   const schema = new Schema();
   const room = Math.random().toString(16).slice(2, 8);
 
@@ -50,9 +48,9 @@ function createCollectionOptions() {
     schema,
     idGenerator,
   };
-}
+};
 
-function initCollection(collection: TestWorkspace) {
+const initCollection = (collection: TestWorkspace) => {
   const doc = collection.createDoc('doc:home').getStore();
 
   doc.load(() => {
@@ -62,13 +60,9 @@ function initCollection(collection: TestWorkspace) {
     doc.addBlock('affine:surface', {}, rootId);
   });
   doc.resetHistory();
-}
+};
 
-async function createEditor(
-  collection: TestWorkspace,
-  mode: DocMode = 'page',
-  extensions: ExtensionType[] = []
-) {
+const createEditor = async (collection: TestWorkspace, mode: DocMode = 'page', extensions: ExtensionType[] = []) => {
   const app = document.createElement('div');
   const blockCollection = collection.docs.values().next().value;
   if (!blockCollection) {
@@ -100,9 +94,9 @@ async function createEditor(
   document.body.append(app);
   await editor.updateComplete;
   return app;
-}
+};
 
-export function createPainterWorker() {
+export const createPainterWorker = () => {
   const worker = new Worker(
     new URL('./turbo-painter.worker.ts', import.meta.url),
     {
@@ -111,18 +105,14 @@ export function createPainterWorker() {
   );
   painterWorkers.add(worker);
   return worker;
-}
+};
 
 type SetupEditorOptions = {
   extensions?: ExtensionType[];
   enableDomRenderer?: boolean;
 };
 
-export async function setupEditor(
-  mode: DocMode = 'page',
-  extensionsInput?: ExtensionType[],
-  optionsInput?: SetupEditorOptions
-) {
+export const setupEditor = async (mode: DocMode = 'page', extensionsInput?: ExtensionType[], optionsInput?: SetupEditorOptions) => {
   const extensions: ExtensionType[] = extensionsInput ?? [];
   const options: SetupEditorOptions = optionsInput ?? {};
   const enableDomRenderer = options?.enableDomRenderer ?? false;
@@ -149,9 +139,9 @@ export async function setupEditor(
     await cleanup();
     appElement?.remove();
   };
-}
+};
 
-export async function cleanup() {
+export const cleanup = async () => {
   window.editor?.remove();
   await window.editor?.updateComplete;
   await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
@@ -170,7 +160,7 @@ export async function cleanup() {
   delete (window as any).renderer;
 
   delete (window as any).store;
-}
+};
 
 declare global {
   const editor: TestAffineEditorContainer;

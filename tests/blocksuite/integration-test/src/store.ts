@@ -3,6 +3,6 @@ import { getInternalStoreExtensions } from '@blocksuite/affine/extensions/store'
 
 const manager = new StoreExtensionManager(getInternalStoreExtensions());
 
-export function getTestStoreManager() {
+export const getTestStoreManager = () => {
   return manager;
-}
+};

@@ -37,18 +37,15 @@ type RichTextElement = HTMLElement & {
   };
 };
 
-function findSlashActionItem(
-  items: SlashMenuItem[],
-  name: string
-): SlashMenuActionItem {
+const findSlashActionItem = (items: SlashMenuItem[], name: string): SlashMenuActionItem => {
   const item = items.find(entry => entry.name === name);
   if (!item || !('action' in item)) {
     throw new Error(`Cannot find slash-menu action: ${name}`);
   }
   return item;
-}
+};
 
-function getRichTextByBlockId(blockId: string): RichTextElement {
+const getRichTextByBlockId = (blockId: string): RichTextElement => {
   const block = editor.host?.view.getBlock(blockId) as HTMLElement | null;
   if (!block) {
     throw new Error(`Cannot find block view: ${blockId}`);
@@ -58,9 +55,9 @@ function getRichTextByBlockId(blockId: string): RichTextElement {
     throw new Error(`Cannot find rich-text for block: ${blockId}`);
   }
   return richText;
-}
+};
 
-async function createParagraph(text = '') {
+const createParagraph = async (text = '') => {
   const noteId = addNote(doc);
   const note = doc.getBlock(noteId)?.model;
   if (!note) {
@@ -80,9 +77,9 @@ async function createParagraph(text = '') {
     noteId,
     paragraphId: paragraph.id,
   };
-}
+};
 
-function setTextSelection(blockId: string, index: number, length: number) {
+const setTextSelection = (blockId: string, index: number, length: number) => {
   const to = length
     ? {
         blockId,
@@ -104,13 +101,9 @@ function setTextSelection(blockId: string, index: number, length: number) {
   editor.host?.selection.setGroup('note', [selection]);
   const richText = getRichTextByBlockId(blockId);
   richText.inlineEditor.setInlineRange({ index, length });
-}
+};
 
-async function triggerMarkdown(
-  blockId: string,
-  input: string,
-  matcherName: string
-) {
+const triggerMarkdown = async (blockId: string, input: string, matcherName: string) => {
   const model = doc.getBlock(blockId)?.model as ParagraphBlockModel | undefined;
   if (!model) {
     throw new Error(`Cannot find paragraph model: ${blockId}`);
@@ -139,9 +132,9 @@ async function triggerMarkdown(
   });
 
   await wait();
-}
+};
 
-function mockKeyboardContext() {
+const mockKeyboardContext = () => {
   const preventDefault = vi.fn();
   const ctx = {
     get(key: string) {
@@ -152,7 +145,7 @@ function mockKeyboardContext() {
     },
   };
   return { ctx: ctx as any, preventDefault };
-}
+};
 
 beforeEach(async () => {
   const cleanup = await setupEditor('page', [LinkExtension]);

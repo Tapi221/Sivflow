@@ -5,22 +5,15 @@ import { wait } from '../utils/common.js';
 import { getSurface } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';
 
-function hasConnectorPath(
-  surfaceView: ReturnType<typeof getSurface>,
-  connectorId: string
-) {
+const hasConnectorPath = (surfaceView: ReturnType<typeof getSurface>, connectorId: string) => {
   const connector = surfaceView.model.getElementById(connectorId);
   if (!connector || !('path' in connector)) return false;
 
   const { path } = connector as { path: unknown };
   return Array.isArray(path) && path.length >= 2;
-}
+};
 
-async function waitForConnectorElement(
-  surfaceView: ReturnType<typeof getSurface>,
-  connectorId: string,
-  timeout = 5000
-) {
+const waitForConnectorElement = async (surfaceView: ReturnType<typeof getSurface>, connectorId: string, timeout = 5000) => {
   const startedAt = Date.now();
 
   while (Date.now() - startedAt < timeout) {
@@ -44,13 +37,9 @@ async function waitForConnectorElement(
   }
 
   return null;
-}
+};
 
-async function waitForConnectorElementRemoval(
-  surfaceView: ReturnType<typeof getSurface>,
-  connectorId: string,
-  timeout = 5000
-) {
+const waitForConnectorElementRemoval = async (surfaceView: ReturnType<typeof getSurface>, connectorId: string, timeout = 5000) => {
   const startedAt = Date.now();
 
   while (Date.now() - startedAt < timeout) {
@@ -64,7 +53,7 @@ async function waitForConnectorElementRemoval(
   }
 
   return false;
-}
+};
 
 describe('Connector rendering with DOM renderer', () => {
   beforeEach(async () => {

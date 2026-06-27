@@ -1,22 +1,7 @@
 import type { EdgelessRootBlockComponent } from '@blocksuite/affine/blocks/root';
 import { getSurfaceBlock } from '@blocksuite/affine/blocks/surface';
-import {
-  type BrushElementModel,
-  type ConnectorElementModel,
-  DEFAULT_NOTE_SHADOW,
-  DefaultTheme,
-  type EdgelessTextBlockModel,
-  FontFamily,
-  type FrameBlockModel,
-  LayoutType,
-  type MindmapElementModel,
-  MindmapStyle,
-  type NoteBlockModel,
-  NoteShadow,
-  type ShapeElementModel,
-  ShapeType,
-  type TextElementModel,
-} from '@blocksuite/affine/model';
+import { DEFAULT_NOTE_SHADOW, DefaultTheme, FontFamily, LayoutType, MindmapStyle, NoteShadow, ShapeType } from '@blocksuite/affine/model';
+import type { BrushElementModel, ConnectorElementModel, EdgelessTextBlockModel, FrameBlockModel, MindmapElementModel, NoteBlockModel, ShapeElementModel, TextElementModel } from '@blocksuite/affine/model';
 import { EditPropsStore } from '@blocksuite/affine/shared/services';
 import type { BlockStdScope } from '@blocksuite/std';
 import { beforeEach, describe, expect, test } from 'vitest';

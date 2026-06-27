@@ -1,16 +1,9 @@
 import { AffineSchemas } from '@blocksuite/affine/schemas';
 import { replaceIdMiddleware } from '@blocksuite/affine/shared/adapters';
-import {
-  type DocSnapshot,
-  Schema,
-  Transformer,
-  type Workspace,
-} from '@blocksuite/store';
+import { Schema, Transformer } from '@blocksuite/store';
+import type { DocSnapshot, Workspace } from '@blocksuite/store';
 
-export async function importFromSnapshot(
-  collection: Workspace,
-  snapshot: DocSnapshot
-) {
+export const importFromSnapshot = async (collection: Workspace, snapshot: DocSnapshot) => {
   const job = new Transformer({
     schema: new Schema().register(AffineSchemas),
     blobCRUD: collection.blobSync,
@@ -23,4 +16,4 @@ export async function importFromSnapshot(
   });
 
   return job.snapshotToDoc(snapshot);
-}
+};

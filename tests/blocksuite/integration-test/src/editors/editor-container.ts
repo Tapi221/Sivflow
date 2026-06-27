@@ -2,11 +2,7 @@ import { SignalWatcher, WithDisposable } from '@blocksuite/affine/global/lit';
 import type { DocMode } from '@blocksuite/affine/model';
 import { ThemeProvider } from '@blocksuite/affine/shared/services';
 import { BlockStdScope, ShadowlessElement } from '@blocksuite/affine/std';
-import {
-  type BlockModel,
-  type ExtensionType,
-  type Store,
-} from '@blocksuite/affine/store';
+import type { BlockModel, ExtensionType, Store } from '@blocksuite/affine/store';
 import { computed, signal } from '@preact/signals-core';
 import { css, html } from 'lit';
 import { property } from 'lit/decorators.js';
@@ -186,7 +182,8 @@ export class TestAffineEditorContainer extends SignalWatcher(
       html`
         <div
           data-theme=${mode === 'page' ? appTheme : edgelessTheme}
-          class=${mode === 'page'
+          class=${
+            mode === 'page'
             ? 'affine-page-viewport'
             : 'affine-edgeless-viewport'}
         >
@@ -195,7 +192,8 @@ export class TestAffineEditorContainer extends SignalWatcher(
             () => html` <doc-title .doc=${this.doc}></doc-title> `
           )}
           <div
-            class=${mode === 'page'
+            class=${
+              mode === 'page'
               ? 'page-editor playground-page-editor-container'
               : 'edgeless-editor-container'}
           >

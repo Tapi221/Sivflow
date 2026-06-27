@@ -1,7 +1,5 @@
-import {
-  type EdgelessRootBlockComponent,
-  EdgelessRootService,
-} from '@blocksuite/affine/blocks/root';
+import { EdgelessRootService } from '@blocksuite/affine/blocks/root';
+import type { EdgelessRootBlockComponent } from '@blocksuite/affine/blocks/root';
 import type { DocSnapshot } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 

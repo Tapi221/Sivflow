@@ -12,9 +12,9 @@ const config = {
   },
 };
 
-function createProvider() {
+const createProvider = () => {
   return new S3StorageProvider(config, 'test-bucket');
-}
+};
 
 test('presignPut should return url and headers', async t => {
   const provider = createProvider();

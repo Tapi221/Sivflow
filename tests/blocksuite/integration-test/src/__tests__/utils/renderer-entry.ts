@@ -10,7 +10,7 @@ import {
 import { addSampleNotes } from './doc-generator.js';
 import { createPainterWorker, setupEditor } from './setup.js';
 
-async function init() {
+const init = async () => {
   await setupEditor('edgeless', [
     ParagraphLayoutHandlerExtension,
     ListLayoutHandlerExtension,
@@ -27,6 +27,6 @@ async function init() {
     ViewportTurboRendererIdentifier
   ) as ViewportTurboRendererExtension;
   window.renderer = renderer;
-}
+};
 
 await init();

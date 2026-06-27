@@ -11,26 +11,23 @@ const config = {
   path: join(process.cwd(), 'node_modules', '.cache/affine-test-storage'),
 };
 
-function createProvider() {
+const createProvider = () => {
   return new FsStorageProvider(
     config,
     'test' + Math.random().toString(16).substring(2, 8)
   );
-}
+};
 
-function keys(list: ListObjectsMetadata[]) {
+const keys = (list: ListObjectsMetadata[]) => {
   return list.map(i => i.key);
-}
+};
 
-async function randomPut(
-  provider: FsStorageProvider,
-  prefix = ''
-): Promise<string> {
+const randomPut = async (provider: FsStorageProvider, prefix = ''): Promise<string> => {
   const key = prefix + 'test-key-' + Math.random().toString(16).substring(2, 8);
   const body = Buffer.from(key);
   await provider.put(key, body);
   return key;
-}
+};
 
 test.after.always(() => {
   fs.rm(config.path, { recursive: true }).catch(console.error);

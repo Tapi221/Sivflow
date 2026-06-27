@@ -2,9 +2,9 @@ import test from 'ava';
 
 import { R2StorageProvider } from '../providers/r2';
 
-function endpointOf(provider: R2StorageProvider) {
+const endpointOf = (provider: R2StorageProvider) => {
   return provider.endpointUrl;
-}
+};
 
 test('R2 provider should use account endpoint by default', t => {
   const provider = new R2StorageProvider(

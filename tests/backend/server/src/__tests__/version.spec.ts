@@ -27,7 +27,7 @@ let app: TestingApp;
 let config: ConfigFactory;
 let version: VersionService;
 
-function checkVersion(enabled = true) {
+const checkVersion = (enabled = true) => {
   config.override({
     client: {
       versionControl: {
@@ -36,11 +36,11 @@ function checkVersion(enabled = true) {
       },
     },
   });
-}
+};
 
-function makeCanaryDateVersion(date: Date, build = '015') {
+const makeCanaryDateVersion = (date: Date, build = '015') => {
   return `${date.getUTCFullYear()}.${date.getUTCMonth() + 1}.${date.getUTCDate()}-canary.${build}`;
-}
+};
 
 test.before(async () => {
   app = await createTestingApp({

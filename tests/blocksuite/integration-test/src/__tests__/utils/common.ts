@@ -1,19 +1,19 @@
 import type { Point } from '@blocksuite/global/gfx';
 
-export function wait(time: number = 0) {
+export const wait = (time: number = 0) => {
   return new Promise(resolve => {
     requestAnimationFrame(() => {
       setTimeout(resolve, time);
     });
   });
-}
+};
 
 /**
  * simulate click event
  * @param target
  * @param position position relative to the target
  */
-export function click(target: HTMLElement, position: { x: number; y: number }) {
+export const click = (target: HTMLElement, position: { x: number; y: number }) => {
   const element = target.getBoundingClientRect();
   const clientX = element.x + position.x;
   const clientY = element.y + position.y;
@@ -43,7 +43,7 @@ export function click(target: HTMLElement, position: { x: number; y: number }) {
       bubbles: true,
     })
   );
-}
+};
 
 type PointerOptions = {
   isPrimary?: boolean;
@@ -62,11 +62,7 @@ const defaultPointerOptions: PointerOptions = {
  * @param target
  * @param position position relative to the target
  */
-export function pointerdown(
-  target: HTMLElement,
-  position: { x: number; y: number },
-  options: PointerOptions = defaultPointerOptions
-) {
+export const pointerdown = (target: HTMLElement, position: { x: number; y: number }, options: PointerOptions = defaultPointerOptions) => {
   const element = target.getBoundingClientRect();
   const clientX = element.x + position.x;
   const clientY = element.y + position.y;
@@ -79,18 +75,14 @@ export function pointerdown(
       ...options,
     })
   );
-}
+};
 
 /**
  * simulate pointerup event
  * @param target
  * @param position position relative to the target
  */
-export function pointerup(
-  target: HTMLElement,
-  position: { x: number; y: number },
-  options: PointerOptions = defaultPointerOptions
-) {
+export const pointerup = (target: HTMLElement, position: { x: number; y: number }, options: PointerOptions = defaultPointerOptions) => {
   const element = target.getBoundingClientRect();
   const clientX = element.x + position.x;
   const clientY = element.y + position.y;
@@ -103,18 +95,14 @@ export function pointerup(
       ...options,
     })
   );
-}
+};
 
 /**
  * simulate pointermove event
  * @param target
  * @param position position relative to the target
  */
-export function pointermove(
-  target: HTMLElement,
-  position: { x: number; y: number },
-  options: PointerOptions = defaultPointerOptions
-) {
+export const pointermove = (target: HTMLElement, position: { x: number; y: number }, options: PointerOptions = defaultPointerOptions) => {
   const element = target.getBoundingClientRect();
   const clientX = element.x + position.x;
   const clientY = element.y + position.y;
@@ -127,14 +115,9 @@ export function pointermove(
       ...options,
     })
   );
-}
+};
 
-export function drag(
-  target: HTMLElement,
-  start: { x: number; y: number },
-  end: { x: number; y: number },
-  step: number = 5
-) {
+export const drag = (target: HTMLElement, start: { x: number; y: number }, end: { x: number; y: number }, step: number = 5) => {
   pointerdown(target, start);
   pointermove(target, start);
 
@@ -152,9 +135,9 @@ export function drag(
 
   pointermove(target, end);
   pointerup(target, end);
-}
+};
 
-export function multiTouchDown(target: Element, points: Point[]) {
+export const multiTouchDown = (target: Element, points: Point[]) => {
   points.forEach((point, index) => {
     pointerdown(target as HTMLElement, point, {
       isPrimary: index === 0,
@@ -162,14 +145,9 @@ export function multiTouchDown(target: Element, points: Point[]) {
       pointerType: 'touch',
     });
   });
-}
+};
 
-export function multiTouchMove(
-  target: Element,
-  from: Point[],
-  to: Point[],
-  step = 5
-) {
+export const multiTouchMove = (target: Element, from: Point[], to: Point[], step = 5) => {
   if (from.length !== to.length) {
     throw new Error('from and to should have the same length');
   }
@@ -189,9 +167,9 @@ export function multiTouchMove(
       });
     }
   }
-}
+};
 
-export function multiTouchUp(target: Element, points: Point[]) {
+export const multiTouchUp = (target: Element, points: Point[]) => {
   points.forEach((point, index) => {
     pointerup(target as HTMLElement, point, {
       isPrimary: index === 0,
@@ -199,4 +177,4 @@ export function multiTouchUp(target: Element, points: Point[]) {
       pointerType: 'touch',
     });
   });
-}
+};

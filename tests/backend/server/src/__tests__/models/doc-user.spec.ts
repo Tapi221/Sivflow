@@ -29,11 +29,11 @@ test.after(async () => {
   await module.close();
 });
 
-async function create() {
+const create = async () => {
   return db.workspace.create({
     data: { public: false },
   });
-}
+};
 
 test('should set doc owner', async t => {
   const workspace = await create();

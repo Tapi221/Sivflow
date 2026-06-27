@@ -1,4 +1,5 @@
-import http, { type IncomingMessage, type ServerResponse } from "node:http";
+import http from "node:http";
+import type { IncomingMessage, ServerResponse } from "node:http";
 
 import { HttpsError } from "firebase-functions/v2/https";
 

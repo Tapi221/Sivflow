@@ -3,6 +3,6 @@ import { getInternalViewExtensions } from '@blocksuite/affine/extensions/view';
 
 const manager = new ViewExtensionManager(getInternalViewExtensions());
 
-export function getTestViewManager() {
+export const getTestViewManager = () => {
   return manager;
-}
+};
