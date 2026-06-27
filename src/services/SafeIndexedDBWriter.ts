@@ -20,7 +20,7 @@ class SafeIndexedDBWriter {
     context: string,
   ): Promise<T | null> => {
     if (StorageStateManager.isReadOnly(userId)) {
-      console.warn(`[Storage:${userId}] Write blocked (READ_ONLY): ${context}`);
+      console.warn(`[Storage:${userId}] 書き込みをブロックしました（READ_ONLY）: ${context}`);
       return null;
     }
 
@@ -62,7 +62,7 @@ class SafeIndexedDBWriter {
 
       if (result === null) {
         console.warn(
-          `[Storage:${userId}] Bulk write aborted at index ${results.length - 1}`,
+          `[Storage:${userId}] 一括書き込みを中断しました。中断位置: ${results.length - 1}`,
         );
         break;
       }

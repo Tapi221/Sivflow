@@ -5,8 +5,8 @@ apply plugin: "com.facebook.react"
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
 /**
- * This is the configuration block to customize your React Native Android app.
- * By default you don't need to apply any configuration, just uncomment the lines you need.
+ * React Native Android アプリを調整するための設定ブロックです。
+ * 既定では設定不要です。必要な行だけコメントを外してください。
  */
 react {
     entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", projectRoot, "android", "absolute"].execute(null, rootDir).text.trim())
@@ -15,48 +15,46 @@ react {
     codegenDir = new File(["node", "--print", "require.resolve('@react-native/codegen/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
 
     enableBundleCompression = (findProperty('android.enableBundleCompression') ?: false).toBoolean()
-    // Use Expo CLI to bundle the app, this ensures the Metro config
-    // works correctly with Expo projects.
+    // Expo CLI を使ってアプリを bundle します。これにより Expo project 用の Metro config が正しく動きます。
     cliFile = new File(["node", "--print", "require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })"].execute(null, rootDir).text.trim())
     bundleCommand = "export:embed"
 
-    /* Folders */
-     //   The root of your project, i.e. where "package.json" lives. Default is '../..'
+    /* フォルダー */
+     //   プロジェクトの root。つまり "package.json" がある場所です。既定値は '../..'
     // root = file("../../")
-    //   The folder where the react-native NPM package is. Default is ../../node_modules/react-native
+    //   react-native の NPM package があるフォルダーです。既定値は ../../node_modules/react-native
     // reactNativeDir = file("../../node_modules/react-native")
-    //   The folder where the react-native Codegen package is. Default is ../../node_modules/@react-native/codegen
+    //   react-native Codegen package があるフォルダーです。既定値は ../../node_modules/@react-native/codegen
     // codegenDir = file("../../node_modules/@react-native/codegen")
 
     /* Variants */
-    //   The list of variants to that are debuggable. For those we're going to
-    //   skip the bundling of the JS bundle and the assets. By default is just 'debug'.
-    //   If you add flavors like lite, prod, etc. you'll have to list your debuggableVariants.
+    //   デバッグ可能な variants の一覧です。対象 variant では JS bundle と assets の bundling をスキップします。
+    //   既定では 'debug' だけです。lite、prod などの flavor を追加する場合は debuggableVariants に列挙してください。
     // debuggableVariants = ["liteDebug", "prodDebug"]
 
     /* Bundling */
-    //   A list containing the node command and its flags. Default is just 'node'.
+    //   node command とその flags の一覧です。既定値は 'node' だけです。
     // nodeExecutableAndArgs = ["node"]
 
     //
-    //   The path to the CLI configuration file. Default is empty.
+    //   CLI 設定ファイルへの path です。既定値は空です。
     // bundleConfig = file(../rn-cli.config.js)
     //
-    //   The name of the generated asset file containing your JS bundle
+    //   JS bundle を生成した asset file の名前です。
     // bundleAssetName = "MyApplication.android.bundle"
     //
-    //   The entry file for bundle generation. Default is 'index.android.js' or 'index.js'
+    //   bundle 生成時の entry file です。既定値は 'index.android.js' または 'index.js' です。
     // entryFile = file("../js/MyApplication.android.js")
     //
-    //   A list of extra flags to pass to the 'bundle' commands.
-    //   See https://github.com/react-native-community/cli/blob/main/docs/commands.md#bundle
+    //   'bundle' command に渡す追加 flags の一覧です。
+    //   参考: https://github.com/react-native-community/cli/blob/main/docs/commands.md#bundle
     // extraPackagerArgs = []
 
     /* Hermes Commands */
-    //   The hermes compiler command to run. By default it is 'hermesc'
+    //   Hermes compiler の command です。既定値は 'hermesc' です。
     // hermesCommand = "$rootDir/my-custom-hermesc/bin/hermesc"
     //
-    //   The list of flags to pass to the Hermes compiler. By default is "-O", "-output-source-map"
+    //   Hermes compiler に渡す flags の一覧です。既定値は "-O", "-output-source-map" です。
     // hermesFlags = ["-O", "-output-source-map"]
 
     /* Autolinking */
@@ -64,20 +62,19 @@ react {
 }
 
 /**
- * Set this to true in release builds to optimize the app using [R8](https://developer.android.com/topic/performance/app-optimization/enable-app-optimization).
+ * release build で [R8](https://developer.android.com/topic/performance/app-optimization/enable-app-optimization) による最適化を有効にする場合は true にします。
  */
 def enableMinifyInReleaseBuilds = (findProperty('android.enableMinifyInReleaseBuilds') ?: false).toBoolean()
 
 /**
- * The preferred build flavor of JavaScriptCore (JSC)
+ * JavaScriptCore (JSC) の推奨 build flavor です。
  *
- * For example, to use the international variant, you can use:
+ * たとえば international variant を使う場合は次のように指定します。
  * `def jscFlavor = 'org.webkit:android-jsc-intl:+'`
  *
- * The international variant includes ICU i18n library and necessary data
- * allowing to use e.g. `Date.toLocaleString` and `String.localeCompare` that
- * give correct results when using with locales other than en-US. Note that
- * this variant is about 6MiB larger per architecture than default.
+ * international variant には ICU i18n library と必要な data が含まれ、
+ * en-US 以外の locale で `Date.toLocaleString` や `String.localeCompare` を使っても
+ * 正しい結果を得られます。なお、この variant は既定より architecture ごとに約 6MiB 大きくなります。
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
@@ -110,8 +107,8 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
+            // 注意: 本番では独自の keystore file を生成してください。
+            // 参考: https://reactnative.dev/docs/signed-apk-android
             signingConfig signingConfigs.debug
             def enableShrinkResources = findProperty('android.enableShrinkResourcesInReleaseBuilds') ?: 'false'
             shrinkResources enableShrinkResources.toBoolean()
@@ -132,20 +129,20 @@ android {
     }
 }
 
-// Apply static values from `gradle.properties` to the `android.packagingOptions`
-// Accepts values in comma delimited lists, example:
+// `gradle.properties` の静的な値を `android.packagingOptions` に適用します。
+// カンマ区切りの一覧を受け取ります。例:
 // android.packagingOptions.pickFirsts=/LICENSE,**/picasa.ini
 ["pickFirsts", "excludes", "merges", "doNotStrip"].each { prop ->
-    // Split option: 'foo,bar' -> ['foo', 'bar']
+    // option を分割します: 'foo,bar' -> ['foo', 'bar']
     def options = (findProperty("android.packagingOptions.$prop") ?: "").split(",");
-    // Trim all elements in place.
+    // すべての要素をその場で trim します。
     for (i in 0..<options.size()) options[i] = options[i].trim();
-    // `[] - ""` is essentially `[""].filter(Boolean)` removing all empty strings.
+    // `[] - ""` は実質的に `[""].filter(Boolean)` と同じで、空文字を取り除きます。
     options -= ""
 
     if (options.length > 0) {
         println "android.packagingOptions.$prop += $options ($options.length)"
-        // Ex: android.packagingOptions.pickFirsts += '**/SCCS/**'
+        // 例: android.packagingOptions.pickFirsts += '**/SCCS/**'
         options.each {
             android.packagingOptions[prop] += it
         }
@@ -153,7 +150,7 @@ android {
 }
 
 dependencies {
-    // The version of react-native is set by the React Native Gradle Plugin
+    // react-native の version は React Native Gradle Plugin によって設定されます。
     implementation("com.facebook.react:react-android")
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
@@ -161,15 +158,15 @@ dependencies {
     def isWebpAnimatedEnabled = (findProperty('expo.webp.animated') ?: "") == "true";
 
     if (isGifEnabled) {
-        // For animated gif support
+        // アニメーション GIF 対応
         implementation("com.facebook.fresco:animated-gif:${expoLibs.versions.fresco.get()}")
     }
 
     if (isWebpEnabled) {
-        // For webp support
+        // WebP 対応
         implementation("com.facebook.fresco:webpsupport:${expoLibs.versions.fresco.get()}")
         if (isWebpAnimatedEnabled) {
-            // Animated webp support
+            // アニメーション WebP 対応
             implementation("com.facebook.fresco:animated-webp:${expoLibs.versions.fresco.get()}")
         }
     }

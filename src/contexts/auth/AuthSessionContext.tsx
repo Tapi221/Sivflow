@@ -27,7 +27,7 @@ const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
     if (!isFirebaseClientAvailable || !auth) {
       initializeDB("anonymous")
         .catch((error) => {
-          console.warn("[Auth] Anonymous local DB initialization failed:", error);
+          console.warn("[Auth] 匿名ユーザー用ローカルDBの初期化に失敗しました:", error);
         })
         .finally(() => {
           setCurrentUser(null);
@@ -50,10 +50,10 @@ const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
               return;
             }
           } catch (error) {
-            console.warn("[Auth] Google Calendar account hydration failed (non-fatal):", error);
+            console.warn("[Auth] Google Calendar アカウントの復元に失敗しました（致命的ではありません）:", error);
           }
         } catch (error) {
-          console.error("[Auth] Fatal setup error:", error);
+          console.error("[Auth] 初期セットアップで致命的なエラーが発生しました:", error);
         } finally {
           setCurrentUser(await refreshAuthProfile(user));
           setLoading(false);
@@ -66,7 +66,7 @@ const AuthSessionProvider = ({ children }: AuthSessionProviderProps) => {
         await resetLocalDBForLogout(previousUserId);
         await initializeDB("anonymous");
       } catch (error) {
-        console.warn("[Auth] Logout DB reset failed (non-fatal):", error);
+        console.warn("[Auth] ログアウト時のDBリセットに失敗しました（致命的ではありません）:", error);
       }
 
       SyncServiceFactory.resetInstance(previousUserId);

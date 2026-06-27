@@ -158,7 +158,7 @@ class IndexedDBMetadataService {
 
     if (!meta) {
       console.warn(
-        `[Metadata:${this.userId}] Missing metadata detected. Creating default metadata to avoid destructive rebuild.`,
+        `[Metadata:${this.userId}] メタデータが見つかりません。破壊的な再構築を避けるため、既定のメタデータを作成します。`,
       );
 
       try {
@@ -168,7 +168,7 @@ class IndexedDBMetadataService {
         return { healthy: true };
       } catch (error) {
         console.error(
-          `[Metadata:${this.userId}] Failed to create metadata during health check`,
+          `[Metadata:${this.userId}] 健全性チェック中のメタデータ作成に失敗しました`,
           error,
         );
         return { healthy: false, reason: "missing_metadata" };
@@ -199,7 +199,7 @@ class IndexedDBMetadataService {
 
     if (diff > 0) {
       console.warn(
-        `[HealthCheck] Card count mismatch detected. Expected: ${expectedCardCount}, Actual: ${actualCardCount}`,
+        `[HealthCheck] カード件数の不一致を検出しました。期待値: ${expectedCardCount}, 実際: ${actualCardCount}`,
       );
 
       if (expectedCardCount === 0 && actualCardCount > 0) {
@@ -208,7 +208,7 @@ class IndexedDBMetadataService {
           return { healthy: true };
         } catch (error) {
           console.error(
-            "[HealthCheck] metadata recompute failed for expected=0 mismatch",
+            "[HealthCheck] expected=0 の不一致に対するメタデータ再計算に失敗しました",
             error,
           );
           return {
@@ -227,7 +227,7 @@ class IndexedDBMetadataService {
           await this.markClean();
           return { healthy: true };
         } catch (error) {
-          console.error("[HealthCheck] Failed to auto-correct metadata", error);
+          console.error("[HealthCheck] メタデータの自動補正に失敗しました", error);
           return {
             healthy: false,
             reason: `count_mismatch_autofix_failed (diff: ${diff})`,
@@ -260,7 +260,7 @@ class IndexedDBMetadataService {
     );
 
     console.warn(
-      `[Metadata:${this.userId}] Rebuild count: ${meta.rebuildCount}, reason: ${reason}`,
+      `[Metadata:${this.userId}] 再構築回数: ${meta.rebuildCount}, 理由: ${reason}`,
     );
   };
 

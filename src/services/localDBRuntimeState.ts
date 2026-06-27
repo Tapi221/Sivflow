@@ -62,7 +62,7 @@ const writeLocalStorage = (key: string, value: string | null) => {
       window.localStorage.setItem(key, value);
     }
   } catch {
-    // ignore localStorage write failures
+    // localStorage への書き込み失敗は無視します。
   }
 };
 const readResetFailedReason = (): string | null => readLocalStorage(RESET_FAILED_REASON_KEY) ?? readLocalStorage(LEGACY_RESET_FAILED_REASON_KEY);
@@ -87,7 +87,7 @@ const updateLocalDBRuntimeStatus = (next: Partial<LocalDBRuntimeStatus>) => {
     try {
       listener(getLocalDBRuntimeStatus());
     } catch (err) {
-      console.error("[LocalDB] Failed to notify runtime status listener", err);
+      console.error("[LocalDB] runtime status listener への通知に失敗しました", err);
     }
   });
   return getLocalDBRuntimeStatus();

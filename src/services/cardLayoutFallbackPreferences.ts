@@ -70,7 +70,7 @@ const writeStore = (store: SplitFallbackPreferencesStore) => {
       JSON.stringify(store),
     );
   } catch {
-    // ignore local persistence failures
+    // ローカル保存の失敗は無視します。
   }
 };
 const resolveSplitFallbackLayoutModePreference = (deviceScope: string, fallbackMode: SplitFallbackCardLayoutMode = DEFAULT_SPLIT_FALLBACK_CARD_LAYOUT_MODE) => {

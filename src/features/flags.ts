@@ -39,7 +39,7 @@ class FeatureFlagService {
         }
       }
     } catch (err) {
-      console.warn("[FeatureFlags] Failed to load overrides:", err);
+      console.warn("[FeatureFlags] override の読み込みに失敗しました:", err);
     }
   };
 
@@ -66,7 +66,7 @@ class FeatureFlagService {
           JSON.stringify(current),
         );
       } catch (err) {
-        console.warn("[FeatureFlags] Failed to persist override:", err);
+        console.warn("[FeatureFlags] override の保存に失敗しました:", err);
       }
     }
   };

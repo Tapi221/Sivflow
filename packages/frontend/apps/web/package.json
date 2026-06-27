@@ -7,7 +7,7 @@
   "scripts": {
     "prebuild": "npm --prefix ../../../.. --workspace @affine/templates run build",
     "predev": "npm --prefix ../../../.. --workspace @affine/templates run build",
-    "build": "vite build",
+    "build": "node --max-old-space-size=4096 ../../../../node_modules/vite/bin/vite.js build",
     "dev": "vite"
   },
   "dependencies": {

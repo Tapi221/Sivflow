@@ -1,14 +1,23 @@
-import { dialogHandlers } from './dialog';
 import { dbEventsV1, dbHandlersV1, nbstoreHandlers } from './nbstore';
 import { previewHandlers } from './preview';
 import { provideExposed } from './provide';
-import { workspaceEvents, workspaceHandlers } from './workspace';
+
+const workspaceHandlers = {
+  delete: async () => {},
+  moveToTrash: async () => {},
+  getBackupWorkspaces: async () => ({ items: [] }),
+  deleteBackupWorkspace: async () => {},
+  recoverBackupWorkspace: async () => ({}),
+  listLocalWorkspaceIds: async () => [],
+};
+
+const workspaceEvents = {};
 
 export const handlers = {
   db: dbHandlersV1,
   nbstore: nbstoreHandlers,
   workspace: workspaceHandlers,
-  dialog: dialogHandlers,
+  dialog: {},
   preview: previewHandlers,
 };
 
