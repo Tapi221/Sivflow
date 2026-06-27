@@ -19,6 +19,8 @@
   "scripts": {
     "npmize": "node scripts/npmize-workspace-protocols.mjs",
     "lint": "npm run typecheck",
+    "lint:fix": "node scripts/lint-fix.mjs",
+    "fix:source-conventions": "node scripts/lint-fix.mjs --fixers-only",
     "typecheck": "tsc --build packages/frontend/apps/web/tsconfig.json --pretty false",
     "test:backend": "npm --workspace @affine/server run test",
     "test:blocksuite": "npm --workspace @blocksuite/integration-test run test:unit",
