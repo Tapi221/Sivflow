@@ -1,7 +1,39 @@
 import debug from 'debug';
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+type ConsoleNoticeLevel = 'log' | 'info' | 'warn';
 
 const SESSION_KEY = 'affine:debug';
+
+const HIDDEN_DEVELOPMENT_CONSOLE_NOTICES = [
+  'Download the React DevTools for a better development experience',
+  'i18next is made possible by our own product, Locize',
+];
+
+const shouldHideDevelopmentConsoleNotice = (args: unknown[]): boolean => {
+  const message = args
+    .map(arg => (typeof arg === 'string' ? arg : ''))
+    .join(' ');
+
+  return HIDDEN_DEVELOPMENT_CONSOLE_NOTICES.some(notice =>
+    message.includes(notice)
+  );
+};
+
+const installDevelopmentConsoleFilters = () => {
+  const levels: ConsoleNoticeLevel[] = ['log', 'info', 'warn'];
+
+  levels.forEach(level => {
+    const original = console[level].bind(console);
+
+    console[level] = (...args: unknown[]) => {
+      if (shouldHideDevelopmentConsoleNotice(args)) {
+        return;
+      }
+
+      original(...args);
+    };
+  });
+};
 
 const localizeDebugLogMessage = (message: string): string => {
   if (message === 'i18n initialized') {
@@ -33,6 +65,8 @@ const localizeDebugLogMessage = (message: string): string => {
 };
 
 if (typeof window !== 'undefined') {
+  installDevelopmentConsoleFilters();
+
   const getSessionValue = (key: string) => {
     try {
       return sessionStorage.getItem(key);
@@ -45,20 +79,20 @@ if (typeof window !== 'undefined') {
     try {
       sessionStorage.setItem(key, value);
     } catch {
-      // ignore if storage is not accessible (e.g., sandboxed renderer)
+      // ストレージにアクセスできない環境では何もしない
     }
   };
 
-  // enable debug logs if the URL search string contains `debug`
-  // e.g. http://localhost:3000/?debug
+  // URL に `debug` が含まれる場合だけデバッグログを有効にする
+  // 例: http://localhost:3000/?debug
   if (window.location.search.includes('debug')) {
-    // enable debug logs for the current session
-    // since the query string may be removed by the browser after navigations,
-    // we need to store the debug flag in sessionStorage
+    // 現在のセッションだけデバッグログを有効にする
+    // 画面遷移後にクエリ文字列が消える場合があるため、
+    // sessionStorage にデバッグフラグを保存する
     setSessionValue(SESSION_KEY, 'true');
   }
   if (getSessionValue(SESSION_KEY) === 'true') {
-    // enable all debug logs by default
+    // 既定ではすべてのデバッグログを有効にする
     debug.enable('*');
     console.warn('デバッグログが有効です');
   }
