@@ -350,6 +350,9 @@ export class CopilotContextModel extends BaseModel {
     threshold: number,
     matchDocIds?: string[]
   ): Promise<DocChunkSimilarity[]> {
+    const docScope = matchDocIds?.length
+      ? Prisma.sql`AND w."doc_id" IN (${Prisma.join(matchDocIds)})`
+      : Prisma.empty;
     const similarityChunks = await this.db.$queryRaw<Array<DocChunkSimilarity>>`
       SELECT
         w."doc_id" as "docId",
@@ -360,9 +363,9 @@ export class CopilotContextModel extends BaseModel {
       LEFT JOIN "ai_workspace_ignored_docs" i
         ON i."workspace_id" = w."workspace_id"
           AND i."doc_id" = w."doc_id"
-          ${matchDocIds?.length ? Prisma.sql`AND w."doc_id" NOT IN (${Prisma.join(matchDocIds)})` : Prisma.empty}
       WHERE
         w."workspace_id" = ${workspaceId}
+        ${docScope}
         AND i."doc_id" IS NULL
         AND (w."embedding" <=> ${embedding}::vector) <= ${threshold}
       ORDER BY "distance" ASC
