@@ -18,10 +18,6 @@ const GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY = defineSecret("GOOGLE_OAUTH_TOKEN_ENCRY
 
 const REGION = "asia-northeast1";
 
-const exchangeGoogleCalendarCode = connectGoogleCalendarAccount;
-
-const getGoogleCalendarAccessToken = refreshGoogleCalendarAccessToken;
-
 
 
 const requireUid = (request: { auth?: { uid?: string } }) => {
@@ -91,6 +87,10 @@ const refreshGoogleCalendarAccessToken = onCall(
     return await refreshGoogleCalendarAccessTokenForUser(uid, request.data ?? {}, readCallableSecrets());
   },
 );
+
+const exchangeGoogleCalendarCode = connectGoogleCalendarAccount;
+
+const getGoogleCalendarAccessToken = refreshGoogleCalendarAccessToken;
 
 
 
