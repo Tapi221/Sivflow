@@ -54,7 +54,6 @@ export class ImportConfigCommand {
       });
     }
 
-    // @ts-expect-error null as user id
     await this.models.appConfig.save(null, forSaving);
   }
 }
