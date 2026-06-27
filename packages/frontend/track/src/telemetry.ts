@@ -1,5 +1,7 @@
 import { DebugLogger } from '@affine/debug';
 
+import { getBuildChannel } from './build-config';
+
 export type TelemetryEvent = {
   schemaVersion: 1;
   eventName: string;
@@ -57,22 +59,17 @@ const logger = new DebugLogger('telemetry');
 const pendingEvents: TelemetryEvent[] = [];
 const PENDING_LIMIT = 500;
 
-const defaultChannel =
-  BUILD_CONFIG.appBuildType === 'beta' ||
-  BUILD_CONFIG.appBuildType === 'internal' ||
-  BUILD_CONFIG.appBuildType === 'canary' ||
-  BUILD_CONFIG.appBuildType === 'stable'
-    ? BUILD_CONFIG.appBuildType
-    : 'stable';
+function createInitialContext(): TelemetryContext {
+  return {
+    isAuthed: false,
+    isSelfHosted: false,
+    channel: getBuildChannel(),
+    officialEndpoint: '',
+    userProperties: {},
+  };
+}
 
-let context: TelemetryContext = {
-  isAuthed: false,
-  isSelfHosted: false,
-  channel: defaultChannel,
-  officialEndpoint: '',
-  userProperties: {},
-};
-
+let context: TelemetryContext = createInitialContext();
 let transport: TelemetryTransport | null = null;
 
 export function setTelemetryTransport(next: TelemetryTransport | null) {
@@ -111,6 +108,12 @@ export function getTelemetryContext() {
   return context;
 }
 
+export function resetTelemetryState() {
+  context = createInitialContext();
+  transport = null;
+  pendingEvents.splice(0, pendingEvents.length);
+}
+
 export async function sendTelemetryEvent(event: TelemetryEvent) {
   if (!transport) {
     enqueuePending(event);
@@ -140,7 +143,11 @@ async function flushPending() {
 
 function enqueuePending(event: TelemetryEvent) {
   if (pendingEvents.length >= PENDING_LIMIT) {
-    pendingEvents.shift();
+    const dropped = pendingEvents.shift();
+    logger.warn('pending telemetry queue is full; dropped oldest event', {
+      eventName: dropped?.eventName,
+      eventId: dropped?.eventId,
+    });
   }
   pendingEvents.push(event);
 }
