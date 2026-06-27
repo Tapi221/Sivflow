@@ -1,6 +1,7 @@
 import type { ChildProcessWithoutNullStreams } from 'node:child_process';
 import { spawn } from 'node:child_process';
 import { resolve } from 'node:path';
+import { setTimeout as delay } from 'node:timers/promises';
 
 import type { BuildContext } from 'esbuild';
 import * as esbuild from 'esbuild';
@@ -20,14 +21,92 @@ const stderrFilterPatterns = [
 ];
 
 let spawnProcess: ChildProcessWithoutNullStreams | null = null;
+let webDevProcess: ChildProcessWithoutNullStreams | null = null;
+const intentionalStops = new WeakSet<ChildProcessWithoutNullStreams>();
 
-function spawnOrReloadElectron() {
+function pipeProcessOutput(
+  processToPipe: ChildProcessWithoutNullStreams,
+  options: { prefix?: string; filterStderr?: boolean } = {}
+) {
+  const { prefix = '', filterStderr = false } = options;
+  const format = (value: Buffer) => {
+    const str = value.toString().trim();
+    return prefix && str ? `${prefix} ${str}` : str;
+  };
+
+  processToPipe.stdout.on('data', d => {
+    const str = format(d);
+    if (str) {
+      console.log(str);
+    }
+  });
+
+  processToPipe.stderr.on('data', d => {
+    const data = format(d);
+    if (!data) return;
+    const mayIgnore =
+      filterStderr && stderrFilterPatterns.some(r => r.test(data));
+    if (mayIgnore) return;
+    console.error(data);
+  });
+}
+
+function stopSpawnedProcess(
+  processToStop: ChildProcessWithoutNullStreams,
+  label: string
+) {
+  if (!processToStop.pid) {
+    return Promise.resolve();
+  }
+
+  intentionalStops.add(processToStop);
+
+  return new Promise<void>(resolve => {
+    const timeout = setTimeout(resolve, 5000);
+
+    processToStop.once('exit', () => {
+      clearTimeout(timeout);
+      resolve();
+    });
+
+    kill(processToStop.pid!, err => {
+      if (err) {
+        clearTimeout(timeout);
+        console.error(`${label} の停止に失敗しました`, err);
+        resolve();
+      }
+    });
+  });
+}
+
+function cleanupProcesses() {
+  if (spawnProcess?.pid) {
+    intentionalStops.add(spawnProcess);
+    kill(spawnProcess.pid);
+  }
+
+  if (webDevProcess?.pid) {
+    intentionalStops.add(webDevProcess);
+    kill(webDevProcess.pid);
+  }
+}
+
+process.once('SIGINT', () => {
+  cleanupProcesses();
+  process.exit();
+});
+
+process.once('SIGTERM', () => {
+  cleanupProcesses();
+  process.exit();
+});
+
+async function spawnOrReloadElectron() {
   if (watchMode) {
     return;
   }
-  if (spawnProcess !== null && spawnProcess.pid) {
-    spawnProcess.off('exit', process.exit);
-    kill(spawnProcess.pid);
+  if (spawnProcess !== null) {
+    await stopSpawnedProcess(spawnProcess, 'Electron');
     spawnProcess = null;
   }
 
@@ -35,38 +114,111 @@ function spawnOrReloadElectron() {
   const exe = resolve(rootDir, 'node_modules', '.bin', `electron${ext}`);
 
   // remove import loader option
-  const NODE_OPTIONS = process.env.NODE_OPTIONS;
+  const env = { ...process.env };
+  const NODE_OPTIONS = env.NODE_OPTIONS;
   if (NODE_OPTIONS) {
-    process.env.NODE_OPTIONS = NODE_OPTIONS.replace(/--import=[^\s]*/, '');
+    env.NODE_OPTIONS = NODE_OPTIONS.replace(/--import=[^\s]*/, '');
   }
 
-  spawnProcess = spawn(exe, ['.', '--inspect'], {
+  const inspectArg = process.env.ELECTRON_INSPECT_PORT
+    ? `--inspect=${process.env.ELECTRON_INSPECT_PORT}`
+    : '--inspect=0';
+
+  const electronProcess = spawn(exe, ['.', inspectArg], {
     cwd: electronDir,
-    env: process.env,
+    env,
     shell: true,
   });
+  spawnProcess = electronProcess;
 
-  spawnProcess.stdout.on('data', d => {
-    const str = d.toString().trim();
-    if (str) {
-      console.log(str);
-    }
-  });
-
-  spawnProcess.stderr.on('data', d => {
-    const data = d.toString().trim();
-    if (!data) return;
-    const mayIgnore = stderrFilterPatterns.some(r => r.test(data));
-    if (mayIgnore) return;
-    console.error(data);
-  });
+  pipeProcessOutput(electronProcess, { filterStderr: true });
 
   // Stops the watch script when the application has quit
-  spawnProcess.on('exit', code => {
-    if (code && code !== 0) {
+  electronProcess.on('exit', code => {
+    if (spawnProcess === electronProcess) {
+      spawnProcess = null;
+    }
+
+    if (!intentionalStops.has(electronProcess) && code && code !== 0) {
       console.log(`Electron はコード ${code} で終了しました`);
     }
   });
+}
+
+async function isDevServerReachable(url: string) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 1000);
+
+  try {
+    await fetch(url, {
+      method: 'HEAD',
+      signal: controller.signal,
+    });
+    return true;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function spawnWebDevServer() {
+  if (webDevProcess !== null) {
+    return;
+  }
+
+  const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+  const currentWebDevProcess = spawn(
+    npm,
+    ['--workspace', '@affine/web', 'run', 'dev'],
+    {
+      cwd: rootDir,
+      env: process.env,
+      shell: true,
+    }
+  );
+  webDevProcess = currentWebDevProcess;
+
+  pipeProcessOutput(currentWebDevProcess, { prefix: '[web]' });
+
+  currentWebDevProcess.on('exit', code => {
+    if (webDevProcess === currentWebDevProcess) {
+      webDevProcess = null;
+    }
+
+    if (!intentionalStops.has(currentWebDevProcess) && code && code !== 0) {
+      console.log(`Web 開発サーバーはコード ${code} で終了しました`);
+    }
+  });
+}
+
+async function ensureDevServer() {
+  const devServerBase = process.env.DEV_SERVER_URL;
+  if (!devServerBase || (await isDevServerReachable(devServerBase))) {
+    return;
+  }
+
+  console.log(
+    `Web 開発サーバーが見つからないため ${devServerBase} を起動しています...`
+  );
+  spawnWebDevServer();
+
+  const timeoutMs = Number(process.env.DEV_SERVER_WAIT_TIMEOUT_MS ?? 120000);
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < timeoutMs) {
+    if (await isDevServerReachable(devServerBase)) {
+      console.log(`Web 開発サーバーに接続しました: ${devServerBase}`);
+      return;
+    }
+
+    await delay(500);
+  }
+
+  throw new Error(
+    `Web 開発サーバー ${devServerBase} に接続できませんでした。` +
+      '別ターミナルで npm run dev:web を起動してから再実行してください。'
+  );
 }
 
 const common = config();
@@ -84,7 +236,9 @@ async function watchLayers() {
             build.onEnd(() => {
               if (initialBuild) {
                 console.log(`[layers] 変更を検出しました。Electron を再起動しています...`);
-                spawnOrReloadElectron();
+                spawnOrReloadElectron().catch(e => {
+                  console.error(e);
+                });
               } else {
                 buildContextPromise.then(resolve).catch(e => {
                   console.error(e);
@@ -112,6 +266,7 @@ if (watchMode) {
   console.log(`変更を監視しています...`);
 } else {
   console.log('Electron を起動しています...');
-  spawnOrReloadElectron();
+  await ensureDevServer();
+  await spawnOrReloadElectron();
   console.log(`Electron を起動しました。変更を監視しています...`);
 }
