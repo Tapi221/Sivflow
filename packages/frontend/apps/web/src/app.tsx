@@ -12,7 +12,6 @@ import { PopupWindowProvider } from '@affine/core/modules/url';
 import { configureBrowserWorkbenchModule } from '@affine/core/modules/workbench';
 import { configureBrowserWorkspaceFlavours } from '@affine/core/modules/workspace-engine';
 import createEmotionCache from '@affine/core/utils/create-emotion-cache';
-import { getWorkerUrl } from '@affine/env/worker';
 import { StoreManagerClient } from '@affine/nbstore/worker/client';
 import { setTelemetryTransport } from '@affine/track';
 import { CacheProvider } from '@emotion/react';
@@ -21,24 +20,35 @@ import { OpClient } from '@toeverything/infra/op';
 import { Suspense } from 'react';
 import { RouterProvider } from 'react-router-dom';
 
+import nbstoreSharedWorkerUrl from './nbstore.worker.ts?sharedworker&url';
+import nbstoreWorkerUrl from './nbstore.worker.ts?worker&url';
+
 const cache = createEmotionCache();
 
-let storeManagerClient: StoreManagerClient;
+function createStoreManagerClient() {
+  if (
+    window.SharedWorker &&
+    localStorage.getItem('disableSharedWorker') !== 'true'
+  ) {
+    try {
+      const worker = new SharedWorker(nbstoreSharedWorkerUrl, {
+        name: 'affine-shared-worker',
+        type: 'module',
+      });
+      return new StoreManagerClient(new OpClient(worker.port));
+    } catch (err) {
+      console.warn(
+        '共有ワーカーの起動に失敗したため、専用ワーカーに切り替えます',
+        err
+      );
+    }
+  }
 
-const workerUrl = getWorkerUrl('nbstore');
-
-if (
-  window.SharedWorker &&
-  localStorage.getItem('disableSharedWorker') !== 'true'
-) {
-  const worker = new SharedWorker(workerUrl, {
-    name: 'affine-shared-worker',
-  });
-  storeManagerClient = new StoreManagerClient(new OpClient(worker.port));
-} else {
-  const worker = new Worker(workerUrl);
-  storeManagerClient = new StoreManagerClient(new OpClient(worker));
+  const worker = new Worker(nbstoreWorkerUrl, { type: 'module' });
+  return new StoreManagerClient(new OpClient(worker));
 }
+
+const storeManagerClient = createStoreManagerClient();
 setTelemetryTransport(storeManagerClient.telemetry);
 window.addEventListener('beforeunload', () => {
   storeManagerClient.dispose();
