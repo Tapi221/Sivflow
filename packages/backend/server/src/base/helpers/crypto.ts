@@ -63,6 +63,34 @@ function parseKey(privateKey: string) {
   return { priv, pub };
 }
 
+function publicKeyPem(publicKey: KeyObject) {
+  return publicKey.export({ format: 'pem', type: 'spki' }).toString('utf8');
+}
+
+function pushUniquePublicKey(
+  keys: KeyObject[],
+  seen: Set<string>,
+  publicKey: KeyObject
+) {
+  const pem = publicKeyPem(publicKey);
+  if (seen.has(pem)) {
+    return;
+  }
+
+  seen.add(pem);
+  keys.push(publicKey);
+}
+
+function pushUniqueAESKey(keys: Buffer[], seen: Set<string>, key: Buffer) {
+  const digest = key.toString('base64');
+  if (seen.has(digest)) {
+    return;
+  }
+
+  seen.add(digest);
+  keys.push(key);
+}
+
 @Injectable()
 export class CryptoHelper implements OnModuleInit {
   logger = new Logger(CryptoHelper.name);
@@ -98,7 +126,10 @@ export class CryptoHelper implements OnModuleInit {
 
   @OnEvent('config.changed')
   onConfigChanged(event: Events['config.changed']) {
-    if (event.updates.crypto?.privateKey) {
+    if (
+      event.updates.crypto?.privateKey ||
+      event.updates.crypto?.previousPrivateKeys
+    ) {
       this.setup();
     }
   }
@@ -108,28 +139,47 @@ export class CryptoHelper implements OnModuleInit {
     const prevAESKey = this.keyPair?.sha256.privateKey;
     const privateKey = this.config.crypto.privateKey || generatePrivateKey();
     const { priv, pub } = parseKey(privateKey);
-    const publicKey = pub
-      .export({ format: 'pem', type: 'spki' })
-      .toString('utf8');
+    const publicKey = publicKeyPem(pub);
     const privateAESKey = this.sha256(privateKey);
+    const previousPublicKeys: KeyObject[] = [];
+    const previousAESKeys: Buffer[] = [];
+    const seenPublicKeys = new Set([publicKey]);
+    const seenAESKeys = new Set([privateAESKey.toString('base64')]);
+
+    for (const previousPrivateKey of this.config.crypto.previousPrivateKeys ?? []) {
+      if (!previousPrivateKey) {
+        continue;
+      }
+
+      try {
+        const { pub: previousPublicKey } = parseKey(previousPrivateKey);
+        pushUniquePublicKey(
+          previousPublicKeys,
+          seenPublicKeys,
+          previousPublicKey
+        );
+        pushUniqueAESKey(
+          previousAESKeys,
+          seenAESKeys,
+          this.sha256(previousPrivateKey)
+        );
+      } catch (error) {
+        this.logger.warn('Invalid previous private key ignored.', error);
+      }
+    }
 
     if (prevPublicKey) {
-      const prevPem = prevPublicKey
-        .export({ format: 'pem', type: 'spki' })
-        .toString('utf8');
+      const prevPem = publicKeyPem(prevPublicKey);
       if (prevPem !== publicKey) {
-        this.previousPublicKeys.unshift(prevPublicKey);
-        this.previousPublicKeys = this.previousPublicKeys.slice(0, 2);
+        pushUniquePublicKey(previousPublicKeys, seenPublicKeys, prevPublicKey);
         if (prevAESKey) {
-          this.previousAESKeys.unshift(prevAESKey);
-          this.previousAESKeys = this.previousAESKeys.slice(0, 2);
+          pushUniqueAESKey(previousAESKeys, seenAESKeys, prevAESKey);
         }
       }
     }
 
-    this.previousAESKeys = this.previousAESKeys.filter(
-      key => !key.equals(privateAESKey)
-    );
+    this.previousPublicKeys = previousPublicKeys;
+    this.previousAESKeys = previousAESKeys;
 
     this.keyPair = {
       publicKey: pub,
