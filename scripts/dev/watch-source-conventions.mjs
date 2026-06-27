@@ -180,7 +180,7 @@ const runFixCycle = async () => {
 
   const firstVerify = runVerify();
   if (firstVerify.ok) {
-    console.log("Source conventions are clean.");
+    console.log("ソース規約は問題ありません。");
     return;
   }
 
@@ -193,7 +193,7 @@ const runFixCycle = async () => {
   const groupedViolations = [...groupViolationsByFile(firstVerify.violations).entries()].slice(0, MAX_FILES_PER_CYCLE);
 
   for (const [filePath, violations] of groupedViolations) {
-    console.log(`Fixing ${toPosix(relative(ROOT_DIR, filePath))} with local LLM...`);
+    console.log(`ローカル LLM で ${toPosix(relative(ROOT_DIR, filePath))} を修正しています...`);
     await fixFileWithLocalLlm(filePath, violations);
   }
 
@@ -206,11 +206,11 @@ const runFixCycle = async () => {
   }
 
   if (SHOULD_TYPECHECK) runTypecheck();
-  console.log("Source conventions are clean after local LLM fixes.");
+  console.log("ローカル LLM 修正後、ソース規約は問題ありません。");
 };
 
 const main = async () => {
-  console.log(SHOULD_FIX ? "Watching Sivflow source conventions with local LLM rewrites enabled." : "Watching Sivflow source conventions in verify-only mode.");
+  console.log(SHOULD_FIX ? "ローカル LLM による書き換えを有効にして Sivflow のソース規約を監視しています。" : "検証のみのモードで Sivflow のソース規約を監視しています。");
 
   let snapshot = getSourceSnapshot();
   await runFixCycle();
