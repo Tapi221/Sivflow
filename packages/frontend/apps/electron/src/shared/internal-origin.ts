@@ -2,7 +2,14 @@ export const mainHost = '.';
 export const anotherHost = 'another-host';
 export const internalHosts = new Set([mainHost, anotherHost]);
 
-export const mainWindowOrigin = `assets://${mainHost}`;
+const devServerBase = process.env.DEV_SERVER_URL;
+const useDevServer =
+  process.env.NODE_ENV === 'development' && !!devServerBase;
+const normalizeOrigin = (origin: string) => origin.replace(/\/+$/, '');
+
+export const mainWindowOrigin = useDevServer
+  ? normalizeOrigin(devServerBase)
+  : `assets://${mainHost}`;
 export const anotherOrigin = `assets://${anotherHost}`;
 
 export const onboardingViewUrl = `${mainWindowOrigin}/onboarding`;
