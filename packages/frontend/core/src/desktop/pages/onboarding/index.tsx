@@ -25,7 +25,7 @@ export const Component = () => {
 
   const openApp = useCallback(() => {
     desktopApi?.handler.ui.handleOpenMainApp().catch(err => {
-      console.log('failed to open main app', err);
+      console.log('メインアプリを開けませんでした', err);
     });
   }, [desktopApi]);
 
