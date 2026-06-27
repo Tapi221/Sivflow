@@ -60,6 +60,15 @@ const sharedElements = {
   'artifact-skeleton': ArtifactSkeleton,
 } satisfies Record<SharedEffectElementTag, CustomElementConstructor>;
 
+function defineSharedElement(
+  tagName: SharedEffectElementTag,
+  elementClass: CustomElementConstructor
+) {
+  if (!customElements.get(tagName)) {
+    customElements.define(tagName, elementClass);
+  }
+}
+
 export function registerAISharedEffects() {
   const registry = customElements;
   if (sharedRegistries.has(registry)) return;
@@ -69,6 +78,6 @@ export function registerAISharedEffects() {
   tooltipEffects();
 
   for (const tag of sharedEffectElementTags) {
-    customElements.define(tag, sharedElements[tag]);
+    defineSharedElement(tag, sharedElements[tag]);
   }
 }
