@@ -33,7 +33,7 @@ const clearDevSwAndCaches = () => {
   void navigator.serviceWorker.getRegistrations().then((registrations) => {
     registrations.forEach((registration) => {
       void registration.unregister();
-      console.log("SW unregistered in dev mode");
+      console.log("開発モードで Service Worker の登録を解除しました");
     });
   });
 
@@ -42,7 +42,7 @@ const clearDevSwAndCaches = () => {
   void caches.keys().then((names) => {
     names.forEach((name) => {
       void caches.delete(name);
-      console.log("[Cache] Deleted cache:", name);
+      console.log("[Cache] キャッシュを削除しました:", name);
     });
   });
 };
@@ -61,7 +61,7 @@ const initServiceWorkerLifecycle = () => {
     void navigator.serviceWorker
       .register("/sw.js")
       .then((registration) => {
-        console.log("SW registered: ", registration);
+        console.log("Service Worker を登録しました: ", registration);
 
         registration.addEventListener("updatefound", () => {
           installUpdateFlow(registration);
@@ -86,7 +86,7 @@ const initServiceWorkerLifecycle = () => {
         );
       })
       .catch((registrationError) => {
-        console.log("SW registration failed: ", registrationError);
+        console.log("Service Worker の登録に失敗しました: ", registrationError);
         logRuntimeFault("sw.register.error", {
           registrationError: toErrorText(registrationError),
         });
