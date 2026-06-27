@@ -43,7 +43,7 @@ const openImageFileDb = (): Promise<IDBDatabase> => {
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => {
       dbPromise = null;
-      reject(request.error ?? new Error("Failed to open image file store"));
+      reject(request.error ?? new Error("画像ファイルストアを開けませんでした"));
     };
   });
   return dbPromise;
@@ -61,7 +61,7 @@ const getStoredImageFile = async (
       resolve(result ?? null);
     };
     request.onerror = () =>
-      reject(request.error ?? new Error("Failed to read image blob"));
+      reject(request.error ?? new Error("画像 blob の読み込みに失敗しました"));
   });
 };
 const putScopedImageBlob = async (id: string, blob: Blob): Promise<void> => {
@@ -73,8 +73,8 @@ const putScopedImageBlob = async (id: string, blob: Blob): Promise<void> => {
     store.put(payload);
     tx.oncomplete = () => resolve();
     tx.onerror = () =>
-      reject(tx.error ?? new Error("Failed to save image blob"));
-    tx.onabort = () => reject(tx.error ?? new Error("Image blob save aborted"));
+      reject(tx.error ?? new Error("画像 blob の保存に失敗しました"));
+    tx.onabort = () => reject(tx.error ?? new Error("画像 blob の保存が中断されました"));
   });
 };
 const putImageBlob = async (blob: Blob, options: PutImageBlobOptions): Promise<ImageBlobRecord> => {
@@ -98,9 +98,9 @@ const deleteImageBlob = async (id: string, options?: BlobScopeOptions): Promise<
     }
     tx.oncomplete = () => resolve();
     tx.onerror = () =>
-      reject(tx.error ?? new Error("Failed to delete image blob"));
+      reject(tx.error ?? new Error("画像 blob の削除に失敗しました"));
     tx.onabort = () =>
-      reject(tx.error ?? new Error("Image blob delete aborted"));
+      reject(tx.error ?? new Error("画像 blob の削除が中断されました"));
   });
 };
 const getImageBlob = async (id: string, options?: BlobScopeOptions): Promise<Blob | null> => {
@@ -136,11 +136,11 @@ const deleteImageBlobsByUser = async (userId: string): Promise<void> => {
     };
     tx.oncomplete = () => resolve();
     tx.onerror = () =>
-      reject(tx.error ?? new Error("Failed to delete image blobs by user"));
+      reject(tx.error ?? new Error("user に紐づく画像 blob の削除に失敗しました"));
     tx.onabort = () =>
-      reject(tx.error ?? new Error("Image blob cleanup aborted"));
+      reject(tx.error ?? new Error("画像 blob の cleanup が中断されました"));
     request.onerror = () =>
-      reject(request.error ?? new Error("Failed to scan image blobs"));
+      reject(request.error ?? new Error("画像 blob の走査に失敗しました"));
   });
 };
 
