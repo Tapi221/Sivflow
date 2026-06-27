@@ -64,27 +64,7 @@ function buildTargetUrl(base: string, urlObject: URL) {
   return new URL(`${urlObject.pathname}${urlObject.search}`, base).toString();
 }
 
-async function buildAuthorizedRequest(request: Request, targetUrl: string) {
-  const clonedRequest = request.clone();
-  const headers = new Headers(clonedRequest.headers);
-  const token = getAuthTokenForUrl(targetUrl);
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
-
-  return new Request(targetUrl, {
-    body:
-      clonedRequest.method === 'GET' || clonedRequest.method === 'HEAD'
-        ? undefined
-        : clonedRequest.body,
-    headers,
-    method: clonedRequest.method,
-    redirect: clonedRequest.redirect,
-    signal: clonedRequest.signal,
-  });
-}
-
-async function proxyRequest(
+function proxyRequest(
   request: Request,
   urlObject: URL,
   base: string,
@@ -92,13 +72,13 @@ async function proxyRequest(
 ) {
   const { bypassCustomProtocolHandlers = true } = options;
   const targetUrl = buildTargetUrl(base, urlObject);
-  const authorizedRequest = await buildAuthorizedRequest(request, targetUrl);
   const proxiedRequest = bypassCustomProtocolHandlers
-    ? Object.assign(authorizedRequest, {
+    ? Object.assign(request.clone(), {
         bypassCustomProtocolHandlers: true,
       })
-    : authorizedRequest;
-  return net.fetch(proxiedRequest);
+    : request;
+
+  return net.fetch(targetUrl, proxiedRequest);
 }
 
 async function handleFileRequest(request: Request) {
@@ -122,7 +102,7 @@ async function handleFileRequest(request: Request) {
     urlObject.pathname &&
     /\.(woff2?|ttf|otf)$/i.test(urlObject.pathname.split('?')[0] ?? '');
 
-  // Redirect to webpack dev server if available
+  // 開発中は Vite 開発サーバーへ転送する。
   if (isDev && devServerBase && !isAbsolutePath && !isFontRequest) {
     return proxyRequest(request, urlObject, devServerBase, {
       bypassCustomProtocolHandlers: false,
