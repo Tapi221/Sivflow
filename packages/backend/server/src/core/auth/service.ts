@@ -21,11 +21,20 @@ import type { CurrentUser } from './session';
 export function sessionUser(
   user: Pick<
     User,
-    'id' | 'email' | 'avatarUrl' | 'name' | 'disabled'
+    | 'id'
+    | 'email'
+    | 'avatarUrl'
+    | 'name'
+    | 'disabled'
+    | 'emailVerifiedAt'
+    | 'password'
   >
 ): CurrentUser {
   // use pick to avoid unexpected fields
-  return pick(user, 'id', 'email', 'avatarUrl', 'name', 'disabled');
+  return assign(pick(user, 'id', 'email', 'avatarUrl', 'name', 'disabled'), {
+    emailVerified: !!user.emailVerifiedAt,
+    hasPassword: !!user.password,
+  });
 }
 
 @Injectable()
@@ -279,11 +288,14 @@ export class AuthService implements OnApplicationBootstrap {
   ): Promise<Omit<User, 'password'>> {
     return this.models.user.update(id, {
       email: newEmail,
+      emailVerifiedAt: new Date(),
     });
   }
 
   async setEmailVerified(id: string) {
-    return await this.models.user.get(id);
+    return await this.models.user.update(id, {
+      emailVerifiedAt: new Date(),
+    });
   }
 
   async sendChangePasswordEmail(email: string, callbackUrl: string) {
