@@ -113,6 +113,9 @@ packages/frontend/core/public/**/*.js
 packages/frontend/core/public/**/*.map
 packages/frontend/core/public/plugins/
 
+# Media Capture Playground
+packages/frontend/media-capture-playground/recordings/
+
 # Electron アプリ
 packages/frontend/apps/electron/*.autogen.*
 packages/frontend/apps/electron/e2e-dist-*/
@@ -144,6 +147,14 @@ packages/frontend/apps/ios/**/*.zip
 packages/frontend/apps/ios/**/*.cer
 packages/frontend/apps/ios/App/fastlane/report.xml
 packages/frontend/apps/ios/App/*.a
+
+# iOS Swift Package
+packages/frontend/apps/ios/App/Packages/**/.build/
+packages/frontend/apps/ios/App/Packages/**/Packages/
+packages/frontend/apps/ios/App/Packages/**/.swiftpm/configuration/registries.json
+packages/frontend/apps/ios/App/Packages/**/.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+packages/frontend/apps/ios/App/Packages/**/.netrc
+packages/frontend/apps/ios/App/Packages/AffineGraphQL/apollo-ios-cli
 
 # Android アプリ (Capacitor)
 packages/frontend/apps/android/App/build/
