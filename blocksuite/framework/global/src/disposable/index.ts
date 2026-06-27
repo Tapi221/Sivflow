@@ -33,41 +33,10 @@ export class DisposableGroup {
     this._disposables.push(d);
   }
 
-  addFromEvent<N extends keyof WindowEventMap>(
-    element: Window,
-    eventName: N,
-    handler: (e: WindowEventMap[N]) => void,
-    options?: boolean | AddEventListenerOptions
-  ): void;
-  addFromEvent<N extends keyof DocumentEventMap>(
-    element: Document,
-    eventName: N,
-    handler: (e: DocumentEventMap[N]) => void,
-    eventOptions?: boolean | AddEventListenerOptions
-  ): void;
-  addFromEvent<N extends keyof HTMLElementEventMap>(
-    element: HTMLElement,
-    eventName: N,
-    handler: (e: HTMLElementEventMap[N]) => void,
-    eventOptions?: boolean | AddEventListenerOptions
-  ): void;
-  addFromEvent<N extends keyof VisualViewportEventMap>(
-    element: VisualViewport,
-    eventName: N,
-    handler: (e: VisualViewportEventMap[N]) => void,
-    eventOptions?: boolean | AddEventListenerOptions
-  ): void;
-  addFromEvent(
-    element: EventTarget | null | undefined,
-    eventName: string,
-    handler: (e: any) => void,
-    eventOptions?: boolean | AddEventListenerOptions
-  ): void;
-
-  addFromEvent(
+  addFromEvent<E extends Event = Event>(
     target: EventTarget | null | undefined,
     type: string,
-    handler: (e: Event) => void,
+    handler: (e: E) => void,
     eventOptions?: boolean | AddEventListenerOptions
   ) {
     if (!target) {
