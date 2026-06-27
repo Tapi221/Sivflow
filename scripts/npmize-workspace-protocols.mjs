@@ -59,4 +59,4 @@ const walk = async dir => {
 };
 
 const count = await walk(root);
-console.log(`updated ${count} package.json file(s)`);
+console.log(`${count} 件の package.json を更新しました`);
