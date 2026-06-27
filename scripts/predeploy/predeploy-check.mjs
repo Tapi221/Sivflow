@@ -117,7 +117,7 @@ const resolveActiveProjectRaw = () => {
       return parsed.result;
     }
   } catch (error) {
-    info(`firebase use --json failed: ${String(error)}`);
+    info(`firebase use --json に失敗しました: ${String(error)}`);
   }
 
   return null;
@@ -150,7 +150,7 @@ if (
 }
 
 info(
-  `Active project: ${activeProjectId}${activeAlias ? ` (alias: ${activeAlias})` : ""}`,
+  `有効なプロジェクト: ${activeProjectId}${activeAlias ? ` (エイリアス: ${activeAlias})` : ""}`,
 );
 
 if (activeAlias === "prod" || activeProjectId === prodProjectId) {
@@ -159,4 +159,4 @@ if (activeAlias === "prod" || activeProjectId === prodProjectId) {
   requireEnvValue("VITE_GOOGLE_OAUTH_SERVER_TOKENS", productionEnv);
 }
 
-info("predeploy-check passed.");
+info("predeploy-check に合格しました。");
