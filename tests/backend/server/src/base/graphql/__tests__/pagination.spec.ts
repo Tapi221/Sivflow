@@ -146,3 +146,9 @@ test('should decode with json', async t => {
   const result2 = decodeWithJson<{ id: number; name: string }>('');
   t.is(result2, null);
 });
+
+test('should reject invalid json cursor', t => {
+  const error = t.throws(() => decodeWithJson(Buffer.from('not-json').toString('base64')));
+
+  t.is(error?.message, 'Invalid pagination cursor');
+});
