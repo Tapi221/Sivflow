@@ -17,6 +17,10 @@ function createEvent(eventName: string): TelemetryEvent {
   };
 }
 
+function waitForQueuedFlush() {
+  return new Promise(resolve => setTimeout(resolve, 0));
+}
+
 beforeEach(() => {
   delete (globalThis as any).BUILD_CONFIG;
   resetTelemetryState();
@@ -58,6 +62,7 @@ describe('telemetry state', () => {
 
     const track = vi.fn().mockResolvedValue({ queued: false });
     setTelemetryTransport({ setContext: vi.fn(), track });
+    await waitForQueuedFlush();
 
     expect(track).toHaveBeenCalledTimes(500);
     expect(track.mock.calls[0]?.[0].eventName).toBe('queued_1');
