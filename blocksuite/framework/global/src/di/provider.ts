@@ -18,7 +18,7 @@ export interface ResolveOptions {
 }
 
 export abstract class ServiceProvider {
-  abstract container: Container;
+  abstract readonly container: Container;
 
   get<T>(identifier: GeneralServiceIdentifier<T>, options?: ResolveOptions): T {
     return this.getRaw(parseIdentifier(identifier), {
@@ -72,7 +72,9 @@ export class ServiceCachePool {
 }
 
 export class ServiceResolver extends ServiceProvider {
-  container = this.provider.container;
+  override get container(): Container {
+    return this.provider.container;
+  }
 
   constructor(
     readonly provider: BasicServiceProvider,
