@@ -1,6 +1,5 @@
 import { parse, resolve } from 'node:path';
 
-import { DocStorage, ValidationResult } from '@affine/native';
 import { parseUniversalId } from '@affine/nbstore';
 import fs from 'fs-extra';
 import { nanoid } from 'nanoid';
@@ -15,6 +14,8 @@ import {
   getWorkspaceDBPath,
   getWorkspacesBasePath,
 } from '../workspace/meta';
+
+type NativeModule = typeof import('@affine/native');
 
 export type ErrorMessage =
   | 'DB_FILE_PATH_INVALID'
@@ -40,10 +41,21 @@ export interface SelectDBFileLocationResult {
 }
 
 const extension = 'affine';
+const NATIVE_LOAD_ERROR_MESSAGE =
+  'ネイティブ依存が不足しているためDBファイルを処理できません。node_modules を削除して npm install を実行してください。';
+
+async function loadNativeModule(): Promise<NativeModule> {
+  try {
+    return await import('@affine/native');
+  } catch (err) {
+    logger.error(NATIVE_LOAD_ERROR_MESSAGE, err);
+    throw new Error(NATIVE_LOAD_ERROR_MESSAGE);
+  }
+}
 
 function getDefaultDBFileName(name: string, id: string) {
   const fileName = `${name}_${id}.${extension}`;
-  // make sure fileName is a valid file name
+  // ファイル名として使えない文字は置換する。
   return fileName.replace(/[/\\?%*:|"<>]/g, '-');
 }
 
@@ -93,9 +105,8 @@ async function normalizeImportDBPath(selectedPath: string) {
 }
 
 /**
- * This function is called when the user clicks the "Save" button in the "Save Workspace" dialog.
- *
- * It will export a compacted database file to the given path
+ * 「ワークスペースを保存」ダイアログの保存ボタンから呼ばれる。
+ * 指定された場所へ、圧縮済みのデータベースファイルを書き出す。
  */
 export async function saveDBFileAs(
   universalId: string,
@@ -105,10 +116,10 @@ export async function saveDBFileAs(
     const { peer, type, id } = parseUniversalId(universalId);
     const dbPath = await getSpaceDBPath(peer, type, id);
 
-    // connect to the pool and make sure all changes (WAL) are written to db
-    const pool = getDocStoragePool();
+    // DBプールへ接続し、WAL の内容をDBファイルへ反映してから保存する。
+    const pool = await getDocStoragePool();
     await pool.connect(universalId, dbPath);
-    await pool.checkpoint(universalId); // make sure all changes (WAL) are written to db
+    await pool.checkpoint(universalId);
 
     if (!dbPath) {
       return {
@@ -191,18 +202,8 @@ export async function selectDBFileLocation(): Promise<SelectDBFileLocationResult
 }
 
 /**
- * This function is called when the user clicks the "Load" button in the "Load Workspace" dialog.
- *
- * It will
- * - symlink the source db file to a new workspace id to app-data
- * - return the new workspace id
- *
- * eg, it will create a new folder in app-data:
- * <app-data>/<app-name>/<workspaces|userspaces>/<peer>/<workspace-id>/storage.db
- *
- * On the renderer side, after the UI got a new workspace id, it will
- * update the local workspace id list and then connect to it.
- *
+ * 「ワークスペースを読み込む」ボタンから呼ばれる。
+ * 選択されたDBファイルをアプリ内部の保存先へ取り込み、新しいワークスペースIDを返す。
  */
 export async function loadDBFile(): Promise<LoadDBFileResult> {
   try {
@@ -213,7 +214,7 @@ export async function loadDBFile(): Promise<LoadDBFileResult> {
       filters: [
         {
           name: 'SQLite Database',
-          // do we want to support other file format?
+          // 必要なら将来ほかの形式も追加する。
           extensions: ['db', 'affine'],
         },
       ],
@@ -230,10 +231,11 @@ export async function loadDBFile(): Promise<LoadDBFileResult> {
       return { error: 'DB_FILE_PATH_INVALID' };
     }
 
+    const { DocStorage } = await loadNativeModule();
     const workspaceId = nanoid(10);
     let storage = new DocStorage(originalPath);
 
-    // if imported db is not a valid v2 db, we will treat it as a v1 db
+    // v2 として読めないDBは v1 DB として扱う。
     if (!(await storage.validate())) {
       return await cpV1DBFile(originalPath, workspaceId);
     }
@@ -242,7 +244,7 @@ export async function loadDBFile(): Promise<LoadDBFileResult> {
       return { error: 'DB_FILE_INVALID' };
     }
 
-    // v2 import logic
+    // v2 の取り込み処理。
     const internalFilePath = await getSpaceDBPath(
       'local',
       'workspace',
@@ -270,12 +272,12 @@ async function cpV1DBFile(
   originalPath: string,
   workspaceId: string
 ): Promise<LoadDBFileResult> {
-  const { SqliteConnection } = await import('@affine/native');
+  const { SqliteConnection, ValidationResult } = await loadNativeModule();
 
   const validationResult = await SqliteConnection.validate(originalPath);
 
   if (validationResult !== ValidationResult.Valid) {
-    return { error: 'DB_FILE_INVALID' }; // invalid db file
+    return { error: 'DB_FILE_INVALID' };
   }
 
   const connection = new SqliteConnection(originalPath);

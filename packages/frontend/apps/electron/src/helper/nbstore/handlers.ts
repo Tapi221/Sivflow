@@ -1,61 +1,92 @@
 import path from 'node:path';
 
-import { DocStoragePool } from '@affine/native';
+import type { DocStoragePool } from '@affine/native';
 import { parseUniversalId } from '@affine/nbstore';
 import type { NativeDBApis } from '@affine/nbstore/sqlite';
 import fs from 'fs-extra';
 
+import { logger } from '../logger';
 import { getSpaceDBPath } from '../workspace/meta';
 
-const POOL = new DocStoragePool();
+const NATIVE_LOAD_ERROR_MESSAGE =
+  'ネイティブ依存が不足しているためローカルDBを開けません。node_modules を削除して npm install を実行してください。';
 
-export function getDocStoragePool() {
-  return POOL;
+let pool: DocStoragePool | undefined;
+
+export async function getDocStoragePool() {
+  if (pool) {
+    return pool;
+  }
+
+  try {
+    const { DocStoragePool } = await import('@affine/native');
+    pool = new DocStoragePool();
+    return pool;
+  } catch (err) {
+    logger.error(NATIVE_LOAD_ERROR_MESSAGE, err);
+    throw new Error(NATIVE_LOAD_ERROR_MESSAGE);
+  }
 }
 
-export const nbstoreHandlers: NativeDBApis = {
+async function callPoolMethod(method: keyof DocStoragePool, ...args: any[]) {
+  const pool = await getDocStoragePool();
+  const handler = pool[method];
+
+  if (typeof handler !== 'function') {
+    throw new Error(`未対応のローカルDB操作です: ${String(method)}`);
+  }
+
+  return handler.apply(pool, args);
+}
+
+const poolHandler = (method: keyof DocStoragePool) => {
+  return async (...args: any[]) => callPoolMethod(method, ...args);
+};
+
+export const nbstoreHandlers = {
   connect: async (universalId: string) => {
     const { peer, type, id } = parseUniversalId(universalId);
     const dbPath = await getSpaceDBPath(peer, type, id);
+    const pool = await getDocStoragePool();
     await fs.ensureDir(path.dirname(dbPath));
-    await POOL.connect(universalId, dbPath);
-    await POOL.setSpaceId(universalId, id);
+    await pool.connect(universalId, dbPath);
+    await pool.setSpaceId(universalId, id);
   },
-  disconnect: POOL.disconnect.bind(POOL),
-  pushUpdate: POOL.pushUpdate.bind(POOL),
-  getDocSnapshot: POOL.getDocSnapshot.bind(POOL),
-  setDocSnapshot: POOL.setDocSnapshot.bind(POOL),
-  getDocUpdates: POOL.getDocUpdates.bind(POOL),
-  markUpdatesMerged: POOL.markUpdatesMerged.bind(POOL),
-  deleteDoc: POOL.deleteDoc.bind(POOL),
-  getDocClocks: POOL.getDocClocks.bind(POOL),
-  getDocClock: POOL.getDocClock.bind(POOL),
-  getDocIndexedClock: POOL.getDocIndexedClock.bind(POOL),
-  setDocIndexedClock: POOL.setDocIndexedClock.bind(POOL),
-  clearDocIndexedClock: POOL.clearDocIndexedClock.bind(POOL),
-  getBlob: POOL.getBlob.bind(POOL),
-  setBlob: POOL.setBlob.bind(POOL),
-  deleteBlob: POOL.deleteBlob.bind(POOL),
-  releaseBlobs: POOL.releaseBlobs.bind(POOL),
-  listBlobs: POOL.listBlobs.bind(POOL),
-  getPeerRemoteClocks: POOL.getPeerRemoteClocks.bind(POOL),
-  getPeerRemoteClock: POOL.getPeerRemoteClock.bind(POOL),
-  setPeerRemoteClock: POOL.setPeerRemoteClock.bind(POOL),
-  getPeerPulledRemoteClocks: POOL.getPeerPulledRemoteClocks.bind(POOL),
-  getPeerPulledRemoteClock: POOL.getPeerPulledRemoteClock.bind(POOL),
-  setPeerPulledRemoteClock: POOL.setPeerPulledRemoteClock.bind(POOL),
-  getPeerPushedClocks: POOL.getPeerPushedClocks.bind(POOL),
-  getPeerPushedClock: POOL.getPeerPushedClock.bind(POOL),
-  setPeerPushedClock: POOL.setPeerPushedClock.bind(POOL),
-  clearClocks: POOL.clearClocks.bind(POOL),
-  setBlobUploadedAt: POOL.setBlobUploadedAt.bind(POOL),
-  getBlobUploadedAt: POOL.getBlobUploadedAt.bind(POOL),
-  crawlDocData: POOL.crawlDocData.bind(POOL),
-  ftsAddDocument: POOL.ftsAddDocument.bind(POOL),
-  ftsDeleteDocument: POOL.ftsDeleteDocument.bind(POOL),
-  ftsSearch: POOL.ftsSearch.bind(POOL),
-  ftsGetDocument: POOL.ftsGetDocument.bind(POOL),
-  ftsGetMatches: POOL.ftsGetMatches.bind(POOL),
-  ftsFlushIndex: POOL.ftsFlushIndex.bind(POOL),
-  ftsIndexVersion: POOL.ftsIndexVersion.bind(POOL),
-};
+  disconnect: poolHandler('disconnect'),
+  pushUpdate: poolHandler('pushUpdate'),
+  getDocSnapshot: poolHandler('getDocSnapshot'),
+  setDocSnapshot: poolHandler('setDocSnapshot'),
+  getDocUpdates: poolHandler('getDocUpdates'),
+  markUpdatesMerged: poolHandler('markUpdatesMerged'),
+  deleteDoc: poolHandler('deleteDoc'),
+  getDocClocks: poolHandler('getDocClocks'),
+  getDocClock: poolHandler('getDocClock'),
+  getDocIndexedClock: poolHandler('getDocIndexedClock'),
+  setDocIndexedClock: poolHandler('setDocIndexedClock'),
+  clearDocIndexedClock: poolHandler('clearDocIndexedClock'),
+  getBlob: poolHandler('getBlob'),
+  setBlob: poolHandler('setBlob'),
+  deleteBlob: poolHandler('deleteBlob'),
+  releaseBlobs: poolHandler('releaseBlobs'),
+  listBlobs: poolHandler('listBlobs'),
+  getPeerRemoteClocks: poolHandler('getPeerRemoteClocks'),
+  getPeerRemoteClock: poolHandler('getPeerRemoteClock'),
+  setPeerRemoteClock: poolHandler('setPeerRemoteClock'),
+  getPeerPulledRemoteClocks: poolHandler('getPeerPulledRemoteClocks'),
+  getPeerPulledRemoteClock: poolHandler('getPeerPulledRemoteClock'),
+  setPeerPulledRemoteClock: poolHandler('setPeerPulledRemoteClock'),
+  getPeerPushedClocks: poolHandler('getPeerPushedClocks'),
+  getPeerPushedClock: poolHandler('getPeerPushedClock'),
+  setPeerPushedClock: poolHandler('setPeerPushedClock'),
+  clearClocks: poolHandler('clearClocks'),
+  setBlobUploadedAt: poolHandler('setBlobUploadedAt'),
+  getBlobUploadedAt: poolHandler('getBlobUploadedAt'),
+  crawlDocData: poolHandler('crawlDocData'),
+  ftsAddDocument: poolHandler('ftsAddDocument'),
+  ftsDeleteDocument: poolHandler('ftsDeleteDocument'),
+  ftsSearch: poolHandler('ftsSearch'),
+  ftsGetDocument: poolHandler('ftsGetDocument'),
+  ftsGetMatches: poolHandler('ftsGetMatches'),
+  ftsFlushIndex: poolHandler('ftsFlushIndex'),
+  ftsIndexVersion: poolHandler('ftsIndexVersion'),
+} satisfies NativeDBApis;
