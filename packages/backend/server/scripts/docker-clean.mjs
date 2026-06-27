@@ -56,7 +56,7 @@ async function deleteFilesByExtension(rootDir, extension) {
     try {
       dir = await fs.opendir(current);
     } catch (err) {
-      debug(`skip unreadable dir ${current}: ${err?.message ?? String(err)}`);
+      debug(`読み取れないディレクトリをスキップします ${current}: ${err?.message ?? String(err)}`);
       continue;
     }
 
@@ -77,7 +77,7 @@ async function deleteFilesByExtension(rootDir, extension) {
             deleted += 1;
           } catch (err) {
             debug(
-              `failed to delete ${fullPath}: ${err?.message ?? String(err)}`
+              `${fullPath} の削除に失敗しました: ${err?.message ?? String(err)}`
             );
           }
         }
@@ -258,17 +258,13 @@ async function prunePrismaEngines(appRoot, targetKey) {
   );
   const prismaBinPath = path.join(appRoot, 'node_modules', '.bin', 'prisma');
 
-  if (!(await exists(prismaClientDir))) {
-    return;
-  }
-
   const keepTarget = await pickExistingPrismaTarget(
     prismaClientDir,
     preferredPrismaTargets(targetKey)
   );
 
   if (!keepTarget) {
-    debug('no prisma keepTarget detected, skip prisma pruning');
+    debug('保持する Prisma ターゲットが見つからないため、Prisma の整理をスキップします');
     return;
   }
 
@@ -285,7 +281,7 @@ async function prunePrismaEngines(appRoot, targetKey) {
   }
 
   if (!(await exists(keepSchemaEngine))) {
-    debug(`missing ${keepSchemaEngine}, skip pruning @prisma/engines`);
+    debug(`${keepSchemaEngine} が見つからないため @prisma/engines の整理をスキップします`);
     return;
   }
 
@@ -311,10 +307,10 @@ async function prunePrismaEngines(appRoot, targetKey) {
 
 const targetKey = normalizeTargetKey(TARGETARCH, TARGETVARIANT);
 
-log(`root=${APP_ROOT} target=${targetKey || '(unknown)'}`);
+log(`root=${APP_ROOT} target=${targetKey || '(不明)'}`);
 
 if (!ALLOW_RUN) {
-  log('skip (set AFFINE_DOCKER_CLEAN=1 to enable)');
+  log('スキップします（有効化するには AFFINE_DOCKER_CLEAN=1 を設定してください）');
   process.exit(0);
 }
 
@@ -327,8 +323,8 @@ const deletedNodeModulesMaps = await deleteFilesByExtension(
   '.map'
 );
 
-debug(`deleted static maps: ${deletedStaticMaps}`);
-debug(`deleted node_modules maps: ${deletedNodeModulesMaps}`);
+debug(`static の map を削除しました: ${deletedStaticMaps}`);
+debug(`node_modules の map を削除しました: ${deletedNodeModulesMaps}`);
 
 const distDir = path.join(APP_ROOT, 'dist');
 await pruneServerNative(distDir, serverNativeArch(targetKey));
