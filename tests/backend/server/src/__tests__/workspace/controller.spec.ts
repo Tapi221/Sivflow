@@ -10,11 +10,7 @@ import { PgWorkspaceDocStorageAdapter } from '../../core/doc';
 import { PermissionReadModel } from '../../core/permission/config';
 import { WorkspaceBlobStorage } from '../../core/storage';
 import { Models, PublicDocMode, WorkspaceRole } from '../../models';
-import {
-  addDocToRootDoc,
-  mergeUpdatesInApplyWay,
-  readAllDocIdsFromRootDoc,
-} from '../../native';
+import { addDocToRootDoc, mergeUpdatesInApplyWay, readAllDocIdsFromRootDoc, } from '../../native';
 import { createTestingApp, TestingApp, TestUser } from '../utils';
 
 const test = ava as TestFn<{

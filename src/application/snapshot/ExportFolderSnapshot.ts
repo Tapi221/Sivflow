@@ -5,13 +5,19 @@ import { localGenerationCounterStore } from "@/infrastructure/browser-storage/Lo
 import type { Card } from "@/types";
 import type { AppSnapshot } from "@/types/domain/snapshot";
 
+
+
 interface ExportFolderSnapshotDependencies {
   fileExporter: JsonFileExportPort;
 }
 
+
+
 const createSnapshotUseCase = createCreateSnapshotUseCase({
   generationCounterStore: localGenerationCounterStore,
 });
+
+
 
 const collectAssetIdsFromCards = (cards: Card[]): Set<string> => {
   const assetIds = new Set<string>();
@@ -117,5 +123,9 @@ const createExportFolderSnapshotUseCase = ({ fileExporter }: ExportFolderSnapsho
   };
 };
 
+
+
 export { createExportFolderSnapshotUseCase };
+
+
 export type { ExportFolderSnapshotDependencies };

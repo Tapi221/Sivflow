@@ -3,14 +3,7 @@ import { PrismaClient, User, Workspace } from '@prisma/client';
 import ava, { TestFn } from 'ava';
 import Sinon from 'sinon';
 import { Config } from '../../base';
-import {
-  ContextEmbedStatus,
-  CopilotContextModel,
-  CopilotSessionModel,
-  CopilotWorkspaceConfigModel,
-  UserModel,
-  WorkspaceModel,
-} from '../../models';
+import { ContextEmbedStatus, CopilotContextModel, CopilotSessionModel, CopilotWorkspaceConfigModel, UserModel, WorkspaceModel, } from '../../models';
 import { createTestingModule } from '../utils';
 import type { TestingModule } from '../utils';
 import { cleanObject } from '../utils/copilot';

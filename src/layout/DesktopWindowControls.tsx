@@ -4,14 +4,20 @@ import { hasDesktopBridge } from "@platform/runtime";
 import type { CSSProperties, MouseEvent } from "react";
 import { windowControls } from "@/platform/capabilities/windowControls";
 
+
+
 type AppRegionStyle = CSSProperties & {
   WebkitAppRegion?: "no-drag";
 };
 type WindowControlAction = () => Promise<void>;
 
+
+
 const NO_DRAG_STYLE: AppRegionStyle = {
   WebkitAppRegion: "no-drag",
 };
+
+
 
 const runWindowAction = (action: WindowControlAction) => {
   void action().catch((error) => {
@@ -26,6 +32,8 @@ const handleClickWindowAction = (
   event.stopPropagation();
   runWindowAction(action);
 };
+
+
 
 const DesktopWindowControls = () => {
   const isDesktop = hasDesktopBridge();
@@ -105,5 +113,7 @@ const DesktopWindowControls = () => {
     </div>
   );
 };
+
+
 
 export { DesktopWindowControls };

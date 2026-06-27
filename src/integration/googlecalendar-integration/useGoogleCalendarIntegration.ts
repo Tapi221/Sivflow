@@ -6,6 +6,8 @@ import { readCalendarIds, readEmail, readRefreshToken, readToken, readWasConnect
 import type { GCalForceSyncOptions, GCalSyncState, GoogleCalendarEvent, GoogleCalendarListItem, UseGoogleCalendarIntegrationOptions } from "./gcalSync.types";
 import { GoogleCalendarSyncEngine } from "@/sync/googlecalendar-sync/GoogleCalendarSyncEngine";
 
+
+
 type EventsAction =
   | {
     type: "upsert";
@@ -25,6 +27,8 @@ type EventsAction =
   | {
     type: "clear";
   };
+
+
 
 const reduceEvents = (
   state: GoogleCalendarEvent[],
@@ -374,5 +378,7 @@ const useGoogleCalendarIntegration = ({ authInstance = auth }: UseGoogleCalendar
     toggleCalendar,
   };
 };
+
+
 
 export { useGoogleCalendarIntegration };

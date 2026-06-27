@@ -4,8 +4,7 @@ import ava, { TestFn } from 'ava';
 import { createTestingModule } from '../../../__tests__/utils';
 import { AFFiNELogger } from '../service';
 
-export const test = ava as TestFn<{
-  module: TestingModule;
+export const test = ava as TestFn<{ module: TestingModule;
   logger: AFFiNELogger;
 }>;
 

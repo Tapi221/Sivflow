@@ -2,19 +2,12 @@ import '@toeverything/theme/style.css';
 import '@toeverything/theme/fonts.css';
 import type { DocMode } from '@blocksuite/affine/model';
 import { AffineSchemas } from '@blocksuite/affine/schemas';
-import {
-  CommunityCanvasTextFonts,
-  FeatureFlagService,
-  FontConfigExtension,
-} from '@blocksuite/affine/shared/services';
+import { CommunityCanvasTextFonts, FeatureFlagService, FontConfigExtension, } from '@blocksuite/affine/shared/services';
 import { ViewportTurboRendererIdentifier } from '@blocksuite/affine-gfx-turbo-renderer';
 import type { ViewportTurboRendererExtension } from '@blocksuite/affine-gfx-turbo-renderer';
 import type { ExtensionType, Store, Transformer } from '@blocksuite/store';
 import { Schema, Text } from '@blocksuite/store';
-import {
-  createAutoIncrementIdGenerator,
-  TestWorkspace,
-} from '@blocksuite/store/test';
+import { createAutoIncrementIdGenerator, TestWorkspace, } from '@blocksuite/store/test';
 import { effects } from '../../effects.js';
 import { TestAffineEditorContainer } from '../../index.js';
 import { getTestStoreManager } from '../../store.js';
@@ -27,10 +20,7 @@ effects();
 const storeExtensions = storeManager.get('store');
 const painterWorkers = new Set<Worker>();
 
-export const getRenderer = () => {
-  return editor.std.get(
-    ViewportTurboRendererIdentifier
-  ) as ViewportTurboRendererExtension;
+export const getRenderer = () => { return editor.std.get( ViewportTurboRendererIdentifier ) as ViewportTurboRendererExtension;
 };
 
 const createCollectionOptions = () => {
@@ -94,13 +84,7 @@ const createEditor = async (collection: TestWorkspace, mode: DocMode = 'page', e
   return app;
 };
 
-export const createPainterWorker = () => {
-  const worker = new Worker(
-    new URL('./turbo-painter.worker.ts', import.meta.url),
-    {
-      type: 'module',
-    }
-  );
+export const createPainterWorker = () => { const worker = new Worker( new URL('./turbo-painter.worker.ts', import.meta.url), { type: 'module', } );
   painterWorkers.add(worker);
   return worker;
 };
@@ -110,8 +94,7 @@ type SetupEditorOptions = {
   enableDomRenderer?: boolean;
 };
 
-export const setupEditor = async (mode: DocMode = 'page', extensionsInput?: ExtensionType[], optionsInput?: SetupEditorOptions) => {
-  const extensions: ExtensionType[] = extensionsInput ?? [];
+export const setupEditor = async (mode: DocMode = 'page', extensionsInput?: ExtensionType[], optionsInput?: SetupEditorOptions) => { const extensions: ExtensionType[] = extensionsInput ?? [];
   const options: SetupEditorOptions = optionsInput ?? {};
   const enableDomRenderer = options?.enableDomRenderer ?? false;
 
@@ -139,8 +122,7 @@ export const setupEditor = async (mode: DocMode = 'page', extensionsInput?: Exte
   };
 };
 
-export const cleanup = async () => {
-  window.editor?.remove();
+export const cleanup = async () => { window.editor?.remove();
   await window.editor?.updateComplete;
   await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
 

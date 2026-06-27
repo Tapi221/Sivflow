@@ -1,9 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type {
-  GraphQLQuery,
-  QueryOptions,
-  QueryResponse,
-} from '@affine/graphql';
+import type { GraphQLQuery, QueryOptions, QueryResponse, } from '@affine/graphql';
 import { transformToForm } from '@affine/graphql';
 import { INestApplication, ModuleMetadata } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
@@ -12,23 +8,12 @@ import { PrismaClient, User } from '@prisma/client';
 import cookieParser from 'cookie-parser';
 import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs';
 import supertest from 'supertest';
-import {
-  AFFiNELogger,
-  ApplyType,
-  GlobalExceptionFilter,
-  JobQueue,
-} from '../../base';
+import { AFFiNELogger, ApplyType, GlobalExceptionFilter, JobQueue, } from '../../base';
 import { SocketIoAdapter } from '../../base/websocket';
 import { AuthService } from '../../core/auth';
 import { Mailer } from '../../core/mail';
 import { UserModel } from '../../models';
-import {
-  createFactory,
-  MockedUser,
-  MockJobQueue,
-  MockUser,
-  MockUserInput,
-} from '../mocks';
+import { createFactory, MockedUser, MockJobQueue, MockUser, MockUserInput, } from '../mocks';
 import { MockMailer } from '../mocks/mailer.mock';
 import { createTestingModule } from './testing-module';
 import { initTestingDB, TEST_LOG_LEVEL } from './utils';
@@ -42,8 +27,7 @@ export type TestUser = User;
 
 const OneMB = 1024 * 1024;
 
-export const createTestingApp = async (moduleDef: TestingAppMetadata = {}): Promise<TestingApp> => {
-  const module = await createTestingModule(moduleDef, false);
+export const createTestingApp = async (moduleDef: TestingAppMetadata = {}): Promise<TestingApp> => { const module = await createTestingModule(moduleDef, false);
   const logger = new AFFiNELogger();
   logger.setLogLevels([TEST_LOG_LEVEL]);
 
@@ -76,8 +60,7 @@ export const createTestingApp = async (moduleDef: TestingAppMetadata = {}): Prom
   return makeTestingApp(app);
 };
 
-export const parseCookies = (res: supertest.Response) => {
-  const cookies = res.get('Set-Cookie') ?? [];
+export const parseCookies = (res: supertest.Response) => { const cookies = res.get('Set-Cookie') ?? [];
   const sessionCookie = cookies.reduce(
     (cookies, cookie) => {
       const [key, value] = cookie.split(';')[0].split('=');
@@ -90,8 +73,7 @@ export const parseCookies = (res: supertest.Response) => {
   return sessionCookie;
 };
 
-export class TestingApp extends ApplyType<INestApplication>() {
-  private sessionCookie: string | null = null;
+export class TestingApp extends ApplyType<INestApplication>() { private sessionCookie: string | null = null;
   private currentUserCookie: string | null = null;
   private csrfCookie: string | null = null;
   private readonly userCookies: Set<string> = new Set();

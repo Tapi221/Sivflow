@@ -2,10 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import test from 'ava';
 import * as Sinon from 'sinon';
 import { applyUpdate, Doc as YDoc, encodeStateAsUpdate } from 'yjs';
-import {
-  DocStorageModule,
-  PgWorkspaceDocStorageAdapter as Adapter,
-} from '../../core/doc';
+import { DocStorageModule, PgWorkspaceDocStorageAdapter as Adapter, } from '../../core/doc';
 import { createTestingModule } from '../utils';
 import type { TestingModule } from '../utils';
 

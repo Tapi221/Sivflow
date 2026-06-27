@@ -3,8 +3,7 @@ import Sinon from 'sinon';
 import { Mailer } from '../../core/mail';
 import { MailName } from '../../mails';
 
-export class MockMailer {
-  send = Sinon.createStubInstance(Mailer).send.resolves(true);
+export class MockMailer { send = Sinon.createStubInstance(Mailer).send.resolves(true);
   trySend(command: Jobs['notification.sendMail']) {
     return this.send(command, true);
   }

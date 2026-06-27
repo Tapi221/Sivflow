@@ -37,11 +37,7 @@ const initTestStaticFiles = (staticPath: string) => {
 };
 
 @Controller('/')
-export class TestResolver {
-  @Public()
-  @Post('/upload')
-  async upload(@RawBody() buffer: Buffer | undefined): Promise<number> {
-    return buffer?.length || 0;
+export class TestResolver { @Public() @Post('/upload') async upload(@RawBody() buffer: Buffer | undefined): Promise<number> { return buffer?.length || 0;
   }
 }
 

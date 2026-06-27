@@ -10,11 +10,7 @@ import { CopilotAccessPolicy } from '../../plugins/copilot/access';
 import { ByokService } from '../../plugins/copilot/byok';
 import { ByokKeyStorage, ByokKeyTestStatus, ByokProvider } from '../../plugins/copilot/byok/types';
 import type { ByokFeatureKind } from '../../plugins/copilot/byok/types';
-import {
-  SubscriptionPlan,
-  SubscriptionRecurring,
-  SubscriptionStatus,
-} from '../../plugins/payment/types';
+import { SubscriptionPlan, SubscriptionRecurring, SubscriptionStatus, } from '../../plugins/payment/types';
 import { createTestingModule } from '../utils';
 import type { TestingModule } from '../utils';
 

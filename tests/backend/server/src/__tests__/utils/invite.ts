@@ -1,14 +1,7 @@
 import type { InvitationType } from '../../core/workspaces';
 import type { TestingApp } from './testing-app';
 
-export const inviteUser = async (app: TestingApp, workspaceId: string, email: string): Promise<string> => {
-  const res = await app.gql(`
-    mutation {
-      inviteMembers(workspaceId: "${workspaceId}", emails: ["${email}"]) {
-        inviteId
-      }
-    }
-  `);
+export const inviteUser = async (app: TestingApp, workspaceId: string, email: string): Promise<string> => { const res = await app.gql(` mutation { inviteMembers(workspaceId: "${workspaceId}", emails: ["${email}"]) { inviteId } } `);
 
   return res.inviteMembers[0].inviteId;
 };
@@ -60,74 +53,32 @@ export const createInviteLink = async (app: TestingApp, workspaceId: string, exp
   return res.createInviteLink;
 };
 
-export const revokeInviteLink = async (app: TestingApp, workspaceId: string): Promise<boolean> => {
-  const res = await app.gql(`
-    mutation {
-      revokeInviteLink(workspaceId: "${workspaceId}")
-    }
-  `);
+export const revokeInviteLink = async (app: TestingApp, workspaceId: string): Promise<boolean> => { const res = await app.gql(` mutation { revokeInviteLink(workspaceId: "${workspaceId}") } `);
 
   return res.revokeInviteLink;
 };
 
-export const acceptInviteById = async (app: TestingApp, workspaceId: string, inviteId: string, sendAcceptMail = false): Promise<boolean> => {
-  const res = await app.gql(`
-    mutation {
-      acceptInviteById(workspaceId: "${workspaceId}", inviteId: "${inviteId}", sendAcceptMail: ${sendAcceptMail})
-    }
-  `);
+export const acceptInviteById = async (app: TestingApp, workspaceId: string, inviteId: string, sendAcceptMail = false): Promise<boolean> => { const res = await app.gql(` mutation { acceptInviteById(workspaceId: "${workspaceId}", inviteId: "${inviteId}", sendAcceptMail: ${sendAcceptMail}) } `);
 
   return res.acceptInviteById;
 };
 
-export const approveMember = async (app: TestingApp, workspaceId: string, userId: string): Promise<string> => {
-  const res = await app.gql(`
-    mutation {
-      approveMember(workspaceId: "${workspaceId}", userId: "${userId}")
-    }
-  `);
+export const approveMember = async (app: TestingApp, workspaceId: string, userId: string): Promise<string> => { const res = await app.gql(` mutation { approveMember(workspaceId: "${workspaceId}", userId: "${userId}") } `);
 
   return res.approveMember;
 };
 
-export const leaveWorkspace = async (app: TestingApp, workspaceId: string, sendLeaveMail = false): Promise<boolean> => {
-  const res = await app.gql(`
-    mutation {
-      leaveWorkspace(workspaceId: "${workspaceId}", sendLeaveMail: ${sendLeaveMail})
-    }
-  `);
+export const leaveWorkspace = async (app: TestingApp, workspaceId: string, sendLeaveMail = false): Promise<boolean> => { const res = await app.gql(` mutation { leaveWorkspace(workspaceId: "${workspaceId}", sendLeaveMail: ${sendLeaveMail}) } `);
 
   return res.leaveWorkspace;
 };
 
-export const revokeUser = async (app: TestingApp, workspaceId: string, userId: string): Promise<boolean> => {
-  const res = await app.gql(`
-    mutation {
-      revokeMember(workspaceId: "${workspaceId}", userId: "${userId}")
-    }
-  `);
+export const revokeUser = async (app: TestingApp, workspaceId: string, userId: string): Promise<boolean> => { const res = await app.gql(` mutation { revokeMember(workspaceId: "${workspaceId}", userId: "${userId}") } `);
 
   return res.revokeMember;
 };
 
-export const getInviteInfo = async (app: TestingApp, inviteId: string): Promise<InvitationType> => {
-  const res = await app.gql(`
-    query {
-      getInviteInfo(inviteId: "${inviteId}") {
-        workspace {
-          id
-          name
-          avatar
-        }
-        user {
-          id
-          name
-          avatarUrl
-        }
-        status
-      }
-    }
-  `);
+export const getInviteInfo = async (app: TestingApp, inviteId: string): Promise<InvitationType> => { const res = await app.gql(` query { getInviteInfo(inviteId: "${inviteId}") { workspace { id name avatar } user { id name avatarUrl } status } } `);
 
   return res.getInviteInfo;
 };

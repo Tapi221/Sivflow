@@ -6,41 +6,15 @@ import type { PermissionAccess } from '../../core/permission';
 import type { Models } from '../../models';
 import { LlmRequest, llmValidateContract } from '../../native';
 import type { LlmToolCallbackRequest, LlmToolCallbackResponse, LlmToolLoopStreamEvent } from '../../native';
-import {
-  buildToolContracts,
-  parseToolContract,
-  parseToolLoopStreamEvent,
-} from '../../plugins/copilot/runtime/contracts';
-import {
-  createToolExecutionCallback,
-  createToolLoopBridge,
-} from '../../plugins/copilot/runtime/tool/bridge';
-import {
-  buildBlobContentGetter,
-  createBlobReadTool,
-} from '../../plugins/copilot/tools/blob-read';
-import {
-  buildDocKeywordSearchGetter,
-  createDocKeywordSearchTool,
-} from '../../plugins/copilot/tools/doc-keyword-search';
-import {
-  buildDocContentGetter,
-  createDocReadTool,
-} from '../../plugins/copilot/tools/doc-read';
-import {
-  buildDocSearchGetter,
-  createDocSemanticSearchTool,
-} from '../../plugins/copilot/tools/doc-semantic-search';
-import {
-  DOCUMENT_SYNC_PENDING_MESSAGE,
-  LOCAL_WORKSPACE_SYNC_REQUIRED_MESSAGE,
-} from '../../plugins/copilot/tools/doc-sync';
+import { buildToolContracts, parseToolContract, parseToolLoopStreamEvent, } from '../../plugins/copilot/runtime/contracts';
+import { createToolExecutionCallback, createToolLoopBridge, } from '../../plugins/copilot/runtime/tool/bridge';
+import { buildBlobContentGetter, createBlobReadTool, } from '../../plugins/copilot/tools/blob-read';
+import { buildDocKeywordSearchGetter, createDocKeywordSearchTool, } from '../../plugins/copilot/tools/doc-keyword-search';
+import { buildDocContentGetter, createDocReadTool, } from '../../plugins/copilot/tools/doc-read';
+import { buildDocSearchGetter, createDocSemanticSearchTool, } from '../../plugins/copilot/tools/doc-semantic-search';
+import { DOCUMENT_SYNC_PENDING_MESSAGE, LOCAL_WORKSPACE_SYNC_REQUIRED_MESSAGE, } from '../../plugins/copilot/tools/doc-sync';
 import { defineTool } from '../../plugins/copilot/tools/tool';
-import {
-  nativeMessages,
-  nativeUserText,
-  singleUserPromptMessages,
-} from './prompt-test-helper';
+import { nativeMessages, nativeUserText, singleUserPromptMessages, } from './prompt-test-helper';
 
 test('defineTool should freeze json schema at definition time', t => {
   const tool = defineTool({

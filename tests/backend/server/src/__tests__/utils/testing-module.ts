@@ -1,11 +1,7 @@
 import { ModuleMetadata } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { Query, Resolver } from '@nestjs/graphql';
-import {
-  Test,
-  TestingModule as BaseTestingModule,
-  TestingModuleBuilder,
-} from '@nestjs/testing';
+import { Test, TestingModule as BaseTestingModule, TestingModuleBuilder, } from '@nestjs/testing';
 import { PrismaClient } from '@prisma/client';
 import { buildAppModule, FunctionalityModules } from '../../app.module';
 import { AFFiNELogger, JobQueue } from '../../base';
@@ -25,8 +21,7 @@ interface TestingModuleMetadata extends ModuleMetadata {
   tapModule?(m: TestingModuleBuilder): void;
 }
 
-export interface TestingModule extends BaseTestingModule {
-  initTestingDB(): Promise<void>;
+export interface TestingModule extends BaseTestingModule { initTestingDB(): Promise<void>;
   create: ReturnType<typeof createFactory>;
   mails: MockMailer;
   queue: MockJobQueue;
@@ -58,9 +53,7 @@ class MockResolver {
 /**
  * @deprecated use {@link createModule} instead
  */
-export const createTestingModule = async (moduleDef: TestingModuleMetadata = {}, autoInitialize = true): Promise<TestingModule> => {
-  // setting up
-  let imports = moduleDef.imports ?? [buildAppModule(globalThis.env)];
+export const createTestingModule = async (moduleDef: TestingModuleMetadata = {}, autoInitialize = true): Promise<TestingModule> => { // setting up let imports = moduleDef.imports ?? [buildAppModule(globalThis.env)];
   imports =
     // @ts-expect-error ignore the type error
     imports[0].module?.name === 'AppModule'

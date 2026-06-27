@@ -13,6 +13,8 @@ import { DesktopWindowControls } from "@/layout/DesktopWindowControls";
 import { getAppTopInsetPx } from "@/platform/presentation/shellMetrics";
 import { usePresentationTarget } from "@/platform/presentation/usePresentationTarget";
 
+
+
 const Layout = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -145,5 +147,7 @@ const Layout = () => {
     </div>
   );
 };
+
+
 
 export default Layout;

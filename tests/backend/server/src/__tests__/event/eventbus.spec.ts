@@ -6,8 +6,7 @@ import { EventBus, metrics } from '../../base';
 import { createTestingModule, sleep } from '../utils';
 import { Listeners } from './provider';
 
-export const test = ava as TestFn<{
-  module: TestingModule;
+export const test = ava as TestFn<{ module: TestingModule;
   eventbus: EventBus;
   listeners: Sinon.SinonSpiedInstance<Listeners>;
 }>;

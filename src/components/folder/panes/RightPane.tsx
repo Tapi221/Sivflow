@@ -4,6 +4,8 @@ import { CardSetViewScreen } from "@/features/cardsetview/presentation/web/ui/co
 import { PdfDocumentPane } from "@/features/pdf/PdfDocumentPane";
 import type { Card, DocumentItem, SelectedExplorerItem } from "@/types";
 
+
+
 type RightPaneProps = {
   selectedItem: SelectedExplorerItem;
   selectedCardId: string | null;
@@ -21,6 +23,8 @@ type RightPaneProps = {
   };
   folderSelectionNonce: number;
 };
+
+
 
 const UnsupportedDocumentPane = () => {
   return (
@@ -82,5 +86,7 @@ const RightPane = ({ selectedItem, selectedCardId, selectedDocument, selectedFol
 
   return <CardPane selectedCardId={null} onCardUpdated={onCardUpdated} />;
 };
+
+
 
 export { RightPane };

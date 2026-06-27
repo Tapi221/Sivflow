@@ -1,9 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import ava, { TestFn } from 'ava';
-import {
-  TokenType,
-  VerificationTokenModel,
-} from '../../models/verification-token';
+import { TokenType, VerificationTokenModel, } from '../../models/verification-token';
 import { createTestingModule } from '../utils';
 import type { TestingModule } from '../utils';
 

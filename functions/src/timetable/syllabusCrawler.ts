@@ -1,11 +1,9 @@
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { getAdminAuth } from "#src/firebaseAdmin.js";
-import {
-  crawlTimetableSyllabusUrlForUser,
-  runTimetableSyllabusCatalogCrawlJob,
-  upsertTimetableSyllabusSourceRecord,
-} from "#src/timetable/syllabusCrawlerService.js";
+import { crawlTimetableSyllabusUrlForUser, runTimetableSyllabusCatalogCrawlJob, upsertTimetableSyllabusSourceRecord, } from "#src/timetable/syllabusCrawlerService.js";
+
+
 
 const REGION = "asia-northeast1";
 const runTimetableSyllabusCatalogCrawl = onSchedule(
@@ -14,6 +12,8 @@ const runTimetableSyllabusCatalogCrawl = onSchedule(
     await runTimetableSyllabusCatalogCrawlJob();
   },
 );
+
+
 
 const requireUid = (request: { auth?: { uid?: string } }) => {
   const uid = request.auth?.uid;
@@ -25,6 +25,8 @@ const requireAdmin = async (uid: string): Promise<void> => {
   if (user.customClaims?.admin !== true) throw new HttpsError("permission-denied", "Admin access is required.");
 };
 
+
+
 const upsertTimetableSyllabusSource = onCall({ region: REGION }, async (request) => {
   const uid = requireUid(request);
   await requireAdmin(uid);
@@ -34,5 +36,7 @@ const crawlTimetableSyllabusUrl = onCall({ region: REGION, timeoutSeconds: 300, 
   const uid = requireUid(request);
   return await crawlTimetableSyllabusUrlForUser(request.data ?? {}, uid);
 });
+
+
 
 export { crawlTimetableSyllabusUrl, runTimetableSyllabusCatalogCrawl, upsertTimetableSyllabusSource };

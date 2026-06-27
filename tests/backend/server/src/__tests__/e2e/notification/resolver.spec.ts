@@ -1,14 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import {
-  DocMode,
-  listNotificationsQuery,
-  MentionNotificationBodyType,
-  mentionUserMutation,
-  NotificationObjectType,
-  NotificationType,
-  readAllNotificationsMutation,
-  readNotificationMutation,
-} from '@affine/graphql';
+import { DocMode, listNotificationsQuery, MentionNotificationBodyType, mentionUserMutation, NotificationObjectType, NotificationType, readAllNotificationsMutation, readNotificationMutation, } from '@affine/graphql';
 import { Mockers } from '../../mocks';
 import { createRealtimeClient, realtimeRequest } from '../realtime';
 import { app, e2e } from '../test';

@@ -6,6 +6,8 @@ import type { BlobUrlFix } from "@/utils/blobUrlSanitizer";
 import { sanitizeBlobUrlsDeep } from "@/utils/blobUrlSanitizer";
 import { sanitizeForLog } from "@/utils/logSanitizer";
 
+
+
 type RebuildTableByType = {
   card: "cards";
   folder: "folders";
@@ -32,6 +34,8 @@ type ClosableLocalDb = {
   close: () => void;
 };
 
+
+
 const REBUILD_TABLE_BY_TYPE: RebuildTableByType = {
   card: "cards",
   folder: "folders",
@@ -41,6 +45,8 @@ const REBUILD_TABLE_BY_TYPE: RebuildTableByType = {
   asset: "images",
   userSetting: "userSettings",
 };
+
+
 
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
@@ -249,5 +255,7 @@ class IndexedDBRebuildOrchestrator {
     }
   };
 }
+
+
 
 export { IndexedDBRebuildOrchestrator };

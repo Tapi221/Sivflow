@@ -9,12 +9,7 @@ import { property } from 'lit/decorators.js';
 import { keyed } from 'lit/directives/keyed.js';
 import { when } from 'lit/directives/when.js';
 
-export class TestAffineEditorContainer extends SignalWatcher(
-  WithDisposable(ShadowlessElement)
-) {
-  static override styles = css`
-    .affine-page-viewport {
-      position: relative;
+export class TestAffineEditorContainer extends SignalWatcher( WithDisposable(ShadowlessElement) ) { static override styles = css` .affine-page-viewport { position: relative;
       display: flex;
       flex-direction: column;
       overflow-x: hidden;

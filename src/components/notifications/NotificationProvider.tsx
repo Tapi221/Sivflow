@@ -5,6 +5,8 @@ import { InfoToast } from "./InfoToast";
 import { notificationService } from "@/services/NotificationService";
 import type { Notification } from "@/types/notification";
 
+
+
 /**
  * 通知プロバイダー
  *
@@ -82,5 +84,7 @@ const NotificationProvider: React.FC<{ children: React.ReactNode; }> = ({ childr
     </>
   );
 };
+
+
 
 export { NotificationProvider };

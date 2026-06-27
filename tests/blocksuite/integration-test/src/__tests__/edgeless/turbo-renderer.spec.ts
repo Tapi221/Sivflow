@@ -3,19 +3,12 @@
  */
 import { ParagraphLayoutHandlerExtension } from '@blocksuite/affine/blocks/paragraph';
 import { noop } from '@blocksuite/affine/global/utils';
-import {
-  TurboRendererConfigFactory,
-  ViewportTurboRendererExtension,
-} from '@blocksuite/affine-gfx-turbo-renderer';
+import { TurboRendererConfigFactory, ViewportTurboRendererExtension, } from '@blocksuite/affine-gfx-turbo-renderer';
 import { firstValueFrom } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { wait } from '../utils/common.js';
 import { addSampleNotes } from '../utils/doc-generator.js';
-import {
-  createPainterWorker,
-  getRenderer,
-  setupEditor,
-} from '../utils/setup.js';
+import { createPainterWorker, getRenderer, setupEditor, } from '../utils/setup.js';
 
 const FRAME = 16;
 

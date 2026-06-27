@@ -2,18 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import type { TestFn } from 'ava';
 import ava from 'ava';
 import { addDocToRootDoc, readAllDocIdsFromRootDoc } from '../native';
-import {
-  acceptInviteById,
-  createTestingApp,
-  createWorkspace,
-  getWorkspacePublicDocs,
-  inviteUser,
-  publishDoc,
-  revokePublicDoc,
-  setWorkspaceSharing,
-  TestingApp,
-  updateWorkspace,
-} from './utils';
+import { acceptInviteById, createTestingApp, createWorkspace, getWorkspacePublicDocs, inviteUser, publishDoc, revokePublicDoc, setWorkspaceSharing, TestingApp, updateWorkspace, } from './utils';
 
 const test = ava as TestFn<{
   app: TestingApp;

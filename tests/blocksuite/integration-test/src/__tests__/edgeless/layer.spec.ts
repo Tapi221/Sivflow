@@ -1,25 +1,14 @@
 import type { EdgelessRootBlockComponent } from '@blocksuite/affine/blocks/root';
-import type {
-  CanvasRenderer,
-  SurfaceElementModel,
-} from '@blocksuite/affine/blocks/surface';
+import type { CanvasRenderer, SurfaceElementModel, } from '@blocksuite/affine/blocks/surface';
 import { ungroupCommand } from '@blocksuite/affine/gfx/group';
-import type {
-  GroupElementModel,
-  MindmapElementModel,
-  NoteBlockModel,
-} from '@blocksuite/affine/model';
+import type { GroupElementModel, MindmapElementModel, NoteBlockModel, } from '@blocksuite/affine/model';
 import { generateKeyBetween } from '@blocksuite/affine/std/gfx';
 import type { BlockComponent } from '@blocksuite/std';
 import type { BlockModel, Store } from '@blocksuite/store';
 import { beforeEach, describe, expect, test } from 'vitest';
 import * as Y from 'yjs';
 import { wait } from '../utils/common.js';
-import {
-  addNote as _addNote,
-  getDocRootBlock,
-  getSurface,
-} from '../utils/edgeless.js';
+import { addNote as _addNote, getDocRootBlock, getSurface, } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';
 
 let service!: EdgelessRootBlockComponent['service'];

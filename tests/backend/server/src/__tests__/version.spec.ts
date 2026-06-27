@@ -2,12 +2,7 @@ import { Controller, Get } from '@nestjs/common';
 import test from 'ava';
 import Sinon from 'sinon';
 import { AppModule } from '../app.module';
-import {
-  CANARY_CLIENT_VERSION_MAX_AGE_DAYS,
-  ConfigFactory,
-  hasNewerVersion,
-  UseNamedGuard,
-} from '../base';
+import { CANARY_CLIENT_VERSION_MAX_AGE_DAYS, ConfigFactory, hasNewerVersion, UseNamedGuard, } from '../base';
 import { Public } from '../core/auth/guard';
 import { VersionService } from '../core/version/service';
 import { createTestingApp, TestingApp } from './utils';

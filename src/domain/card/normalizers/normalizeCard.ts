@@ -13,7 +13,11 @@ import { makeFallbackId } from "@/utils/fallbackId";
 import type { UnknownRecord } from "@/utils/records";
 import { asRecord, pick } from "@/utils/records";
 
+
+
 type GridBlockType = Parameters<typeof isGridOffsetType>[0];
+
+
 
 const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
   "text",
@@ -27,6 +31,8 @@ const CARD_BLOCK_TYPES = new Set<CardBlock["type"]>([
   "pdf",
 ]);
 const SUBJECTIVE_SCORE_VALUES = new Set<SubjectiveScoreValue>([0, 1, 2, 3]);
+
+
 
 const isGridBlockType = (value: unknown): value is GridBlockType => {
   return (
@@ -449,5 +455,7 @@ const normalizeCard = (raw: unknown): Card => {
   if (inkDocument !== undefined) normalized.inkDocument = inkDocument;
   return normalized;
 };
+
+
 
 export { normalizeCard };

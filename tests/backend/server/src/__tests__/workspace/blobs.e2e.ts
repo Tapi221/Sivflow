@@ -5,19 +5,7 @@ import { Config, ConfigFactory, StorageProviderFactory } from '../../base';
 import { QuotaStateService } from '../../core/quota/state';
 import { WorkspaceBlobStorage } from '../../core/storage/wrappers/blob';
 import { BlobModel, WorkspaceFeatureModel } from '../../models';
-import {
-  collectAllBlobSizes,
-  completeBlobUpload,
-  createBlobUpload,
-  createTestingApp,
-  createWorkspace,
-  deleteWorkspace,
-  getBlobUploadPartUrl,
-  getWorkspaceBlobsSize,
-  listBlobs,
-  setBlob,
-  TestingApp,
-} from '../utils';
+import { collectAllBlobSizes, completeBlobUpload, createBlobUpload, createTestingApp, createWorkspace, deleteWorkspace, getBlobUploadPartUrl, getWorkspaceBlobsSize, listBlobs, setBlob, TestingApp, } from '../utils';
 
 const OneMB = 1024 * 1024;
 const RESTRICTED_QUOTA = {

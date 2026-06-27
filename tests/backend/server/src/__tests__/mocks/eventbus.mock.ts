@@ -2,8 +2,7 @@ import Sinon from 'sinon';
 import { EventBus } from '../../base';
 import { EventName } from '../../base/event/def';
 
-export class MockEventBus {
-  private readonly stub = Sinon.createStubInstance(EventBus);
+export class MockEventBus { private readonly stub = Sinon.createStubInstance(EventBus);
 
   emit = this.stub.emitAsync;
   emitAsync = this.stub.emitAsync;

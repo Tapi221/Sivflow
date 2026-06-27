@@ -10,8 +10,7 @@ registerCompletionHandler(async () => {
   await app.close();
 });
 
-export const refreshEnv = () => {
-  globalThis.env = new Env();
+export const refreshEnv = () => { globalThis.env = new Env();
 };
 
 export * from '../mocks';

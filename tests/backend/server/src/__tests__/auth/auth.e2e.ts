@@ -2,16 +2,7 @@ import { randomBytes } from 'node:crypto';
 import type { TestFn } from 'ava';
 import ava from 'ava';
 import supertest from 'supertest';
-import {
-  changeEmail,
-  changePassword,
-  createTestingApp,
-  currentUser,
-  sendChangeEmail,
-  sendSetPasswordEmail,
-  sendVerifyChangeEmail,
-  TestingApp,
-} from '../utils';
+import { changeEmail, changePassword, createTestingApp, currentUser, sendChangeEmail, sendSetPasswordEmail, sendVerifyChangeEmail, TestingApp, } from '../utils';
 
 const test = ava as TestFn<{
   app: TestingApp;

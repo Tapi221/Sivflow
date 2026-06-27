@@ -1,9 +1,5 @@
 import type { SurfaceBlockModel } from '@blocksuite/affine/blocks/surface';
-import type {
-  BrushElementModel,
-  ConnectorElementModel,
-  GroupElementModel,
-} from '@blocksuite/affine/model';
+import type { BrushElementModel, ConnectorElementModel, GroupElementModel, } from '@blocksuite/affine/model';
 import { serializeXYWH } from '@blocksuite/global/gfx';
 import { beforeEach, describe, expect, test } from 'vitest';
 import { wait } from '../utils/common.js';

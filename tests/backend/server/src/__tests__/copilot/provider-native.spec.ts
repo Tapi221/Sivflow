@@ -2,17 +2,10 @@ import serverNativeModule from '@affine/server-native';
 import test from 'ava';
 import Sinon from 'sinon';
 import { z } from 'zod';
-import {
-  CopilotPromptInvalid,
-  CopilotQuotaExceeded,
-  NoCopilotProviderAvailable,
-} from '../../base';
+import { CopilotPromptInvalid, CopilotQuotaExceeded, NoCopilotProviderAvailable, } from '../../base';
 import { llmMatchModelCapabilities, llmResolveRequestedModelMatch } from '../../native';
 import type { LlmBackendConfig, LlmEmbeddingRequest, LlmImageRequest, LlmPreparedDispatchRoute, LlmPreparedEmbeddingDispatchRoute, LlmPreparedImageDispatchRoute, LlmPreparedRerankDispatchRoute, LlmPreparedStructuredDispatchRoute, LlmProtocol, LlmRequest, LlmRerankRequest, LlmStructuredRequest } from '../../native';
-import type {
-  CopilotProviderProfile,
-  ProviderMiddlewareConfig,
-} from '../../plugins/copilot/config';
+import type { CopilotProviderProfile, ProviderMiddlewareConfig, } from '../../plugins/copilot/config';
 import { CopilotProviderFactory } from '../../plugins/copilot/providers/factory';
 import { OpenAIProvider } from '../../plugins/copilot/providers/openai';
 import { CopilotProvider } from '../../plugins/copilot/providers/provider';
@@ -28,14 +21,7 @@ import { NativeExecutionEngine } from '../../plugins/copilot/runtime/native-exec
 import { buildNativeRequest } from '../../plugins/copilot/runtime/native-request-runtime';
 import { getProviderRuntimeHost } from '../../plugins/copilot/runtime/provider-runtime-context';
 import { defineTool } from '../../plugins/copilot/tools/tool';
-import {
-  nativeMessages,
-  nativeUserText,
-  promptMessages,
-  singleUserPromptMessages,
-  systemPrompt,
-  userPrompt,
-} from './prompt-test-helper';
+import { nativeMessages, nativeUserText, promptMessages, singleUserPromptMessages, systemPrompt, userPrompt, } from './prompt-test-helper';
 
 const createNativeExecutionEngine = () => {
   return new NativeExecutionEngine({

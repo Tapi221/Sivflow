@@ -13,10 +13,7 @@ declare global {
 }
 
 @Injectable()
-export class Listeners {
-  @OnEvent('__test__.event')
-  onTestEvent(payload: Events['__test__.event']) {
-    return payload;
+export class Listeners { @OnEvent('__test__.event') onTestEvent(payload: Events['__test__.event']) { return payload;
   }
 
   @OnEvent('__test__.event')

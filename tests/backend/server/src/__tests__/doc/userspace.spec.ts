@@ -1,10 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import ava, { TestFn } from 'ava';
 import { applyUpdate, Doc as YDoc } from 'yjs';
-import {
-  DocStorageModule,
-  PgUserspaceDocStorageAdapter as Adapter,
-} from '../../core/doc';
+import { DocStorageModule, PgUserspaceDocStorageAdapter as Adapter, } from '../../core/doc';
 import { Models } from '../../models';
 import type { User } from '../../models';
 import { createTestingModule } from '../utils';

@@ -5,12 +5,7 @@ import { io } from 'socket.io-client';
 import type { Socket as SocketIOClient } from 'socket.io-client';
 import { Doc, encodeStateAsUpdate } from 'yjs';
 import { CANARY_CLIENT_VERSION_MAX_AGE_DAYS } from '../../base';
-import {
-  DocRole,
-  Models,
-  WorkspaceMemberStatus,
-  WorkspaceRole,
-} from '../../models';
+import { DocRole, Models, WorkspaceMemberStatus, WorkspaceRole, } from '../../models';
 import { AuthService } from '../../core/auth/service';
 import { JwtSessionService } from '../../core/auth/jwt-session';
 import { createTestingApp, TestingApp } from '../utils';

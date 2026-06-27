@@ -3,10 +3,7 @@ import serverNativeModule from '@affine/server-native';
 import type { ProviderMiddlewareConfig } from '../../plugins/copilot/config';
 import { CopilotChatOptions, CopilotEmbeddingOptions, CopilotProviderType, CopilotStructuredOptions, ModelConditions, ModelFullConditions, ModelOutputType, PromptMessage, StreamObject } from '../../plugins/copilot/providers';
 import type { CopilotProviderModel } from '../../plugins/copilot/providers';
-import {
-  DEFAULT_DIMENSIONS,
-  OpenAIProvider,
-} from '../../plugins/copilot/providers/openai';
+import { DEFAULT_DIMENSIONS, OpenAIProvider, } from '../../plugins/copilot/providers/openai';
 import type { ProviderModelRuntimeContext } from '../../plugins/copilot/providers/provider-model-runtime';
 import { createNativeExecutionDriverSpec } from '../../plugins/copilot/providers/provider-runtime-contract';
 import type { CopilotProviderExecution, ProviderDriverSpec } from '../../plugins/copilot/providers/provider-runtime-contract';
@@ -168,8 +165,7 @@ const emitMockTextStream = (model: string, callback: (error: Error | null, event
   callback(null, LLM_STREAM_END_MARKER);
 };
 
-export const installMockCopilotRuntime = () => {
-  const native = serverNativeModule as Record<string, any>;
+export const installMockCopilotRuntime = () => { const native = serverNativeModule as Record<string, any>;
   const original = {
     llmDispatchPrepared: native.llmDispatchPrepared,
     llmDispatchPreparedStream: native.llmDispatchPreparedStream,
@@ -404,8 +400,7 @@ export const installMockCopilotRuntime = () => {
   };
 };
 
-export class MockCopilotProvider extends OpenAIProvider {
-  private runtimeHostOverride?: ProviderRuntimeContexts;
+export class MockCopilotProvider extends OpenAIProvider { private runtimeHostOverride?: ProviderRuntimeContexts;
 
   protected override resolveModelRuntimeContext(): ProviderModelRuntimeContext {
     const providerType = this.type as CopilotProviderType;

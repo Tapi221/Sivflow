@@ -1,5 +1,7 @@
 import { resolveWheelZoomStepCount } from "@/utils/zoom/wheelZoomMath";
 
+
+
 type ComputeNextScaleFromWheelInput = {
   currentScale: number;
   deltaY: number;
@@ -20,8 +22,12 @@ type ResolveTrackpadDeltaYForScaleRatioInput = {
   sensitivity: number;
 };
 
+
+
 const DEFAULT_PDF_WHEEL_DELTA_PER_ZOOM_STEP = 120;
 const SIOYEK_ZOOM_INC_FACTOR = 1.2;
+
+
 
 const normalizeScale = (value: number): number => Number(value.toFixed(3));
 const clampScale = (value: number, minScale: number, maxScale: number): number => {
@@ -58,5 +64,7 @@ const resolveTrackpadDeltaYForScaleRatio = ({ scaleRatio, sensitivity }: Resolve
 
   return -Math.log(scaleRatio) / sensitivity;
 };
+
+
 
 export { normalizeScale, clampScale, computeNextScaleFromWheel, computeNextScaleFromGesture, resolveTrackpadDeltaYForScaleRatio };

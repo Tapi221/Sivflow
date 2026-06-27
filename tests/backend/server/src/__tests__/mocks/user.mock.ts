@@ -5,15 +5,12 @@ import { FeatureConfigs } from '../../models';
 import type { UserFeatureName } from '../../models';
 import { Mocker } from './factory';
 
-export type MockUserInput = Prisma.UserCreateInput & {
-  feature?: UserFeatureName;
+export type MockUserInput = Prisma.UserCreateInput & { feature?: UserFeatureName;
 };
 
 export type MockedUser = User;
 
-export class MockUser extends Mocker<MockUserInput, MockedUser> {
-  override async create(input?: Partial<MockUserInput>) {
-    const { feature, ...userInput } = input ?? {};
+export class MockUser extends Mocker<MockUserInput, MockedUser> { override async create(input?: Partial<MockUserInput>) { const { feature, ...userInput } = input ?? {};
     const user = await this.db.user.create({
       data: {
         createdAt: new Date(Date.now() - 25 * 60 * 60 * 1000),

@@ -4,15 +4,7 @@ import test from 'ava';
 import { createModule } from '../../../__tests__/create-module';
 import { Mockers } from '../../../__tests__/mocks';
 import { Due, NotificationNotFound } from '../../../base';
-import {
-  DocMode,
-  MentionNotificationBody,
-  Models,
-  NotificationType,
-  User,
-  Workspace,
-  WorkspaceMemberStatus,
-} from '../../../models';
+import { DocMode, MentionNotificationBody, Models, NotificationType, User, Workspace, WorkspaceMemberStatus, } from '../../../models';
 import { DocStorageModule } from '../../doc';
 import { FeatureModule } from '../../features';
 import { MailModule } from '../../mail';

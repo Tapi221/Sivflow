@@ -6,6 +6,8 @@ import { createGoogleTask, deleteGoogleTask, fetchGoogleTasks, moveGoogleTask, p
 import type { GoogleTaskListAccountState } from "./useGoogleTaskLists";
 import type { GoogleTaskItem, GoogleTaskListItem } from "@/sync/googletask-sync/gtaskSync.types";
 
+
+
 type GoogleTasksAccountState = {
   tasks: GoogleTaskItem[];
   isLoading: boolean;
@@ -41,12 +43,16 @@ type AccountTokenSnapshot = {
   taskLists: GoogleTaskListItem[];
 };
 
+
+
 const EMPTY_ACCOUNT_STATE: GoogleTasksAccountState = {
   tasks: [],
   isLoading: false,
   error: null,
 };
 const DEFAULT_POLL_INTERVAL_MS = 10_000;
+
+
 
 const toErrorMessage = (error: unknown) => {
   if (!(error instanceof Error)) return String(error);
@@ -516,5 +522,9 @@ const useGoogleTasks = (accounts: GoogleConnectedServiceAccountEntry[], taskList
   };
 };
 
+
+
 export { useGoogleTasks };
+
+
 export type { GoogleTasksAccountState, GoogleTaskCreateInput, GoogleTaskPatchInput };

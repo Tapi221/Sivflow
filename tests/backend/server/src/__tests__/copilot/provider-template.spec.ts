@@ -1,11 +1,7 @@
 import serverNativeModule from '@affine/server-native';
 import test from 'ava';
 import { z } from 'zod';
-import type {
-  LlmEmbeddingRequest,
-  LlmRerankRequest,
-  LlmStructuredRequest,
-} from '../../native';
+import type { LlmEmbeddingRequest, LlmRerankRequest, LlmStructuredRequest, } from '../../native';
 import { CopilotProvider } from '../../plugins/copilot/providers/provider';
 import type { ProviderDriverSpec } from '../../plugins/copilot/providers/provider-runtime-contract';
 import { CopilotProviderType } from '../../plugins/copilot/providers/types';

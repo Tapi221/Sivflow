@@ -4,12 +4,16 @@ import { useEffectiveLocalUserId } from "@/contexts/auth/useEffectiveLocalUserId
 import { getLocalDb } from "@/services/localdb";
 import type { DocumentItem } from "@/types";
 
+
+
 type DocumentWithLegacyDelete = DocumentItem & {
   is_deleted?: boolean;
 };
 type UseDocumentsReadOptions = {
   enabled?: boolean;
 };
+
+
 
 const getDocumentOrderIndex = (document: DocumentItem): number => {
   const orderIndex = Number(document.orderIndex);
@@ -58,5 +62,7 @@ const useDocumentsRead = (folderId?: string, options?: UseDocumentsReadOptions) 
     error,
   };
 };
+
+
 
 export { useDocumentsRead };

@@ -4,6 +4,8 @@ import { persistentQueue } from "@/services/PersistentOfflineQueue";
 import type { UploadedImage } from "@/types/domain/assets";
 import type { CardBlock, CardFaceAttachments } from "@/types/domain/card";
 
+
+
 type LocalImageRecordLike = {
   remoteStatus?: "none" | "uploading" | "ready" | "failed" | null;
   status?: "pending" | "uploading" | "ready" | "failed" | null;
@@ -13,8 +15,12 @@ type LocalImageRecordLike = {
   storagePath?: string | null;
 };
 
+
+
 const IMAGE_UPLOAD_SAVE_TIMEOUT_MS = 30_000;
 const IMAGE_UPLOAD_SAVE_POLL_MS = 300;
+
+
 
 const sleep = (ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -235,5 +241,7 @@ const waitForDraftImageUploads = async (draft: EditorDraft): Promise<EditorDraft
     await processAssetQueueBestEffort();
   }
 };
+
+
 
 export { waitForDraftImageUploads };

@@ -1,10 +1,4 @@
-import {
-  AiJobStatus,
-  AiJobType,
-  PrismaClient,
-  User,
-  Workspace,
-} from '@prisma/client';
+import { AiJobStatus, AiJobType, PrismaClient, User, Workspace, } from '@prisma/client';
 import ava, { TestFn } from 'ava';
 import { Config } from '../../base';
 import { CopilotJobModel } from '../../models';

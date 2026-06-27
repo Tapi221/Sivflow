@@ -7,6 +7,8 @@ import { CardSetLibraryDashboard } from "@/features/library-cardset/components/C
 import { PdfLibraryDashboard } from "@/features/library-pdf/components/PdfLibraryDashboard";
 import type { Card, CardSet, DocumentItem, Folder, SelectedExplorerItem } from "@/types";
 
+
+
 interface SectionListColumnPaneProps {
   className?: string;
   sidebarWidth: number;
@@ -75,10 +77,14 @@ type ExternalPathSelectionSnapshot = {
   selectedFolderId: string | null;
 };
 
+
+
 const EXPLORER_COLUMN_PATH_CHANGE_EVENT =
   "sivflow:explorer-column-path-change";
 const EXPLORER_COLUMN_PATH_NAVIGATE_EVENT =
   "sivflow:explorer-column-path-navigate";
+
+
 
 const normalizeFolderParentId = (folder: FolderLike): string | null => {
   return folder.parentFolderId ?? folder.parent_folder_id ?? null;
@@ -201,6 +207,8 @@ const getSelectedItemKey = (item: SelectedExplorerItem): string => {
   if (!item) return "__none__";
   return "id" in item ? `${item.type}:${item.id}` : item.type;
 };
+
+
 
 const SectionListColumnPane = ({
   className,
@@ -485,5 +493,7 @@ const SectionListColumnPane = ({
     </SectionListBlankPane>
   );
 };
+
+
 
 export { SectionListColumnPane };

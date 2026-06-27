@@ -13,6 +13,8 @@ import { PDF_TRACKPAD_ZOOM_SENSITIVITY, PDF_ZOOM_BUTTON_SCALE_FACTOR, PDF_ZOOM_M
 import { clampScale, computeNextScaleFromGesture, normalizeScale } from "./pdfZoom.utils";
 import type { PdfViewerState } from "@/types";
 
+
+
 type PdfViewerStateChangePersistence = "immediate" | "deferred" | "none";
 type PdfViewerStateChangeOptions = {
   persistence?: PdfViewerStateChangePersistence;
@@ -64,6 +66,8 @@ type PdfZoomAnchor = {
   clientY: number;
 };
 
+
+
 const PDF_COMPACT_VIEWPORT_MAX_WIDTH = 640;
 const PDF_FALLBACK_PAGE_SIZE: PdfPageSize = { width: 612, height: 792 };
 const PDF_HISTORY_LIMIT = 80;
@@ -83,6 +87,8 @@ const PDFJS_ASSET_BASE_URL = "/pdfjs/";
 const PDFJS_CMAP_URL = `${PDFJS_ASSET_BASE_URL}cmaps/`;
 const PDFJS_STANDARD_FONT_DATA_URL = `${PDFJS_ASSET_BASE_URL}standard_fonts/`;
 const PDFJS_WASM_URL = `${PDFJS_ASSET_BASE_URL}wasm/`;
+
+
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 const createDefaultToolbarState = (): PdfToolbarState => ({
@@ -225,6 +231,8 @@ const restorePdfZoomAnchor = (container: HTMLElement, anchor: PdfZoomAnchor, pre
     container.scrollTop = contentTop * scaleRatio - anchorTop;
   });
 };
+
+
 
 const PdfPageCanvas = ({ pdfDocument, pageNumber, pageSize, registerPageElement, scale, scrollRoot, onPageSizeChange }: PdfPageCanvasProps) => {
   const pageElementRef = useRef<HTMLDivElement | null>(null);
@@ -704,5 +712,7 @@ const PdfPane = ({ source, className, viewerState = null, viewerOptions, onLoadE
     </section>
   );
 };
+
+
 
 export { PdfPane };

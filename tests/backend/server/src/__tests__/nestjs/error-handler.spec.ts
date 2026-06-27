@@ -1,30 +1,12 @@
 import assert from 'node:assert/strict';
-import {
-  applyDecorators,
-  Body,
-  Controller,
-  Get,
-  HttpStatus,
-  INestApplication,
-  Logger,
-  LoggerService,
-  Post,
-} from '@nestjs/common';
+import { applyDecorators, Body, Controller, Get, HttpStatus, INestApplication, Logger, LoggerService, Post, } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import {
-  MessageBody,
-  SubscribeMessage as RawSubscribeMessage,
-  WebSocketGateway,
-} from '@nestjs/websockets';
+import { MessageBody, SubscribeMessage as RawSubscribeMessage, WebSocketGateway, } from '@nestjs/websockets';
 import testFn, { TestFn } from 'ava';
 import Sinon from 'sinon';
 import request from 'supertest';
 import { z } from 'zod';
-import {
-  AccessDenied,
-  GatewayErrorWrapper,
-  UserFriendlyError,
-} from '../../base';
+import { AccessDenied, GatewayErrorWrapper, UserFriendlyError, } from '../../base';
 import { Public } from '../../core/auth';
 import { EmailSchema } from '../../models/common/schema';
 import { createTestingApp } from '../utils';

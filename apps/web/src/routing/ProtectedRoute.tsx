@@ -4,9 +4,13 @@ import { LoadingFallback } from "@web-renderer/components/common/LoadingFallback
 import { useAuthSession } from "@/contexts/auth/useAuthSession";
 import { isPreviewRouteEnabled } from "@web/routing/previewRouteGuard";
 
+
+
 type ProtectedRouteProps = {
   children: ReactNode;
 };
+
+
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { currentUser, loading } = useAuthSession();
@@ -19,5 +23,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   return children;
 };
 
+
+
 export { ProtectedRoute };
+
+
 export type { ProtectedRouteProps };

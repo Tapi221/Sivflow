@@ -7,6 +7,8 @@ import { createDefaultEditorBlockSettings, parseEditorBlockSettings } from "@/li
 import { getLocalDb } from "@/services/localdb";
 import type { UserSettings } from "@/types";
 
+
+
 const DEFAULT_THEME_ACCENT_COLOR = "#1e96eb";
 const HEX_COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
 const LEGACY_SETTING_KEYS = [
@@ -15,6 +17,8 @@ const LEGACY_SETTING_KEYS = [
   "folder" + "SidebarDisplayMode",
 ] as const;
 const DEFAULT_SETTINGS: Partial<UserSettings> = { language: "ja", weekStartDay: "monday", notificationsEnabled: false, soundEnabled: true, showReviewHard: true, showReviewEasy: true, autoCarryOver: true, delayBonusEnabled: false, reviewStartNextDay: true, defaultPreviewEnabled: false, autoDraftEnabled: true, autoSaveEnabled: true, autoVoiceQuestion: false, autoVoiceAnswer: false, cardEditorHeightPx: null, questionDisplayMode: "tap_to_reveal" as const, markdownTabSize: 2, accentColor: DEFAULT_THEME_ACCENT_COLOR, editorBlockSettings: createDefaultEditorBlockSettings() };
+
+
 
 const normalizeThemeAccentColor = (color: string | null | undefined): string => {
   const normalizedColor = color?.trim().toLowerCase();
@@ -212,5 +216,7 @@ const useUserSettings = () => {
     updateSettings,
   };
 };
+
+
 
 export { DEFAULT_SETTINGS, DEFAULT_THEME_ACCENT_COLOR, normalizeThemeAccentColor, useUserSettings };

@@ -1,9 +1,6 @@
 import { LinkExtension } from '@blocksuite/affine-inline-link';
 import { textKeymap } from '@blocksuite/affine-inline-preset';
-import type {
-  ListBlockModel,
-  ParagraphBlockModel,
-} from '@blocksuite/affine-model';
+import type { ListBlockModel, ParagraphBlockModel, } from '@blocksuite/affine-model';
 import { insertContent } from '@blocksuite/affine-rich-text';
 import { REFERENCE_NODE } from '@blocksuite/affine-shared/consts';
 import { createDefaultDoc } from '@blocksuite/affine-shared/utils';
@@ -12,10 +9,7 @@ import type { InlineMarkdownMatch } from '@blocksuite/std/inline';
 import { Text } from '@blocksuite/store';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { defaultSlashMenuConfig } from '../../../../affine/widgets/slash-menu/src/config.js';
-import type {
-  SlashMenuActionItem,
-  SlashMenuItem,
-} from '../../../../affine/widgets/slash-menu/src/types.js';
+import type { SlashMenuActionItem, SlashMenuItem, } from '../../../../affine/widgets/slash-menu/src/types.js';
 import { wait } from '../utils/common.js';
 import { addNote } from '../utils/edgeless.js';
 import { setupEditor } from '../utils/setup.js';

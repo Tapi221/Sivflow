@@ -1,14 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { TestFn } from 'ava';
 import ava from 'ava';
-import {
-  createBmp,
-  createTestingApp,
-  getPublicUserById,
-  smallestPng,
-  TestingApp,
-  updateAvatar,
-} from '../utils';
+import { createBmp, createTestingApp, getPublicUserById, smallestPng, TestingApp, updateAvatar, } from '../utils';
 
 const test = ava as TestFn<{
   app: TestingApp;

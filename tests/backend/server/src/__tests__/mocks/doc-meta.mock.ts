@@ -6,10 +6,6 @@ export type MockDocMetaInput = Prisma.WorkspaceDocUncheckedCreateInput;
 
 export type MockedDocMeta = WorkspaceDoc;
 
-export class MockDocMeta extends Mocker<MockDocMetaInput, MockedDocMeta> {
-  override async create(input: MockDocMetaInput) {
-    return await this.db.workspaceDoc.create({
-      data: input,
-    });
+export class MockDocMeta extends Mocker<MockDocMetaInput, MockedDocMeta> { override async create(input: MockDocMetaInput) { return await this.db.workspaceDoc.create({ data: input, });
   }
 }

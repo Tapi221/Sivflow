@@ -13,6 +13,8 @@ import { AppProviders } from "@web/AppProviders";
 import { WebApp } from "@web/WebApp";
 import { renderGoogleOAuthCallback } from "@/integration/google-integration/google.oauth-callback";
 
+
+
 type SivflowReactRootStore = {
   container: HTMLElement;
   root: Root;
@@ -23,9 +25,13 @@ declare global {
   }
 }
 
+
+
 const ROOT_ELEMENT_ID = "root";
 const ROOT_ELEMENT_MISSING_MESSAGE = "React の描画先 root 要素が見つかりません。";
 const REACT_ROOT_UNMOUNT_FAILURE_MESSAGE = "[Startup] 既存 React root の破棄に失敗しました";
+
+
 
 const ensureRootElement = (): HTMLElement => {
   const rootElement = document.getElementById(ROOT_ELEMENT_ID);

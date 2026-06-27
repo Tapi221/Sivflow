@@ -3,11 +3,7 @@ import { omit } from 'lodash-es';
 import { createModule } from '../../../__tests__/create-module';
 import { Mockers } from '../../../__tests__/mocks';
 import { Models } from '../../../models';
-import {
-  parseDocToMarkdownFromDocSnapshot,
-  readAllBlocksFromDocSnapshot,
-  readAllDocIdsFromWorkspaceSnapshot,
-} from '../blocksuite';
+import { parseDocToMarkdownFromDocSnapshot, readAllBlocksFromDocSnapshot, readAllDocIdsFromWorkspaceSnapshot, } from '../blocksuite';
 
 const module = await createModule({});
 const models = module.get(Models);

@@ -7,12 +7,7 @@ interface MockTeamWorkspaceInput {
   quantity: number;
 }
 
-export class MockTeamWorkspace extends Mocker<
-  MockTeamWorkspaceInput,
-  { id: string }
-> {
-  override async create(input?: Partial<MockTeamWorkspaceInput>) {
-    const id = input?.id ?? faker.string.uuid();
+export class MockTeamWorkspace extends Mocker< MockTeamWorkspaceInput, { id: string } > { override async create(input?: Partial<MockTeamWorkspaceInput>) { const id = input?.id ?? faker.string.uuid();
     const quantity = input?.quantity ?? 10;
 
     await this.db.subscription.create({

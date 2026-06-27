@@ -12,12 +12,7 @@ import { SubscriptionCronJobs } from '../../plugins/payment/cron';
 import { RevenueCatService } from '../../plugins/payment/revenuecat';
 import { SubscriptionService } from '../../plugins/payment/service';
 import { StripeFactory } from '../../plugins/payment/stripe';
-import {
-  encodeLookupKey,
-  SubscriptionPlan,
-  SubscriptionRecurring,
-  SubscriptionStatus,
-} from '../../plugins/payment/types';
+import { encodeLookupKey, SubscriptionPlan, SubscriptionRecurring, SubscriptionStatus, } from '../../plugins/payment/types';
 import { createTestingApp } from '../utils';
 import type { TestingApp } from '../utils';
 

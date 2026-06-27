@@ -3,14 +3,7 @@ import { join } from 'node:path';
 import { PrismaClient } from '@prisma/client';
 import test from 'ava';
 import { PermissionProjectionChecker } from '../../core/permission/projection-checker';
-import {
-  DocRole,
-  PERMISSION_PROJECTION_TRIGGER_ERROR_CATEGORIES,
-  PermissionProjectionModel,
-  permissionProjectionTriggerErrorCategory,
-  WorkspaceMemberStatus,
-  WorkspaceRole,
-} from '../../models';
+import { DocRole, PERMISSION_PROJECTION_TRIGGER_ERROR_CATEGORIES, PermissionProjectionModel, permissionProjectionTriggerErrorCategory, WorkspaceMemberStatus, WorkspaceRole, } from '../../models';
 import { createModule } from '../create-module';
 import { Mockers } from '../mocks';
 

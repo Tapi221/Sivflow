@@ -2,8 +2,7 @@ import { interval, map, take, takeUntil } from 'rxjs';
 import Sinon from 'sinon';
 import { JobQueue } from '../../base';
 
-export class MockJobQueue {
-  add = Sinon.createStubInstance(JobQueue).add.resolves();
+export class MockJobQueue { add = Sinon.createStubInstance(JobQueue).add.resolves();
   remove = Sinon.createStubInstance(JobQueue).remove.resolves();
   removeWhere = Sinon.createStubInstance(JobQueue).removeWhere.resolves([]);
 

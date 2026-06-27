@@ -11,27 +11,12 @@ import { ConversationPolicy } from '../../plugins/copilot/conversation/policy';
 import type { Turn } from '../../plugins/copilot/core';
 import { CopilotEmbeddingClientService } from '../../plugins/copilot/embedding/client';
 import { CopilotProviderType } from '../../plugins/copilot/providers/types';
-import {
-  projectActionResultToAssistantTurn,
-  summarizeActionResult,
-} from '../../plugins/copilot/runtime/action-output-projector';
+import { projectActionResultToAssistantTurn, summarizeActionResult, } from '../../plugins/copilot/runtime/action-output-projector';
 import { ActionRuntimeBridge } from '../../plugins/copilot/runtime/action-runtime-bridge';
-import {
-  ActionStreamHost,
-  projectActionEventToChatEvent,
-} from '../../plugins/copilot/runtime/hosts/action-stream-host';
-import {
-  admittedAttachmentToPromptAttachment,
-  AttachmentAdmissionHost,
-} from '../../plugins/copilot/runtime/hosts/attachment-admission';
-import {
-  planAdmittedAttachmentMaterialization,
-  planHostUrlAttachmentMaterialization,
-} from '../../plugins/copilot/runtime/hosts/attachment-materialization-planner';
-import {
-  AttachmentMaterializer,
-  resolveAttachmentFetchUrl,
-} from '../../plugins/copilot/runtime/hosts/attachment-materializer';
+import { ActionStreamHost, projectActionEventToChatEvent, } from '../../plugins/copilot/runtime/hosts/action-stream-host';
+import { admittedAttachmentToPromptAttachment, AttachmentAdmissionHost, } from '../../plugins/copilot/runtime/hosts/attachment-admission';
+import { planAdmittedAttachmentMaterialization, planHostUrlAttachmentMaterialization, } from '../../plugins/copilot/runtime/hosts/attachment-materialization-planner';
+import { AttachmentMaterializer, resolveAttachmentFetchUrl, } from '../../plugins/copilot/runtime/hosts/attachment-materializer';
 import { ConversationHost } from '../../plugins/copilot/runtime/hosts/conversation-host';
 import { ImageResultHost } from '../../plugins/copilot/runtime/hosts/image-result-host';
 import { ResponsePostprocessor } from '../../plugins/copilot/runtime/hosts/response-postprocessor';

@@ -1,9 +1,6 @@
 import type { Point } from '@blocksuite/global/gfx';
 
-export const wait = (time: number = 0) => {
-  return new Promise(resolve => {
-    requestAnimationFrame(() => {
-      setTimeout(resolve, time);
+export const wait = (time: number = 0) => { return new Promise(resolve => { requestAnimationFrame(() => { setTimeout(resolve, time);
     });
   });
 };
@@ -137,19 +134,11 @@ export const drag = (target: HTMLElement, start: { x: number; y: number }, end: 
   pointerup(target, end);
 };
 
-export const multiTouchDown = (target: Element, points: Point[]) => {
-  points.forEach((point, index) => {
-    pointerdown(target as HTMLElement, point, {
-      isPrimary: index === 0,
-      pointerId: index,
-      pointerType: 'touch',
-    });
+export const multiTouchDown = (target: Element, points: Point[]) => { points.forEach((point, index) => { pointerdown(target as HTMLElement, point, { isPrimary: index === 0, pointerId: index, pointerType: 'touch', });
   });
 };
 
-export const multiTouchMove = (target: Element, from: Point[], to: Point[], step = 5) => {
-  if (from.length !== to.length) {
-    throw new Error('from and to should have the same length');
+export const multiTouchMove = (target: Element, from: Point[], to: Point[], step = 5) => { if (from.length !== to.length) { throw new Error('from and to should have the same length');
   }
 
   if (step !== 0) {
@@ -169,12 +158,6 @@ export const multiTouchMove = (target: Element, from: Point[], to: Point[], step
   }
 };
 
-export const multiTouchUp = (target: Element, points: Point[]) => {
-  points.forEach((point, index) => {
-    pointerup(target as HTMLElement, point, {
-      isPrimary: index === 0,
-      pointerId: index,
-      pointerType: 'touch',
-    });
+export const multiTouchUp = (target: Element, points: Point[]) => { points.forEach((point, index) => { pointerup(target as HTMLElement, point, { isPrimary: index === 0, pointerId: index, pointerType: 'touch', });
   });
 };

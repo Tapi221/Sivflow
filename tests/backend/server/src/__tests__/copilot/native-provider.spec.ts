@@ -14,30 +14,15 @@ import type { PromptMessage, StreamObject } from '../../plugins/copilot/provider
 import { getVertexGoogleBaseUrl } from '../../plugins/copilot/providers/utils';
 import { buildPromptStructuredResponseFromFields, buildStructuredResponseContract, buildToolContracts, requireStructuredOutputContract } from '../../plugins/copilot/runtime/contracts';
 import type { RequiredStructuredOutputContract } from '../../plugins/copilot/runtime/contracts';
-import {
-  buildCanonicalNativeRequest,
-  buildCanonicalNativeStructuredRequest,
-  buildNativeRequest,
-  buildNativeStructuredRequest,
-} from '../../plugins/copilot/runtime/native-request-runtime';
+import { buildCanonicalNativeRequest, buildCanonicalNativeStructuredRequest, buildNativeRequest, buildNativeStructuredRequest, } from '../../plugins/copilot/runtime/native-request-runtime';
 import { getProviderRuntimeHost } from '../../plugins/copilot/runtime/provider-runtime-context';
 import type { ToolLoopBackend } from '../../plugins/copilot/runtime/tool/bridge';
 import { createToolExecutionCallback } from '../../plugins/copilot/runtime/tool/bridge';
 import { NativeProviderAdapter } from '../../plugins/copilot/runtime/tool/native-adapter';
 import { NativeRuntimeAdapter } from '../../plugins/copilot/runtime/tool/native-runtime-adapter';
-import type {
-  CopilotToolExecuteOptions,
-  CopilotToolSet,
-} from '../../plugins/copilot/tools';
+import type { CopilotToolExecuteOptions, CopilotToolSet, } from '../../plugins/copilot/tools';
 import { defineTool } from '../../plugins/copilot/tools/tool';
-import {
-  jsonOnlyPromptMessages,
-  nativeMessages,
-  nativeUserText,
-  promptMessages,
-  systemPrompt,
-  userPrompt,
-} from './prompt-test-helper';
+import { jsonOnlyPromptMessages, nativeMessages, nativeUserText, promptMessages, systemPrompt, userPrompt, } from './prompt-test-helper';
 
 const mockDispatch = () =>
   (async function* (): AsyncIterableIterator<LlmToolLoopStreamEvent> {

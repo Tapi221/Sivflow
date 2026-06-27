@@ -6,6 +6,8 @@ import { buildEntityRenameDeleteMenuActions } from "@/components/folder/componen
 import { EXPLORER_ROW_CONTENT_CLASS, EXPLORER_ROW_ICON_SLOT_CLASS, EXPLORER_ROW_INPUT_CLASS, EXPLORER_ROW_LEADING_SLOT_CLASS, EXPLORER_ROW_TITLE_SLOT_CLASS, FOLDER_ROW_ICON_ACTIVE_CLASS, FOLDER_ROW_ICON_MUTED_CLASS, FOLDER_ROW_ICON_SIZE_CLASS, FOLDER_ROW_TITLE_CLASS } from "./shared";
 import { SidebarEntityRow } from "./SidebarEntityRow";
 
+
+
 type TreeNode = {
   rawId: string;
   name: string;
@@ -42,6 +44,8 @@ interface CardSetRowProps {
   }) => Promise<void>;
   setRowRef: (id: string, node: HTMLElement | null) => void;
 }
+
+
 
 const CardSetRow = ({ treeNode, style, depth, isOpen, isSelected, toggle, editingId, editingName, renameCancelledRef, editInputRef, setEditingId, setEditingName, openRowMenuId, setOpenRowMenuId, onItemSelect, canRename, canDelete, handleDelete, handleRenameConfirm, setRowRef }: CardSetRowProps) => {
   const rowMenuId = `cardSet:${treeNode.rawId}`;
@@ -201,5 +205,7 @@ const CardSetRow = ({ treeNode, style, depth, isOpen, isSelected, toggle, editin
     />
   );
 };
+
+
 
 export { CardSetRow };

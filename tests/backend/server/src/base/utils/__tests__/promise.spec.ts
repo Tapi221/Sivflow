@@ -1,9 +1,6 @@
 import test from 'ava';
 import Sinon from 'sinon';
-import {
-  exponentialBackoffDelay,
-  ExponentialBackoffScheduler,
-} from '../promise';
+import { exponentialBackoffDelay, ExponentialBackoffScheduler, } from '../promise';
 
 test('exponentialBackoffDelay should cap exponential growth at maxDelayMs', t => {
   t.is(exponentialBackoffDelay(0, { baseDelayMs: 100, maxDelayMs: 500 }), 100);

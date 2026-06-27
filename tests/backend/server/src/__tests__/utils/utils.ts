@@ -2,8 +2,7 @@ import { INestApplicationContext, LogLevel } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import whywhywhy from 'why-is-node-running';
 
-export const TEST_LOG_LEVEL: LogLevel =
-  (process.env.TEST_LOG_LEVEL as LogLevel) ?? 'fatal';
+export const TEST_LOG_LEVEL: LogLevel = (process.env.TEST_LOG_LEVEL as LogLevel) ?? 'fatal';
 
 const flushDB = async (client: PrismaClient) => {
   const result: { tablename: string }[] =
@@ -47,25 +46,14 @@ const isDeadlockError = (error: unknown) => {
   );
 };
 
-export const initTestingDB = async (context: INestApplicationContext) => {
-  const db = context.get(PrismaClient, { strict: false });
+export const initTestingDB = async (context: INestApplicationContext) => { const db = context.get(PrismaClient, { strict: false });
   await flushDB(db);
 };
 
-export const sleep = async (ms: number) => {
-  return new Promise(resolve => setTimeout(resolve, ms));
+export const sleep = async (ms: number) => { return new Promise(resolve => setTimeout(resolve, ms));
 };
 
-export const debugProcessHolding = (ignorePrismaStack = true) => {
-  setImmediate(() => {
-    whywhywhy({
-      error: message => {
-        // ignore prisma error
-        if (
-          ignorePrismaStack &&
-          (message.includes('Prisma') || message.includes('prisma'))
-        ) {
-          return;
+export const debugProcessHolding = (ignorePrismaStack = true) => { setImmediate(() => { whywhywhy({ error: message => { // ignore prisma error if ( ignorePrismaStack && (message.includes('Prisma') || message.includes('prisma')) ) { return;
         }
 
         console.error(message);

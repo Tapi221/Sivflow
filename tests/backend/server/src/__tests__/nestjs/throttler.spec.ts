@@ -5,12 +5,7 @@ import Sinon from 'sinon';
 import type { Response } from 'supertest';
 import { AppModule } from '../../app.module';
 import { ConfigModule } from '../../base/config';
-import {
-  CloudThrottlerGuard,
-  SkipThrottle,
-  Throttle,
-  ThrottlerStorage,
-} from '../../base/throttler';
+import { CloudThrottlerGuard, SkipThrottle, Throttle, ThrottlerStorage, } from '../../base/throttler';
 import { Public } from '../../core/auth';
 import { createTestingApp, TestingApp } from '../utils';
 

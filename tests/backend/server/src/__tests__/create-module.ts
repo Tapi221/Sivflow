@@ -1,9 +1,5 @@
 import { ModuleMetadata } from '@nestjs/common';
-import {
-  Test,
-  TestingModule as NestjsTestingModule,
-  TestingModuleBuilder,
-} from '@nestjs/testing';
+import { Test, TestingModule as NestjsTestingModule, TestingModuleBuilder, } from '@nestjs/testing';
 import { PrismaClient } from '@prisma/client';
 import { FunctionalityModules } from '../app.module';
 import { AFFiNELogger, EventBus, JobQueue } from '../base';
@@ -14,15 +10,13 @@ interface TestingModuleMetadata extends ModuleMetadata {
   tapModule?(m: TestingModuleBuilder): void;
 }
 
-export interface TestingModule extends NestjsTestingModule {
-  [Symbol.asyncDispose](): Promise<void>;
+export interface TestingModule extends NestjsTestingModule { [Symbol.asyncDispose](): Promise<void>;
   create: ReturnType<typeof createFactory>;
   queue: MockJobQueue;
   event: MockEventBus;
 }
 
-export const createModule = async (metadata: TestingModuleMetadata = {}): Promise<TestingModule> => {
-  const { tapModule, ...meta } = metadata;
+export const createModule = async (metadata: TestingModuleMetadata = {}): Promise<TestingModule> => { const { tapModule, ...meta } = metadata;
 
   const builder = Test.createTestingModule({
     ...meta,

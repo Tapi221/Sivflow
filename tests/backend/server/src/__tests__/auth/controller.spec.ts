@@ -6,19 +6,10 @@ import ava, { ExecutionContext, TestFn } from 'ava';
 import Sinon from 'sinon';
 import supertest from 'supertest';
 import { ConfigFactory } from '../../base';
-import {
-  getRequestCookie,
-  getRequestHeader,
-  parseCookies as safeParseCookies,
-} from '../../base/utils/request';
+import { getRequestCookie, getRequestHeader, parseCookies as safeParseCookies, } from '../../base/utils/request';
 import { MagicLinkAuthService } from '../../core/auth/magic-link';
 import { AuthService } from '../../core/auth/service';
-import {
-  createTestingApp,
-  currentUser,
-  parseCookies,
-  TestingApp,
-} from '../utils';
+import { createTestingApp, currentUser, parseCookies, TestingApp, } from '../utils';
 
 const test = ava as TestFn<{
   auth: AuthService;

@@ -7,28 +7,13 @@ import { PrismaClient } from '@prisma/client';
 import cookieParser from 'cookie-parser';
 import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs';
 import supertest from 'supertest';
-import {
-  AFFiNELogger,
-  CacheInterceptor,
-  CloudThrottlerGuard,
-  EventBus,
-  GlobalExceptionFilter,
-  JobQueue,
-  OneMB,
-} from '../../base';
+import { AFFiNELogger, CacheInterceptor, CloudThrottlerGuard, EventBus, GlobalExceptionFilter, JobQueue, OneMB, } from '../../base';
 import { ThrottlerStorage } from '../../base/throttler';
 import { SocketIoAdapter } from '../../base/websocket';
 import { AuthGuard, AuthService } from '../../core/auth';
 import { Mailer } from '../../core/mail';
 import { Models } from '../../models';
-import {
-  createFactory,
-  MockedUser,
-  MockJobQueue,
-  MockMailer,
-  MockUser,
-  MockUserInput,
-} from '../mocks';
+import { createFactory, MockedUser, MockJobQueue, MockMailer, MockUser, MockUserInput, } from '../mocks';
 import { parseCookies, TEST_LOG_LEVEL } from '../utils';
 
 interface TestingAppMetadata {
@@ -37,8 +22,7 @@ interface TestingAppMetadata {
   imports?: ModuleMetadata['imports'];
 }
 
-export class TestingApp extends NestApplication {
-  private sessionCookie: string | null = null;
+export class TestingApp extends NestApplication { private sessionCookie: string | null = null;
   private currentUserCookie: string | null = null;
   private csrfCookie: string | null = null;
   private readonly userCookies: Set<string> = new Set();
@@ -230,8 +214,7 @@ export class TestingApp extends NestApplication {
   }
 }
 
-export const createApp = async (metadata: TestingAppMetadata = {}): Promise<TestingApp> => {
-  const { buildAppModule } = await import('../../app.module');
+export const createApp = async (metadata: TestingAppMetadata = {}): Promise<TestingApp> => { const { buildAppModule } = await import('../../app.module');
   const { tapModule, tapApp } = metadata;
 
   const builder = Test.createTestingModule({

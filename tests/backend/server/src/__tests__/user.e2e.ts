@@ -1,10 +1,5 @@
 import test from 'ava';
-import {
-  createTestingApp,
-  currentUser,
-  deleteAccount,
-  TestingApp,
-} from './utils';
+import { createTestingApp, currentUser, deleteAccount, TestingApp, } from './utils';
 
 let app: TestingApp;
 

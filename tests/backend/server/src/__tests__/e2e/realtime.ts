@@ -1,9 +1,4 @@
-import type {
-  RealtimeAck,
-  RealtimeRequestInputOf,
-  RealtimeRequestName,
-  RealtimeRequestOutputOf,
-} from '@affine/realtime';
+import type { RealtimeAck, RealtimeRequestInputOf, RealtimeRequestName, RealtimeRequestOutputOf, } from '@affine/realtime';
 import { io } from 'socket.io-client';
 import type { Socket as SocketIOClient } from 'socket.io-client';
 import type { Response } from 'supertest';
@@ -49,8 +44,7 @@ const waitForConnect = async (socket: SocketIOClient) => {
   );
 };
 
-export const createRealtimeClient = async (app: TestingApp, user: MockedUser) => {
-  await app.login(user);
+export const createRealtimeClient = async (app: TestingApp, user: MockedUser) => { await app.login(user);
   
   const cookies = app.getCookies();
   const cookieStr = Object.entries(cookies)
@@ -69,14 +63,7 @@ export const createRealtimeClient = async (app: TestingApp, user: MockedUser) =>
   return socket;
 };
 
-export const realtimeRequest = async <Op extends RealtimeRequestName>(socket: SocketIOClient, op: Op, input: RealtimeRequestInputOf<Op>): Promise<RealtimeRequestOutputOf<Op>> => {
-  const ack = await withTimeout(
-    new Promise<RealtimeAck<RealtimeRequestOutputOf<Op>>>(resolve => {
-      socket.emit(
-        'realtime:request',
-        { op, input, clientVersion: REALTIME_CLIENT_VERSION },
-        (res: RealtimeAck<RealtimeRequestOutputOf<Op>>) => resolve(res)
-      );
+export const realtimeRequest = async <Op extends RealtimeRequestName>(socket: SocketIOClient, op: Op, input: RealtimeRequestInputOf<Op>): Promise<RealtimeRequestOutputOf<Op>> => { const ack = await withTimeout( new Promise<RealtimeAck<RealtimeRequestOutputOf<Op>>>(resolve => { socket.emit( 'realtime:request', { op, input, clientVersion: REALTIME_CLIENT_VERSION }, (res: RealtimeAck<RealtimeRequestOutputOf<Op>>) => resolve(res) );
     }),
     WS_TIMEOUT_MS,
     `realtime request ${op}`

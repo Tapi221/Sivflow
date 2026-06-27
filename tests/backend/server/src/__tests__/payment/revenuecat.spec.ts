@@ -3,11 +3,7 @@ import type { User } from '@prisma/client';
 import ava, { TestFn } from 'ava';
 import { omit } from 'lodash-es';
 import Sinon from 'sinon';
-import {
-  EventBus,
-  ManagedByAppStoreOrPlay,
-  SubscriptionAlreadyExists,
-} from '../../base';
+import { EventBus, ManagedByAppStoreOrPlay, SubscriptionAlreadyExists, } from '../../base';
 import { ConfigModule } from '../../base/config';
 import { FeatureService } from '../../core/features';
 import { Models } from '../../models';
@@ -18,11 +14,7 @@ import { UserSubscriptionResolver } from '../../plugins/payment/resolver';
 import { RcEvent, resolveProductMapping, RevenueCatService, RevenueCatWebhookController, RevenueCatWebhookHandler } from '../../plugins/payment/revenuecat';
 import type { Subscription } from '../../plugins/payment/revenuecat';
 import { SubscriptionService } from '../../plugins/payment/service';
-import {
-  SubscriptionPlan,
-  SubscriptionRecurring,
-  SubscriptionStatus,
-} from '../../plugins/payment/types';
+import { SubscriptionPlan, SubscriptionRecurring, SubscriptionStatus, } from '../../plugins/payment/types';
 import { createTestingApp, TestingApp } from '../utils';
 
 type Ctx = {

@@ -4,6 +4,8 @@ import { cn } from "@web-renderer/lib/utils";
 import type { ComponentProps, ReactNode } from "react";
 import type { MenuAction } from "./menuActions";
 
+
+
 type ContextMenuVariant = "default" | "compact" | "create" | "toolbar";
 type ContextMenuAnchorPoint = {
   x: number;
@@ -20,6 +22,8 @@ interface ContextMenuProps {
   variant?: ContextMenuVariant;
 }
 
+
+
 const CONTEXT_MENU_COLLISION_PADDING_PX = 8;
 const CONTEXT_MENU_VARIANT_CLASS_NAMES: Record<ContextMenuVariant, string> = {
   default: "min-w-40",
@@ -28,8 +32,12 @@ const CONTEXT_MENU_VARIANT_CLASS_NAMES: Record<ContextMenuVariant, string> = {
   toolbar: "min-w-40",
 };
 
+
+
 const isVisibleMenuAction = (action: MenuAction) => action.hidden !== true;
 const getContextMenuVariantClassName = (variant: ContextMenuVariant) => CONTEXT_MENU_VARIANT_CLASS_NAMES[variant];
+
+
 
 const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions, className, variant = "default" }: ContextMenuProps) => {
   const suppressCloseAutoFocusRef = useRef(false);
@@ -99,5 +107,9 @@ const ContextMenu = ({ children, anchorPoint, open, onOpenChange, actions, class
   );
 };
 
+
+
 export { ContextMenu };
+
+
 export type { ContextMenuVariant };

@@ -3,6 +3,8 @@ import { AnimatedCheckboxBase } from "@web-renderer/chip/checkbox/AnimatedCheckb
 import { cn } from "@web-renderer/lib/utils";
 import type { KeyboardEvent, MouseEvent } from "react";
 
+
+
 type SelectableGoogleSourceRowProps = {
   id: string;
   label: string;
@@ -18,6 +20,8 @@ type SelectableGoogleSourceSwitchProps = {
   onToggle: () => void;
 };
 
+
+
 const GOOGLE_SOURCE_ROW_CLASS_NAME = "flex h-6 w-full items-center gap-1.5 overflow-hidden rounded-md px-0 text-left";
 const SOURCE_ROW_CHECKED_TEXT_CLASS_NAME = "text-stone-500";
 const SOURCE_ROW_UNCHECKED_TEXT_CLASS_NAME = "text-stone-500 opacity-70";
@@ -26,6 +30,8 @@ const SOURCE_ROW_SWITCH_SIZE_CLASS_NAME = "h-3.5 w-3.5";
 const SOURCE_ROW_SWITCH_CHECK_STROKE_WIDTH = 2.5;
 const SOURCE_ROW_SWITCH_BORDER_WIDTH = 1.5;
 const SOURCE_ROW_SWITCH_INACTIVE_BORDER_COLOR = SIDEBAR_COLOR.sourceSwitchInactiveBorder;
+
+
 
 const SelectableGoogleSourceSwitch = ({ label, checked, color, onToggle }: SelectableGoogleSourceSwitchProps) => {
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
@@ -55,5 +61,7 @@ const SelectableGoogleSourceRow = ({ id, label, checked, color, className, onTog
     </div>
   );
 };
+
+
 
 export { GOOGLE_SOURCE_ROW_CLASS_NAME, SelectableGoogleSourceRow };

@@ -1,15 +1,8 @@
 import test from 'ava';
 import { OpenAIProvider } from '../../plugins/copilot/providers';
 import { CopilotProviderLifecycleService } from '../../plugins/copilot/providers/lifecycle-service';
-import {
-  buildProviderRegistry,
-  resolveModel,
-  stripProviderPrefix,
-} from '../../plugins/copilot/providers/provider-registry';
-import {
-  CopilotProviderType,
-  ModelOutputType,
-} from '../../plugins/copilot/providers/types';
+import { buildProviderRegistry, resolveModel, stripProviderPrefix, } from '../../plugins/copilot/providers/provider-registry';
+import { CopilotProviderType, ModelOutputType, } from '../../plugins/copilot/providers/types';
 
 test('buildProviderRegistry should keep explicit profile over legacy compatibility profile', t => {
   const registry = buildProviderRegistry({

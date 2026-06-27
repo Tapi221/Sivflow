@@ -19,22 +19,6 @@ import { MockUserSettings } from './user-settings.mock';
 import { MockWorkspace } from './workspace.mock';
 import { MockWorkspaceUser } from './workspace-user.mock';
 
-export const Mockers = {
-  User: MockUser,
-  Workspace: MockWorkspace,
-  TeamWorkspace: MockTeamWorkspace,
-  WorkspaceUser: MockWorkspaceUser,
-  UserSettings: MockUserSettings,
-  DocMeta: MockDocMeta,
-  DocSnapshot: MockDocSnapshot,
-  DocUser: MockDocUser,
-  AccessToken: MockAccessToken,
-};
+export const Mockers = { User: MockUser, Workspace: MockWorkspace, TeamWorkspace: MockTeamWorkspace, WorkspaceUser: MockWorkspaceUser, UserSettings: MockUserSettings, DocMeta: MockDocMeta, DocSnapshot: MockDocSnapshot, DocUser: MockDocUser, AccessToken: MockAccessToken, };
 
-export {
-  installMockCopilotRuntime,
-  MockCopilotProvider,
-  MockEventBus,
-  MockJobQueue,
-  MockMailer,
-};
+export { installMockCopilotRuntime, MockCopilotProvider, MockEventBus, MockJobQueue, MockMailer, };

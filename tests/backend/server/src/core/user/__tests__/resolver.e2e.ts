@@ -1,10 +1,5 @@
 import test from 'ava';
-import {
-  createTestingApp,
-  getUserSettings,
-  TestingApp,
-  updateUserSettings,
-} from '../../../__tests__/utils';
+import { createTestingApp, getUserSettings, TestingApp, updateUserSettings, } from '../../../__tests__/utils';
 
 let app: TestingApp;
 

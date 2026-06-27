@@ -1,6 +1,8 @@
 import { HttpsError } from "firebase-functions/v2/https";
 import { postgresQuery } from "#src/postgres.js";
 
+
+
 type StoredGoogleCalendarAccount = {
   email: string;
   name: string | null;
@@ -24,6 +26,8 @@ type UpsertGoogleCalendarAccountInput = {
   photoUrl: string | null;
   encryptedRefreshToken: string;
 };
+
+
 
 const isReusableCachedPhotoUrl = (photoUrl: unknown): photoUrl is string =>
   typeof photoUrl === "string" &&
@@ -114,5 +118,9 @@ const deleteGoogleCalendarAccount = async (uid: string, accountEmail: string): P
   await postgresQuery("delete from google_calendar_accounts where uid = $1 and account_email = $2", [uid, accountEmail]);
 };
 
+
+
 export { deleteGoogleCalendarAccount, listGoogleCalendarAccountsByUid, normalizePhotoUrl, requireGoogleCalendarAccount, selectGoogleCalendarAccount, upsertGoogleCalendarAccount };
+
+
 export type { StoredGoogleCalendarAccount };

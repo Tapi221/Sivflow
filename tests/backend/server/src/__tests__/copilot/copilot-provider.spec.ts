@@ -11,12 +11,7 @@ import { Models } from '../../models';
 import { llmImageDispatchPlan } from '../../native';
 import { CopilotModule } from '../../plugins/copilot';
 import { PromptService } from '../../plugins/copilot/prompt';
-import {
-  CopilotProviderFactory,
-  CopilotProviderType,
-  StreamObject,
-  StreamObjectSchema,
-} from '../../plugins/copilot/providers';
+import { CopilotProviderFactory, CopilotProviderType, StreamObject, StreamObjectSchema, } from '../../plugins/copilot/providers';
 import { ActionStreamHost } from '../../plugins/copilot/runtime/hosts/action-stream-host';
 import { getProviderRuntimeHost } from '../../plugins/copilot/runtime/provider-runtime-context';
 import { ChatSession, ChatSessionService } from '../../plugins/copilot/session';
@@ -25,12 +20,7 @@ import { CopilotTranscriptionService } from '../../plugins/copilot/transcript/se
 import { TestingPromptService } from '../mocks/prompt-service.mock';
 import { createTestingModule, TestingModule } from '../utils';
 import { TestAssets } from '../utils/copilot';
-import {
-  assistantPrompt,
-  promptMessages,
-  singleUserPromptMessages,
-  userPrompt,
-} from './prompt-test-helper';
+import { assistantPrompt, promptMessages, singleUserPromptMessages, userPrompt, } from './prompt-test-helper';
 
 type Tester = {
   auth: AuthService;

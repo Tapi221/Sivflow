@@ -1,18 +1,8 @@
-import {
-  getInviteInfoQuery,
-  inviteByEmailsMutation,
-  publishPageMutation,
-  revokeMemberPermissionMutation,
-  revokePublicPageMutation,
-  WorkspaceMemberStatus,
-} from '@affine/graphql';
+import { getInviteInfoQuery, inviteByEmailsMutation, publishPageMutation, revokeMemberPermissionMutation, revokePublicPageMutation, WorkspaceMemberStatus, } from '@affine/graphql';
 import { PrismaClient } from '@prisma/client';
 import { QuotaService } from '../../../core/quota/service';
 import { WorkspaceRole } from '../../../models';
-import {
-  SubscriptionPlan,
-  SubscriptionRecurring,
-} from '../../../plugins/payment/types';
+import { SubscriptionPlan, SubscriptionRecurring, } from '../../../plugins/payment/types';
 import { Mockers } from '../../mocks';
 import { app, e2e } from '../test';
 

@@ -9,6 +9,8 @@ import { useCalendarWeekStartSetting } from "@/features/calendar/useCalendarWeek
 import { useMonthInfiniteScroll } from "@/features/scroll/schedule/useInfiniteScroll.month.desktop";
 import type { GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 
+
+
 type CalendarMonthViewProps = {
   currentDate: Date;
   selectedDate: Date;
@@ -26,7 +28,11 @@ type MonthViewStyle = CSSProperties & {
   "--calendar-month-row-height": string;
 };
 
+
+
 const MONTH_ROW_HEIGHT_PER_EVENT_COUNT = 22;
+
+
 
 const getMonthRowHeight = (monthVisibleEventCount: number): number => {
   const normalizedEventCount = Number.isFinite(monthVisibleEventCount)
@@ -39,6 +45,8 @@ const getMonthRowHeight = (monthVisibleEventCount: number): number => {
 const createMonthViewStyle = (monthRowHeight: number): MonthViewStyle => ({
   "--calendar-month-row-height": `${monthRowHeight}px`,
 });
+
+
 
 const CalendarMonthView = ({
   currentDate,
@@ -93,5 +101,7 @@ const CalendarMonthView = ({
     </div>
   );
 };
+
+
 
 export { CalendarMonthView };

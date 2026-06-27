@@ -10,11 +10,7 @@ import { licenseClient, LicenseService } from '../../plugins/license/service';
 import { StripeWebhookController } from '../../plugins/payment/controller';
 import { SubscriptionCronJobs } from '../../plugins/payment/cron';
 import { PaymentEventHandlers } from '../../plugins/payment/event';
-import {
-  SubscriptionPlan,
-  SubscriptionRecurring,
-  SubscriptionVariant,
-} from '../../plugins/payment/types';
+import { SubscriptionPlan, SubscriptionRecurring, SubscriptionVariant, } from '../../plugins/payment/types';
 
 type Context = Record<string, never>;
 

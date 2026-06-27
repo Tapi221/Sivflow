@@ -14,71 +14,16 @@ import { QuotaService } from '../../core/quota';
 import { ContextCategories, DocRole, WorkspaceRole } from '../../models';
 import { CompatSubmissionStore } from '../../plugins/copilot/compat/submission-store';
 import { CopilotContextService } from '../../plugins/copilot/context';
-import {
-  CopilotEmbeddingJob,
-  MockEmbeddingClient,
-} from '../../plugins/copilot/embedding';
+import { CopilotEmbeddingJob, MockEmbeddingClient, } from '../../plugins/copilot/embedding';
 import { PromptService } from '../../plugins/copilot/prompt';
-import {
-  CopilotProviderFactory,
-  CopilotProviderType,
-  GeminiGenerativeProvider,
-  OpenAIProvider,
-} from '../../plugins/copilot/providers';
+import { CopilotProviderFactory, CopilotProviderType, GeminiGenerativeProvider, OpenAIProvider, } from '../../plugins/copilot/providers';
 import { CapabilityRuntime } from '../../plugins/copilot/runtime/capability-runtime';
 import { ChatSessionService } from '../../plugins/copilot/session';
 import { CopilotStorage } from '../../plugins/copilot/storage';
-import {
-  installMockCopilotRuntime,
-  MockCopilotProvider,
-  Mockers,
-} from '../mocks';
+import { installMockCopilotRuntime, MockCopilotProvider, Mockers, } from '../mocks';
 import { TestingPromptService } from '../mocks/prompt-service.mock';
-import {
-  acceptInviteById,
-  createTestingApp,
-  createWorkspace,
-  inviteUser,
-  smallestPng,
-  TestingApp,
-  TestUser,
-} from '../utils';
-import {
-  addContextCategory,
-  addContextDoc,
-  addContextFile,
-  array2sse,
-  chatWithActionStream,
-  chatWithImages,
-  chatWithStreamObject,
-  chatWithText,
-  chatWithTextStream,
-  cleanObject,
-  createCopilotContext,
-  createCopilotMessage,
-  createCopilotSession,
-  createDocCopilotSession,
-  createPinnedCopilotSession,
-  createWorkspaceCopilotSession,
-  forkCopilotSession,
-  getCopilotSession,
-  getDocSessions,
-  getHistories,
-  getPinnedSessions,
-  getTranscriptTask,
-  getWorkspaceSessions,
-  listContext,
-  listContextCategories,
-  listContextDocAndFiles,
-  matchFiles,
-  matchWorkspaceDocs,
-  settleTranscriptTask,
-  sse2array,
-  submitTranscriptTask,
-  textToEventStream,
-  unsplashSearch,
-  updateCopilotSession,
-} from '../utils/copilot';
+import { acceptInviteById, createTestingApp, createWorkspace, inviteUser, smallestPng, TestingApp, TestUser, } from '../utils';
+import { addContextCategory, addContextDoc, addContextFile, array2sse, chatWithActionStream, chatWithImages, chatWithStreamObject, chatWithText, chatWithTextStream, cleanObject, createCopilotContext, createCopilotMessage, createCopilotSession, createDocCopilotSession, createPinnedCopilotSession, createWorkspaceCopilotSession, forkCopilotSession, getCopilotSession, getDocSessions, getHistories, getPinnedSessions, getTranscriptTask, getWorkspaceSessions, listContext, listContextCategories, listContextDocAndFiles, matchFiles, matchWorkspaceDocs, settleTranscriptTask, sse2array, submitTranscriptTask, textToEventStream, unsplashSearch, updateCopilotSession, } from '../utils/copilot';
 
 const test = ava as TestFn<{
   auth: AuthService;

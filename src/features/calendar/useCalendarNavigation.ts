@@ -8,11 +8,17 @@ import { persistScheduleNavigationState, readStoredScheduleNavigationState } fro
 import type { CalendarViewMode, CalendarViewModeSelection } from "./scheduleScreen.types";
 import { createCalendarScrollBuffer } from "@/features/scroll/schedule/calendarScrollBuffer";
 
+
+
 type CalendarNavigationOptions = {
   allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay; };
 
+
+
 const MULTI_SELECT_VIEW_MODES = ["days", "timetable", "list", "pieChart"] as const satisfies readonly CalendarViewMode[];
 const MULTI_SELECT_VIEW_MODE_SET = new Set<CalendarViewMode>(MULTI_SELECT_VIEW_MODES);
+
+
 
 const isViewModeSelectionArray = (selection: CalendarViewModeSelection): selection is readonly CalendarViewMode[] => Array.isArray(selection);
 const isMultiSelectViewMode = (viewMode: CalendarViewMode): boolean => MULTI_SELECT_VIEW_MODE_SET.has(viewMode);
@@ -286,5 +292,7 @@ const useCalendarNavigation = ({ allowMultiSelectViewMode = true, weekStartDay =
     resetCalendarPosition,
   };
 };
+
+
 
 export { useCalendarNavigation };

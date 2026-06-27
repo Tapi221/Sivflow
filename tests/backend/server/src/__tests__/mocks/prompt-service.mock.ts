@@ -3,14 +3,10 @@ import { CopilotPromptInvalid } from '../../base';
 import { llmGetBuiltInPromptSpec, llmRenderBuiltInPrompt } from '../../native';
 import { PromptService } from '../../plugins/copilot/prompt';
 import type { Prompt } from '../../plugins/copilot/prompt/spec';
-import type {
-  PromptConfig,
-  PromptMessage,
-} from '../../plugins/copilot/providers/types';
+import type { PromptConfig, PromptMessage, } from '../../plugins/copilot/providers/types';
 
 @Injectable()
-export class TestingPromptService extends PromptService {
-  private readonly customPrompts = new Map<string, Prompt>();
+export class TestingPromptService extends PromptService { private readonly customPrompts = new Map<string, Prompt>();
   private readonly builtInPromptOverrides = new Map<string, Prompt>();
 
   reset() {

@@ -1,12 +1,7 @@
 import { Workspace } from '@prisma/client';
 import ava, { TestFn } from 'ava';
 import { AdminWorkspaceResolver } from '../../core/workspaces/resolvers/admin';
-import {
-  FeatureType,
-  UserModel,
-  WorkspaceFeatureModel,
-  WorkspaceModel,
-} from '../../models';
+import { FeatureType, UserModel, WorkspaceFeatureModel, WorkspaceModel, } from '../../models';
 import { createTestingModule } from '../utils';
 import type { TestingModule } from '../utils';
 

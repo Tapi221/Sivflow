@@ -14,6 +14,8 @@ import { createInitialMonthVisibleWeekRange } from "@/features/scroll/schedule/u
 import type { GCalWritableEventDeleteInput, GCalWritableEventInput, GCalWritableEventUpdateInput, GoogleCalendarEvent } from "@/integration/googlecalendar-integration/gcalSync.types";
 import { useCalendarEventSync } from "@/sync/googlecalendar-sync/useCalendarEventSync";
 
+
+
 type UseScheduleScreenOptions = {
   allowMultiSelectViewMode?: boolean; weekStartDay?: CalendarWeekStartDay; };
 type UseScheduleScreenReturn = {
@@ -78,6 +80,8 @@ type MonthRenderedRangeSnapshot = CalendarDateRange & {
   scrollTargetToken: number;
   weekStartDay: CalendarWeekStartDay;
 };
+
+
 
 const getGoogleCalendarEventDedupeKey = (event: GoogleCalendarEvent): string => event.id;
 const isSameCalendarDateRange = (left: CalendarDateRange | null, right: CalendarDateRange): boolean => left?.start.getTime() === right.start.getTime() && left.end.getTime() === right.end.getTime();
@@ -248,5 +252,9 @@ const useScheduleScreen = ({ allowMultiSelectViewMode = true, weekStartDay }: Us
   };
 };
 
+
+
 export { useScheduleScreen };
+
+
 export type { UseScheduleScreenReturn };

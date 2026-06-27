@@ -6,54 +6,26 @@ import type { TestFn } from 'ava';
 import ava from 'ava';
 import { nanoid } from 'nanoid';
 import Sinon from 'sinon';
-import {
-  EventBus,
-  JobQueue,
-  RequestMutex,
-  SpaceAccessDenied,
-} from '../../base';
+import { EventBus, JobQueue, RequestMutex, SpaceAccessDenied, } from '../../base';
 import { ConfigModule } from '../../base/config';
 import { AuthService } from '../../core/auth';
 import { QuotaModule } from '../../core/quota';
 import { QuotaStateService } from '../../core/quota/state';
 import { StorageModule, WorkspaceBlobStorage } from '../../core/storage';
-import {
-  ContextCategories,
-  CopilotSessionModel,
-  Models,
-  WorkspaceMemberStatus,
-  WorkspaceModel,
-  WorkspaceRole,
-} from '../../models';
+import { ContextCategories, CopilotSessionModel, Models, WorkspaceMemberStatus, WorkspaceModel, WorkspaceRole, } from '../../models';
 import { CopilotModule } from '../../plugins/copilot';
 import { CopilotContextService } from '../../plugins/copilot/context';
 import { CopilotContextResolver } from '../../plugins/copilot/context/resolver';
-import {
-  chatMessageFromTurn,
-  turnFromChatMessage,
-} from '../../plugins/copilot/core';
+import { chatMessageFromTurn, turnFromChatMessage, } from '../../plugins/copilot/core';
 import { CopilotCronJobs } from '../../plugins/copilot/cron';
-import {
-  CopilotEmbeddingClientService,
-  CopilotEmbeddingJob,
-  MockEmbeddingClient,
-} from '../../plugins/copilot/embedding';
+import { CopilotEmbeddingClientService, CopilotEmbeddingJob, MockEmbeddingClient, } from '../../plugins/copilot/embedding';
 import { PromptService } from '../../plugins/copilot/prompt';
-import {
-  CopilotProviderFactory,
-  CopilotProviderType,
-  ModelInputType,
-  ModelOutputType,
-  OpenAIProvider,
-} from '../../plugins/copilot/providers';
+import { CopilotProviderFactory, CopilotProviderType, ModelInputType, ModelOutputType, OpenAIProvider, } from '../../plugins/copilot/providers';
 import { TextStreamParser } from '../../plugins/copilot/providers/utils';
 import { CopilotResolver } from '../../plugins/copilot/resolver';
 import { ActionRuntimeBridge } from '../../plugins/copilot/runtime/action-runtime-bridge';
 import { CapabilityRuntime } from '../../plugins/copilot/runtime/capability-runtime';
-import {
-  parsePromptRenderContract,
-  parsePromptSessionContract,
-} from '../../plugins/copilot/runtime/contracts';
+import { parsePromptRenderContract, parsePromptSessionContract, } from '../../plugins/copilot/runtime/contracts';
 import { projectActionEventToChatEvent } from '../../plugins/copilot/runtime/hosts/action-stream-host';
 import { CapabilityPolicyHost } from '../../plugins/copilot/runtime/hosts/capability-policy-host';
 import { ConversationHost } from '../../plugins/copilot/runtime/hosts/conversation-host';

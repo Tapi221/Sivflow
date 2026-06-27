@@ -3,13 +3,7 @@ import test from 'ava';
 import Sinon from 'sinon';
 import { createTestingApp } from '../../../__tests__/utils';
 import { Public } from '../../../core/auth';
-import {
-  decodeWithJson,
-  paginate,
-  Paginated,
-  paginateWithCustomCursor,
-  PaginationInput,
-} from '../pagination';
+import { decodeWithJson, paginate, Paginated, paginateWithCustomCursor, PaginationInput, } from '../pagination';
 
 const TOTAL_COUNT = 105;
 const ITEMS = Array.from({ length: TOTAL_COUNT }, (_, i) => ({ id: i + 1 }));

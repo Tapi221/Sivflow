@@ -13,6 +13,8 @@ import type { StoredGoogleAccount } from "@/integration/googlecalendar-integrati
 import { readStoredAccounts } from "@/integration/googlecalendar-integration/gcal.multi-storage";
 import type { UserSettings } from "@/types";
 
+
+
 type SettingsSectionId = "account" | "preferences" | "study" | "editor" | "audio" | "ai" | "hotkey";
 type SettingsLanguage = UserSettings["language"];
 type BooleanSettingsKey = "notificationsEnabled" | "soundEnabled" | "showReviewHard" | "showReviewEasy" | "autoCarryOver" | "delayBonusEnabled" | "reviewStartNextDay" | "defaultPreviewEnabled" | "autoDraftEnabled" | "autoSaveEnabled" | "autoVoiceQuestion" | "autoVoiceAnswer";
@@ -69,6 +71,8 @@ type Copy = {
   weekStartOptions: Record<UserSettings["weekStartDay"], string>;
   questionDisplayOptions: Record<QuestionDisplayMode, string>;
 };
+
+
 
 const SETTINGS_SECTION_IDS: readonly SettingsSectionId[] = ["account", "preferences", "study", "editor", "audio", "ai", "hotkey"];
 const GOOGLE_PROVIDER_ID = "google.com";
@@ -190,6 +194,8 @@ const COPY: Record<SettingsLanguage, Copy> = {
   },
 };
 
+
+
 const toOptions = <T extends string | number,>(values: readonly T[], labels: Record<T, string>): SettingOption<T>[] => values.map((value) => ({ value, label: labels[value] }));
 const normalizeAccountEmail = (email: string | null | undefined): string | null => {
   const normalizedEmail = email?.trim().toLowerCase();
@@ -220,6 +226,8 @@ const getSectionIcon = (sectionId: SettingsSectionId): ReactNode => {
   if (sectionId === "ai") return <Brain className={ICON_CLASS_NAME} size={16} />;
   return <Keyboard className={ICON_CLASS_NAME} size={16} />;
 };
+
+
 
 const Section = ({ title, description, children }: { title: string; description: string; children: ReactNode }) => (
   <section className="w-full overflow-visible border-0 bg-white" aria-label={title}>
@@ -317,5 +325,7 @@ const SettingsWorkspaceRootScreen = () => {
     </div>
   );
 };
+
+
 
 export { SettingsWorkspaceRootScreen };

@@ -1,17 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import {
-  CommentChangeAction,
-  createCommentMutation,
-  createReplyMutation,
-  deleteCommentMutation,
-  deleteReplyMutation,
-  DocMode,
-  listCommentChangesQuery,
-  listCommentsQuery,
-  resolveCommentMutation,
-  updateCommentMutation,
-  updateReplyMutation,
-} from '@affine/graphql';
+import { CommentChangeAction, createCommentMutation, createReplyMutation, deleteCommentMutation, deleteReplyMutation, DocMode, listCommentChangesQuery, listCommentsQuery, resolveCommentMutation, updateCommentMutation, updateReplyMutation, } from '@affine/graphql';
 import { DocRole } from '../../../models';
 import { Mockers } from '../../mocks';
 import { app, e2e } from '../test';

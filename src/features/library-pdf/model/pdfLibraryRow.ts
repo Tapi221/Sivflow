@@ -1,11 +1,15 @@
 import type { DocumentItem, Folder } from "@/types";
 import { normalizeDate } from "@/utils/codec/date";
 
+
+
 type PdfDashboardRow = {
   id: string; title: string; fileName: string; folderId: string; categoryLabel: string; folderPathLabel: string; storagePathLabel: string; pageCount: number | null; currentPage: number | null; progressPercent: number | null; updatedAt: Date | null; lastViewedAt: Date | null; tags: string[]; orderIndex: number };
 type ViewerStateWithLastOpenedAt = NonNullable<DocumentItem["viewerState"]> & { lastOpenedAt?: unknown };
 type BuildPdfDashboardRowsParams = {
   documents: DocumentItem[]; folders: Folder[]; tagById: ReadonlyMap<string, { name: string }> };
+
+
 
 const toDate = (value: unknown): Date | null => normalizeDate(value);
 const resolveFolderName = (folder: Folder | undefined): string => folder?.folderName?.trim() ?? "未分類";
@@ -90,5 +94,9 @@ const buildPdfDashboardRows = ({ documents, folders, tagById }: BuildPdfDashboar
     });
 };
 
+
+
 export { buildPdfDashboardRows };
+
+
 export type { PdfDashboardRow };

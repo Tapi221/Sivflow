@@ -21,8 +21,7 @@ const addSampleNote = (doc: Store, noteId: string, i: number) => {
   );
 };
 
-export const addSampleNotes = (doc: Store, n: number) => {
-  const cols = Math.ceil(Math.sqrt(n));
+export const addSampleNotes = (doc: Store, n: number) => { const cols = Math.ceil(Math.sqrt(n));
   const NOTE_WIDTH = 500;
   const NOTE_HEIGHT = 250;
   const SPACING = 50;

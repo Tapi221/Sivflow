@@ -1,12 +1,7 @@
 import { Type } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
-export abstract class Mocker<In, Out> {
-  // NOTE(@forehalo):
-  //   The reason why we don't inject [Models] to Mocker for more easier data creation with built in logic is,
-  //   the method in [Models] may introduce side effects like 'events',
-  //   which may break the tests with event emitting asserts.
-  protected db!: PrismaClient;
+export abstract class Mocker<In, Out> { // NOTE(@forehalo): // The reason why we don't inject [Models] to Mocker for more easier data creation with built in logic is, // the method in [Models] may introduce side effects like 'events', // which may break the tests with event emitting asserts. protected db!: PrismaClient;
 
   abstract create(input?: Partial<In>): Promise<Out>;
 }
@@ -23,10 +18,7 @@ interface FactoryOptions {
   logger: ((val: any) => void) | boolean;
 }
 
-export const createFactory = (db: PrismaClient, opts: FactoryOptions = { logger: false }) => {
-  const log = (val: any) => {
-    if (typeof opts.logger === 'function') {
-      opts.logger(val);
+export const createFactory = (db: PrismaClient, opts: FactoryOptions = { logger: false }) => { const log = (val: any) => { if (typeof opts.logger === 'function') { opts.logger(val);
     } else if (opts.logger) {
       console.log(val);
     }

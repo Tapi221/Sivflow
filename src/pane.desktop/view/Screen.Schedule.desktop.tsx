@@ -33,6 +33,8 @@ import { CalendarSelectedViewsSplitView } from "@/pane.desktop/leftpane/schedule
 import { CalendarSidebar } from "@/pane.desktop/leftpane/schedule/CalendarSidebar";
 import { MobileCalendarEventComposer } from "./MobileCalendarEventComposer";
 
+
+
 type CalendarEventDisplayRange = {
   start: Date;
   end: Date;
@@ -46,6 +48,8 @@ type CalendarEventDisplayRangeOptions = {
   monthRenderedRange: CalendarDateRange;
   yearRenderedRange: CalendarDateRange | null;
 };
+
+
 
 const IOS_CALENDAR_MONTH_SURFACE_CLASS = "border-transparent";
 const IOS_CALENDAR_WEEKDAY_SURFACE_CLASS = "border-transparent shadow-none";
@@ -62,6 +66,8 @@ const LIST_AND_PIE_CHART_EVENT_BUFFER_DAYS = 45;
 const LIST_VISIBLE_MONTH_SYNC_DELAY_MS = 700;
 const LIST_SCROLL_IDLE_DELAY_MS = 180;
 const WEEKDAY_EVENT_BUFFER_DAYS = 1;
+
+
 
 const readStoredAllDayEventOrder = (): CalendarAllDayEventOrderMap => {
   if (typeof window === "undefined") return {};
@@ -111,6 +117,8 @@ const createInitialCalendarPrintRange = (date: Date): CalendarPrintRangeState =>
 const createInitialMonthVisibleEventCount = (): number => readStoredScheduleMonthVisibleEventCount() ?? DEFAULT_MONTH_VISIBLE_EVENT_COUNT;
 const createMonthStartDate = (date: Date): Date => startOfMonth(startOfDay(date));
 const getListVisibleMonthSyncKey = (date: Date): string => `${date.getFullYear()}-${date.getMonth()}`;
+
+
 
 const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose, contentToolbar = null }: ScheduleScreenProps) => {
   const pane = useScheduleScreen();
@@ -283,5 +291,7 @@ const ScheduleScreen = ({ isLeftPanelCollapsed = false, onClose: _onClose, conte
     </CarvePanelShell>
   );
 };
+
+
 
 export { ScheduleScreen };

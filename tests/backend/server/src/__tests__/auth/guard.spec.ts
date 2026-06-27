@@ -4,13 +4,7 @@ import ava, { TestFn } from 'ava';
 import Sinon from 'sinon';
 import request from 'supertest';
 import { CANARY_CLIENT_VERSION_MAX_AGE_DAYS, ConfigFactory } from '../../base';
-import {
-  AuthModule,
-  CurrentUser,
-  JwtSessionService,
-  Public,
-  Session,
-} from '../../core/auth';
+import { AuthModule, CurrentUser, JwtSessionService, Public, Session, } from '../../core/auth';
 import { AuthService } from '../../core/auth/service';
 import { Models } from '../../models';
 import { createTestingApp, TestingApp } from '../utils';

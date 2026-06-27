@@ -5,14 +5,20 @@ import { ProtectedRoute } from "@web/routing/ProtectedRoute";
 import Layout from "@/Layout";
 import { ScheduleRoute } from "@/routes/Schedule";
 
+
+
 const Materials = lazy(() => import("@/routes/Materials").then((module) => ({ default: module.Materials })));
 const Settings = lazy(() => import("@/routes/SettingScreen").then((module) => ({ default: module.SettingScreen })));
 const Trash = lazy(() => import("@web-renderer/routes/Trash").then((module) => ({ default: module.TrashPage })));
 const REDIRECT_TO_SCHEDULE_ROUTES = ["calendar/*", "CardEdit/*", "CardSetView/*", "CardView/*", "study/*", "library/*", "statistics/*"] as const;
 
+
+
 const withRouteFallback = (element: ReactNode) => {
   return <Suspense fallback={null}>{element}</Suspense>;
 };
+
+
 
 const DefaultRedirect = () => {
   return <Navigate to="/schedule" replace />;
@@ -32,5 +38,7 @@ const AppRoutes = () => {
     </Routes>
   );
 };
+
+
 
 export { AppRoutes };

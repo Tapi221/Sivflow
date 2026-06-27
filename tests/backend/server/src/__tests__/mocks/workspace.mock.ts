@@ -6,16 +6,13 @@ import { omit } from 'lodash-es';
 import { WorkspaceRole } from '../../models';
 import { Mocker } from './factory';
 
-export type MockWorkspaceInput = Prisma.WorkspaceCreateInput & {
-  owner?: { id: string };
+export type MockWorkspaceInput = Prisma.WorkspaceCreateInput & { owner?: { id: string };
   snapshot?: Uint8Array | true;
 };
 
 export type MockedWorkspace = Workspace;
 
-export class MockWorkspace extends Mocker<MockWorkspaceInput, MockedWorkspace> {
-  override async create(input?: Partial<MockWorkspaceInput>) {
-    const owner = input?.owner;
+export class MockWorkspace extends Mocker<MockWorkspaceInput, MockedWorkspace> { override async create(input?: Partial<MockWorkspaceInput>) { const owner = input?.owner;
     if (input?.snapshot === true) {
       const snapshot = await readFile(
         path.join(
