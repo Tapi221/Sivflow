@@ -14,11 +14,16 @@ const backendProxyTarget =
   process.env.SIVFLOW_BACKEND_URL ??
   process.env.AFFINE_BACKEND_URL ??
   'http://127.0.0.1:3010';
+const backendEnabled =
+  process.env.SIVFLOW_ENABLE_BACKEND === 'true' ||
+  process.env.AFFINE_ENABLE_BACKEND === 'true' ||
+  Boolean(process.env.SIVFLOW_BACKEND_URL || process.env.AFFINE_BACKEND_URL);
 
 const buildConfig = {
   SENTRY_DSN: '',
   appBuildType: 'local',
   appVersion: '0.26.3',
+  backendEnabled,
   debug: true,
   distribution: 'web',
   editorVersion: '0.26.3',
@@ -74,6 +79,33 @@ const normalizeVanillaExtractFsVirtualCssPlugin = {
   },
 };
 
+const backendProxy = backendEnabled
+  ? {
+      '/api': {
+        target: backendProxyTarget,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/graphql': {
+        target: backendProxyTarget,
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+      },
+      '/oauth': {
+        target: backendProxyTarget,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/socket.io': {
+        target: backendProxyTarget,
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+      },
+    }
+  : undefined;
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
@@ -107,30 +139,7 @@ export default defineConfig({
       clientPort: devServerPort,
       protocol: 'ws',
     },
-    proxy: {
-      '/api': {
-        target: backendProxyTarget,
-        changeOrigin: true,
-        secure: false,
-      },
-      '/graphql': {
-        target: backendProxyTarget,
-        changeOrigin: true,
-        secure: false,
-        ws: true,
-      },
-      '/oauth': {
-        target: backendProxyTarget,
-        changeOrigin: true,
-        secure: false,
-      },
-      '/socket.io': {
-        target: backendProxyTarget,
-        changeOrigin: true,
-        secure: false,
-        ws: true,
-      },
-    },
+    proxy: backendProxy,
   },
   worker: {
     format: 'es',
