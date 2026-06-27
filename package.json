@@ -18,7 +18,7 @@
   "scripts": {
     "npmize": "node scripts/npmize-workspace-protocols.mjs",
     "lint": "npm run typecheck",
-    "typecheck": "tsc --project packages/frontend/apps/web/tsconfig.json --pretty false",
+    "typecheck": "tsc --build packages/frontend/apps/web/tsconfig.json --pretty false",
     "db:up": "docker compose -f docker-compose.postgres.yml up -d",
     "db:down": "docker compose -f docker-compose.postgres.yml down",
     "db:reset": "docker compose -f docker-compose.postgres.yml down -v && docker compose -f docker-compose.postgres.yml up -d",
