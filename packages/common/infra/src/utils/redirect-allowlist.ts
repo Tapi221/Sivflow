@@ -17,7 +17,7 @@ function normalizeHostname(hostname: string) {
 }
 
 function hostnameMatchesDomain(hostname: string, domain: string) {
-  return hostname === domain || hostname.endsWith(`.${domain}`);
+  return hostname === domain;
 }
 
 export function isAllowedRedirectTarget(
