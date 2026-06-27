@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import react from '@vitejs/plugin-react';
+import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import { defineConfig } from 'vite';
 
 dns.setDefaultResultOrder('verbatim');
@@ -59,7 +60,7 @@ export default defineConfig({
   esbuild: {
     target: rollupCompatibleTarget,
   },
-  plugins: [stripPrivateAccessorPlugin, react()],
+  plugins: [stripPrivateAccessorPlugin, vanillaExtractPlugin(), react()],
   resolve: {
     alias: {
       '@affine/core': path.resolve(__dirname, '../../core/src'),
