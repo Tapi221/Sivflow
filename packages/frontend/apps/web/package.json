@@ -5,6 +5,8 @@
   "private": true,
   "browser": "src/index.tsx",
   "scripts": {
+    "prebuild": "npm --workspace @affine/templates run build",
+    "predev": "npm --workspace @affine/templates run build",
     "build": "vite build",
     "dev": "vite"
   },
