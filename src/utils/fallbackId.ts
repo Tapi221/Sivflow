@@ -1,6 +1,4 @@
-import { asRecord } from "./records";
-
-
+import { asRecord } from "@/utils/records";
 
 const makeFallbackId = () => {
   try {
@@ -14,7 +12,5 @@ const makeFallbackId = () => {
   }
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 };
-
-
 
 export { makeFallbackId };
