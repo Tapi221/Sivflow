@@ -8,8 +8,26 @@ import { Redis as IORedis, RedisOptions } from 'ioredis';
 
 import { Config } from '../config';
 
+const REDIS_MAX_DB_INDEX = 15;
+
+function assertValidDBIndex(db = 0) {
+  if (!Number.isInteger(db) || db < 0 || db > REDIS_MAX_DB_INDEX) {
+    throw new Error(
+      // Redis は既定で [0..16) を許可します。
+      // 用途ごとに `config.redis.db + [0..4]` で db を分けるため、
+      // 実際に接続する db index が Redis 既定上限を超えないことを検証します。
+      `database index が不正です: ${db}。0 から ${REDIS_MAX_DB_INDEX} の間にしてください`
+    );
+  }
+}
+
 class Redis extends IORedis implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(this.constructor.name);
+
+  constructor(options: RedisOptions) {
+    assertValidDBIndex(options.db);
+    super(options);
+  }
 
   errorHandler = (err: Error) => {
     this.logger.error(err);
@@ -31,16 +49,6 @@ class Redis extends IORedis implements OnModuleInit, OnModuleDestroy {
     const client = super.duplicate(override);
     client.on('error', this.errorHandler);
     return client;
-  }
-
-  assertValidDBIndex(db: number) {
-    if (db && db > 15) {
-      throw new Error(
-        // Redis は既定で [0..16) を許可します。
-        // 用途ごとに `this.options.db + [0..4]` で db を分けます。
-        `database index が不正です: ${db}。0 から 11 の間にしてください`
-      );
-    }
   }
 }
 
