@@ -32,14 +32,14 @@ function prepare() {
   for (const { to, generator } of files) {
     const targetFilePath = path.join(SELF_HOST_CONFIG_DIR, to);
     if (!fs.existsSync(targetFilePath)) {
-      console.log(`creating config file [${targetFilePath}].`);
+      console.log(`設定ファイルを作成しています [${targetFilePath}]。`);
       fs.writeFileSync(targetFilePath, generator(), 'utf-8');
     }
   }
 }
 
 function runPrismaMigrations() {
-  console.log('running prisma migrations.');
+  console.log('Prisma マイグレーションを実行しています。');
   execSync('yarn prisma migrate deploy', {
     encoding: 'utf-8',
     env: process.env,
@@ -48,7 +48,7 @@ function runPrismaMigrations() {
 }
 
 function repairPgvectorEmbeddingTables() {
-  console.log('repairing copilot pgvector embedding tables.');
+  console.log('copilot pgvector embedding tables を修復しています。');
   const sql = fs.readFileSync(
     path.join(import.meta.dirname, 'repair-pgvector-embedding-tables.sql'),
     'utf-8'
@@ -62,7 +62,7 @@ function repairPgvectorEmbeddingTables() {
 }
 
 function runDataMigrations() {
-  console.log('running data migrations.');
+  console.log('データマイグレーションを実行しています。');
   execSync('yarn cli run', {
     encoding: 'utf-8',
     env: process.env,
@@ -71,7 +71,7 @@ function runDataMigrations() {
 }
 
 function fixFailedMigrations() {
-  console.log('fixing failed migrations.');
+  console.log('失敗したマイグレーションを修正しています。');
   const maybeFailedMigrations = [
     '20250521083048_fix_workspace_embedding_chunk_primary_key',
   ];
@@ -82,7 +82,7 @@ function fixFailedMigrations() {
         env: process.env,
         stdio: 'pipe',
       });
-      console.log(`migration [${migration}] has been rolled back.`);
+      console.log(`マイグレーション [${migration}] を rolled back として解決しました。`);
     } catch (err) {
       if (
         err.message.includes(
@@ -100,7 +100,7 @@ function fixFailedMigrations() {
       }
       // ignore other errors
       console.log(
-        `migration [${migration}] rolled back failed. ${err.message}`
+        `マイグレーション [${migration}] の rolled back 解決に失敗しました。${err.message}`
       );
     }
   }
