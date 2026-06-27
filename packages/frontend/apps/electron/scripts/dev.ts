@@ -12,8 +12,11 @@ import { config, electronDir, rootDir } from './common';
 // this means we don't spawn electron windows, mainly for testing
 const watchMode = process.argv.includes('--watch');
 const rendererDevWorkspace =
-  process.env.ELECTRON_RENDERER_DEV_WORKSPACE ?? '@affine/electron-renderer';
+  process.env.ELECTRON_RENDERER_DEV_WORKSPACE ?? '@affine/web';
 const rendererDevScript = process.env.ELECTRON_RENDERER_DEV_SCRIPT ?? 'dev';
+const rendererLogPrefix =
+  process.env.ELECTRON_RENDERER_LOG_PREFIX ??
+  (rendererDevWorkspace === '@affine/web' ? '[web]' : '[renderer]');
 
 /** Messages on stderr that match any of the contained patterns will be stripped from output */
 const stderrFilterPatterns = [
@@ -182,7 +185,7 @@ function spawnWebDevServer() {
   );
   webDevProcess = currentWebDevProcess;
 
-  pipeProcessOutput(currentWebDevProcess, { prefix: '[renderer]' });
+  pipeProcessOutput(currentWebDevProcess, { prefix: rendererLogPrefix });
 
   currentWebDevProcess.on('exit', code => {
     if (webDevProcess === currentWebDevProcess) {
@@ -190,7 +193,7 @@ function spawnWebDevServer() {
     }
 
     if (!intentionalStops.has(currentWebDevProcess) && code && code !== 0) {
-      console.log(`Electron Renderer 開発サーバーはコード ${code} で終了しました`);
+      console.log(`Web 開発サーバーはコード ${code} で終了しました`);
     }
   });
 }
@@ -202,7 +205,7 @@ async function ensureDevServer() {
   }
 
   console.log(
-    `Electron Renderer 開発サーバーが見つからないため ${devServerBase} を起動しています...`
+    `Web 開発サーバーが見つからないため ${devServerBase} を起動しています...`
   );
   spawnWebDevServer();
 
@@ -211,7 +214,7 @@ async function ensureDevServer() {
 
   while (Date.now() - startedAt < timeoutMs) {
     if (await isDevServerReachable(devServerBase)) {
-      console.log(`Electron Renderer 開発サーバーに接続しました: ${devServerBase}`);
+      console.log(`Web 開発サーバーに接続しました: ${devServerBase}`);
       return;
     }
 
@@ -219,7 +222,7 @@ async function ensureDevServer() {
   }
 
   throw new Error(
-    `Electron Renderer 開発サーバー ${devServerBase} に接続できませんでした。` +
+    `Web 開発サーバー ${devServerBase} に接続できませんでした。` +
       `別ターミナルで npm --workspace ${rendererDevWorkspace} run ${rendererDevScript} を起動してから再実行してください。`
   );
 }
