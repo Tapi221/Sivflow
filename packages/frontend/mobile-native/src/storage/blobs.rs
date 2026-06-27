@@ -5,10 +5,9 @@ impl DocStoragePool {
   pub async fn get_blob(&self, universal_id: String, key: String) -> Result<Option<Blob>> {
     #[cfg(any(target_os = "android", target_os = "ios", test))]
     {
-      use affine_nbstore::Blob as NbBlob;
       enum BlobEncodeOutcome {
         Cached(Blob),
-        Inline(NbBlob),
+        Inline,
       }
 
       let universal_id_for_cache = universal_id.clone();
@@ -37,14 +36,20 @@ impl DocStoragePool {
         return Ok(Some(blob.into()));
       }
 
+      let inline_blob = Blob {
+        key: blob.key.clone(),
+        data: encode_base64_data(&blob.data),
+        mime: blob.mime.clone(),
+        size: blob.size,
+        created_at: blob.created_at.and_utc().timestamp_millis(),
+      };
       let universal_id_for_cache = universal_id.clone();
-      let key_for_fallback = key.clone();
       return match self
         .run_mobile_cache_io(
           move |cache| {
             Ok(match cache.cache_blob(&universal_id_for_cache, &blob) {
               Ok(cached) => BlobEncodeOutcome::Cached(cached),
-              Err(_) => BlobEncodeOutcome::Inline(blob),
+              Err(_) => BlobEncodeOutcome::Inline,
             })
           },
           "Failed to cache blob file",
@@ -52,16 +57,7 @@ impl DocStoragePool {
         .await
       {
         Ok(BlobEncodeOutcome::Cached(cached)) => Ok(Some(cached)),
-        Ok(BlobEncodeOutcome::Inline(blob)) => Ok(Some(blob.into())),
-        Err(_) => Ok(
-          self
-            .inner
-            .get(universal_id)
-            .await?
-            .get_blob(key_for_fallback)
-            .await?
-            .map(Into::into),
-        ),
+        Ok(BlobEncodeOutcome::Inline) | Err(_) => Ok(Some(inline_blob)),
       };
     }
 
@@ -73,7 +69,7 @@ impl DocStoragePool {
 
   pub async fn set_blob(&self, universal_id: String, blob: SetBlob) -> Result<()> {
     #[cfg(any(target_os = "android", target_os = "ios", test))]
-    let key = blob.key.clone();
+    let key_for_cache = blob.key.clone();
     let blob = NbSetBlob {
       key: blob.key,
       data: Into::<Data>::into(self.decode_blob_data(&universal_id, &blob.data).await?),
@@ -86,7 +82,7 @@ impl DocStoragePool {
       let _ = self
         .run_mobile_cache_io(
           move |cache| {
-            cache.invalidate_blob(&universal_id_for_cache, &key);
+            cache.invalidate_blob(&universal_id_for_cache, &key_for_cache);
             Ok(())
           },
           "Failed to invalidate mobile blob cache entry",
