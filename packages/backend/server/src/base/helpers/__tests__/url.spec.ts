@@ -123,6 +123,8 @@ test('can validate callbackUrl allowlist', t => {
 test('can validate redirect_uri allowlist', t => {
   t.true(t.context.url.isAllowedRedirectUri('/redirect-proxy'));
   t.true(t.context.url.isAllowedRedirectUri('https://github.com'));
+  t.true(t.context.url.isAllowedRedirectUri('https://accounts.google.com'));
+  t.false(t.context.url.isAllowedRedirectUri('https://evil.github.com'));
   t.false(t.context.url.isAllowedRedirectUri('javascript:alert(1)'));
   t.false(t.context.url.isAllowedRedirectUri('https://evilgithub.com'));
 });
