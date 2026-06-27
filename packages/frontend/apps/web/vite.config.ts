@@ -1,8 +1,14 @@
+import dns from 'node:dns';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+
+dns.setDefaultResultOrder('verbatim');
+
+const devServerPort = 8080;
+const devServerHost = 'localhost';
 
 const buildConfig = {
   SENTRY_DSN: '',
@@ -57,8 +63,14 @@ export default defineConfig({
     },
   },
   server: {
-    host: '0.0.0.0',
-    port: 8080,
+    host: devServerHost,
+    port: devServerPort,
+    strictPort: true,
+    hmr: {
+      host: devServerHost,
+      clientPort: devServerPort,
+      protocol: 'ws',
+    },
   },
   worker: {
     // nbstore.worker は SharedWorker/Worker ともに module として起動しているため、
