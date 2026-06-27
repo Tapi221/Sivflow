@@ -91,6 +91,15 @@ const editorElements = {
   'transcription-block': LitTranscriptionBlock,
 } satisfies Record<EditorEffectElementTag, CustomElementConstructor>;
 
+function defineEditorElement(
+  tagName: EditorEffectElementTag,
+  elementClass: CustomElementConstructor
+) {
+  if (!customElements.get(tagName)) {
+    customElements.define(tagName, elementClass);
+  }
+}
+
 export function registerAIEditorEffects() {
   const registry = customElements;
   if (editorRegistries.has(registry)) return;
@@ -100,6 +109,6 @@ export function registerAIEditorEffects() {
   componentAiItemEffects();
 
   for (const tag of editorEffectElementTags) {
-    customElements.define(tag, editorElements[tag]);
+    defineEditorElement(tag, editorElements[tag]);
   }
 }
