@@ -100,7 +100,7 @@ const writeStore = (store: CardSetViewNavigationPreferencesStore) => {
     window.localStorage.setItem(CARD_SET_VIEW_NAVIGATION_PREFERENCES_STORAGE_KEY, JSON.stringify(store));
     window.localStorage.removeItem(LEGACY_CARD_SET_VIEW_NAVIGATION_PREFERENCES_STORAGE_KEY);
   } catch {
-    // ignore local persistence failures
+    // ローカル保存の失敗は無視します。
   }
 };
 const getCardSetViewNavigationPreference = (scope: CardSetViewNavigationPreferenceScope) => {
