@@ -108,41 +108,71 @@ export class Menu {
   }
 
   focusNext() {
-    if (!this._currentFocused$.value) {
-      const ele = this.menuElement.getFirstFocusableElement();
-      if (ele instanceof MenuFocusable) {
-        ele.focus();
-      }
-      return;
-    }
     const list = this.menuElement
       .getFocusableElements()
       .filter(ele => ele instanceof MenuFocusable);
+
+    if (!this._currentFocused$.value) {
+      list[0]?.focus();
+      return;
+    }
+
     const index = list.indexOf(this._currentFocused$.value);
     list[index + 1]?.focus();
   }
 
+  focusPrev() {
+    this.focusPrevious();
+  }
+
   focusPrevious() {
-    if (!this._currentFocused$.value) {
-      const ele = this.menuElement.getLastFocusableElement();
-      if (ele instanceof MenuFocusable) {
-        ele.focus();
-      }
-      return;
-    }
     const list = this.menuElement
       .getFocusableElements()
       .filter(ele => ele instanceof MenuFocusable);
+
+    if (!this._currentFocused$.value) {
+      list.at(-1)?.focus();
+      return;
+    }
+
     const index = list.indexOf(this._currentFocused$.value);
     list[index - 1]?.focus();
+  }
+
+  focusTo(focused?: MenuFocusable) {
+    this.menuElement.focusTo(focused);
+  }
+
+  openSubMenu(menu: Menu) {
+    if (this._subMenu$.value === menu) {
+      return;
+    }
+    this.closeSubMenu();
+    this.setSubMenu(menu);
+  }
+
+  pressEnter() {
+    this._currentFocused$.value?.onPressEnter();
   }
 
   renderItems(items = this.options.items) {
     return items.map((item, index) => item(this, index)).filter(Boolean);
   }
 
+  search(name: string) {
+    const keyword = this.searchName$.value.trim().toLowerCase();
+    if (!keyword) {
+      return true;
+    }
+    return name.toLowerCase().includes(keyword);
+  }
+
   setCurrentFocused(focused?: MenuFocusable) {
     this._currentFocused$.value = focused;
+  }
+
+  setFocusOnly(focused?: MenuFocusable) {
+    this.setCurrentFocused(focused);
   }
 
   setSubMenu(menu?: Menu) {
