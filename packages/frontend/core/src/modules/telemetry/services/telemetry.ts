@@ -11,6 +11,41 @@ import { ApplicationStarted } from '../../lifecycle';
 
 const logger = new DebugLogger('telemetry-service');
 
+type TrackTelemetryChannel = NonNullable<
+  Parameters<typeof setTelemetryContext>[0]['channel']
+>;
+
+type GlobalWithBuildConfig = typeof globalThis & {
+  BUILD_CONFIG?: Partial<BUILD_CONFIG_TYPE>;
+};
+
+const trackTelemetryChannels = new Set<TrackTelemetryChannel>([
+  'stable',
+  'beta',
+  'internal',
+  'canary',
+]);
+
+function readGlobalBuildConfig(): Partial<BUILD_CONFIG_TYPE> | undefined {
+  try {
+    if (typeof BUILD_CONFIG !== 'undefined') {
+      return BUILD_CONFIG;
+    }
+  } catch {
+    // BUILD_CONFIG が未注入の環境では globalThis 側の確認に進む
+  }
+
+  return (globalThis as GlobalWithBuildConfig).BUILD_CONFIG;
+}
+
+function resolveTelemetryChannel(): TrackTelemetryChannel {
+  const channel = readGlobalBuildConfig()?.appBuildType;
+
+  return trackTelemetryChannels.has(channel as TrackTelemetryChannel)
+    ? (channel as TrackTelemetryChannel)
+    : 'stable';
+}
+
 @OnEvent(ApplicationStarted, e => e.onApplicationStart)
 export class TelemetryService extends Service {
   private readonly disposableFns: (() => void)[] = [];
@@ -50,13 +85,7 @@ export class TelemetryService extends Service {
     let prevSelfHosted: boolean | undefined = undefined;
     const unsubscribe = this.currentAccount$.subscribe(
       ({ account, selfHosted }) => {
-        const channel =
-          BUILD_CONFIG.appBuildType === 'beta' ||
-          BUILD_CONFIG.appBuildType === 'internal' ||
-          BUILD_CONFIG.appBuildType === 'canary' ||
-          BUILD_CONFIG.appBuildType === 'stable'
-            ? BUILD_CONFIG.appBuildType
-            : 'stable';
+        const channel = resolveTelemetryChannel();
 
         setTelemetryContext({
           isAuthed: !!account,
