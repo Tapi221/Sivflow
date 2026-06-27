@@ -171,5 +171,5 @@ const updateFile = (filePath) => {
 const updatedFiles = getTargetFilePaths().filter(updateFile);
 
 if (updatedFiles.length > 0) {
-  console.log(`既知 lint エラーの自動修正を ${updatedFiles.length} file(s) 適用しました。`);
+  console.log(`既知 lint エラーの自動修正を ${updatedFiles.length} 件のファイルに適用しました。`);
 }
