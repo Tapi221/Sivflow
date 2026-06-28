@@ -3,7 +3,9 @@ import path from 'node:path';
 
 import * as esbuild from 'esbuild';
 
-import { config, mode, rootDir } from './common';
+process.env.NODE_ENV ??= 'production';
+
+const { config, mode, rootDir } = await import('./common');
 
 async function buildLayers() {
   const common = config();
