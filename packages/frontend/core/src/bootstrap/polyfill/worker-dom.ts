@@ -30,6 +30,9 @@ type WorkerDomNode = {
   parentNode: WorkerDomNode | null;
 };
 
+const hasOwn = (target: object, key: string) =>
+  Object.prototype.hasOwnProperty.call(target, key);
+
 const detachFromParent = (item: WorkerDomNode) => {
   item.parentNode?.removeChild?.(item);
 };
@@ -90,7 +93,8 @@ const createNode = (nodeType = 1, nodeName = ''): WorkerDomNode => {
       clone.innerHTML = node.innerHTML;
 
       if (node.content) {
-        clone.content = node.content.cloneNode?.(true) ?? createDocumentFragment();
+        clone.content =
+          node.content.cloneNode?.(true) ?? createDocumentFragment();
       }
 
       if (copyChildren) {
@@ -107,10 +111,10 @@ const createNode = (nodeType = 1, nodeName = ''): WorkerDomNode => {
       return true;
     },
     getAttribute(name: string) {
-      return Object.hasOwn(node.attributes, name) ? node.attributes[name] : null;
+      return hasOwn(node.attributes, name) ? node.attributes[name] : null;
     },
     hasAttribute(name: string) {
-      return Object.hasOwn(node.attributes, name);
+      return hasOwn(node.attributes, name);
     },
     insertBefore(item: WorkerDomNode, referenceNode?: WorkerDomNode | null) {
       detachFromParent(item);
@@ -198,16 +202,21 @@ ensureDocumentMethod(treeWalkerMethod, (root: WorkerDomNode) => {
   };
   collect(root);
 
-  return {
+  const walker: {
+    currentNode: WorkerDomNode | null;
+    nextNode(): WorkerDomNode | null;
+  } = {
     currentNode: root,
     nextNode() {
       const next = nodes.shift() ?? null;
       if (next) {
-        this.currentNode = next;
+        walker.currentNode = next;
       }
       return next;
     },
   };
+
+  return walker;
 });
 ensureDocumentMethod('importNode', (node: WorkerDomNode) =>
   typeof node?.cloneNode === 'function' ? node.cloneNode(true) : node
