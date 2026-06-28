@@ -10,6 +10,7 @@ import { GraphQLJSONObject } from 'graphql-scalars';
 
 import { Paginated } from '../../base';
 import {
+  CommentNotificationBody,
   DocMode,
   InvitationNotificationBody,
   MentionDoc,
@@ -100,6 +101,26 @@ export class MentionNotificationBodyType extends BaseNotificationBodyType {
 }
 
 @ObjectType()
+export class CommentNotificationBodyType
+  extends BaseNotificationBodyType
+  implements Partial<CommentNotificationBody>
+{
+  @Field(() => ID)
+  commentId!: string;
+
+  @Field(() => ID, {
+    nullable: true,
+  })
+  replyId?: string;
+
+  @Field(() => MentionDocType)
+  doc!: MentionDocType;
+}
+
+@ObjectType()
+export class CommentMentionNotificationBodyType extends CommentNotificationBodyType {}
+
+@ObjectType()
 export abstract class InvitationBaseNotificationBodyType extends BaseNotificationBodyType {
   @Field(() => ID)
   inviteId!: string;
@@ -121,6 +142,11 @@ export class InvitationBlockedNotificationBodyType
   implements Partial<InvitationNotificationBody> {}
 
 @ObjectType()
+export class InvitationRejectedNotificationBodyType
+  extends InvitationBaseNotificationBodyType
+  implements Partial<InvitationNotificationBody> {}
+
+@ObjectType()
 export class InvitationReviewRequestNotificationBodyType
   extends InvitationBaseNotificationBodyType
   implements Partial<InvitationNotificationBody> {}
@@ -138,9 +164,12 @@ export const UnionNotificationBodyType = createUnionType({
   types: () =>
     [
       MentionNotificationBodyType,
+      CommentNotificationBodyType,
+      CommentMentionNotificationBodyType,
       InvitationNotificationBodyType,
       InvitationAcceptedNotificationBodyType,
       InvitationBlockedNotificationBodyType,
+      InvitationRejectedNotificationBodyType,
       InvitationReviewRequestNotificationBodyType,
       InvitationReviewApprovedNotificationBodyType,
       InvitationReviewDeclinedNotificationBodyType,
