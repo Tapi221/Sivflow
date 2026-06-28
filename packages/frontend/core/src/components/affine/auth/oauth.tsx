@@ -25,7 +25,7 @@ function notifyOAuthError(error: unknown) {
 
   if (code === 'auth/unauthorized-domain') {
     notify.error({
-      title: 'Firebase Auth domain is not allowed',
+      title: 'Firebase Auth のドメインが許可されていません',
       message:
         'Firebase Console の Authentication > Settings > Authorized domains に localhost または 127.0.0.1 を追加してください。',
     });
@@ -34,7 +34,7 @@ function notifyOAuthError(error: unknown) {
 
   if (code === 'auth/operation-not-allowed') {
     notify.error({
-      title: 'Google sign-in is disabled',
+      title: 'Googleログインが無効です',
       message:
         'Firebase Console の Authentication > Sign-in method で Google を有効にしてください。',
     });
@@ -43,9 +43,9 @@ function notifyOAuthError(error: unknown) {
 
   if (code === 'auth/popup-closed-by-user') {
     notify.error({
-      title: 'Google sign-in was closed',
+      title: 'Googleログインが閉じられました',
       message:
-        'Google ログイン画面が閉じられました。もう一度開いて最後まで進めてください。',
+        'Googleログイン画面が閉じられました。もう一度開いて最後まで進めてください。',
     });
     return;
   }
@@ -55,9 +55,9 @@ function notifyOAuthError(error: unknown) {
     error.message.includes('Firebase Auth config is missing')
   ) {
     notify.error({
-      title: 'Google login is not configured',
+      title: 'Googleログインが設定されていません',
       message:
-        'Set BUILD_CONFIG.firebaseAuth or VITE_FIREBASE_* env vars before using Google sign-in.',
+        'BUILD_CONFIG.firebaseAuth または VITE_FIREBASE_* の環境変数を設定してください。',
     });
     return;
   }
@@ -119,7 +119,7 @@ function FirebaseGoogleProvider({ onContinue }: { onContinue: () => void }) {
       prefix={<GoogleIcon />}
       onClick={onClick}
     >
-      Continue with Google
+      Googleで続行
     </Button>
   );
 }
