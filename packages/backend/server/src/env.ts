@@ -80,20 +80,22 @@ globalThis.readEnv = function readEnv<T>(
   return value as T;
 };
 
+function readNodeEnv() {
+  return (process.env.NODE_ENV ?? NodeEnv.Production) as NodeEnv;
+}
+
+function getDefaultDeploymentType(nodeEnv: NodeEnv) {
+  return nodeEnv === NodeEnv.Development
+    ? DeploymentType.Affine
+    : DeploymentType.Selfhosted;
+}
+
 export class Env implements AppEnv {
-  NODE_ENV = (process.env.NODE_ENV ?? NodeEnv.Production) as NodeEnv;
-  NAMESPACE = readEnv(
-    'AFFINE_ENV',
-    Namespace.Production,
-    Object.values(Namespace)
-  );
-  DEPLOYMENT_TYPE = readEnv(
-    'DEPLOYMENT_TYPE',
-    this.dev ? DeploymentType.Affine : DeploymentType.Selfhosted,
-    Object.values(DeploymentType)
-  );
-  FLAVOR = readEnv('SERVER_FLAVOR', Flavor.AllInOne, Object.values(Flavor));
-  platform = readEnv('DEPLOYMENT_PLATFORM', Platform.Unknown);
+  NODE_ENV: NodeEnv;
+  NAMESPACE: Namespace;
+  DEPLOYMENT_TYPE: DeploymentType;
+  FLAVOR: Flavor;
+  platform: Platform;
   version = pkg.version;
   projectRoot = resolve(fileURLToPath(import.meta.url), '../../');
 
@@ -142,11 +144,25 @@ export class Env implements AppEnv {
   }
 
   constructor() {
+    this.NODE_ENV = readNodeEnv();
     if (!Object.values(NodeEnv).includes(this.NODE_ENV)) {
       throw new Error(
         `Invalid NODE_ENV environment. \`${this.NODE_ENV}\` is not a valid NODE_ENV value.`
       );
     }
+
+    this.NAMESPACE = readEnv(
+      'AFFINE_ENV',
+      Namespace.Production,
+      Object.values(Namespace)
+    );
+    this.DEPLOYMENT_TYPE = readEnv(
+      'DEPLOYMENT_TYPE',
+      getDefaultDeploymentType(this.NODE_ENV),
+      Object.values(DeploymentType)
+    );
+    this.FLAVOR = readEnv('SERVER_FLAVOR', Flavor.AllInOne, Object.values(Flavor));
+    this.platform = readEnv('DEPLOYMENT_PLATFORM', Platform.Unknown);
   }
 }
 
