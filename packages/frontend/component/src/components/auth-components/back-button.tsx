@@ -7,6 +7,7 @@ import { Button } from '../../ui/button';
 
 export const BackButton: FC<ButtonProps> = props => {
   const t = useI18n();
+  const label = t['com.affine.backButton']();
   return (
     <Button
       variant="plain"
@@ -16,7 +17,7 @@ export const BackButton: FC<ButtonProps> = props => {
       prefix={<ArrowLeftSmallIcon />}
       {...props}
     >
-      {'戻る' || t['com.affine.backButton']()}
+      {label === 'Back' ? '戻る' : label}
     </Button>
   );
 };
