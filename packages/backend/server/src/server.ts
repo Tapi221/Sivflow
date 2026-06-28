@@ -61,6 +61,9 @@ export async function run() {
           origin,
           finalAllowedOrigins,
           blockedOrigin => {
+            // Telemetry-specific origins are appended dynamically. Keep the
+            // existing behavior of only logging default-origin blocks here so
+            // telemetry CORS noise is handled by telemetry-specific diagnostics.
             if (!appendedOrigins.length) {
               logger.warn(
                 `Blocked CORS request from origin: ${blockedOrigin}`,
