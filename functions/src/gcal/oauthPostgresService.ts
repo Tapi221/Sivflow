@@ -5,8 +5,6 @@ import { cacheGoogleProfileImageUrl } from "#src/gcal/profileImageCache.js";
 import { classifyGoogleTokenEndpointFailure } from "#src/gcal/tokenErrors.js";
 import type { GoogleOAuthServerErrorReason } from "#src/gcal/tokenErrors.js";
 
-
-
 type StoredGoogleCalendarAccount = {
   email: string;
   name: string | null;
@@ -35,8 +33,6 @@ type GoogleCalendarAccessResponse = {
   refreshTokenStored: true;
 };
 
-
-
 const GOOGLE_TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 const GOOGLE_TOKENINFO_ENDPOINT = "https://oauth2.googleapis.com/tokeninfo";
 const GOOGLE_USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo";
@@ -47,8 +43,6 @@ const REQUIRED_GOOGLE_SCOPES = [
   "https://www.googleapis.com/auth/tasks",
   "https://www.googleapis.com/auth/drive.file",
 ] as const;
-
-
 
 const getStringValue = (value: unknown): string => (typeof value === "string" ? value.trim() : "");
 const getErrorSummary = (error: unknown): Record<string, unknown> => {
@@ -400,9 +394,6 @@ const refreshGoogleCalendarAccessTokenForUser = async (
   return toAccessResponse(accessToken, account, getTokenNumber(data, "expires_in"));
 };
 
-
-
 export { connectGoogleCalendarAccountForUser, disconnectGoogleCalendarAccountForUser, listGoogleCalendarAccountsForUser, loadGoogleOAuthSecrets, refreshGoogleCalendarAccessTokenForUser };
-
 
 export type { GoogleCalendarAccessResponse, GoogleOAuthSecrets };
