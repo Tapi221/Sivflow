@@ -92,6 +92,4 @@ class StorageStateManager {
   }
 }
 
-
-
 export { StorageStateManager };
