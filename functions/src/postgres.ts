@@ -1,11 +1,7 @@
 import pg from "pg";
 
-
-
 const { Pool } = pg;
 let pool: pg.Pool | null = null;
-
-
 
 const getDatabaseUrl = (): string => {
   const databaseUrl = process.env.DATABASE_URL?.trim();
@@ -32,7 +28,5 @@ const closePostgresPool = async (): Promise<void> => {
   await pool.end();
   pool = null;
 };
-
-
 
 export { closePostgresPool, getPostgresPool, postgresQuery };
