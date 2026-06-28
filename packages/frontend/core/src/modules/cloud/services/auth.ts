@@ -1,5 +1,5 @@
 import { UserFriendlyError } from '@affine/error';
-import type { OAuthProviderType } from '@affine/graphql';
+import { OAuthProviderType } from '@affine/graphql';
 import { track } from '@affine/track';
 import { OnEvent, Service } from '@toeverything/infra';
 import { nanoid } from 'nanoid';
@@ -15,6 +15,11 @@ import { AccountLoggedIn } from '../events/account-logged-in';
 import { AccountLoggedOut } from '../events/account-logged-out';
 import { ServerStarted } from '../events/server-started';
 import type { AuthStore } from '../stores/auth';
+import {
+  FIREBASE_EMAIL_FOR_SIGN_IN_KEY,
+  getFirebaseAuth,
+  isFirebaseAuthConfigured,
+} from '../utils/firebase-auth';
 import type { FetchService } from './fetch';
 
 @OnEvent(ApplicationFocused, e => e.onApplicationFocused)
@@ -104,6 +109,11 @@ export class AuthService extends Service {
       ? this.setClientNonce()
       : undefined;
     try {
+      if (isFirebaseAuthConfigured()) {
+        await this.sendFirebaseEmailLink(email, redirectUrl);
+        return;
+      }
+
       const scheme = this.urlService.getClientScheme();
       const magicLinkUrlParams = new URLSearchParams();
       if (redirectUrl) {
@@ -151,6 +161,54 @@ export class AuthService extends Service {
     }
   }
 
+  async signInFirebaseEmailLink(email: string | null | undefined, link: string) {
+    const method = 'magic-link';
+    try {
+      const auth = await getFirebaseAuth();
+      const { isSignInWithEmailLink, signInWithEmailLink } = await import(
+        'firebase/auth'
+      );
+
+      if (!isSignInWithEmailLink(auth, link)) {
+        throw new Error('Invalid Firebase email sign-in link.');
+      }
+
+      const signInEmail =
+        email ?? window.localStorage.getItem(FIREBASE_EMAIL_FOR_SIGN_IN_KEY);
+      if (!signInEmail) {
+        throw new Error('Email is required to complete Firebase sign-in.');
+      }
+
+      const credential = await signInWithEmailLink(auth, signInEmail, link);
+      window.localStorage.removeItem(FIREBASE_EMAIL_FOR_SIGN_IN_KEY);
+      const token = await credential.user.getIdToken();
+      await this.signInFirebaseToken(token);
+      track.$.$.auth.signedIn({ method });
+    } catch (e) {
+      track.$.$.auth.signInFail({
+        method,
+        reason: UserFriendlyError.fromAny(e).name,
+      });
+      throw e;
+    }
+  }
+
+  async signInFirebaseToken(idToken: string) {
+    const res = await this.fetchService.fetch('/api/auth/firebase', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ token: idToken }),
+    });
+
+    if (!res.ok) {
+      const message = await res.text();
+      throw new Error(message || 'Failed to sign in with Firebase.');
+    }
+
+    this.session.revalidate();
+  }
+
   async oauthPreflight(
     provider: OAuthProviderType,
     client: string,
@@ -188,7 +246,7 @@ export class AuthService extends Service {
       const { redirectUri } = await this.store.signInOauth(
         code,
         state,
-        provider
+        provider,
       );
 
       this.session.revalidate();
@@ -233,6 +291,10 @@ export class AuthService extends Service {
     verifyToken?: string;
     challenge?: string;
   }) {
+    if (isFirebaseAuthConfigured()) {
+      return this.signInFirebasePassword(credential.email, credential.password);
+    }
+
     track.$.$.auth.signIn({ method: 'password' });
     try {
       const user = await this.store.signInPassword(credential);
@@ -265,6 +327,10 @@ export class AuthService extends Service {
   }
 
   checkUserByEmail(email: string) {
+    if (isFirebaseAuthConfigured()) {
+      return this.checkFirebaseUserByEmail(email);
+    }
+
     return this.store.checkUserByEmail(email);
   }
 
@@ -278,6 +344,89 @@ export class AuthService extends Service {
     }
 
     return headers;
+  }
+
+  private async sendFirebaseEmailLink(email: string, redirectUrl?: string) {
+    const auth = await getFirebaseAuth();
+    const { sendSignInLinkToEmail } = await import('firebase/auth');
+    const callbackUrl = new URL('/magic-link', window.location.origin);
+    const scheme = this.urlService.getClientScheme();
+
+    if (redirectUrl) {
+      callbackUrl.searchParams.set('redirect_uri', redirectUrl);
+    }
+    if (scheme) {
+      callbackUrl.searchParams.set('client', scheme);
+    }
+
+    await sendSignInLinkToEmail(auth, email, {
+      url: callbackUrl.toString(),
+      handleCodeInApp: true,
+    });
+    window.localStorage.setItem(FIREBASE_EMAIL_FOR_SIGN_IN_KEY, email);
+  }
+
+  private async signInFirebasePassword(email: string, password: string) {
+    track.$.$.auth.signIn({ method: 'password' });
+    try {
+      const auth = await getFirebaseAuth();
+      const { signInWithEmailAndPassword } = await import('firebase/auth');
+      const credential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const token = await credential.user.getIdToken();
+      await this.signInFirebaseToken(token);
+      track.$.$.auth.signedIn({ method: 'password' });
+    } catch (e) {
+      track.$.$.auth.signInFail({
+        method: 'password',
+        reason: UserFriendlyError.fromAny(e).name,
+      });
+      throw e;
+    }
+  }
+
+  private async checkFirebaseUserByEmail(email: string) {
+    const auth = await getFirebaseAuth();
+    const {
+      EmailAuthProvider,
+      GoogleAuthProvider,
+      fetchSignInMethodsForEmail,
+    } = await import('firebase/auth');
+    const providers = await fetchSignInMethodsForEmail(auth, email);
+    const hasPassword = providers.includes(
+      EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD
+    );
+    const hasEmailLink = providers.includes(
+      EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD
+    );
+    const oauthProviders = providers.includes(
+      GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD
+    )
+      ? [OAuthProviderType.Google]
+      : [];
+
+    return {
+      registered: providers.length > 0,
+      methods: {
+        password: {
+          available: hasPassword,
+        },
+        magicLink: {
+          available: hasEmailLink || !hasPassword,
+        },
+        oauth: {
+          available: oauthProviders.length > 0,
+          providers: oauthProviders,
+        },
+        passkey: {
+          available: false,
+          discoverable: false,
+        },
+      },
+    };
   }
 
   private setClientNonce(): string {
