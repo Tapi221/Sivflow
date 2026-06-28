@@ -364,13 +364,19 @@ export class AuthService implements OnApplicationBootstrap {
     otp: string,
     signUp: boolean
   ) {
-    return await this.mailer.send({
+    const command = {
       name: signUp ? 'SignUp' : 'SignIn',
       to: email,
       props: {
         url: link,
         otp,
       },
-    });
+    } as const;
+
+    if (env.dev) {
+      return await this.mailer.trySend(command);
+    }
+
+    return await this.mailer.send(command);
   }
 }
