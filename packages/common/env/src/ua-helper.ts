@@ -38,6 +38,9 @@ export class UaHelper {
     if ('standalone' in window.navigator) {
       return !!window.navigator.standalone;
     }
+    if (typeof window.matchMedia !== 'function') {
+      return false;
+    }
     return !!window.matchMedia('(display-mode: standalone)').matches;
   }
 
