@@ -50,8 +50,8 @@ function parseArgs(args: string[]) {
   let count: number = 1;
 
   args.forEach(arg => {
-    let kvSep = arg.indexOf('=');
-    if (kvSep) {
+    const kvSep = arg.indexOf('=');
+    if (kvSep > 0) {
       const key = arg.slice(0, kvSep);
       const val = arg.slice(kvSep + 1);
 
