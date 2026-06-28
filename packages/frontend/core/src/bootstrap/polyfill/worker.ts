@@ -1,3 +1,4 @@
+import './worker-global';
 import './array';
 import './set';
 import './dispose';
