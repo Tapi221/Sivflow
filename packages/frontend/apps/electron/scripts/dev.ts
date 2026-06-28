@@ -17,9 +17,6 @@ const rendererDevScript = process.env.ELECTRON_RENDERER_DEV_SCRIPT ?? 'dev';
 const rendererLogPrefix =
   process.env.ELECTRON_RENDERER_LOG_PREFIX ??
   (rendererDevWorkspace === '@affine/web' ? '[web]' : '[renderer]');
-const backendDevWorkspace =
-  process.env.ELECTRON_BACKEND_DEV_WORKSPACE ?? '@affine/server';
-const backendDevScript = process.env.ELECTRON_BACKEND_DEV_SCRIPT ?? 'dev';
 const backendLogPrefix = process.env.ELECTRON_BACKEND_LOG_PREFIX ?? '[backend]';
 
 process.env.DEV_SERVER_URL ??= 'http://127.0.0.1:8080';
@@ -186,16 +183,20 @@ function spawnBackendDevServer() {
     return;
   }
 
-  const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  const currentBackendDevProcess = spawn(
-    npm,
-    ['--workspace', backendDevWorkspace, 'run', backendDevScript],
-    {
-      cwd: rootDir,
-      env: process.env,
-      shell: true,
-    }
+  const node = process.execPath;
+  const backendDevScriptPath = resolve(
+    rootDir,
+    'packages',
+    'backend',
+    'server',
+    'scripts',
+    'dev.mjs'
   );
+  const currentBackendDevProcess = spawn(node, [backendDevScriptPath], {
+    cwd: rootDir,
+    env: process.env,
+    shell: false,
+  });
   backendDevProcess = currentBackendDevProcess;
 
   pipeProcessOutput(currentBackendDevProcess, { prefix: backendLogPrefix });
@@ -269,7 +270,7 @@ async function ensureBackendDevServer() {
 
   throw new Error(
     `Backend 開発サーバー ${backendServerBase} に接続できませんでした。` +
-      `別ターミナルで npm --workspace ${backendDevWorkspace} run ${backendDevScript} を起動してから再実行してください。`
+      '別ターミナルで npm run dev:backend を起動してから再実行してください。'
   );
 }
 
