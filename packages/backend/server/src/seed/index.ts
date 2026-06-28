@@ -41,11 +41,12 @@ const create = createFactory(client, {
   },
 });
 
-function parseArgs(args: string[]) {
-  if (!args.length) {
-    return { count: 1 };
-  }
+type ParsedArgs = {
+  overrides: Record<string, any>;
+  count: number;
+};
 
+function parseArgs(args: string[]): ParsedArgs {
   const overrides: Record<string, any> = {};
   let count: number = 1;
 
