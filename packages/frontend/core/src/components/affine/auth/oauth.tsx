@@ -1,11 +1,11 @@
 import { Button } from '@affine/component/ui/button';
 import { notify } from '@affine/component/ui/notification';
 import { useAsyncCallback } from '@affine/core/components/hooks/affine-async-hooks';
+import { AuthService, ServerService } from '@affine/core/modules/cloud';
 import {
-  AuthService,
-  FetchService,
-  ServerService,
-} from '@affine/core/modules/cloud';
+  getFirebaseAuth,
+  isFirebaseAuthConfigured,
+} from '@affine/core/modules/cloud/utils/firebase-auth';
 import { UrlService } from '@affine/core/modules/url';
 import { UserFriendlyError } from '@affine/error';
 import { OAuthProviderType } from '@affine/graphql';
@@ -42,61 +42,6 @@ const OAuthProviderMap: Record<
   },
 };
 
-type FirebaseAuthConfig = {
-  apiKey: string;
-  authDomain: string;
-  projectId: string;
-  appId: string;
-  storageBucket?: string;
-  messagingSenderId?: string;
-};
-
-function getFirebaseEnvConfig(): Partial<FirebaseAuthConfig> {
-  const env = (import.meta as ImportMeta & {
-    env?: Record<string, string | undefined>;
-  }).env;
-
-  return {
-    apiKey: env?.VITE_FIREBASE_API_KEY,
-    authDomain: env?.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: env?.VITE_FIREBASE_PROJECT_ID,
-    appId: env?.VITE_FIREBASE_APP_ID,
-    storageBucket: env?.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: env?.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  };
-}
-
-function getFirebaseAuthConfig() {
-  const buildConfig = BUILD_CONFIG as typeof BUILD_CONFIG & {
-    firebase?: Partial<FirebaseAuthConfig>;
-    firebaseAuth?: Partial<FirebaseAuthConfig>;
-  };
-  const config =
-    buildConfig.firebaseAuth ?? buildConfig.firebase ?? getFirebaseEnvConfig();
-
-  if (
-    !config?.apiKey ||
-    !config.authDomain ||
-    !config.projectId ||
-    !config.appId
-  ) {
-    throw new Error(
-      'Firebase Auth config is missing. Set BUILD_CONFIG.firebaseAuth or VITE_FIREBASE_* env vars.'
-    );
-  }
-
-  return config as FirebaseAuthConfig;
-}
-
-async function getFirebaseAuth() {
-  const [{ getApps, initializeApp }, { getAuth }] = await Promise.all([
-    import('firebase/app'),
-    import('firebase/auth'),
-  ]);
-  const app = getApps()[0] ?? initializeApp(getFirebaseAuthConfig());
-  return getAuth(app);
-}
-
 function isFirebaseConfigError(error: unknown) {
   return (
     error instanceof Error &&
@@ -121,10 +66,16 @@ export function OAuth({ redirectUrl }: { redirectUrl?: string }) {
   const serverService = useService(ServerService);
   const urlService = useService(UrlService);
   const auth = useService(AuthService);
-  const fetchService = useService(FetchService);
   const oauth = useLiveData(serverService.server.features$.map(r => r?.oauth));
   const oauthProviders = useLiveData(
     serverService.server.config$.map(r => r?.oauthProviders)
+  );
+  const firebaseAuthConfigured = isFirebaseAuthConfigured();
+  const providers = Array.from(
+    new Set([
+      ...(oauth ? (oauthProviders ?? []) : []),
+      ...(firebaseAuthConfigured ? [OAuthProviderType.Google] : []),
+    ])
   );
 
   const onContinue = useAsyncCallback(
@@ -132,6 +83,24 @@ export function OAuth({ redirectUrl }: { redirectUrl?: string }) {
       track.$.$.auth.signIn({ method: 'oauth', provider });
 
       try {
+        if (provider === OAuthProviderType.Google && firebaseAuthConfigured) {
+          const { GoogleAuthProvider, signInWithPopup } = await import(
+            'firebase/auth'
+          );
+          const authInstance = await getFirebaseAuth();
+          const googleProvider = new GoogleAuthProvider();
+          const credential = await signInWithPopup(authInstance, googleProvider);
+          const token = await credential.user.getIdToken();
+
+          await auth.signInFirebaseToken(token);
+          track.$.$.auth.signedIn({ method: 'oauth', provider });
+
+          if (redirectUrl) {
+            urlService.openExternal(redirectUrl);
+          }
+          return;
+        }
+
         const nativeClient = urlService.getClientScheme();
         if (nativeClient) {
           const { url } = await auth.oauthPreflight(
@@ -143,45 +112,22 @@ export function OAuth({ redirectUrl }: { redirectUrl?: string }) {
           return;
         }
 
-        const { GoogleAuthProvider, signInWithPopup } = await import(
-          'firebase/auth'
-        );
-
-        if (provider === OAuthProviderType.Google) {
-          const authInstance = await getFirebaseAuth();
-          const googleProvider = new GoogleAuthProvider();
-          const credential = await signInWithPopup(authInstance, googleProvider);
-          const token = await credential.user.getIdToken();
-
-          await fetchService.fetch('/api/auth/firebase', {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ token }),
-          });
-          auth.session.revalidate();
-
-          if (redirectUrl) {
-            urlService.openExternal(redirectUrl);
-          }
-        } else {
-          notify.error({
-            title: 'Not Implemented',
-            message: `Provider ${provider} is not supported yet.`,
-          });
-        }
+        notify.error({
+          title: 'Not Implemented',
+          message: `Provider ${provider} is not supported without Firebase Auth.`,
+        });
       } catch (e) {
         notifyOAuthError(e);
       }
     },
-    [auth, fetchService, urlService, redirectUrl]
+    [auth, firebaseAuthConfigured, urlService, redirectUrl]
   );
 
-  if (!oauth) {
+  if (providers.length === 0) {
     return null;
   }
 
-  return oauthProviders?.map(provider => {
+  return providers.map(provider => {
     return (
       <OAuthProvider
         key={provider}
