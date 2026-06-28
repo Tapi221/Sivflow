@@ -77,7 +77,7 @@
     "ai": "^5.0.118",
     "bullmq": "^5.40.2",
     "cookie-parser": "^1.4.7",
-    "cross-env": "^10.1.0",
+    "cross-env": "^7.0.3",
     "date-fns": "^4.0.0",
     "dotenv": "^16.4.7",
     "eventemitter2": "^6.4.9",
