@@ -16,16 +16,13 @@ import {
 import type { AuthSessionStatus } from '@affine/core/modules/cloud/entities/session';
 import { Unreachable } from '@affine/env/constant';
 import { UserFriendlyError } from '@affine/error';
-import { ServerDeploymentType } from '@affine/graphql';
-import { useI18n } from '@affine/i18n';
 import { useLiveData, useService } from '@toeverything/infra';
 import type { Dispatch, SetStateAction } from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { SignInState } from '.';
 import { Back } from './back';
 import { Captcha } from './captcha';
-import * as styles from './style.css';
 
 export const SignInWithPasswordStep = ({
   state,
@@ -36,7 +33,6 @@ export const SignInWithPasswordStep = ({
   changeState: Dispatch<SetStateAction<SignInState>>;
   onAuthenticated?: (status: AuthSessionStatus) => void;
 }) => {
-  const t = useI18n();
   const authService = useService(AuthService);
 
   const email = state.email;
@@ -47,14 +43,9 @@ export const SignInWithPasswordStep = ({
 
   const [password, setPassword] = useState('');
   const [passwordError, setPasswordError] = useState(false);
-  const [passwordErrorHint, setPasswordErrorHint] = useState('');
+  const [passwordErrorHint, setPasswordErrorHint] = useState('パスワードを確認してください');
   const captchaService = useService(CaptchaService);
   const serverService = useService(ServerService);
-  const isSelfhosted = useLiveData(
-    serverService.server.config$.selector(
-      c => c.type === ServerDeploymentType.Selfhosted
-    )
-  );
   const serverName = useLiveData(
     serverService.server.config$.selector(c => c.serverName)
   );
@@ -69,16 +60,12 @@ export const SignInWithPasswordStep = ({
   useEffect(() => {
     if (loginStatus === 'authenticated') {
       notify.success({
-        title: t['com.affine.auth.toast.title.signed-in'](),
-        message: t['com.affine.auth.toast.message.signed-in'](),
+        title: 'ログインしました',
+        message: 'Sivflow にログインしました。',
       });
     }
     onAuthenticated?.(loginStatus);
-  }, [loginStatus, onAuthenticated, t]);
-
-  useEffect(() => {
-    setPasswordErrorHint(t['com.affine.auth.password.error']());
-  }, [t]);
+  }, [loginStatus, onAuthenticated]);
 
   const onSignIn = useAsyncCallback(async () => {
     if (isLoading || (!verifyToken && needCaptcha)) return;
@@ -95,21 +82,8 @@ export const SignInWithPasswordStep = ({
       console.error(err);
       const error = UserFriendlyError.fromAny(err);
 
-      if (
-        error.is('WRONG_SIGN_IN_CREDENTIALS') ||
-        error.is('PASSWORD_REQUIRED')
-      ) {
-        setPasswordError(true);
-        setPasswordErrorHint(t['com.affine.auth.password.error']());
-      } else {
-        setPasswordError(false);
-        notify.error({
-          title: t['com.affine.auth.toast.title.failed'](),
-          message: error.is('REQUEST_ABORTED')
-            ? t['error.NETWORK_ERROR']()
-            : t[`error.${error.name}`](error.data),
-        });
-      }
+      setPasswordError(true);
+      setPasswordErrorHint(error.message || 'メールアドレスまたはパスワードが正しくありません');
       captchaService.revalidate();
     } finally {
       setIsLoading(false);
@@ -123,19 +97,11 @@ export const SignInWithPasswordStep = ({
     email,
     password,
     challenge,
-    t,
   ]);
-
-  const sendMagicLink = useCallback(() => {
-    changeState(prev => ({ ...prev, step: 'signInWithEmail' }));
-  }, [changeState]);
 
   return (
     <AuthContainer>
-      <AuthHeader
-        title={t['com.affine.auth.sign.in']()}
-        subTitle={serverName}
-      />
+      <AuthHeader title="ログイン" subTitle={serverName} />
 
       <AuthContent>
         <form
@@ -145,7 +111,7 @@ export const SignInWithPasswordStep = ({
           }}
         >
           <AuthInput
-            label={t['com.affine.settings.email']()}
+            label="メールアドレス"
             readOnly={true}
             value={email}
             type="email"
@@ -155,7 +121,7 @@ export const SignInWithPasswordStep = ({
           <AuthInput
             autoFocus
             data-testid="password-input"
-            label={t['com.affine.auth.password']()}
+            label="パスワード"
             value={password}
             type="password"
             name="password"
@@ -164,7 +130,7 @@ export const SignInWithPasswordStep = ({
               setPassword(value);
               if (passwordError) {
                 setPasswordError(false);
-                setPasswordErrorHint(t['com.affine.auth.password.error']());
+                setPasswordErrorHint('パスワードを確認してください');
               }
             }}
             error={passwordError}
@@ -179,20 +145,9 @@ export const SignInWithPasswordStep = ({
             style={{ width: '100%' }}
             disabled={isLoading || (!verifyToken && needCaptcha)}
           >
-            {t['com.affine.auth.sign.in']()}
+            ログイン
           </Button>
         </form>
-        {!isSelfhosted && (
-          <div className={styles.passwordButtonRow}>
-            <a
-              data-testid="send-magic-link-button"
-              className={styles.linkButton}
-              onClick={sendMagicLink}
-            >
-              {t['com.affine.auth.sign.auth.code.send-email.sign-in']()}
-            </a>
-          </div>
-        )}
       </AuthContent>
       <AuthFooter>
         <Back changeState={changeState} />
