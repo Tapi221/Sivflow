@@ -149,8 +149,12 @@ export function getTokenEncoder(model?: string | null): Tokenizer | null {
     return null;
   } else {
     // c100k based model
-    const encoder = serverNativeModule.fromModelName('gpt-4');
-    if (encoder) ENCODER_CACHE.set('gpt-4', encoder);
+    const encoder =
+      ENCODER_CACHE.get('gpt-4') ?? serverNativeModule.fromModelName('gpt-4');
+    if (encoder) {
+      ENCODER_CACHE.set('gpt-4', encoder);
+      ENCODER_CACHE.set(model, encoder);
+    }
     return encoder;
   }
 }
@@ -1336,6 +1340,10 @@ export function llmNormalizePreparedRoutes<T = unknown>(value: unknown): T {
   return nativeLlmModule.llmNormalizePreparedRoutes(value) as T;
 }
 
+function doneIteratorResult<T>(): IteratorResult<T> {
+  return { value: undefined as unknown as T, done: true };
+}
+
 class NativeStreamAdapter<T> implements AsyncIterableIterator<T> {
   readonly #queue: T[] = [];
   readonly #waiters: ((result: IteratorResult<T>) => void)[] = [];
@@ -1379,7 +1387,7 @@ class NativeStreamAdapter<T> implements AsyncIterableIterator<T> {
 
     while (this.#waiters.length) {
       const waiter = this.#waiters.shift();
-      waiter?.({ value: undefined as T, done: true });
+      waiter?.(doneIteratorResult<T>());
     }
   }
 
@@ -1413,7 +1421,7 @@ class NativeStreamAdapter<T> implements AsyncIterableIterator<T> {
     }
 
     if (this.#ended) {
-      return { value: undefined as T, done: true };
+      return doneIteratorResult<T>();
     }
 
     return await new Promise(resolve => {
@@ -1424,7 +1432,7 @@ class NativeStreamAdapter<T> implements AsyncIterableIterator<T> {
   async return(): Promise<IteratorResult<T>> {
     this.close(true);
 
-    return { value: undefined as T, done: true };
+    return doneIteratorResult<T>();
   }
 }
 
@@ -1666,14 +1674,6 @@ export function llmDispatchToolLoopStreamRouted(
     }
   );
 
-  const originalAbort = handle?.abort?.bind(handle);
-  if (signal) {
-    if (signal.aborted) {
-      originalAbort?.();
-    } else if (originalAbort) {
-      signal.addEventListener('abort', () => originalAbort(), { once: true });
-    }
-  }
 
   adapter = new NativeStreamAdapter(handle, signal);
   pushFn = event => {
