@@ -246,7 +246,7 @@ export class AuthService extends Service {
       const { redirectUri } = await this.store.signInOauth(
         code,
         state,
-        provider,
+        provider
       );
 
       this.session.revalidate();
@@ -329,6 +329,18 @@ export class AuthService extends Service {
   checkUserByEmail(email: string) {
     if (isFirebaseAuthConfigured()) {
       return this.checkFirebaseUserByEmail(email);
+    }
+
+    if (!BUILD_CONFIG.backendEnabled) {
+      return Promise.resolve({
+        registered: false,
+        methods: {
+          password: { available: false },
+          magicLink: { available: false },
+          oauth: { available: false, providers: [] },
+          passkey: { available: false, discoverable: false },
+        },
+      });
     }
 
     return this.store.checkUserByEmail(email);
