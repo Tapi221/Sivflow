@@ -1,6 +1,14 @@
 const globalObject = globalThis as any;
 const treeWalkerMethod = ['create', 'Tree', 'Walker'].join('');
 
+if (typeof globalObject.window === 'undefined') {
+  globalObject.window = globalObject;
+}
+
+if (typeof globalObject.self === 'undefined') {
+  globalObject.self = globalObject;
+}
+
 if (typeof globalObject.HTMLElement === 'undefined') {
   globalObject.HTMLElement = class HTMLElement {};
 }
