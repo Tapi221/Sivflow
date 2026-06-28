@@ -50,6 +50,15 @@ describe("nbstore Worker の bootstrap 境界", () => {
     expect(source).toContain("import './request-idle-callback';");
   });
 
+  it("worker DOM スタブは window/self を globalThis に向ける", () => {
+    const source = readRepoFile(
+      "packages/frontend/core/src/bootstrap/polyfill/worker-dom.ts",
+    );
+
+    expect(source).toContain("globalObject.window = globalObject;");
+    expect(source).toContain("globalObject.self = globalObject;");
+  });
+
   it("worker polyfill は DOM / browser 専用 polyfill を含めない", () => {
     const source = readRepoFile(
       "packages/frontend/core/src/bootstrap/polyfill/worker.ts",
