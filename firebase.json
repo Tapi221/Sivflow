@@ -23,6 +23,41 @@
     ],
     "rewrites": [
       {
+        "source": "/api",
+        "run": {
+          "serviceId": "sivflow-api",
+          "region": "asia-northeast1"
+        }
+      },
+      {
+        "source": "/api/**",
+        "run": {
+          "serviceId": "sivflow-api",
+          "region": "asia-northeast1"
+        }
+      },
+      {
+        "source": "/graphql",
+        "run": {
+          "serviceId": "sivflow-api",
+          "region": "asia-northeast1"
+        }
+      },
+      {
+        "source": "/oauth/**",
+        "run": {
+          "serviceId": "sivflow-api",
+          "region": "asia-northeast1"
+        }
+      },
+      {
+        "source": "/socket.io/**",
+        "run": {
+          "serviceId": "sivflow-api",
+          "region": "asia-northeast1"
+        }
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
