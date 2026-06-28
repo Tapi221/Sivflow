@@ -16,7 +16,7 @@ function loadPrivateKey() {
 }
 
 function load() {
-  let isPrivateKeyFromEnv = !!process.env.AFFINE_PRIVATE_KEY;
+  const isPrivateKeyFromEnv = !!process.env.AFFINE_PRIVATE_KEY;
   // load `.env` under pwd
   config();
   // load `.env` under user config folder
@@ -27,6 +27,11 @@ function load() {
   // The old AFFINE_PRIVATE_KEY in old .env is somehow not working,
   // we should ignore it
   if (!isPrivateKeyFromEnv) {
+    if (process.env.AFFINE_PRIVATE_KEY) {
+      console.warn(
+        'AFFINE_PRIVATE_KEY loaded from .env is ignored. Use config/private.key or an explicit process environment variable instead.'
+      );
+    }
     delete process.env.AFFINE_PRIVATE_KEY;
   }
 
