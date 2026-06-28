@@ -20,6 +20,7 @@ import { SocketIoAdapter } from './base/websocket';
 import { AuthGuard } from './core/auth';
 import { TelemetryService } from './core/telemetry/service';
 import { serverTimingAndCache } from './middleware/timing';
+import { env } from './prelude';
 
 const OneMB = 1024 * 1024;
 
@@ -42,8 +43,12 @@ export async function run() {
   let telemetry: TelemetryService | null = null;
   try {
     telemetry = app.get(TelemetryService, { strict: false });
-  } catch {
-    telemetry = null;
+  } catch (error) {
+    if (error instanceof Error && error.name === 'UnknownElementException') {
+      telemetry = null;
+    } else {
+      throw error;
+    }
   }
 
   const defaultAllowedOrigins = buildCorsAllowedOrigins(url);
