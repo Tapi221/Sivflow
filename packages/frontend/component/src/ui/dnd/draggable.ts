@@ -1,6 +1,5 @@
 import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { centerUnderPointer } from '@atlaskit/pragmatic-drag-and-drop/element/center-under-pointer';
-import { disableNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/disable-native-drag-preview';
 import { pointerOutsideOfPreview } from '@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview';
 import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
 import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
@@ -20,6 +19,29 @@ import {
   type DraggableGetFeedback,
   type toExternalData,
 } from './types';
+
+const transparentDragPreviewImage = (() => {
+  if (typeof Image === 'undefined') {
+    return null;
+  }
+
+  const image = new Image();
+  image.src =
+    'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+  return image;
+})();
+
+function disableNativeDragPreview({
+  nativeSetDragImage,
+}: {
+  nativeSetDragImage: DataTransfer['setDragImage'] | null;
+}) {
+  if (!nativeSetDragImage || !transparentDragPreviewImage) {
+    return;
+  }
+
+  nativeSetDragImage(transparentDragPreviewImage, 0, 0);
+}
 
 export interface DraggableOptions<D extends DNDData = DNDData> {
   data?: DraggableGet<D['draggable']>;
