@@ -66,12 +66,12 @@ export const SignInStep = ({
   useEffect(() => {
     if (loginStatus === 'authenticated') {
       notify.success({
-        title: t['com.affine.auth.toast.title.signed-in'](),
-        message: t['com.affine.auth.toast.message.signed-in'](),
+        title: 'ログインしました',
+        message: 'Sivflow にログインしました。',
       });
     }
     onAuthenticated?.(loginStatus);
-  }, [loginStatus, onAuthenticated, t]);
+  }, [loginStatus, onAuthenticated]);
 
   const onContinue = useAsyncCallback(async () => {
     if (!validateEmail(email)) {
@@ -105,13 +105,13 @@ export const SignInStep = ({
       }
 
       notify.error({
-        title: 'Failed to sign in',
-        message: 'Firebase Auth is not configured for this sign-in screen.',
+        title: 'ログインできませんでした',
+        message: 'このログイン画面では Firebase Auth が設定されていません。',
       });
     } catch (err: any) {
       console.error(err);
       notify.error({
-        title: 'Failed to sign in',
+        title: 'ログインできませんでした',
         message: err.message,
       });
     } finally {
@@ -122,10 +122,7 @@ export const SignInStep = ({
   if (versionError && isSelfhosted) {
     return (
       <AuthContainer>
-        <AuthHeader
-          title={t['com.affine.auth.sign.in']()}
-          subTitle={serverName}
-        />
+        <AuthHeader title="ログイン" subTitle={serverName} />
         <AuthContent>
           <div>{versionError}</div>
         </AuthContent>
@@ -135,10 +132,7 @@ export const SignInStep = ({
 
   return (
     <AuthContainer>
-      <AuthHeader
-        title={t['com.affine.auth.sign.in']()}
-        subTitle={serverName}
-      />
+      <AuthHeader title="ログイン" subTitle={serverName} />
 
       <AuthContent>
         <OAuth redirectUrl={state.redirectUrl} />
@@ -151,13 +145,11 @@ export const SignInStep = ({
         >
           <AuthInput
             className={style.authInput}
-            label={t['com.affine.settings.email']()}
-            placeholder={t['com.affine.auth.sign.email.placeholder']()}
+            label="メールアドレス"
+            placeholder="メールアドレスを入力"
             onChange={setEmail}
             error={!isValidEmail}
-            errorHint={
-              isValidEmail ? '' : t['com.affine.auth.sign.email.error']()
-            }
+            errorHint={isValidEmail ? '' : '有効なメールアドレスを入力してください'}
             onEnter={onContinue}
             type="email"
             name="username"
@@ -175,7 +167,7 @@ export const SignInStep = ({
             suffix={<ArrowRightBigIcon />}
             suffixStyle={{ width: 20, height: 20, color: cssVar('blue') }}
           >
-            {t['com.affine.auth.sign.email.continue']()}
+            メールで続行
           </Button>
         </form>
       </AuthContent>
