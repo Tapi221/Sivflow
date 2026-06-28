@@ -300,8 +300,9 @@ export class DocFrontend {
         return;
       }
       const existingData = encodeStateAsUpdate(doc);
+      const hasExistingData = !isEmptyUpdate(existingData);
 
-      if (!isEmptyUpdate(existingData)) {
+      if (hasExistingData) {
         this.schedule({
           type: 'save',
           docId: doc.guid,
@@ -315,9 +316,13 @@ export class DocFrontend {
       const docRecord = await this.storage.getDoc(job.docId);
       throwIfAborted(signal);
 
+      let hasReadyData = hasExistingData;
       if (docRecord && !isEmptyUpdate(docRecord.bin)) {
         this.applyUpdate(job.docId, docRecord.bin);
+        hasReadyData = true;
+      }
 
+      if (hasReadyData) {
         this.status.readyDocs.add(job.docId);
       }
 
