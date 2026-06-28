@@ -8,8 +8,6 @@ import { connectGoogleCalendarAccountForUser, disconnectGoogleCalendarAccountFor
 
 import type { GoogleOAuthSecrets } from "#src/gcal/oauthPostgresService.js";
 
-
-
 const GOOGLE_OAUTH_CLIENT_ID = defineSecret("GOOGLE_OAUTH_CLIENT_ID");
 
 const GOOGLE_OAUTH_CLIENT_SECRET = defineSecret("GOOGLE_OAUTH_CLIENT_SECRET");
@@ -17,8 +15,6 @@ const GOOGLE_OAUTH_CLIENT_SECRET = defineSecret("GOOGLE_OAUTH_CLIENT_SECRET");
 const GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY = defineSecret("GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY");
 
 const REGION = "asia-northeast1";
-
-
 
 const requireUid = (request: { auth?: { uid?: string } }) => {
   const uid = request.auth?.uid;
@@ -48,8 +44,6 @@ const readCallableSecrets = (): GoogleOAuthSecrets =>
     clientSecret: readSecretValue(GOOGLE_OAUTH_CLIENT_SECRET, "GOOGLE_OAUTH_CLIENT_SECRET"),
     tokenEncryptionKey: readSecretValue(GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY, "GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY"),
   });
-
-
 
 const disconnectGoogleCalendarAccount = onCall({ region: REGION }, async (request) => {
   const uid = requireUid(request);
@@ -91,8 +85,6 @@ const refreshGoogleCalendarAccessToken = onCall(
 const exchangeGoogleCalendarCode = connectGoogleCalendarAccount;
 
 const getGoogleCalendarAccessToken = refreshGoogleCalendarAccessToken;
-
-
 
 export { googleCalendarWebhook } from "#src/gcal/googleCalendarWebhook.js";
 
