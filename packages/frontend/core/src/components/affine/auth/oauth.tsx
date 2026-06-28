@@ -14,15 +14,46 @@ import { GoogleIcon } from '@blocksuite/icons/rc';
 import { useService } from '@toeverything/infra';
 import { useCallback } from 'react';
 
-function isFirebaseConfigError(error: unknown) {
-  return (
-    error instanceof Error &&
-    error.message.includes('Firebase Auth config is missing')
-  );
+function getFirebaseErrorCode(error: unknown) {
+  return error instanceof Error && 'code' in error
+    ? String((error as { code?: unknown }).code)
+    : undefined;
 }
 
 function notifyOAuthError(error: unknown) {
-  if (isFirebaseConfigError(error)) {
+  const code = getFirebaseErrorCode(error);
+
+  if (code === 'auth/unauthorized-domain') {
+    notify.error({
+      title: 'Firebase Auth domain is not allowed',
+      message:
+        'Firebase Console の Authentication > Settings > Authorized domains に localhost または 127.0.0.1 を追加してください。',
+    });
+    return;
+  }
+
+  if (code === 'auth/operation-not-allowed') {
+    notify.error({
+      title: 'Google sign-in is disabled',
+      message:
+        'Firebase Console の Authentication > Sign-in method で Google を有効にしてください。',
+    });
+    return;
+  }
+
+  if (code === 'auth/popup-closed-by-user') {
+    notify.error({
+      title: 'Google sign-in was closed',
+      message:
+        'Google ログイン画面が閉じられました。もう一度開いて最後まで進めてください。',
+    });
+    return;
+  }
+
+  if (
+    error instanceof Error &&
+    error.message.includes('Firebase Auth config is missing')
+  ) {
     notify.error({
       title: 'Google login is not configured',
       message:
@@ -63,6 +94,7 @@ export function OAuth({ redirectUrl }: { redirectUrl?: string }) {
         urlService.openExternal(redirectUrl);
       }
     } catch (e) {
+      console.error(e);
       notifyOAuthError(e);
     }
   }, [auth, urlService, redirectUrl]);
