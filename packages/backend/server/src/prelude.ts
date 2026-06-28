@@ -41,3 +41,6 @@ function load() {
 
 load();
 createGlobalEnv();
+
+export const env = globalThis.env;
+export const CLS_REQUEST_HOST = globalThis.CLS_REQUEST_HOST;
