@@ -3,8 +3,6 @@ import { lookup } from "node:dns/promises";
 import { HttpsError } from "firebase-functions/v2/https";
 import { getPostgresPool } from "#src/postgres.js";
 
-
-
 type TimetableSyllabusSlot = {
   dayIndex: number;
   periodLabel: string;
@@ -49,8 +47,6 @@ type RobotsRuleGroup = {
   allow: string[];
 };
 
-
-
 const CRAWLER_VERSION = 1;
 const DEFAULT_MAX_PAGES = 24;
 const MAX_ALLOWED_PAGES = 80;
@@ -60,8 +56,6 @@ const USER_AGENT = "SivflowSyllabusCrawler/1.0 (+https://sivflow.app)";
 const COURSE_LINK_PATTERN = /syllabus|course|class|lesson|subject|detail|授業|講義|科目|シラバス/i;
 const WEEKDAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"] as const;
 const PRIVATE_IPV4_PATTERNS = [/^10\./, /^127\./, /^169\.254\./, /^192\.168\./, /^172\.(1[6-9]|2\d|3[0-1])\./, /^0\./];
-
-
 
 const normalizeText = (value: string): string =>
   value
@@ -507,7 +501,5 @@ const runTimetableSyllabusCatalogCrawlJob = async (): Promise<{ ok: true; jobs: 
 
   return { ok: true, jobs };
 };
-
-
 
 export { crawlTimetableSyllabusUrlForUser, runTimetableSyllabusCatalogCrawlJob, upsertTimetableSyllabusSourceRecord };
