@@ -3,22 +3,27 @@ import process from 'node:process';
 
 const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
-const child = spawn(npmCommand, ['--workspace', '@affine/web', 'run', 'dev'], {
-  stdio: 'inherit',
-  env: {
-    ...process.env,
-    SIVFLOW_ENABLE_BACKEND: 'true',
-  },
-});
+function prefixOutput(label, chunk, stream) {
+  const text = chunk.toString();
+  for (const line of text.split(/\r?\n/)) {
+    if (line) stream.write(`[${label}] ${line}\n`);
+  }
+}
 
-child.on('exit', code => {
-  process.exit(code ?? 0);
-});
+function run(label, args, extraEnv = {}) {
+  const child = spawn(npmCommand, args, {
+    stdio: ['inherit', 'pipe', 'pipe'],
+    env: {
+      ...process.env,
+      ...extraEnv,
+    },
+  });
 
-process.on('SIGINT', () => {
-  if (!child.killed) child.kill('SIGINT');
-});
+  child.stdout.on('data', chunk => prefixOutput(label, chunk, process.stdout));
+  child.stderr.on('data', chunk => prefixOutput(label, chunk, process.stderr));
+}
 
-process.on('SIGTERM', () => {
-  if (!child.killed) child.kill('SIGTERM');
+run('backend', ['--workspace', '@affine/server', 'run', 'dev']);
+run('web', ['--workspace', '@affine/web', 'run', 'dev'], {
+  SIVFLOW_ENABLE_BACKEND: 'true',
 });
