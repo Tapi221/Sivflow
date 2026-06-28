@@ -12,7 +12,6 @@ import { AuthService, ServerService } from '@affine/core/modules/cloud';
 import type { AuthSessionStatus } from '@affine/core/modules/cloud/entities/session';
 import { isFirebaseAuthConfigured } from '@affine/core/modules/cloud/utils/firebase-auth';
 import { ServerDeploymentType } from '@affine/graphql';
-import { useI18n } from '@affine/i18n';
 import { ArrowRightBigIcon } from '@blocksuite/icons/rc';
 import { useLiveData, useService } from '@toeverything/infra';
 import { cssVar } from '@toeverything/theme';
@@ -45,7 +44,6 @@ export const SignInStep = ({
   onSkip: () => void;
   onAuthenticated?: (status: AuthSessionStatus) => void;
 }) => {
-  const t = useI18n();
   const serverService = useService(ServerService);
   const serverName = useLiveData(
     serverService.server.config$.selector(c => c.serverName)
