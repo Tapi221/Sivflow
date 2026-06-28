@@ -18,6 +18,8 @@ const rendererLogPrefix =
   process.env.ELECTRON_RENDERER_LOG_PREFIX ??
   (rendererDevWorkspace === '@affine/web' ? '[web]' : '[renderer]');
 
+process.env.DEV_SERVER_URL ??= 'http://127.0.0.1:8080';
+
 /** Messages on stderr that match any of the contained patterns will be stripped from output */
 const stderrFilterPatterns = [
   // warning about devtools extension
