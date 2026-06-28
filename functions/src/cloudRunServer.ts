@@ -6,14 +6,10 @@ import { connectGoogleCalendarAccountForUser, disconnectGoogleCalendarAccountFor
 import { closePostgresPool, getPostgresPool } from "#src/postgres.js";
 import { crawlTimetableSyllabusUrlForUser, runTimetableSyllabusCatalogCrawlJob, upsertTimetableSyllabusSourceRecord, } from "#src/timetable/syllabusCrawlerService.js";
 
-
-
 const DEFAULT_HOST = "0.0.0.0";
 const DEFAULT_PORT = 8080;
 const SERVICE_NAME = "sivflow-api";
 const MAX_JSON_BODY_BYTES = 1_000_000;
-
-
 
 const getPort = (): number => {
   const rawPort = process.env.PORT ?? `${DEFAULT_PORT}`;
@@ -255,16 +251,12 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse): Promise
   });
 };
 
-
-
 const server = http.createServer((req, res) => {
   void handleRequest(req, res).catch((error: unknown) => {
     console.error("[cloudrun] request failed", error);
     writeError(res, error);
   });
 });
-
-
 
 const shutdown = (signal: NodeJS.Signals): void => {
   console.log(`[cloudrun] ${signal} を受信しました。シャットダウンします。`);
