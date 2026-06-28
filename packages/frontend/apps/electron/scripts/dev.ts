@@ -17,8 +17,13 @@ const rendererDevScript = process.env.ELECTRON_RENDERER_DEV_SCRIPT ?? 'dev';
 const rendererLogPrefix =
   process.env.ELECTRON_RENDERER_LOG_PREFIX ??
   (rendererDevWorkspace === '@affine/web' ? '[web]' : '[renderer]');
+const backendDevWorkspace =
+  process.env.ELECTRON_BACKEND_DEV_WORKSPACE ?? '@affine/server';
+const backendDevScript = process.env.ELECTRON_BACKEND_DEV_SCRIPT ?? 'dev';
+const backendLogPrefix = process.env.ELECTRON_BACKEND_LOG_PREFIX ?? '[backend]';
 
 process.env.DEV_SERVER_URL ??= 'http://127.0.0.1:8080';
+process.env.ELECTRON_BACKEND_DEV_SERVER_URL ??= 'http://127.0.0.1:3010';
 
 /** Messages on stderr that match any of the contained patterns will be stripped from output */
 const stderrFilterPatterns = [
@@ -29,6 +34,7 @@ const stderrFilterPatterns = [
 ];
 
 let spawnProcess: ChildProcessWithoutNullStreams | null = null;
+let backendDevProcess: ChildProcessWithoutNullStreams | null = null;
 let webDevProcess: ChildProcessWithoutNullStreams | null = null;
 const intentionalStops = new WeakSet<ChildProcessWithoutNullStreams>();
 
@@ -96,6 +102,11 @@ function cleanupProcesses() {
   if (webDevProcess?.pid) {
     intentionalStops.add(webDevProcess);
     kill(webDevProcess.pid);
+  }
+
+  if (backendDevProcess?.pid) {
+    intentionalStops.add(backendDevProcess);
+    kill(backendDevProcess.pid);
   }
 }
 
@@ -170,6 +181,39 @@ async function isDevServerReachable(url: string) {
   }
 }
 
+function spawnBackendDevServer() {
+  if (backendDevProcess !== null) {
+    return;
+  }
+
+  const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+  const currentBackendDevProcess = spawn(
+    npm,
+    ['--workspace', backendDevWorkspace, 'run', backendDevScript],
+    {
+      cwd: rootDir,
+      env: process.env,
+      shell: true,
+    }
+  );
+  backendDevProcess = currentBackendDevProcess;
+
+  pipeProcessOutput(currentBackendDevProcess, { prefix: backendLogPrefix });
+
+  currentBackendDevProcess.on('exit', code => {
+    if (backendDevProcess === currentBackendDevProcess) {
+      backendDevProcess = null;
+    }
+
+    if (!intentionalStops.has(currentBackendDevProcess) && code && code !== 0) {
+      console.log(
+        `Backend 開発サーバーはコード ${code} で終了しました。` +
+          '/graphql と /api/auth/session は 3010 に接続できません。'
+      );
+    }
+  });
+}
+
 function spawnWebDevServer() {
   if (webDevProcess !== null) {
     return;
@@ -198,6 +242,35 @@ function spawnWebDevServer() {
       console.log(`Web 開発サーバーはコード ${code} で終了しました`);
     }
   });
+}
+
+async function ensureBackendDevServer() {
+  const backendServerBase = process.env.ELECTRON_BACKEND_DEV_SERVER_URL;
+  if (!backendServerBase || (await isDevServerReachable(backendServerBase))) {
+    return;
+  }
+
+  console.log(
+    `Backend 開発サーバーが見つからないため ${backendServerBase} を起動しています...`
+  );
+  spawnBackendDevServer();
+
+  const timeoutMs = Number(process.env.BACKEND_DEV_SERVER_WAIT_TIMEOUT_MS ?? 120000);
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < timeoutMs) {
+    if (await isDevServerReachable(backendServerBase)) {
+      console.log(`Backend 開発サーバーに接続しました: ${backendServerBase}`);
+      return;
+    }
+
+    await delay(500);
+  }
+
+  throw new Error(
+    `Backend 開発サーバー ${backendServerBase} に接続できませんでした。` +
+      `別ターミナルで npm --workspace ${backendDevWorkspace} run ${backendDevScript} を起動してから再実行してください。`
+  );
 }
 
 async function ensureDevServer() {
@@ -274,6 +347,7 @@ if (watchMode) {
   console.log(`変更を監視しています...`);
 } else {
   console.log('Electron を起動しています...');
+  await ensureBackendDevServer();
   await ensureDevServer();
   await spawnOrReloadElectron();
   console.log(`Electron を起動しました。変更を監視しています...`);
