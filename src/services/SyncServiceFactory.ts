@@ -6,18 +6,14 @@ import { DiffEngine } from "@/services/logic/DiffEngine";
 import { NetworkMonitor } from "@/services/logic/NetworkMonitor";
 import { QueueManager } from "@/services/logic/QueueManager";
 import { TelemetryService } from "@/services/logic/TelemetryService";
-import { SyncServiceV2 } from "./SyncServiceV2";
+import { SyncServiceV2 } from "@/services/SyncServiceV2";
 import type { SyncContextSource } from "@/types/domain/telemetry";
-
-
 
 type SyncServiceInternals = {
   cloudAdapter: ICloudSyncAdapter;
   localDB: LocalDBLike;
   userId: string;
 };
-
-
 
 const isProjectMapChange = (change: SyncChange): boolean => change.type === "projectMap";
 const toProjectMapRecord = (userId: string, change: SyncChange): Record<string, unknown> => {
@@ -144,7 +140,5 @@ class SyncServiceFactory {
     SyncServiceFactory.pendingInstances.clear();
   };
 }
-
-
 
 export { SyncServiceFactory };
