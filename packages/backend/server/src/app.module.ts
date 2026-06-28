@@ -51,7 +51,7 @@ import { TelemetryModule } from './core/telemetry';
 import { UserModule } from './core/user';
 import { VersionModule } from './core/version';
 import { WorkspaceModule } from './core/workspaces';
-import { Env } from './env';
+import type { Env } from './env';
 import { ModelsModule } from './models';
 import { CalendarModule } from './plugins/calendar';
 import { CaptchaModule } from './plugins/captcha';
@@ -62,6 +62,7 @@ import { LicenseModule } from './plugins/license';
 import { OAuthModule } from './plugins/oauth';
 import { PaymentModule } from './plugins/payment';
 import { WorkerModule } from './plugins/worker';
+import { CLS_REQUEST_HOST, env as appEnv } from './prelude';
 
 function getRequestHost(req: Request) {
   return req.get('host') ?? req.hostname;
@@ -226,4 +227,4 @@ export function buildAppModule(env: Env) {
   return factor.compile();
 }
 
-export const AppModule = buildAppModule(env);
+export const AppModule = buildAppModule(appEnv);
