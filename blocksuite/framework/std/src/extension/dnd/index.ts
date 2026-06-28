@@ -5,7 +5,6 @@ import {
   monitorForElements,
 } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { centerUnderPointer } from '@atlaskit/pragmatic-drag-and-drop/element/center-under-pointer';
-import { disableNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/disable-native-drag-preview';
 import { pointerOutsideOfPreview } from '@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview';
 import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
 import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
@@ -32,14 +31,32 @@ import type {
   OriginalMonitorOption,
 } from './types.js';
 
+const transparentDragPreviewImage = (() => {
+  if (typeof Image === 'undefined') {
+    return null;
+  }
+
+  const image = new Image();
+  image.src =
+    'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+  return image;
+})();
+
+function disableNativeDragPreview({
+  nativeSetDragImage,
+}: {
+  nativeSetDragImage: DataTransfer['setDragImage'] | null;
+}) {
+  if (!nativeSetDragImage || !transparentDragPreviewImage) {
+    return;
+  }
+
+  nativeSetDragImage(transparentDragPreviewImage, 0, 0);
+}
+
 export type DragEntity = { type: string };
-
 export type DragFrom = { at: string };
-
-export type DragFromBlockSuite = {
-  at: 'blocksuite-editor';
-  docId: string;
-};
+export type DragFromBlockSuite = { at: 'blocksuite-editor'; docId: string };
 
 export type DragPayload<
   E extends DragEntity = DragEntity,
@@ -64,63 +81,18 @@ export type DraggableOption<
   PayloadFrom extends DragFrom,
   DropPayload extends {},
 > = Pick<OriginalDraggableOption, 'element' | 'dragHandle' | 'canDrag'> & {
-  /**
-   * Set drag data for the draggable element.
-   * @see {@link ElementGetFeedbackArgs} for callback arguments
-   * @param callback - callback to set drag
-   */
   setDragData?: (args: ElementGetFeedbackArgs) => PayloadEntity;
-
-  /**
-   * Set external drag data for the draggable element.
-   * @param callback - callback to set external drag data
-   * @see {@link ElementGetFeedbackArgs} for callback arguments
-   */
   setExternalDragData?: (
     args: ElementGetFeedbackArgs
   ) => ReturnType<
     Required<OriginalDraggableOption>['getInitialDataForExternal']
   >;
-
-  /**
-   * Set custom drag preview for the draggable element.
-   *
-   * `setDragPreview` is a function that will be called with a `container` element and other drag data as parameter when the drag preview is generating.
-   * Append the custom element to the `container` which will be used to generate the preview. Once the drag preview is generated, the
-   * `container` element and its children will be removed automatically.
-   *
-   * If you want to completely disable the drag preview, just set `setDragPreview` to `false`.
-   *
-   * @example
-   * dnd.draggable({
-   *  // ...
-   *  setDragPreview: ({ container }) => {
-   *    const preview = document.createElement('div');
-   *    preview.style.width = '100px';
-   *    preview.style.height = '100px';
-   *    preview.style.backgroundColor = 'red';
-   *    preview.innerText = 'Custom Drag Preview';
-   *    container.appendChild(preview);
-   *
-   *    return () => {
-   *      // do some cleanup
-   *    }
-   *  }
-   * })
-   *
-   * @param callback - callback to set custom drag preview
-   * @returns
-   */
   setDragPreview?:
     | false
     | ((
         options: ElementDragEventBaseArgs<
           DragPayload<PayloadEntity, PayloadFrom>
         > & {
-          /**
-           * Allows you to use the native `setDragImage` function if you want
-           * Although, we recommend using alternative techniques (see element adapter docs)
-           */
           nativeSetDragImage: DataTransfer['setDragImage'] | null;
           container: HTMLElement;
           setOffset: (
@@ -135,40 +107,17 @@ export type DropTargetOption<
   PayloadFrom extends DragFrom,
   DropPayload extends {},
 > = {
-  /**
-   * {@link OriginalDropTargetOption.element}
-   */
   element: HTMLElement;
-
-  /**
-   * Allow drop position for the drop target.
-   */
   allowDropPosition?: Edge[];
-
-  /**
-   * {@link OriginalDropTargetOption.getDropEffect}
-   */
   getDropEffect?: (
     args: ElementDropTargetFeedbackArgs<DragPayload<PayloadEntity, PayloadFrom>>
   ) => DropTargetRecord['dropEffect'];
-
-  /**
-   * {@link OriginalDropTargetOption.canDrop}
-   */
   canDrop?: (
     args: ElementDropTargetFeedbackArgs<DragPayload<PayloadEntity, PayloadFrom>>
   ) => boolean;
-
-  /**
-   * {@link OriginalDropTargetOption.getData}
-   */
   setDropData?: (
     args: ElementDropTargetFeedbackArgs<DragPayload<PayloadEntity, PayloadFrom>>
   ) => DropPayload;
-
-  /**
-   * {@link OriginalDropTargetOption.getIsSticky}
-   */
   getIsSticky?: (
     args: ElementDropTargetFeedbackArgs<DragPayload<PayloadEntity, PayloadFrom>>
   ) => boolean;
@@ -179,9 +128,6 @@ export type MonitorOption<
   PayloadFrom extends DragFrom,
   DropPayload extends {},
 > = {
-  /**
-   * {@link OriginalMonitorOption.canMonitor}
-   */
   canMonitor?: (
     args: ElementMonitorFeedbackArgs<DragPayload<PayloadEntity, PayloadFrom>>
   ) => boolean;
@@ -210,9 +156,6 @@ export const DndExtensionIdentifier = LifeCycleWatcherIdentifier(
 export class DndController extends LifeCycleWatcher {
   static override key = 'DndController';
 
-  /**
-   * Make an element draggable.
-   */
   draggable<
     PayloadEntity extends DragEntity = DragEntity,
     DropData extends {} = {},
@@ -318,9 +261,6 @@ export class DndController extends LifeCycleWatcher {
     });
   }
 
-  /**
-   * Make an element a drop target.
-   */
   dropTarget<
     PayloadEntity extends DragEntity = DragEntity,
     DropData extends {} = {},
