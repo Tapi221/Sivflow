@@ -58,6 +58,8 @@ fn active_workspace_role(input: &PermissionEvaluationInputV1) -> anyhow::Result<
   }
   let role = parse_workspace_role(role)?;
   if role == WorkspaceRole::External {
+    // Explicit external rows are legacy non-membership records. Public external
+    // access is emitted separately as policy candidates below.
     return Ok(None);
   }
   Ok(Some(role))
