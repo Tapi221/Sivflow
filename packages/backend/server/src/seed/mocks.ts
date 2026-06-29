@@ -45,6 +45,14 @@ interface FactoryOptions {
   logger: ((val: unknown) => void) | boolean;
 }
 
+function requireSeedInput<T>(name: string, input: Partial<T> | undefined): T {
+  if (!input) {
+    throw new Error(`${name} seed input is required`);
+  }
+
+  return input as T;
+}
+
 export const createSeedFactory = (
   db: PrismaClient,
   opts: FactoryOptions = { logger: false }
@@ -80,7 +88,7 @@ export const createSeedFactory = (
 
       if (!factory) {
         factory = new Factory();
-        // @ts-expect-error private
+        // @ts-expect-error protected
         factory.db = db;
         FACTORIES.set(Factory.name, factory);
       }
@@ -311,12 +319,17 @@ class MockWorkspaceUser extends SeedMocker<
   MockWorkspaceUserInput,
   WorkspaceUserRole
 > {
-  override async create(input: MockWorkspaceUserInput) {
+  override async create(input?: Partial<MockWorkspaceUserInput>) {
+    const data = requireSeedInput<MockWorkspaceUserInput>(
+      'WorkspaceUser',
+      input
+    );
+
     return await this.db.workspaceUserRole.create({
       data: {
         type: WorkspaceRole.Collaborator,
         status: WorkspaceMemberStatus.Accepted,
-        ...input,
+        ...data,
       },
     });
   }
@@ -327,12 +340,14 @@ export type MockUserSettingsInput = UserSettingsInput & {
 };
 
 class MockUserSettings extends SeedMocker<MockUserSettingsInput, UserSettings> {
-  override async create(input: MockUserSettingsInput) {
+  override async create(input?: Partial<MockUserSettingsInput>) {
+    const data = requireSeedInput<MockUserSettingsInput>('UserSettings', input);
+
     return await this.db.userSettings.create({
       data: {
-        userId: input.userId,
+        userId: data.userId,
         payload: {
-          ...omit(input, 'userId'),
+          ...omit(data, 'userId'),
         },
       },
     });
@@ -342,9 +357,11 @@ class MockUserSettings extends SeedMocker<MockUserSettingsInput, UserSettings> {
 export type MockDocMetaInput = Prisma.WorkspaceDocUncheckedCreateInput;
 
 class MockDocMeta extends SeedMocker<MockDocMetaInput, WorkspaceDoc> {
-  override async create(input: MockDocMetaInput) {
+  override async create(input?: Partial<MockDocMetaInput>) {
+    const data = requireSeedInput<MockDocMetaInput>('DocMeta', input);
+
     return await this.db.workspaceDoc.create({
-      data: input,
+      data,
     });
   }
 }
@@ -359,13 +376,15 @@ export type MockDocSnapshotInput = {
 };
 
 class MockDocSnapshot extends SeedMocker<MockDocSnapshotInput, Snapshot> {
-  override async create(input: MockDocSnapshotInput) {
-    if (!input.blob) {
-      input.blob = await readFile(
+  override async create(input?: Partial<MockDocSnapshotInput>) {
+    const data = requireSeedInput<MockDocSnapshotInput>('DocSnapshot', input);
+
+    if (!data.blob) {
+      data.blob = await readFile(
         path.join(
           import.meta.dirname,
           `../../../../../tests/backend/server/src/__tests__/__fixtures__/${
-            input.snapshotFile ?? 'test-doc.snapshot.bin'
+            data.snapshotFile ?? 'test-doc.snapshot.bin'
           }`
         )
       );
@@ -373,13 +392,13 @@ class MockDocSnapshot extends SeedMocker<MockDocSnapshotInput, Snapshot> {
 
     return await this.db.snapshot.create({
       data: {
-        id: input.docId ?? faker.string.nanoid(),
-        workspaceId: input.workspaceId,
-        blob: input.blob,
+        id: data.docId ?? faker.string.nanoid(),
+        workspaceId: data.workspaceId,
+        blob: data.blob,
         createdAt: new Date(),
-        updatedAt: input.updatedAt ?? new Date(),
-        createdBy: input.user.id,
-        updatedBy: input.user.id,
+        updatedAt: data.updatedAt ?? new Date(),
+        createdBy: data.user.id,
+        updatedBy: data.user.id,
       },
     });
   }
@@ -388,9 +407,11 @@ class MockDocSnapshot extends SeedMocker<MockDocSnapshotInput, Snapshot> {
 export type MockDocUserInput = Prisma.WorkspaceDocUserRoleUncheckedCreateInput;
 
 class MockDocUser extends SeedMocker<MockDocUserInput, WorkspaceDocUserRole> {
-  override async create(input: MockDocUserInput) {
+  override async create(input?: Partial<MockDocUserInput>) {
+    const data = requireSeedInput<MockDocUserInput>('DocUser', input);
+
     return await this.db.workspaceDocUserRole.create({
-      data: input,
+      data,
     });
   }
 }
@@ -401,11 +422,13 @@ export type MockAccessTokenInput = Omit<
 >;
 
 class MockAccessToken extends SeedMocker<MockAccessTokenInput, AccessToken> {
-  override async create(input: MockAccessTokenInput) {
+  override async create(input?: Partial<MockAccessTokenInput>) {
+    const data = requireSeedInput<MockAccessTokenInput>('AccessToken', input);
+
     return await this.db.accessToken.create({
       data: {
-        ...input,
-        name: input.name ?? faker.lorem.word(),
+        ...data,
+        name: data.name ?? faker.lorem.word(),
         token: 'ut_' + faker.string.hexadecimal({ length: 37 }),
       },
     });
