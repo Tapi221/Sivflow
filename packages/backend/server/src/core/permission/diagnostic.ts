@@ -1,4 +1,4 @@
-import { Inject, Injectable, Optional } from '@nestjs/common';
+import { Inject, Injectable, Optional, forwardRef } from '@nestjs/common';
 
 import { metrics } from '../../base';
 import type { PermissionEvaluationOutputV1 } from '../../native';
@@ -29,7 +29,9 @@ type PermissionShadowMismatchCategory =
 @Injectable()
 export class PermissionDiagnosticService {
   constructor(
+    @Inject(forwardRef(() => PermissionContextLoader))
     private readonly loader: PermissionContextLoader,
+    @Inject(forwardRef(() => PermissionService))
     private readonly permission: PermissionService,
     @Optional()
     @Inject(PermissionSqlPredicateBuilder)

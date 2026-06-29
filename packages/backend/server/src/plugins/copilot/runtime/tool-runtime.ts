@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { Config } from '../../../base';
 import { DocReader, DocWriter } from '../../../core/doc';
@@ -47,14 +47,14 @@ export type ProviderSpecificToolResolver = (
 @Injectable()
 export class ToolRuntime {
   constructor(
-    private readonly config: Config,
-    private readonly ac: PermissionAccess,
-    private readonly context: CopilotContextService,
-    private readonly docReader: DocReader,
-    private readonly docWriter: DocWriter,
-    private readonly models: Models,
-    private readonly promptRuntime: PromptRuntime,
-    private readonly indexerService: IndexerService
+    @Inject(Config) private readonly config: Config,
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(CopilotContextService) private readonly context: CopilotContextService,
+    @Inject(DocReader) private readonly docReader: DocReader,
+    @Inject(DocWriter) private readonly docWriter: DocWriter,
+    @Inject(Models) private readonly models: Models,
+    @Inject(PromptRuntime) private readonly promptRuntime: PromptRuntime,
+    @Inject(IndexerService) private readonly indexerService: IndexerService
   ) {}
 
   async getTools(

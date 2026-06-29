@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { OnJob } from '../../base';
 import { CalendarService } from './service';
@@ -14,7 +14,7 @@ declare global {
 
 @Injectable()
 export class CalendarJob {
-  constructor(private readonly calendar: CalendarService) {}
+  constructor(@Inject(CalendarService) private readonly calendar: CalendarService) {}
 
   @OnJob('calendar.syncSubscription')
   async syncSubscription({

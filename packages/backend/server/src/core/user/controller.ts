@@ -1,4 +1,10 @@
-import { Controller, Get, Param, Res } from '@nestjs/common';
+import {
+  Inject,
+  Controller,
+  Get,
+  Param,
+  Res,
+} from '@nestjs/common';
 import type { Response } from 'express';
 
 import {
@@ -12,7 +18,7 @@ import { AvatarStorage } from '../storage';
 @Public()
 @Controller('/api/avatars')
 export class UserAvatarController {
-  constructor(private readonly storage: AvatarStorage) {}
+  constructor(@Inject(AvatarStorage) private readonly storage: AvatarStorage) {}
 
   @Get('/:id')
   async getAvatar(@Res() res: Response, @Param('id') id: string) {

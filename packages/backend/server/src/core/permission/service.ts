@@ -1,4 +1,4 @@
-import { Inject, Injectable, Optional } from '@nestjs/common';
+import { Inject, Injectable, Optional, forwardRef } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
 import {
@@ -60,13 +60,14 @@ const RUNTIME_RESTRICTED_DOC_ACTIONS = new Set<PermissionDocAction>([
 @Injectable()
 export class PermissionService {
   constructor(
+    @Inject(forwardRef(() => PermissionContextLoader))
     private readonly loader: PermissionContextLoader,
     @Optional()
     @Inject(PermissionSqlPredicateBuilder)
     private readonly sqlPredicate = new PermissionSqlPredicateBuilder(),
-    @Optional()
+    @Inject(WorkspacePolicyService) @Optional()
     private readonly workspacePolicy?: WorkspacePolicyService,
-    @Optional()
+    @Inject(Config) @Optional()
     private readonly config?: Config
   ) {}
 

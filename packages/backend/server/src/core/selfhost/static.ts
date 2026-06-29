@@ -1,6 +1,8 @@
-import { join } from 'node:path';
+import type { OnModuleInit } from '@nestjs/common';
+import { join, } from 'node:path';
 
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  Inject, Injectable } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import type { Application } from 'express';
 import { static as serveStatic } from 'express';
@@ -12,9 +14,9 @@ import { SetupMiddleware } from './setup';
 @Injectable()
 export class StaticFilesResolver implements OnModuleInit {
   constructor(
-    private readonly config: Config,
-    private readonly adapterHost: HttpAdapterHost,
-    private readonly check: SetupMiddleware
+    @Inject(Config) private readonly config: Config,
+    @Inject(HttpAdapterHost) private readonly adapterHost: HttpAdapterHost,
+    @Inject(SetupMiddleware) private readonly check: SetupMiddleware
   ) {}
 
   onModuleInit() {

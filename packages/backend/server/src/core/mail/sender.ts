@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   createTestAccount,
   createTransport,
@@ -43,7 +43,7 @@ export class MailSender {
   private fallbackSMTP: Transporter<SMTPTransport.SentMessageInfo> | null =
     null;
   private usingTestAccount = false;
-  constructor(private readonly config: Config) {}
+  constructor(@Inject(Config) private readonly config: Config) {}
 
   static create(config: Config['mailer']['SMTP']) {
     return createTransport(configToSMTPOptions(config));

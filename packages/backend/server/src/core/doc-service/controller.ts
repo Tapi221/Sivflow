@@ -1,4 +1,5 @@
 import {
+  Inject,
   Controller,
   Get,
   Logger,
@@ -18,7 +19,7 @@ import { DatabaseDocReader } from '../doc';
 export class DocRpcController {
   private readonly logger = new Logger(DocRpcController.name);
 
-  constructor(private readonly docReader: DatabaseDocReader) {}
+  constructor(@Inject(DatabaseDocReader) private readonly docReader: DatabaseDocReader) {}
 
   @SkipThrottle()
   @Internal()

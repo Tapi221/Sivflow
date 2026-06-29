@@ -1,6 +1,11 @@
-import { createHash } from 'node:crypto';
+import {
+  createHash,
+} from 'node:crypto';
 
-import { Injectable } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 
 import {
   type BlobInputType,
@@ -25,10 +30,10 @@ export class CopilotStorage {
   public provider!: StorageProvider;
 
   constructor(
-    private readonly config: Config,
-    private readonly url: URLHelper,
-    private readonly storageFactory: StorageProviderFactory,
-    private readonly quota: QuotaService
+    @Inject(Config) private readonly config: Config,
+    @Inject(URLHelper) private readonly url: URLHelper,
+    @Inject(StorageProviderFactory) private readonly storageFactory: StorageProviderFactory,
+    @Inject(QuotaService) private readonly quota: QuotaService
   ) {}
 
   @OnEvent('config.init')

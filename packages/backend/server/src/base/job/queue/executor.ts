@@ -1,5 +1,7 @@
-import { getQueueToken, getSharedConfigToken } from '@nestjs/bullmq';
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import type { OnModuleDestroy } from '@nestjs/common';
+import { getQueueToken, getSharedConfigToken, } from '@nestjs/bullmq';
+import {
+  Inject, Injectable, Logger } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { Job, Queue as Bullmq, Worker, WorkerOptions } from 'bullmq';
 import { difference, merge } from 'lodash-es';
@@ -19,10 +21,10 @@ export class JobExecutor implements OnModuleDestroy {
   private readonly workers: Map<Queue, Worker> = new Map();
 
   constructor(
-    private readonly config: Config,
-    private readonly redis: QueueRedis,
-    private readonly scanner: JobHandlerScanner,
-    private readonly ref: ModuleRef
+    @Inject(Config) private readonly config: Config,
+    @Inject(QueueRedis) private readonly redis: QueueRedis,
+    @Inject(JobHandlerScanner) private readonly scanner: JobHandlerScanner,
+    @Inject(ModuleRef) private readonly ref: ModuleRef
   ) {}
 
   @OnEvent('config.init')

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { Config } from '../../../base';
 import {
@@ -12,7 +12,7 @@ export class CopilotProviderRegistryService {
   private lastConfig?: CopilotProvidersConfigInput;
   private lastRegistry?: CopilotProviderRegistry;
 
-  constructor(private readonly config: Config) {}
+  constructor(@Inject(Config) private readonly config: Config) {}
 
   getRegistry(): CopilotProviderRegistry {
     const providerConfig = this.config.copilot.providers;

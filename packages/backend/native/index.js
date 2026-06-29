@@ -50,6 +50,14 @@ if (!binding) {
           return undefined;
         }
 
+        if (property === '__missingNative') {
+          return true;
+        }
+
+        if (property === '__missingNativeError') {
+          return createMissingNativeError();
+        }
+
         return () => {
           throw createMissingNativeError();
         };

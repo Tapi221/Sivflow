@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import {
   Args,
   Field,
@@ -297,13 +297,13 @@ export class WorkspaceDocResolver {
     /**
      * @deprecated migrate to models
      */
-    private readonly prisma: PrismaClient,
-    private readonly ac: PermissionAccess,
-    private readonly permission: PermissionService,
-    private readonly models: Models,
-    private readonly cache: Cache,
-    private readonly event: EventBus,
-    private readonly config: Config
+    @Inject(PrismaClient) private readonly prisma: PrismaClient,
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(PermissionService) private readonly permission: PermissionService,
+    @Inject(Models) private readonly models: Models,
+    @Inject(Cache) private readonly cache: Cache,
+    @Inject(EventBus) private readonly event: EventBus,
+    @Inject(Config) private readonly config: Config
   ) {}
 
   private async assertCanShare(
@@ -567,10 +567,10 @@ export class DocResolver {
   private readonly logger = new Logger(DocResolver.name);
 
   constructor(
-    private readonly ac: PermissionAccess,
-    private readonly models: Models,
-    private readonly grants: DocGrantsService,
-    private readonly event: EventBus
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(Models) private readonly models: Models,
+    @Inject(DocGrantsService) private readonly grants: DocGrantsService,
+    @Inject(EventBus) private readonly event: EventBus
   ) {}
 
   @ResolveField(() => PublicUserType, {

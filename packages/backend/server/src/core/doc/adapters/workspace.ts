@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { chunk } from 'lodash-es';
 
 import {
@@ -42,11 +42,11 @@ export class PgWorkspaceDocStorageAdapter extends DocStorageAdapter {
   );
 
   constructor(
-    private readonly models: Models,
-    private readonly mutex: Mutex,
-    private readonly event: EventBus,
-    protected override readonly options: DocStorageOptions,
-    private readonly queue: JobQueue
+    @Inject(Models) private readonly models: Models,
+    @Inject(Mutex) private readonly mutex: Mutex,
+    @Inject(EventBus) private readonly event: EventBus,
+    @Inject(DocStorageOptions) protected override readonly options: DocStorageOptions,
+    @Inject(JobQueue) private readonly queue: JobQueue
   ) {
     super(options);
   }

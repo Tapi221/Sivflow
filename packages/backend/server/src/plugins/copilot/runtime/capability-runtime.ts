@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CopilotPromptInvalid } from '../../../base';
 import { ValidatedStructuredValueSchema } from '../core';
@@ -35,8 +35,8 @@ const providerModelId = (modelId?: string) => modelId ?? 'auto';
 @Injectable()
 export class CapabilityRuntime {
   constructor(
-    private readonly plans: ExecutionPlanBuilder,
-    private readonly engine: NativeExecutionEngine
+    @Inject(ExecutionPlanBuilder) private readonly plans: ExecutionPlanBuilder,
+    @Inject(NativeExecutionEngine) private readonly engine: NativeExecutionEngine
   ) {}
 
   private async executePlan<TPlan, TResult>(

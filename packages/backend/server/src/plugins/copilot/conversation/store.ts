@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import {
   CleanupSessionOptions,
@@ -30,7 +30,7 @@ type ForkTurnsInput = Omit<ForkConversationSeed, 'messages'> & {
 
 @Injectable()
 export class ConversationStore {
-  constructor(private readonly models: Models) {}
+  constructor(@Inject(Models) private readonly models: Models) {}
 
   /**
    * Durable-history boundary only.

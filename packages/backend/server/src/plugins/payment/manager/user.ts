@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   Prisma,
   PrismaClient,
@@ -61,12 +61,12 @@ export class UserSubscriptionManager extends SubscriptionManager {
   constructor(
     stripeProvider: StripeFactory,
     db: PrismaClient,
-    private readonly config: Config,
-    private readonly event: EventBus,
-    private readonly url: URLHelper,
-    private readonly mutex: Mutex,
-    private readonly entitlement: EntitlementService,
-    private readonly revenueCat: RevenueCatService
+    @Inject(Config) private readonly config: Config,
+    @Inject(EventBus) private readonly event: EventBus,
+    @Inject(URLHelper) private readonly url: URLHelper,
+    @Inject(Mutex) private readonly mutex: Mutex,
+    @Inject(EntitlementService) private readonly entitlement: EntitlementService,
+    @Inject(RevenueCatService) private readonly revenueCat: RevenueCatService
   ) {
     super(stripeProvider, db);
   }

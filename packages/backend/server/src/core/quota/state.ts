@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
 import { EventBus, OnEvent } from '../../base';
@@ -24,9 +24,9 @@ declare global {
 @Injectable()
 export class QuotaStateService {
   constructor(
-    private readonly db: PrismaClient,
-    private readonly entitlement: EntitlementService,
-    private readonly event: EventBus
+    @Inject(PrismaClient) private readonly db: PrismaClient,
+    @Inject(EntitlementService) private readonly entitlement: EntitlementService,
+    @Inject(EventBus) private readonly event: EventBus
   ) {}
 
   async reconcileUserQuotaState(

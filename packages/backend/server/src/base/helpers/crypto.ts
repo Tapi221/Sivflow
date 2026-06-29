@@ -1,21 +1,8 @@
-import {
-  createCipheriv,
-  createDecipheriv,
-  createHash,
-  createPrivateKey,
-  createPublicKey,
-  createSign,
-  createVerify,
-  generateKeyPairSync,
-  type KeyObject,
-  randomBytes,
-  randomInt,
-  sign,
-  timingSafeEqual,
-  verify,
-} from 'node:crypto';
+import type { OnModuleInit } from '@nestjs/common';
+import { createCipheriv, createDecipheriv, createHash, createPrivateKey, createPublicKey, createSign, createVerify, generateKeyPairSync, type KeyObject, randomBytes, randomInt, sign, timingSafeEqual, verify, } from 'node:crypto';
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  Inject, Injectable, Logger } from '@nestjs/common';
 import {
   hash as hashPassword,
   verify as verifyPassword,
@@ -117,7 +104,7 @@ export class CryptoHelper implements OnModuleInit {
     }
   }
 
-  constructor(private readonly config: Config) {}
+  constructor(@Inject(Config) private readonly config: Config) {}
 
   @OnEvent('config.init')
   onConfigInit() {

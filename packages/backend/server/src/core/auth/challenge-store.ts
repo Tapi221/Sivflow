@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { InvalidAuthState, SessionCache } from '../../base';
 import { isValidCacheTtl } from '../../base/cache/provider';
@@ -15,7 +15,7 @@ export type AuthChallengePurpose =
 
 @Injectable()
 export class AuthChallengeStore {
-  constructor(private readonly cache: SessionCache) {}
+  constructor(@Inject(SessionCache) private readonly cache: SessionCache) {}
 
   async create<T>(
     purpose: AuthChallengePurpose,

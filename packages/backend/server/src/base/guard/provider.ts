@@ -1,10 +1,5 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  Logger,
-  OnModuleInit,
-} from '@nestjs/common';
+import type { CanActivate, ExecutionContext, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 export interface RegisterGuardName {}
 

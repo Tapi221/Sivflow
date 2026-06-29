@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import { type Prisma, PrismaClient, UserStripeCustomer } from '@prisma/client';
 import Stripe from 'stripe';
 import { z } from 'zod';
@@ -92,8 +93,8 @@ export const CheckoutParams = z.object({
 export abstract class SubscriptionManager {
   protected readonly scheduleManager: ScheduleManager;
   constructor(
-    protected readonly stripeProvider: StripeFactory,
-    protected readonly db: PrismaClient
+    @Inject(StripeFactory) protected readonly stripeProvider: StripeFactory,
+    @Inject(PrismaClient) protected readonly db: PrismaClient
   ) {
     this.scheduleManager = new ScheduleManager(this.stripeProvider);
   }

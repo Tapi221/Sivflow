@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
   Args,
   Field,
@@ -440,8 +440,8 @@ class AdminUpdateWorkspaceInput {
 @Resolver(() => AdminWorkspace)
 export class AdminWorkspaceResolver {
   constructor(
-    private readonly models: Models,
-    private readonly url: URLHelper
+    @Inject(Models) private readonly models: Models,
+    @Inject(URLHelper) private readonly url: URLHelper
   ) {}
 
   private assertCloudOnly() {

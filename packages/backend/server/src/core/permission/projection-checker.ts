@@ -1,4 +1,4 @@
-import { Injectable, Optional } from '@nestjs/common';
+import { Inject, Injectable, Optional, forwardRef } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
 import { Models } from '../../models';
@@ -21,11 +21,15 @@ type ProjectionDecisionSample = {
 @Injectable()
 export class PermissionProjectionChecker {
   constructor(
+    @Inject(PrismaClient)
     private readonly db: PrismaClient,
-    private readonly models: Models,
+    @Inject(Models)
+    @Inject(Models) private readonly models: Models,
     @Optional()
+    @Inject(forwardRef(() => PermissionContextLoader))
     private readonly loader?: PermissionContextLoader,
     @Optional()
+    @Inject(forwardRef(() => PermissionService))
     private readonly permission?: PermissionService
   ) {}
 

@@ -1,11 +1,5 @@
-import {
-  CallHandler,
-  ExecutionContext,
-  Injectable,
-  Logger,
-  NestInterceptor,
-  SetMetadata,
-} from '@nestjs/common';
+import type { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/common';
+import { Inject, Injectable, Logger, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { GqlContextType, GqlExecutionContext } from '@nestjs/graphql';
 import { mergeMap, Observable, of } from 'rxjs';
@@ -23,8 +17,8 @@ type CacheConfig = [string[], string[]?];
 export class CacheInterceptor implements NestInterceptor {
   private readonly logger = new Logger(CacheInterceptor.name);
   constructor(
-    private readonly reflector: Reflector,
-    private readonly cache: Cache
+    @Inject(Reflector) private readonly reflector: Reflector,
+    @Inject(Cache) private readonly cache: Cache
   ) {}
   async intercept(
     ctx: ExecutionContext,

@@ -1,4 +1,4 @@
-import { PipeTransform, Type } from '@nestjs/common';
+import type { PipeTransform, Type } from '@nestjs/common';
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 
 import { BadRequest } from '../error';

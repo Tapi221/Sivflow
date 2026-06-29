@@ -1,4 +1,5 @@
-import { Injectable, OnModuleInit, Optional } from '@nestjs/common';
+import type { OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { z } from 'zod';
 
 import { OnEvent, SpaceAccessDenied } from '../../base';
@@ -43,10 +44,10 @@ declare module '@affine/realtime' {
 @Injectable()
 export class QuotaStateRealtimeProvider implements OnModuleInit {
   constructor(
-    private readonly models: Models,
-    private readonly quotaState: QuotaStateService,
-    @Optional() private readonly registry?: RealtimeRegistry,
-    @Optional() private readonly publisher?: RealtimePublisher
+    @Inject(Models) private readonly models: Models,
+    @Inject(QuotaStateService) private readonly quotaState: QuotaStateService,
+    @Inject(RealtimeRegistry) @Optional() private readonly registry?: RealtimeRegistry,
+    @Inject(RealtimePublisher) @Optional() private readonly publisher?: RealtimePublisher
   ) {}
 
   onModuleInit() {

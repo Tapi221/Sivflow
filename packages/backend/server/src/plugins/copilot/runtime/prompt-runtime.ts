@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CopilotPromptNotFound } from '../../../base';
 import { PromptService } from '../prompt/service';
@@ -23,9 +23,9 @@ type PromptRuntimeStructuredProviderOptions = Omit<
 @Injectable()
 export class PromptRuntime {
   constructor(
-    private readonly prompts: PromptService,
-    private readonly capabilityPolicy: CapabilityPolicyHost,
-    private readonly runtime: CapabilityRuntime
+    @Inject(PromptService) private readonly prompts: PromptService,
+    @Inject(CapabilityPolicyHost) private readonly capabilityPolicy: CapabilityPolicyHost,
+    @Inject(CapabilityRuntime) private readonly runtime: CapabilityRuntime
   ) {}
 
   private async preparePrompt(

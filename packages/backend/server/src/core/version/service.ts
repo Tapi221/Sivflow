@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import semver from 'semver';
 
 import {
@@ -13,7 +13,7 @@ export class VersionService {
   private static readonly HARD_REQUIRED_VERSION = '>=0.25.0';
   private static readonly CANARY_REQUIRED_VERSION = 'canary (within 2 months)';
 
-  constructor(private readonly config: Config) {}
+  constructor(@Inject(Config) private readonly config: Config) {}
 
   async checkVersion(clientVersion?: string) {
     const requiredVersion = this.config.client.versionControl.requiredVersion;

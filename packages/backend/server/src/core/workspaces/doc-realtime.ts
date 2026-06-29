@@ -2,7 +2,8 @@ import type {
   DocShareStateSnapshot,
   PaginatedDocGrantedUsersSnapshot,
 } from '@affine/realtime';
-import { Injectable, OnModuleInit, Optional } from '@nestjs/common';
+import type { OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { z } from 'zod';
 
 import { OnEvent, PaginationInput } from '../../base';
@@ -24,10 +25,10 @@ const docInput = z
 @Injectable()
 export class DocShareRealtimeProvider implements OnModuleInit {
   constructor(
-    private readonly ac: PermissionAccess,
-    private readonly models: Models,
-    @Optional() private readonly registry?: RealtimeRegistry,
-    @Optional() private readonly publisher?: RealtimePublisher
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(Models) private readonly models: Models,
+    @Inject(RealtimeRegistry) @Optional() private readonly registry?: RealtimeRegistry,
+    @Inject(RealtimePublisher) @Optional() private readonly publisher?: RealtimePublisher
   ) {}
 
   onModuleInit() {
@@ -107,11 +108,11 @@ export class DocShareRealtimeProvider implements OnModuleInit {
 @Injectable()
 export class DocGrantsRealtimeProvider implements OnModuleInit {
   constructor(
-    private readonly ac: PermissionAccess,
-    private readonly models: Models,
-    private readonly grants: DocGrantsService,
-    @Optional() private readonly registry?: RealtimeRegistry,
-    @Optional() private readonly publisher?: RealtimePublisher
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(Models) private readonly models: Models,
+    @Inject(DocGrantsService) private readonly grants: DocGrantsService,
+    @Inject(RealtimeRegistry) @Optional() private readonly registry?: RealtimeRegistry,
+    @Inject(RealtimePublisher) @Optional() private readonly publisher?: RealtimePublisher
   ) {}
 
   onModuleInit() {

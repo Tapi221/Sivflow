@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import {
+  Inject,
   Body,
   Controller,
   Get,
@@ -50,11 +51,11 @@ export class LicenseController {
   private readonly logger = new Logger(LicenseController.name);
 
   constructor(
-    private readonly db: PrismaClient,
-    private readonly mutex: Mutex,
-    private readonly subscription: SubscriptionService,
-    private readonly manager: SelfhostTeamSubscriptionManager,
-    private readonly stripeProvider: StripeFactory
+    @Inject(PrismaClient) private readonly db: PrismaClient,
+    @Inject(Mutex) private readonly mutex: Mutex,
+    @Inject(SubscriptionService) private readonly subscription: SubscriptionService,
+    @Inject(SelfhostTeamSubscriptionManager) private readonly manager: SelfhostTeamSubscriptionManager,
+    @Inject(StripeFactory) private readonly stripeProvider: StripeFactory
   ) {}
 
   @Post('/:license/activate')

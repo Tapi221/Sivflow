@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { ClsService } from 'nestjs-cls';
 
@@ -92,9 +92,9 @@ function cacheKey(parts: readonly unknown[]) {
 @Injectable()
 export class PermissionContextLoader {
   constructor(
-    private readonly models: Models,
-    private readonly db: PrismaClient,
-    private readonly cls?: ClsService
+    @Inject(Models) private readonly models: Models,
+    @Inject(PrismaClient) private readonly db: PrismaClient,
+    @Inject(ClsService) private readonly cls?: ClsService
   ) {}
 
   async load(input: {

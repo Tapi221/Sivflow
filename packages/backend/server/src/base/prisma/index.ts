@@ -1,6 +1,7 @@
 import './config';
 
-import { Global, Module, Provider } from '@nestjs/common';
+import type { Provider } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
 import { PrismaFactory } from './factory';

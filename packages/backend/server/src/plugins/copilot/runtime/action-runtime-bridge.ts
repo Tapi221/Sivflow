@@ -1,4 +1,4 @@
-import { Injectable, Optional } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 
 import { Models } from '../../../models';
 import type { AiActionRunStatus } from '../../../models/copilot-action-run';
@@ -105,9 +105,9 @@ function resolveFinalStatus(
 @Injectable()
 export class ActionRuntimeBridge {
   constructor(
-    private readonly models: Models,
-    private readonly turnPersistence: TurnPersistence,
-    @Optional() private readonly plans?: ExecutionPlanBuilder
+    @Inject(Models) private readonly models: Models,
+    @Inject(TurnPersistence) private readonly turnPersistence: TurnPersistence,
+    @Inject(ExecutionPlanBuilder) @Optional() private readonly plans?: ExecutionPlanBuilder
   ) {}
 
   protected runNativeStream(

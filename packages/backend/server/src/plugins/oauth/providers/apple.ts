@@ -1,6 +1,6 @@
 import { JsonWebKey } from 'node:crypto';
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import { z } from 'zod';
 
@@ -33,7 +33,7 @@ export class AppleOAuthProvider extends OAuthProvider {
   private args: z.infer<typeof AppleProviderArgsSchema> | null = null;
   private _jwtCache: { token: string; expiresAt: number } | null = null;
 
-  constructor(private readonly url: URLHelper) {
+  constructor(@Inject(URLHelper) private readonly url: URLHelper) {
     super();
   }
 

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { OnEvent } from '../../base';
 import { Models } from '../../models';
@@ -40,9 +40,9 @@ export class WorkspaceEvents {
   private readonly logger = new Logger(WorkspaceEvents.name);
 
   constructor(
-    private readonly workspaceService: WorkspaceService,
-    private readonly models: Models,
-    private readonly mailer: Mailer
+    @Inject(WorkspaceService) private readonly workspaceService: WorkspaceService,
+    @Inject(Models) private readonly models: Models,
+    @Inject(Mailer) private readonly mailer: Mailer
   ) {}
 
   @OnEvent('workspace.members.roleChanged')

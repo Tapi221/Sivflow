@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 
 import { ServerFeature, ServerService } from '../../../../core';
@@ -32,9 +32,9 @@ type ResolvePolicyModelInput = ResolveModelInput & {
 @Injectable()
 export class CapabilityPolicyHost {
   constructor(
-    private readonly server: ServerService,
-    private readonly moduleRef: ModuleRef,
-    private readonly modelSelection: ModelSelectionPolicy
+    @Inject(ServerService) private readonly server: ServerService,
+    @Inject(ModuleRef) private readonly moduleRef: ModuleRef,
+    @Inject(ModelSelectionPolicy) private readonly modelSelection: ModelSelectionPolicy
   ) {}
 
   private async hasAiProAccess(

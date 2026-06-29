@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InstalledLicense, PrismaClient } from '@prisma/client';
 
@@ -65,13 +65,13 @@ export class LicenseService {
   private readonly logger = new Logger(LicenseService.name);
 
   constructor(
-    private readonly db: PrismaClient,
-    private readonly event: EventBus,
-    private readonly models: Models,
-    private readonly crypto: CryptoHelper,
-    private readonly policy: WorkspacePolicyService,
-    private readonly entitlement: EntitlementService,
-    private readonly quotaState: QuotaStateService
+    @Inject(PrismaClient) private readonly db: PrismaClient,
+    @Inject(EventBus) private readonly event: EventBus,
+    @Inject(Models) private readonly models: Models,
+    @Inject(CryptoHelper) private readonly crypto: CryptoHelper,
+    @Inject(WorkspacePolicyService) private readonly policy: WorkspacePolicyService,
+    @Inject(EntitlementService) private readonly entitlement: EntitlementService,
+    @Inject(QuotaStateService) private readonly quotaState: QuotaStateService
   ) {}
 
   @OnEvent('workspace.subscription.canceled')

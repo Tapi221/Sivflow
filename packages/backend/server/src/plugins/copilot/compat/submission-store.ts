@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { Cache } from '../../../base';
 import type { PromptMessage } from '../providers/types';
@@ -35,7 +35,7 @@ export type AcceptedCompatSubmission = Omit<
 
 @Injectable()
 export class CompatSubmissionStore {
-  constructor(private readonly cache: Cache) {}
+  constructor(@Inject(Cache) private readonly cache: Cache) {}
 
   private submissionKey(token: string) {
     return `copilot:submission:${token}`;

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { ActionForbidden, InvalidAuthState } from '../../base';
 import { Models } from '../../models';
@@ -20,7 +20,7 @@ type FirebaseLookupResponse = {
 
 @Injectable()
 export class FirebaseAuthService {
-  constructor(private readonly models: Models) {}
+  constructor(@Inject(Models) private readonly models: Models) {}
 
   async verifyIdToken(idToken: string): Promise<VerifiedIdentity> {
     const token = idToken?.trim();

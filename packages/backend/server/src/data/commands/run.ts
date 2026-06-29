@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { PrismaClient } from '@prisma/client';
 import { once } from 'lodash-es';
@@ -38,8 +38,8 @@ export const collectMigrations = once(() => {
 export class RunCommand {
   logger = new Logger(RunCommand.name);
   constructor(
-    private readonly db: PrismaClient,
-    private readonly injector: ModuleRef
+    @Inject(PrismaClient) private readonly db: PrismaClient,
+    @Inject(ModuleRef) private readonly injector: ModuleRef
   ) {}
 
   async execute(): Promise<void> {
@@ -137,8 +137,8 @@ export class RevertCommand {
   logger = new Logger(RevertCommand.name);
 
   constructor(
-    private readonly db: PrismaClient,
-    private readonly injector: ModuleRef
+    @Inject(PrismaClient) private readonly db: PrismaClient,
+    @Inject(ModuleRef) private readonly injector: ModuleRef
   ) {}
 
   async execute(name?: string): Promise<void> {

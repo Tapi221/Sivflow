@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import {
   Args,
   Field,
@@ -61,9 +61,9 @@ export class ServerConfigResolver {
   private readonly logger = new Logger(ServerConfigResolver.name);
 
   constructor(
-    private readonly config: Config,
-    private readonly url: URLHelper,
-    private readonly server: ServerService
+    @Inject(Config) private readonly config: Config,
+    @Inject(URLHelper) private readonly url: URLHelper,
+    @Inject(ServerService) private readonly server: ServerService
   ) {}
 
   @Public()
@@ -210,7 +210,7 @@ class AppConfigValidateResult {
 @Admin()
 @Resolver(() => GraphQLJSONObject)
 export class AppConfigResolver {
-  constructor(private readonly service: ServerService) {}
+  constructor(@Inject(ServerService) private readonly service: ServerService) {}
 
   @Query(() => GraphQLJSONObject, {
     description: 'get the whole app configuration',

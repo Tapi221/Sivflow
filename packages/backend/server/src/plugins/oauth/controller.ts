@@ -1,4 +1,5 @@
 import {
+  Inject,
   Body,
   Controller,
   Get,
@@ -64,7 +65,7 @@ function getQueryValue(value: unknown) {
 
 @Controller('/oauth')
 export class OAuthWebCallbackController {
-  constructor(private readonly url: URLHelper) {}
+  constructor(@Inject(URLHelper) private readonly url: URLHelper) {}
 
   @Public()
   @Get('/callback')
@@ -111,10 +112,10 @@ export class OAuthWebCallbackController {
 @Controller('/api/oauth')
 export class OAuthController {
   constructor(
-    private readonly sessionIssuer: SessionIssuer,
-    private readonly oauth: OAuthService,
-    private readonly providerFactory: OAuthProviderFactory,
-    private readonly url: URLHelper
+    @Inject(SessionIssuer) private readonly sessionIssuer: SessionIssuer,
+    @Inject(OAuthService) private readonly oauth: OAuthService,
+    @Inject(OAuthProviderFactory) private readonly providerFactory: OAuthProviderFactory,
+    @Inject(URLHelper) private readonly url: URLHelper
   ) {}
 
   @Public()

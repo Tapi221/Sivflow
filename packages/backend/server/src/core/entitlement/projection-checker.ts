@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class EntitlementProjectionChecker {
-  constructor(private readonly db: PrismaClient) {}
+  constructor(@Inject(PrismaClient) private readonly db: PrismaClient) {}
 
   async checkEntitlementProjection() {
     const now = new Date();

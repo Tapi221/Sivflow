@@ -1,4 +1,4 @@
-import { DynamicModule, ExecutionContext } from '@nestjs/common';
+import type { DynamicModule, ExecutionContext } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ClsPluginTransactional } from '@nestjs-cls/transactional';
 import { TransactionalAdapterPrisma } from '@nestjs-cls/transactional-adapter-prisma';

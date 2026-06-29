@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { JobQueue, OneDay, OnJob } from '../../base';
@@ -16,9 +16,9 @@ export class BlobUploadCleanupJob {
   private readonly logger = new Logger(BlobUploadCleanupJob.name);
 
   constructor(
-    private readonly models: Models,
-    private readonly storage: WorkspaceBlobStorage,
-    private readonly queue: JobQueue
+    @Inject(Models) private readonly models: Models,
+    @Inject(WorkspaceBlobStorage) private readonly storage: WorkspaceBlobStorage,
+    @Inject(JobQueue) private readonly queue: JobQueue
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)

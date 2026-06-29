@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { URLHelper } from '../../../base';
 import { OAuthProviderName } from '../config';
@@ -24,7 +24,7 @@ export interface UserInfo {
 export class GoogleOAuthProvider extends OAuthProvider {
   override provider = OAuthProviderName.Google;
 
-  constructor(private readonly url: URLHelper) {
+  constructor(@Inject(URLHelper) private readonly url: URLHelper) {
     super();
   }
 

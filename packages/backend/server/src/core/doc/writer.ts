@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { nanoid } from 'nanoid';
 
 import { EventBus } from '../../base';
@@ -38,8 +43,8 @@ export class DocWriter {
   private readonly logger = new Logger(DocWriter.name);
 
   constructor(
-    private readonly storage: PgWorkspaceDocStorageAdapter,
-    private readonly event: EventBus
+    @Inject(PgWorkspaceDocStorageAdapter) private readonly storage: PgWorkspaceDocStorageAdapter,
+    @Inject(EventBus) private readonly event: EventBus
   ) {}
 
   /**

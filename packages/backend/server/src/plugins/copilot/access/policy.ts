@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CopilotQuotaExceeded } from '../../../base';
 import { ByokService } from '../byok/service';
@@ -31,8 +31,8 @@ export type CopilotTurnRouteAccess = {
 @Injectable()
 export class CopilotAccessPolicy {
   constructor(
-    private readonly conversationPolicy: ConversationPolicy,
-    private readonly byok: ByokService
+    @Inject(ConversationPolicy) private readonly conversationPolicy: ConversationPolicy,
+    @Inject(ByokService) private readonly byok: ByokService
   ) {}
 
   async getByokProfiles(context: CopilotAccessContext = {}) {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { Config } from '../../../../base';
 import { fetchRemoteAttachment } from '../../../../native';
@@ -31,7 +31,7 @@ export function resolveAttachmentFetchUrl(url: string) {
 
 @Injectable()
 export class AttachmentMaterializer {
-  constructor(private readonly config: Config) {}
+  constructor(@Inject(Config) private readonly config: Config) {}
 
   private buildFetchOptions(url: URL, trustedHostSuffixes: string[]) {
     const baseOptions = {

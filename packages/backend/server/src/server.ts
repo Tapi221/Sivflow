@@ -1,33 +1,50 @@
 import { NestFactory } from '@nestjs/core';
 import { UnknownElementException } from '@nestjs/core/errors/exceptions/unknown-element.exception';
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import cookieParser from 'cookie-parser';
-import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs';
-
-import {
-  AFFiNELogger,
-  buildCorsAllowedOrigins,
-  CacheInterceptor,
-  CloudThrottlerGuard,
-  Config,
-  CORS_ALLOWED_HEADERS,
-  CORS_ALLOWED_METHODS,
-  CORS_EXPOSED_HEADERS,
-  corsOriginCallback,
-  GlobalExceptionFilter,
-  URLHelper,
-} from './base';
-import { SocketIoAdapter } from './base/websocket';
-import { AuthGuard } from './core/auth';
-import { TelemetryService } from './core/telemetry/service';
 import { serverTimingAndCache } from './middleware/timing';
 import { env } from './prelude';
+import { traceStartup } from './startup-trace';
 
 const OneMB = 1024 * 1024;
 
 export async function run() {
+  traceStartup('importing cookie-parser');
+  const { default: cookieParser } = await import('cookie-parser');
+  traceStartup('importing graphql-upload');
+  const { default: graphqlUploadExpress } = await import(
+    'graphql-upload/graphqlUploadExpress.mjs'
+  );
+  traceStartup('importing logger');
+  const { AFFiNELogger } = await import('./base/logger');
+  traceStartup('importing config');
+  const { Config } = await import('./base/config');
+  traceStartup('importing cors');
+  const {
+    buildCorsAllowedOrigins,
+    CORS_ALLOWED_HEADERS,
+    CORS_ALLOWED_METHODS,
+    CORS_EXPOSED_HEADERS,
+    corsOriginCallback,
+  } = await import('./base/cors');
+  traceStartup('importing cache');
+  const { CacheInterceptor } = await import('./base/cache');
+  traceStartup('importing throttler');
+  const { CloudThrottlerGuard } = await import('./base/throttler');
+  traceStartup('importing exception filter');
+  const { GlobalExceptionFilter } = await import('./base/nestjs/exception');
+  traceStartup('importing url helper');
+  const { URLHelper } = await import('./base/helpers/url');
+  traceStartup('importing websocket');
+  const { SocketIoAdapter } = await import('./base/websocket');
+  traceStartup('importing auth');
+  const { AuthGuard } = await import('./core/auth/guard');
+  traceStartup('importing telemetry');
+  const { TelemetryService } = await import('./core/telemetry/service');
+
+  traceStartup('importing AppModule');
   const { AppModule } = await import('./app.module');
 
+  traceStartup('creating Nest application');
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     cors: false,
     rawBody: true,
@@ -130,6 +147,7 @@ export async function run() {
     });
   }
 
+  traceStartup('listening');
   await app.listen(config.server.port, config.server.listenAddr);
 
   const formattedAddr = config.server.listenAddr.includes(':')

@@ -1,5 +1,5 @@
 import type { RawBodyRequest } from '@nestjs/common';
-import { Controller, Logger, Post, Req } from '@nestjs/common';
+import { Inject, Controller, Logger, Post, Req } from '@nestjs/common';
 import { Prisma, PrismaClient, Provider } from '@prisma/client';
 import type { Request } from 'express';
 import Stripe from 'stripe';
@@ -13,10 +13,10 @@ export class StripeWebhookController {
   private readonly logger = new Logger(StripeWebhookController.name);
 
   constructor(
-    private readonly config: Config,
-    private readonly db: PrismaClient,
-    private readonly stripeProvider: StripeFactory,
-    private readonly event: EventBus
+    @Inject(Config) private readonly config: Config,
+    @Inject(PrismaClient) private readonly db: PrismaClient,
+    @Inject(StripeFactory) private readonly stripeProvider: StripeFactory,
+    @Inject(EventBus) private readonly event: EventBus
   ) {}
 
   @Public()

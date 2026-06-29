@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { InvalidOauthResponse, URLHelper } from '../../../base';
 import { OAuthProviderName } from '../config';
@@ -28,7 +28,7 @@ interface UserEmailInfo {
 export class GithubOAuthProvider extends OAuthProvider {
   provider = OAuthProviderName.GitHub;
 
-  constructor(private readonly url: URLHelper) {
+  constructor(@Inject(URLHelper) private readonly url: URLHelper) {
     super();
   }
 

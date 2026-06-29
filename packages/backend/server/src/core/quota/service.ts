@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { MemberQuotaExceeded, OnEvent } from '../../base';
 import {
@@ -27,7 +27,7 @@ export type WorkspaceQuotaWithUsage = Omit<
 export class QuotaService {
   protected logger = new Logger(QuotaService.name);
 
-  constructor(private readonly quotaState: QuotaStateService) {}
+  constructor(@Inject(QuotaStateService) private readonly quotaState: QuotaStateService) {}
 
   @OnEvent('user.postCreated')
   async onUserCreated({ id }: Events['user.postCreated']) {

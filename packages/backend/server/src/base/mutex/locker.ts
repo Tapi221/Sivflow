@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Command } from 'ioredis';
 
 import { SessionRedis } from '../redis';
@@ -32,7 +32,7 @@ end`;
 export class Locker {
   private readonly logger = new Logger(Locker.name);
 
-  constructor(private readonly redis: SessionRedis) {}
+  constructor(@Inject(SessionRedis) private readonly redis: SessionRedis) {}
 
   async lock(owner: string, key: string): Promise<Lock> {
     const lockKey = `MutexLock:${key}`;

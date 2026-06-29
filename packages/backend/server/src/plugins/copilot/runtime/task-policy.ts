@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { QuotaStateService } from '../../../core/quota/state';
 import { PromptService } from '../prompt/service';
@@ -9,8 +9,8 @@ export const DEFAULT_RERANK_MODEL = 'gpt-4o-mini';
 @Injectable()
 export class TaskPolicy {
   constructor(
-    private readonly quotaState: QuotaStateService,
-    private readonly prompts: PromptService
+    @Inject(QuotaStateService) private readonly quotaState: QuotaStateService,
+    @Inject(PromptService) private readonly prompts: PromptService
   ) {}
 
   resolveEmbeddingModelId() {

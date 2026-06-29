@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { getStreamAsBuffer } from 'get-stream';
 
@@ -71,12 +71,12 @@ export class MailJob {
   private readonly logger = new Logger('MailJob');
 
   constructor(
-    private readonly cache: Cache,
-    private readonly queue: JobQueue,
-    private readonly sender: MailSender,
-    private readonly doc: DocReader,
-    private readonly workspaceBlob: WorkspaceBlobStorage,
-    private readonly models: Models
+    @Inject(Cache) private readonly cache: Cache,
+    @Inject(JobQueue) private readonly queue: JobQueue,
+    @Inject(MailSender) private readonly sender: MailSender,
+    @Inject(DocReader) private readonly doc: DocReader,
+    @Inject(WorkspaceBlobStorage) private readonly workspaceBlob: WorkspaceBlobStorage,
+    @Inject(Models) private readonly models: Models
   ) {}
 
   private calculateRetryDelay(startTime: number) {

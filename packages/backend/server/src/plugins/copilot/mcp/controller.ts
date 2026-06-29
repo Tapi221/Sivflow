@@ -1,4 +1,5 @@
 import {
+  Inject,
   Controller,
   Delete,
   Get,
@@ -47,7 +48,7 @@ const SUPPORTED_PROTOCOL_VERSIONS = new Set([
 export class WorkspaceMcpController {
   private readonly logger = new Logger(WorkspaceMcpController.name);
 
-  constructor(private readonly provider: WorkspaceMcpProvider) {}
+  constructor(@Inject(WorkspaceMcpProvider) private readonly provider: WorkspaceMcpProvider) {}
 
   @Get('/')
   @Delete('/')

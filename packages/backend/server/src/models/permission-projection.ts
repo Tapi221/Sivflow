@@ -1,4 +1,4 @@
-import { Injectable, Optional } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 
 import { metrics } from '../base';
@@ -69,7 +69,7 @@ async function count(first: Promise<CountRow[]>) {
 
 @Injectable()
 export class PermissionProjectionModel extends BaseModel {
-  constructor(@Optional() private readonly prisma?: PrismaClient) {
+  constructor(@Inject(PrismaClient) @Optional() private readonly prisma?: PrismaClient) {
     super();
   }
 

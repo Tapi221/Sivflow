@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import {
   CopilotMessageNotFound,
@@ -32,10 +32,10 @@ type AppendedSessionMessage = {
 @Injectable()
 export class ConversationHost {
   constructor(
-    private readonly sessions: ChatSessionService,
-    private readonly submissions: CompatSubmissionStore,
-    private readonly mutex: Mutex,
-    private readonly access: CopilotAccessPolicy
+    @Inject(ChatSessionService) private readonly sessions: ChatSessionService,
+    @Inject(CompatSubmissionStore) private readonly submissions: CompatSubmissionStore,
+    @Inject(Mutex) private readonly mutex: Mutex,
+    @Inject(CopilotAccessPolicy) private readonly access: CopilotAccessPolicy
   ) {}
 
   private async loadAcceptedTurn(

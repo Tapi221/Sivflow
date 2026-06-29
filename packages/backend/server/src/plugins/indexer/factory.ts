@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { SearchProviderNotFound } from '../../base';
 import { ServerFeature, ServerService } from '../../core';
@@ -7,7 +7,7 @@ import type { SearchProvider } from './providers/def';
 
 @Injectable()
 export class SearchProviderFactory {
-  constructor(private readonly server: ServerService) {}
+  constructor(@Inject(ServerService) private readonly server: ServerService) {}
 
   private readonly logger = new Logger(SearchProviderFactory.name);
   readonly #providers = new Map<SearchProviderType, SearchProvider>();

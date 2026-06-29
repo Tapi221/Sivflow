@@ -1,6 +1,7 @@
 import { setServers } from 'node:dns/promises';
 
 import {
+  Inject,
   Body,
   Controller,
   Get,
@@ -72,13 +73,13 @@ type SignInResponse = CurrentUser & {
 @Controller('/api/auth')
 export class AuthController {
   constructor(
-    private readonly auth: AuthService,
-    private readonly sessionIssuer: SessionIssuer,
-    private readonly magicLink: MagicLinkAuthService,
-    private readonly openApp: OpenAppAuthService,
-    private readonly authMethods: AuthMethodsService,
-    private readonly sessionExchange: SessionExchangeService,
-    private readonly models: Models
+    @Inject(AuthService) private readonly auth: AuthService,
+    @Inject(SessionIssuer) private readonly sessionIssuer: SessionIssuer,
+    @Inject(MagicLinkAuthService) private readonly magicLink: MagicLinkAuthService,
+    @Inject(OpenAppAuthService) private readonly openApp: OpenAppAuthService,
+    @Inject(AuthMethodsService) private readonly authMethods: AuthMethodsService,
+    @Inject(SessionExchangeService) private readonly sessionExchange: SessionExchangeService,
+    @Inject(Models) private readonly models: Models
   ) {
     if (env.dev) {
       // set DNS servers in dev mode

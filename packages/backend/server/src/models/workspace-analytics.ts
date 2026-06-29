@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
 import { BadRequest, QueryTooLong } from '../base';
@@ -237,7 +237,7 @@ function parseCursorString(value: unknown): string {
 
 @Injectable()
 export class WorkspaceAnalyticsModel extends BaseModel {
-  constructor(private readonly redis: CacheRedis) {
+  constructor(@Inject(CacheRedis) private readonly redis: CacheRedis) {
     super();
   }
 

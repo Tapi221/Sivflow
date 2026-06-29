@@ -1,9 +1,5 @@
-import {
-  ExistingProvider,
-  FactoryProvider,
-  Global,
-  Module,
-} from '@nestjs/common';
+import type { ExistingProvider, FactoryProvider } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 
 import { ApplyType } from '../base';

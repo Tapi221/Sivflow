@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { ActionForbidden } from '../../../base';
 import { QuotaStateService } from '../../../core/quota/state';
@@ -7,8 +7,8 @@ import { Models, WorkspaceRole } from '../../../models';
 @Injectable()
 export class ByokEntitlementPolicy {
   constructor(
-    private readonly models: Models,
-    private readonly quotaState: QuotaStateService
+    @Inject(Models) private readonly models: Models,
+    @Inject(QuotaStateService) private readonly quotaState: QuotaStateService
   ) {}
 
   async hasAiPlan(userId?: string) {

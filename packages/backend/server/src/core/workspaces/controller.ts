@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import {
+  Inject,
   Controller,
   Get,
   Head,
@@ -37,12 +38,12 @@ import { DocID } from '../utils/doc';
 export class WorkspacesController {
   logger = new Logger(WorkspacesController.name);
   constructor(
-    private readonly storage: WorkspaceBlobStorage,
-    private readonly commentAttachmentStorage: CommentAttachmentStorage,
-    private readonly ac: PermissionAccess,
-    private readonly workspace: PgWorkspaceDocStorageAdapter,
-    private readonly docReader: DocReader,
-    private readonly models: Models
+    @Inject(WorkspaceBlobStorage) private readonly storage: WorkspaceBlobStorage,
+    @Inject(CommentAttachmentStorage) private readonly commentAttachmentStorage: CommentAttachmentStorage,
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(PgWorkspaceDocStorageAdapter) private readonly workspace: PgWorkspaceDocStorageAdapter,
+    @Inject(DocReader) private readonly docReader: DocReader,
+    @Inject(Models) private readonly models: Models
   ) {}
 
   private buildVisitorId(req: Request, workspaceId: string, docId: string) {

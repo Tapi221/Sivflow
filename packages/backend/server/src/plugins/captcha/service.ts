@@ -1,6 +1,12 @@
-import { randomUUID } from 'node:crypto';
+import {
+  randomUUID,
+} from 'node:crypto';
 
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import type { Request } from 'express';
 import { nanoid } from 'nanoid';
 import { z } from 'zod';
@@ -27,9 +33,9 @@ export class CaptchaService {
   private readonly captcha: CaptchaConfig;
 
   constructor(
-    private readonly config: Config,
-    private readonly challenges: AuthChallengeStore,
-    private readonly server: ServerService
+    @Inject(Config) private readonly config: Config,
+    @Inject(AuthChallengeStore) private readonly challenges: AuthChallengeStore,
+    @Inject(ServerService) private readonly server: ServerService
   ) {
     this.captcha = config.captcha.config;
   }

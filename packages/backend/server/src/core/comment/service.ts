@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import {
   CommentCreate,
@@ -13,7 +13,7 @@ import { PublicUserType } from '../user';
 
 @Injectable()
 export class CommentService {
-  constructor(private readonly models: Models) {}
+  constructor(@Inject(Models) private readonly models: Models) {}
 
   async createComment(input: CommentCreate) {
     const comment = await this.models.comment.create(input);

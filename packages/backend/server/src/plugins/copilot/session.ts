@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
 import { AiPromptRole } from '@prisma/client';
 
@@ -184,13 +184,13 @@ export class ChatSessionService {
   private readonly logger = new Logger(ChatSessionService.name);
 
   constructor(
-    private readonly models: Models,
-    private readonly jobs: JobQueue,
-    private readonly store: ConversationStore,
-    private readonly access: CopilotAccessPolicy,
-    private readonly conversationPolicy: ConversationPolicy,
-    private readonly prompts: PromptService,
-    private readonly promptRuntime: PromptRuntime
+    @Inject(Models) private readonly models: Models,
+    @Inject(JobQueue) private readonly jobs: JobQueue,
+    @Inject(ConversationStore) private readonly store: ConversationStore,
+    @Inject(CopilotAccessPolicy) private readonly access: CopilotAccessPolicy,
+    @Inject(ConversationPolicy) private readonly conversationPolicy: ConversationPolicy,
+    @Inject(PromptService) private readonly prompts: PromptService,
+    @Inject(PromptRuntime) private readonly promptRuntime: PromptRuntime
   ) {}
 
   private stripNullBytes(value?: string | null): string {

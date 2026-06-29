@@ -1,13 +1,13 @@
 import { createHash } from 'node:crypto';
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import type { LlmImageResponse } from '../../../../native';
 import { CopilotStorage } from '../../storage';
 
 @Injectable()
 export class ImageResultHost {
-  constructor(private readonly storage: CopilotStorage) {}
+  constructor(@Inject(CopilotStorage) private readonly storage: CopilotStorage) {}
 
   async persistRemoteLink(userId: string, workspaceId: string, link: string) {
     return await this.storage.handleRemoteLink(userId, workspaceId, link);

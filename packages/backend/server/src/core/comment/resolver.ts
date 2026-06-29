@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
+import { Inject } from '@nestjs/common';
 import {
   Args,
   Mutation,
@@ -53,13 +54,13 @@ export interface CommentCursor {
 @Resolver(() => WorkspaceType)
 export class CommentResolver {
   constructor(
-    private readonly service: CommentService,
-    private readonly ac: PermissionAccess,
-    private readonly commentAttachmentStorage: CommentAttachmentStorage,
-    private readonly queue: JobQueue,
-    private readonly models: Models,
-    private readonly server: ServerService,
-    private readonly realtime: RealtimePublisher
+    @Inject(CommentService) private readonly service: CommentService,
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(CommentAttachmentStorage) private readonly commentAttachmentStorage: CommentAttachmentStorage,
+    @Inject(JobQueue) private readonly queue: JobQueue,
+    @Inject(Models) private readonly models: Models,
+    @Inject(ServerService) private readonly server: ServerService,
+    @Inject(RealtimePublisher) private readonly realtime: RealtimePublisher
   ) {
     // enable comment feature by default
     this.server.enableFeature(ServerFeature.Comment);

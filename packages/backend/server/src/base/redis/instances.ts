@@ -1,9 +1,5 @@
-import {
-  Injectable,
-  Logger,
-  OnModuleDestroy,
-  OnModuleInit,
-} from '@nestjs/common';
+import type { OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Redis as IORedis, RedisOptions } from 'ioredis';
 
 import { Config } from '../config';
@@ -54,14 +50,14 @@ class Redis extends IORedis implements OnModuleInit, OnModuleDestroy {
 
 @Injectable()
 export class CacheRedis extends Redis {
-  constructor(config: Config) {
+  constructor(@Inject(Config) config: Config) {
     super({ ...config.redis, ...config.redis.ioredis });
   }
 }
 
 @Injectable()
 export class SessionRedis extends Redis {
-  constructor(config: Config) {
+  constructor(@Inject(Config) config: Config) {
     super({
       ...config.redis,
       ...config.redis.ioredis,
@@ -72,7 +68,7 @@ export class SessionRedis extends Redis {
 
 @Injectable()
 export class SocketIoRedis extends Redis {
-  constructor(config: Config) {
+  constructor(@Inject(Config) config: Config) {
     super({
       ...config.redis,
       ...config.redis.ioredis,
@@ -83,7 +79,7 @@ export class SocketIoRedis extends Redis {
 
 @Injectable()
 export class QueueRedis extends Redis {
-  constructor(config: Config) {
+  constructor(@Inject(Config) config: Config) {
     super({
       ...config.redis,
       ...config.redis.ioredis,

@@ -1,4 +1,5 @@
-import { Injectable, Type } from '@nestjs/common';
+import type { Type } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 
 import { OnEvent } from '../../../base';
@@ -16,9 +17,9 @@ export class CopilotProviderLifecycleService {
   >();
 
   constructor(
-    private readonly moduleRef: ModuleRef,
-    private readonly factory: CopilotProviderFactory,
-    private readonly registries: CopilotProviderRegistryService
+    @Inject(ModuleRef) private readonly moduleRef: ModuleRef,
+    @Inject(CopilotProviderFactory) private readonly factory: CopilotProviderFactory,
+    @Inject(CopilotProviderRegistryService) private readonly registries: CopilotProviderRegistryService
   ) {}
 
   private getProviders(): CopilotProvider[] {

@@ -1,4 +1,5 @@
 import {
+  Inject,
   Controller,
   Get,
   Logger,
@@ -73,9 +74,9 @@ export class WorkerController {
   private readonly logger = new Logger(WorkerController.name);
 
   constructor(
-    private readonly cache: Cache,
-    private readonly url: URLHelper,
-    private readonly service: WorkerService
+    @Inject(Cache) private readonly cache: Cache,
+    @Inject(URLHelper) private readonly url: URLHelper,
+    @Inject(WorkerService) private readonly service: WorkerService
   ) {}
 
   private get allowedOrigin() {

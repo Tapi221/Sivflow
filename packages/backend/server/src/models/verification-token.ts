@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { type VerificationToken } from '@prisma/client';
 
 import { CryptoHelper } from '../base/helpers';
@@ -17,7 +17,7 @@ export enum TokenType {
 
 @Injectable()
 export class VerificationTokenModel extends BaseModel {
-  constructor(private readonly crypto: CryptoHelper) {
+  constructor(@Inject(CryptoHelper) private readonly crypto: CryptoHelper) {
     super();
   }
 

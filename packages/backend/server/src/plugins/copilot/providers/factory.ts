@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { CopilotQuotaExceeded } from '../../../base';
 import { ServerFeature, ServerService } from '../../../core';
@@ -70,9 +70,9 @@ type EffectiveProviderRegistry = {
 @Injectable()
 export class CopilotProviderFactory {
   constructor(
-    private readonly server: ServerService,
-    private readonly registries: CopilotProviderRegistryService,
-    private readonly access: CopilotAccessPolicy
+    @Inject(ServerService) private readonly server: ServerService,
+    @Inject(CopilotProviderRegistryService) private readonly registries: CopilotProviderRegistryService,
+    @Inject(CopilotAccessPolicy) private readonly access: CopilotAccessPolicy
   ) {}
 
   private readonly logger = new Logger(CopilotProviderFactory.name);

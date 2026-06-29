@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { PrismaClient } from '@prisma/client';
 
@@ -28,10 +28,10 @@ export interface BoundAuthMethods {
 @Injectable()
 export class AuthMethodsService {
   constructor(
-    private readonly config: Config,
-    private readonly models: Models,
-    private readonly db: PrismaClient,
-    private readonly ref: ModuleRef
+    @Inject(Config) private readonly config: Config,
+    @Inject(Models) private readonly models: Models,
+    @Inject(PrismaClient) private readonly db: PrismaClient,
+    @Inject(ModuleRef) private readonly ref: ModuleRef
   ) {}
 
   async loginPreflight(email: string) {

@@ -1,4 +1,5 @@
 import {
+  Inject,
   Body,
   Controller,
   Get,
@@ -26,9 +27,9 @@ import { CalendarService } from './service';
 @Controller('/api/calendar')
 export class CalendarController {
   constructor(
-    private readonly calendar: CalendarService,
-    private readonly oauth: CalendarOAuthService,
-    private readonly url: URLHelper
+    @Inject(CalendarService) private readonly calendar: CalendarService,
+    @Inject(CalendarOAuthService) private readonly oauth: CalendarOAuthService,
+    @Inject(URLHelper) private readonly url: URLHelper
   ) {}
 
   @Post('/oauth/preflight')

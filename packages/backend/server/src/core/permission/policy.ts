@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
 
 import { OnEvent } from '../../base';
@@ -32,7 +32,9 @@ declare global {
 @Injectable()
 export class WorkspacePolicyService {
   constructor(
-    private readonly models: Models,
+    @Inject(Models)
+    @Inject(Models) private readonly models: Models,
+    @Inject(QuotaStateService)
     private readonly quotaState: QuotaStateService
   ) {}
 

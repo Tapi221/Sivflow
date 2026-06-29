@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { paginate, PaginationInput } from '../../base';
 import { Models } from '../../models';
@@ -6,7 +6,7 @@ import type { WorkspaceUserType } from '../user';
 
 @Injectable()
 export class DocGrantsService {
-  constructor(private readonly models: Models) {}
+  constructor(@Inject(Models) private readonly models: Models) {}
 
   async paginateGrantedUsers(
     workspaceId: string,

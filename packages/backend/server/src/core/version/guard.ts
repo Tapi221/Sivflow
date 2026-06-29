@@ -3,7 +3,7 @@ import type {
   ExecutionContext,
   OnModuleInit,
 } from '@nestjs/common';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import {
   Config,
@@ -21,8 +21,8 @@ export class VersionGuardProvider
   name = 'version' as const;
 
   constructor(
-    private readonly config: Config,
-    private readonly version: VersionService
+    @Inject(Config) private readonly config: Config,
+    @Inject(VersionService) private readonly version: VersionService
   ) {
     super();
   }

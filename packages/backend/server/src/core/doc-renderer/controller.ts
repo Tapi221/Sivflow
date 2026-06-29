@@ -1,8 +1,17 @@
-import { createHash } from 'node:crypto';
+import {
+  createHash,
+} from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { Controller, Get, Logger, Req, Res } from '@nestjs/common';
+import {
+  Inject,
+  Controller,
+  Get,
+  Logger,
+  Req,
+  Res,
+} from '@nestjs/common';
 import type { Request, Response } from 'express';
 import isMobile from 'is-mobile';
 
@@ -58,10 +67,10 @@ export class DocRendererController {
   private readonly mobileAssets: HtmlAssets = defaultAssets;
 
   constructor(
-    private readonly doc: DocReader,
-    private readonly models: Models,
-    private readonly config: Config,
-    private readonly permission: PermissionService
+    @Inject(DocReader) private readonly doc: DocReader,
+    @Inject(Models) private readonly models: Models,
+    @Inject(Config) private readonly config: Config,
+    @Inject(PermissionService) private readonly permission: PermissionService
   ) {
     this.webAssets = this.readHtmlAssets(join(env.projectRoot, 'static'));
     this.mobileAssets = this.readHtmlAssets(

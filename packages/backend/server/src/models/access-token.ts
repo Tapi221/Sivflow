@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CryptoHelper } from '../base';
 import { BaseModel } from './base';
@@ -31,7 +31,7 @@ type UserAccessToken = {
 
 @Injectable()
 export class AccessTokenModel extends BaseModel {
-  constructor(private readonly crypto: CryptoHelper) {
+  constructor(@Inject(CryptoHelper) private readonly crypto: CryptoHelper) {
     super();
   }
 

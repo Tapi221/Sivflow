@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import { Args, ID, Mutation, ResolveField, Resolver } from '@nestjs/graphql';
 
 import {
@@ -20,8 +21,8 @@ import {
 @Resolver(() => UserType)
 export class UserNotificationResolver {
   constructor(
-    private readonly service: NotificationService,
-    private readonly ac: PermissionAccess
+    @Inject(NotificationService) private readonly service: NotificationService,
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess
   ) {}
 
   @ResolveField(() => PaginatedNotificationObjectType, {

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import {
   CompositePropagator,
@@ -99,8 +99,8 @@ export class OpentelemetryProvider {
   #sdk: NodeSDK | null = null;
 
   constructor(
-    private readonly config: Config,
-    private readonly ref: ModuleRef
+    @Inject(Config) private readonly config: Config,
+    @Inject(ModuleRef) private readonly ref: ModuleRef
   ) {}
 
   @OnEvent('config.init')

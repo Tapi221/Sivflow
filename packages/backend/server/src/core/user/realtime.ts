@@ -3,7 +3,8 @@ import type {
   CurrentUserProfileSnapshot,
   UserSettingsSnapshot,
 } from '@affine/realtime';
-import { Injectable, OnModuleInit, Optional } from '@nestjs/common';
+import type { OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import { z } from 'zod';
 
 import { AuthenticationRequired, OnEvent, UserNotFound } from '../../base';
@@ -34,9 +35,9 @@ export class UserRealtimeProvider
   implements OnModuleInit
 {
   constructor(
-    private readonly models: Models,
-    @Optional() private readonly registry?: RealtimeRegistry,
-    @Optional() private readonly publisher?: RealtimePublisher
+    @Inject(Models) private readonly models: Models,
+    @Inject(RealtimeRegistry) @Optional() private readonly registry?: RealtimeRegistry,
+    @Inject(RealtimePublisher) @Optional() private readonly publisher?: RealtimePublisher
   ) {
     super();
   }

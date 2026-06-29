@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { EmailServiceNotConfigured, JobQueue } from '../../base';
 import { MailSender } from './sender';
@@ -6,8 +6,8 @@ import { MailSender } from './sender';
 @Injectable()
 export class Mailer {
   constructor(
-    private readonly queue: JobQueue,
-    private readonly sender: MailSender
+    @Inject(JobQueue) private readonly queue: JobQueue,
+    @Inject(MailSender) private readonly sender: MailSender
   ) {}
 
   /**

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import type {
   LlmPreparedDispatchRoute,
@@ -539,8 +539,8 @@ function buildRerankPlanArtifacts(
 @Injectable()
 export class ExecutionPlanBuilder {
   constructor(
-    private readonly providers: CopilotProviderFactory,
-    private readonly executionMetrics: CopilotExecutionMetrics
+    @Inject(CopilotProviderFactory) private readonly providers: CopilotProviderFactory,
+    @Inject(CopilotExecutionMetrics) private readonly executionMetrics: CopilotExecutionMetrics
   ) {}
 
   private async buildMessagePlan<

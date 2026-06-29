@@ -1,4 +1,4 @@
-import { FactoryProvider } from '@nestjs/common';
+import type { FactoryProvider } from '@nestjs/common';
 
 import { Config } from './config';
 import { ConfigFactory } from './factory';

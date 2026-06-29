@@ -5,7 +5,7 @@ import {
   type RealtimeTopicInputOf,
   type RealtimeTopicName,
 } from '@affine/realtime';
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { Server } from 'socket.io';
 
 import { EventBus } from '../../base';
@@ -18,8 +18,8 @@ export class RealtimePublisher {
   private server?: Server;
 
   constructor(
-    private readonly registry: RealtimeRegistry,
-    private readonly event: EventBus
+    @Inject(RealtimeRegistry) private readonly registry: RealtimeRegistry,
+    @Inject(EventBus) private readonly event: EventBus
   ) {}
 
   attachServer(server: Server) {

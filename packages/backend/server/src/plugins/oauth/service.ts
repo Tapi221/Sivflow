@@ -1,6 +1,13 @@
-import { createHash, randomBytes } from 'node:crypto';
+import {
+  createHash,
+  randomBytes,
+} from 'node:crypto';
 
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { type ConnectedAccount } from '@prisma/client';
 
 import {
@@ -47,11 +54,11 @@ export class OAuthService {
   private readonly logger = new Logger(OAuthService.name);
 
   constructor(
-    private readonly providerFactory: OAuthProviderFactory,
-    private readonly challenges: AuthChallengeStore,
-    private readonly auth: AuthService,
-    private readonly models: Models,
-    private readonly config: Config
+    @Inject(OAuthProviderFactory) private readonly providerFactory: OAuthProviderFactory,
+    @Inject(AuthChallengeStore) private readonly challenges: AuthChallengeStore,
+    @Inject(AuthService) private readonly auth: AuthService,
+    @Inject(Models) private readonly models: Models,
+    @Inject(Config) private readonly config: Config
   ) {}
 
   isValidState(stateStr: string) {

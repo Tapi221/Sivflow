@@ -1,6 +1,11 @@
-import { isIP } from 'node:net';
+import {
+  isIP,
+} from 'node:net';
 
-import { Injectable } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import type { Response } from 'express';
 import { ClsService } from 'nestjs-cls';
 
@@ -59,8 +64,8 @@ export class URLHelper {
   baseUrl!: string;
 
   constructor(
-    private readonly config: Config,
-    private readonly cls?: ClsService
+    @Inject(Config) private readonly config: Config,
+    @Inject(ClsService) private readonly cls?: ClsService
   ) {
     this.init();
   }

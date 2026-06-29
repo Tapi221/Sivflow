@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CopilotSessionInvalidInput } from '../../../base';
 import { llmResolveRequestedModelMatch } from '../../../native';
@@ -12,7 +12,7 @@ export type ResolveModelInput = {
 
 @Injectable()
 export class ModelSelectionPolicy {
-  constructor(private readonly registries: CopilotProviderRegistryService) {}
+  constructor(@Inject(CopilotProviderRegistryService) private readonly registries: CopilotProviderRegistryService) {}
 
   private getRegistry() {
     return this.registries.getRegistry();

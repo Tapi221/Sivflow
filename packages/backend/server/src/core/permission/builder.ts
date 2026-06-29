@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 
 import { DocID } from '../utils/doc';
-import { Resource } from './resource';
+import type { Resource } from './resource';
 import { PermissionService } from './service';
 import {
   DOC_ACTIONS,
@@ -21,7 +21,11 @@ function assertPerm(permission?: PermissionService) {
 
 @Injectable()
 export class AccessControllerBuilder {
-  constructor(private readonly permission?: PermissionService) {}
+  constructor(
+    @Optional()
+    @Inject(PermissionService)
+    private readonly permission?: PermissionService
+  ) {}
 
   user(userId: string) {
     return new UserAccessControllerBuilder(userId, this.permission);

@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import {
   Args,
   GraphQLISODateTime,
@@ -32,9 +33,9 @@ import {
 @Resolver(() => ServerConfigType)
 export class CalendarServerConfigResolver {
   constructor(
-    private readonly providerFactory: CalendarProviderFactory,
-    private readonly config: Config,
-    private readonly calendar: CalendarService
+    @Inject(CalendarProviderFactory) private readonly providerFactory: CalendarProviderFactory,
+    @Inject(Config) private readonly config: Config,
+    @Inject(CalendarService) private readonly calendar: CalendarService
   ) {}
 
   @ResolveField(() => [CalendarProviderName])
@@ -66,7 +67,7 @@ export class CalendarServerConfigResolver {
 
 @Resolver(() => UserType)
 export class UserCalendarResolver {
-  constructor(private readonly calendar: CalendarService) {}
+  constructor(@Inject(CalendarService) private readonly calendar: CalendarService) {}
 
   @ResolveField(() => [CalendarAccountObjectType])
   async calendarAccounts(
@@ -82,7 +83,7 @@ export class UserCalendarResolver {
 
 @Resolver(() => CalendarAccountObjectType)
 export class CalendarAccountResolver {
-  constructor(private readonly calendar: CalendarService) {}
+  constructor(@Inject(CalendarService) private readonly calendar: CalendarService) {}
 
   @ResolveField(() => Int)
   async calendarsCount(
@@ -112,8 +113,8 @@ export class CalendarAccountResolver {
 @Resolver(() => WorkspaceType)
 export class WorkspaceCalendarResolver {
   constructor(
-    private readonly calendar: CalendarService,
-    private readonly access: PermissionAccess
+    @Inject(CalendarService) private readonly calendar: CalendarService,
+    @Inject(PermissionAccess) private readonly access: PermissionAccess
   ) {}
 
   @ResolveField(() => [WorkspaceCalendarObjectType])
@@ -132,8 +133,8 @@ export class WorkspaceCalendarResolver {
 @Resolver(() => WorkspaceCalendarObjectType)
 export class WorkspaceCalendarEventsResolver {
   constructor(
-    private readonly calendar: CalendarService,
-    private readonly access: PermissionAccess
+    @Inject(CalendarService) private readonly calendar: CalendarService,
+    @Inject(PermissionAccess) private readonly access: PermissionAccess
   ) {}
 
   @ResolveField(() => [CalendarEventObjectType])
@@ -159,10 +160,10 @@ export class WorkspaceCalendarEventsResolver {
 @Resolver(() => CalendarAccountObjectType)
 export class CalendarMutationResolver {
   constructor(
-    private readonly calendar: CalendarService,
-    private readonly oauth: CalendarOAuthService,
-    private readonly models: Models,
-    private readonly access: PermissionAccess
+    @Inject(CalendarService) private readonly calendar: CalendarService,
+    @Inject(CalendarOAuthService) private readonly oauth: CalendarOAuthService,
+    @Inject(Models) private readonly models: Models,
+    @Inject(PermissionAccess) private readonly access: PermissionAccess
   ) {}
 
   @Mutation(() => String)

@@ -1,4 +1,5 @@
-import { FactoryProvider, Injectable, Logger } from '@nestjs/common';
+import type { FactoryProvider } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { diffUpdate, encodeStateVectorFromUpdate } from 'yjs';
 
@@ -42,9 +43,9 @@ export abstract class DocReader {
   protected readonly logger = new Logger(DocReader.name);
 
   constructor(
-    protected readonly cache: Cache,
-    protected readonly models: Models,
-    protected readonly blobStorage: WorkspaceBlobStorage
+    @Inject(Cache) protected readonly cache: Cache,
+    @Inject(Models) protected readonly models: Models,
+    @Inject(WorkspaceBlobStorage) protected readonly blobStorage: WorkspaceBlobStorage
   ) {}
 
   // keep methods to allow test mocking
@@ -168,10 +169,10 @@ export abstract class DocReader {
 @Injectable()
 export class DatabaseDocReader extends DocReader {
   constructor(
-    protected override readonly cache: Cache,
-    protected override readonly models: Models,
-    protected override readonly blobStorage: WorkspaceBlobStorage,
-    protected readonly workspace: PgWorkspaceDocStorageAdapter
+    @Inject(Cache) protected override readonly cache: Cache,
+    @Inject(Models) protected override readonly models: Models,
+    @Inject(WorkspaceBlobStorage) protected override readonly blobStorage: WorkspaceBlobStorage,
+    @Inject(PgWorkspaceDocStorageAdapter) protected readonly workspace: PgWorkspaceDocStorageAdapter
   ) {
     super(cache, models, blobStorage);
   }
@@ -273,12 +274,12 @@ export class RpcDocReader extends DatabaseDocReader {
   protected override readonly logger = new Logger(DocReader.name);
 
   constructor(
-    private readonly config: Config,
-    private readonly crypto: CryptoHelper,
-    protected override readonly cache: Cache,
-    protected override readonly models: Models,
-    protected override readonly blobStorage: WorkspaceBlobStorage,
-    protected override readonly workspace: PgWorkspaceDocStorageAdapter
+    @Inject(Config) private readonly config: Config,
+    @Inject(CryptoHelper) private readonly crypto: CryptoHelper,
+    @Inject(Cache) protected override readonly cache: Cache,
+    @Inject(Models) protected override readonly models: Models,
+    @Inject(WorkspaceBlobStorage) protected override readonly blobStorage: WorkspaceBlobStorage,
+    @Inject(PgWorkspaceDocStorageAdapter) protected override readonly workspace: PgWorkspaceDocStorageAdapter
   ) {
     super(cache, models, blobStorage, workspace);
   }

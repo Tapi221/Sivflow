@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { AiPromptRole } from '@prisma/client';
 
 import type { Conversation, Turn } from '../core';
@@ -27,9 +27,9 @@ export type CanonicalConversationMeta = Omit<
 @Injectable()
 export class CompatHistoryProjector {
   constructor(
-    private readonly visibility: HistoryVisibilityPolicy,
-    private readonly preloadProjector: HistoryPromptPreloadProjector,
-    private readonly attachmentUrls: HistoryAttachmentUrlProjector
+    @Inject(HistoryVisibilityPolicy) private readonly visibility: HistoryVisibilityPolicy,
+    @Inject(HistoryPromptPreloadProjector) private readonly preloadProjector: HistoryPromptPreloadProjector,
+    @Inject(HistoryAttachmentUrlProjector) private readonly attachmentUrls: HistoryAttachmentUrlProjector
   ) {}
 
   private projectSessionBase(

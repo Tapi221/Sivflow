@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { Models } from '../../models';
 
@@ -8,7 +8,7 @@ const STAFF = ['@toeverything.info', '@affine.pro'];
 export class FeatureService {
   protected logger = new Logger(FeatureService.name);
 
-  constructor(private readonly models: Models) {}
+  constructor(@Inject(Models) private readonly models: Models) {}
 
   // ======== Admin ========
   isStaff(email: string) {

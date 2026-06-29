@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Inject, BadRequestException, Injectable } from '@nestjs/common';
 import { AiJobStatus } from '@prisma/client';
 
 import {
@@ -39,14 +39,14 @@ const TRANSCRIPT_STRATEGY = 'gemini';
 @Injectable()
 export class CopilotTranscriptionService {
   constructor(
-    private readonly models: Models,
-    private readonly job: JobQueue,
-    private readonly storage: CopilotStorage,
-    private readonly tasks: TaskPolicy,
-    private readonly prompts: PromptService,
-    private readonly actionBridge: ActionRuntimeBridge,
-    private readonly access: CopilotAccessPolicy,
-    private readonly realtime: RealtimePublisher
+    @Inject(Models) private readonly models: Models,
+    @Inject(JobQueue) private readonly job: JobQueue,
+    @Inject(CopilotStorage) private readonly storage: CopilotStorage,
+    @Inject(TaskPolicy) private readonly tasks: TaskPolicy,
+    @Inject(PromptService) private readonly prompts: PromptService,
+    @Inject(ActionRuntimeBridge) private readonly actionBridge: ActionRuntimeBridge,
+    @Inject(CopilotAccessPolicy) private readonly access: CopilotAccessPolicy,
+    @Inject(RealtimePublisher) private readonly realtime: RealtimePublisher
   ) {}
 
   private parseTaskPayload(payload: unknown): TranscriptionPayloadV2 {

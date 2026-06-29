@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CopilotContextService } from '../context/service';
 import { type Turn } from '../core';
@@ -18,12 +18,12 @@ import { TurnPersistence } from './hosts/turn-persistence';
 @Injectable()
 export class TurnOrchestrator {
   constructor(
-    private readonly conversations: ConversationHost,
-    private readonly context: CopilotContextService,
-    private readonly capabilityPolicy: CapabilityPolicyHost,
-    private readonly runtime: CapabilityRuntime,
-    private readonly imageResults: ImageResultHost,
-    private readonly turnPersistence: TurnPersistence
+    @Inject(ConversationHost) private readonly conversations: ConversationHost,
+    @Inject(CopilotContextService) private readonly context: CopilotContextService,
+    @Inject(CapabilityPolicyHost) private readonly capabilityPolicy: CapabilityPolicyHost,
+    @Inject(CapabilityRuntime) private readonly runtime: CapabilityRuntime,
+    @Inject(ImageResultHost) private readonly imageResults: ImageResultHost,
+    @Inject(TurnPersistence) private readonly turnPersistence: TurnPersistence
   ) {}
 
   private async buildPromptParams(

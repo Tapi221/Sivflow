@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import type {
   BlobInputType,
@@ -21,9 +21,9 @@ export class AvatarStorage {
   }
 
   constructor(
-    private readonly AFFiNEConfig: Config,
-    private readonly url: URLHelper,
-    private readonly storageFactory: StorageProviderFactory
+    @Inject(Config) private readonly AFFiNEConfig: Config,
+    @Inject(URLHelper) private readonly url: URLHelper,
+    @Inject(StorageProviderFactory) private readonly storageFactory: StorageProviderFactory
   ) {}
 
   @OnEvent('config.init')

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { SessionCache } from '../../base';
 import { CalendarProviderName } from './providers';
@@ -16,7 +16,7 @@ const CALENDAR_OAUTH_STATE_KEY = 'CALENDAR_OAUTH_STATE';
 
 @Injectable()
 export class CalendarOAuthService {
-  constructor(private readonly cache: SessionCache) {}
+  constructor(@Inject(SessionCache) private readonly cache: SessionCache) {}
 
   isValidState(stateStr: string) {
     return stateStr.length === 36;

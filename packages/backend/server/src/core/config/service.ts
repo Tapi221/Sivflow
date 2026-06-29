@@ -1,4 +1,5 @@
-import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
+import type { OnApplicationBootstrap } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { set } from 'lodash-es';
 
 import {
@@ -31,9 +32,9 @@ export class ServerService implements OnApplicationBootstrap {
   readonly #logger = new Logger(ServerService.name);
 
   constructor(
-    private readonly models: Models,
-    private readonly configFactory: ConfigFactory,
-    private readonly event: EventBus
+    @Inject(Models) private readonly models: Models,
+    @Inject(ConfigFactory) private readonly configFactory: ConfigFactory,
+    @Inject(EventBus) private readonly event: EventBus
   ) {}
 
   async onApplicationBootstrap() {

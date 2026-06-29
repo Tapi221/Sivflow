@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { User, UserStripeCustomer } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 import Stripe from 'stripe';
@@ -77,13 +77,13 @@ export class SubscriptionService {
   private readonly scheduleManager: ScheduleManager;
 
   constructor(
-    private readonly stripeProvider: StripeFactory,
-    private readonly db: PrismaClient,
-    private readonly feature: FeatureService,
-    private readonly models: Models,
-    private readonly userManager: UserSubscriptionManager,
-    private readonly workspaceManager: WorkspaceSubscriptionManager,
-    private readonly selfhostManager: SelfhostTeamSubscriptionManager
+    @Inject(StripeFactory) private readonly stripeProvider: StripeFactory,
+    @Inject(PrismaClient) private readonly db: PrismaClient,
+    @Inject(FeatureService) private readonly feature: FeatureService,
+    @Inject(Models) private readonly models: Models,
+    @Inject(UserSubscriptionManager) private readonly userManager: UserSubscriptionManager,
+    @Inject(WorkspaceSubscriptionManager) private readonly workspaceManager: WorkspaceSubscriptionManager,
+    @Inject(SelfhostTeamSubscriptionManager) private readonly selfhostManager: SelfhostTeamSubscriptionManager
   ) {
     this.scheduleManager = new ScheduleManager(this.stripeProvider);
   }

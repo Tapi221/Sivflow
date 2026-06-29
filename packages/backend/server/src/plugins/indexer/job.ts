@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { Config, JOB_SIGNAL, JobQueue, OnJob } from '../../base';
 import { readAllDocIdsFromWorkspaceSnapshot } from '../../core/utils/blocksuite';
@@ -32,10 +32,13 @@ export class IndexerJob {
   private readonly logger = new Logger(IndexerJob.name);
 
   constructor(
-    private readonly models: Models,
+    @Inject(Models)
+    @Inject(Models) private readonly models: Models,
+    @Inject(IndexerService)
     private readonly service: IndexerService,
-    private readonly queue: JobQueue,
-    private readonly config: Config
+    @Inject(JobQueue)
+    @Inject(JobQueue) private readonly queue: JobQueue,
+    @Inject(Config) private readonly config: Config
   ) {}
 
   @OnJob('indexer.indexDoc')

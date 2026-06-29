@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { pick } from 'lodash-es';
 import z from 'zod/v3';
 
@@ -99,11 +99,11 @@ function defineTool<T extends z.ZodTypeAny>(
 @Injectable()
 export class WorkspaceMcpProvider {
   constructor(
-    private readonly ac: PermissionAccess,
-    private readonly reader: DocReader,
-    private readonly writer: DocWriter,
-    private readonly context: CopilotContextService,
-    private readonly indexer: IndexerService
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(DocReader) private readonly reader: DocReader,
+    @Inject(DocWriter) private readonly writer: DocWriter,
+    @Inject(CopilotContextService) private readonly context: CopilotContextService,
+    @Inject(IndexerService) private readonly indexer: IndexerService
   ) {}
 
   async for(userId: string, workspaceId: string): Promise<WorkspaceMcpServer> {

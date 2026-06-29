@@ -1,4 +1,9 @@
-import { Global, Injectable, Module } from '@nestjs/common';
+import {
+  Inject,
+  Global,
+  Injectable,
+  Module,
+} from '@nestjs/common';
 import {
   DiscoveryModule,
   DiscoveryService,
@@ -9,8 +14,8 @@ import { RESOLVER_TYPE_METADATA } from '@nestjs/graphql';
 @Injectable()
 export class ModuleScanner {
   constructor(
-    private readonly discovery: DiscoveryService,
-    private readonly scanner: MetadataScanner
+    @Inject(DiscoveryService) private readonly discovery: DiscoveryService,
+    @Inject(MetadataScanner) private readonly scanner: MetadataScanner
   ) {}
 
   getClassProviders() {

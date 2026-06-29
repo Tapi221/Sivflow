@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import {
   Args,
   Field,
@@ -85,8 +86,8 @@ export class AdminLicensePreview {
 @Resolver(() => WorkspaceType)
 export class LicenseResolver {
   constructor(
-    private readonly service: LicenseService,
-    private readonly ac: PermissionAccess
+    @Inject(LicenseService) private readonly service: LicenseService,
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess
   ) {}
 
   @ResolveField(() => License, {
@@ -169,7 +170,7 @@ export class LicenseResolver {
 @Admin()
 @Resolver(() => AdminLicensePreview)
 export class AdminLicenseResolver {
-  constructor(private readonly service: LicenseService) {}
+  constructor(@Inject(LicenseService) private readonly service: LicenseService) {}
 
   @Mutation(() => AdminLicensePreview)
   async previewLicense(

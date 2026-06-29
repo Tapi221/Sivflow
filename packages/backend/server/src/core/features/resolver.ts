@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import {
   Args,
   Int,
@@ -22,7 +23,7 @@ registerEnumType(Feature, {
 
 @Resolver(() => UserType)
 export class UserFeatureResolver extends AvailableUserFeatureConfig {
-  constructor(private readonly models: Models) {
+  constructor(@Inject(Models) private readonly models: Models) {
     super();
   }
 
@@ -41,9 +42,9 @@ export class UserFeatureResolver extends AvailableUserFeatureConfig {
 @Resolver(() => Boolean)
 export class AdminFeatureManagementResolver extends AvailableUserFeatureConfig {
   constructor(
-    private readonly models: Models,
-    private readonly entitlement: EntitlementService,
-    private readonly event: EventBus
+    @Inject(Models) private readonly models: Models,
+    @Inject(EntitlementService) private readonly entitlement: EntitlementService,
+    @Inject(EventBus) private readonly event: EventBus
   ) {
     super();
   }

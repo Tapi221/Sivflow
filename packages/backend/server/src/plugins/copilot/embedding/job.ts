@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import {
   BlobNotFound,
@@ -31,13 +31,13 @@ export class CopilotEmbeddingJob {
   private client: EmbeddingClient | undefined;
 
   constructor(
-    private readonly embeddingClients: CopilotEmbeddingClientService,
-    private readonly doc: DocReader,
-    private readonly event: EventBus,
-    private readonly models: Models,
-    private readonly queue: JobQueue,
-    private readonly storage: CopilotStorage,
-    private readonly workspaceStorage: WorkspaceBlobStorage
+    @Inject(CopilotEmbeddingClientService) private readonly embeddingClients: CopilotEmbeddingClientService,
+    @Inject(DocReader) private readonly doc: DocReader,
+    @Inject(EventBus) private readonly event: EventBus,
+    @Inject(Models) private readonly models: Models,
+    @Inject(JobQueue) private readonly queue: JobQueue,
+    @Inject(CopilotStorage) private readonly storage: CopilotStorage,
+    @Inject(WorkspaceBlobStorage) private readonly workspaceStorage: WorkspaceBlobStorage
   ) {}
 
   @OnEvent('config.init')

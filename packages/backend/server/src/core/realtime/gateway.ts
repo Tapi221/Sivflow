@@ -4,7 +4,12 @@ import type {
   RealtimeUnsubscribeEnvelope,
 } from '@affine/realtime';
 import { getRealtimeInputKey } from '@affine/realtime';
-import { applyDecorators, Logger, UseInterceptors } from '@nestjs/common';
+import {
+  Inject,
+  applyDecorators,
+  Logger,
+  UseInterceptors,
+} from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -48,8 +53,8 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayDisconnect {
   private readonly server!: Server;
 
   constructor(
-    private readonly registry: RealtimeRegistry,
-    private readonly publisher: RealtimePublisher
+    @Inject(RealtimeRegistry) private readonly registry: RealtimeRegistry,
+    @Inject(RealtimePublisher) private readonly publisher: RealtimePublisher
   ) {}
 
   afterInit(_server: Server) {

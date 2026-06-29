@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { Config, OnEvent, URLHelper } from '../../base';
 import { cleanTelemetryEvent } from './cleaner';
@@ -16,8 +16,8 @@ export class TelemetryService {
   private readonly deduper: TelemetryDeduper;
 
   constructor(
-    private readonly config: Config,
-    private readonly url: URLHelper
+    @Inject(Config) private readonly config: Config,
+    @Inject(URLHelper) private readonly url: URLHelper
   ) {
     this.deduper = new TelemetryDeduper(
       this.config.telemetry.dedupe.ttlHours * 60 * 60 * 1000,

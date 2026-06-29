@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import type { NodeTextMiddleware } from '../../config';
 import type {
@@ -16,7 +16,7 @@ export type ProviderSpecificToolResolver = (
 
 @Injectable()
 export class ToolExecutorHost {
-  constructor(private readonly runtime: ToolRuntime) {}
+  constructor(@Inject(ToolRuntime) private readonly runtime: ToolRuntime) {}
 
   async getTools(
     options: CopilotChatOptions,

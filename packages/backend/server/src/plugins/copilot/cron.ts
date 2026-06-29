@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { JOB_SIGNAL, JobQueue, OneDay, OnJob } from '../../base';
@@ -21,8 +21,8 @@ export class CopilotCronJobs {
   private readonly logger = new Logger(CopilotCronJobs.name);
 
   constructor(
-    private readonly models: Models,
-    private readonly jobs: JobQueue
+    @Inject(Models) private readonly models: Models,
+    @Inject(JobQueue) private readonly jobs: JobQueue
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)

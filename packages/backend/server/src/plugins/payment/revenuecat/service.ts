@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { z } from 'zod';
 
 import { Config } from '../../../base';
@@ -125,7 +125,7 @@ export class RevenueCatService {
   private readonly logger = new Logger(RevenueCatService.name);
   private readonly productsCache = new Map<string, Product[]>();
 
-  constructor(private readonly config: Config) {}
+  constructor(@Inject(Config) private readonly config: Config) {}
 
   private get apiKey(): string {
     const key = this.config.payment.revenuecat?.apiKey;

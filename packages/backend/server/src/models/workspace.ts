@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
 import { Prisma, type Workspace, WorkspaceMemberStatus } from '@prisma/client';
 
@@ -80,7 +80,7 @@ export type UpdateWorkspaceInput = Pick<
 
 @Injectable()
 export class WorkspaceModel extends BaseModel {
-  constructor(private readonly event: EventBus) {
+  constructor(@Inject(EventBus) private readonly event: EventBus) {
     super();
   }
 

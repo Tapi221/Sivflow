@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import type { Request } from 'express';
 
 import { ActionForbidden, InvalidAuthState } from '../../base';
@@ -15,9 +15,9 @@ interface SessionExchangePayload {
 @Injectable()
 export class SessionExchangeService {
   constructor(
-    private readonly auth: AuthService,
-    private readonly challenges: AuthChallengeStore,
-    private readonly jwtSession: JwtSessionService
+    @Inject(AuthService) private readonly auth: AuthService,
+    @Inject(AuthChallengeStore) private readonly challenges: AuthChallengeStore,
+    @Inject(JwtSessionService) private readonly jwtSession: JwtSessionService
   ) {}
 
   async createCode(req: Request, userId: string, sessionId: string) {

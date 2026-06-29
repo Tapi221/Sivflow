@@ -1,4 +1,4 @@
-import { LoggerService, Provider } from '@nestjs/common';
+import type { LoggerService, Provider } from '@nestjs/common';
 import { createLogger, format, transports } from 'winston';
 
 import { AFFiNELogger as LoggerProvide } from '../../../base/logger';

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
 import { OnEvent } from '../../base';
@@ -26,9 +26,9 @@ export class DocEventsListener {
   private readonly logger = new Logger(DocEventsListener.name);
 
   constructor(
-    private readonly docReader: DocReader,
-    private readonly models: Models,
-    private readonly workspace: PgWorkspaceDocStorageAdapter
+    @Inject(DocReader) private readonly docReader: DocReader,
+    @Inject(Models) private readonly models: Models,
+    @Inject(PgWorkspaceDocStorageAdapter) private readonly workspace: PgWorkspaceDocStorageAdapter
   ) {}
 
   @OnEvent('doc.snapshot.updated')

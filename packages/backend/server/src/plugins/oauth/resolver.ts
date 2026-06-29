@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import { registerEnumType, ResolveField, Resolver } from '@nestjs/graphql';
 
 import { ServerConfigType } from '../../core/config/types';
@@ -8,7 +9,7 @@ registerEnumType(OAuthProviderName, { name: 'OAuthProviderType' });
 
 @Resolver(() => ServerConfigType)
 export class OAuthResolver {
-  constructor(private readonly factory: OAuthProviderFactory) {}
+  constructor(@Inject(OAuthProviderFactory) private readonly factory: OAuthProviderFactory) {}
 
   @ResolveField(() => [OAuthProviderName])
   oauthProviders() {

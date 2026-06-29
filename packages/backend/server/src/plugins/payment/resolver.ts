@@ -1,4 +1,4 @@
-import { Headers } from '@nestjs/common';
+import { Inject, Headers } from '@nestjs/common';
 import {
   Args,
   Field,
@@ -213,7 +213,7 @@ class CreateCheckoutSessionInput implements z.infer<typeof CheckoutParams> {
 
 @Resolver(() => SubscriptionType)
 export class SubscriptionResolver {
-  constructor(private readonly service: SubscriptionService) {}
+  constructor(@Inject(SubscriptionService) private readonly service: SubscriptionService) {}
 
   @Public()
   @Query(() => [SubscriptionPrice])
@@ -459,9 +459,9 @@ export class SubscriptionResolver {
 @Resolver(() => UserType)
 export class UserSubscriptionResolver {
   constructor(
-    private readonly db: PrismaClient,
-    private readonly entitlement: EntitlementService,
-    private readonly rcHandler: RevenueCatWebhookHandler
+    @Inject(PrismaClient) private readonly db: PrismaClient,
+    @Inject(EntitlementService) private readonly entitlement: EntitlementService,
+    @Inject(RevenueCatWebhookHandler) private readonly rcHandler: RevenueCatWebhookHandler
   ) {}
 
   private normalizeSubscription(s: Subscription) {
@@ -687,9 +687,9 @@ export class UserSubscriptionResolver {
 @Resolver(() => WorkspaceType)
 export class WorkspaceSubscriptionResolver {
   constructor(
-    private readonly db: PrismaClient,
-    private readonly entitlement: EntitlementService,
-    private readonly ac: PermissionAccess
+    @Inject(PrismaClient) private readonly db: PrismaClient,
+    @Inject(EntitlementService) private readonly entitlement: EntitlementService,
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess
   ) {}
 
   private async currentWorkspaceSubscription(workspaceId: string) {

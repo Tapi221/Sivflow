@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { NoCopilotProviderAvailable } from '../../../base';
 import {
@@ -467,8 +467,8 @@ function noRouteStream<T>(plan: ExecutionPlan) {
 @Injectable()
 export class NativeExecutionEngine {
   constructor(
-    private readonly byok: ByokService,
-    private readonly executionMetrics?: CopilotExecutionMetrics
+    @Inject(ByokService) private readonly byok: ByokService,
+    @Inject(CopilotExecutionMetrics) private readonly executionMetrics?: CopilotExecutionMetrics
   ) {}
 
   private noRoute(plan: ExecutionPlan): never {

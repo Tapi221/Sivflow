@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { Config, metrics } from '../../base';
 import { QuotaService } from '../quota';
@@ -11,8 +11,8 @@ export class DocStorageOptions implements IDocStorageOptions {
   private readonly logger = new Logger('DocStorageOptions');
 
   constructor(
-    private readonly config: Config,
-    private readonly quota: QuotaService
+    @Inject(Config) private readonly config: Config,
+    @Inject(QuotaService) private readonly quota: QuotaService
   ) {}
 
   mergeUpdates = async (updates: Uint8Array[]) => {

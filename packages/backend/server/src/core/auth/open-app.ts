@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { InvalidAuthState } from '../../base';
 import { AuthChallengeStore } from './challenge-store';
@@ -7,7 +7,7 @@ import type { CurrentUser } from './session';
 
 @Injectable()
 export class OpenAppAuthService {
-  constructor(private readonly challenges: AuthChallengeStore) {}
+  constructor(@Inject(AuthChallengeStore) private readonly challenges: AuthChallengeStore) {}
 
   async createSignInCode(user: CurrentUser) {
     return this.challenges.create(

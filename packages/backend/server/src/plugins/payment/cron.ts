@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaClient, Provider } from '@prisma/client';
 
@@ -31,13 +31,13 @@ export class SubscriptionCronJobs {
   private readonly logger = new Logger(SubscriptionCronJobs.name);
 
   constructor(
-    private readonly db: PrismaClient,
-    private readonly event: EventBus,
-    private readonly queue: JobQueue,
-    private readonly rcHandler: RevenueCatWebhookHandler,
-    private readonly stripeFactory: StripeFactory,
-    private readonly subscription: SubscriptionService,
-    private readonly entitlement: EntitlementService
+    @Inject(PrismaClient) private readonly db: PrismaClient,
+    @Inject(EventBus) private readonly event: EventBus,
+    @Inject(JobQueue) private readonly queue: JobQueue,
+    @Inject(RevenueCatWebhookHandler) private readonly rcHandler: RevenueCatWebhookHandler,
+    @Inject(StripeFactory) private readonly stripeFactory: StripeFactory,
+    @Inject(SubscriptionService) private readonly subscription: SubscriptionService,
+    @Inject(EntitlementService) private readonly entitlement: EntitlementService
   ) {}
 
   private getDateRange(after: number, base: number | Date = Date.now()) {

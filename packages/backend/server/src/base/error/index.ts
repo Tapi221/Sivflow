@@ -1,8 +1,9 @@
+import type { OnModuleInit } from '@nestjs/common';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { Logger, Module, OnModuleInit } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { Args, Query, Resolver } from '@nestjs/graphql';
 
 import { generateUserFriendlyErrors } from './def';

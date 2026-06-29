@@ -1,6 +1,16 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import {
+  createHmac,
+  timingSafeEqual,
+} from 'node:crypto';
 
-import { Controller, Logger, Put, Req, Res } from '@nestjs/common';
+import {
+  Inject,
+  Controller,
+  Logger,
+  Put,
+  Req,
+  Res,
+} from '@nestjs/common';
 import type { Request, Response } from 'express';
 
 import {
@@ -40,9 +50,9 @@ export class R2UploadController {
   private provider: R2StorageProvider | null = null;
 
   constructor(
-    private readonly config: Config,
-    private readonly models: Models,
-    private readonly storageFactory: StorageProviderFactory
+    @Inject(Config) private readonly config: Config,
+    @Inject(Models) private readonly models: Models,
+    @Inject(StorageProviderFactory) private readonly storageFactory: StorageProviderFactory
   ) {}
 
   @OnEvent('config.changed')

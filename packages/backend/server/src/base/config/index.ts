@@ -1,4 +1,5 @@
-import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
+import type { DynamicModule, Provider } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 
 import { Config } from './config';
 import { ConfigFactory, OVERRIDE_CONFIG_TOKEN } from './factory';

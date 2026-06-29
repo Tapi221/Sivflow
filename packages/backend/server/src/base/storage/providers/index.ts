@@ -1,4 +1,4 @@
-import { Type } from '@nestjs/common';
+import type { Type } from '@nestjs/common';
 
 import { JSONSchema } from '../../config';
 import { FsStorageConfig, FsStorageProvider } from './fs';

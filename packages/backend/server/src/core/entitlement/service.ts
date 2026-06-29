@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Entitlement, Prisma, PrismaClient } from '@prisma/client';
 
 import { BadRequest, CryptoHelper, EventBus } from '../../base';
@@ -74,9 +74,9 @@ export class EntitlementService {
   >();
 
   constructor(
-    private readonly db: PrismaClient,
-    private readonly crypto: CryptoHelper,
-    private readonly event: EventBus
+    @Inject(PrismaClient) private readonly db: PrismaClient,
+    @Inject(CryptoHelper) private readonly crypto: CryptoHelper,
+    @Inject(EventBus) private readonly event: EventBus
   ) {}
 
   getUserEntitlements(userId: string) {

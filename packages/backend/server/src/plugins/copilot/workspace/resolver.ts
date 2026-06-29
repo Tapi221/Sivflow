@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import {
   Args,
   Context,
@@ -49,7 +50,7 @@ export class CopilotWorkspaceConfigType {
  */
 @Resolver(() => WorkspaceType)
 export class CopilotWorkspaceEmbeddingResolver {
-  constructor(private readonly ac: PermissionAccess) {}
+  constructor(@Inject(PermissionAccess) private readonly ac: PermissionAccess) {}
 
   @ResolveField(() => CopilotWorkspaceConfigType, {
     complexity: 2,
@@ -70,9 +71,9 @@ export class CopilotWorkspaceEmbeddingResolver {
 @Resolver(() => CopilotWorkspaceConfigType)
 export class CopilotWorkspaceEmbeddingConfigResolver {
   constructor(
-    private readonly ac: PermissionAccess,
-    private readonly mutex: Mutex,
-    private readonly copilotWorkspace: CopilotWorkspaceService
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(Mutex) private readonly mutex: Mutex,
+    @Inject(CopilotWorkspaceService) private readonly copilotWorkspace: CopilotWorkspaceService
   ) {}
 
   @ResolveField(() => PaginatedIgnoredDocsType, {

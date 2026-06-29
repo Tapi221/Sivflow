@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import {
   Args,
   Field,
@@ -27,8 +28,8 @@ class GenerateAccessTokenInput {
 @Resolver(() => AccessToken)
 export class AccessTokenResolver {
   constructor(
-    private readonly models: Models,
-    private readonly event: EventBus
+    @Inject(Models) private readonly models: Models,
+    @Inject(EventBus) private readonly event: EventBus
   ) {}
 
   @Query(() => [RevealedAccessToken], {
@@ -67,7 +68,7 @@ export class AccessTokenResolver {
 
 @Resolver(() => UserType)
 export class UserAccessTokenResolver {
-  constructor(private readonly models: Models) {}
+  constructor(@Inject(Models) private readonly models: Models) {}
 
   @ResolveField(() => [AccessToken])
   async accessTokens(

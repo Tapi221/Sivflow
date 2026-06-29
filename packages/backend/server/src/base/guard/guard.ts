@@ -1,11 +1,5 @@
-import {
-  applyDecorators,
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  SetMetadata,
-  UseGuards,
-} from '@nestjs/common';
+import type { CanActivate, ExecutionContext } from '@nestjs/common';
+import { Inject, applyDecorators, Injectable, SetMetadata, UseGuards } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
 import { GUARD_PROVIDER, NamedGuards } from './provider';
@@ -14,7 +8,7 @@ const BasicGuardSymbol = Symbol('BasicGuard');
 
 @Injectable()
 export class BasicGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(@Inject(Reflector) private readonly reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext) {
     // get registered guard name

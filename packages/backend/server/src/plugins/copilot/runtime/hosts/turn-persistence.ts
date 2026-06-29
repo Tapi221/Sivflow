@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import type { Turn } from '../../core';
 import type { StreamObject } from '../../providers/types';
@@ -9,8 +9,8 @@ import { ResponsePostprocessor } from './response-postprocessor';
 @Injectable()
 export class TurnPersistence {
   constructor(
-    private readonly conversations: ConversationHost,
-    private readonly postprocessor: ResponsePostprocessor
+    @Inject(ConversationHost) private readonly conversations: ConversationHost,
+    @Inject(ResponsePostprocessor) private readonly postprocessor: ResponsePostprocessor
   ) {}
 
   async persistTextResult(

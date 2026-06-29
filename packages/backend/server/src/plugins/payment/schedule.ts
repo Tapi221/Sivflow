@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import Stripe from 'stripe';
 
 import { StripeFactory } from './stripe';
@@ -8,7 +8,7 @@ export class ScheduleManager {
   private _schedule: Stripe.SubscriptionSchedule | null = null;
   private readonly logger = new Logger(ScheduleManager.name);
 
-  constructor(private readonly stripeProvider: StripeFactory) {}
+  constructor(@Inject(StripeFactory) private readonly stripeProvider: StripeFactory) {}
 
   get stripe() {
     return this.stripeProvider.stripe;

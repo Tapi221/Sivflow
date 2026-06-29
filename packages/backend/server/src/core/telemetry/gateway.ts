@@ -1,4 +1,4 @@
-import { applyDecorators, UseInterceptors } from '@nestjs/common';
+import { Inject, applyDecorators, UseInterceptors } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -23,7 +23,7 @@ type EventResponse<Data = any> = [Data] extends [never]
 @WebSocketGateway()
 @UseInterceptors(ClsInterceptor)
 export class TelemetryGateway {
-  constructor(private readonly telemetry: TelemetryService) {}
+  constructor(@Inject(TelemetryService) private readonly telemetry: TelemetryService) {}
 
   @SubscribeMessage('telemetry:batch')
   async onBatch(

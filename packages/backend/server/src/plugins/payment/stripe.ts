@@ -1,4 +1,5 @@
-import { FactoryProvider, Injectable, Logger } from '@nestjs/common';
+import type { FactoryProvider } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import Stripe from 'stripe';
 
 import { Config, Mutex, OnEvent } from '../../base';
@@ -15,9 +16,9 @@ export class StripeFactory {
   readonly #logger = new Logger(StripeFactory.name);
 
   constructor(
-    private readonly config: Config,
-    private readonly mutex: Mutex,
-    private readonly server: ServerService
+    @Inject(Config) private readonly config: Config,
+    @Inject(Mutex) private readonly mutex: Mutex,
+    @Inject(ServerService) private readonly server: ServerService
   ) {}
 
   get stripe() {

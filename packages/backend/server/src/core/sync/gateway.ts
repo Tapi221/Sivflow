@@ -1,10 +1,5 @@
-import {
-  applyDecorators,
-  Logger,
-  OnModuleDestroy,
-  OnModuleInit,
-  UseInterceptors,
-} from '@nestjs/common';
+import type { OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Inject, applyDecorators, Logger, UseInterceptors } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -223,12 +218,12 @@ export class SpaceSyncGateway
   private activeUsersFlushQueued = false;
 
   constructor(
-    private readonly ac: PermissionAccess,
-    private readonly event: EventBus,
-    private readonly workspace: PgWorkspaceDocStorageAdapter,
-    private readonly userspace: PgUserspaceDocStorageAdapter,
-    private readonly docReader: DocReader,
-    private readonly models: Models
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(EventBus) private readonly event: EventBus,
+    @Inject(PgWorkspaceDocStorageAdapter) private readonly workspace: PgWorkspaceDocStorageAdapter,
+    @Inject(PgUserspaceDocStorageAdapter) private readonly userspace: PgUserspaceDocStorageAdapter,
+    @Inject(DocReader) private readonly docReader: DocReader,
+    @Inject(Models) private readonly models: Models
   ) {}
 
   onModuleInit() {
@@ -830,8 +825,8 @@ export class SpaceSyncGateway
 abstract class SyncSocketAdapter {
   constructor(
     private readonly spaceType: SpaceType,
-    public readonly client: Socket,
-    public readonly storage: DocStorageAdapter
+    @Inject(Socket) public readonly client: Socket,
+    @Inject(DocStorageAdapter) public readonly storage: DocStorageAdapter
   ) {}
 
   room(spaceId: string, roomType: RoomType = 'sync') {
@@ -899,9 +894,9 @@ class WorkspaceSyncAdapter extends SyncSocketAdapter {
   constructor(
     client: Socket,
     storage: DocStorageAdapter,
-    private readonly ac: PermissionAccess,
-    private readonly docReader: DocReader,
-    private readonly models: Models
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(DocReader) private readonly docReader: DocReader,
+    @Inject(Models) private readonly models: Models
   ) {
     super(SpaceType.Workspace, client, storage);
   }

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import {
   autoMetadata,
@@ -32,11 +32,11 @@ export class CommentAttachmentStorage {
   }
 
   constructor(
-    private readonly AFFiNEConfig: Config,
-    private readonly event: EventBus,
-    private readonly storageFactory: StorageProviderFactory,
-    private readonly models: Models,
-    private readonly url: URLHelper
+    @Inject(Config) private readonly AFFiNEConfig: Config,
+    @Inject(EventBus) private readonly event: EventBus,
+    @Inject(StorageProviderFactory) private readonly storageFactory: StorageProviderFactory,
+    @Inject(Models) private readonly models: Models,
+    @Inject(URLHelper) private readonly url: URLHelper
   ) {}
 
   @OnEvent('config.init')

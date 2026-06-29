@@ -1,4 +1,12 @@
-import { Body, Controller, Options, Post, Req, Res } from '@nestjs/common';
+import {
+  Inject,
+  Body,
+  Controller,
+  Options,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
 import type { Request, Response } from 'express';
 
 import { BadRequest, Throttle, UseNamedGuard } from '../../base';
@@ -15,7 +23,7 @@ import { TelemetryAck, type TelemetryBatch } from './types';
 @Throttle('default')
 @Controller('/api/telemetry')
 export class TelemetryController {
-  constructor(private readonly telemetry: TelemetryService) {}
+  constructor(@Inject(TelemetryService) private readonly telemetry: TelemetryService) {}
 
   @Options('/collect')
   collectOptions(@Req() req: Request, @Res() res: Response) {

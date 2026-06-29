@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { getStreamAsBuffer } from 'get-stream';
 
 import { Cache, JobQueue, NotFound, URLHelper } from '../../base';
@@ -25,14 +25,14 @@ export class WorkspaceService {
   private readonly logger = new Logger(WorkspaceService.name);
 
   constructor(
-    private readonly cache: Cache,
-    private readonly models: Models,
-    private readonly url: URLHelper,
-    private readonly doc: DocReader,
-    private readonly blobStorage: WorkspaceBlobStorage,
-    private readonly mailer: Mailer,
-    private readonly queue: JobQueue,
-    private readonly quotaState: QuotaStateService
+    @Inject(Cache) private readonly cache: Cache,
+    @Inject(Models) private readonly models: Models,
+    @Inject(URLHelper) private readonly url: URLHelper,
+    @Inject(DocReader) private readonly doc: DocReader,
+    @Inject(WorkspaceBlobStorage) private readonly blobStorage: WorkspaceBlobStorage,
+    @Inject(Mailer) private readonly mailer: Mailer,
+    @Inject(JobQueue) private readonly queue: JobQueue,
+    @Inject(QuotaStateService) private readonly quotaState: QuotaStateService
   ) {}
 
   async getInviteInfo(inviteId: string): Promise<InviteInfo> {

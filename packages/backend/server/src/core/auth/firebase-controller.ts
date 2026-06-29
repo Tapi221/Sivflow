@@ -1,4 +1,11 @@
-import { Body, Controller, Post, Req, Res } from '@nestjs/common';
+import {
+  Inject,
+  Body,
+  Controller,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
 import type { Request, Response } from 'express';
 
 import { InvalidAuthState, UseNamedGuard } from '../../base';
@@ -14,8 +21,8 @@ interface FirebaseCredential {
 @Controller('/api/auth/firebase')
 export class FirebaseAuthController {
   constructor(
-    private readonly models: Models,
-    private readonly sessionIssuer: SessionIssuer
+    @Inject(Models) private readonly models: Models,
+    @Inject(SessionIssuer) private readonly sessionIssuer: SessionIssuer
   ) {}
 
   @Public()

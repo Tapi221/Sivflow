@@ -3,16 +3,13 @@ import {
   ID,
   InputType,
   ObjectType,
-  OmitType,
-  PartialType,
-  PickType,
   registerEnumType,
 } from '@nestjs/graphql';
 import { WorkspaceMemberStatus } from '@prisma/client';
 import { GraphQLJSONObject, SafeIntResolver } from 'graphql-scalars';
 
 import { DocRole, WorkspaceRole } from '../permission';
-import { UserType, WorkspaceUserType } from '../user/types';
+import { WorkspaceUserType } from '../user/types';
 
 registerEnumType(WorkspaceRole, {
   name: 'WorkspaceRole',
@@ -36,13 +33,46 @@ registerEnumType(WorkspaceMemberStatus, {
 });
 
 @ObjectType()
-export class InviteUserType extends OmitType(
-  PartialType(UserType),
-  ['id'],
-  ObjectType
-) {
+export class InviteUserType {
   @Field(() => ID)
   id!: string;
+
+  @Field(() => String, { description: 'User name', nullable: true })
+  name?: string | null;
+
+  @Field(() => String, { description: 'User email', nullable: true })
+  email?: string | null;
+
+  @Field(() => Boolean, {
+    description: 'User email verified',
+    nullable: true,
+  })
+  emailVerified?: boolean | null;
+
+  @Field(() => Boolean, {
+    description: 'User has password',
+    nullable: true,
+  })
+  hasPassword?: boolean | null;
+
+  @Field(() => String, {
+    description: 'User avatar url',
+    nullable: true,
+  })
+  avatarUrl?: string | null;
+
+  @Field(() => Date, {
+    deprecationReason: 'useless',
+    description: 'User email verified',
+    nullable: true,
+  })
+  createdAt?: Date | null;
+
+  @Field(() => Boolean, {
+    description: 'User is disabled',
+    nullable: true,
+  })
+  disabled?: boolean | null;
 
   @Field(() => WorkspaceRole, {
     deprecationReason: 'Use role instead',
@@ -133,19 +163,36 @@ export class InvitationType {
 }
 
 @InputType()
-export class UpdateWorkspaceInput extends PickType(
-  PartialType(WorkspaceType),
-  [
-    'public',
-    'enableAi',
-    'enableSharing',
-    'enableUrlPreview',
-    'enableDocEmbedding',
-  ],
-  InputType
-) {
+export class UpdateWorkspaceInput {
   @Field(() => ID)
   id!: string;
+
+  @Field(() => Boolean, {
+    description: 'is Public workspace',
+    nullable: true,
+  })
+  public?: boolean;
+
+  @Field(() => Boolean, { description: 'Enable AI', nullable: true })
+  enableAi?: boolean;
+
+  @Field(() => Boolean, {
+    description: 'Enable workspace sharing',
+    nullable: true,
+  })
+  enableSharing?: boolean;
+
+  @Field(() => Boolean, {
+    description: 'Enable url previous when sharing',
+    nullable: true,
+  })
+  enableUrlPreview?: boolean;
+
+  @Field(() => Boolean, {
+    description: 'Enable doc embedding',
+    nullable: true,
+  })
+  enableDocEmbedding?: boolean;
 }
 
 @ObjectType()

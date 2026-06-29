@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { ConfigFactory, InvalidAppConfigInput } from '../../base';
 import { Models } from '../../models';
@@ -11,8 +11,8 @@ export class ImportConfigCommand {
   logger = new Logger(ImportConfigCommand.name);
 
   constructor(
-    private readonly models: Models,
-    private readonly configFactory: ConfigFactory
+    @Inject(Models) private readonly models: Models,
+    @Inject(ConfigFactory) private readonly configFactory: ConfigFactory
   ) {}
 
   async execute(path?: string): Promise<void> {

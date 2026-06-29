@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
 import { OnEvent } from '../../base';
@@ -22,7 +22,7 @@ function isIgnorablePermissionEventError(error: unknown) {
 export class EventsListener {
   private readonly logger = new Logger(EventsListener.name);
 
-  constructor(private readonly models: Models) {}
+  constructor(@Inject(Models) private readonly models: Models) {}
 
   @OnEvent('doc.created')
   async setDefaultPageOwner(payload: Events['doc.created']) {

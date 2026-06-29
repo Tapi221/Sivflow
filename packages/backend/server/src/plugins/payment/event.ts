@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { EventBus, OnEvent } from '../../base';
 import { WorkspacePolicyService } from '../../core/permission';
@@ -9,10 +9,10 @@ import { SubscriptionPlan } from './types';
 @Injectable()
 export class PaymentEventHandlers {
   constructor(
-    private readonly workspace: WorkspaceService,
-    private readonly policy: WorkspacePolicyService,
-    private readonly quotaState: QuotaStateService,
-    private readonly event: EventBus
+    @Inject(WorkspaceService) private readonly workspace: WorkspaceService,
+    @Inject(WorkspacePolicyService) private readonly policy: WorkspacePolicyService,
+    @Inject(QuotaStateService) private readonly quotaState: QuotaStateService,
+    @Inject(EventBus) private readonly event: EventBus
   ) {}
 
   @OnEvent('workspace.subscription.activated')

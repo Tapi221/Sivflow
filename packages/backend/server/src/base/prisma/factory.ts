@@ -1,5 +1,5 @@
 import type { OnModuleDestroy } from '@nestjs/common';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 import { PrismaClient } from '@prisma/client';
 
@@ -18,7 +18,7 @@ export class PrismaFactory implements OnModuleDestroy {
   static INSTANCE: PrismaClient | null = null;
   readonly #instance: PrismaClient;
 
-  constructor(config: Config) {
+  constructor(@Inject(Config) config: Config) {
     this.#instance = new PrismaClient(createPrismaOptions(config));
     PrismaFactory.INSTANCE = this.#instance;
   }

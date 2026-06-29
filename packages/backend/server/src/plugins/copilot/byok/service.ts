@@ -1,6 +1,6 @@
 import { createHash, createHmac, randomUUID } from 'node:crypto';
 
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Inject, BadRequestException, Injectable } from '@nestjs/common';
 
 import {
   BadRequest,
@@ -112,10 +112,10 @@ export class ByokService {
   private readonly probeFetch = safeFetch;
 
   constructor(
-    private readonly models: Models,
-    private readonly crypto: CryptoHelper,
-    private readonly cache: Cache,
-    private readonly entitlement: ByokEntitlementPolicy
+    @Inject(Models) private readonly models: Models,
+    @Inject(CryptoHelper) private readonly crypto: CryptoHelper,
+    @Inject(Cache) private readonly cache: Cache,
+    @Inject(ByokEntitlementPolicy) private readonly entitlement: ByokEntitlementPolicy
   ) {}
 
   get customEndpointSupported() {

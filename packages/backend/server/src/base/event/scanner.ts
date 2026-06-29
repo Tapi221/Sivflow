@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { once } from 'lodash-es';
 
 import { ModuleScanner } from '../nestjs/scanner';
@@ -10,7 +10,7 @@ import {
 
 @Injectable()
 export class EventHandlerScanner {
-  constructor(private readonly scanner: ModuleScanner) {}
+  constructor(@Inject(ModuleScanner) private readonly scanner: ModuleScanner) {}
 
   scan = once(() => {
     const handlers: Array<{

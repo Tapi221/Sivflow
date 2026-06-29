@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { camelCase, chunk, mapKeys, snakeCase } from 'lodash-es';
 
 import {
@@ -109,9 +109,11 @@ export class IndexerService {
   private readonly logger = new Logger(IndexerService.name);
 
   constructor(
-    private readonly models: Models,
+    @Inject(Models)
+    @Inject(Models) private readonly models: Models,
+    @Inject(SearchProviderFactory)
     private readonly factory: SearchProviderFactory,
-    private readonly queue: JobQueue
+    @Inject(JobQueue) private readonly queue: JobQueue
   ) {}
 
   async createTables() {

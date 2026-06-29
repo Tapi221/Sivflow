@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CopilotQuotaExceeded } from '../../../base';
 import { QuotaService } from '../../../core/quota/service';
@@ -9,8 +9,8 @@ import type { ResolvedPrompt } from '../prompt';
 @Injectable()
 export class ConversationPolicy {
   constructor(
-    private readonly models: Models,
-    private readonly quota: QuotaService
+    @Inject(Models) private readonly models: Models,
+    @Inject(QuotaService) private readonly quota: QuotaService
   ) {}
 
   async getQuota(userId: string) {

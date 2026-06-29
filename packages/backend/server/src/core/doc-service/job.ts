@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaClient } from '@prisma/client';
 
@@ -28,11 +28,11 @@ export class DocServiceCronJob {
   private readonly logger = new Logger(DocServiceCronJob.name);
 
   constructor(
-    private readonly workspace: PgWorkspaceDocStorageAdapter,
-    private readonly docReader: DatabaseDocReader,
-    private readonly prisma: PrismaClient,
-    private readonly job: JobQueue,
-    private readonly models: Models
+    @Inject(PgWorkspaceDocStorageAdapter) private readonly workspace: PgWorkspaceDocStorageAdapter,
+    @Inject(DatabaseDocReader) private readonly docReader: DatabaseDocReader,
+    @Inject(PrismaClient) private readonly prisma: PrismaClient,
+    @Inject(JobQueue) private readonly job: JobQueue,
+    @Inject(Models) private readonly models: Models
   ) {}
 
   @OnJob('doc.mergePendingDocUpdates')

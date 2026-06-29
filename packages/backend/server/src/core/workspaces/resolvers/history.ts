@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import {
   Args,
   Field,
@@ -36,8 +37,8 @@ class DocHistoryType implements Partial<SnapshotHistory> {
 @Resolver(() => WorkspaceType)
 export class DocHistoryResolver {
   constructor(
-    private readonly workspace: PgWorkspaceDocStorageAdapter,
-    private readonly ac: PermissionAccess
+    @Inject(PgWorkspaceDocStorageAdapter) private readonly workspace: PgWorkspaceDocStorageAdapter,
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess
   ) {}
 
   @ResolveField(() => [DocHistoryType])

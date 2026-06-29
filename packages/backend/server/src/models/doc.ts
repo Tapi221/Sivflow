@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
 import type { Update } from '@prisma/client';
 import { Prisma } from '@prisma/client';
@@ -46,7 +46,7 @@ export type DocMetaUpsertInput = Omit<
  */
 @Injectable()
 export class DocModel extends BaseModel {
-  constructor(private readonly event: EventBus) {
+  constructor(@Inject(EventBus) private readonly event: EventBus) {
     super();
   }
 

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import {
   ActionForbidden,
@@ -22,11 +22,11 @@ export class MagicLinkAuthService {
   private readonly logger = new Logger(MagicLinkAuthService.name);
 
   constructor(
-    private readonly url: URLHelper,
-    private readonly auth: AuthService,
-    private readonly models: Models,
-    private readonly config: Config,
-    private readonly crypto: CryptoHelper
+    @Inject(URLHelper) private readonly url: URLHelper,
+    @Inject(AuthService) private readonly auth: AuthService,
+    @Inject(Models) private readonly models: Models,
+    @Inject(Config) private readonly config: Config,
+    @Inject(CryptoHelper) private readonly crypto: CryptoHelper
   ) {}
 
   async send(email: string, callbackUrl = '/magic-link', clientNonce?: string) {

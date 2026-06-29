@@ -49,6 +49,7 @@ import serverNativeModule, {
   type SafeFetchResponse,
   type Tokenizer,
 } from '@affine/server-native';
+import { createHash } from 'node:crypto';
 
 export type {
   AssertSafeUrlRequest,
@@ -117,6 +118,16 @@ import type {
   ToolCallRequest,
   ToolCallResult,
 } from './plugins/copilot/runtime/contracts/tool-contract';
+import {
+  DocRole,
+  type DocAction,
+  fixupDocRole,
+  mapDocRoleToPermissions,
+  mapWorkspaceRoleToPermissions,
+  RoleActionsMap,
+  WorkspaceRole,
+  type WorkspaceAction,
+} from './core/permission/types';
 
 export const mergeUpdatesInApplyWay = serverNativeModule.mergeUpdatesInApplyWay;
 
@@ -272,16 +283,436 @@ export type PermissionEvaluationOutputV1 = {
   }>;
 };
 
+type PermissionActionRoleMatrixV1 = {
+  workspace: {
+    roles: Record<PermissionWorkspaceRole, string[]>;
+  };
+  doc: {
+    roles: Record<PermissionDocRole, string[]>;
+  };
+};
+
+const LEGACY_TO_NATIVE_WORKSPACE_ROLE = new Map<
+  WorkspaceRole,
+  PermissionWorkspaceRole
+>([
+  [WorkspaceRole.External, 'external'],
+  [WorkspaceRole.Collaborator, 'member'],
+  [WorkspaceRole.Admin, 'admin'],
+  [WorkspaceRole.Owner, 'owner'],
+]);
+
+const NATIVE_TO_LEGACY_WORKSPACE_ROLE = new Map<
+  PermissionWorkspaceRole,
+  WorkspaceRole
+>([...LEGACY_TO_NATIVE_WORKSPACE_ROLE.entries()].map(([legacy, native]) => [
+  native,
+  legacy,
+]));
+
+const LEGACY_TO_NATIVE_DOC_ROLE = new Map<DocRole, PermissionDocRole>([
+  [DocRole.None, 'none'],
+  [DocRole.External, 'external'],
+  [DocRole.Reader, 'reader'],
+  [DocRole.Commenter, 'commenter'],
+  [DocRole.Editor, 'editor'],
+  [DocRole.Manager, 'manager'],
+  [DocRole.Owner, 'owner'],
+]);
+
+const NATIVE_TO_LEGACY_DOC_ROLE = new Map<PermissionDocRole, DocRole>(
+  [...LEGACY_TO_NATIVE_DOC_ROLE.entries()].map(([legacy, native]) => [
+    native,
+    legacy,
+  ])
+);
+
+const RUNTIME_RESTRICTED_WORKSPACE_ACTIONS = new Set<string>([
+  'Workspace.Sync',
+  'Workspace.CreateDoc',
+  'Workspace.Delete',
+  'Workspace.TransferOwner',
+  'Workspace.Users.Manage',
+  'Workspace.Administrators.Manage',
+  'Workspace.Settings.Update',
+  'Workspace.Properties.Create',
+  'Workspace.Properties.Update',
+  'Workspace.Properties.Delete',
+  'Workspace.Blobs.Write',
+  'Workspace.Payment.Manage',
+]);
+
+const RUNTIME_RESTRICTED_DOC_ACTIONS = new Set<string>([
+  'Doc.Duplicate',
+  'Doc.Trash',
+  'Doc.Restore',
+  'Doc.Delete',
+  'Doc.Update',
+  'Doc.Publish',
+  'Doc.TransferOwner',
+  'Doc.Properties.Update',
+  'Doc.Users.Manage',
+  'Doc.Comments.Create',
+  'Doc.Comments.Update',
+  'Doc.Comments.Delete',
+  'Doc.Comments.Resolve',
+]);
+
+function uniqueActions<T extends string>(actions: Iterable<T>): T[] {
+  return [...new Set(actions)];
+}
+
+function buildPermissionActionRoleMatrixV1Fallback(): PermissionActionRoleMatrixV1 {
+  return {
+    workspace: {
+      roles: {
+        external: uniqueActions(
+          RoleActionsMap.WorkspaceRole[WorkspaceRole.External]
+        ),
+        member: uniqueActions(
+          RoleActionsMap.WorkspaceRole[WorkspaceRole.Collaborator]
+        ),
+        admin: uniqueActions(RoleActionsMap.WorkspaceRole[WorkspaceRole.Admin]),
+        owner: uniqueActions(RoleActionsMap.WorkspaceRole[WorkspaceRole.Owner]),
+      },
+    },
+    doc: {
+      roles: {
+        none: [],
+        external: uniqueActions(RoleActionsMap.DocRole[DocRole.External]),
+        reader: uniqueActions(RoleActionsMap.DocRole[DocRole.Reader]),
+        commenter: uniqueActions(RoleActionsMap.DocRole[DocRole.Commenter]),
+        editor: uniqueActions(RoleActionsMap.DocRole[DocRole.Editor]),
+        manager: uniqueActions(RoleActionsMap.DocRole[DocRole.Manager]),
+        owner: uniqueActions(RoleActionsMap.DocRole[DocRole.Owner]),
+      },
+    },
+  };
+}
+
+const permissionActionRoleMatrixFallback =
+  buildPermissionActionRoleMatrixV1Fallback();
+
+function nativeWorkspaceRoleToLegacy(
+  role?: PermissionWorkspaceRole
+): WorkspaceRole | null {
+  return role ? (NATIVE_TO_LEGACY_WORKSPACE_ROLE.get(role) ?? null) : null;
+}
+
+function nativeDocRoleToLegacy(role?: PermissionDocRole): DocRole | null {
+  return role ? (NATIVE_TO_LEGACY_DOC_ROLE.get(role) ?? null) : null;
+}
+
+function legacyWorkspaceRoleToNative(
+  role: WorkspaceRole | null
+): PermissionWorkspaceRole | undefined {
+  return role == null ? undefined : LEGACY_TO_NATIVE_WORKSPACE_ROLE.get(role);
+}
+
+function legacyDocRoleToNative(
+  role: DocRole | null
+): PermissionDocRole | undefined {
+  return role == null ? undefined : LEGACY_TO_NATIVE_DOC_ROLE.get(role);
+}
+
+function workspaceRoleAllowsAction(
+  role: PermissionWorkspaceRole | undefined,
+  action: string
+) {
+  const legacyRole = nativeWorkspaceRoleToLegacy(role);
+  if (legacyRole == null) {
+    return false;
+  }
+  return mapWorkspaceRoleToPermissions(legacyRole)[action as WorkspaceAction];
+}
+
+function docRoleAllowsAction(role: PermissionDocRole | undefined, action: string) {
+  const legacyRole = nativeDocRoleToLegacy(role);
+  if (legacyRole == null) {
+    return false;
+  }
+  return mapDocRoleToPermissions(legacyRole)[action as DocAction];
+}
+
+function runtimeRestrictionsForAction(input: {
+  action: string;
+  restrictedActions: Set<string>;
+  readonly?: boolean;
+  readonlyReason?: string;
+  known?: boolean;
+  stale?: boolean;
+}): PermissionDecisionV1['restrictions'] {
+  if (!input.restrictedActions.has(input.action)) {
+    return [];
+  }
+
+  if (input.readonly) {
+    return [
+      {
+        type: 'readonly',
+        ...(input.readonlyReason ? { reason: input.readonlyReason } : {}),
+      },
+    ];
+  }
+
+  if (input.known === false) {
+    return [{ type: 'runtime_unknown' }];
+  }
+
+  if (input.stale) {
+    return [{ type: 'runtime_stale' }];
+  }
+
+  return [];
+}
+
+function evaluatePermissionV1Fallback(
+  input: PermissionEvaluationInputV1
+): PermissionEvaluationOutputV1 {
+  if (input.version !== 1) {
+    throw new Error(`Unsupported permission evaluation version: ${input.version}`);
+  }
+
+  const runtime = input.runtime ?? {};
+  const workspace = input.workspace ?? {};
+  const localWorkspace =
+    input.subject?.allowLocal === true && workspace.local === true;
+  const activeWorkspaceMember = workspace.memberState === 'active';
+  const sharingEnabled = workspace.sharingEnabled ?? runtime.sharingEnabled ?? true;
+  const workspacePublic = workspace.public === true;
+  const workspacePreviewEnabled =
+    workspace.urlPreviewEnabled === true || runtime.urlPreviewEnabled === true;
+
+  let workspaceEffectiveRole: PermissionWorkspaceRole | undefined;
+  if (localWorkspace) {
+    workspaceEffectiveRole = 'owner';
+  } else if (activeWorkspaceMember && workspace.role) {
+    workspaceEffectiveRole = workspace.role;
+  } else if (workspacePublic) {
+    workspaceEffectiveRole = 'external';
+  }
+
+  const workspaceDecisions = (input.workspaceActions ?? []).map(action => {
+    const restrictions = runtimeRestrictionsForAction({
+      action,
+      restrictedActions: RUNTIME_RESTRICTED_WORKSPACE_ACTIONS,
+      readonly: runtime.readonly,
+      readonlyReason: runtime.readonlyReason,
+      known: runtime.known,
+      stale: runtime.stale,
+    });
+    const sources: PermissionDecisionV1['sources'] = [];
+    let allowed = false;
+
+    if (action === 'Workspace.Preview') {
+      if (workspaceRoleAllowsAction(workspaceEffectiveRole, 'Workspace.Read')) {
+        allowed = true;
+        if (localWorkspace) {
+          sources.push({ type: 'local-workspace' });
+        } else if (workspaceEffectiveRole) {
+          sources.push({
+            type: activeWorkspaceMember ? 'workspace-member' : 'workspace-policy',
+            role: workspaceEffectiveRole,
+          });
+        }
+      } else if (workspacePreviewEnabled || workspacePublic || localWorkspace) {
+        allowed = true;
+        sources.push({
+          type: workspacePreviewEnabled
+            ? 'workspace-preview-policy'
+            : localWorkspace
+              ? 'local-workspace'
+              : 'workspace-policy',
+          ...(workspacePublic ? { role: 'external' } : {}),
+        });
+      }
+    } else if (workspaceRoleAllowsAction(workspaceEffectiveRole, action)) {
+      allowed = restrictions.length === 0;
+      if (localWorkspace) {
+        sources.push({ type: 'local-workspace' });
+      } else if (workspaceEffectiveRole) {
+        sources.push({
+          type: activeWorkspaceMember ? 'workspace-member' : 'workspace-policy',
+          role: workspaceEffectiveRole,
+        });
+      }
+    }
+
+    return {
+      action,
+      allowed,
+      sources,
+      restrictions,
+    };
+  });
+
+  const docs = (input.docs ?? []).map(doc => {
+    const subjectWorkspaceRole = localWorkspace
+      ? 'owner'
+      : activeWorkspaceMember
+        ? workspace.role
+        : undefined;
+    const explicitUserRole =
+      doc.explicitUserRole && (activeWorkspaceMember || sharingEnabled)
+        ? doc.explicitUserRole
+        : undefined;
+    const publicDocRole =
+      doc.visibility === 'public' &&
+      doc.publicRole === 'external' &&
+      sharingEnabled
+        ? 'external'
+        : undefined;
+    const memberDefaultRole =
+      activeWorkspaceMember && !explicitUserRole ? doc.memberDefaultRole : undefined;
+
+    const effectiveRoleCandidates = uniqueActions(
+      [
+        explicitUserRole,
+        memberDefaultRole,
+        publicDocRole,
+        ...((doc.groupGrantsEnabled ? doc.groupGrants : []) ?? []).map(
+          grant => grant.role
+        ),
+      ].filter((role): role is PermissionDocRole => role !== undefined)
+    )
+      .map(nativeDocRoleToLegacy)
+      .filter((role): role is DocRole => role !== null)
+      .map(role =>
+        fixupDocRole(nativeWorkspaceRoleToLegacy(subjectWorkspaceRole), role)
+      )
+      .filter((role): role is DocRole => role !== null);
+
+    const inheritedDocRole = (() => {
+      const workspaceRole = nativeWorkspaceRoleToLegacy(subjectWorkspaceRole);
+      if (workspaceRole === WorkspaceRole.Owner) {
+        return DocRole.Owner;
+      }
+      if (workspaceRole === WorkspaceRole.Admin) {
+        return DocRole.Manager;
+      }
+      return null;
+    })();
+
+    const effectiveLegacyDocRole = (() => {
+      const roles = [
+        ...effectiveRoleCandidates,
+        ...(inheritedDocRole == null ? [] : [inheritedDocRole]),
+      ];
+      if (roles.length === 0) {
+        return null;
+      }
+      return roles.reduce((highest, role) => Math.max(highest, role)) as DocRole;
+    })();
+    const effectiveDocRole = legacyDocRoleToNative(effectiveLegacyDocRole);
+    const resourceOwnerRole =
+      doc.explicitUserRole === 'owner' || localWorkspace ? 'owner' : undefined;
+    const previewEnabled = doc.previewEnabled === true;
+
+    const decisions = (doc.actions ?? []).map(action => {
+      const restrictions = runtimeRestrictionsForAction({
+        action,
+        restrictedActions: RUNTIME_RESTRICTED_DOC_ACTIONS,
+        readonly: runtime.readonly,
+        readonlyReason: runtime.readonlyReason,
+        known: runtime.known,
+        stale: runtime.stale,
+      });
+      const sources: PermissionDecisionV1['sources'] = [];
+      let allowed = false;
+
+      if (action === 'Doc.Preview') {
+        if (effectiveDocRole && docRoleAllowsAction(effectiveDocRole, 'Doc.Read')) {
+          allowed = true;
+        } else if (previewEnabled) {
+          allowed = true;
+          sources.push({ type: 'doc-preview-policy' });
+        }
+      } else if (effectiveDocRole && docRoleAllowsAction(effectiveDocRole, action)) {
+        allowed = restrictions.length === 0;
+      }
+
+      if (allowed && sources.length === 0) {
+        if (localWorkspace) {
+          sources.push({ type: 'local-workspace' });
+        } else if (
+          subjectWorkspaceRole &&
+          (subjectWorkspaceRole === 'owner' || subjectWorkspaceRole === 'admin')
+        ) {
+          sources.push({
+            type: 'inherited-workspace-role',
+            role: subjectWorkspaceRole,
+          });
+        } else if (explicitUserRole) {
+          sources.push({ type: 'doc-grant', role: explicitUserRole });
+        } else if (memberDefaultRole) {
+          sources.push({ type: 'member-default-policy', role: memberDefaultRole });
+        } else if (publicDocRole) {
+          sources.push({ type: 'public-policy', role: publicDocRole });
+        }
+      }
+
+      if (
+        !allowed &&
+        restrictions.length === 0 &&
+        !activeWorkspaceMember &&
+        !sharingEnabled &&
+        (action === 'Doc.Read' || action === 'Doc.Preview' || explicitUserRole)
+      ) {
+        restrictions.push({ type: 'sharing-disabled' });
+      }
+
+      return {
+        action,
+        allowed,
+        sources,
+        restrictions,
+      };
+    });
+
+    return {
+      docId: doc.docId,
+      ...(resourceOwnerRole ? { resourceOwnerRole } : {}),
+      ...(effectiveDocRole ? { effectiveRole: effectiveDocRole } : {}),
+      decisions,
+    };
+  });
+
+  return {
+    version: 1,
+    workspace: {
+      ...(workspaceEffectiveRole === 'owner' ? { resourceOwnerRole: 'owner' } : {}),
+      ...(workspaceEffectiveRole ? { effectiveRole: workspaceEffectiveRole } : {}),
+      decisions: workspaceDecisions,
+    },
+    docs,
+  };
+}
+
 export const evaluatePermissionV1 = (
   input: PermissionEvaluationInputV1
-): PermissionEvaluationOutputV1 =>
-  serverNativeModule.evaluatePermissionV1(input);
+): PermissionEvaluationOutputV1 => {
+  if (hasNativeServerModule && nativeLlmModule.evaluatePermissionV1) {
+    return nativeLlmModule.evaluatePermissionV1(input) as PermissionEvaluationOutputV1;
+  }
 
-export const permissionActionRoleMatrixV1 = (): unknown =>
-  serverNativeModule.permissionActionRoleMatrixV1();
+  return evaluatePermissionV1Fallback(input);
+};
 
-export const permissionActionRoleMatrixV1Json =
-  serverNativeModule.permissionActionRoleMatrixV1Json;
+export const permissionActionRoleMatrixV1 = (): PermissionActionRoleMatrixV1 => {
+  if (hasNativeServerModule && nativeLlmModule.permissionActionRoleMatrixV1) {
+    return nativeLlmModule.permissionActionRoleMatrixV1() as PermissionActionRoleMatrixV1;
+  }
+
+  return permissionActionRoleMatrixFallback;
+};
+
+export const permissionActionRoleMatrixV1Json = (): string => {
+  if (hasNativeServerModule && nativeLlmModule.permissionActionRoleMatrixV1Json) {
+    return nativeLlmModule.permissionActionRoleMatrixV1Json();
+  }
+
+  return JSON.stringify(permissionActionRoleMatrixFallback);
+};
 
 export const resolveEntitlementV1 = (
   input: ResolveEntitlementInput
@@ -297,6 +728,8 @@ export const updateDocProperties = serverNativeModule.updateDocProperties;
 export const updateRootDocMetaTitle = serverNativeModule.updateRootDocMetaTitle;
 
 const nativeLlmModule = serverNativeModule;
+const hasNativeServerModule =
+  (nativeLlmModule as { __missingNative?: boolean }).__missingNative !== true;
 
 export type LlmProtocol =
   | 'openai_chat'
@@ -1282,13 +1715,13 @@ export function llmValidateJsonSchema<T = unknown>(
 export function llmCanonicalJsonSchemaHash(
   schema: Record<string, unknown>
 ): string {
-  if (!nativeLlmModule.llmCanonicalJsonSchemaHash) {
-    throw new Error(
-      'native canonical JSON schema hash helper is not available'
-    );
+  if (hasNativeServerModule && nativeLlmModule.llmCanonicalJsonSchemaHash) {
+    return nativeLlmModule.llmCanonicalJsonSchemaHash(schema);
   }
 
-  return nativeLlmModule.llmCanonicalJsonSchemaHash(schema);
+  return createHash('sha256')
+    .update(stableJsonStringify(schema))
+    .digest('hex');
 }
 
 export type LlmContractName =
@@ -1342,6 +1775,26 @@ export function llmNormalizePreparedRoutes<T = unknown>(value: unknown): T {
 
 function doneIteratorResult<T>(): IteratorResult<T> {
   return { value: undefined as unknown as T, done: true };
+}
+
+function stableJsonStringify(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map(stableJsonStringify).join(',')}]`;
+  }
+
+  if (value && typeof value === 'object') {
+    const entries = Object.entries(value as Record<string, unknown>).sort(
+      ([a], [b]) => a.localeCompare(b)
+    );
+    return `{${entries
+      .map(
+        ([key, entryValue]) =>
+          `${JSON.stringify(key)}:${stableJsonStringify(entryValue)}`
+      )
+      .join(',')}}`;
+  }
+
+  return JSON.stringify(value);
 }
 
 class NativeStreamAdapter<T> implements AsyncIterableIterator<T> {

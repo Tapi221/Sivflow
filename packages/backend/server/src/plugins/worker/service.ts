@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { Config, OnEvent, URLHelper } from '../../base';
 import { fixUrl, OriginRules } from './utils';
@@ -8,8 +8,8 @@ export class WorkerService {
   allowedOrigins: OriginRules;
 
   constructor(
-    private readonly config: Config,
-    private readonly url: URLHelper
+    @Inject(Config) private readonly config: Config,
+    @Inject(URLHelper) private readonly url: URLHelper
   ) {
     this.allowedOrigins = [...this.url.allowedOrigins];
   }

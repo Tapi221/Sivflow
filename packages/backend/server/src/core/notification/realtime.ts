@@ -1,4 +1,5 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import type { OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { z } from 'zod';
 
 import {
@@ -11,8 +12,8 @@ import { NotificationService } from './service';
 @Injectable()
 export class NotificationRealtimeProvider implements OnModuleInit {
   constructor(
-    private readonly service: NotificationService,
-    private readonly registry: RealtimeRegistry
+    @Inject(NotificationService) private readonly service: NotificationService,
+    @Inject(RealtimeRegistry) private readonly registry: RealtimeRegistry
   ) {}
 
   onModuleInit() {

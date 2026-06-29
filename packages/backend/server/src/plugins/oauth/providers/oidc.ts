@@ -1,4 +1,5 @@
-import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import type { OnModuleDestroy } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   createRemoteJWKSet,
   customFetch,
@@ -84,7 +85,7 @@ export class OIDCProvider extends OAuthProvider implements OnModuleDestroy {
   });
   #validationGeneration = 0;
 
-  constructor(private readonly url: URLHelper) {
+  constructor(@Inject(URLHelper) private readonly url: URLHelper) {
     super();
   }
 

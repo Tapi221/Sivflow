@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Inject, BadRequestException, Injectable } from '@nestjs/common';
 
 import {
   type FileUpload,
@@ -28,10 +28,10 @@ type CreateInboxMessage = {
 @Injectable()
 export class ConversationInboxService {
   constructor(
-    private readonly chatSession: ChatSessionService,
-    private readonly ac: PermissionAccess,
-    private readonly storage: CopilotStorage,
-    private readonly submissions: CompatSubmissionStore
+    @Inject(ChatSessionService) private readonly chatSession: ChatSessionService,
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(CopilotStorage) private readonly storage: CopilotStorage,
+    @Inject(CompatSubmissionStore) private readonly submissions: CompatSubmissionStore
   ) {}
 
   async createMessage(

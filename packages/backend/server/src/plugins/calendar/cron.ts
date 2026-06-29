@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { JobQueue } from '../../base';
@@ -9,8 +9,8 @@ const CALENDAR_POLL_BATCH_SIZE = 200;
 @Injectable()
 export class CalendarCronJobs {
   constructor(
-    private readonly models: Models,
-    private readonly queue: JobQueue
+    @Inject(Models) private readonly models: Models,
+    @Inject(JobQueue) private readonly queue: JobQueue
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE)

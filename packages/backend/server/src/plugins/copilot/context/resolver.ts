@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 
 import {
@@ -289,12 +290,12 @@ class ContextMatchedDocChunk implements DocChunkSimilarity {
 @Resolver(() => CopilotType)
 export class CopilotContextRootResolver {
   constructor(
-    private readonly ac: PermissionAccess,
-    private readonly event: EventBus,
-    private readonly mutex: RequestMutex,
-    private readonly chatSession: ChatSessionService,
-    private readonly context: CopilotContextService,
-    private readonly models: Models
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(EventBus) private readonly event: EventBus,
+    @Inject(RequestMutex) private readonly mutex: RequestMutex,
+    @Inject(ChatSessionService) private readonly chatSession: ChatSessionService,
+    @Inject(CopilotContextService) private readonly context: CopilotContextService,
+    @Inject(Models) private readonly models: Models
   ) {}
 
   private async checkChatSession(
@@ -438,12 +439,12 @@ export class CopilotContextRootResolver {
 @Resolver(() => CopilotContextType)
 export class CopilotContextResolver {
   constructor(
-    private readonly ac: PermissionAccess,
-    private readonly models: Models,
-    private readonly mutex: RequestMutex,
-    private readonly context: CopilotContextService,
-    private readonly jobs: CopilotEmbeddingJob,
-    private readonly storage: CopilotStorage
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(Models) private readonly models: Models,
+    @Inject(RequestMutex) private readonly mutex: RequestMutex,
+    @Inject(CopilotContextService) private readonly context: CopilotContextService,
+    @Inject(CopilotEmbeddingJob) private readonly jobs: CopilotEmbeddingJob,
+    @Inject(CopilotStorage) private readonly storage: CopilotStorage
   ) {}
 
   @ResolveField(() => [CopilotContextCategory], {

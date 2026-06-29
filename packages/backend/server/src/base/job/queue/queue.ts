@@ -1,5 +1,5 @@
 import { getQueueToken } from '@nestjs/bullmq';
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { Job, JobsOptions, Queue } from 'bullmq';
 import { ClsServiceManager } from 'nestjs-cls';
@@ -38,7 +38,7 @@ function normalizedJobIds(jobId: string) {
 export class JobQueue {
   private readonly logger = new Logger(JobQueue.name);
 
-  constructor(private readonly moduleRef: ModuleRef) {}
+  constructor(@Inject(ModuleRef) private readonly moduleRef: ModuleRef) {}
 
   async add<T extends JobName>(name: T, payload: Jobs[T], opts?: JobsOptions) {
     const ns = namespace(name);

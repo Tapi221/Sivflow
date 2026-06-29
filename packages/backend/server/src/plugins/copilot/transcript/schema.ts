@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { llmGetContractSchema } from '../../../native';
 import { buildStructuredResponseFromSchemaJson } from '../runtime/contracts';
+import { toToolJsonSchema } from '../tools/json-schema';
 
 // Owner: DB/job/API legacy compatibility and transcript projection.
 // Native owns transcript domain result schemas; this file accepts historical
@@ -121,8 +122,34 @@ function buildRequiredStructuredContract(schema: Record<string, unknown>) {
   };
 }
 
+function buildTranscriptGeneratedResultSchemaFallback() {
+  return toToolJsonSchema(
+    z
+      .object({
+        normalizedSegments: z
+          .array(NormalizedTranscriptSegmentSchema)
+          .nullable()
+          .optional(),
+        normalizedTranscript: z.string(),
+        summaryJson: MeetingSummaryV2Schema.nullable().optional(),
+        providerMeta: TranscriptProviderMetaSchema.nullable().optional(),
+      })
+      .strict()
+  );
+}
+
 export const TranscriptActionResultContract = buildRequiredStructuredContract(
-  llmGetContractSchema('transcriptGeneratedResult')
+  (() => {
+    try {
+      return llmGetContractSchema('transcriptGeneratedResult');
+    } catch (error) {
+      console.warn(
+        '[copilot][transcript] Native transcript contract schema is unavailable. Falling back to a JS-generated schema for development.',
+        error
+      );
+      return buildTranscriptGeneratedResultSchemaFallback();
+    }
+  })()
 );
 
 type CanonicalTranscriptPayload = z.infer<typeof TranscriptionPayloadV2Schema>;

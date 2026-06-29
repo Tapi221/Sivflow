@@ -1,4 +1,5 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import type { OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { ModuleScanner } from '../../nestjs';
 import { getJobHandlerMetadata, JOB_SIGNAL } from './def';
@@ -13,7 +14,7 @@ export class JobHandlerScanner implements OnModuleInit {
   private readonly handlers: Record<string, JobHandler> = {};
   private readonly logger = new Logger(JobHandlerScanner.name);
 
-  constructor(private readonly scanner: ModuleScanner) {}
+  constructor(@Inject(ModuleScanner) private readonly scanner: ModuleScanner) {}
 
   async onModuleInit() {
     this.scan();

@@ -1,15 +1,17 @@
 import { nanoid } from 'nanoid';
 
 import {
-  ContextBlob,
   ContextCategories,
+  ContextEmbedStatus,
+  Models,
+} from '../../../models';
+import type {
+  ContextBlob,
   ContextCategory,
   ContextConfig,
   ContextDoc,
-  ContextEmbedStatus,
   ContextFile,
   FileChunkSimilarity,
-  Models,
 } from '../../../models';
 import type {
   EmbeddingCallOptions,

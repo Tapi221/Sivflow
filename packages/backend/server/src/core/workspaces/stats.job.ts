@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Prisma, PrismaClient } from '@prisma/client';
 
@@ -16,7 +16,7 @@ const TRANSACTION_TIMEOUT_MS = 120_000;
 export class WorkspaceStatsJob {
   private readonly logger = new Logger(WorkspaceStatsJob.name);
 
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(@Inject(PrismaClient) private readonly prisma: PrismaClient) {}
 
   @Cron(CronExpression.EVERY_MINUTE)
   async refreshDirty() {

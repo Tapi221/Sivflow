@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { AiPromptRole } from '@prisma/client';
 
 import { PromptService } from '../prompt/service';
@@ -7,7 +7,7 @@ import type { CanonicalConversationHistory } from './history-projector';
 
 @Injectable()
 export class HistoryPromptPreloadProjector {
-  constructor(private readonly prompts: PromptService) {}
+  constructor(@Inject(PromptService) private readonly prompts: PromptService) {}
 
   project(
     history: CanonicalConversationHistory,

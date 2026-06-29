@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { JobQueue, OnJob } from '../../base';
@@ -13,8 +13,8 @@ declare global {
 @Injectable()
 export class DocStorageCronJob {
   constructor(
-    private readonly models: Models,
-    private readonly queue: JobQueue
+    @Inject(Models) private readonly models: Models,
+    @Inject(JobQueue) private readonly queue: JobQueue
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)

@@ -1,5 +1,7 @@
-import { getQueueToken } from '@nestjs/bullmq';
-import { Injectable, Logger, Module, OnModuleInit } from '@nestjs/common';
+import type { OnModuleInit } from '@nestjs/common';
+import { getQueueToken, } from '@nestjs/bullmq';
+import {
+  Inject, Injectable, Logger, Module } from '@nestjs/common';
 import { HttpAdapterHost, ModuleRef } from '@nestjs/core';
 import { createQueueDashExpressMiddleware } from '@queuedash/api';
 import type { Queue as BullMQQueue } from 'bullmq';
@@ -21,11 +23,11 @@ class QueueDashboardService implements OnModuleInit {
   private readonly logger = new Logger(QueueDashboardService.name);
 
   constructor(
-    private readonly adapterHost: HttpAdapterHost,
-    private readonly config: Config,
-    private readonly feature: FeatureService,
-    private readonly authGuard: AuthGuard,
-    private readonly moduleRef: ModuleRef
+    @Inject(HttpAdapterHost) private readonly adapterHost: HttpAdapterHost,
+    @Inject(Config) private readonly config: Config,
+    @Inject(FeatureService) private readonly feature: FeatureService,
+    @Inject(AuthGuard) private readonly authGuard: AuthGuard,
+    @Inject(ModuleRef) private readonly moduleRef: ModuleRef
   ) {}
 
   async onModuleInit() {

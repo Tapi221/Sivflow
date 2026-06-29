@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import {
   Args,
   Field,
@@ -65,11 +66,11 @@ export class WorkspaceRolePermissions {
 @Resolver(() => WorkspaceType)
 export class WorkspaceResolver {
   constructor(
-    private readonly ac: PermissionAccess,
-    private readonly quota: QuotaService,
-    private readonly models: Models,
-    private readonly workspaceService: WorkspaceService,
-    private readonly logger: AFFiNELogger
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(QuotaService) private readonly quota: QuotaService,
+    @Inject(Models) private readonly models: Models,
+    @Inject(WorkspaceService) private readonly workspaceService: WorkspaceService,
+    @Inject(AFFiNELogger) private readonly logger: AFFiNELogger
   ) {
     logger.setContext(WorkspaceResolver.name);
   }

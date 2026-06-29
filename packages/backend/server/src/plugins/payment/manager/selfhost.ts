@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaClient, Provider, UserStripeCustomer } from '@prisma/client';
 import { omit, pick } from 'lodash-es';
 import { z } from 'zod';
@@ -46,8 +46,8 @@ export class SelfhostTeamSubscriptionManager extends SubscriptionManager {
   constructor(
     stripeProvider: StripeFactory,
     db: PrismaClient,
-    private readonly url: URLHelper,
-    private readonly mailer: Mailer
+    @Inject(URLHelper) private readonly url: URLHelper,
+    @Inject(Mailer) private readonly mailer: Mailer
   ) {
     super(stripeProvider, db);
   }

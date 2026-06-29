@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import { Args, Parent, ResolveField, Resolver } from '@nestjs/graphql';
 import { Prisma, PrismaClient } from '@prisma/client';
 
@@ -22,11 +23,11 @@ import {
 @Resolver(() => WorkspaceType)
 export class IndexerResolver {
   constructor(
-    private readonly indexer: IndexerService,
-    private readonly ac: PermissionAccess,
-    private readonly db: PrismaClient,
-    private readonly permission: PermissionService,
-    private readonly quotaState: QuotaStateService
+    @Inject(IndexerService) private readonly indexer: IndexerService,
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(PrismaClient) private readonly db: PrismaClient,
+    @Inject(PermissionService) private readonly permission: PermissionService,
+    @Inject(QuotaStateService) private readonly quotaState: QuotaStateService
   ) {}
 
   @ResolveField(() => SearchResultObjectType, {

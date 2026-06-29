@@ -1,4 +1,5 @@
 import {
+  Inject,
   BeforeApplicationShutdown,
   Controller,
   Get,
@@ -58,10 +59,10 @@ export class CopilotController implements BeforeApplicationShutdown {
   private readonly ongoingStreamCount$ = new BehaviorSubject(0);
 
   constructor(
-    private readonly config: Config,
-    private readonly orchestrator: TurnOrchestrator,
-    private readonly actionStreams: ActionStreamHost,
-    private readonly storage: CopilotStorage
+    @Inject(Config) private readonly config: Config,
+    @Inject(TurnOrchestrator) private readonly orchestrator: TurnOrchestrator,
+    @Inject(ActionStreamHost) private readonly actionStreams: ActionStreamHost,
+    @Inject(CopilotStorage) private readonly storage: CopilotStorage
   ) {}
 
   async beforeApplicationShutdown() {

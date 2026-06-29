@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
 import { Prisma, PrismaClient } from '@prisma/client';
 
@@ -18,7 +18,7 @@ import {
 
 @Injectable()
 export class CopilotWorkspaceConfigModel extends BaseModel {
-  constructor(private readonly database: PrismaClient) {
+  constructor(@Inject(PrismaClient) private readonly database: PrismaClient) {
     super();
   }
 

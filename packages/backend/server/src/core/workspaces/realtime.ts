@@ -1,11 +1,7 @@
+import type { OnModuleInit } from '@nestjs/common';
+import { WORKSPACE_MEMBERS_REQUEST_TAKE_MAX, type WorkspaceAccessSnapshot, type WorkspaceConfigSnapshot, type WorkspaceInviteLinkSnapshot, type WorkspaceMemberSnapshot, } from '@affine/realtime';
 import {
-  WORKSPACE_MEMBERS_REQUEST_TAKE_MAX,
-  type WorkspaceAccessSnapshot,
-  type WorkspaceConfigSnapshot,
-  type WorkspaceInviteLinkSnapshot,
-  type WorkspaceMemberSnapshot,
-} from '@affine/realtime';
-import { Injectable, OnModuleInit, Optional } from '@nestjs/common';
+  Inject, Injectable, Optional } from '@nestjs/common';
 import { z } from 'zod';
 
 import {
@@ -57,10 +53,10 @@ function serializeWorkspaceMember(
 @Injectable()
 export class WorkspaceAccessRealtimeProvider implements OnModuleInit {
   constructor(
-    private readonly ac: PermissionAccess,
-    private readonly workspaceService: WorkspaceService,
-    @Optional() private readonly registry?: RealtimeRegistry,
-    @Optional() private readonly publisher?: RealtimePublisher
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(WorkspaceService) private readonly workspaceService: WorkspaceService,
+    @Inject(RealtimeRegistry) @Optional() private readonly registry?: RealtimeRegistry,
+    @Inject(RealtimePublisher) @Optional() private readonly publisher?: RealtimePublisher
   ) {}
 
   onModuleInit() {
@@ -142,10 +138,10 @@ export class WorkspaceAccessRealtimeProvider implements OnModuleInit {
 @Injectable()
 export class WorkspaceConfigRealtimeProvider implements OnModuleInit {
   constructor(
-    private readonly ac: PermissionAccess,
-    private readonly models: Models,
-    @Optional() private readonly registry?: RealtimeRegistry,
-    @Optional() private readonly publisher?: RealtimePublisher
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(Models) private readonly models: Models,
+    @Inject(RealtimeRegistry) @Optional() private readonly registry?: RealtimeRegistry,
+    @Inject(RealtimePublisher) @Optional() private readonly publisher?: RealtimePublisher
   ) {}
 
   onModuleInit() {
@@ -205,12 +201,12 @@ export class WorkspaceConfigRealtimeProvider implements OnModuleInit {
 @Injectable()
 export class WorkspaceMembersRealtimeProvider implements OnModuleInit {
   constructor(
-    private readonly cache: Cache,
-    private readonly url: URLHelper,
-    private readonly ac: PermissionAccess,
-    private readonly models: Models,
-    @Optional() private readonly registry?: RealtimeRegistry,
-    @Optional() private readonly publisher?: RealtimePublisher
+    @Inject(Cache) private readonly cache: Cache,
+    @Inject(URLHelper) private readonly url: URLHelper,
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(Models) private readonly models: Models,
+    @Inject(RealtimeRegistry) @Optional() private readonly registry?: RealtimeRegistry,
+    @Inject(RealtimePublisher) @Optional() private readonly publisher?: RealtimePublisher
   ) {}
 
   onModuleInit() {

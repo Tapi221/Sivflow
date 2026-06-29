@@ -1,11 +1,11 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import type { Request, Response } from 'express';
 
 import { ServerService } from '../config';
 
 @Injectable()
 export class SetupMiddleware implements NestMiddleware {
-  constructor(private readonly server: ServerService) {}
+  constructor(@Inject(ServerService) private readonly server: ServerService) {}
 
   use = (req: Request, res: Response, next: (error?: Error | any) => void) => {
     if (!env.selfhosted) {

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaClient, Provider, UserStripeCustomer } from '@prisma/client';
 import { omit, pick } from 'lodash-es';
 import { z } from 'zod';
@@ -50,10 +50,10 @@ export class WorkspaceSubscriptionManager extends SubscriptionManager {
   constructor(
     stripeProvider: StripeFactory,
     db: PrismaClient,
-    private readonly url: URLHelper,
-    private readonly event: EventBus,
-    private readonly models: Models,
-    private readonly entitlement: EntitlementService
+    @Inject(URLHelper) private readonly url: URLHelper,
+    @Inject(EventBus) private readonly event: EventBus,
+    @Inject(Models) private readonly models: Models,
+    @Inject(EntitlementService) private readonly entitlement: EntitlementService
   ) {
     super(stripeProvider, db);
   }

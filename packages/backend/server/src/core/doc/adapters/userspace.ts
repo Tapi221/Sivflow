@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { Mutex } from '../../../base';
 import { Models } from '../../../models';
@@ -8,8 +8,8 @@ import { DocRecord, DocStorageAdapter } from '../storage';
 @Injectable()
 export class PgUserspaceDocStorageAdapter extends DocStorageAdapter {
   constructor(
-    private readonly mutex: Mutex,
-    private readonly models: Models,
+    @Inject(Mutex) private readonly mutex: Mutex,
+    @Inject(Models) private readonly models: Models,
     options: DocStorageOptions
   ) {
     super(options);

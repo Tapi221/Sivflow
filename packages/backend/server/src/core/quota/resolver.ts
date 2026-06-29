@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import { ResolveField, Resolver } from '@nestjs/graphql';
 
 import { CurrentUser } from '../auth/session';
@@ -7,7 +8,7 @@ import { UserQuotaType, UserQuotaUsageType } from './types';
 
 @Resolver(() => UserType)
 export class QuotaResolver {
-  constructor(private readonly quota: QuotaService) {}
+  constructor(@Inject(QuotaService) private readonly quota: QuotaService) {}
 
   @ResolveField(() => UserQuotaType, { name: 'quota' })
   async getQuota(@CurrentUser() me: UserType): Promise<UserQuotaType> {

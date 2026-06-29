@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import Redis from 'ioredis';
 
 export interface CacheSetOptions {
@@ -20,7 +21,7 @@ export function isValidCacheTtl(ttl: unknown): ttl is number {
 }
 
 export class CacheProvider {
-  constructor(private readonly redis: Redis) {}
+  constructor(@Inject(Redis) private readonly redis: Redis) {}
 
   // standard operation
   async get<T = unknown>(key: string): Promise<T> {

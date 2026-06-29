@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { Inject, BadRequestException, NotFoundException } from '@nestjs/common';
 import {
   Args,
   Field,
@@ -365,13 +365,13 @@ export class CopilotResolver {
   private readonly modelNames = new Map<string, string>();
 
   constructor(
-    private readonly ac: PermissionAccess,
-    private readonly mutex: RequestMutex,
-    private readonly prompt: PromptService,
-    private readonly chatSession: ChatSessionService,
-    private readonly historyProjector: CompatHistoryProjector,
-    private readonly inbox: ConversationInboxService,
-    private readonly providerFactory: CopilotProviderFactory
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(RequestMutex) private readonly mutex: RequestMutex,
+    @Inject(PromptService) private readonly prompt: PromptService,
+    @Inject(ChatSessionService) private readonly chatSession: ChatSessionService,
+    @Inject(CompatHistoryProjector) private readonly historyProjector: CompatHistoryProjector,
+    @Inject(ConversationInboxService) private readonly inbox: ConversationInboxService,
+    @Inject(CopilotProviderFactory) private readonly providerFactory: CopilotProviderFactory
   ) {}
 
   @ResolveField(() => CopilotQuotaType, {
@@ -829,7 +829,7 @@ export class CopilotResolver {
 @Throttle()
 @Resolver(() => UserType)
 export class UserCopilotResolver {
-  constructor(private readonly ac: PermissionAccess) {}
+  constructor(@Inject(PermissionAccess) private readonly ac: PermissionAccess) {}
 
   @ResolveField(() => CopilotType)
   async copilot(

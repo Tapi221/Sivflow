@@ -1,9 +1,5 @@
-import {
-  Injectable,
-  Logger,
-  OnApplicationBootstrap,
-  OnModuleInit,
-} from '@nestjs/common';
+import type { OnApplicationBootstrap, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   OnGatewayConnection,
   WebSocketGateway,
@@ -41,9 +37,9 @@ export class EventBus
   private readonly server?: Server;
 
   constructor(
-    private readonly emitter: EventEmitter2,
-    private readonly cls: ClsService,
-    private readonly scanner: EventHandlerScanner
+    @Inject(EventEmitter2) private readonly emitter: EventEmitter2,
+    @Inject(ClsService) private readonly cls: ClsService,
+    @Inject(EventHandlerScanner) private readonly scanner: EventHandlerScanner
   ) {}
 
   handleConnection(client: Socket) {

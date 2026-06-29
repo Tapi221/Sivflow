@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { Models } from '../../../models';
 import { taskToJob } from './job';
 
 @Injectable()
 export class CopilotTranscriptionReader {
-  constructor(private readonly models: Models) {}
+  constructor(@Inject(Models) private readonly models: Models) {}
 
   async queryTask(
     userId: string,

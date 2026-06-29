@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
 import { NotificationNotFound, PaginationInput, URLHelper } from '../../base';
@@ -30,11 +30,11 @@ export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
 
   constructor(
-    private readonly models: Models,
-    private readonly docReader: DocReader,
-    private readonly mailer: Mailer,
-    private readonly url: URLHelper,
-    private readonly realtime: RealtimePublisher
+    @Inject(Models) private readonly models: Models,
+    @Inject(DocReader) private readonly docReader: DocReader,
+    @Inject(Mailer) private readonly mailer: Mailer,
+    @Inject(URLHelper) private readonly url: URLHelper,
+    @Inject(RealtimePublisher) private readonly realtime: RealtimePublisher
   ) {}
 
   async cleanExpiredNotifications() {

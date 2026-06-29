@@ -1,6 +1,12 @@
-import { randomUUID } from 'node:crypto';
+import {
+  randomUUID,
+} from 'node:crypto';
 
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
 import type { CalendarAccount, Prisma } from '@prisma/client';
 import { addDays, subDays } from 'date-fns';
@@ -42,11 +48,11 @@ export class CalendarService {
   private generatedWebhookToken?: string;
 
   constructor(
-    private readonly models: Models,
-    private readonly providerFactory: CalendarProviderFactory<CalendarProvider>,
-    private readonly queue: JobQueue,
-    private readonly config: Config,
-    private readonly url: URLHelper
+    @Inject(Models) private readonly models: Models,
+    @Inject(CalendarProviderFactory) private readonly providerFactory: CalendarProviderFactory<CalendarProvider>,
+    @Inject(JobQueue) private readonly queue: JobQueue,
+    @Inject(Config) private readonly config: Config,
+    @Inject(URLHelper) private readonly url: URLHelper
   ) {}
 
   async listAccounts(userId: string) {

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import type { Request, Response } from 'express';
 
 import { getClientVersionFromRequest, getRequestCookie } from '../../base';
@@ -18,8 +18,8 @@ export type IssuedSession = {
 @Injectable()
 export class SessionIssuer {
   constructor(
-    private readonly auth: AuthService,
-    private readonly sessionExchange: SessionExchangeService
+    @Inject(AuthService) private readonly auth: AuthService,
+    @Inject(SessionExchangeService) private readonly sessionExchange: SessionExchangeService
   ) {}
 
   async issue(

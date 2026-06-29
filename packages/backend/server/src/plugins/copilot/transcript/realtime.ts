@@ -1,4 +1,5 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import type { OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { z } from 'zod';
 
 import { CopilotTranscriptionJobNotFound } from '../../../base';
@@ -13,9 +14,9 @@ import { CopilotTranscriptionReader } from './reader';
 @Injectable()
 export class CopilotTranscriptRealtimeProvider implements OnModuleInit {
   constructor(
-    private readonly ac: PermissionAccess,
-    private readonly transcript: CopilotTranscriptionReader,
-    private readonly registry: RealtimeRegistry
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(CopilotTranscriptionReader) private readonly transcript: CopilotTranscriptionReader,
+    @Inject(RealtimeRegistry) private readonly registry: RealtimeRegistry
   ) {}
 
   onModuleInit() {

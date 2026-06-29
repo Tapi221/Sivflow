@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import type { LlmImageResponse } from '../../../../native';
 import { PromptService } from '../../prompt';
@@ -46,10 +46,10 @@ function actionTextResultSchema() {
 @Injectable()
 export class ActionStreamHost {
   constructor(
-    private readonly conversations: ConversationHost,
-    private readonly bridge: ActionRuntimeBridge,
-    private readonly prompts: PromptService,
-    private readonly imageResults: ImageResultHost
+    @Inject(ConversationHost) private readonly conversations: ConversationHost,
+    @Inject(ActionRuntimeBridge) private readonly bridge: ActionRuntimeBridge,
+    @Inject(PromptService) private readonly prompts: PromptService,
+    @Inject(ImageResultHost) private readonly imageResults: ImageResultHost
   ) {}
 
   async stream(

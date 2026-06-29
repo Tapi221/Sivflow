@@ -1,4 +1,5 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import type { OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { z } from 'zod';
 
 import { decodeWithJson, encodeWithJson } from '../../base/graphql';
@@ -19,9 +20,9 @@ export function commentRoom(workspaceId: string, docId: string) {
 @Injectable()
 export class CommentRealtimeProvider implements OnModuleInit {
   constructor(
-    private readonly service: CommentService,
-    private readonly ac: PermissionAccess,
-    private readonly registry: RealtimeRegistry
+    @Inject(CommentService) private readonly service: CommentService,
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(RealtimeRegistry) private readonly registry: RealtimeRegistry
   ) {}
 
   onModuleInit() {

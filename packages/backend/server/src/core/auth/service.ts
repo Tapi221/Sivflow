@@ -1,6 +1,8 @@
-import { randomUUID } from 'node:crypto';
+import type { OnApplicationBootstrap } from '@nestjs/common';
+import { randomUUID, } from 'node:crypto';
 
-import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
+import {
+  Inject, Injectable } from '@nestjs/common';
 import type { CookieOptions, Request, Response } from 'express';
 import { assign, pick } from 'lodash-es';
 
@@ -50,9 +52,9 @@ export class AuthService implements OnApplicationBootstrap {
   static readonly csrfCookieName = CSRF_COOKIE_NAME;
 
   constructor(
-    private readonly config: Config,
-    private readonly models: Models,
-    private readonly mailer: Mailer
+    @Inject(Config) private readonly config: Config,
+    @Inject(Models) private readonly models: Models,
+    @Inject(Mailer) private readonly mailer: Mailer
   ) {
     this.cookieOptions = {
       sameSite: 'lax',

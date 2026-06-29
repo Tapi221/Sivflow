@@ -4,7 +4,7 @@ import type {
   FactoryProvider,
   OnModuleInit,
 } from '@nestjs/common';
-import { Injectable, SetMetadata } from '@nestjs/common';
+import { Inject, Injectable, SetMetadata } from '@nestjs/common';
 import { ModuleRef, Reflector } from '@nestjs/core';
 import type { Request, Response } from 'express';
 import semver from 'semver';
@@ -52,11 +52,11 @@ export class AuthGuard implements CanActivate, OnModuleInit {
   private static readonly CANARY_REQUIRED_VERSION = 'canary (within 2 months)';
 
   constructor(
-    private readonly crypto: CryptoHelper,
-    private readonly cache: Cache,
-    private readonly config: Config,
-    private readonly ref: ModuleRef,
-    private readonly reflector: Reflector
+    @Inject(CryptoHelper) private readonly crypto: CryptoHelper,
+    @Inject(Cache) private readonly cache: Cache,
+    @Inject(Config) private readonly config: Config,
+    @Inject(ModuleRef) private readonly ref: ModuleRef,
+    @Inject(Reflector) private readonly reflector: Reflector
   ) {}
 
   onModuleInit() {

@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import {
   Args,
   Field,
@@ -259,9 +260,9 @@ class CreateWorkspaceByokLocalLeaseInput {
 @Resolver(() => WorkspaceType)
 export class WorkspaceByokResolver {
   constructor(
-    private readonly ac: PermissionAccess,
-    private readonly entitlement: ByokEntitlementPolicy,
-    private readonly byok: ByokService
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(ByokEntitlementPolicy) private readonly entitlement: ByokEntitlementPolicy,
+    @Inject(ByokService) private readonly byok: ByokService
   ) {}
 
   @ResolveField(() => WorkspaceByokSettingsType, {

@@ -1,6 +1,7 @@
+import type { OnApplicationBootstrap } from '@nestjs/common';
 import { createHash } from 'node:crypto';
 
-import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import {
   FileUpload,
@@ -18,10 +19,10 @@ export class CopilotWorkspaceService implements OnApplicationBootstrap {
   private supportEmbedding = false;
 
   constructor(
-    private readonly server: ServerService,
-    private readonly models: Models,
-    private readonly queue: JobQueue,
-    private readonly storage: CopilotStorage
+    @Inject(ServerService) private readonly server: ServerService,
+    @Inject(Models) private readonly models: Models,
+    @Inject(JobQueue) private readonly queue: JobQueue,
+    @Inject(CopilotStorage) private readonly storage: CopilotStorage
   ) {}
 
   async onApplicationBootstrap() {

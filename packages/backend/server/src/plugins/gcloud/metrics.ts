@@ -1,6 +1,7 @@
+import type { Provider } from '@nestjs/common';
 import { TraceExporter } from '@google-cloud/opentelemetry-cloud-trace-exporter';
 import { GcpDetectorSync } from '@google-cloud/opentelemetry-resource-util';
-import { Global, Injectable, Module, Provider } from '@nestjs/common';
+import { Global, Injectable, Module } from '@nestjs/common';
 import {
   type Resource,
   resourceFromAttributes,

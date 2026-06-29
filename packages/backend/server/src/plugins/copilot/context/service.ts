@@ -1,4 +1,5 @@
-import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
+import type { OnApplicationBootstrap } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import {
   Cache,
@@ -30,9 +31,9 @@ export class CopilotContextService implements OnApplicationBootstrap {
   private client: EmbeddingClient | undefined;
 
   constructor(
-    private readonly embeddingClients: CopilotEmbeddingClientService,
-    private readonly cache: Cache,
-    private readonly models: Models
+    @Inject(CopilotEmbeddingClientService) private readonly embeddingClients: CopilotEmbeddingClientService,
+    @Inject(Cache) private readonly cache: Cache,
+    @Inject(Models) private readonly models: Models
   ) {}
 
   @OnEvent('config.init')

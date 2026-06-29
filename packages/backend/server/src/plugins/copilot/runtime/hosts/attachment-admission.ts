@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { OneMB } from '../../../../base';
 import type {
@@ -156,7 +156,7 @@ function admittedBytesSource(input: {
 
 @Injectable()
 export class AttachmentAdmissionHost {
-  constructor(private readonly materializer: AttachmentMaterializer) {}
+  constructor(@Inject(AttachmentMaterializer) private readonly materializer: AttachmentMaterializer) {}
 
   async admitPromptAttachment(
     attachment: PromptAttachment,

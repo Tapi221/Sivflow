@@ -3,7 +3,7 @@ import type {
   ExecutionContext,
   OnModuleInit,
 } from '@nestjs/common';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import {
   Config,
@@ -20,8 +20,8 @@ export class CaptchaGuardProvider
   name = 'captcha' as const;
 
   constructor(
-    private readonly config: Config,
-    private readonly captcha: CaptchaService
+    @Inject(Config) private readonly config: Config,
+    @Inject(CaptchaService) private readonly captcha: CaptchaService
   ) {
     super();
   }

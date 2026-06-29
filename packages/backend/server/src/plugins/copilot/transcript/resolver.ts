@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   Args,
   Field,
@@ -295,8 +295,8 @@ const FinishedStatus: Set<AiJobStatus> = new Set([
 @Resolver(() => CopilotType)
 export class CopilotTranscriptionResolver {
   constructor(
-    private readonly ac: PermissionAccess,
-    private readonly transcript: CopilotTranscriptionService
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(CopilotTranscriptionService) private readonly transcript: CopilotTranscriptionService
   ) {}
 
   private handleJobResult(

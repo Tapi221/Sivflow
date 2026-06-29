@@ -1,4 +1,4 @@
-import { Logger, UseGuards } from '@nestjs/common';
+import { Inject, Logger, UseGuards } from '@nestjs/common';
 import {
   Args,
   Field,
@@ -125,10 +125,10 @@ class ListedBlob {
 export class WorkspaceBlobResolver {
   logger = new Logger(WorkspaceBlobResolver.name);
   constructor(
-    private readonly ac: PermissionAccess,
-    private readonly quota: QuotaService,
-    private readonly storage: WorkspaceBlobStorage,
-    private readonly models: Models
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(QuotaService) private readonly quota: QuotaService,
+    @Inject(WorkspaceBlobStorage) private readonly storage: WorkspaceBlobStorage,
+    @Inject(Models) private readonly models: Models
   ) {}
 
   @ResolveField(() => [ListedBlob], {

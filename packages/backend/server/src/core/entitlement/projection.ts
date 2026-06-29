@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Entitlement, IapStore, PrismaClient, Provider } from '@prisma/client';
 
 import { OnEvent } from '../../base';
@@ -23,9 +23,9 @@ type Metadata = {
 @Injectable()
 export class LegacyEntitlementProjectionService {
   constructor(
-    private readonly db: PrismaClient,
-    private readonly models: Models,
-    private readonly entitlement: EntitlementService
+    @Inject(PrismaClient) private readonly db: PrismaClient,
+    @Inject(Models) private readonly models: Models,
+    @Inject(EntitlementService) private readonly entitlement: EntitlementService
   ) {}
 
   @OnEvent('entitlement.changed')

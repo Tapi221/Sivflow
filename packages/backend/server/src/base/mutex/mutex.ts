@@ -17,7 +17,7 @@ export class Mutex {
   protected logger = new Logger(Mutex.name);
   private readonly clusterIdentifier = `cluster:${nanoid()}`;
 
-  constructor(protected readonly locker: Locker) {}
+  constructor(@Inject(Locker) protected readonly locker: Locker) {}
 
   /**
    * resource を lock し、dispose 時に lock を解放する lock guard を返します。

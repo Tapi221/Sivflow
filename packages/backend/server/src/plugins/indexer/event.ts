@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { Config, JobQueue, OnEvent } from '../../base';
@@ -6,8 +6,8 @@ import { Config, JobQueue, OnEvent } from '../../base';
 @Injectable()
 export class IndexerEvent {
   constructor(
-    private readonly queue: JobQueue,
-    private readonly config: Config
+    @Inject(JobQueue) private readonly queue: JobQueue,
+    @Inject(Config) private readonly config: Config
   ) {}
 
   @OnEvent('doc.updated')

@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import {
   Args,
   Int,
@@ -69,16 +69,16 @@ export class WorkspaceMemberResolver {
   private readonly logger = new Logger(WorkspaceMemberResolver.name);
 
   constructor(
-    private readonly cache: Cache,
-    private readonly event: EventBus,
-    private readonly url: URLHelper,
-    private readonly ac: PermissionAccess,
-    private readonly models: Models,
-    private readonly mutex: RequestMutex,
-    private readonly policy: WorkspacePolicyService,
-    private readonly workspaceService: WorkspaceService,
-    private readonly quota: QuotaService,
-    private readonly config: Config
+    @Inject(Cache) private readonly cache: Cache,
+    @Inject(EventBus) private readonly event: EventBus,
+    @Inject(URLHelper) private readonly url: URLHelper,
+    @Inject(PermissionAccess) private readonly ac: PermissionAccess,
+    @Inject(Models) private readonly models: Models,
+    @Inject(RequestMutex) private readonly mutex: RequestMutex,
+    @Inject(WorkspacePolicyService) private readonly policy: WorkspacePolicyService,
+    @Inject(WorkspaceService) private readonly workspaceService: WorkspaceService,
+    @Inject(QuotaService) private readonly quota: QuotaService,
+    @Inject(Config) private readonly config: Config
   ) {}
 
   private async assertCanInviteOrShare(

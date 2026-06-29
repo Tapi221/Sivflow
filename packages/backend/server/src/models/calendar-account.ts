@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Transactional } from '@nestjs-cls/transactional';
 import type { CalendarAccount, Prisma } from '@prisma/client';
 
@@ -36,7 +36,7 @@ export interface UpdateCalendarAccountTokensInput extends CalendarAccountTokens 
 
 @Injectable()
 export class CalendarAccountModel extends BaseModel {
-  constructor(private readonly crypto: CryptoHelper) {
+  constructor(@Inject(CryptoHelper) private readonly crypto: CryptoHelper) {
     super();
   }
 

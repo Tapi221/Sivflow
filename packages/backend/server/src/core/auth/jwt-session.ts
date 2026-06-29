@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 
 import { AuthenticationRequired, CryptoHelper } from '../../base';
@@ -36,8 +36,8 @@ function isUserSessionJwtPayload(
 @Injectable()
 export class JwtSessionService {
   constructor(
-    private readonly crypto: CryptoHelper,
-    private readonly models: Models
+    @Inject(CryptoHelper) private readonly crypto: CryptoHelper,
+    @Inject(Models) private readonly models: Models
   ) {}
 
   private get currentKey() {

@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import {
   Args,
   Field,
@@ -45,9 +46,11 @@ export class ClientTokenType {
 @Resolver(() => UserType)
 export class AuthResolver {
   constructor(
+    @Inject(URLHelper)
     private readonly url: URLHelper,
+    @Inject(AuthService)
     private readonly auth: AuthService,
-    private readonly models: Models
+    @Inject(Models) private readonly models: Models
   ) {}
 
   @SkipThrottle()

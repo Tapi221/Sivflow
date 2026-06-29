@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import {
   Args,
   createUnionType,
@@ -53,8 +54,9 @@ import {
 @Resolver(() => UserType)
 export class UserResolver {
   constructor(
+    @Inject(AvatarStorage)
     private readonly storage: AvatarStorage,
-    private readonly models: Models
+    @Inject(Models) private readonly models: Models
   ) {}
 
   @Throttle('strict')
@@ -188,7 +190,8 @@ export class UserResolver {
 @Resolver(() => UserType)
 export class UserSettingsResolver {
   constructor(
-    private readonly models: Models,
+    @Inject(Models) private readonly models: Models,
+    @Inject(EventBus)
     private readonly event: EventBus
   ) {}
 
@@ -270,8 +273,9 @@ const UserImportResultType = createUnionType({
 @Resolver(() => UserType)
 export class UserManagementResolver {
   constructor(
+    @Inject(PrismaClient)
     private readonly db: PrismaClient,
-    private readonly models: Models
+    @Inject(Models) private readonly models: Models
   ) {}
 
   @Query(() => Int, {

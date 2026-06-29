@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import Stripe from 'stripe';
 
 import { OnEvent } from '../../base';
@@ -14,8 +14,8 @@ import { StripeFactory } from './stripe';
 @Injectable()
 export class StripeWebhook {
   constructor(
-    private readonly service: SubscriptionService,
-    private readonly stripeProvider: StripeFactory
+    @Inject(SubscriptionService) private readonly service: SubscriptionService,
+    @Inject(StripeFactory) private readonly stripeProvider: StripeFactory
   ) {}
 
   get stripe() {
