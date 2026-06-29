@@ -74,14 +74,28 @@ export const GenericSelector = ({
   useThemeColorMeta(cssVarV2('layer/background/secondary'));
   const listRef = useRef<HTMLUListElement>(null);
   const quickScrollRef = useRef<HTMLDivElement>(null);
+  const touchedRef = useRef(false);
 
   const typeText = typeName;
 
+  const dataIds = useMemo(() => new Set(data.map(el => el.id)), [data]);
   // make sure "initial ids" exist in list
-  const [initial] = useState(
-    originalInitial.filter(id => data.some(el => el.id === id))
+  const initial = useMemo(
+    () => originalInitial.filter(id => dataIds.has(id)),
+    [dataIds, originalInitial]
   );
   const [selected, setSelected] = useState(initial);
+
+  useEffect(() => {
+    setSelected(prev => {
+      if (!touchedRef.current) {
+        return initial;
+      }
+
+      const next = prev.filter(id => dataIds.has(id));
+      return next.length === prev.length ? prev : next;
+    });
+  }, [dataIds, initial]);
 
   const added = useMemo(
     () => selected.filter(id => !initial.includes(id)),
@@ -94,6 +108,7 @@ export const GenericSelector = ({
   const disableConfirm = added.length === 0 && removed.length === 0;
 
   const handleToggleSelected = useCallback((id: string) => {
+    touchedRef.current = true;
     setSelected(prev => {
       if (prev.includes(id)) {
         return prev.filter(v => v !== id);
