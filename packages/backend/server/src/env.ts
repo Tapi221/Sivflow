@@ -162,7 +162,11 @@ export class Env implements AppEnv {
       Object.values(DeploymentType)
     );
     this.FLAVOR = readEnv('SERVER_FLAVOR', Flavor.AllInOne, Object.values(Flavor));
-    this.platform = readEnv('DEPLOYMENT_PLATFORM', Platform.Unknown);
+    this.platform = readEnv(
+      'DEPLOYMENT_PLATFORM',
+      Platform.Unknown,
+      Object.values(Platform)
+    );
   }
 }
 
