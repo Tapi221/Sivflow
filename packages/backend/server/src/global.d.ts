@@ -13,11 +13,11 @@ declare type Exact<T extends { [key: string]: unknown }> = {
 declare type Leaf<T> = T & { __leaf: true };
 declare type NonLeaf<T> = T extends Leaf<infer V> ? V : T;
 
-declare type DeeplyEraseLeaf<T> = T extends Leaf<infer V> ? V
- : 
-   {
-      [K in keyof T]: DeeplyEraseLeaf<T[K]>
-    }
+declare type DeeplyEraseLeaf<T> = T extends Leaf<infer V>
+  ? V
+  : {
+      [K in keyof T]: DeeplyEraseLeaf<T[K]>;
+    };
 
 declare type PrimitiveType =
   | string
