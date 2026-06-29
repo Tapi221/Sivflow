@@ -24,8 +24,16 @@ const command =
 const child = spawn(command, ['watch', './src/index.ts'], {
   cwd: workspaceDir,
   env,
-  stdio: 'inherit',
+  stdio: ['inherit', 'pipe', 'pipe'],
   shell: process.platform === 'win32',
+});
+
+child.stdout?.on('data', chunk => {
+  process.stdout.write(chunk);
+});
+
+child.stderr?.on('data', chunk => {
+  process.stderr.write(chunk);
 });
 
 child.on('error', error => {

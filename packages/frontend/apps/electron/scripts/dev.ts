@@ -297,7 +297,7 @@ async function ensureBackendDevServer() {
   );
   spawnBackendDevServer();
 
-  const timeoutMs = Number(process.env.BACKEND_DEV_SERVER_WAIT_TIMEOUT_MS ?? 120000);
+  const timeoutMs = Number(process.env.BACKEND_DEV_SERVER_WAIT_TIMEOUT_MS ?? 300000);
   const startedAt = Date.now();
 
   while (Date.now() - startedAt < timeoutMs) {
