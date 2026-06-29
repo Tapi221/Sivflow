@@ -8,8 +8,6 @@ import {
   Mutation,
   ObjectType,
   Parent,
-  PartialType,
-  PickType,
   Query,
   registerEnumType,
   ResolveField,
@@ -355,13 +353,13 @@ class PaginatedAdminAllSharedLink {
 
 @ObjectType()
 export class AdminWorkspace {
-  @Field()
+  @Field(() => String)
   id!: string;
 
-  @Field()
+  @Field(() => Boolean)
   public!: boolean;
 
-  @Field()
+  @Field(() => Date)
   createdAt!: Date;
 
   @Field(() => String, { nullable: true })
@@ -370,16 +368,16 @@ export class AdminWorkspace {
   @Field(() => String, { nullable: true })
   avatarKey?: string | null;
 
-  @Field()
+  @Field(() => Boolean)
   enableAi!: boolean;
 
-  @Field()
+  @Field(() => Boolean)
   enableSharing!: boolean;
 
-  @Field()
+  @Field(() => Boolean)
   enableUrlPreview!: boolean;
 
-  @Field()
+  @Field(() => Boolean)
   enableDocEmbedding!: boolean;
 
   @Field(() => [Feature])
@@ -411,20 +409,30 @@ export class AdminWorkspace {
 }
 
 @InputType()
-class AdminUpdateWorkspaceInput extends PartialType(
-  PickType(AdminWorkspace, [
-    'public',
-    'enableAi',
-    'enableSharing',
-    'enableUrlPreview',
-    'enableDocEmbedding',
-    'name',
-    'avatarKey',
-  ] as const),
-  InputType
-) {
-  @Field()
+class AdminUpdateWorkspaceInput {
+  @Field(() => String)
   id!: string;
+
+  @Field(() => Boolean, { nullable: true })
+  public?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  enableAi?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  enableSharing?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  enableUrlPreview?: boolean;
+
+  @Field(() => Boolean, { nullable: true })
+  enableDocEmbedding?: boolean;
+
+  @Field(() => String, { nullable: true })
+  name?: string | null;
+
+  @Field(() => String, { nullable: true })
+  avatarKey?: string | null;
 }
 
 @Injectable()

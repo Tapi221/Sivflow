@@ -20,10 +20,10 @@ export class UserType implements CurrentUser {
   @Field(() => ID)
   id!: string;
 
-  @Field({ description: 'User name' })
+  @Field(() => String, { description: 'User name' })
   name!: string;
 
-  @Field({ description: 'User email' })
+  @Field(() => String, { description: 'User email' })
   email!: string;
 
   @Field(() => Boolean, { description: 'User email verified' })
@@ -53,10 +53,10 @@ export class UserType implements CurrentUser {
 
 @ObjectType()
 export class PublicUserType implements PublicUser {
-  @Field()
+  @Field(() => String)
   id!: string;
 
-  @Field()
+  @Field(() => String)
   name!: string;
 
   @Field(() => String, { nullable: true })
@@ -65,13 +65,13 @@ export class PublicUserType implements PublicUser {
 
 @ObjectType()
 export class WorkspaceUserType implements WorkspaceUser {
-  @Field()
+  @Field(() => String)
   id!: string;
 
-  @Field()
+  @Field(() => String)
   name!: string;
 
-  @Field()
+  @Field(() => String)
   email!: string;
 
   @Field(() => String, { nullable: true })
@@ -80,7 +80,7 @@ export class WorkspaceUserType implements WorkspaceUser {
 
 @ObjectType()
 export class LimitedUserType implements Partial<User> {
-  @Field({ description: 'User email' })
+  @Field(() => String, { description: 'User email' })
   email!: string;
 
   @Field(() => Boolean, {
@@ -103,50 +103,50 @@ export const UserOrLimitedUser = createUnionType({
 
 @ObjectType()
 export class DeleteAccount {
-  @Field()
+  @Field(() => Boolean)
   success!: boolean;
 }
 @ObjectType()
 export class RemoveAvatar {
-  @Field()
+  @Field(() => Boolean)
   success!: boolean;
 }
 
 @ObjectType()
 export class UserSettingsType implements UserSettings {
-  @Field({ description: 'Receive invitation email' })
+  @Field(() => Boolean, { description: 'Receive invitation email' })
   receiveInvitationEmail!: boolean;
 
-  @Field({ description: 'Receive mention email' })
+  @Field(() => Boolean, { description: 'Receive mention email' })
   receiveMentionEmail!: boolean;
 
-  @Field({ description: 'Receive comment email' })
+  @Field(() => Boolean, { description: 'Receive comment email' })
   receiveCommentEmail!: boolean;
 }
 
 @InputType()
 export class UpdateUserInput implements Partial<User> {
-  @Field({ description: 'User name', nullable: true })
+  @Field(() => String, { description: 'User name', nullable: true })
   name?: string;
 }
 
 @InputType()
 export class ManageUserInput {
-  @Field({ description: 'User email', nullable: true })
+  @Field(() => String, { description: 'User email', nullable: true })
   email?: string;
 
-  @Field({ description: 'User name', nullable: true })
+  @Field(() => String, { description: 'User name', nullable: true })
   name?: string;
 }
 
 @InputType()
 export class UpdateUserSettingsInput implements UserSettingsInput {
-  @Field({ description: 'Receive invitation email', nullable: true })
+  @Field(() => Boolean, { description: 'Receive invitation email', nullable: true })
   receiveInvitationEmail?: boolean;
 
-  @Field({ description: 'Receive mention email', nullable: true })
+  @Field(() => Boolean, { description: 'Receive mention email', nullable: true })
   receiveMentionEmail?: boolean;
 
-  @Field({ description: 'Receive comment email', nullable: true })
+  @Field(() => Boolean, { description: 'Receive comment email', nullable: true })
   receiveCommentEmail?: boolean;
 }

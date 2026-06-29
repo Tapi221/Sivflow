@@ -5,7 +5,13 @@ import { fileURLToPath } from 'node:url';
 
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
 import { utils } from '@electron-forge/core';
+import MakerDeb from '@electron-forge/maker-deb';
+import MakerDMG from '@electron-forge/maker-dmg';
+import MakerFlatpak from '@electron-forge/maker-flatpak';
+import MakerSquirrel from '@electron-forge/maker-squirrel';
+import MakerZIP from '@electron-forge/maker-zip';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
+import MakerAppImage from '@reforged/maker-appimage';
 
 import {
   appIdMap,
@@ -165,65 +171,52 @@ const trimElectronPakLocales = async (resourcesAppDir, targetPlatform) => {
 
 const makers = [
   !process.env.SKIP_BUNDLE &&
-    platform === 'darwin' && {
-      name: '@electron-forge/maker-dmg',
-      config: {
-        format: 'ULMO',
-        icon: icnsPath,
-        name: 'AFFiNE',
-        'icon-size': 128,
-        background: path.join(
-          __dirname,
-          './resources/icons/dmg-background.png'
-        ),
-        contents: [
-          {
-            x: 176,
-            y: 192,
-            type: 'file',
-            path: path.join(
-              __dirname,
-              'out',
-              buildType,
-              `${productName}-darwin-${arch}`,
-              `${productName}.app`
-            ),
-          },
-          { x: 432, y: 192, type: 'link', path: '/Applications' },
-        ],
-        iconSize: 118,
-        file: path.join(
-          __dirname,
-          'out',
-          buildType,
-          `${productName}-darwin-${arch}`,
-          `${productName}.app`
-        ),
-      },
-    },
-  {
-    name: '@electron-forge/maker-zip',
-    config: {
-      name: 'affine',
-      iconUrl: icoPath,
-      setupIcon: icoPath,
-      platforms: ['darwin', 'linux', 'win32'],
-    },
-  },
-  !process.env.SKIP_BUNDLE && {
-    name: '@electron-forge/maker-squirrel',
-    config: {
+    platform === 'darwin' &&
+    new MakerDMG({
+      format: 'ULMO',
+      icon: icnsPath,
+      name: 'AFFiNE',
+      'icon-size': 128,
+      background: path.join(__dirname, './resources/icons/dmg-background.png'),
+      contents: [
+        {
+          x: 176,
+          y: 192,
+          type: 'file',
+          path: path.join(
+            __dirname,
+            'out',
+            buildType,
+            `${productName}-darwin-${arch}`,
+            `${productName}.app`
+          ),
+        },
+        { x: 432, y: 192, type: 'link', path: '/Applications' },
+      ],
+      iconSize: 118,
+      file: path.join(
+        __dirname,
+        'out',
+        buildType,
+        `${productName}-darwin-${arch}`,
+        `${productName}.app`
+      ),
+    }),
+  new MakerZIP({
+    name: 'affine',
+    iconUrl: icoPath,
+    setupIcon: icoPath,
+    platforms: ['darwin', 'linux', 'win32'],
+  }),
+  !process.env.SKIP_BUNDLE &&
+    new MakerSquirrel({
       name: productName,
       setupIcon: icoPath,
       iconUrl: iconUrl,
       loadingGif: './resources/icons/affine_installing.gif',
-    },
-  },
-  !process.env.SKIP_BUNDLE && {
-    name: '@reforged/maker-appimage',
-    platforms: ['linux'],
-    /** @type {import('@reforged/maker-appimage').MakerAppImageConfig} */
-    config: {
+    }),
+  !process.env.SKIP_BUNDLE &&
+    new MakerAppImage({
       options: {
         bin: productName,
         mimeType: linuxMimeTypes,
@@ -241,11 +234,9 @@ const makers = [
         compressor: 'zstd',
         icon: { '64x64': iconX64PngPath, '512x512': iconX512PngPath },
       },
-    },
-  },
-  !process.env.SKIP_BUNDLE && {
-    name: '@electron-forge/maker-deb',
-    config: {
+    }),
+  !process.env.SKIP_BUNDLE &&
+    new MakerDeb({
       bin: productName,
       options: {
         name: productName,
@@ -259,13 +250,9 @@ const makers = [
           prerm: './resources/deb/prerm',
         },
       },
-    },
-  },
-  !process.env.SKIP_BUNDLE && {
-    name: '@electron-forge/maker-flatpak',
-    platforms: ['linux'],
-    /** @type {import('@electron-forge/maker-flatpak').MakerFlatpakConfig} */
-    config: {
+    }),
+  !process.env.SKIP_BUNDLE &&
+    new MakerFlatpak({
       options: {
         mimeType: linuxMimeTypes,
         productName,
@@ -297,24 +284,17 @@ const makers = [
           },
         ],
         finishArgs: [
-          // Wayland/X11 Rendering
           '--socket=wayland',
           '--socket=x11',
           '--share=ipc',
-          // Open GL
           '--device=dri',
-          // Audio output
           '--socket=pulseaudio',
-          // Read/write home directory access
           '--filesystem=home',
-          // Allow communication with network
           '--share=network',
-          // System notifications with libnotify
           '--talk-name=org.freedesktop.Notifications',
         ],
       },
-    },
-  },
+    }),
 ].filter(Boolean);
 
 console.log('makers 一覧', makers);

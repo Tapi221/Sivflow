@@ -43,6 +43,7 @@
     "dev:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/dev-backend-local.ps1",
     "dev:server": "npm --workspace @affine/server run dev",
     "build": "npm --workspace @affine/web run build",
+    "build:deploy": "npm --workspace @affine/templates run build && npm --workspace @affine/web run build:raw",
     "build:web": "npm --workspace @affine/web run build",
     "build:frontend": "npm --workspace @affine/web run build",
     "build:backend": "npm --workspace @affine/server run build",
@@ -62,6 +63,13 @@
   },
   "packageManager": "npm@10.9.0",
   "dependencies": {
-    "firebase": "^12.15.0"
+    "firebase": "^12.15.0",
+    "lodash.includes": "^4.3.0",
+    "lodash.isboolean": "^3.0.3",
+    "lodash.isinteger": "^4.0.4",
+    "lodash.isnumber": "^3.0.3",
+    "lodash.isplainobject": "^4.0.6",
+    "lodash.isstring": "^4.0.1",
+    "lodash.once": "^4.1.1"
   }
 }

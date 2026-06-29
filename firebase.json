@@ -14,7 +14,7 @@
   "hosting": {
     "public": "packages/frontend/apps/web/dist",
     "predeploy": [
-      "npm run build"
+      "npm run build:deploy"
     ],
     "ignore": [
       "firebase.json",

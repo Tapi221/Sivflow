@@ -53,7 +53,7 @@ export class InviteUserType extends OmitType(
   @Field(() => WorkspaceRole, { description: 'User role in workspace' })
   role!: WorkspaceRole;
 
-  @Field({ description: 'Invite id' })
+  @Field(() => String, { description: 'Invite id' })
   inviteId!: string;
 
   @Field(() => WorkspaceMemberStatus, {
@@ -67,25 +67,25 @@ export class WorkspaceFeatureType {
   @Field(() => ID)
   id!: string;
 
-  @Field({ description: 'is Public workspace' })
+  @Field(() => Boolean, { description: 'is Public workspace' })
   public!: boolean;
 
-  @Field({ description: 'Workspace created date' })
+  @Field(() => Date, { description: 'Workspace created date' })
   createdAt!: Date;
 }
 
 @ObjectType()
 export class WorkspaceType extends WorkspaceFeatureType {
-  @Field({ description: 'Enable AI' })
+  @Field(() => Boolean, { description: 'Enable AI' })
   enableAi!: boolean;
 
-  @Field({ description: 'Enable workspace sharing' })
+  @Field(() => Boolean, { description: 'Enable workspace sharing' })
   enableSharing!: boolean;
 
-  @Field({ description: 'Enable url previous when sharing' })
+  @Field(() => Boolean, { description: 'Enable url previous when sharing' })
   enableUrlPreview!: boolean;
 
-  @Field({ description: 'Enable doc embedding' })
+  @Field(() => Boolean, { description: 'Enable doc embedding' })
   enableDocEmbedding!: boolean;
 
   @Field(() => [InviteUserType], {
@@ -99,7 +99,7 @@ export class InvitationWorkspaceType {
   @Field(() => ID)
   id!: string;
 
-  @Field({ description: 'Workspace name' })
+  @Field(() => String, { description: 'Workspace name' })
   name!: string;
 
   @Field(() => String, {
@@ -117,11 +117,13 @@ export class WorkspaceBlobSizes {
 
 @ObjectType()
 export class InvitationType {
-  @Field({ description: 'Workspace information' })
+  @Field(() => InvitationWorkspaceType, {
+    description: 'Workspace information',
+  })
   workspace!: InvitationWorkspaceType;
-  @Field({ description: 'User information' })
+  @Field(() => WorkspaceUserType, { description: 'User information' })
   user!: WorkspaceUserType;
-  @Field({ description: 'Invitee information' })
+  @Field(() => WorkspaceUserType, { description: 'Invitee information' })
   invitee!: WorkspaceUserType;
   @Field(() => WorkspaceMemberStatus, {
     description: 'Invitation status in workspace',
