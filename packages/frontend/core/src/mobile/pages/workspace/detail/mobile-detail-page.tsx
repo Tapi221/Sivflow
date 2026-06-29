@@ -18,7 +18,6 @@ import { FeatureFlagService } from '@affine/core/modules/feature-flag';
 import { GlobalContextService } from '@affine/core/modules/global-context';
 import { JournalService } from '@affine/core/modules/journal';
 import { WorkbenchService } from '@affine/core/modules/workbench';
-import { ViewService } from '@affine/core/modules/workbench/services/view';
 import { WorkspaceService } from '@affine/core/modules/workspace';
 import { i18nTime } from '@affine/i18n';
 import { DisposableGroup } from '@blocksuite/affine/global/disposable';
@@ -55,8 +54,6 @@ const DetailPageImpl = () => {
     featureFlagService,
     aIButtonService,
   } = useServices({
-    WorkbenchService,
-    ViewService,
     EditorService,
     DocService,
     WorkspaceService,
