@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { UnknownElementException } from '@nestjs/core/errors/exceptions/unknown-element.exception';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs';
@@ -44,7 +45,7 @@ export async function run() {
   try {
     telemetry = app.get(TelemetryService, { strict: false });
   } catch (error) {
-    if (error instanceof Error && error.name === 'UnknownElementException') {
+    if (error instanceof UnknownElementException) {
       telemetry = null;
     } else {
       throw error;
