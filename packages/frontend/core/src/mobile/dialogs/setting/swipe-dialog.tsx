@@ -29,6 +29,13 @@ export interface SwipeDialogProps extends React.PropsWithChildren {
 
 const overlayOpacityRange = [0, 0.1];
 
+const getFallbackPrev = () => {
+  const root = document.body.firstElementChild;
+  return root instanceof HTMLElement ? root : null;
+};
+
+const getPrevElement = (prev: HTMLElement | null) => prev ?? getFallbackPrev();
+
 const tick = (
   overlay: HTMLDivElement,
   dialog: HTMLDivElement,
@@ -57,7 +64,7 @@ const reset = (
 ) => {
   overlay && (overlay.style.background = 'transparent');
   dialog && (dialog.style.transform = 'unset');
-  const prevEl = prev ?? document.querySelector('#app');
+  const prevEl = getPrevElement(prev);
   if (prevEl) {
     prevEl.style.transform = 'unset';
   }
@@ -69,7 +76,7 @@ const getAnimeProxy = (
   maybePrev: HTMLElement | null,
   init: number
 ) => {
-  const prev = maybePrev ?? document.querySelector('#app');
+  const prev = getPrevElement(maybePrev);
   return new Proxy(
     { deltaX: init },
     {
@@ -192,9 +199,9 @@ export const SwipeDialog = ({
       preventScroll: true,
       onSwipeStart: () => {},
       onSwipe({ deltaX }) {
-        const prevOrAppRoot = prev ?? document.querySelector('#app');
+        const prevOrRoot = getPrevElement(prev);
         if (!overlay || !dialog) return;
-        tick(overlay, dialog, prevOrAppRoot, deltaX, overlay.clientWidth);
+        tick(overlay, dialog, prevOrRoot, deltaX, overlay.clientWidth);
       },
       onSwipeEnd: ({ deltaX }) => {
         if (!overlay || !dialog) return;
