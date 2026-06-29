@@ -90,6 +90,24 @@ const DOC_WRITE_ACTIONS: &[&str] = &[
   "Doc.Comments.Resolve",
 ];
 
+const WORKSPACE_READONLY_RESTRICTED_ACTIONS: &[&str] = &[
+  "Workspace.CreateDoc",
+  "Workspace.Settings.Update",
+  "Workspace.Properties.Create",
+  "Workspace.Properties.Update",
+  "Workspace.Properties.Delete",
+  "Workspace.Blobs.Write",
+];
+
+const DOC_READONLY_RESTRICTED_ACTIONS: &[&str] = &[
+  "Doc.Update",
+  "Doc.Duplicate",
+  "Doc.Publish",
+  "Doc.Comments.Create",
+  "Doc.Comments.Update",
+  "Doc.Comments.Resolve",
+];
+
 fn action_set(groups: &[&[&str]]) -> BTreeSet<String> {
   groups
     .iter()
@@ -151,21 +169,7 @@ pub(super) fn is_write_action(action: &str) -> bool {
 }
 
 pub(super) fn is_readonly_restricted_action(action: &str) -> bool {
-  matches!(
-    action,
-    "Workspace.CreateDoc"
-      | "Workspace.Settings.Update"
-      | "Workspace.Properties.Create"
-      | "Workspace.Properties.Update"
-      | "Workspace.Properties.Delete"
-      | "Workspace.Blobs.Write"
-      | "Doc.Update"
-      | "Doc.Duplicate"
-      | "Doc.Publish"
-      | "Doc.Comments.Create"
-      | "Doc.Comments.Update"
-      | "Doc.Comments.Resolve"
-  )
+  WORKSPACE_READONLY_RESTRICTED_ACTIONS.contains(&action) || DOC_READONLY_RESTRICTED_ACTIONS.contains(&action)
 }
 
 pub(super) fn role_matrix_json() -> Value {
@@ -200,14 +204,7 @@ pub(super) fn role_matrix_json() -> Value {
         "workspacePreview": [WORKSPACE_PREVIEW_ACTION],
       },
       "readonlyWriteActions": {
-        "restricted": [
-          "Workspace.CreateDoc",
-          "Workspace.Settings.Update",
-          "Workspace.Properties.Create",
-          "Workspace.Properties.Update",
-          "Workspace.Properties.Delete",
-          "Workspace.Blobs.Write",
-        ],
+        "restricted": WORKSPACE_READONLY_RESTRICTED_ACTIONS,
       },
     },
     "doc": {
@@ -216,14 +213,7 @@ pub(super) fn role_matrix_json() -> Value {
         "docPreview": [DOC_PREVIEW_ACTION],
       },
       "readonlyWriteActions": {
-        "restricted": [
-          "Doc.Update",
-          "Doc.Duplicate",
-          "Doc.Publish",
-          "Doc.Comments.Create",
-          "Doc.Comments.Update",
-          "Doc.Comments.Resolve",
-        ],
+        "restricted": DOC_READONLY_RESTRICTED_ACTIONS,
       },
     },
   })
@@ -251,5 +241,28 @@ mod tests {
         .unwrap()
         .contains(&json!("Doc.Read"))
     );
+  }
+
+  #[test]
+  fn readonly_restrictions_match_matrix_artifact() {
+    let artifact = role_matrix_json();
+    let workspace_restricted = artifact["workspace"]["readonlyWriteActions"]["restricted"]
+      .as_array()
+      .unwrap();
+    let doc_restricted = artifact["doc"]["readonlyWriteActions"]["restricted"]
+      .as_array()
+      .unwrap();
+
+    assert_eq!(workspace_restricted.len(), WORKSPACE_READONLY_RESTRICTED_ACTIONS.len());
+    for action in WORKSPACE_READONLY_RESTRICTED_ACTIONS {
+      assert!(workspace_restricted.contains(&json!(*action)));
+      assert!(is_readonly_restricted_action(action));
+    }
+
+    assert_eq!(doc_restricted.len(), DOC_READONLY_RESTRICTED_ACTIONS.len());
+    for action in DOC_READONLY_RESTRICTED_ACTIONS {
+      assert!(doc_restricted.contains(&json!(*action)));
+      assert!(is_readonly_restricted_action(action));
+    }
   }
 }
