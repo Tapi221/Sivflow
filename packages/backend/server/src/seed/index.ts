@@ -73,9 +73,11 @@ function parseArgs(args: string[]): ParsedArgs {
         overrides[key] = val;
       }
     } else {
-      const maybeCount = parseInt(arg, 10);
-      if (!maybeCount || Number.isNaN(maybeCount)) {
-        console.warn(`Invalid parameter: ${arg}`);
+      const maybeCount = Number(arg);
+      if (!Number.isInteger(maybeCount) || maybeCount < 1) {
+        console.warn(
+          `Invalid count parameter: ${arg}. Count must be a positive integer.`
+        );
         return;
       }
       count = maybeCount;
