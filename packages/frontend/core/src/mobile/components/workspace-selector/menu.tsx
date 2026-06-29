@@ -12,6 +12,7 @@ import {
 import { GlobalDialogService } from '@affine/core/modules/dialogs';
 import { GlobalContextService } from '@affine/core/modules/global-context';
 import {
+  WorkspaceService,
   type WorkspaceMetadata,
   WorkspacesService,
 } from '@affine/core/modules/workspace';
@@ -25,7 +26,12 @@ import {
   SelfhostIcon,
   SignOutIcon,
 } from '@blocksuite/icons/rc';
-import { FrameworkScope, useLiveData, useService } from '@toeverything/infra';
+import {
+  FrameworkScope,
+  useLiveData,
+  useService,
+  useServiceOptional,
+} from '@toeverything/infra';
 import clsx from 'clsx';
 import { type HTMLAttributes, useCallback, useMemo } from 'react';
 
@@ -276,6 +282,7 @@ const AddServer = () => {
 
 export const SelectorMenu = ({ onClose }: { onClose?: () => void }) => {
   const workspacesService = useService(WorkspacesService);
+  const currentWorkspace = useServiceOptional(WorkspaceService)?.workspace;
   const workspaces = useLiveData(workspacesService.list.workspaces$);
   const serversService = useService(ServersService);
   const { jumpToPage } = useNavigateHelper();
@@ -314,7 +321,7 @@ export const SelectorMenu = ({ onClose }: { onClose?: () => void }) => {
       }
       onClose?.();
     },
-    [onClose, jumpToPage]
+    [currentWorkspace?.id, onClose, jumpToPage]
   );
 
   return (
