@@ -12,7 +12,7 @@ export const JournalDatePickerContext = createContext<{
   onSelect: (date: string) => void;
   withDotDates: Set<string | null | undefined>;
 }>({
-  width: window.innerWidth,
+  width: 0,
   cursor: '',
   setCursor: () => {},
   selected: '',
