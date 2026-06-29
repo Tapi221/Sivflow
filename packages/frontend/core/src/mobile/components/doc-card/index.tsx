@@ -11,7 +11,7 @@ import {
 import type { DocMeta } from '@blocksuite/affine/store';
 import { useLiveData, useService } from '@toeverything/infra';
 import clsx from 'clsx';
-import { forwardRef, type ReactNode, useMemo, useRef } from 'react';
+import { forwardRef, type ReactNode, useMemo } from 'react';
 
 import * as styles from './styles.css';
 import { DocCardTags } from './tag';
@@ -39,7 +39,6 @@ export const DocCard = forwardRef<HTMLAnchorElement, DocCardProps>(
     { showTags = true, meta, className, autoHeightById, ...attrs },
     outerRef
   ) {
-    const containerRef = useRef<HTMLAnchorElement | null>(null);
     const favAdapter = useService(CompatibleFavoriteItemsAdapter);
     const docDisplayService = useService(DocDisplayMetaService);
     const title = useLiveData(docDisplayService.title$(meta.id));
@@ -62,14 +61,7 @@ export const DocCard = forwardRef<HTMLAnchorElement, DocCardProps>(
     return (
       <WorkbenchLink
         to={`/${meta.id}`}
-        ref={ref => {
-          containerRef.current = ref;
-          if (typeof outerRef === 'function') {
-            outerRef(ref);
-          } else if (outerRef) {
-            outerRef.current = ref;
-          }
-        }}
+        ref={outerRef}
         className={clsx(styles.card, className)}
         data-testid="doc-card"
         data-doc-id={meta.id}
