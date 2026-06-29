@@ -296,6 +296,26 @@ mod tests {
   }
 
   #[test]
+  fn doc_sharing_enabled_overrides_disabled_runtime_and_workspace_sharing() {
+    let mut input = base_input();
+    input.workspace.role = None;
+    input.runtime.sharing_enabled = Some(false);
+    input.workspace.sharing_enabled = Some(false);
+    input.docs[0].sharing_enabled = Some(true);
+    input.docs[0].visibility = Some("public".to_string());
+    input.docs[0].public_role = Some("external".to_string());
+    input.docs[0].explicit_user_role = Some("reader".to_string());
+    input.docs[0].actions = vec!["Doc.Read".to_string()];
+
+    let output = evaluate_permission(input).unwrap();
+    let read = decision(&output.docs[0].decisions, "Doc.Read");
+
+    assert!(read.allowed);
+    assert!(read.sources.iter().any(|source| source.source_type == "doc-grant"));
+    assert!(read.sources.iter().any(|source| source.source_type == "public-policy"));
+  }
+
+  #[test]
   fn doc_publish_requires_sharing_enabled() {
     let mut input = base_input();
     input.docs[0].member_default_role = Some("manager".to_string());
