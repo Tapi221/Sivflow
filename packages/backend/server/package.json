@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "affine bundle -p @affine/server",
-    "dev": "cross-env NODE_ENV=development AFFINE_ENV=dev AFFINE_SERVER_EXTERNAL_URL=http://localhost:8080 DEBUG=affine:* FORCE_COLOR=true DEBUG_COLORS=true tsx watch ./src/index.ts",
+    "dev": "node ./scripts/dev.mjs",
     "dev:mail": "email dev -d src/mails",
     "test": "ava --concurrency 1 --serial",
     "test:copilot": "ava \"src/__tests__/copilot-*.spec.ts\"",

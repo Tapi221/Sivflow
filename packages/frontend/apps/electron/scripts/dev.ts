@@ -18,7 +18,7 @@ const rendererLogPrefix =
   process.env.ELECTRON_RENDERER_LOG_PREFIX ??
   (rendererDevWorkspace === '@affine/web' ? '[web]' : '[renderer]');
 const backendLogPrefix = process.env.ELECTRON_BACKEND_LOG_PREFIX ?? '[backend]';
-const requiredNodeRange = '>=20.19.0 <23.0.0';
+const requiredNodeVersion = '22.20.0';
 
 process.env.DEV_SERVER_URL ??= 'http://127.0.0.1:8080';
 process.env.ELECTRON_BACKEND_DEV_SERVER_URL ??= 'http://127.0.0.1:3010';
@@ -52,15 +52,7 @@ function isSupportedNodeVersion(version: string) {
     return false;
   }
 
-  if (major < 20 || major >= 23) {
-    return false;
-  }
-
-  if (major === 20 && minor < 19) {
-    return false;
-  }
-
-  return true;
+  return major === 22 && minor === 20 && patch === 0;
 }
 
 function assertSupportedNodeVersion() {
@@ -70,7 +62,7 @@ function assertSupportedNodeVersion() {
 
   process.stderr.write(
     [
-      `Sivflow の開発環境は Node.js ${requiredNodeRange} が必要です。`,
+      `Sivflow の開発環境は Node.js ${requiredNodeVersion} が必要です。`,
       `現在の Node.js は ${process.version} です。`,
       '',
       'PowerShell で次を実行してください:',

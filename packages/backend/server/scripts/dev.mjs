@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const env = {
   ...process.env,
@@ -12,9 +14,15 @@ const env = {
   DEBUG_COLORS: process.env.DEBUG_COLORS ?? 'true',
 };
 
-const command = process.platform === 'win32' ? 'tsx.cmd' : 'tsx';
+const scriptDir = fileURLToPath(new URL('.', import.meta.url));
+const workspaceDir = resolve(scriptDir, '..');
+const rootDir = resolve(workspaceDir, '..', '..', '..');
+const command =
+  process.platform === 'win32'
+    ? resolve(rootDir, 'node_modules', '.bin', 'tsx.cmd')
+    : resolve(rootDir, 'node_modules', '.bin', 'tsx');
 const child = spawn(command, ['watch', './src/index.ts'], {
-  cwd: new URL('..', import.meta.url),
+  cwd: workspaceDir,
   env,
   stdio: 'inherit',
   shell: process.platform === 'win32',
