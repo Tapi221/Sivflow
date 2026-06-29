@@ -2,7 +2,11 @@ import '../prelude';
 
 import { PrismaClient } from '@prisma/client';
 
-import { createFactory, Mockers } from '../__tests__/mocks';
+import {
+  createSeedFactory,
+  Mockers,
+  type SeedMockerInput,
+} from './mocks';
 
 const args = process.argv.slice(2);
 
@@ -10,7 +14,7 @@ if (!args.length || args.includes('-h') || args.includes('--help')) {
   console.log(`
 seed [Entity] [count] [[field]=[val]]
 
-Checkout [server/src/__tests__/mocks/*.mock.ts] for all available Entities and Inputs
+Checkout [server/src/seed/mocks.ts] for all available Entities and Inputs
 
 examples:
 
@@ -34,19 +38,19 @@ if (!name || !Mocker) {
 }
 
 const client = new PrismaClient();
-const create = createFactory(client, {
-  logger: (val: any) => {
+const create = createSeedFactory(client, {
+  logger: (val: unknown) => {
     console.log(`${name} ${JSON.stringify(val)}`);
   },
 });
 
 type ParsedArgs = {
-  overrides: Record<string, any>;
+  overrides: Record<string, unknown>;
   count: number;
 };
 
 function parseArgs(args: string[]): ParsedArgs {
-  const overrides: Record<string, any> = {};
+  const overrides: Record<string, unknown> = {};
   let count: number = 1;
 
   args.forEach(arg => {
@@ -69,7 +73,7 @@ function parseArgs(args: string[]): ParsedArgs {
         overrides[key] = val;
       }
     } else {
-      const maybeCount = parseInt(arg);
+      const maybeCount = parseInt(arg, 10);
       if (!maybeCount || Number.isNaN(maybeCount)) {
         console.warn(`Invalid parameter: ${arg}`);
         return;
@@ -87,7 +91,11 @@ function parseArgs(args: string[]): ParsedArgs {
 const { overrides, count } = parseArgs(args);
 
 try {
-  await create(Mocker, overrides as any, count);
+  await create(
+    Mocker,
+    overrides as Partial<SeedMockerInput<typeof Mocker>>,
+    count
+  );
 } finally {
   await client.$disconnect();
 }
