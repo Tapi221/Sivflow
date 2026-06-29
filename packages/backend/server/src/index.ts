@@ -1,5 +1,5 @@
 /// <reference types="./global.d.ts" />
-import './prelude';
+import { env } from './prelude';
 
 import { run as runCli } from './cli';
 import { run as runServer } from './server';
