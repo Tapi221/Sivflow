@@ -3,7 +3,7 @@ mod candidates;
 mod evaluator;
 mod types;
 
-use actions::role_matrix_json;
+use actions::{role_matrix_json, VERSION};
 pub use evaluator::evaluate_permission;
 use napi::{Error as NapiError, Result, Status};
 use napi_derive::napi;
@@ -14,6 +14,12 @@ pub use types::*;
 pub fn evaluate_permission_v1(input: Value) -> Result<Value> {
   let input = serde_json::from_value::<PermissionEvaluationInputV1>(input)
     .map_err(|err| NapiError::new(Status::InvalidArg, err.to_string()))?;
+  if input.version != VERSION {
+    return Err(NapiError::new(
+      Status::InvalidArg,
+      format!("unsupported permission evaluation input version: {}", input.version),
+    ));
+  }
   evaluate_permission(input)
     .and_then(|output| serde_json::to_value(output).map_err(Into::into))
     .map_err(|err| NapiError::new(Status::GenericFailure, err.to_string()))
