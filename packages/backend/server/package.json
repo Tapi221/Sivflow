@@ -35,6 +35,7 @@
     "@ai-sdk/openai-compatible": "^1.0.28",
     "@ai-sdk/perplexity": "^2.0.21",
     "@apollo/server": "^4.13.0",
+    "@faker-js/faker": "^10.1.0",
     "@fal-ai/serverless-client": "^0.15.0",
     "@google-cloud/opentelemetry-cloud-trace-exporter": "^3.0.0",
     "@google-cloud/opentelemetry-resource-util": "^3.0.0",
@@ -121,7 +122,6 @@
   },
   "devDependencies": {
     "@affine/graphql": "*",
-    "@faker-js/faker": "^10.1.0",
     "@nestjs/swagger": "^11.2.0",
     "@nestjs/testing": "^11.1.14",
     "@react-email/preview-server": "^4.3.2",
