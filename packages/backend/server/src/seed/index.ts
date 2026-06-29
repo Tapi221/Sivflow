@@ -4,8 +4,6 @@ import { PrismaClient } from '@prisma/client';
 
 import { createFactory, Mockers } from '../__tests__/mocks';
 
-const client = new PrismaClient();
-
 const args = process.argv.slice(2);
 
 if (!args.length || args.includes('-h') || args.includes('--help')) {
@@ -35,6 +33,7 @@ if (!name || !Mocker) {
   );
 }
 
+const client = new PrismaClient();
 const create = createFactory(client, {
   logger: (val: any) => {
     console.log(`${name} ${JSON.stringify(val)}`);
@@ -86,4 +85,9 @@ function parseArgs(args: string[]): ParsedArgs {
 }
 
 const { overrides, count } = parseArgs(args);
-await create(Mocker, overrides as any, count);
+
+try {
+  await create(Mocker, overrides as any, count);
+} finally {
+  await client.$disconnect();
+}
