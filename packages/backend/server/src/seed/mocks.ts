@@ -39,8 +39,6 @@ export type SeedMockerInput<Ctor extends SeedMockerConstructor<any, any>> =
 type SeedMockerOutput<Ctor extends SeedMockerConstructor<any, any>> =
   Ctor extends SeedMockerConstructor<any, infer Out> ? Out : never;
 
-const FACTORIES = new Map<string, SeedMocker<any, any>>();
-
 interface FactoryOptions {
   logger: ((val: unknown) => void) | boolean;
 }
@@ -57,6 +55,7 @@ export const createSeedFactory = (
   db: PrismaClient,
   opts: FactoryOptions = { logger: false }
 ) => {
+  const factories = new Map<string, SeedMocker<any, any>>();
   const log = (val: unknown) => {
     if (typeof opts.logger === 'function') {
       opts.logger(val);
@@ -84,13 +83,13 @@ export const createSeedFactory = (
       overridesOrCount?: Partial<SeedMockerInput<Ctor>> | number,
       count?: number
     ): Promise<SeedMockerOutput<Ctor> | SeedMockerOutput<Ctor>[]> {
-      let factory = FACTORIES.get(Factory.name);
+      let factory = factories.get(Factory.name);
 
       if (!factory) {
         factory = new Factory();
         // @ts-expect-error protected
         factory.db = db;
-        FACTORIES.set(Factory.name, factory);
+        factories.set(Factory.name, factory);
       }
 
       let overrides: Partial<SeedMockerInput<Ctor>> | undefined = undefined;
