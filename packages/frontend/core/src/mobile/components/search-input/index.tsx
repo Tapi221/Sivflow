@@ -47,7 +47,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
   ) {
     const focusRef = useAutoFocus<HTMLInputElement>(autoFocus);
     const containerRef = useRef<HTMLDivElement>(null);
-    const [width, setWidth] = useState(window.innerWidth);
+    const [width, setWidth] = useState(0);
     const [inputValue, setInputValue] = useState(value);
 
     const clipPath = useMemo(
@@ -64,6 +64,10 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
     useEffect(() => {
       setWidth(containerRef.current?.offsetWidth ?? 0);
     }, []);
+
+    useEffect(() => {
+      setInputValue(value);
+    }, [value]);
 
     const emitValue = useMemo(() => {
       const cb = (value: string) => onInput?.(value);
