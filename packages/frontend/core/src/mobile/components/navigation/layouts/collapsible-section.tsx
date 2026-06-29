@@ -83,7 +83,7 @@ export const CollapsibleSection = ({
   ...attrs
 }: CollapsibleSectionProps) => {
   const navigationPanelService = useService(NavigationPanelService);
-  const collapsed = useLiveData(navigationPanelService.collapsed$(path));
+  const collapsed = useLiveData(navigationPanelService.collapsed$(path)) ?? true;
 
   const setCollapsed = useCallback(
     (v: boolean) => navigationPanelService.setCollapsed(path, v),
