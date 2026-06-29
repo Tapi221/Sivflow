@@ -125,11 +125,17 @@ pub(super) fn decide(
       role: Some(candidate.role.clone()),
     })
     .collect::<Vec<_>>();
-  let restrictions = restricted_decision(input, action);
+  let mut restrictions = restricted_decision(input, action);
+  if sources.is_empty() {
+    restrictions.push(PermissionDecisionRestrictionV1 {
+      restriction_type: "no_permission_source",
+      reason: None,
+    });
+  }
 
   PermissionDecisionV1 {
     action: action.to_string(),
-    allowed: !sources.is_empty() && restrictions.is_empty(),
+    allowed: restrictions.is_empty(),
     sources,
     restrictions,
   }
@@ -266,30 +272,30 @@ pub(super) fn doc_candidates(
     }
   }
 
-  if matches!(active_workspace_role, Some(role) if role != WorkspaceRole::External)
-    && explicit_user_role.is_none()
-    && let Some(role) = doc.member_default_role.as_deref()
-  {
-    let role = parse_doc_role(role)?;
-    candidates.push(Candidate {
-      source_type: "member-default-policy",
-      role: role_name(role),
-      actions: doc_actions_for_role(role),
-      owner: false,
-    });
+  let can_apply_member_default = active_workspace_member && explicit_user_role.is_none();
+  if can_apply_member_default {
+    if let Some(role) = doc.member_default_role.as_deref() {
+      let role = parse_doc_role(role)?;
+      candidates.push(Candidate {
+        source_type: "member-default-policy",
+        role: role_name(role),
+        actions: doc_actions_for_role(role),
+        owner: false,
+      });
+    }
   }
 
-  if sharing
-    && doc.visibility.as_deref() == Some("public")
-    && let Some(role) = doc.public_role.as_deref()
-  {
-    let role = parse_doc_role(role)?;
-    candidates.push(Candidate {
-      source_type: "public-policy",
-      role: role_name(role),
-      actions: doc_actions_for_role(role),
-      owner: false,
-    });
+  let public_policy_enabled = sharing && doc.visibility.as_deref() == Some("public");
+  if public_policy_enabled {
+    if let Some(role) = doc.public_role.as_deref() {
+      let role = parse_doc_role(role)?;
+      candidates.push(Candidate {
+        source_type: "public-policy",
+        role: role_name(role),
+        actions: doc_actions_for_role(role),
+        owner: false,
+      });
+    }
   }
 
   if sharing && (doc.preview_enabled || doc.visibility.as_deref() == Some("public") || url_preview_enabled(input)) {
@@ -308,4 +314,40 @@ pub(super) fn doc_candidates(
   }
 
   Ok(candidates)
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use super::super::types::PermissionRuntimeInputV1;
+
+  fn known_input() -> PermissionEvaluationInputV1 {
+    PermissionEvaluationInputV1 {
+      version: 1,
+      legacy_compat_mode: false,
+      subject: Default::default(),
+      runtime: PermissionRuntimeInputV1 {
+        known: true,
+        ..Default::default()
+      },
+      workspace: Default::default(),
+      workspace_actions: Vec::new(),
+      docs: Vec::new(),
+    }
+  }
+
+  #[test]
+  fn denied_decision_explains_missing_permission_source() {
+    let decision = decide(&known_input(), "Workspace.Read", &[]);
+
+    assert!(!decision.allowed);
+    assert!(decision.sources.is_empty());
+    assert_eq!(
+      decision.restrictions,
+      vec![PermissionDecisionRestrictionV1 {
+        restriction_type: "no_permission_source",
+        reason: None,
+      }]
+    );
+  }
 }
