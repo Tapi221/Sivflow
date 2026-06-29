@@ -4,7 +4,8 @@
   "sideEffect": false,
   "version": "0.26.3",
   "scripts": {
-    "build": "node ./build-edgeless.mjs && node ./build-stickers.mjs",
+    "build": "node ../../../scripts/build-cache.mjs --name affine-templates --root ../../.. --cwd packages/frontend/templates --input package.json --input package-lock.json --input packages/frontend/templates/package.json --input packages/frontend/templates/build-edgeless.mjs --input packages/frontend/templates/build-stickers.mjs --input packages/frontend/templates/edgeless-snapshot --input packages/frontend/templates/stickers --output packages/frontend/templates/edgeless --output packages/frontend/templates/edgeless-templates.gen.ts --output packages/frontend/templates/stickers-templates.gen.ts --output packages/frontend/core/public/static/templates -- npm run build:raw",
+    "build:raw": "node ./build-edgeless.mjs && node ./build-stickers.mjs",
     "postinstall": "npm run build"
   },
   "type": "module",
