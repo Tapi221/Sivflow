@@ -24,11 +24,23 @@ export const JournalDatePicker = ({
   ...attrs
 }: JournalDatePickerProps) => {
   const [cursor, setCursor] = useState(selected);
+  const [width, setWidth] = useState(() =>
+    typeof window === 'undefined' ? 0 : window.innerWidth
+  );
 
   // should update cursor when selected modified outside
   useEffect(() => {
     setCursor(selected);
   }, [selected]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const updateWidth = () => setWidth(window.innerWidth);
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
 
   const onSelect = useCallback(
     (date: string) => {
@@ -37,7 +49,6 @@ export const JournalDatePicker = ({
     },
     [onChange]
   );
-  const width = window.innerWidth;
   const journalDatePickerContextValue = useMemo(
     () => ({
       selected,
