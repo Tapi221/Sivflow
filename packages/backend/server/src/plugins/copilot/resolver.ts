@@ -1,4 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import {
   Args,
   Field,
@@ -408,6 +408,18 @@ export class CopilotResolver {
     return { userId: user.id, workspaceId, docId: docId || undefined };
   }
 
+  private assertCreateMessagePayload(options: CreateChatMessageInput) {
+    const hasContent =
+      typeof options.content === 'string' && options.content.trim().length > 0;
+    const hasAttachments = !!options.attachments?.length;
+    const hasBlob = !!options.blob;
+    const hasBlobs = !!options.blobs?.length;
+
+    if (!hasContent && !hasAttachments && !hasBlob && !hasBlobs) {
+      throw new BadRequestException('Message content or attachment is required');
+    }
+  }
+
   @ResolveField(() => CopilotModelsType, {
     description:
       'List available models for a prompt, with human-readable names',
@@ -795,6 +807,8 @@ export class CopilotResolver {
     @Args({ name: 'options', type: () => CreateChatMessageInput })
     options: CreateChatMessageInput
   ): Promise<string> {
+    this.assertCreateMessagePayload(options);
+
     const lockFlag = `${COPILOT_LOCKER}:message:${user?.id}:${options.sessionId}`;
     await using lock = await this.mutex.acquire(lockFlag);
     if (!lock) {
