@@ -33,7 +33,11 @@ const CollectionDocs = ({ collection }: { collection: Collection }) => {
   const [explorerContextValue] = useState(() =>
     createDocExplorerContext({
       quickFavorite: true,
-      displayProperties: ['createdAt', 'updatedAt', 'tags'],
+      displayProperties: [
+        'system:createdAt',
+        'system:updatedAt',
+        'system:tags',
+      ],
       view: 'masonry',
       showDragHandle: false,
       groupBy: undefined,
