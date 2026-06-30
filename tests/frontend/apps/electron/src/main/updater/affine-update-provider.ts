@@ -1,0 +1,1 @@
+export * from '../../../../../../../packages/frontend/apps/electron/src/main/updater/affine-update-provider';
