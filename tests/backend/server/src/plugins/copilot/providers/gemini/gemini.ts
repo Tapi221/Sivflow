@@ -1,0 +1,1 @@
+export { GeminiProvider } from '../../../../../../../../packages/backend/server/src/plugins/copilot/providers/gemini/gemini';
