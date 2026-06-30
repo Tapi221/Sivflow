@@ -2,13 +2,13 @@ import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class AccessToken {
-  @Field()
+  @Field(() => String)
   id!: string;
 
-  @Field()
+  @Field(() => String)
   name!: string;
 
-  @Field()
+  @Field(() => Date)
   createdAt!: Date;
 
   @Field(() => Date, { nullable: true })
@@ -17,6 +17,6 @@ export class AccessToken {
 
 @ObjectType()
 export class RevealedAccessToken extends AccessToken {
-  @Field()
+  @Field(() => String)
   token!: string;
 }

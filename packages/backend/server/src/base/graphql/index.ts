@@ -9,7 +9,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import type { Request, Response } from 'express';
 
 import { NodeEnv } from '../../env';
-import { Config } from '../config';
+import { CONFIG_TOKEN } from '../config/tokens';
 import { mapAnyError } from '../nestjs/exception';
 import { GQLLoggerPlugin } from './logger-plugin';
 
@@ -67,7 +67,7 @@ export type GraphqlContext = {
           },
         };
       },
-      inject: [Config],
+      inject: [CONFIG_TOKEN],
     }),
   ],
 })

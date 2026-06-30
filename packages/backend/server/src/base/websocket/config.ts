@@ -1,7 +1,7 @@
 import { GatewayMetadata } from '@nestjs/websockets';
 import { z } from 'zod';
 
-import { defineModuleConfig } from '../config';
+import { defineModuleConfig } from '../config/register';
 
 declare global {
   interface AppConfigSchema {

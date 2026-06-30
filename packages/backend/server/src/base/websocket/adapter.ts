@@ -4,7 +4,7 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { Server, Socket } from 'socket.io';
 
-import { Config } from '../config';
+import type { Config } from '../config/config';
 import {
   buildCorsAllowedOrigins,
   CORS_ALLOWED_HEADERS,

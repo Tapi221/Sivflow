@@ -134,7 +134,24 @@ export class ServerService implements OnApplicationBootstrap {
   }
 
   private async loadDbOverrides() {
-    const configs = await this.models.appConfig.load();
+    let configs;
+    try {
+      configs = await this.models.appConfig.load();
+    } catch (error) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code === 'P2021'
+      ) {
+        this.#logger.warn(
+          'app_configs table is missing; continuing with default server config for local startup.'
+        );
+        return {};
+      }
+
+      throw error;
+    }
     const overrides: DeepPartial<AppConfig> = {};
 
     configs.forEach(config => {

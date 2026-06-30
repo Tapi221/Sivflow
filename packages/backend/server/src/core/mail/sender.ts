@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+﻿import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   createTestAccount,
   createTransport,
@@ -9,6 +9,7 @@ import {
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
 
 import { Config, metrics, OnEvent } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { resolveSMTPHeloHostname } from './utils';
 
 export type SendOptions = Omit<SendMailOptions, 'to' | 'subject' | 'html'> & {
@@ -43,7 +44,7 @@ export class MailSender {
   private fallbackSMTP: Transporter<SMTPTransport.SentMessageInfo> | null =
     null;
   private usingTestAccount = false;
-  constructor(@Inject(Config) private readonly config: Config) {}
+  constructor(@Inject(CONFIG_TOKEN) private readonly config: Config) {}
 
   static create(config: Config['mailer']['SMTP']) {
     return createTransport(configToSMTPOptions(config));

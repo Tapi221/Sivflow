@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { defineModuleConfig, JSONSchema } from '../../base';
+import { defineModuleConfig, type JSONSchema } from '../../base/config/register';
 
 export interface OAuthProviderConfig {
   clientId: string;

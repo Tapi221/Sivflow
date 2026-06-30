@@ -1,10 +1,11 @@
-import type { RawBodyRequest } from '@nestjs/common';
+﻿import type { RawBodyRequest } from '@nestjs/common';
 import { Inject, Controller, Logger, Post, Req } from '@nestjs/common';
 import { Prisma, PrismaClient, Provider } from '@prisma/client';
 import type { Request } from 'express';
 import Stripe from 'stripe';
 
 import { Config, EventBus, InternalServerError } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { Public } from '../../core/auth';
 import { StripeFactory } from './stripe';
 
@@ -13,7 +14,7 @@ export class StripeWebhookController {
   private readonly logger = new Logger(StripeWebhookController.name);
 
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(PrismaClient) private readonly db: PrismaClient,
     @Inject(StripeFactory) private readonly stripeProvider: StripeFactory,
     @Inject(EventBus) private readonly event: EventBus

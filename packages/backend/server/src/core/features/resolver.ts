@@ -53,7 +53,7 @@ export class AdminFeatureManagementResolver extends AvailableUserFeatureConfig {
     description: 'update user enabled feature',
   })
   async updateUserFeatures(
-    @Args('id') id: string,
+    @Args('id', { type: () => String }) id: string,
     @Args({ name: 'features', type: () => [Feature] })
     features: UserFeatureName[]
   ) {

@@ -321,8 +321,8 @@ export class CopilotContextRootResolver {
   async contexts(
     @Parent() copilot: CopilotType,
     @CurrentUser() user: CurrentUser,
-    @Args('sessionId', { nullable: true }) sessionId?: string,
-    @Args('contextId', { nullable: true }) contextId?: string
+    @Args('sessionId', { type: () => String, nullable: true }) sessionId?: string,
+    @Args('contextId', { type: () => String, nullable: true }) contextId?: string
   ): Promise<CopilotContextType[]> {
     if (sessionId || contextId) {
       const lockFlag = `${COPILOT_LOCKER}:context:${sessionId || contextId}`;
@@ -367,8 +367,8 @@ export class CopilotContextRootResolver {
   @CallMetric('ai', 'context_create')
   async createCopilotContext(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
-    @Args('sessionId') sessionId: string
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
+    @Args('sessionId', { type: () => String }) sessionId: string
   ): Promise<string> {
     const lockFlag = `${COPILOT_LOCKER}:context:${sessionId}`;
     await using lock = await this.mutex.acquire(lockFlag);
@@ -387,7 +387,7 @@ export class CopilotContextRootResolver {
   @CallMetric('ai', 'context_queue_workspace_doc')
   async queueWorkspaceEmbedding(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
     @Args('docId', { type: () => [String] }) docIds: string[]
   ): Promise<boolean> {
     await this.ac
@@ -416,7 +416,7 @@ export class CopilotContextRootResolver {
   @CallMetric('ai', 'context_query_workspace_embedding_status')
   async queryWorkspaceEmbeddingStatus(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string
+    @Args('workspaceId', { type: () => String }) workspaceId: string
   ): Promise<ContextWorkspaceEmbeddingStatus> {
     // DEPRECATED-0.26-COMPAT(realtime): remove after server no longer supports 0.26.x clients.
     await this.ac
@@ -908,7 +908,7 @@ export class CopilotContextResolver {
     @CurrentUser() user: CurrentUser,
     @Context() ctx: { req: Request },
     @Parent() context: CopilotContextType,
-    @Args('content') content: string,
+    @Args('content', { type: () => String }) content: string,
     @Args('limit', { type: () => SafeIntResolver, nullable: true })
     limit?: number,
     @Args('scopedThreshold', { type: () => Float, nullable: true })
@@ -978,7 +978,7 @@ export class CopilotContextResolver {
     @CurrentUser() user: CurrentUser,
     @Context() ctx: { req: Request },
     @Parent() context: CopilotContextType,
-    @Args('content') content: string,
+    @Args('content', { type: () => String }) content: string,
     @Args('limit', { type: () => SafeIntResolver, nullable: true })
     limit?: number,
     @Args('scopedThreshold', { type: () => Float, nullable: true })

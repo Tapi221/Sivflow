@@ -22,6 +22,7 @@ import {
   parseCookies,
   UnsupportedClientVersion,
 } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { WEBSOCKET_OPTIONS } from '../../base/websocket';
 import {
   extractTokenFromHeader,
@@ -54,7 +55,7 @@ export class AuthGuard implements CanActivate, OnModuleInit {
   constructor(
     @Inject(CryptoHelper) private readonly crypto: CryptoHelper,
     @Inject(Cache) private readonly cache: Cache,
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(ModuleRef) private readonly ref: ModuleRef,
     @Inject(Reflector) private readonly reflector: Reflector
   ) {}
@@ -418,5 +419,5 @@ export const AuthWebsocketOptionsProvider: FactoryProvider = {
       },
     };
   },
-  inject: [Config, AuthGuard],
+  inject: [CONFIG_TOKEN, AuthGuard],
 };

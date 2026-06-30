@@ -8,6 +8,12 @@ import { z } from 'zod';
 import { type EnvConfigType, parseEnvValue } from './env';
 import { AppConfigByPath } from './types';
 
+const __name = <T extends Function>(target: T, value: string): T =>
+  Object.defineProperty(target, 'name', {
+    value,
+    configurable: true,
+  });
+
 export type JSONSchema = { description?: string } & (
   | { type?: undefined; oneOf?: JSONSchema[] }
   | {
@@ -157,14 +163,15 @@ function standardizeDescriptor<T>(
   }
 
   const shape = desc.shape ?? shapeFromType(type);
+  function validateValue(value: T) {
+    return desc.validate ? desc.validate(value) : shape.safeParse(value);
+  }
 
   return {
     desc: desc.desc,
     default: desc.default,
     type,
-    validate: (value: T) => {
-      return desc.validate ? desc.validate(value) : shape.safeParse(value);
-    },
+    validate: validateValue,
     env,
     link: desc.link,
     schema: {

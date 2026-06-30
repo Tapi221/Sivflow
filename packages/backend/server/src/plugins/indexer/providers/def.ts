@@ -1,6 +1,7 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 
 import { Config, OnEvent } from '../../../base';
+import { CONFIG_TOKEN } from '../../../base/config/tokens';
 import { SearchProviderType } from '../config';
 import { SearchProviderFactory } from '../factory';
 import { SearchTable } from '../tables';
@@ -135,8 +136,8 @@ export abstract class SearchProvider {
 
   protected readonly logger = new Logger(this.constructor.name);
 
-  @Inject() private readonly factory!: SearchProviderFactory;
-  @Inject() private readonly AFFiNEConfig!: Config;
+  @Inject(forwardRef(() => SearchProviderFactory)) private readonly factory!: SearchProviderFactory;
+  @Inject(CONFIG_TOKEN) private readonly AFFiNEConfig!: Config;
 
   protected get config() {
     return this.AFFiNEConfig.indexer;

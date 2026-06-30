@@ -161,8 +161,8 @@ export class WorkspaceBlobResolver {
   async blobUploadPartUrl(
     @CurrentUser() user: CurrentUser,
     @Parent() workspace: WorkspaceType,
-    @Args('key') key: string,
-    @Args('uploadId') uploadId: string,
+    @Args('key', { type: () => String }) key: string,
+    @Args('uploadId', { type: () => String }) uploadId: string,
     @Args('partNumber', { type: () => Int }) partNumber: number
   ): Promise<BlobUploadPart> {
     return this.getUploadPart(user, workspace.id, key, uploadId, partNumber);
@@ -171,7 +171,7 @@ export class WorkspaceBlobResolver {
   @Mutation(() => String)
   async setBlob(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
     @Args({ name: 'blob', type: () => GraphQLUpload })
     blob: FileUpload
   ) {
@@ -199,10 +199,10 @@ export class WorkspaceBlobResolver {
   @Mutation(() => BlobUploadInit)
   async createBlobUpload(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
-    @Args('key') key: string,
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
+    @Args('key', { type: () => String }) key: string,
     @Args('size', { type: () => Int }) size: number,
-    @Args('mime') mime: string
+    @Args('mime', { type: () => String }) mime: string
   ): Promise<BlobUploadInit> {
     await this.ac
       .user(user.id)
@@ -328,9 +328,9 @@ export class WorkspaceBlobResolver {
   @Mutation(() => String)
   async completeBlobUpload(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
-    @Args('key') key: string,
-    @Args('uploadId', { nullable: true }) uploadId?: string,
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
+    @Args('key', { type: () => String }) key: string,
+    @Args('uploadId', { type: () => String, nullable: true }) uploadId?: string,
     @Args({
       name: 'parts',
       type: () => [BlobUploadPartInput],
@@ -406,9 +406,9 @@ export class WorkspaceBlobResolver {
   @Mutation(() => Boolean)
   async abortBlobUpload(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
-    @Args('key') key: string,
-    @Args('uploadId') uploadId: string
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
+    @Args('key', { type: () => String }) key: string,
+    @Args('uploadId', { type: () => String }) uploadId: string
   ) {
     await this.ac
       .user(user.id)
@@ -450,7 +450,7 @@ export class WorkspaceBlobResolver {
   @Mutation(() => Boolean)
   async deleteBlob(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
     @Args('hash', {
       type: () => String,
       deprecationReason: 'use parameter [key]',
@@ -479,7 +479,7 @@ export class WorkspaceBlobResolver {
   @Mutation(() => Boolean)
   async releaseDeletedBlobs(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string
+    @Args('workspaceId', { type: () => String }) workspaceId: string
   ) {
     await this.ac
       .user(user.id)

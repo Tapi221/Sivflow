@@ -17,7 +17,7 @@ export async function run() {
   traceStartup('importing logger');
   const { AFFiNELogger } = await import('./base/logger');
   traceStartup('importing config');
-  const { Config } = await import('./base/config');
+  const { CONFIG_TOKEN } = await import('./base/config');
   traceStartup('importing cors');
   const {
     buildCorsAllowedOrigins,
@@ -56,7 +56,7 @@ export async function run() {
 
   const logger = app.get(AFFiNELogger);
   app.useLogger(logger);
-  const config = app.get(Config);
+  const config = app.get<import('./base/config').Config>(CONFIG_TOKEN);
   const url = app.get(URLHelper);
   let telemetry: TelemetryService | null = null;
   try {

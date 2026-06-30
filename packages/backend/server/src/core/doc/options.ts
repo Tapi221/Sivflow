@@ -1,6 +1,7 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+﻿import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { Config, metrics } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { QuotaService } from '../quota';
 import { compareCodecResult } from './codec-compare';
 import { applyUpdatesWithNative, applyUpdatesWithYjs } from './merge-updates';
@@ -11,7 +12,7 @@ export class DocStorageOptions implements IDocStorageOptions {
   private readonly logger = new Logger('DocStorageOptions');
 
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(QuotaService) private readonly quota: QuotaService
   ) {}
 

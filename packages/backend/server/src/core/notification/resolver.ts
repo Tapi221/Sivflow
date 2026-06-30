@@ -30,7 +30,7 @@ export class UserNotificationResolver {
   })
   async notifications(
     @CurrentUser() me: UserType,
-    @Args('pagination', PaginationInput.decode) pagination: PaginationInput
+    @Args('pagination', { type: () => PaginationInput }, PaginationInput.decode) pagination: PaginationInput
   ): Promise<PaginatedNotificationObjectType> {
     const [notifications, totalCount] = await Promise.all([
       this.service.findManyByUserId(me.id, pagination),
@@ -44,7 +44,7 @@ export class UserNotificationResolver {
   })
   async mentionUser(
     @CurrentUser() me: UserType,
-    @Args('input') input: MentionInput
+    @Args('input', { type: () => MentionInput }) input: MentionInput
   ) {
     const parsedInput = MentionNotificationCreateSchema.parse({
       userId: input.userId,
@@ -82,7 +82,7 @@ export class UserNotificationResolver {
   })
   async readNotification(
     @CurrentUser() me: UserType,
-    @Args('id') notificationId: string
+    @Args('id', { type: () => String }) notificationId: string
   ) {
     await this.service.markAsRead(me.id, notificationId);
     return true;

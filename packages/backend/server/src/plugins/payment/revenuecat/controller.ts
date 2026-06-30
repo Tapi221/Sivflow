@@ -1,7 +1,8 @@
-import { Inject, Body, Controller, Headers, Logger, Post } from '@nestjs/common';
+﻿import { Inject, Body, Controller, Headers, Logger, Post } from '@nestjs/common';
 import { z } from 'zod';
 
 import { Config, EventBus, JobQueue } from '../../../base';
+import { CONFIG_TOKEN } from '../../../base/config/tokens';
 import { Public } from '../../../core/auth';
 import { FeatureService } from '../../../core/features';
 import { Models } from '../../../models';
@@ -53,7 +54,7 @@ export class RevenueCatWebhookController {
   private readonly logger = new Logger(RevenueCatWebhookController.name);
 
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(EventBus) private readonly event: EventBus,
     @Inject(JobQueue) private readonly queue: JobQueue,
     @Inject(Models) private readonly models: Models,

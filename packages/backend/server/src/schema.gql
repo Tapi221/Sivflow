@@ -429,6 +429,36 @@ input CommentCreateInput {
   workspaceId: ID!
 }
 
+type CommentMentionNotificationBodyType {
+  commentId: ID!
+
+  """
+  The user who created the notification, maybe null when user is deleted or sent by system
+  """
+  createdByUser: PublicUserType
+  doc: MentionDocType!
+  replyId: ID
+
+  """The type of the notification"""
+  type: NotificationType!
+  workspace: NotificationWorkspaceType
+}
+
+type CommentNotificationBodyType {
+  commentId: ID!
+
+  """
+  The user who created the notification, maybe null when user is deleted or sent by system
+  """
+  createdByUser: PublicUserType
+  doc: MentionDocType!
+  replyId: ID
+
+  """The type of the notification"""
+  type: NotificationType!
+  workspace: NotificationWorkspaceType
+}
+
 type CommentObjectType {
   """The content of the comment"""
   content: JSONObject!
@@ -1264,6 +1294,18 @@ type InvitationNotificationBodyType {
   workspace: NotificationWorkspaceType
 }
 
+type InvitationRejectedNotificationBodyType {
+  """
+  The user who created the notification, maybe null when user is deleted or sent by system
+  """
+  createdByUser: PublicUserType
+  inviteId: ID!
+
+  """The type of the notification"""
+  type: NotificationType!
+  workspace: NotificationWorkspaceType
+}
+
 type InvitationReviewApprovedNotificationBodyType {
   """
   The user who created the notification, maybe null when user is deleted or sent by system
@@ -1352,6 +1394,12 @@ type InviteUserType {
 
   """User email"""
   email: String
+
+  """User email verified"""
+  emailVerified: Boolean
+
+  """User has password"""
+  hasPassword: Boolean
   id: ID!
 
   """Invite id"""
@@ -1413,6 +1461,9 @@ type License {
 type LimitedUserType {
   """User email"""
   email: String!
+
+  """User has password"""
+  hasPassword: Boolean
 }
 
 input LinkCalDAVAccountInput {
@@ -2471,7 +2522,7 @@ type TranscriptionSourceAudioType {
   sampleRate: Int
 }
 
-union UnionNotificationBodyType = InvitationAcceptedNotificationBodyType | InvitationBlockedNotificationBodyType | InvitationNotificationBodyType | InvitationReviewApprovedNotificationBodyType | InvitationReviewDeclinedNotificationBodyType | InvitationReviewRequestNotificationBodyType | MentionNotificationBodyType
+union UnionNotificationBodyType = CommentMentionNotificationBodyType | CommentNotificationBodyType | InvitationAcceptedNotificationBodyType | InvitationBlockedNotificationBodyType | InvitationNotificationBodyType | InvitationRejectedNotificationBodyType | InvitationReviewApprovedNotificationBodyType | InvitationReviewDeclinedNotificationBodyType | InvitationReviewRequestNotificationBodyType | MentionNotificationBodyType
 
 type UnknownOauthProviderDataType {
   name: String!
@@ -2634,8 +2685,14 @@ type UserType {
   """User email"""
   email: String!
 
+  """User email verified"""
+  emailVerified: Boolean!
+
   """Enabled features of a user"""
   features: [FeatureType!]!
+
+  """User has password"""
+  hasPassword: Boolean
   id: ID!
 
   """Get user invoice count"""

@@ -23,16 +23,16 @@ registerEnumType(DeploymentType, {
 
 @ObjectType()
 export class ServerConfigType {
-  @Field({
+  @Field(() => String, {
     description:
       'server identical name could be shown as badge on user interface',
   })
   name!: string;
 
-  @Field({ description: 'server version' })
+  @Field(() => String, { description: 'server version' })
   version!: string;
 
-  @Field({ description: 'server base url' })
+  @Field(() => String, { description: 'server base url' })
   baseUrl!: string;
 
   @Field(() => DeploymentType, { description: 'server type' })

@@ -1,6 +1,7 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+﻿import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { Config, OnEvent, URLHelper } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { cleanTelemetryEvent } from './cleaner';
 import { TelemetryDeduper } from './deduper';
 import { Ga4Client } from './ga4-client';
@@ -16,7 +17,7 @@ export class TelemetryService {
   private readonly deduper: TelemetryDeduper;
 
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(URLHelper) private readonly url: URLHelper
   ) {
     this.deduper = new TelemetryDeduper(

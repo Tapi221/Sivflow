@@ -1,20 +1,21 @@
 import type { OnModuleInit } from '@nestjs/common';
-import { join, } from 'node:path';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 
-import {
-  Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import type { Application } from 'express';
 import { static as serveStatic } from 'express';
 import isMobile from 'is-mobile';
 
-import { Config } from '../../base';
+import type { Config } from '../../base/config/config';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { SetupMiddleware } from './setup';
 
 @Injectable()
 export class StaticFilesResolver implements OnModuleInit {
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(HttpAdapterHost) private readonly adapterHost: HttpAdapterHost,
     @Inject(SetupMiddleware) private readonly check: SetupMiddleware
   ) {}
@@ -67,13 +68,20 @@ export class StaticFilesResolver implements OnModuleInit {
       [basePath + '/admin', basePath + '/admin/*path'],
       this.check.use,
       (_req, res) => {
-        res.sendFile(
-          join(
-            staticPath,
-            'admin',
-            env.selfhosted ? 'selfhost.html' : 'index.html'
-          )
+        const htmlPath = join(
+          staticPath,
+          'admin',
+          env.selfhosted ? 'selfhost.html' : 'index.html'
         );
+
+        if (existsSync(htmlPath)) {
+          return res.sendFile(htmlPath);
+        }
+
+        return res
+          .status(200)
+          .type('html')
+          .send('<!doctype html><title>Sivflow Admin</title>');
       }
     );
     // END REGION
@@ -115,14 +123,20 @@ export class StaticFilesResolver implements OnModuleInit {
         isMobile({
           ua: req.headers['user-agent'] ?? undefined,
         });
-
-      return res.sendFile(
-        join(
-          staticPath,
-          mobile ? 'mobile' : '',
-          env.selfhosted ? 'selfhost.html' : 'index.html'
-        )
+      const htmlPath = join(
+        staticPath,
+        mobile ? 'mobile' : '',
+        env.selfhosted ? 'selfhost.html' : 'index.html'
       );
+
+      if (existsSync(htmlPath)) {
+        return res.sendFile(htmlPath);
+      }
+
+      return res
+        .status(200)
+        .type('html')
+        .send('<!doctype html><title>Sivflow</title>');
     });
     // END REGION
   }

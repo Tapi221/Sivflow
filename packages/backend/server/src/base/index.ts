@@ -9,6 +9,7 @@ export {
 export {
   Config,
   ConfigFactory,
+  CONFIG_TOKEN,
   defineModuleConfig,
   type JSONSchema,
 } from './config';

@@ -607,7 +607,7 @@ export class UserSubscriptionResolver {
   })
   async requestApplySubscription(
     @CurrentUser() user: CurrentUser,
-    @Args('transactionId') transactionId: string
+    @Args('transactionId', { type: () => String }) transactionId: string
   ): Promise<Subscription[]> {
     if (!user) {
       throw new AuthenticationRequired();

@@ -1,10 +1,11 @@
-import './config';
+﻿import './config';
 
 import { Module } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { ClsService } from 'nestjs-cls';
 
 import { Config } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { Models } from '../../models';
 import { QuotaServiceModule } from '../quota/service.module';
 import { AccessControllerBuilder } from './builder';
@@ -39,7 +40,7 @@ const permissionServiceProvider = {
     PermissionContextLoader,
     PermissionSqlPredicateBuilder,
     { token: WorkspacePolicyService, optional: true },
-    { token: Config, optional: true },
+    { token: CONFIG_TOKEN, optional: true },
   ],
 };
 

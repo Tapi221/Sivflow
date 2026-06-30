@@ -1,6 +1,6 @@
 import type { Stripe } from 'stripe';
 
-import { defineModuleConfig } from '../../base';
+import { defineModuleConfig } from '../../base/config/register';
 
 export interface PaymentStartupConfig {
   stripe?: {

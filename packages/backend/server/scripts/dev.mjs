@@ -19,6 +19,7 @@ const env = {
   POSTGRES_PORT: process.env.POSTGRES_PORT ?? '5432',
   REDIS_SERVER_HOST: process.env.REDIS_SERVER_HOST ?? 'localhost',
   REDIS_SERVER_PORT: process.env.REDIS_SERVER_PORT ?? '6379',
+  TS_NODE_TRANSPILE_ONLY: process.env.TS_NODE_TRANSPILE_ONLY ?? '1',
   SIVFLOW_STARTUP_TRACE: process.env.SIVFLOW_STARTUP_TRACE ?? 'true',
   SIVFLOW_STARTUP_TRACE_FILE:
     process.env.SIVFLOW_STARTUP_TRACE_FILE ??
@@ -33,11 +34,6 @@ const backendBootstrapScriptPath = resolve(
   'scripts',
   'ensure-local-backend-prereqs.mjs'
 );
-const command =
-  process.platform === 'win32'
-    ? resolve(rootDir, 'node_modules', '.bin', 'tsx.cmd')
-    : resolve(rootDir, 'node_modules', '.bin', 'tsx');
-
 const bootstrap = spawnSync(process.execPath, [backendBootstrapScriptPath], {
   cwd: rootDir,
   env,
@@ -49,12 +45,21 @@ if (bootstrap.status !== 0) {
   process.exit(bootstrap.status ?? 1);
 }
 
-const child = spawn(command, ['watch', './src/index.ts'], {
-  cwd: workspaceDir,
-  env,
-  stdio: ['inherit', 'pipe', 'pipe'],
-  shell: process.platform === 'win32',
-});
+const child = spawn(
+  process.execPath,
+  [
+    '--experimental-specifier-resolution=node',
+    '--loader',
+    'ts-node/esm',
+    './src/index.ts',
+  ],
+  {
+    cwd: workspaceDir,
+    env,
+    stdio: ['inherit', 'pipe', 'pipe'],
+    shell: false,
+  }
+);
 
 child.stdout?.on('data', chunk => {
   process.stdout.write(chunk);

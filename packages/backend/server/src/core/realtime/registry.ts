@@ -18,9 +18,7 @@ export class RealtimeRegistry {
     handler: RealtimeRequestHandler<Op>
   ) {
     if (this.requests.has(handler.name)) {
-      throw new Error(
-        `Realtime request handler already registered: ${handler.name}`
-      );
+      return;
     }
     this.requests.set(
       handler.name,
@@ -32,9 +30,7 @@ export class RealtimeRegistry {
     handler: RealtimeTopicHandler<Topic>
   ) {
     if (this.topics.has(handler.name)) {
-      throw new Error(
-        `Realtime topic handler already registered: ${handler.name}`
-      );
+      return;
     }
     this.topics.set(
       handler.name,

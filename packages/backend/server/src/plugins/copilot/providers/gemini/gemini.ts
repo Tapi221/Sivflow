@@ -1,6 +1,6 @@
 import { setTimeout as delay } from 'node:timers/promises';
 
-import { Inject } from '@nestjs/common';
+import { Inject, forwardRef } from '@nestjs/common';
 import { ZodError } from 'zod';
 
 import {
@@ -41,8 +41,8 @@ function normalizeMimeType(mediaType?: string) {
 }
 
 export abstract class GeminiProvider<T> extends CopilotProvider<T> {
-  @Inject() protected readonly attachmentMaterializer!: AttachmentMaterializer;
-  @Inject()
+  @Inject(forwardRef(() => AttachmentMaterializer)) protected readonly attachmentMaterializer!: AttachmentMaterializer;
+  @Inject(forwardRef(() => AttachmentAdmissionHost))
   protected readonly attachmentAdmissionHost?: AttachmentAdmissionHost;
 
   protected resolveModelBackendKind() {

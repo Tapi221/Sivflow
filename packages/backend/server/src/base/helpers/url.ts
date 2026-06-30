@@ -1,4 +1,4 @@
-import {
+﻿import {
   isIP,
 } from 'node:net';
 
@@ -9,7 +9,8 @@ import {
 import type { Response } from 'express';
 import { ClsService } from 'nestjs-cls';
 
-import { Config } from '../config';
+import type { Config } from '../config/config';
+import { CONFIG_TOKEN } from '../config/tokens';
 import { ActionForbidden } from '../error';
 import { OnEvent } from '../event';
 
@@ -64,7 +65,7 @@ export class URLHelper {
   baseUrl!: string;
 
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(ClsService) private readonly cls?: ClsService
   ) {
     this.init();

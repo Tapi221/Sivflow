@@ -1,4 +1,4 @@
-import { Inject, Injectable, Optional, forwardRef } from '@nestjs/common';
+﻿import { Inject, Injectable, Optional, forwardRef } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 
 import {
@@ -8,6 +8,7 @@ import {
   metrics,
   SpaceAccessDenied,
 } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import {
   evaluatePermissionV1,
   type PermissionEvaluationInputV1,
@@ -67,8 +68,8 @@ export class PermissionService {
     private readonly sqlPredicate = new PermissionSqlPredicateBuilder(),
     @Inject(WorkspacePolicyService) @Optional()
     private readonly workspacePolicy?: WorkspacePolicyService,
-    @Inject(Config) @Optional()
-    private readonly config?: Config
+    @Optional()
+    @Inject(CONFIG_TOKEN) private readonly config?: Config
   ) {}
 
   readModel() {

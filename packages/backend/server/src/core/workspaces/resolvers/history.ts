@@ -44,7 +44,7 @@ export class DocHistoryResolver {
   @ResolveField(() => [DocHistoryType])
   async histories(
     @Parent() workspace: WorkspaceType,
-    @Args('guid') guid: string,
+    @Args('guid', { type: () => String }) guid: string,
     @Args({ name: 'before', type: () => GraphQLISODateTime, nullable: true })
     timestamp: Date = new Date(),
     @Args({ name: 'take', type: () => Int, nullable: true })
@@ -71,8 +71,8 @@ export class DocHistoryResolver {
   @Mutation(() => Date)
   async recoverDoc(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
-    @Args('guid') guid: string,
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
+    @Args('guid', { type: () => String }) guid: string,
     @Args({ name: 'timestamp', type: () => GraphQLISODateTime }) timestamp: Date
   ): Promise<Date> {
     const docId = new DocID(guid, workspaceId);

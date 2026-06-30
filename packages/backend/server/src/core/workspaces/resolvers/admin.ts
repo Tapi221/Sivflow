@@ -500,7 +500,7 @@ export class AdminWorkspaceResolver {
     description: 'Get workspace detail for admin',
     nullable: true,
   })
-  async adminWorkspace(@Args('id') id: string) {
+  async adminWorkspace(@Args('id', { type: () => String }) id: string) {
     this.assertCloudOnly();
     const { rows } = await this.models.workspace.adminListWorkspaces({
       first: 1,
@@ -562,7 +562,7 @@ export class AdminWorkspaceResolver {
     description: 'List all shared links across workspaces for admin panel',
   })
   async adminAllSharedLinks(
-    @Args('pagination', PaginationInput.decode) pagination: PaginationInput,
+    @Args('pagination', { type: () => PaginationInput }, PaginationInput.decode) pagination: PaginationInput,
     @Args('filter', {
       nullable: true,
       type: () => AdminAllSharedLinksFilterInput,

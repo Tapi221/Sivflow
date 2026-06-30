@@ -1,8 +1,9 @@
-import type { FactoryProvider } from '@nestjs/common';
+﻿import type { FactoryProvider } from '@nestjs/common';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import Stripe from 'stripe';
 
 import { Config, Mutex, OnEvent } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { ServerFeature, ServerService } from '../../core';
 import {
   decodeLookupKey,
@@ -16,7 +17,7 @@ export class StripeFactory {
   readonly #logger = new Logger(StripeFactory.name);
 
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(Mutex) private readonly mutex: Mutex,
     @Inject(ServerService) private readonly server: ServerService
   ) {}

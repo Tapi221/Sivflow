@@ -1,4 +1,4 @@
-import {
+﻿import {
   createHash,
 } from 'node:crypto';
 
@@ -20,6 +20,7 @@ import {
   StorageProviderFactory,
   URLHelper,
 } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { QuotaService } from '../../core/quota';
 import { fetchRemoteAttachment } from '../../native';
 
@@ -30,7 +31,7 @@ export class CopilotStorage {
   public provider!: StorageProvider;
 
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(URLHelper) private readonly url: URLHelper,
     @Inject(StorageProviderFactory) private readonly storageFactory: StorageProviderFactory,
     @Inject(QuotaService) private readonly quota: QuotaService

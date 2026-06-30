@@ -1,4 +1,4 @@
-import {
+﻿import {
   createHmac,
   timingSafeEqual,
 } from 'node:crypto';
@@ -24,6 +24,7 @@ import {
   StorageProviderConfig,
   StorageProviderFactory,
 } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import {
   R2StorageConfig,
   R2StorageProvider,
@@ -50,7 +51,7 @@ export class R2UploadController {
   private provider: R2StorageProvider | null = null;
 
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(Models) private readonly models: Models,
     @Inject(StorageProviderFactory) private readonly storageFactory: StorageProviderFactory
   ) {}

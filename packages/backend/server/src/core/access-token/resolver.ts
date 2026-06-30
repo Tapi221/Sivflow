@@ -18,7 +18,7 @@ import { AccessToken, RevealedAccessToken } from './types';
 
 @InputType()
 class GenerateAccessTokenInput {
-  @Field()
+  @Field(() => String)
   name!: string;
 
   @Field(() => Date, { nullable: true })
@@ -44,7 +44,7 @@ export class AccessTokenResolver {
   @Mutation(() => RevealedAccessToken)
   async generateUserAccessToken(
     @CurrentUser() user: CurrentUser,
-    @Args('input') input: GenerateAccessTokenInput
+    @Args('input', { type: () => GenerateAccessTokenInput }) input: GenerateAccessTokenInput
   ): Promise<RevealedAccessToken> {
     const token = await this.models.accessToken.create({
       userId: user.id,
@@ -58,7 +58,7 @@ export class AccessTokenResolver {
   @Mutation(() => Boolean)
   async revokeUserAccessToken(
     @CurrentUser() user: CurrentUser,
-    @Args('id') id: string
+    @Args('id', { type: () => String }) id: string
   ): Promise<boolean> {
     await this.models.accessToken.revoke(id, user.id);
     this.event.emit('user.access_token.revoked', { userId: user.id });

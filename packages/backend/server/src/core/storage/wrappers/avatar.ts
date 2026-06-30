@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+﻿import { Inject, Injectable } from '@nestjs/common';
 
 import type {
   BlobInputType,
@@ -11,6 +11,7 @@ import {
   StorageProviderFactory,
   URLHelper,
 } from '../../../base';
+import { CONFIG_TOKEN } from '../../../base/config/tokens';
 
 @Injectable()
 export class AvatarStorage {
@@ -21,7 +22,7 @@ export class AvatarStorage {
   }
 
   constructor(
-    @Inject(Config) private readonly AFFiNEConfig: Config,
+    @Inject(CONFIG_TOKEN) private readonly AFFiNEConfig: Config,
     @Inject(URLHelper) private readonly url: URLHelper,
     @Inject(StorageProviderFactory) private readonly storageFactory: StorageProviderFactory
   ) {}

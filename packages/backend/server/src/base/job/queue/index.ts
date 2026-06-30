@@ -5,7 +5,8 @@ import { DynamicModule } from '@nestjs/common';
 import { type QueueOptions } from 'bullmq';
 import { type Redis as IORedis } from 'ioredis';
 
-import { Config } from '../../config';
+import type { Config } from '../../config/config';
+import { CONFIG_TOKEN } from '../../config/tokens';
 import { QueueRedis } from '../../redis';
 import { Queue, QUEUES } from './def';
 import { JobExecutor } from './executor';
@@ -35,7 +36,7 @@ export class JobModule {
               connection: redis as IORedis,
             };
           },
-          inject: [Config, QueueRedis],
+          inject: [CONFIG_TOKEN, QueueRedis],
         }),
         BullModule.registerQueue(
           ...QUEUES.map(name => {

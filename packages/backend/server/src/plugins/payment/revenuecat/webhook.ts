@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+﻿import { Inject, Injectable, Logger } from '@nestjs/common';
 import { IapStore, PrismaClient, Provider } from '@prisma/client';
 
 import {
@@ -11,6 +11,7 @@ import {
   OnJob,
   sleep,
 } from '../../../base';
+import { CONFIG_TOKEN } from '../../../base/config/tokens';
 import { EntitlementService } from '../../../core/entitlement';
 import {
   SubscriptionPlan,
@@ -31,7 +32,7 @@ export class RevenueCatWebhookHandler {
   constructor(
     @Inject(RevenueCatService) private readonly rc: RevenueCatService,
     @Inject(PrismaClient) private readonly db: PrismaClient,
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(EventBus) private readonly event: EventBus,
     @Inject(JobQueue) private readonly queue: JobQueue,
     @Inject(EntitlementService) private readonly entitlement: EntitlementService

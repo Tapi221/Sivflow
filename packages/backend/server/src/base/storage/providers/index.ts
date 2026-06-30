@@ -1,6 +1,6 @@
 import type { Type } from '@nestjs/common';
 
-import { JSONSchema } from '../../config';
+import type { JSONSchema } from '../../config/register';
 import { FsStorageConfig, FsStorageProvider } from './fs';
 import { StorageProvider } from './provider';
 import { R2_JURISDICTIONS, R2StorageConfig, R2StorageProvider } from './r2';

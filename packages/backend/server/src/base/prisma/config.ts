@@ -1,7 +1,7 @@
 import type { Prisma } from '@prisma/client';
 import { z } from 'zod';
 
-import { defineModuleConfig } from '../config';
+import { defineModuleConfig } from '../config/register';
 
 declare global {
   interface AppConfigSchema {

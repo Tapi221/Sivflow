@@ -1,10 +1,10 @@
 import type { FactoryProvider } from '@nestjs/common';
 
-import { Config } from './config';
 import { ConfigFactory } from './factory';
+import { CONFIG_TOKEN } from './tokens';
 
 export const ConfigProvider: FactoryProvider = {
-  provide: Config,
+  provide: CONFIG_TOKEN,
   useFactory: (factory: ConfigFactory) => {
     return factory.config;
   },

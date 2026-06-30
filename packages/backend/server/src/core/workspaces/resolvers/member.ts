@@ -38,6 +38,7 @@ import {
   URLHelper,
   UserNotFound,
 } from '../../../base';
+import { CONFIG_TOKEN } from '../../../base/config/tokens';
 import { Models } from '../../../models';
 import { CurrentUser, Public } from '../../auth';
 import {
@@ -78,7 +79,7 @@ export class WorkspaceMemberResolver {
     @Inject(WorkspacePolicyService) private readonly policy: WorkspacePolicyService,
     @Inject(WorkspaceService) private readonly workspaceService: WorkspaceService,
     @Inject(QuotaService) private readonly quota: QuotaService,
-    @Inject(Config) private readonly config: Config
+    @Inject(CONFIG_TOKEN) private readonly config: Config
   ) {}
 
   private async assertCanInviteOrShare(
@@ -182,7 +183,7 @@ export class WorkspaceMemberResolver {
   @Mutation(() => [InviteResult])
   async inviteMembers(
     @CurrentUser() me: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
     @Args({ name: 'emails', type: () => [String] }) emails: string[]
   ): Promise<InviteResult[]> {
     await this.ac
@@ -316,7 +317,7 @@ export class WorkspaceMemberResolver {
   @Mutation(() => InviteLink)
   async createInviteLink(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
     @Args('expireTime', { type: () => WorkspaceInviteLinkExpireTime })
     expireTime: WorkspaceInviteLinkExpireTime
   ): Promise<InviteLink> {
@@ -360,7 +361,7 @@ export class WorkspaceMemberResolver {
   @Mutation(() => Boolean)
   async revokeInviteLink(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string
+    @Args('workspaceId', { type: () => String }) workspaceId: string
   ) {
     await this.ac
       .user(user.id)
@@ -380,8 +381,8 @@ export class WorkspaceMemberResolver {
   @Mutation(() => Boolean)
   async approveMember(
     @CurrentUser() me: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
-    @Args('userId') userId: string
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
+    @Args('userId', { type: () => String }) userId: string
   ) {
     await this.ac
       .user(me.id)
@@ -434,8 +435,8 @@ export class WorkspaceMemberResolver {
   @Mutation(() => Boolean)
   async grantMember(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
-    @Args('userId') userId: string,
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
+    @Args('userId', { type: () => String }) userId: string,
     @Args('permission', { type: () => WorkspaceRole }) newRole: WorkspaceRole
   ) {
     await this.ac
@@ -480,7 +481,7 @@ export class WorkspaceMemberResolver {
   })
   async getInviteInfo(
     @CurrentUser() user: UserType | undefined,
-    @Args('inviteId') inviteId: string
+    @Args('inviteId', { type: () => String }) inviteId: string
   ): Promise<InvitationType> {
     const { workspaceId, inviteeUserId, isLink } =
       await this.workspaceService.getInviteInfo(inviteId);
@@ -510,8 +511,8 @@ export class WorkspaceMemberResolver {
   @Mutation(() => Boolean)
   async revokeMember(
     @CurrentUser() me: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
-    @Args('userId') userId: string
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
+    @Args('userId', { type: () => String }) userId: string
   ) {
     if (userId === me.id) {
       throw new CanNotRevokeYourself();
@@ -559,10 +560,11 @@ export class WorkspaceMemberResolver {
   @Public()
   async acceptInviteById(
     @CurrentUser() user: CurrentUser | undefined,
-    @Args('inviteId') inviteId: string,
-    @Args('workspaceId', { deprecationReason: 'never used', nullable: true })
+    @Args('inviteId', { type: () => String }) inviteId: string,
+    @Args('workspaceId', { type: () => String, deprecationReason: 'never used', nullable: true })
     _workspaceId: string,
     @Args('sendAcceptMail', {
+      type: () => Boolean,
       nullable: true,
       deprecationReason: 'never used',
     })
@@ -618,13 +620,15 @@ export class WorkspaceMemberResolver {
   @Mutation(() => Boolean)
   async leaveWorkspace(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
     @Args('sendLeaveMail', {
+      type: () => Boolean,
       nullable: true,
       deprecationReason: 'no used anymore',
     })
     _sendLeaveMail?: boolean,
     @Args('workspaceName', {
+      type: () => String,
       nullable: true,
       deprecationReason: 'no longer used',
     })

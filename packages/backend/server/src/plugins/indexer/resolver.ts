@@ -36,7 +36,7 @@ export class IndexerResolver {
   async search(
     @CurrentUser() me: UserType,
     @Parent() workspace: WorkspaceType,
-    @Args('input') input: SearchInput
+    @Args('input', { type: () => SearchInput }) input: SearchInput
   ): Promise<SearchResultObjectType> {
     // currentUser can read the workspace
     await this.ac.user(me.id).workspace(workspace.id).assert('Workspace.Read');
@@ -68,7 +68,7 @@ export class IndexerResolver {
   async aggregate(
     @CurrentUser() me: UserType,
     @Parent() workspace: WorkspaceType,
-    @Args('input') input: AggregateInput
+    @Args('input', { type: () => AggregateInput }) input: AggregateInput
   ): Promise<AggregateResultObjectType> {
     // currentUser can read the workspace
     await this.ac.user(me.id).workspace(workspace.id).assert('Workspace.Read');
@@ -100,7 +100,7 @@ export class IndexerResolver {
   async searchDocs(
     @CurrentUser() me: UserType,
     @Parent() workspace: WorkspaceType,
-    @Args('input') input: SearchDocsInput
+    @Args('input', { type: () => SearchDocsInput }) input: SearchDocsInput
   ): Promise<SearchDocObjectType[]> {
     const readableDocIds = await this.#readableDocIdsForSearch(workspace, me);
     const docs = await this.indexer.searchDocsByKeyword(

@@ -1,6 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common';
+﻿import { Inject, Injectable } from '@nestjs/common';
 
 import { Config } from '../../../base';
+import { CONFIG_TOKEN } from '../../../base/config/tokens';
 import {
   buildProviderRegistry,
   type CopilotProviderRegistry,
@@ -12,7 +13,7 @@ export class CopilotProviderRegistryService {
   private lastConfig?: CopilotProvidersConfigInput;
   private lastRegistry?: CopilotProviderRegistry;
 
-  constructor(@Inject(Config) private readonly config: Config) {}
+  constructor(@Inject(CONFIG_TOKEN) private readonly config: Config) {}
 
   getRegistry(): CopilotProviderRegistry {
     const providerConfig = this.config.copilot.providers;

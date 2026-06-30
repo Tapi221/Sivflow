@@ -4,6 +4,7 @@ import { Global, Module } from '@nestjs/common';
 import { Config } from './config';
 import { ConfigFactory, OVERRIDE_CONFIG_TOKEN } from './factory';
 import { ConfigProvider } from './provider';
+import { CONFIG_TOKEN } from './tokens';
 
 @Global()
 @Module({
@@ -26,5 +27,5 @@ export class ConfigModule {
   }
 }
 
-export { Config, ConfigFactory };
+export { Config, ConfigFactory, CONFIG_TOKEN };
 export { defineModuleConfig, type JSONSchema } from './register';

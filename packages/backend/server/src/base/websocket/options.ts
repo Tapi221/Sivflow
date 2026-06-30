@@ -1,6 +1,7 @@
 import type { FactoryProvider } from '@nestjs/common';
 
-import { Config } from '../config';
+import type { Config } from '../config/config';
+import { CONFIG_TOKEN } from '../config/tokens';
 
 export const WEBSOCKET_OPTIONS = Symbol('WEBSOCKET_OPTIONS');
 
@@ -9,5 +10,5 @@ export const websocketOptionsProvider: FactoryProvider = {
   useFactory: (config: Config) => {
     return config.websocket;
   },
-  inject: [Config],
+  inject: [CONFIG_TOKEN],
 };

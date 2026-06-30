@@ -76,21 +76,21 @@ const OIDC_FETCH_OPTIONS = {
 @Injectable()
 export class OIDCProvider extends OAuthProvider implements OnModuleDestroy {
   override provider = OAuthProviderName.OIDC;
-  #endpoints: OIDCConfiguration | null = null;
-  #jwks: ReturnType<typeof createRemoteJWKSet> | null = null;
+  private endpointsState: OIDCConfiguration | null = null;
+  private jwksState: ReturnType<typeof createRemoteJWKSet> | null = null;
   private readonly oidcFetch = safeFetch;
-  readonly #retryScheduler = new ExponentialBackoffScheduler({
+  private readonly retryScheduler = new ExponentialBackoffScheduler({
     baseDelayMs: OIDC_DISCOVERY_INITIAL_RETRY_DELAY,
     maxDelayMs: OIDC_DISCOVERY_MAX_RETRY_DELAY,
   });
-  #validationGeneration = 0;
+  private validationGeneration = 0;
 
   constructor(@Inject(URLHelper) private readonly url: URLHelper) {
     super();
   }
 
   onModuleDestroy() {
-    this.#retryScheduler.clear();
+    this.retryScheduler.clear();
   }
 
   override get requiresPkce() {
@@ -98,26 +98,26 @@ export class OIDCProvider extends OAuthProvider implements OnModuleDestroy {
   }
 
   private get endpoints() {
-    if (!this.#endpoints) {
+    if (!this.endpointsState) {
       throw new Error('OIDC provider is not configured');
     }
-    return this.#endpoints;
+    return this.endpointsState;
   }
 
   private get jwks() {
-    if (!this.#jwks) {
+    if (!this.jwksState) {
       throw new Error('OIDC provider is not configured');
     }
-    return this.#jwks;
+    return this.jwksState;
   }
 
   override get configured() {
-    return this.#endpoints !== null && this.#jwks !== null;
+    return this.endpointsState !== null && this.jwksState !== null;
   }
 
   protected override setup() {
-    const generation = ++this.#validationGeneration;
-    this.#retryScheduler.clear();
+    const generation = ++this.validationGeneration;
+    this.retryScheduler.clear();
 
     this.validateAndSync(generation).catch(() => {
       /* noop */
@@ -125,25 +125,25 @@ export class OIDCProvider extends OAuthProvider implements OnModuleDestroy {
   }
 
   private async validateAndSync(generation: number) {
-    if (generation !== this.#validationGeneration) {
+    if (generation !== this.validationGeneration) {
       return;
     }
 
     if (!super.configured) {
       this.resetState();
-      this.#retryScheduler.reset();
+      this.retryScheduler.reset();
       super.setup();
       return;
     }
 
     const config = this.config as OAuthOIDCProviderConfig;
-    if (!config.issuer) {
-      this.logger.error('Missing OIDC issuer configuration');
-      this.resetState();
-      this.#retryScheduler.reset();
-      super.setup();
-      return;
-    }
+      if (!config.issuer) {
+        this.logger.error('Missing OIDC issuer configuration');
+        this.resetState();
+        this.retryScheduler.reset();
+        super.setup();
+        return;
+      }
 
     try {
       const res = await this.oidcFetch(
@@ -152,7 +152,7 @@ export class OIDCProvider extends OAuthProvider implements OnModuleDestroy {
         OIDC_FETCH_OPTIONS
       );
 
-      if (generation !== this.#validationGeneration) {
+      if (generation !== this.validationGeneration) {
         return;
       }
 
@@ -174,15 +174,15 @@ export class OIDCProvider extends OAuthProvider implements OnModuleDestroy {
         return;
       }
 
-      this.#endpoints = configuration;
-      this.#jwks = createRemoteJWKSet(new URL(configuration.jwks_uri), {
+      this.endpointsState = configuration;
+      this.jwksState = createRemoteJWKSet(new URL(configuration.jwks_uri), {
         [customFetch]: (url, init) =>
           this.oidcFetch(url, init, OIDC_FETCH_OPTIONS),
       });
-      this.#retryScheduler.reset();
+      this.retryScheduler.reset();
       super.setup();
     } catch (e) {
-      if (generation !== this.#validationGeneration) {
+      if (generation !== this.validationGeneration) {
         return;
       }
       this.logger.error('Failed to validate OIDC configuration', e);
@@ -197,11 +197,11 @@ export class OIDCProvider extends OAuthProvider implements OnModuleDestroy {
   }
 
   private scheduleRetry(generation: number) {
-    if (generation !== this.#validationGeneration) {
+    if (generation !== this.validationGeneration) {
       return;
     }
 
-    const delay = this.#retryScheduler.schedule(() => {
+    const delay = this.retryScheduler.schedule(() => {
       this.validateAndSync(generation).catch(() => {
         /* noop */
       });
@@ -216,8 +216,8 @@ export class OIDCProvider extends OAuthProvider implements OnModuleDestroy {
   }
 
   private resetState() {
-    this.#endpoints = null;
-    this.#jwks = null;
+    this.endpointsState = null;
+    this.jwksState = null;
   }
 
   getAuthUrl(state: string): string {

@@ -7,7 +7,8 @@ import { Job, Queue as Bullmq, Worker, WorkerOptions } from 'bullmq';
 import { difference, merge } from 'lodash-es';
 import { CLS_ID, ClsServiceManager } from 'nestjs-cls';
 
-import { Config } from '../../config';
+import type { Config } from '../../config/config';
+import { CONFIG_TOKEN } from '../../config/tokens';
 import { OnEvent } from '../../event';
 import { metrics, wrapCallMetric } from '../../metrics';
 import { QueueRedis } from '../../redis';
@@ -21,7 +22,7 @@ export class JobExecutor implements OnModuleDestroy {
   private readonly workers: Map<Queue, Worker> = new Map();
 
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(QueueRedis) private readonly redis: QueueRedis,
     @Inject(JobHandlerScanner) private readonly scanner: JobHandlerScanner,
     @Inject(ModuleRef) private readonly ref: ModuleRef

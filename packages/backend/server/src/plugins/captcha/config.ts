@@ -1,4 +1,4 @@
-import { defineModuleConfig } from '../../base';
+import { defineModuleConfig } from '../../base/config/register';
 import { CaptchaConfig } from './types';
 
 declare global {

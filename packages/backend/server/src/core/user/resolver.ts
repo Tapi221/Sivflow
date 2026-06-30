@@ -67,7 +67,7 @@ export class UserResolver {
   })
   @Public()
   async user(
-    @Args('email') email: string,
+    @Args('email', { type: () => String }) email: string,
     @CurrentUser() currentUser?: CurrentUser
   ): Promise<typeof UserOrLimitedUser | null> {
     validators.assertValidEmail(email);
@@ -311,7 +311,7 @@ export class UserManagementResolver {
     name: 'userById',
     description: 'Get user by id',
   })
-  async getUser(@Args('id') id: string) {
+  async getUser(@Args('id', { type: () => String }) id: string) {
     const user = await this.models.user.get(id, {
       withDisabled: true,
     });
@@ -328,7 +328,7 @@ export class UserManagementResolver {
     description: 'Get user by email for admin',
     nullable: true,
   })
-  async getUserByEmail(@Args('email') email: string) {
+  async getUserByEmail(@Args('email', { type: () => String }) email: string) {
     const user = await this.models.user.getUserByEmail(email, {
       withDisabled: true,
     });
@@ -381,7 +381,7 @@ export class UserManagementResolver {
   })
   async deleteUser(
     @CurrentUser() user: CurrentUser,
-    @Args('id') id: string
+    @Args('id', { type: () => String }) id: string
   ): Promise<DeleteAccount> {
     if (user.id === id) {
       throw new CannotDeleteOwnAccount();
@@ -394,8 +394,8 @@ export class UserManagementResolver {
     description: 'Update an user',
   })
   async updateUser(
-    @Args('id') id: string,
-    @Args('input') input: ManageUserInput
+    @Args('id', { type: () => String }) id: string,
+    @Args('input', { type: () => ManageUserInput }) input: ManageUserInput
   ): Promise<UserType> {
     const user = await this.db.user.findUnique({
       where: { id },
@@ -421,14 +421,14 @@ export class UserManagementResolver {
   @Mutation(() => UserType, {
     description: 'Ban an user',
   })
-  async banUser(@Args('id') id: string): Promise<UserType> {
+  async banUser(@Args('id', { type: () => String }) id: string): Promise<UserType> {
     return sessionUser(await this.models.user.ban(id));
   }
 
   @Mutation(() => UserType, {
     description: 'Reenable an banned user',
   })
-  async enableUser(@Args('id') id: string): Promise<UserType> {
+  async enableUser(@Args('id', { type: () => String }) id: string): Promise<UserType> {
     return sessionUser(await this.models.user.enable(id));
   }
 }

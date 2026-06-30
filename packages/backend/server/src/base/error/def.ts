@@ -177,7 +177,8 @@ function generateErrorArgs(name: string, args: ErrorArgs) {
   const typeName = `${name}DataType`;
   const lines = [`@ObjectType()`, `class ${typeName} {`];
   Object.entries(args).forEach(([arg, fieldArgs]) => {
-    lines.push(`  @Field() ${arg}!: ${fieldArgs}`);
+    const gqlType = fieldArgs === 'string' ? 'String' : fieldArgs === 'number' ? 'Number' : 'Boolean';
+    lines.push(`  @Field(() => ${gqlType}) ${arg}!: ${fieldArgs}`);
   });
 
   lines.push('}');
@@ -971,3 +972,11 @@ export const USER_FRIENDLY_ERRORS = {
     message: 'You have exceeded the comment attachment size quota.',
   },
 } satisfies Record<string, UserFriendlyErrorOptions>;
+
+if (process.env.GENERATE_ERRORS === 'true') {
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const target = path.resolve(process.cwd(), 'packages/backend/server/src/base/error/errors.gen.ts');
+  fs.writeFileSync(target, generateUserFriendlyErrors());
+  console.log('Successfully generated errors.gen.ts at ' + target);
+}

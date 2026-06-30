@@ -32,13 +32,13 @@ import { CurrentUser } from './session';
 
 @ObjectType('tokenType')
 export class ClientTokenType {
-  @Field()
+  @Field(() => String)
   token!: string;
 
-  @Field()
+  @Field(() => String)
   refresh!: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   sessionToken?: string;
 }
 
@@ -88,8 +88,8 @@ export class AuthResolver {
   @Public()
   @Mutation(() => Boolean)
   async changePassword(
-    @Args('token') token: string,
-    @Args('newPassword') newPassword: string,
+    @Args('token', { type: () => String }) token: string,
+    @Args('newPassword', { type: () => String }) newPassword: string,
     @Args('userId', { type: () => String, nullable: true }) userId?: string
   ) {
     if (!userId) {
@@ -118,8 +118,8 @@ export class AuthResolver {
   @Mutation(() => UserType)
   async changeEmail(
     @CurrentUser() user: CurrentUser,
-    @Args('token') token: string,
-    @Args('email') email: string
+    @Args('token', { type: () => String }) token: string,
+    @Args('email', { type: () => String }) email: string
   ) {
     // @see [sendChangeEmail]
     const valid = await this.models.verificationToken.verify(
@@ -146,8 +146,9 @@ export class AuthResolver {
   @Mutation(() => Boolean)
   async sendChangePasswordEmail(
     @CurrentUser() user: CurrentUser,
-    @Args('callbackUrl') callbackUrl: string,
+    @Args('callbackUrl', { type: () => String }) callbackUrl: string,
     @Args('email', {
+      type: () => String,
       nullable: true,
       deprecationReason: 'fetched from signed in user',
     })
@@ -170,8 +171,9 @@ export class AuthResolver {
   @Mutation(() => Boolean)
   async sendSetPasswordEmail(
     @CurrentUser() user: CurrentUser,
-    @Args('callbackUrl') callbackUrl: string,
+    @Args('callbackUrl', { type: () => String }) callbackUrl: string,
     @Args('email', {
+      type: () => String,
       nullable: true,
       deprecationReason: 'fetched from signed in user',
     })
@@ -190,7 +192,7 @@ export class AuthResolver {
   @Mutation(() => Boolean)
   async sendChangeEmail(
     @CurrentUser() user: CurrentUser,
-    @Args('callbackUrl') callbackUrl: string
+    @Args('callbackUrl', { type: () => String }) callbackUrl: string
   ) {
     if (!user.emailVerified) {
       throw new EmailVerificationRequired();
@@ -209,9 +211,9 @@ export class AuthResolver {
   @Mutation(() => Boolean)
   async sendVerifyChangeEmail(
     @CurrentUser() user: CurrentUser,
-    @Args('token') token: string,
-    @Args('email') email: string,
-    @Args('callbackUrl') callbackUrl: string
+    @Args('token', { type: () => String }) token: string,
+    @Args('email', { type: () => String }) email: string,
+    @Args('callbackUrl', { type: () => String }) callbackUrl: string
   ) {
     if (!token) {
       throw new EmailTokenNotFound();
@@ -255,7 +257,7 @@ export class AuthResolver {
   @Mutation(() => Boolean)
   async sendVerifyEmail(
     @CurrentUser() user: CurrentUser,
-    @Args('callbackUrl') callbackUrl: string
+    @Args('callbackUrl', { type: () => String }) callbackUrl: string
   ) {
     const token = await this.models.verificationToken.create(
       TokenType.VerifyEmail,
@@ -270,7 +272,7 @@ export class AuthResolver {
   @Mutation(() => Boolean)
   async verifyEmail(
     @CurrentUser() user: CurrentUser,
-    @Args('token') token: string
+    @Args('token', { type: () => String }) token: string
   ) {
     if (!token) {
       throw new EmailTokenNotFound();
@@ -298,8 +300,8 @@ export class AuthResolver {
     description: 'Create change password url',
   })
   async createChangePasswordUrl(
-    @Args('userId') userId: string,
-    @Args('callbackUrl') callbackUrl: string
+    @Args('userId', { type: () => String }) userId: string,
+    @Args('callbackUrl', { type: () => String }) callbackUrl: string
   ): Promise<string> {
     const token = await this.models.verificationToken.create(
       TokenType.ChangePassword,

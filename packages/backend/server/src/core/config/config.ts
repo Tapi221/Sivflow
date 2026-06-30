@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { defineModuleConfig } from '../../base';
+import { defineModuleConfig } from '../../base/config/register';
 
 export interface ServerFlags {
   allowGuestDemoWorkspace: boolean;

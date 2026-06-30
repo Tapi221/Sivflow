@@ -32,6 +32,7 @@ import {
   PaginationInput,
   registerObjectType,
 } from '../../../base';
+import { CONFIG_TOKEN } from '../../../base/config/tokens';
 import { PageInfo } from '../../../base/graphql/pagination';
 import { Models, PublicDocMode } from '../../../models';
 import { CurrentUser } from '../../auth';
@@ -303,7 +304,7 @@ export class WorkspaceDocResolver {
     @Inject(Models) private readonly models: Models,
     @Inject(Cache) private readonly cache: Cache,
     @Inject(EventBus) private readonly event: EventBus,
-    @Inject(Config) private readonly config: Config
+    @Inject(CONFIG_TOKEN) private readonly config: Config
   ) {}
 
   private async assertCanShare(
@@ -335,7 +336,7 @@ export class WorkspaceDocResolver {
   async pageMeta(
     @CurrentUser() me: CurrentUser,
     @Parent() workspace: WorkspaceType,
-    @Args('pageId') pageId: string
+    @Args('pageId', { type: () => String }) pageId: string
   ) {
     await this.ac.user(me.id).doc(workspace.id, pageId).assert('Doc.Read');
 
@@ -364,7 +365,7 @@ export class WorkspaceDocResolver {
   async docs(
     @CurrentUser() me: CurrentUser,
     @Parent() workspace: WorkspaceType,
-    @Args('pagination', PaginationInput.decode) pagination: PaginationInput
+    @Args('pagination', { type: () => PaginationInput }, PaginationInput.decode) pagination: PaginationInput
   ): Promise<PaginatedDocType> {
     await this.ac
       .user(me.id)
@@ -385,7 +386,7 @@ export class WorkspaceDocResolver {
   async recentlyUpdatedDocs(
     @CurrentUser() me: CurrentUser,
     @Parent() workspace: WorkspaceType,
-    @Args('pagination', PaginationInput.decode) pagination: PaginationInput
+    @Args('pagination', { type: () => PaginationInput }, PaginationInput.decode) pagination: PaginationInput
   ): Promise<PaginatedDocType> {
     const predicate = this.permission.docReadableSqlPredicate({
       userId: me.id,
@@ -422,7 +423,7 @@ export class WorkspaceDocResolver {
   async doc(
     @CurrentUser() me: CurrentUser,
     @Parent() workspace: WorkspaceType,
-    @Args('docId') docId: string
+    @Args('docId', { type: () => String }) docId: string
   ): Promise<DocType> {
     const doc = await this.models.doc.getDocInfo(workspace.id, docId);
     if (doc) {
@@ -447,8 +448,8 @@ export class WorkspaceDocResolver {
   @Mutation(() => DocType)
   async publishDoc(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
-    @Args('docId') docId: string,
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
+    @Args('docId', { type: () => String }) docId: string,
     @Args({
       name: 'mode',
       type: () => PublicDocMode,
@@ -485,8 +486,8 @@ export class WorkspaceDocResolver {
   @Mutation(() => DocType)
   async revokePublicDoc(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
-    @Args('docId') docId: string
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
+    @Args('docId', { type: () => String }) docId: string
   ) {
     if (workspaceId === docId) {
       this.logger.error('Expect to revoke public doc, but it is a workspace', {
@@ -656,9 +657,9 @@ export class DocResolver {
   async lastAccessedMembers(
     @CurrentUser() me: CurrentUser,
     @Parent() doc: DocType,
-    @Args('pagination', PaginationInput.decode) pagination: PaginationInput,
-    @Args('query', { nullable: true }) query?: string,
-    @Args('includeTotal', { nullable: true, defaultValue: false })
+    @Args('pagination', { type: () => PaginationInput }, PaginationInput.decode) pagination: PaginationInput,
+    @Args('query', { type: () => String, nullable: true }) query?: string,
+    @Args('includeTotal', { type: () => Boolean, nullable: true, defaultValue: false })
     includeTotal?: boolean
   ): Promise<PaginatedDocMemberLastAccess> {
     await this.ac
@@ -692,7 +693,7 @@ export class DocResolver {
   async grantedUsersList(
     @CurrentUser() user: CurrentUser,
     @Parent() doc: DocType,
-    @Args('pagination', PaginationInput.decode) pagination: PaginationInput
+    @Args('pagination', { type: () => PaginationInput }, PaginationInput.decode) pagination: PaginationInput
   ): Promise<PaginatedGrantedDocUserType> {
     await this.ac.user(user.id).doc(doc).assert('Doc.Users.Read');
     return await this.grants.paginateGrantedUsers(
@@ -705,7 +706,7 @@ export class DocResolver {
   @Mutation(() => Boolean)
   async grantDocUserRoles(
     @CurrentUser() user: CurrentUser,
-    @Args('input') input: GrantDocUserRolesInput
+    @Args('input', { type: () => GrantDocUserRolesInput }) input: GrantDocUserRolesInput
   ): Promise<boolean> {
     const pairs = {
       spaceId: input.workspaceId,
@@ -748,7 +749,7 @@ export class DocResolver {
   @Mutation(() => Boolean)
   async revokeDocUserRoles(
     @CurrentUser() user: CurrentUser,
-    @Args('input') input: RevokeDocUserRoleInput
+    @Args('input', { type: () => RevokeDocUserRoleInput }) input: RevokeDocUserRoleInput
   ): Promise<boolean> {
     const pairs = {
       spaceId: input.workspaceId,
@@ -787,7 +788,7 @@ export class DocResolver {
   @Mutation(() => Boolean)
   async updateDocUserRole(
     @CurrentUser() user: CurrentUser,
-    @Args('input') input: UpdateDocUserRoleInput
+    @Args('input', { type: () => UpdateDocUserRoleInput }) input: UpdateDocUserRoleInput
   ): Promise<boolean> {
     const pairs = {
       spaceId: input.workspaceId,
@@ -844,7 +845,7 @@ export class DocResolver {
   @Mutation(() => Boolean)
   async updateDocDefaultRole(
     @CurrentUser() user: CurrentUser,
-    @Args('input') input: UpdateDocDefaultRoleInput
+    @Args('input', { type: () => UpdateDocDefaultRoleInput }) input: UpdateDocDefaultRoleInput
   ) {
     if (input.role === DocRole.Owner) {
       this.logger.debug(

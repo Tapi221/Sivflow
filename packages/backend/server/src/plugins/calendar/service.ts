@@ -1,4 +1,4 @@
-import {
+﻿import {
   randomUUID,
 } from 'node:crypto';
 
@@ -19,6 +19,7 @@ import {
   JobQueue,
   URLHelper,
 } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { Models } from '../../models';
 import type { CalendarCalDAVProviderPreset } from './config';
 import {
@@ -51,7 +52,7 @@ export class CalendarService {
     @Inject(Models) private readonly models: Models,
     @Inject(CalendarProviderFactory) private readonly providerFactory: CalendarProviderFactory<CalendarProvider>,
     @Inject(JobQueue) private readonly queue: JobQueue,
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(URLHelper) private readonly url: URLHelper
   ) {}
 

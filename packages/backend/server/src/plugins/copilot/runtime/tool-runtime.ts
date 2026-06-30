@@ -1,6 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common';
+﻿import { Inject, Injectable } from '@nestjs/common';
 
 import { Config } from '../../../base';
+import { CONFIG_TOKEN } from '../../../base/config/tokens';
 import { DocReader, DocWriter } from '../../../core/doc';
 import { PermissionAccess } from '../../../core/permission';
 import { Models } from '../../../models';
@@ -47,7 +48,7 @@ export type ProviderSpecificToolResolver = (
 @Injectable()
 export class ToolRuntime {
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(PermissionAccess) private readonly ac: PermissionAccess,
     @Inject(CopilotContextService) private readonly context: CopilotContextService,
     @Inject(DocReader) private readonly docReader: DocReader,

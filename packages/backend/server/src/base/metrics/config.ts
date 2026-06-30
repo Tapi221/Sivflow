@@ -1,4 +1,4 @@
-import { defineModuleConfig } from '../config';
+import { defineModuleConfig } from '../config/register';
 
 declare global {
   interface AppConfigSchema {

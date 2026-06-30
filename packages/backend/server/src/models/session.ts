@@ -6,7 +6,8 @@ import {
   type UserSession,
 } from '@prisma/client';
 
-import { Config } from '../base';
+import { type Config } from '../base';
+import { CONFIG_TOKEN } from '../base/config/tokens';
 import { BaseModel } from './base';
 
 export type { Session, UserSession };
@@ -14,7 +15,7 @@ export type UserSessionWithUser = UserSession & { user: User };
 
 @Injectable()
 export class SessionModel extends BaseModel {
-  @Inject(Config)
+  @Inject(CONFIG_TOKEN)
   private readonly config!: Config;
 
   async createSession() {

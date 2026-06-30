@@ -426,7 +426,7 @@ export class CopilotResolver {
     complexity: 2,
   })
   async models(
-    @Args('promptName') promptName: string
+    @Args('promptName', { type: () => String }) promptName: string
   ): Promise<CopilotModelsType> {
     const prompt = await this.prompt.get(promptName);
     if (!prompt) {
@@ -472,7 +472,7 @@ export class CopilotResolver {
   async session(
     @Parent() copilot: CopilotType,
     @CurrentUser() user: CurrentUser,
-    @Args('sessionId') sessionId: string
+    @Args('sessionId', { type: () => String }) sessionId: string
   ): Promise<CopilotSessionType> {
     await this.assertPermission(user, copilot);
     const state = await this.chatSession.getMetaState(sessionId);
@@ -499,8 +499,8 @@ export class CopilotResolver {
   async sessions(
     @Parent() copilot: CopilotType,
     @CurrentUser() user: CurrentUser,
-    @Args('docId', { nullable: true }) maybeDocId?: string,
-    @Args('options', { nullable: true }) options?: QueryChatSessionsInput
+    @Args('docId', { type: () => String, nullable: true }) maybeDocId?: string,
+    @Args('options', { type: () => QueryChatSessionsInput, nullable: true }) options?: QueryChatSessionsInput
   ): Promise<CopilotSessionType[]> {
     if (!copilot.workspaceId) {
       return [];
@@ -542,8 +542,8 @@ export class CopilotResolver {
   async histories(
     @Parent() copilot: CopilotType,
     @CurrentUser() user: CurrentUser,
-    @Args('docId', { nullable: true }) docId?: string,
-    @Args('options', { nullable: true }) options?: QueryChatHistoriesInput
+    @Args('docId', { type: () => String, nullable: true }) docId?: string,
+    @Args('options', { type: () => QueryChatHistoriesInput, nullable: true }) options?: QueryChatHistoriesInput
   ): Promise<CopilotHistoriesType[]> {
     const workspaceId = copilot.workspaceId;
     if (!workspaceId) {
@@ -581,9 +581,9 @@ export class CopilotResolver {
   async chats(
     @Parent() copilot: CopilotType,
     @CurrentUser() user: CurrentUser,
-    @Args('pagination', PaginationInput.decode) pagination: PaginationInput,
-    @Args('docId', { nullable: true }) docId?: string,
-    @Args('options', { nullable: true }) options?: QueryChatHistoriesInput
+    @Args('pagination', { type: () => PaginationInput }, PaginationInput.decode) pagination: PaginationInput,
+    @Args('docId', { type: () => String, nullable: true }) docId?: string,
+    @Args('options', { type: () => QueryChatHistoriesInput, nullable: true }) options?: QueryChatHistoriesInput
   ): Promise<PaginatedCopilotHistoriesType> {
     const workspaceId = copilot.workspaceId;
     if (!workspaceId) {
@@ -834,7 +834,7 @@ export class UserCopilotResolver {
   @ResolveField(() => CopilotType)
   async copilot(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId', { nullable: true }) workspaceId?: string
+    @Args('workspaceId', { type: () => String, nullable: true }) workspaceId?: string
   ): Promise<CopilotType> {
     if (workspaceId) {
       await this.ac

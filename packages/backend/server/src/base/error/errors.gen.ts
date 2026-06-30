@@ -35,8 +35,8 @@ export class BadRequest extends UserFriendlyError {
 }
 @ObjectType()
 class GraphqlBadRequestDataType {
-  @Field() code!: string
-  @Field() message!: string
+  @Field(() => String) code!: string
+  @Field(() => String) message!: string
 }
 
 export class GraphqlBadRequest extends UserFriendlyError {
@@ -46,7 +46,7 @@ export class GraphqlBadRequest extends UserFriendlyError {
 }
 @ObjectType()
 class HttpRequestErrorDataType {
-  @Field() message!: string
+  @Field(() => String) message!: string
 }
 
 export class HttpRequestError extends UserFriendlyError {
@@ -56,7 +56,7 @@ export class HttpRequestError extends UserFriendlyError {
 }
 @ObjectType()
 class SsrfBlockedErrorDataType {
-  @Field() reason!: string
+  @Field(() => String) reason!: string
 }
 
 export class SsrfBlockedError extends UserFriendlyError {
@@ -66,8 +66,8 @@ export class SsrfBlockedError extends UserFriendlyError {
 }
 @ObjectType()
 class ResponseTooLargeErrorDataType {
-  @Field() limitBytes!: number
-  @Field() receivedBytes!: number
+  @Field(() => Number) limitBytes!: number
+  @Field(() => Number) receivedBytes!: number
 }
 
 export class ResponseTooLargeError extends UserFriendlyError {
@@ -83,7 +83,7 @@ export class EmailServiceNotConfigured extends UserFriendlyError {
 }
 @ObjectType()
 class ImageFormatNotSupportedDataType {
-  @Field() format!: string
+  @Field(() => String) format!: string
 }
 
 export class ImageFormatNotSupported extends UserFriendlyError {
@@ -93,7 +93,7 @@ export class ImageFormatNotSupported extends UserFriendlyError {
 }
 @ObjectType()
 class QueryTooLongDataType {
-  @Field() max!: number
+  @Field(() => Number) max!: number
 }
 
 export class QueryTooLong extends UserFriendlyError {
@@ -103,7 +103,7 @@ export class QueryTooLong extends UserFriendlyError {
 }
 @ObjectType()
 class ValidationErrorDataType {
-  @Field() errors!: string
+  @Field(() => String) errors!: string
 }
 
 export class ValidationError extends UserFriendlyError {
@@ -137,7 +137,7 @@ export class SameEmailProvided extends UserFriendlyError {
 }
 @ObjectType()
 class WrongSignInCredentialsDataType {
-  @Field() email!: string
+  @Field(() => String) email!: string
 }
 
 export class WrongSignInCredentials extends UserFriendlyError {
@@ -147,7 +147,7 @@ export class WrongSignInCredentials extends UserFriendlyError {
 }
 @ObjectType()
 class UnknownOauthProviderDataType {
-  @Field() name!: string
+  @Field(() => String) name!: string
 }
 
 export class UnknownOauthProvider extends UserFriendlyError {
@@ -169,8 +169,8 @@ export class InvalidOauthCallbackState extends UserFriendlyError {
 }
 @ObjectType()
 class InvalidOauthCallbackCodeDataType {
-  @Field() status!: number
-  @Field() body!: string
+  @Field(() => Number) status!: number
+  @Field(() => String) body!: string
 }
 
 export class InvalidOauthCallbackCode extends UserFriendlyError {
@@ -186,7 +186,7 @@ export class InvalidAuthState extends UserFriendlyError {
 }
 @ObjectType()
 class MissingOauthQueryParameterDataType {
-  @Field() name!: string
+  @Field(() => String) name!: string
 }
 
 export class MissingOauthQueryParameter extends UserFriendlyError {
@@ -202,7 +202,7 @@ export class OauthAccountAlreadyConnected extends UserFriendlyError {
 }
 @ObjectType()
 class InvalidOauthResponseDataType {
-  @Field() reason!: string
+  @Field(() => String) reason!: string
 }
 
 export class InvalidOauthResponse extends UserFriendlyError {
@@ -212,7 +212,7 @@ export class InvalidOauthResponse extends UserFriendlyError {
 }
 @ObjectType()
 class InvalidEmailDataType {
-  @Field() email!: string
+  @Field(() => String) email!: string
 }
 
 export class InvalidEmail extends UserFriendlyError {
@@ -222,8 +222,8 @@ export class InvalidEmail extends UserFriendlyError {
 }
 @ObjectType()
 class InvalidPasswordLengthDataType {
-  @Field() min!: number
-  @Field() max!: number
+  @Field(() => Number) min!: number
+  @Field(() => Number) max!: number
 }
 
 export class InvalidPasswordLength extends UserFriendlyError {
@@ -293,7 +293,7 @@ export class EmailVerificationRequired extends UserFriendlyError {
 }
 @ObjectType()
 class WorkspacePermissionNotFoundDataType {
-  @Field() spaceId!: string
+  @Field(() => String) spaceId!: string
 }
 
 export class WorkspacePermissionNotFound extends UserFriendlyError {
@@ -303,7 +303,7 @@ export class WorkspacePermissionNotFound extends UserFriendlyError {
 }
 @ObjectType()
 class SpaceNotFoundDataType {
-  @Field() spaceId!: string
+  @Field(() => String) spaceId!: string
 }
 
 export class SpaceNotFound extends UserFriendlyError {
@@ -313,7 +313,7 @@ export class SpaceNotFound extends UserFriendlyError {
 }
 @ObjectType()
 class MemberNotFoundInSpaceDataType {
-  @Field() spaceId!: string
+  @Field(() => String) spaceId!: string
 }
 
 export class MemberNotFoundInSpace extends UserFriendlyError {
@@ -323,7 +323,7 @@ export class MemberNotFoundInSpace extends UserFriendlyError {
 }
 @ObjectType()
 class NotInSpaceDataType {
-  @Field() spaceId!: string
+  @Field(() => String) spaceId!: string
 }
 
 export class NotInSpace extends UserFriendlyError {
@@ -333,7 +333,7 @@ export class NotInSpace extends UserFriendlyError {
 }
 @ObjectType()
 class AlreadyInSpaceDataType {
-  @Field() spaceId!: string
+  @Field(() => String) spaceId!: string
 }
 
 export class AlreadyInSpace extends UserFriendlyError {
@@ -343,7 +343,7 @@ export class AlreadyInSpace extends UserFriendlyError {
 }
 @ObjectType()
 class SpaceAccessDeniedDataType {
-  @Field() spaceId!: string
+  @Field(() => String) spaceId!: string
 }
 
 export class SpaceAccessDenied extends UserFriendlyError {
@@ -353,7 +353,7 @@ export class SpaceAccessDenied extends UserFriendlyError {
 }
 @ObjectType()
 class SpaceOwnerNotFoundDataType {
-  @Field() spaceId!: string
+  @Field(() => String) spaceId!: string
 }
 
 export class SpaceOwnerNotFound extends UserFriendlyError {
@@ -363,7 +363,7 @@ export class SpaceOwnerNotFound extends UserFriendlyError {
 }
 @ObjectType()
 class SpaceShouldHaveOnlyOneOwnerDataType {
-  @Field() spaceId!: string
+  @Field(() => String) spaceId!: string
 }
 
 export class SpaceShouldHaveOnlyOneOwner extends UserFriendlyError {
@@ -385,8 +385,8 @@ export class CanNotRevokeYourself extends UserFriendlyError {
 }
 @ObjectType()
 class DocNotFoundDataType {
-  @Field() spaceId!: string
-  @Field() docId!: string
+  @Field(() => String) spaceId!: string
+  @Field(() => String) docId!: string
 }
 
 export class DocNotFound extends UserFriendlyError {
@@ -396,9 +396,9 @@ export class DocNotFound extends UserFriendlyError {
 }
 @ObjectType()
 class DocActionDeniedDataType {
-  @Field() spaceId!: string
-  @Field() docId!: string
-  @Field() action!: string
+  @Field(() => String) spaceId!: string
+  @Field(() => String) docId!: string
+  @Field(() => String) action!: string
 }
 
 export class DocActionDenied extends UserFriendlyError {
@@ -408,8 +408,8 @@ export class DocActionDenied extends UserFriendlyError {
 }
 @ObjectType()
 class DocUpdateBlockedDataType {
-  @Field() spaceId!: string
-  @Field() docId!: string
+  @Field(() => String) spaceId!: string
+  @Field(() => String) docId!: string
 }
 
 export class DocUpdateBlocked extends UserFriendlyError {
@@ -419,8 +419,8 @@ export class DocUpdateBlocked extends UserFriendlyError {
 }
 @ObjectType()
 class VersionRejectedDataType {
-  @Field() version!: string
-  @Field() serverVersion!: string
+  @Field(() => String) version!: string
+  @Field(() => String) serverVersion!: string
 }
 
 export class VersionRejected extends UserFriendlyError {
@@ -430,7 +430,7 @@ export class VersionRejected extends UserFriendlyError {
 }
 @ObjectType()
 class InvalidHistoryTimestampDataType {
-  @Field() timestamp!: string
+  @Field(() => String) timestamp!: string
 }
 
 export class InvalidHistoryTimestamp extends UserFriendlyError {
@@ -440,9 +440,9 @@ export class InvalidHistoryTimestamp extends UserFriendlyError {
 }
 @ObjectType()
 class DocHistoryNotFoundDataType {
-  @Field() spaceId!: string
-  @Field() docId!: string
-  @Field() timestamp!: number
+  @Field(() => String) spaceId!: string
+  @Field(() => String) docId!: string
+  @Field(() => Number) timestamp!: number
 }
 
 export class DocHistoryNotFound extends UserFriendlyError {
@@ -452,8 +452,8 @@ export class DocHistoryNotFound extends UserFriendlyError {
 }
 @ObjectType()
 class BlobNotFoundDataType {
-  @Field() spaceId!: string
-  @Field() blobId!: string
+  @Field(() => String) spaceId!: string
+  @Field(() => String) blobId!: string
 }
 
 export class BlobNotFound extends UserFriendlyError {
@@ -481,8 +481,8 @@ export class ExpectToRevokePublicDoc extends UserFriendlyError {
 }
 @ObjectType()
 class ExpectToGrantDocUserRolesDataType {
-  @Field() spaceId!: string
-  @Field() docId!: string
+  @Field(() => String) spaceId!: string
+  @Field(() => String) docId!: string
 }
 
 export class ExpectToGrantDocUserRoles extends UserFriendlyError {
@@ -492,8 +492,8 @@ export class ExpectToGrantDocUserRoles extends UserFriendlyError {
 }
 @ObjectType()
 class ExpectToRevokeDocUserRolesDataType {
-  @Field() spaceId!: string
-  @Field() docId!: string
+  @Field(() => String) spaceId!: string
+  @Field(() => String) docId!: string
 }
 
 export class ExpectToRevokeDocUserRoles extends UserFriendlyError {
@@ -503,8 +503,8 @@ export class ExpectToRevokeDocUserRoles extends UserFriendlyError {
 }
 @ObjectType()
 class ExpectToUpdateDocUserRoleDataType {
-  @Field() spaceId!: string
-  @Field() docId!: string
+  @Field(() => String) spaceId!: string
+  @Field(() => String) docId!: string
 }
 
 export class ExpectToUpdateDocUserRole extends UserFriendlyError {
@@ -562,7 +562,7 @@ export class InvalidInvitation extends UserFriendlyError {
 }
 @ObjectType()
 class NoMoreSeatDataType {
-  @Field() spaceId!: string
+  @Field(() => String) spaceId!: string
 }
 
 export class NoMoreSeat extends UserFriendlyError {
@@ -572,7 +572,7 @@ export class NoMoreSeat extends UserFriendlyError {
 }
 @ObjectType()
 class UnsupportedSubscriptionPlanDataType {
-  @Field() plan!: string
+  @Field(() => String) plan!: string
 }
 
 export class UnsupportedSubscriptionPlan extends UserFriendlyError {
@@ -594,7 +594,7 @@ export class InvalidCheckoutParameters extends UserFriendlyError {
 }
 @ObjectType()
 class SubscriptionAlreadyExistsDataType {
-  @Field() plan!: string
+  @Field(() => String) plan!: string
 }
 
 export class SubscriptionAlreadyExists extends UserFriendlyError {
@@ -610,7 +610,7 @@ export class InvalidSubscriptionParameters extends UserFriendlyError {
 }
 @ObjectType()
 class SubscriptionNotExistsDataType {
-  @Field() plan!: string
+  @Field(() => String) plan!: string
 }
 
 export class SubscriptionNotExists extends UserFriendlyError {
@@ -638,7 +638,7 @@ export class SubscriptionExpired extends UserFriendlyError {
 }
 @ObjectType()
 class SameSubscriptionRecurringDataType {
-  @Field() recurring!: string
+  @Field(() => String) recurring!: string
 }
 
 export class SameSubscriptionRecurring extends UserFriendlyError {
@@ -654,8 +654,8 @@ export class CustomerPortalCreateFailed extends UserFriendlyError {
 }
 @ObjectType()
 class SubscriptionPlanNotFoundDataType {
-  @Field() plan!: string
-  @Field() recurring!: string
+  @Field(() => String) plan!: string
+  @Field(() => String) recurring!: string
 }
 
 export class SubscriptionPlanNotFound extends UserFriendlyError {
@@ -689,8 +689,8 @@ export class ManagedByAppStoreOrPlay extends UserFriendlyError {
 }
 @ObjectType()
 class CalendarProviderRequestErrorDataType {
-  @Field() status!: number
-  @Field() message!: string
+  @Field(() => Number) status!: number
+  @Field(() => String) message!: string
 }
 
 export class CalendarProviderRequestError extends UserFriendlyError {
@@ -718,7 +718,7 @@ export class CopilotSessionDeleted extends UserFriendlyError {
 }
 @ObjectType()
 class NoCopilotProviderAvailableDataType {
-  @Field() modelId!: string
+  @Field(() => String) modelId!: string
 }
 
 export class NoCopilotProviderAvailable extends UserFriendlyError {
@@ -734,8 +734,8 @@ export class CopilotFailedToGenerateText extends UserFriendlyError {
 }
 @ObjectType()
 class CopilotFailedToGenerateEmbeddingDataType {
-  @Field() provider!: string
-  @Field() message!: string
+  @Field(() => String) provider!: string
+  @Field(() => String) message!: string
 }
 
 export class CopilotFailedToGenerateEmbedding extends UserFriendlyError {
@@ -763,7 +763,7 @@ export class CopilotActionTaken extends UserFriendlyError {
 }
 @ObjectType()
 class CopilotDocNotFoundDataType {
-  @Field() docId!: string
+  @Field(() => String) docId!: string
 }
 
 export class CopilotDocNotFound extends UserFriendlyError {
@@ -779,7 +779,7 @@ export class CopilotDocsNotFound extends UserFriendlyError {
 }
 @ObjectType()
 class CopilotMessageNotFoundDataType {
-  @Field() messageId!: string
+  @Field(() => String) messageId!: string
 }
 
 export class CopilotMessageNotFound extends UserFriendlyError {
@@ -789,7 +789,7 @@ export class CopilotMessageNotFound extends UserFriendlyError {
 }
 @ObjectType()
 class CopilotPromptNotFoundDataType {
-  @Field() name!: string
+  @Field(() => String) name!: string
 }
 
 export class CopilotPromptNotFound extends UserFriendlyError {
@@ -805,8 +805,8 @@ export class CopilotPromptInvalid extends UserFriendlyError {
 }
 @ObjectType()
 class CopilotProviderNotSupportedDataType {
-  @Field() provider!: string
-  @Field() kind!: string
+  @Field(() => String) provider!: string
+  @Field(() => String) kind!: string
 }
 
 export class CopilotProviderNotSupported extends UserFriendlyError {
@@ -816,9 +816,9 @@ export class CopilotProviderNotSupported extends UserFriendlyError {
 }
 @ObjectType()
 class CopilotProviderSideErrorDataType {
-  @Field() provider!: string
-  @Field() kind!: string
-  @Field() message!: string
+  @Field(() => String) provider!: string
+  @Field(() => String) kind!: string
+  @Field(() => String) message!: string
 }
 
 export class CopilotProviderSideError extends UserFriendlyError {
@@ -828,7 +828,7 @@ export class CopilotProviderSideError extends UserFriendlyError {
 }
 @ObjectType()
 class CopilotInvalidContextDataType {
-  @Field() contextId!: string
+  @Field(() => String) contextId!: string
 }
 
 export class CopilotInvalidContext extends UserFriendlyError {
@@ -838,8 +838,8 @@ export class CopilotInvalidContext extends UserFriendlyError {
 }
 @ObjectType()
 class CopilotContextFileNotSupportedDataType {
-  @Field() fileName!: string
-  @Field() message!: string
+  @Field(() => String) fileName!: string
+  @Field(() => String) message!: string
 }
 
 export class CopilotContextFileNotSupported extends UserFriendlyError {
@@ -849,8 +849,8 @@ export class CopilotContextFileNotSupported extends UserFriendlyError {
 }
 @ObjectType()
 class CopilotFailedToModifyContextDataType {
-  @Field() contextId!: string
-  @Field() message!: string
+  @Field(() => String) contextId!: string
+  @Field(() => String) message!: string
 }
 
 export class CopilotFailedToModifyContext extends UserFriendlyError {
@@ -860,9 +860,9 @@ export class CopilotFailedToModifyContext extends UserFriendlyError {
 }
 @ObjectType()
 class CopilotFailedToMatchContextDataType {
-  @Field() contextId!: string
-  @Field() content!: string
-  @Field() message!: string
+  @Field(() => String) contextId!: string
+  @Field(() => String) content!: string
+  @Field(() => String) message!: string
 }
 
 export class CopilotFailedToMatchContext extends UserFriendlyError {
@@ -872,9 +872,9 @@ export class CopilotFailedToMatchContext extends UserFriendlyError {
 }
 @ObjectType()
 class CopilotFailedToMatchGlobalContextDataType {
-  @Field() workspaceId!: string
-  @Field() content!: string
-  @Field() message!: string
+  @Field(() => String) workspaceId!: string
+  @Field(() => String) content!: string
+  @Field(() => String) message!: string
 }
 
 export class CopilotFailedToMatchGlobalContext extends UserFriendlyError {
@@ -914,7 +914,7 @@ export class CopilotTranscriptionAudioNotProvided extends UserFriendlyError {
 }
 @ObjectType()
 class CopilotFailedToAddWorkspaceFileEmbeddingDataType {
-  @Field() message!: string
+  @Field(() => String) message!: string
 }
 
 export class CopilotFailedToAddWorkspaceFileEmbedding extends UserFriendlyError {
@@ -948,7 +948,7 @@ export class CopilotQuotaExceeded extends UserFriendlyError {
 }
 @ObjectType()
 class RuntimeConfigNotFoundDataType {
-  @Field() key!: string
+  @Field(() => String) key!: string
 }
 
 export class RuntimeConfigNotFound extends UserFriendlyError {
@@ -958,9 +958,9 @@ export class RuntimeConfigNotFound extends UserFriendlyError {
 }
 @ObjectType()
 class InvalidRuntimeConfigTypeDataType {
-  @Field() key!: string
-  @Field() want!: string
-  @Field() get!: string
+  @Field(() => String) key!: string
+  @Field(() => String) want!: string
+  @Field(() => String) get!: string
 }
 
 export class InvalidRuntimeConfigType extends UserFriendlyError {
@@ -1024,7 +1024,7 @@ export class LicenseNotFound extends UserFriendlyError {
 }
 @ObjectType()
 class InvalidLicenseToActivateDataType {
-  @Field() reason!: string
+  @Field(() => String) reason!: string
 }
 
 export class InvalidLicenseToActivate extends UserFriendlyError {
@@ -1034,7 +1034,7 @@ export class InvalidLicenseToActivate extends UserFriendlyError {
 }
 @ObjectType()
 class InvalidLicenseUpdateParamsDataType {
-  @Field() reason!: string
+  @Field(() => String) reason!: string
 }
 
 export class InvalidLicenseUpdateParams extends UserFriendlyError {
@@ -1050,8 +1050,8 @@ export class LicenseExpired extends UserFriendlyError {
 }
 @ObjectType()
 class UnsupportedClientVersionDataType {
-  @Field() clientVersion!: string
-  @Field() requiredVersion!: string
+  @Field(() => String) clientVersion!: string
+  @Field(() => String) requiredVersion!: string
 }
 
 export class UnsupportedClientVersion extends UserFriendlyError {
@@ -1067,7 +1067,7 @@ export class NotificationNotFound extends UserFriendlyError {
 }
 @ObjectType()
 class MentionUserDocAccessDeniedDataType {
-  @Field() docId!: string
+  @Field(() => String) docId!: string
 }
 
 export class MentionUserDocAccessDenied extends UserFriendlyError {
@@ -1083,9 +1083,9 @@ export class MentionUserOneselfDenied extends UserFriendlyError {
 }
 @ObjectType()
 class InvalidAppConfigDataType {
-  @Field() module!: string
-  @Field() key!: string
-  @Field() hint!: string
+  @Field(() => String) module!: string
+  @Field(() => String) key!: string
+  @Field(() => String) hint!: string
 }
 
 export class InvalidAppConfig extends UserFriendlyError {
@@ -1095,7 +1095,7 @@ export class InvalidAppConfig extends UserFriendlyError {
 }
 @ObjectType()
 class InvalidAppConfigInputDataType {
-  @Field() message!: string
+  @Field(() => String) message!: string
 }
 
 export class InvalidAppConfigInput extends UserFriendlyError {
@@ -1111,8 +1111,8 @@ export class SearchProviderNotFound extends UserFriendlyError {
 }
 @ObjectType()
 class InvalidSearchProviderRequestDataType {
-  @Field() reason!: string
-  @Field() type!: string
+  @Field(() => String) reason!: string
+  @Field(() => String) type!: string
 }
 
 export class InvalidSearchProviderRequest extends UserFriendlyError {
@@ -1122,7 +1122,7 @@ export class InvalidSearchProviderRequest extends UserFriendlyError {
 }
 @ObjectType()
 class InvalidIndexerInputDataType {
-  @Field() reason!: string
+  @Field(() => String) reason!: string
 }
 
 export class InvalidIndexerInput extends UserFriendlyError {

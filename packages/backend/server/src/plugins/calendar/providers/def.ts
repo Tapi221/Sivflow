@@ -1,7 +1,8 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import type { CalendarAccount } from '@prisma/client';
 
 import { CalendarProviderRequestError, Config, OnEvent } from '../../../base';
+import { CONFIG_TOKEN } from '../../../base/config/tokens';
 import { CalendarProviderFactory, CalendarProviderName } from './factory';
 
 export interface CalendarProviderTokens {
@@ -111,8 +112,8 @@ export abstract class CalendarProvider {
 
   protected readonly logger = new Logger(this.constructor.name);
 
-  @Inject() private readonly factory!: CalendarProviderFactory;
-  @Inject() private readonly AFFiNEConfig!: Config;
+  @Inject(forwardRef(() => CalendarProviderFactory)) private readonly factory!: CalendarProviderFactory;
+  @Inject(CONFIG_TOKEN) private readonly AFFiNEConfig!: Config;
 
   get config() {
     return (this.AFFiNEConfig.calendar as Record<string, any>)[this.provider];

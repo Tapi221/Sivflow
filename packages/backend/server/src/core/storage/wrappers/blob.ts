@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+﻿import { createHash } from 'node:crypto';
 
 import { Inject, Injectable, Logger } from '@nestjs/common';
 
@@ -14,6 +14,7 @@ import {
   StorageProviderFactory,
   URLHelper,
 } from '../../../base';
+import { CONFIG_TOKEN } from '../../../base/config/tokens';
 import { Models } from '../../../models';
 
 declare global {
@@ -53,7 +54,7 @@ export class WorkspaceBlobStorage {
   }
 
   constructor(
-    @Inject(Config) private readonly AFFiNEConfig: Config,
+    @Inject(CONFIG_TOKEN) private readonly AFFiNEConfig: Config,
     @Inject(EventBus) private readonly event: EventBus,
     @Inject(StorageProviderFactory) private readonly storageFactory: StorageProviderFactory,
     @Inject(Models) private readonly models: Models,

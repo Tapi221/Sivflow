@@ -1,4 +1,4 @@
-import {
+﻿import {
   createHash,
   randomBytes,
 } from 'node:crypto';
@@ -19,6 +19,7 @@ import {
   SignUpForbidden,
   UnknownOauthProvider,
 } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import {
   AuthChallengeStore,
   AuthService,
@@ -58,7 +59,7 @@ export class OAuthService {
     @Inject(AuthChallengeStore) private readonly challenges: AuthChallengeStore,
     @Inject(AuthService) private readonly auth: AuthService,
     @Inject(Models) private readonly models: Models,
-    @Inject(Config) private readonly config: Config
+    @Inject(CONFIG_TOKEN) private readonly config: Config
   ) {}
 
   isValidState(stateStr: string) {

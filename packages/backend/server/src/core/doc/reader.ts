@@ -1,4 +1,4 @@
-import type { FactoryProvider } from '@nestjs/common';
+﻿import type { FactoryProvider } from '@nestjs/common';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { diffUpdate, encodeStateVectorFromUpdate } from 'yjs';
@@ -11,6 +11,7 @@ import {
   safeFetch,
   UserFriendlyError,
 } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { Models } from '../../models';
 import { WorkspaceBlobStorage } from '../storage';
 import {
@@ -274,7 +275,7 @@ export class RpcDocReader extends DatabaseDocReader {
   protected override readonly logger = new Logger(DocReader.name);
 
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(CryptoHelper) private readonly crypto: CryptoHelper,
     @Inject(Cache) protected override readonly cache: Cache,
     @Inject(Models) protected override readonly models: Models,

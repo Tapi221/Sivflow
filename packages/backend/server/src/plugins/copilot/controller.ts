@@ -1,4 +1,4 @@
-import {
+﻿import {
   Inject,
   BeforeApplicationShutdown,
   Controller,
@@ -36,6 +36,7 @@ import {
   metrics,
   UnsplashIsNotConfigured,
 } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { CurrentUser, Public } from '../../core/auth';
 import {
   ActionStreamHost,
@@ -59,7 +60,7 @@ export class CopilotController implements BeforeApplicationShutdown {
   private readonly ongoingStreamCount$ = new BehaviorSubject(0);
 
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(TurnOrchestrator) private readonly orchestrator: TurnOrchestrator,
     @Inject(ActionStreamHost) private readonly actionStreams: ActionStreamHost,
     @Inject(CopilotStorage) private readonly storage: CopilotStorage

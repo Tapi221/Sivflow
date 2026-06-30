@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   CanActivate,
   ExecutionContext,
   OnModuleInit,
@@ -10,6 +10,7 @@ import {
   getRequestResponseFromContext,
   GuardProvider,
 } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { CaptchaService } from './service';
 
 @Injectable()
@@ -20,7 +21,7 @@ export class CaptchaGuardProvider
   name = 'captcha' as const;
 
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(CaptchaService) private readonly captcha: CaptchaService
   ) {
     super();

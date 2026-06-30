@@ -1,4 +1,4 @@
-import {
+﻿import {
   createHash,
 } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -16,6 +16,7 @@ import type { Request, Response } from 'express';
 import isMobile from 'is-mobile';
 
 import { Config, getRequestTrackerId, metrics } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { Models } from '../../models';
 import { htmlSanitize } from '../../native';
 import { Public } from '../auth';
@@ -69,7 +70,7 @@ export class DocRendererController {
   constructor(
     @Inject(DocReader) private readonly doc: DocReader,
     @Inject(Models) private readonly models: Models,
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(PermissionService) private readonly permission: PermissionService
   ) {
     this.webAssets = this.readHtmlAssets(join(env.projectRoot, 'static'));
@@ -288,11 +289,23 @@ export class DocRendererController {
 
       return assets;
     } catch (e) {
-      if (env.prod) {
-        throw e;
-      } else {
+      if (
+        e &&
+        typeof e === 'object' &&
+        'code' in e &&
+        e.code === 'ENOENT'
+      ) {
+        this.logger.warn(
+          `HTML assets manifest was not found at ${manifestPath}; using empty assets for local startup.`
+        );
         return defaultAssets;
       }
+
+      if (env.prod) {
+        throw e;
+      }
+
+      return defaultAssets;
     }
   }
 }

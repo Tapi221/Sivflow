@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 
 import {
   Config,
@@ -7,6 +7,7 @@ import {
   OnEvent,
   safeFetch,
 } from '../../../base';
+import { CONFIG_TOKEN } from '../../../base/config/tokens';
 import { OAuthProviderName } from '../config';
 import { OAuthProviderFactory } from '../factory';
 import type { OAuthState } from '../types';
@@ -42,8 +43,8 @@ export abstract class OAuthProvider {
   abstract getUser(tokens: Tokens, state: OAuthState): Promise<OAuthAccount>;
 
   protected readonly logger = new Logger(this.constructor.name);
-  @Inject() private readonly factory!: OAuthProviderFactory;
-  @Inject() private readonly AFFiNEConfig!: Config;
+  @Inject(forwardRef(() => OAuthProviderFactory)) private readonly factory!: OAuthProviderFactory;
+  @Inject(CONFIG_TOKEN) private readonly AFFiNEConfig!: Config;
 
   get config() {
     return this.AFFiNEConfig.oauth.providers[this.provider];

@@ -1,4 +1,4 @@
-import type { OnModuleInit } from '@nestjs/common';
+﻿import type { OnModuleInit } from '@nestjs/common';
 import { join, } from 'node:path';
 
 import {
@@ -8,6 +8,7 @@ import type { Application, Request, Response } from 'express';
 import { static as serveStatic } from 'express';
 
 import { Config } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { isMobileRequest } from '../utils/user-agent';
 
 const staticPathRegex = /^\/(_plugin|assets|imgs|js|plugins|static)\//;
@@ -25,7 +26,7 @@ function isMissingStaticAssetError(error: unknown) {
 @Injectable()
 export class StaticFilesResolver implements OnModuleInit {
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(HttpAdapterHost) private readonly adapterHost: HttpAdapterHost
   ) {}
 

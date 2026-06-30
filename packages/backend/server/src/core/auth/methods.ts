@@ -1,8 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+﻿import { Inject, Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { PrismaClient } from '@prisma/client';
 
 import { Config } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { Models, type User } from '../../models';
 import { verifyEmailDomainRecords } from './email-domain';
 
@@ -28,7 +29,7 @@ export interface BoundAuthMethods {
 @Injectable()
 export class AuthMethodsService {
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(Models) private readonly models: Models,
     @Inject(PrismaClient) private readonly db: PrismaClient,
     @Inject(ModuleRef) private readonly ref: ModuleRef

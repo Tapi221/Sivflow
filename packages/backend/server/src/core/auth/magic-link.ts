@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+﻿import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import {
   ActionForbidden,
@@ -11,6 +11,7 @@ import {
   URLHelper,
   WrongSignInCredentials,
 } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { Models, TokenType } from '../../models';
 import { validators } from '../utils/validators';
 import { verifyEmailDomainRecords } from './email-domain';
@@ -25,7 +26,7 @@ export class MagicLinkAuthService {
     @Inject(URLHelper) private readonly url: URLHelper,
     @Inject(AuthService) private readonly auth: AuthService,
     @Inject(Models) private readonly models: Models,
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(CryptoHelper) private readonly crypto: CryptoHelper
   ) {}
 

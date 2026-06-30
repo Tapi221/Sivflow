@@ -10,6 +10,7 @@ import {
 } from '@nestjs/graphql';
 
 import { ActionForbidden, AuthenticationRequired, Config } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { CurrentUser } from '../../core/auth';
 import { ServerConfigType } from '../../core/config/types';
 import { PermissionAccess } from '../../core/permission';
@@ -34,7 +35,7 @@ import {
 export class CalendarServerConfigResolver {
   constructor(
     @Inject(CalendarProviderFactory) private readonly providerFactory: CalendarProviderFactory,
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(CalendarService) private readonly calendar: CalendarService
   ) {}
 
@@ -169,7 +170,7 @@ export class CalendarMutationResolver {
   @Mutation(() => String)
   async linkCalendarAccount(
     @CurrentUser() user: CurrentUser | null,
-    @Args('input') input: LinkCalendarAccountInput
+    @Args('input', { type: () => LinkCalendarAccountInput }) input: LinkCalendarAccountInput
   ) {
     if (!user) {
       throw new AuthenticationRequired();
@@ -190,7 +191,7 @@ export class CalendarMutationResolver {
   @Mutation(() => CalendarAccountObjectType)
   async linkCalDAVAccount(
     @CurrentUser() user: CurrentUser | null,
-    @Args('input') input: LinkCalDAVAccountInput
+    @Args('input', { type: () => LinkCalDAVAccountInput }) input: LinkCalDAVAccountInput
   ) {
     if (!user) {
       throw new AuthenticationRequired();
@@ -205,8 +206,8 @@ export class CalendarMutationResolver {
   @Mutation(() => CalendarAccountObjectType, { nullable: true })
   async updateCalendarAccount(
     @CurrentUser() user: CurrentUser,
-    @Args('accountId') accountId: string,
-    @Args('refreshIntervalMinutes') refreshIntervalMinutes: number
+    @Args('accountId', { type: () => String }) accountId: string,
+    @Args('refreshIntervalMinutes', { type: () => Int }) refreshIntervalMinutes: number
   ) {
     return await this.calendar.updateAccountRefreshInterval(
       user.id,
@@ -218,7 +219,7 @@ export class CalendarMutationResolver {
   @Mutation(() => Boolean)
   async unlinkCalendarAccount(
     @CurrentUser() user: CurrentUser,
-    @Args('accountId') accountId: string
+    @Args('accountId', { type: () => String }) accountId: string
   ) {
     return await this.calendar.unlinkAccount(user.id, accountId);
   }
@@ -226,7 +227,7 @@ export class CalendarMutationResolver {
   @Mutation(() => WorkspaceCalendarObjectType)
   async updateWorkspaceCalendars(
     @CurrentUser() user: CurrentUser,
-    @Args('input') input: UpdateWorkspaceCalendarsInput
+    @Args('input', { type: () => UpdateWorkspaceCalendarsInput }) input: UpdateWorkspaceCalendarsInput
   ) {
     await this.access
       .user(user.id)

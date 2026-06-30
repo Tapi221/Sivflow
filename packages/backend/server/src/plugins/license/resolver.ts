@@ -109,8 +109,8 @@ export class LicenseResolver {
   @Mutation(() => License)
   async activateLicense(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
-    @Args('license') license: string
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
+    @Args('license', { type: () => String }) license: string
   ) {
     await this.ac
       .user(user.id)
@@ -123,7 +123,7 @@ export class LicenseResolver {
   @Mutation(() => Boolean)
   async deactivateLicense(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string
+    @Args('workspaceId', { type: () => String }) workspaceId: string
   ) {
     await this.ac
       .user(user.id)
@@ -136,7 +136,7 @@ export class LicenseResolver {
   @Mutation(() => String)
   async createSelfhostWorkspaceCustomerPortal(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string
+    @Args('workspaceId', { type: () => String }) workspaceId: string
   ) {
     await this.ac
       .user(user.id)
@@ -151,7 +151,7 @@ export class LicenseResolver {
   @Mutation(() => License)
   async installLicense(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
     @Args('license', { type: () => GraphQLUpload }) licenseFile: FileUpload
   ) {
     await this.ac

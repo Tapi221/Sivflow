@@ -1,10 +1,10 @@
 import { z } from 'zod';
 
+import { defineModuleConfig } from '../../base/config/register';
 import {
-  defineModuleConfig,
   StorageJSONSchema,
-  StorageProviderConfig,
-} from '../../base';
+  type StorageProviderConfig,
+} from '../../base/storage';
 import {
   AnthropicOfficialConfig,
   AnthropicVertexConfig,

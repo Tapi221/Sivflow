@@ -1,4 +1,4 @@
-import { defineModuleConfig } from '../../base';
+import { defineModuleConfig } from '../../base/config/register';
 
 export interface WorkerStartupConfigurations {
   allowedOrigin: string[];

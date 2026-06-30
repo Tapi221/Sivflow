@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   CanActivate,
   ExecutionContext,
   OnModuleInit,
@@ -11,6 +11,7 @@ import {
   getRequestResponseFromContext,
   GuardProvider,
 } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { VersionService } from './service';
 
 @Injectable()
@@ -21,7 +22,7 @@ export class VersionGuardProvider
   name = 'version' as const;
 
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(VersionService) private readonly version: VersionService
   ) {
     super();

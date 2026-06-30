@@ -8,6 +8,7 @@ import type { Queue as BullMQQueue } from 'bullmq';
 import type { Application, NextFunction, Request, Response } from 'express';
 
 import { Config } from '../../base/config';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { QUEUES } from '../../base/job/queue/def';
 import { AuthGuard, AuthModule } from '../auth';
 import { FeatureModule, FeatureService } from '../features';
@@ -24,7 +25,7 @@ class QueueDashboardService implements OnModuleInit {
 
   constructor(
     @Inject(HttpAdapterHost) private readonly adapterHost: HttpAdapterHost,
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(FeatureService) private readonly feature: FeatureService,
     @Inject(AuthGuard) private readonly authGuard: AuthGuard,
     @Inject(ModuleRef) private readonly moduleRef: ModuleRef

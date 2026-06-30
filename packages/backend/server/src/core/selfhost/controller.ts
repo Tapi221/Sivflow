@@ -1,4 +1,4 @@
-import { Inject, Body, Controller, Post, Req, Res } from '@nestjs/common';
+﻿import { Inject, Body, Controller, Post, Req, Res } from '@nestjs/common';
 import type { Request, Response } from 'express';
 
 import {
@@ -9,6 +9,7 @@ import {
   PasswordRequired,
   UseNamedGuard,
 } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { Models } from '../../models';
 import { Public, SessionIssuer } from '../auth';
 import { ServerService } from '../config';
@@ -23,7 +24,7 @@ interface CreateUserInput {
 @Controller('/api/setup')
 export class CustomSetupController {
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(Models) private readonly models: Models,
     @Inject(SessionIssuer) private readonly sessionIssuer: SessionIssuer,
     @Inject(Mutex) private readonly mutex: Mutex,

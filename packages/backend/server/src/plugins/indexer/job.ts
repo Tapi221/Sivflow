@@ -1,6 +1,7 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+﻿import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { Config, JOB_SIGNAL, JobQueue, OnJob } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { readAllDocIdsFromWorkspaceSnapshot } from '../../core/utils/blocksuite';
 import { Models } from '../../models';
 import { IndexerService } from './service';
@@ -38,7 +39,7 @@ export class IndexerJob {
     private readonly service: IndexerService,
     @Inject(JobQueue)
     @Inject(JobQueue) private readonly queue: JobQueue,
-    @Inject(Config) private readonly config: Config
+    @Inject(CONFIG_TOKEN) private readonly config: Config
   ) {}
 
   @OnJob('indexer.indexDoc')

@@ -1,6 +1,6 @@
 import { DefaultJobOptions, WorkerOptions } from 'bullmq';
 
-import { defineModuleConfig, JSONSchema } from '../../config';
+import { defineModuleConfig, type JSONSchema } from '../../config/register';
 import { Queue } from './def';
 
 declare global {

@@ -1,4 +1,4 @@
-import { defineModuleConfig } from '../config';
+import { defineModuleConfig } from '../config/register';
 
 export type ThrottlerType = 'default' | 'strict';
 

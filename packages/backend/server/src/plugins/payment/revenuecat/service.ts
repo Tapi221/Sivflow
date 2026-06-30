@@ -1,7 +1,8 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+﻿import { Inject, Injectable, Logger } from '@nestjs/common';
 import { z } from 'zod';
 
 import { Config } from '../../../base';
+import { CONFIG_TOKEN } from '../../../base/config/tokens';
 
 const Store = z.enum([
   'amazon',
@@ -125,7 +126,7 @@ export class RevenueCatService {
   private readonly logger = new Logger(RevenueCatService.name);
   private readonly productsCache = new Map<string, Product[]>();
 
-  constructor(@Inject(Config) private readonly config: Config) {}
+  constructor(@Inject(CONFIG_TOKEN) private readonly config: Config) {}
 
   private get apiKey(): string {
     const key = this.config.payment.revenuecat?.apiKey;

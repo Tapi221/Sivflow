@@ -1,6 +1,7 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 
 import { Config } from '../../../base';
+import { CONFIG_TOKEN } from '../../../base/config/tokens';
 import type { NodeTextMiddleware, ProviderMiddlewareConfig } from '../config';
 import { ToolExecutorHost } from '../runtime/hosts/tool-executor-host';
 import { mapNativeSemanticError } from '../runtime/native-errors';
@@ -53,8 +54,8 @@ export abstract class CopilotProvider<C = any> {
   ): CopilotModelBackendKind;
   abstract configured(execution?: CopilotProviderExecution): boolean;
 
-  @Inject() protected readonly AFFiNEConfig!: Config;
-  @Inject() protected readonly toolExecutorHost!: ToolExecutorHost;
+  @Inject(CONFIG_TOKEN) protected readonly AFFiNEConfig!: Config;
+  @Inject(forwardRef(() => ToolExecutorHost)) protected readonly toolExecutorHost!: ToolExecutorHost;
 
   get maxSteps() {
     return this.MAX_STEPS;

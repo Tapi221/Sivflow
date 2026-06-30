@@ -168,7 +168,7 @@ export class WorkspaceResolver {
   @Query(() => WorkspaceType, {
     description: 'Get workspace by id',
   })
-  async workspace(@CurrentUser() user: CurrentUser, @Args('id') id: string) {
+  async workspace(@CurrentUser() user: CurrentUser, @Args('id', { type: () => String }) id: string) {
     await this.ac.user(user.id).workspace(id).assert('Workspace.Read');
 
     const workspace = await this.models.workspace.get(id);
@@ -186,7 +186,7 @@ export class WorkspaceResolver {
   })
   async workspaceRolePermissions(
     @CurrentUser() user: CurrentUser,
-    @Args('id') id: string
+    @Args('id', { type: () => String }) id: string
   ): Promise<WorkspaceRolePermissions> {
     const { role, permissions } = await this.ac
       .user(user.id)
@@ -260,7 +260,7 @@ export class WorkspaceResolver {
   @Mutation(() => Boolean)
   async deleteWorkspace(
     @CurrentUser() user: CurrentUser,
-    @Args('id') id: string
+    @Args('id', { type: () => String }) id: string
   ) {
     await this.ac.user(user.id).workspace(id).assert('Workspace.Delete');
 

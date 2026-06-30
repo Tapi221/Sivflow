@@ -1,4 +1,4 @@
-import { Inject, Logger } from '@nestjs/common';
+﻿import { Inject, Logger } from '@nestjs/common';
 import {
   Args,
   Field,
@@ -13,6 +13,7 @@ import {
 import { GraphQLJSON, GraphQLJSONObject } from 'graphql-scalars';
 
 import { Config, hasNewerVersion, URLHelper } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { Namespace } from '../../env';
 import { Feature, type WorkspaceFeatureName } from '../../models';
 import { CurrentUser, Public } from '../auth';
@@ -61,7 +62,7 @@ export class ServerConfigResolver {
   private readonly logger = new Logger(ServerConfigResolver.name);
 
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(URLHelper) private readonly url: URLHelper,
     @Inject(ServerService) private readonly server: ServerService
   ) {}

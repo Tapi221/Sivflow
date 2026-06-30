@@ -81,7 +81,7 @@ export class CopilotWorkspaceEmbeddingConfigResolver {
   })
   async ignoredDocs(
     @Parent() config: CopilotWorkspaceConfigType,
-    @Args('pagination', PaginationInput.decode) pagination: PaginationInput
+    @Args('pagination', { type: () => PaginationInput }, PaginationInput.decode) pagination: PaginationInput
   ): Promise<PaginatedIgnoredDocsType> {
     const [ignoredDocs, totalCount] =
       await this.copilotWorkspace.listIgnoredDocs(
@@ -135,7 +135,7 @@ export class CopilotWorkspaceEmbeddingConfigResolver {
   })
   async files(
     @Parent() config: CopilotWorkspaceConfigType,
-    @Args('pagination', PaginationInput.decode) pagination: PaginationInput
+    @Args('pagination', { type: () => PaginationInput }, PaginationInput.decode) pagination: PaginationInput
   ): Promise<PaginatedCopilotWorkspaceFileType> {
     const [files, totalCount] = await this.copilotWorkspace.listFiles(
       config.workspaceId,

@@ -192,9 +192,14 @@ export const parsePageDocFromBinary = serverNativeModule.parsePageDoc;
 export const parseWorkspaceDocFromBinary = serverNativeModule.parseWorkspaceDoc;
 export const readAllDocIdsFromRootDoc =
   serverNativeModule.readAllDocIdsFromRootDoc;
-export const AFFINE_PRO_PUBLIC_KEY = serverNativeModule.AFFINE_PRO_PUBLIC_KEY;
+export const AFFINE_PRO_PUBLIC_KEY =
+  typeof serverNativeModule.AFFINE_PRO_PUBLIC_KEY === 'string'
+    ? serverNativeModule.AFFINE_PRO_PUBLIC_KEY
+    : '';
 export const AFFINE_PRO_LICENSE_AES_KEY =
-  serverNativeModule.AFFINE_PRO_LICENSE_AES_KEY;
+  typeof serverNativeModule.AFFINE_PRO_LICENSE_AES_KEY === 'string'
+    ? serverNativeModule.AFFINE_PRO_LICENSE_AES_KEY
+    : '';
 
 export type PermissionWorkspaceRole = 'external' | 'member' | 'admin' | 'owner';
 export type PermissionDocRole =

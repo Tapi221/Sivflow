@@ -1,8 +1,9 @@
-import type { OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+﻿import type { OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Redis as IORedis, RedisOptions } from 'ioredis';
 
-import { Config } from '../config';
+import type { Config } from '../config/config';
+import { CONFIG_TOKEN } from '../config/tokens';
 
 const REDIS_MAX_DB_INDEX = 15;
 
@@ -50,14 +51,14 @@ class Redis extends IORedis implements OnModuleInit, OnModuleDestroy {
 
 @Injectable()
 export class CacheRedis extends Redis {
-  constructor(@Inject(Config) config: Config) {
+  constructor(@Inject(CONFIG_TOKEN) config: Config) {
     super({ ...config.redis, ...config.redis.ioredis });
   }
 }
 
 @Injectable()
 export class SessionRedis extends Redis {
-  constructor(@Inject(Config) config: Config) {
+  constructor(@Inject(CONFIG_TOKEN) config: Config) {
     super({
       ...config.redis,
       ...config.redis.ioredis,
@@ -68,7 +69,7 @@ export class SessionRedis extends Redis {
 
 @Injectable()
 export class SocketIoRedis extends Redis {
-  constructor(@Inject(Config) config: Config) {
+  constructor(@Inject(CONFIG_TOKEN) config: Config) {
     super({
       ...config.redis,
       ...config.redis.ioredis,
@@ -79,7 +80,7 @@ export class SocketIoRedis extends Redis {
 
 @Injectable()
 export class QueueRedis extends Redis {
-  constructor(@Inject(Config) config: Config) {
+  constructor(@Inject(CONFIG_TOKEN) config: Config) {
     super({
       ...config.redis,
       ...config.redis.ioredis,

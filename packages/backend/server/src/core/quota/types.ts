@@ -1,35 +1,35 @@
-import { Field, ObjectType } from '@nestjs/graphql';
+import { Field, ObjectType, Int } from '@nestjs/graphql';
 import { SafeIntResolver } from 'graphql-scalars';
 
 import { UserQuota, WorkspaceQuota } from '../../models';
 
 @ObjectType()
 export class UserQuotaHumanReadableType {
-  @Field()
+  @Field(() => String)
   name!: string;
 
-  @Field()
+  @Field(() => String)
   blobLimit!: string;
 
-  @Field()
+  @Field(() => String)
   storageQuota!: string;
 
-  @Field()
+  @Field(() => String)
   usedStorageQuota!: string;
 
-  @Field()
+  @Field(() => String)
   historyPeriod!: string;
 
-  @Field()
+  @Field(() => String)
   memberLimit!: string;
 
-  @Field()
+  @Field(() => String)
   copilotActionLimit!: string;
 }
 
 @ObjectType()
 export class UserQuotaType implements UserQuota {
-  @Field()
+  @Field(() => String)
   name!: string;
 
   @Field(() => SafeIntResolver)
@@ -44,7 +44,7 @@ export class UserQuotaType implements UserQuota {
   @Field(() => SafeIntResolver)
   historyPeriod!: number;
 
-  @Field()
+  @Field(() => Int)
   memberLimit!: number;
 
   @Field(() => Number, { nullable: true })
@@ -65,34 +65,34 @@ export class UserQuotaUsageType {
 
 @ObjectType()
 export class WorkspaceQuotaHumanReadableType {
-  @Field()
+  @Field(() => String)
   name!: string;
 
-  @Field()
+  @Field(() => String)
   blobLimit!: string;
 
-  @Field()
+  @Field(() => String)
   storageQuota!: string;
 
-  @Field()
+  @Field(() => String)
   storageQuotaUsed!: string;
 
-  @Field()
+  @Field(() => String)
   historyPeriod!: string;
 
-  @Field()
+  @Field(() => String)
   memberLimit!: string;
 
-  @Field()
+  @Field(() => String)
   memberCount!: string;
 
-  @Field()
+  @Field(() => String)
   overcapacityMemberCount!: string;
 }
 
 @ObjectType()
 export class WorkspaceQuotaType implements Partial<WorkspaceQuota> {
-  @Field()
+  @Field(() => String)
   name!: string;
 
   @Field(() => SafeIntResolver)
@@ -107,15 +107,15 @@ export class WorkspaceQuotaType implements Partial<WorkspaceQuota> {
   @Field(() => SafeIntResolver)
   historyPeriod!: number;
 
-  @Field()
+  @Field(() => Int)
   memberLimit!: number;
 
-  @Field()
+  @Field(() => Int)
   memberCount!: number;
 
-  @Field()
+  @Field(() => Int)
   overcapacityMemberCount!: number;
 
-  @Field()
+  @Field(() => WorkspaceQuotaHumanReadableType)
   humanReadable!: WorkspaceQuotaHumanReadableType;
 }

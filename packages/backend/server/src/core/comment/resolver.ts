@@ -69,7 +69,7 @@ export class CommentResolver {
   @Mutation(() => CommentObjectType)
   async createComment(
     @CurrentUser() me: UserType,
-    @Args('input') input: CommentCreateInput
+    @Args('input', { type: () => CommentCreateInput }) input: CommentCreateInput
   ): Promise<CommentObjectType> {
     await this.assertPermission(me, input, 'Doc.Comments.Create');
 
@@ -103,7 +103,7 @@ export class CommentResolver {
   })
   async updateComment(
     @CurrentUser() me: UserType,
-    @Args('input') input: CommentUpdateInput
+    @Args('input', { type: () => CommentUpdateInput }) input: CommentUpdateInput
   ) {
     const comment = await this.service.getComment(input.id);
     if (!comment) {
@@ -122,7 +122,7 @@ export class CommentResolver {
   })
   async resolveComment(
     @CurrentUser() me: UserType,
-    @Args('input') input: CommentResolveInput
+    @Args('input', { type: () => CommentResolveInput }) input: CommentResolveInput
   ) {
     const comment = await this.service.getComment(input.id);
     if (!comment) {
@@ -139,7 +139,7 @@ export class CommentResolver {
   @Mutation(() => Boolean, {
     description: 'Delete a comment',
   })
-  async deleteComment(@CurrentUser() me: UserType, @Args('id') id: string) {
+  async deleteComment(@CurrentUser() me: UserType, @Args('id', { type: () => String }) id: string) {
     const comment = await this.service.getComment(id);
     if (!comment) {
       throw new CommentNotFound();
@@ -155,7 +155,7 @@ export class CommentResolver {
   @Mutation(() => ReplyObjectType)
   async createReply(
     @CurrentUser() me: UserType,
-    @Args('input') input: ReplyCreateInput
+    @Args('input', { type: () => ReplyCreateInput }) input: ReplyCreateInput
   ): Promise<ReplyObjectType> {
     const comment = await this.service.getComment(input.commentId);
     if (!comment) {
@@ -194,7 +194,7 @@ export class CommentResolver {
   })
   async updateReply(
     @CurrentUser() me: UserType,
-    @Args('input') input: ReplyUpdateInput
+    @Args('input', { type: () => ReplyUpdateInput }) input: ReplyUpdateInput
   ) {
     const reply = await this.service.getReply(input.id);
     if (!reply) {
@@ -211,7 +211,7 @@ export class CommentResolver {
   @Mutation(() => Boolean, {
     description: 'Delete a reply',
   })
-  async deleteReply(@CurrentUser() me: UserType, @Args('id') id: string) {
+  async deleteReply(@CurrentUser() me: UserType, @Args('id', { type: () => String }) id: string) {
     const reply = await this.service.getReply(id);
     if (!reply) {
       throw new ReplyNotFound();
@@ -230,9 +230,10 @@ export class CommentResolver {
   async comments(
     @CurrentUser() me: UserType,
     @Parent() workspace: WorkspaceType,
-    @Args('docId') docId: string,
+    @Args('docId', { type: () => String }) docId: string,
     @Args({
       name: 'pagination',
+      type: () => PaginationInput,
       nullable: true,
     })
     pagination?: PaginationInput
@@ -299,8 +300,8 @@ export class CommentResolver {
   async commentChanges(
     @CurrentUser() me: UserType,
     @Parent() workspace: WorkspaceType,
-    @Args('docId') docId: string,
-    @Args({ name: 'pagination' })
+    @Args('docId', { type: () => String }) docId: string,
+    @Args({ name: 'pagination', type: () => PaginationInput })
     pagination: PaginationInput
   ): Promise<PaginatedCommentChangeObjectType> {
     // DEPRECATED-0.26-COMPAT(realtime): remove after server no longer supports 0.26.x clients.
@@ -344,8 +345,8 @@ export class CommentResolver {
   })
   async uploadCommentAttachment(
     @CurrentUser() me: UserType,
-    @Args('workspaceId') workspaceId: string,
-    @Args('docId') docId: string,
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
+    @Args('docId', { type: () => String }) docId: string,
     @Args({ name: 'attachment', type: () => GraphQLUpload })
     attachment: FileUpload
   ) {

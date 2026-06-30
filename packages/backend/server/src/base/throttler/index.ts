@@ -1,4 +1,4 @@
-import './config';
+﻿import './config';
 
 import type { ExecutionContext } from '@nestjs/common';
 import { Inject, Global, Injectable, Module } from '@nestjs/common';
@@ -15,7 +15,8 @@ import {
 } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 
-import { Config } from '../config';
+import type { Config } from '../config/config';
+import { CONFIG_TOKEN } from '../config/tokens';
 import { getRequestResponseFromContext } from '../utils/request';
 import { getRequestTrackerId } from '../utils/request-tracker';
 import type { ThrottlerType } from './config';
@@ -27,7 +28,7 @@ export class ThrottlerStorage extends ThrottlerStorageService {}
 @Injectable()
 class CustomOptionsFactory implements ThrottlerOptionsFactory {
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     private readonly storage: ThrottlerStorage
   ) {}
 
@@ -57,7 +58,7 @@ export class CloudThrottlerGuard extends ThrottlerGuard {
     @InjectThrottlerOptions() options: ThrottlerModuleOptions,
     @InjectThrottlerStorage() storageService: ThrottlerStorage,
     reflector: Reflector,
-    @Inject(Config) private readonly config: Config
+    @Inject(CONFIG_TOKEN) private readonly config: Config
   ) {
     super(options, storageService, reflector);
   }

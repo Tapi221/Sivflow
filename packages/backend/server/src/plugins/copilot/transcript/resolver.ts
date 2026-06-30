@@ -345,8 +345,8 @@ export class CopilotTranscriptionResolver {
   @Mutation(() => TranscriptionResultType, { nullable: true })
   async submitTranscriptTask(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
-    @Args('blobId') blobId: string,
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
+    @Args('blobId', { type: () => String }) blobId: string,
     @Args({ name: 'blob', type: () => GraphQLUpload, nullable: true })
     blob: FileUpload | null,
     @Args({ name: 'blobs', type: () => [GraphQLUpload], nullable: true })
@@ -383,8 +383,8 @@ export class CopilotTranscriptionResolver {
   @Mutation(() => TranscriptionResultType, { nullable: true })
   async retryTranscriptTask(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
-    @Args('taskId') taskId: string
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
+    @Args('taskId', { type: () => String }) taskId: string
   ): Promise<TranscriptionResultType | null> {
     await this.ac
       .user(user.id)
@@ -403,8 +403,8 @@ export class CopilotTranscriptionResolver {
   @Mutation(() => TranscriptionResultType, { nullable: true })
   async settleTranscriptTask(
     @CurrentUser() user: CurrentUser,
-    @Args('workspaceId') workspaceId: string,
-    @Args('taskId') taskId: string
+    @Args('workspaceId', { type: () => String }) workspaceId: string,
+    @Args('taskId', { type: () => String }) taskId: string
   ): Promise<TranscriptionResultType | null> {
     await this.ac
       .user(user.id)
@@ -423,9 +423,9 @@ export class CopilotTranscriptionResolver {
   async transcriptTask(
     @Parent() copilot: CopilotType,
     @CurrentUser() user: CurrentUser,
-    @Args('taskId', { nullable: true })
+    @Args('taskId', { type: () => String, nullable: true })
     taskId?: string,
-    @Args('blobId', { nullable: true })
+    @Args('blobId', { type: () => String, nullable: true })
     blobId?: string
   ): Promise<TranscriptionResultType | null> {
     // DEPRECATED-0.26-COMPAT(realtime): remove after server no longer supports 0.26.x clients.

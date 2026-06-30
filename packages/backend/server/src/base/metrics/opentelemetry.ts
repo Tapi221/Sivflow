@@ -28,7 +28,8 @@ import {
 } from '@opentelemetry/semantic-conventions/incubating';
 import { PrismaInstrumentation } from '@prisma/instrumentation';
 
-import { Config } from '../config';
+import type { Config } from '../config/config';
+import { CONFIG_TOKEN } from '../config/tokens';
 import { OnEvent } from '../event/def';
 import { registerCustomMetrics } from './metrics';
 import { PrismaMetricProducer } from './prisma';
@@ -99,7 +100,7 @@ export class OpentelemetryProvider {
   #sdk: NodeSDK | null = null;
 
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(ModuleRef) private readonly ref: ModuleRef
   ) {}
 

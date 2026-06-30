@@ -1,4 +1,4 @@
-import type { OnModuleInit } from '@nestjs/common';
+﻿import type { OnModuleInit } from '@nestjs/common';
 import { createCipheriv, createDecipheriv, createHash, createPrivateKey, createPublicKey, createSign, createVerify, generateKeyPairSync, type KeyObject, randomBytes, randomInt, sign, timingSafeEqual, verify, } from 'node:crypto';
 
 import {
@@ -12,7 +12,8 @@ import {
   AFFINE_PRO_LICENSE_AES_KEY,
   AFFINE_PRO_PUBLIC_KEY,
 } from '../../native';
-import { Config } from '../config';
+import type { Config } from '../config/config';
+import { CONFIG_TOKEN } from '../config/tokens';
 import { OnEvent } from '../event';
 
 const NONCE_LENGTH = 12;
@@ -104,7 +105,7 @@ export class CryptoHelper implements OnModuleInit {
     }
   }
 
-  constructor(@Inject(Config) private readonly config: Config) {}
+  constructor(@Inject(CONFIG_TOKEN) private readonly config: Config) {}
 
   @OnEvent('config.init')
   onConfigInit() {

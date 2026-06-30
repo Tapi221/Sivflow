@@ -1,4 +1,4 @@
-import { Inject } from '@nestjs/common';
+import { Inject, forwardRef } from '@nestjs/common';
 
 import {
   CopilotProviderSideError,
@@ -37,8 +37,8 @@ export type OpenAIConfig = {
 
 export class OpenAIProvider extends CopilotProvider<OpenAIConfig> {
   readonly type = CopilotProviderType.OpenAI;
-  @Inject() protected readonly attachmentMaterializer!: AttachmentMaterializer;
-  @Inject()
+  @Inject(forwardRef(() => AttachmentMaterializer)) protected readonly attachmentMaterializer!: AttachmentMaterializer;
+  @Inject(forwardRef(() => AttachmentAdmissionHost))
   protected readonly attachmentAdmissionHost?: AttachmentAdmissionHost;
 
   protected resolveModelBackendKind(execution?: CopilotProviderExecution) {

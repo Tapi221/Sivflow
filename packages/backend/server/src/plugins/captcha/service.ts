@@ -1,4 +1,4 @@
-import {
+﻿import {
   randomUUID,
 } from 'node:crypto';
 
@@ -17,6 +17,7 @@ import {
   getRequestClientIp,
   OnEvent,
 } from '../../base';
+import { CONFIG_TOKEN } from '../../base/config/tokens';
 import { ServerFeature, ServerService } from '../../core';
 import { AuthChallengeStore } from '../../core/auth';
 import { verifyChallengeResponse } from '../../native';
@@ -33,7 +34,7 @@ export class CaptchaService {
   private readonly captcha: CaptchaConfig;
 
   constructor(
-    @Inject(Config) private readonly config: Config,
+    @Inject(CONFIG_TOKEN) private readonly config: Config,
     @Inject(AuthChallengeStore) private readonly challenges: AuthChallengeStore,
     @Inject(ServerService) private readonly server: ServerService
   ) {

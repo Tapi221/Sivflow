@@ -305,7 +305,7 @@ export class WorkspaceByokResolver {
   @Mutation(() => TestWorkspaceByokConfigResultType)
   async testWorkspaceByokConfig(
     @CurrentUser() user: CurrentUser,
-    @Args('input') input: TestWorkspaceByokConfigInput
+    @Args('input', { type: () => TestWorkspaceByokConfigInput }) input: TestWorkspaceByokConfigInput
   ) {
     await this.ac
       .user(user.id)
@@ -325,7 +325,7 @@ export class WorkspaceByokResolver {
   @Throttle('strict')
   async upsertWorkspaceByokConfig(
     @CurrentUser() user: CurrentUser,
-    @Args('input') input: UpsertWorkspaceByokConfigInput
+    @Args('input', { type: () => UpsertWorkspaceByokConfigInput }) input: UpsertWorkspaceByokConfigInput
   ) {
     await this.ac
       .user(user.id)
@@ -341,7 +341,7 @@ export class WorkspaceByokResolver {
   @Throttle('strict')
   async reorderWorkspaceByokConfigs(
     @CurrentUser() user: CurrentUser,
-    @Args('input') input: ReorderWorkspaceByokConfigsInput
+    @Args('input', { type: () => ReorderWorkspaceByokConfigsInput }) input: ReorderWorkspaceByokConfigsInput
   ) {
     await this.ac
       .user(user.id)
@@ -392,7 +392,7 @@ export class WorkspaceByokResolver {
   @Throttle('strict')
   async createWorkspaceByokLocalLease(
     @CurrentUser() user: CurrentUser,
-    @Args('input') input: CreateWorkspaceByokLocalLeaseInput
+    @Args('input', { type: () => CreateWorkspaceByokLocalLeaseInput }) input: CreateWorkspaceByokLocalLeaseInput
   ) {
     await this.ac
       .user(user.id)
