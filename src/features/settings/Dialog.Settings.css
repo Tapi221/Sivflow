@@ -5,7 +5,7 @@
 }
 
 .settings-language-dropdown-content {
-  z-index: 120;
+  z-index: var(--dropdown-menu-z-index, 1100);
 }
 
 .settings-workspace-dialog .settings-workspace {
