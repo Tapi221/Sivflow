@@ -1,1 +1,2 @@
 export { OpenAIProvider } from '../../../../../../../packages/backend/server/src/plugins/copilot/providers/openai';
+export { DEFAULT_DIMENSIONS } from '../../../../../../../packages/backend/server/src/plugins/copilot/providers/openai';
