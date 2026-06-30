@@ -1,50 +1,54 @@
-import { UserFriendlyError } from '@affine/error';
-import { OAuthProviderType } from '@affine/graphql';
-import { track } from '@affine/track';
-import { OnEvent, Service } from '@toeverything/infra';
-import { nanoid } from 'nanoid';
-import { distinctUntilChanged, map, skip, type Subscription } from 'rxjs';
+import { UserFriendlyError } from "@affine/error";
+import { OAuthProviderType } from "@affine/graphql";
+import { track } from "@affine/track";
+import { OnEvent, Service } from "@toeverything/infra";
+import { nanoid } from "nanoid";
+import { distinctUntilChanged, map, skip, type Subscription } from "rxjs";
 
-import type { GlobalDialogService } from '../../dialogs';
-import { ApplicationFocused } from '../../lifecycle';
-import type { NbstoreService } from '../../storage';
-import type { UrlService } from '../../url';
-import { AuthSession } from '../entities/session';
-import { AccountChanged } from '../events/account-changed';
-import { AccountLoggedIn } from '../events/account-logged-in';
-import { AccountLoggedOut } from '../events/account-logged-out';
-import { ServerStarted } from '../events/server-started';
-import type { AuthStore } from '../stores/auth';
+import type { GlobalDialogService } from "../../dialogs";
+import { ApplicationFocused } from "../../lifecycle";
+import type { NbstoreService } from "../../storage";
+import type { UrlService } from "../../url";
+import { AuthSession } from "../entities/session";
+import { AccountChanged } from "../events/account-changed";
+import { AccountLoggedIn } from "../events/account-logged-in";
+import { AccountLoggedOut } from "../events/account-logged-out";
+import { ServerStarted } from "../events/server-started";
+import type { AuthStore } from "../stores/auth";
 import {
+  clearPendingFirebaseRedirectSignIn,
   FIREBASE_EMAIL_FOR_SIGN_IN_KEY,
   getFirebaseAuth,
+  getPendingFirebaseRedirectSignInTarget,
+  hasPendingFirebaseRedirectSignIn,
   isFirebaseAuthConfigured,
-} from '../utils/firebase-auth';
-import type { FetchService } from './fetch';
+} from "../utils/firebase-auth";
+import type { FetchService } from "./fetch";
 
-@OnEvent(ApplicationFocused, e => e.onApplicationFocused)
-@OnEvent(ServerStarted, e => e.onServerStarted)
+@OnEvent(ApplicationFocused, (e) => e.onApplicationFocused)
+@OnEvent(ServerStarted, (e) => e.onServerStarted)
 export class AuthService extends Service {
   session = this.framework.createEntity(AuthSession);
   private profileSubscription?: Subscription;
+  private firebaseRedirectSignInPromise?: Promise<void>;
 
   constructor(
     private readonly fetchService: FetchService,
     private readonly store: AuthStore,
     private readonly urlService: UrlService,
     private readonly dialogService: GlobalDialogService,
-    private readonly nbstoreService: NbstoreService
+    private readonly nbstoreService: NbstoreService,
   ) {
     super();
 
     this.session.account$
       .pipe(
-        map(a => ({
+        map((a) => ({
           id: a?.id,
           account: a,
         })),
         distinctUntilChanged((a, b) => a.id === b.id), // only emit when the value changes
-        skip(1) // skip the initial value
+        skip(1), // skip the initial value
       )
       .subscribe(({ account }) => {
         if (account === null) {
@@ -59,14 +63,17 @@ export class AuthService extends Service {
       });
 
     this.subscribeProfile();
+    void this.ensureFirebaseRedirectSignInProcessed();
   }
 
   private onServerStarted() {
+    void this.ensureFirebaseRedirectSignInProcessed();
     this.session.revalidate();
     this.subscribeProfile();
   }
 
   private onApplicationFocused() {
+    void this.ensureFirebaseRedirectSignInProcessed();
     this.session.revalidate();
   }
 
@@ -75,7 +82,7 @@ export class AuthService extends Service {
     this.profileSubscription = undefined;
     if (!this.session.account$.value) return;
     this.profileSubscription = this.nbstoreService.realtime
-      .subscribe('user.profile.changed', {})
+      .subscribe("user.profile.changed", {})
       .subscribe({
         next: () => {
           void (async () => {
@@ -100,9 +107,9 @@ export class AuthService extends Service {
     email: string,
     verifyToken?: string,
     challenge?: string,
-    redirectUrl?: string // url to redirect to after signed-in
+    redirectUrl?: string, // url to redirect to after signed-in
   ) {
-    track.$.$.auth.signIn({ method: 'magic-link' });
+    track.$.$.auth.signIn({ method: "magic-link" });
     // Only native clients use `client_nonce` for magic-link/otp sign-in.
     // Web needs to keep cross-device magic-link compatibility.
     const magicLinkClientNonce = BUILD_CONFIG.isNative
@@ -117,13 +124,13 @@ export class AuthService extends Service {
       const scheme = this.urlService.getClientScheme();
       const magicLinkUrlParams = new URLSearchParams();
       if (redirectUrl) {
-        magicLinkUrlParams.set('redirect_uri', redirectUrl);
+        magicLinkUrlParams.set("redirect_uri", redirectUrl);
       }
       if (scheme) {
-        magicLinkUrlParams.set('client', scheme);
+        magicLinkUrlParams.set("client", scheme);
       }
-      await this.fetchService.fetch('/api/auth/sign-in', {
-        method: 'POST',
+      await this.fetchService.fetch("/api/auth/sign-in", {
+        method: "POST",
         body: JSON.stringify({
           email,
           // we call it [callbackUrl] instead of [redirect_uri]
@@ -132,13 +139,13 @@ export class AuthService extends Service {
           client_nonce: magicLinkClientNonce,
         }),
         headers: {
-          'content-type': 'application/json',
+          "content-type": "application/json",
           ...(verifyToken ? this.captchaHeaders(verifyToken, challenge) : {}),
         },
       });
     } catch (e) {
       track.$.$.auth.signInFail({
-        method: 'magic-link',
+        method: "magic-link",
         reason: UserFriendlyError.fromAny(e).name,
       });
       throw e;
@@ -146,11 +153,12 @@ export class AuthService extends Service {
   }
 
   async signInMagicLink(email: string, token: string, byLink = true) {
-    const method = byLink ? 'magic-link' : 'otp';
+    const method = byLink ? "magic-link" : "otp";
     try {
       await this.store.signInMagicLink(email, token);
 
-      this.session.revalidate();
+      await this.primeSessionFromCookie();
+      await this.session.waitForRevalidation();
       track.$.$.auth.signedIn({ method });
     } catch (e) {
       track.$.$.auth.signInFail({
@@ -161,22 +169,24 @@ export class AuthService extends Service {
     }
   }
 
-  async signInFirebaseEmailLink(email: string | null | undefined, link: string) {
-    const method = 'magic-link';
+  async signInFirebaseEmailLink(
+    email: string | null | undefined,
+    link: string,
+  ) {
+    const method = "magic-link";
     try {
       const auth = await getFirebaseAuth();
-      const { isSignInWithEmailLink, signInWithEmailLink } = await import(
-        'firebase/auth'
-      );
+      const { isSignInWithEmailLink, signInWithEmailLink } =
+        await import("firebase/auth");
 
       if (!isSignInWithEmailLink(auth, link)) {
-        throw new Error('Invalid Firebase email sign-in link.');
+        throw new Error("Invalid Firebase email sign-in link.");
       }
 
       const signInEmail =
         email ?? window.localStorage.getItem(FIREBASE_EMAIL_FOR_SIGN_IN_KEY);
       if (!signInEmail) {
-        throw new Error('Email is required to complete Firebase sign-in.');
+        throw new Error("Email is required to complete Firebase sign-in.");
       }
 
       const credential = await signInWithEmailLink(auth, signInEmail, link);
@@ -194,31 +204,32 @@ export class AuthService extends Service {
   }
 
   async signInFirebaseToken(idToken: string) {
-    const res = await this.fetchService.fetch('/api/auth/firebase', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'content-type': 'application/json' },
+    const res = await this.fetchService.fetch("/api/auth/firebase", {
+      method: "POST",
+      credentials: "include",
+      headers: { "content-type": "application/json" },
       body: JSON.stringify({ token: idToken }),
     });
 
     if (!res.ok) {
       const message = await res.text();
-      throw new Error(message || 'Failed to sign in with Firebase.');
+      throw new Error(message || "Failed to sign in with Firebase.");
     }
 
-    this.session.revalidate();
+    await this.primeSessionFromCookie();
+    await this.session.waitForRevalidation();
   }
 
   async oauthPreflight(
     provider: OAuthProviderType,
     client: string,
-    /** @deprecated*/ redirectUrl?: string
+    /** @deprecated*/ redirectUrl?: string,
   ): Promise<Record<string, string>> {
     // OAuth callback requires `client_nonce` for all clients (including web).
     const clientNonce = this.setClientNonce();
     try {
-      const res = await this.fetchService.fetch('/api/oauth/preflight', {
-        method: 'POST',
+      const res = await this.fetchService.fetch("/api/oauth/preflight", {
+        method: "POST",
         body: JSON.stringify({
           provider,
           client,
@@ -226,14 +237,14 @@ export class AuthService extends Service {
           client_nonce: clientNonce,
         }),
         headers: {
-          'content-type': 'application/json',
+          "content-type": "application/json",
         },
       });
 
       return await res.json();
     } catch (e) {
       track.$.$.auth.signInFail({
-        method: 'oauth',
+        method: "oauth",
         provider,
         reason: UserFriendlyError.fromAny(e).name,
       });
@@ -246,16 +257,17 @@ export class AuthService extends Service {
       const { redirectUri } = await this.store.signInOauth(
         code,
         state,
-        provider
+        provider,
       );
 
-      this.session.revalidate();
+      await this.primeSessionFromCookie();
+      await this.session.waitForRevalidation();
 
-      track.$.$.auth.signedIn({ method: 'oauth', provider });
+      track.$.$.auth.signedIn({ method: "oauth", provider });
       return { redirectUri };
     } catch (e) {
       track.$.$.auth.signInFail({
-        method: 'oauth',
+        method: "oauth",
         provider,
         reason: UserFriendlyError.fromAny(e).name,
       });
@@ -265,15 +277,15 @@ export class AuthService extends Service {
 
   async createOpenAppSignInCode() {
     const res = await this.fetchService.fetch(
-      '/api/auth/open-app/sign-in-code',
+      "/api/auth/open-app/sign-in-code",
       {
-        method: 'POST',
-      }
+        method: "POST",
+      },
     );
     const body = (await res.json()) as { code?: string };
 
     if (!body.code) {
-      throw new Error('Missing open-app sign-in code');
+      throw new Error("Missing open-app sign-in code");
     }
 
     return body.code;
@@ -282,7 +294,8 @@ export class AuthService extends Service {
   async signInOpenAppSignInCode(code: string) {
     await this.store.signInOpenAppSignInCode(code);
 
-    this.session.revalidate();
+    await this.primeSessionFromCookie();
+    await this.session.waitForRevalidation();
   }
 
   async signInPassword(credential: {
@@ -295,17 +308,17 @@ export class AuthService extends Service {
       return this.signInFirebasePassword(credential.email, credential.password);
     }
 
-    track.$.$.auth.signIn({ method: 'password' });
+    track.$.$.auth.signIn({ method: "password" });
     try {
       const user = await this.store.signInPassword(credential);
       if (user) {
         this.store.setCachedSignInUser(user);
       }
       this.session.revalidate();
-      track.$.$.auth.signedIn({ method: 'password' });
+      track.$.$.auth.signedIn({ method: "password" });
     } catch (e) {
       track.$.$.auth.signInFail({
-        method: 'password',
+        method: "password",
         reason: UserFriendlyError.fromAny(e).name,
       });
       throw e;
@@ -322,7 +335,7 @@ export class AuthService extends Service {
     const res = await this.store.deleteAccount();
     this.store.setCachedAuthSession(null);
     this.session.revalidate();
-    this.dialogService.open('deleted-account', {});
+    this.dialogService.open("deleted-account", {});
     return res;
   }
 
@@ -348,11 +361,11 @@ export class AuthService extends Service {
 
   captchaHeaders(token: string, challenge?: string) {
     const headers: Record<string, string> = {
-      'x-captcha-token': token,
+      "x-captcha-token": token,
     };
 
     if (challenge) {
-      headers['x-captcha-challenge'] = challenge;
+      headers["x-captcha-challenge"] = challenge;
     }
 
     return headers;
@@ -360,15 +373,15 @@ export class AuthService extends Service {
 
   private async sendFirebaseEmailLink(email: string, redirectUrl?: string) {
     const auth = await getFirebaseAuth();
-    const { sendSignInLinkToEmail } = await import('firebase/auth');
-    const callbackUrl = new URL('/magic-link', window.location.origin);
+    const { sendSignInLinkToEmail } = await import("firebase/auth");
+    const callbackUrl = new URL("/magic-link", window.location.origin);
     const scheme = this.urlService.getClientScheme();
 
     if (redirectUrl) {
-      callbackUrl.searchParams.set('redirect_uri', redirectUrl);
+      callbackUrl.searchParams.set("redirect_uri", redirectUrl);
     }
     if (scheme) {
-      callbackUrl.searchParams.set('client', scheme);
+      callbackUrl.searchParams.set("client", scheme);
     }
 
     await sendSignInLinkToEmail(auth, email, {
@@ -379,21 +392,21 @@ export class AuthService extends Service {
   }
 
   private async signInFirebasePassword(email: string, password: string) {
-    track.$.$.auth.signIn({ method: 'password' });
+    track.$.$.auth.signIn({ method: "password" });
     try {
       const auth = await getFirebaseAuth();
-      const { signInWithEmailAndPassword } = await import('firebase/auth');
+      const { signInWithEmailAndPassword } = await import("firebase/auth");
       const credential = await signInWithEmailAndPassword(
         auth,
         email,
-        password
+        password,
       );
       const token = await credential.user.getIdToken();
       await this.signInFirebaseToken(token);
-      track.$.$.auth.signedIn({ method: 'password' });
+      track.$.$.auth.signedIn({ method: "password" });
     } catch (e) {
       track.$.$.auth.signInFail({
-        method: 'password',
+        method: "password",
         reason: UserFriendlyError.fromAny(e).name,
       });
       throw e;
@@ -406,16 +419,16 @@ export class AuthService extends Service {
       EmailAuthProvider,
       GoogleAuthProvider,
       fetchSignInMethodsForEmail,
-    } = await import('firebase/auth');
+    } = await import("firebase/auth");
     const providers = await fetchSignInMethodsForEmail(auth, email);
     const hasPassword = providers.includes(
-      EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD
+      EmailAuthProvider.EMAIL_PASSWORD_SIGN_IN_METHOD,
     );
     const hasEmailLink = providers.includes(
-      EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD
+      EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
     );
     const oauthProviders = providers.includes(
-      GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD
+      GoogleAuthProvider.GOOGLE_SIGN_IN_METHOD,
     )
       ? [OAuthProviderType.Google]
       : [];
@@ -445,5 +458,144 @@ export class AuthService extends Service {
     const nonce = nanoid();
     this.store.setClientNonce(nonce);
     return nonce;
+  }
+
+  private ensureFirebaseRedirectSignInProcessed() {
+    this.firebaseRedirectSignInPromise ??=
+      this.processPendingFirebaseRedirectSignIn().finally(() => {
+        this.firebaseRedirectSignInPromise = undefined;
+      });
+
+    return this.firebaseRedirectSignInPromise;
+  }
+
+  private async processPendingFirebaseRedirectSignIn() {
+    if (!isFirebaseAuthConfigured() || !hasPendingFirebaseRedirectSignIn()) {
+      return;
+    }
+
+    const redirectTarget = getPendingFirebaseRedirectSignInTarget();
+    let shouldClearPendingRedirect = false;
+
+    try {
+      const user = await this.resolveFirebaseRedirectSignInUser();
+
+      if (!user) {
+        return;
+      }
+
+      shouldClearPendingRedirect = true;
+      const token = await user.getIdToken();
+      await this.signInFirebaseToken(token);
+      await this.session.waitForRevalidation();
+      track.$.$.auth.signedIn({
+        method: "oauth",
+        provider: OAuthProviderType.Google,
+      });
+
+      if (redirectTarget && typeof window !== "undefined") {
+        if (redirectTarget.toUpperCase() === "CLOSE_POPUP") {
+          window.close();
+          return;
+        }
+
+        const nextUrl = new URL(redirectTarget, window.location.origin);
+
+        if (nextUrl.toString() !== window.location.href) {
+          window.location.replace(nextUrl.toString());
+          return;
+        }
+      }
+    } catch (e) {
+      shouldClearPendingRedirect = true;
+      track.$.$.auth.signInFail({
+        method: "oauth",
+        provider: OAuthProviderType.Google,
+        reason: UserFriendlyError.fromAny(e).name,
+      });
+      console.error("Failed to complete Firebase redirect sign-in.", e);
+    } finally {
+      if (shouldClearPendingRedirect) {
+        clearPendingFirebaseRedirectSignIn();
+      }
+    }
+  }
+
+  private async primeSessionFromCookie() {
+    const res = await this.fetchService.fetch("/api/auth/session", {
+      cache: "no-store",
+      credentials: "include",
+    });
+
+    if (!res.ok) {
+      return;
+    }
+
+    const session = (await res.json()) as {
+      user?: {
+        avatarUrl?: string | null;
+        email?: string;
+        id: string;
+        name?: string;
+      } | null;
+    };
+
+    if (!session.user) {
+      return;
+    }
+
+    this.store.setCachedAuthSession({
+      account: {
+        id: session.user.id,
+        email: session.user.email,
+        label: session.user.name ?? session.user.email ?? session.user.id,
+        avatar: session.user.avatarUrl ?? null,
+      },
+    });
+  }
+
+  private async resolveFirebaseRedirectSignInUser() {
+    const auth = await getFirebaseAuth();
+    const { getRedirectResult, onAuthStateChanged } =
+      await import("firebase/auth");
+    const timeoutMs = 5000;
+
+    const timeout = <T>(value: T) =>
+      new Promise<T>(resolve => {
+        window.setTimeout(() => resolve(value), timeoutMs);
+      });
+
+    const credential = await Promise.race([
+      getRedirectResult(auth).catch(error => {
+        console.error("Failed to read Firebase redirect result.", error);
+        return null;
+      }),
+      timeout<null>(null),
+    ]);
+
+    if (credential?.user) {
+      return credential.user;
+    }
+
+    if (auth.currentUser) {
+      return auth.currentUser;
+    }
+
+    return await Promise.race([
+      new Promise<null | NonNullable<typeof auth.currentUser>>(resolve => {
+        const unsubscribe = onAuthStateChanged(
+          auth,
+          user => {
+            unsubscribe();
+            resolve(user);
+          },
+          () => {
+            unsubscribe();
+            resolve(null);
+          },
+        );
+      }),
+      timeout<null>(null),
+    ]);
   }
 }

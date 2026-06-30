@@ -5,6 +5,9 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const migrationsDir = path.join(root, 'functions', 'db', 'migrations');
+const backendServerDir = path.join(root, 'packages', 'backend', 'server');
+const prismaSchemaPath = path.join(backendServerDir, 'schema.prisma');
+const prismaCliPath = path.join(root, 'node_modules', 'prisma', 'build', 'index.js');
 const rawDatabaseUrl = process.env.DATABASE_URL ?? '';
 const defaultConnectionUrl =
   'postgresql://sivflow:sivflow@localhost:5432/sivflow';
@@ -23,20 +26,12 @@ function toPsqlConnectionUrl(value) {
   }
 }
 
-if (!fs.existsSync(migrationsDir)) {
-  console.error(`[Sivflow] migrationディレクトリが見つかりません: ${migrationsDir}`);
-  process.exit(1);
-}
-
-const files = fs
-  .readdirSync(migrationsDir)
-  .filter(file => file.endsWith('.sql'))
-  .sort();
-
-if (files.length === 0) {
-  console.log('[Sivflow] 実行するPostgreSQL migrationはありません。');
-  process.exit(0);
-}
+const files = fs.existsSync(migrationsDir)
+  ? fs
+      .readdirSync(migrationsDir)
+      .filter(file => file.endsWith('.sql'))
+      .sort()
+  : [];
 
 const connectionUrl = toPsqlConnectionUrl(rawDatabaseUrl);
 const defaultArgs = ['-h', 'localhost', '-p', '5432', '-U', 'sivflow', '-d', 'sivflow'];
@@ -89,6 +84,35 @@ function applyMigrationWithDocker(fullPath) {
     {
       input: fs.readFileSync(fullPath),
       stdio: ['pipe', 'inherit', 'inherit'],
+    }
+  );
+}
+
+function runPrismaDbPush() {
+  if (!fs.existsSync(prismaSchemaPath)) {
+    console.error(`[Sivflow] Prisma schema が見つかりません: ${prismaSchemaPath}`);
+    process.exit(1);
+  }
+
+  if (!fs.existsSync(prismaCliPath)) {
+    console.error(`[Sivflow] Prisma CLI が見つかりません: ${prismaCliPath}`);
+    process.exit(1);
+  }
+
+  return run(
+    process.execPath,
+    [
+      prismaCliPath,
+      'db',
+      'push',
+      '--skip-generate',
+      '--schema',
+      prismaSchemaPath,
+    ],
+    {
+      cwd: root,
+      shell: false,
+      stdio: 'inherit',
     }
   );
 }
@@ -160,6 +184,18 @@ for (const file of files) {
     console.error('[Sivflow] PostgreSQL migrationに失敗しました。psqlコマンドとDATABASE_URLを確認してください。');
     process.exit(result.status ?? 1);
   }
+}
+
+if (files.length === 0) {
+  console.log('[Sivflow] 実行する functions/db SQL migration はありません。');
+}
+
+console.log('[Sivflow] Prisma schema を PostgreSQL に同期します...');
+const prismaPushResult = runPrismaDbPush();
+
+if (prismaPushResult.status !== 0) {
+  console.error('[Sivflow] Prisma schema の同期に失敗しました。DATABASE_URL と schema.prisma を確認してください。');
+  process.exit(prismaPushResult.status ?? 1);
 }
 
 console.log('[Sivflow] PostgreSQL migrationが完了しました。');

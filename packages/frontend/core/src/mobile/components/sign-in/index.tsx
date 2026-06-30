@@ -8,10 +8,12 @@ export const MobileSignInPanel = ({
   onClose,
   server,
   initStep,
+  redirectUrl,
 }: {
   onClose: () => void;
   server?: string;
   initStep?: SignInStep;
+  redirectUrl?: string;
 }) => {
   const onAuthenticated = useCallback(
     (status: AuthSessionStatus) => {
@@ -29,6 +31,7 @@ export const MobileSignInPanel = ({
         onAuthenticated={onAuthenticated}
         server={server}
         initStep={initStep}
+        redirectUrl={redirectUrl}
       />
     </MobileSignInLayout>
   );

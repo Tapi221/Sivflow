@@ -1,20 +1,22 @@
-import { FlexWrapper, Input, notify, Wrapper } from '@affine/component';
-import { Button } from '@affine/component/ui/button';
-import { useCatchEventCallback } from '@affine/core/components/hooks/use-catch-event-hook';
-import { Upload } from '@affine/core/components/pure/file-upload';
-import { WorkspaceAvatar } from '@affine/core/components/workspace-avatar';
-import { WorkspacePermissionService } from '@affine/core/modules/permissions';
-import { WorkspaceService } from '@affine/core/modules/workspace';
-import { validateAndReduceImage } from '@affine/core/utils/reduce-image';
-import { UNTITLED_WORKSPACE_NAME } from '@affine/env/constant';
-import { useI18n } from '@affine/i18n';
-import { CameraIcon } from '@blocksuite/icons/rc';
-import { LiveData, useLiveData, useService } from '@toeverything/infra';
-import type { KeyboardEvent } from 'react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { map } from 'rxjs';
+import { FlexWrapper, Input, notify, Wrapper } from "@affine/component";
+import { Button } from "@affine/component/ui/button";
+import { useCatchEventCallback } from "@affine/core/components/hooks/use-catch-event-hook";
+import { Upload } from "@affine/core/components/pure/file-upload";
+import { WorkspaceAvatar } from "@affine/core/components/workspace-avatar";
+import { WorkspacePermissionService } from "@affine/core/modules/permissions";
+import {
+  workspaceRootDocRenderable$,
+  WorkspaceService,
+} from "@affine/core/modules/workspace";
+import { validateAndReduceImage } from "@affine/core/utils/reduce-image";
+import { UNTITLED_WORKSPACE_NAME } from "@affine/env/constant";
+import { useI18n } from "@affine/i18n";
+import { CameraIcon } from "@blocksuite/icons/rc";
+import { LiveData, useLiveData, useService } from "@toeverything/infra";
+import type { KeyboardEvent } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import * as style from './style.css';
+import * as style from "./style.css";
 
 export const ProfilePanel = () => {
   const t = useI18n();
@@ -28,16 +30,11 @@ export const ProfilePanel = () => {
   const workspaceIsReady = useLiveData(
     useMemo(() => {
       return workspace
-        ? LiveData.from(
-            workspace.engine.doc
-              .docState$(workspace.id)
-              .pipe(map(v => v.ready)),
-            false
-          )
+        ? LiveData.from(workspaceRootDocRenderable$(workspace), false)
         : null;
-    }, [workspace])
+    }, [workspace]),
   );
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const currentName = useLiveData(workspace.name$);
 
   useEffect(() => {
@@ -50,7 +47,7 @@ export const ProfilePanel = () => {
         return;
       }
       if (!file) {
-        workspace.setAvatar('');
+        workspace.setAvatar("");
         return;
       }
       try {
@@ -63,7 +60,7 @@ export const ProfilePanel = () => {
         throw error;
       }
     },
-    [workspace]
+    [workspace],
   );
 
   const setWorkspaceName = useCallback(
@@ -73,10 +70,10 @@ export const ProfilePanel = () => {
       }
       workspace.setName(name);
     },
-    [workspace]
+    [workspace],
   );
 
-  const [input, setInput] = useState<string>('');
+  const [input, setInput] = useState<string>("");
   useEffect(() => {
     setInput(name);
   }, [name]);
@@ -84,9 +81,9 @@ export const ProfilePanel = () => {
   const handleUpdateWorkspaceName = useCallback(
     (name: string) => {
       setWorkspaceName(name);
-      notify.success({ title: t['Update workspace name success']() });
+      notify.success({ title: t["Update workspace name success"]() });
     },
-    [setWorkspaceName, t]
+    [setWorkspaceName, t],
   );
 
   const handleSetInput = useCallback((value: string) => {
@@ -95,11 +92,11 @@ export const ProfilePanel = () => {
 
   const handleKeyUp = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
-      if (e.code === 'Enter' && name !== input) {
+      if (e.code === "Enter" && name !== input) {
         handleUpdateWorkspaceName(input);
       }
     },
-    [handleUpdateWorkspaceName, input, name]
+    [handleUpdateWorkspaceName, input, name],
   );
 
   const handleClick = useCallback(() => {
@@ -114,16 +111,16 @@ export const ProfilePanel = () => {
     (file: File) => {
       setWorkspaceAvatar(file)
         .then(() => {
-          notify.success({ title: 'Update workspace avatar success' });
+          notify.success({ title: "Update workspace avatar success" });
         })
-        .catch(error => {
+        .catch((error) => {
           notify.error({
-            title: 'Update workspace avatar failed',
+            title: "Update workspace avatar failed",
             message: error,
           });
         });
     },
-    [setWorkspaceAvatar]
+    [setWorkspaceAvatar],
   );
 
   const canAdjustAvatar = workspaceIsReady && isOwner;
@@ -146,28 +143,28 @@ export const ProfilePanel = () => {
           onRemove={canAdjustAvatar ? handleRemoveUserAvatar : undefined}
           avatarTooltipOptions={
             canAdjustAvatar
-              ? { content: t['Click to replace photo']() }
+              ? { content: t["Click to replace photo"]() }
               : undefined
           }
           removeTooltipOptions={
-            canAdjustAvatar ? { content: t['Remove photo']() } : undefined
+            canAdjustAvatar ? { content: t["Remove photo"]() } : undefined
           }
           data-testid="workspace-setting-avatar"
           removeButtonProps={{
-            ['data-testid' as string]: 'workspace-setting-remove-avatar-button',
+            ["data-testid" as string]: "workspace-setting-remove-avatar-button",
           }}
         />
       </Upload>
 
       <Wrapper marginLeft={20}>
-        <div className={style.label}>{t['Workspace Name']()}</div>
+        <div className={style.label}>{t["Workspace Name"]()}</div>
         <FlexWrapper alignItems="center" flexGrow="1">
           <Input
             disabled={!workspaceIsReady || !isOwner}
             value={input}
             style={{ width: 280, height: 32 }}
             data-testid="workspace-name-input"
-            placeholder={t['Workspace Name']()}
+            placeholder={t["Workspace Name"]()}
             maxLength={64}
             minLength={0}
             onChange={handleSetInput}
@@ -178,10 +175,10 @@ export const ProfilePanel = () => {
               data-testid="save-workspace-name"
               onClick={handleClick}
               style={{
-                marginLeft: '12px',
+                marginLeft: "12px",
               }}
             >
-              {t['com.affine.editCollection.save']()}
+              {t["com.affine.editCollection.save"]()}
             </Button>
           )}
         </FlexWrapper>

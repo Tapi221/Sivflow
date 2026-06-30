@@ -9,7 +9,7 @@
     "predev": "npm --prefix ../../../.. --workspace @affine/templates run build",
     "build": "node ../../../../scripts/build-cache.mjs --name affine-web --root ../../../.. --cwd packages/frontend/apps/web --input package.json --input package-lock.json --input packages/frontend --input packages/common --input blocksuite --output packages/frontend/apps/web/dist -- npm run build:raw",
     "build:raw": "node --max-old-space-size=4096 ../../../../node_modules/vite/bin/vite.js build",
-    "dev": "vite"
+    "dev": "node ../../../../scripts/dev-web-vite.mjs"
   },
   "dependencies": {
     "@affine/component": "*",

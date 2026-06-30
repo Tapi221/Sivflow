@@ -7,13 +7,67 @@ export type FirebaseAuthConfig = {
   messagingSenderId?: string;
 };
 
-export const FIREBASE_EMAIL_FOR_SIGN_IN_KEY =
-  'sivflow.firebase.emailForSignIn';
+export const FIREBASE_EMAIL_FOR_SIGN_IN_KEY = "sivflow.firebase.emailForSignIn";
+export const FIREBASE_REDIRECT_SIGN_IN_KEY = "sivflow.firebase.redirectSignIn";
+export const FIREBASE_REDIRECT_SIGN_IN_TARGET_KEY =
+  "sivflow.firebase.redirectSignInTarget";
+
+function getSessionStorage() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    return window.sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
+function getLocalStorage() {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
+function getRedirectSignInStorages() {
+  const storages = [getSessionStorage(), getLocalStorage()].filter(
+    (storage): storage is Storage => storage !== null,
+  );
+
+  return storages.filter(
+    (storage, index) => storages.findIndex(item => item === storage) === index,
+  );
+}
+
+function readRedirectSignInStorageValue(key: string) {
+  for (const storage of getRedirectSignInStorages()) {
+    try {
+      const value = storage.getItem(key);
+
+      if (value !== null) {
+        return value;
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return null;
+}
 
 function getFirebaseEnvConfig(): Partial<FirebaseAuthConfig> {
-  const env = (import.meta as ImportMeta & {
-    env?: Record<string, string | undefined>;
-  }).env;
+  const env = (
+    import.meta as ImportMeta & {
+      env?: Record<string, string | undefined>;
+    }
+  ).env;
 
   return {
     apiKey: env?.VITE_FIREBASE_API_KEY,
@@ -40,7 +94,7 @@ export function getFirebaseAuthConfig() {
     !config.appId
   ) {
     throw new Error(
-      'Firebase Auth config is missing. Set BUILD_CONFIG.firebaseAuth or VITE_FIREBASE_* env vars.'
+      "Firebase Auth config is missing. Set BUILD_CONFIG.firebaseAuth or VITE_FIREBASE_* env vars.",
     );
   }
 
@@ -58,9 +112,42 @@ export function isFirebaseAuthConfigured() {
 
 export async function getFirebaseAuth() {
   const [{ getApps, initializeApp }, { getAuth }] = await Promise.all([
-    import('firebase/app'),
-    import('firebase/auth'),
+    import("firebase/app"),
+    import("firebase/auth"),
   ]);
   const app = getApps()[0] ?? initializeApp(getFirebaseAuthConfig());
   return getAuth(app);
+}
+
+export function markPendingFirebaseRedirectSignIn(redirectUrl?: string) {
+  const storages = getRedirectSignInStorages();
+
+  if (storages.length === 0) {
+    return;
+  }
+
+  for (const storage of storages) {
+    storage.setItem(FIREBASE_REDIRECT_SIGN_IN_KEY, "true");
+
+    if (redirectUrl) {
+      storage.setItem(FIREBASE_REDIRECT_SIGN_IN_TARGET_KEY, redirectUrl);
+    } else {
+      storage.removeItem(FIREBASE_REDIRECT_SIGN_IN_TARGET_KEY);
+    }
+  }
+}
+
+export function hasPendingFirebaseRedirectSignIn() {
+  return readRedirectSignInStorageValue(FIREBASE_REDIRECT_SIGN_IN_KEY) === "true";
+}
+
+export function getPendingFirebaseRedirectSignInTarget() {
+  return readRedirectSignInStorageValue(FIREBASE_REDIRECT_SIGN_IN_TARGET_KEY);
+}
+
+export function clearPendingFirebaseRedirectSignIn() {
+  for (const storage of getRedirectSignInStorages()) {
+    storage.removeItem(FIREBASE_REDIRECT_SIGN_IN_KEY);
+    storage.removeItem(FIREBASE_REDIRECT_SIGN_IN_TARGET_KEY);
+  }
 }

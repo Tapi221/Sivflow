@@ -29,7 +29,11 @@ export type GLOBAL_DIALOG_SCHEMA = {
     templateMode: DocMode;
     snapshotUrl: string;
   }) => void;
-  'sign-in': (props: { server?: string; step?: string }) => void;
+  'sign-in': (props: {
+    server?: string;
+    step?: string;
+    redirectUrl?: string;
+  }) => void;
   'change-password': (props: {
     server?: string;
     hasPassword?: boolean;

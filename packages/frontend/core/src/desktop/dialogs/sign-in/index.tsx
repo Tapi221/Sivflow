@@ -5,12 +5,22 @@ import type {
   DialogComponentProps,
   GLOBAL_DIALOG_SCHEMA,
 } from '@affine/core/modules/dialogs';
+import { GlobalContextService } from '@affine/core/modules/global-context';
+import { useLiveData, useService } from '@toeverything/infra';
 import { useCallback } from 'react';
 export const SignInDialog = ({
   close,
   server: initialServerBaseUrl,
   step,
+  redirectUrl,
 }: DialogComponentProps<GLOBAL_DIALOG_SCHEMA['sign-in']>) => {
+  const globalContextService = useService(GlobalContextService);
+  const currentWorkspaceFlavour = useLiveData(
+    globalContextService.globalContext.workspaceFlavour.$
+  );
+  const resolvedRedirectUrl =
+    redirectUrl ??
+    (currentWorkspaceFlavour === 'local' ? '/?initCloud=true' : undefined);
   const onAuthenticated = useCallback(
     (status: AuthSessionStatus) => {
       if (status === 'authenticated') {
@@ -39,6 +49,7 @@ export const SignInDialog = ({
         onAuthenticated={onAuthenticated}
         server={initialServerBaseUrl}
         initStep={step as SignInStep}
+        redirectUrl={resolvedRedirectUrl}
       />
     </Modal>
   );

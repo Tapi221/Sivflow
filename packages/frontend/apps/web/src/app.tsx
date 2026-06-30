@@ -100,9 +100,12 @@ framework.impl(PopupWindowProvider, {
 const frameworkProvider = framework.provider();
 
 // setup application lifecycle events, and emit application start event
-window.addEventListener('focus', () => {
+const emitApplicationFocused = () => {
   frameworkProvider.get(LifecycleService).applicationFocus();
-});
+};
+
+window.addEventListener('focus', emitApplicationFocused);
+window.addEventListener('pageshow', emitApplicationFocused);
 frameworkProvider.get(LifecycleService).applicationStart();
 
 export function App() {

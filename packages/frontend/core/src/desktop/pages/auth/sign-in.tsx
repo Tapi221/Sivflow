@@ -48,16 +48,21 @@ export const SignIn = ({
         if (redirectUrl) {
           if (redirectUrl.toUpperCase() === 'CLOSE_POPUP') {
             window.close();
+            return;
           }
           navigate(redirectUrl, {
             replace: true,
           });
         } else {
-          handleClose();
+          // ログイン成功後は /?initCloud=true へリダイレクトし、
+          // index page のロジックによってクラウドワークスペースを開く（なければ作成する）。
+          // redirectUrl なしで単純に / へ飛ぶと last_workspace_id（デモワークスペース）が
+          // 優先されてしまい、クラウドワークスペースに切り替わらないため。
+          jumpToIndex(RouteLogic.REPLACE, { search: 'initCloud=true' });
         }
       }
     },
-    [handleClose, navigate, redirectUrl]
+    [jumpToIndex, navigate, redirectUrl]
   );
 
   const initStep = server ? 'addSelfhosted' : 'signIn';
@@ -70,6 +75,7 @@ export const SignIn = ({
           onAuthenticated={handleAuthenticated}
           initStep={initStep}
           server={server}
+          redirectUrl={redirectUrl ?? undefined}
         />
       </div>
     </SignInPageContainer>

@@ -1,36 +1,38 @@
-import { uniReactRoot } from '@affine/component';
-import { AffineErrorBoundary } from '@affine/core/components/affine/affine-error-boundary';
-import { AiLoginRequiredModal } from '@affine/core/components/affine/auth/ai-login-required';
-import { SWRConfigProvider } from '@affine/core/components/providers/swr-config-provider';
-import { WorkspaceSideEffects } from '@affine/core/components/providers/workspace-side-effects';
+import { uniReactRoot } from "@affine/component";
+import { AffineErrorBoundary } from "@affine/core/components/affine/affine-error-boundary";
+import { AiLoginRequiredModal } from "@affine/core/components/affine/auth/ai-login-required";
+import { SWRConfigProvider } from "@affine/core/components/providers/swr-config-provider";
+import { WorkspaceSideEffects } from "@affine/core/components/providers/workspace-side-effects";
 import {
   DefaultServerService,
   WorkspaceServerService,
-} from '@affine/core/modules/cloud';
-import { GlobalContextService } from '@affine/core/modules/global-context';
-import { PeekViewManagerModal } from '@affine/core/modules/peek-view';
+} from "@affine/core/modules/cloud";
+import { GlobalContextService } from "@affine/core/modules/global-context";
+import { PeekViewManagerModal } from "@affine/core/modules/peek-view";
 import type {
   Workspace,
   WorkspaceMetadata,
-} from '@affine/core/modules/workspace';
-import { WorkspacesService } from '@affine/core/modules/workspace';
+} from "@affine/core/modules/workspace";
+import {
+  workspaceRootDocRenderable$,
+  WorkspacesService,
+} from "@affine/core/modules/workspace";
 import {
   FrameworkScope,
   LiveData,
   useLiveData,
   useServices,
-} from '@toeverything/infra';
+} from "@toeverything/infra";
 import {
   type PropsWithChildren,
   useEffect,
   useLayoutEffect,
   useMemo,
   useState,
-} from 'react';
-import { map } from 'rxjs';
+} from "react";
 
-import { AppFallback } from '../../components/app-fallback';
-import { WorkspaceDialogs } from '../../dialogs';
+import { AppFallback } from "../../components/app-fallback";
+import { WorkspaceDialogs } from "../../dialogs";
 
 // TODO(@forehalo): [core/electron] とグローバル context を再利用する
 declare global {
@@ -44,7 +46,7 @@ declare global {
   // oxlint-disable-next-line no-var
   var importWorkspaceSnapshot: () => Promise<void>;
   interface WindowEventMap {
-    'affine:workspace:change': CustomEvent<{ id: string }>;
+    "affine:workspace:change": CustomEvent<{ id: string }>;
   }
 }
 
@@ -76,26 +78,26 @@ export const WorkspaceLayout = ({
       // デバッグ用途
       window.currentWorkspace = workspace ?? undefined;
       window.dispatchEvent(
-        new CustomEvent('affine:workspace:change', {
+        new CustomEvent("affine:workspace:change", {
           detail: {
             id: workspace.id,
           },
-        })
+        }),
       );
-      localStorage.setItem('last_workspace_id', workspace.id);
+      localStorage.setItem("last_workspace_id", workspace.id);
       globalContextService.globalContext.workspaceId.set(workspace.id);
       if (workspaceServer) {
         globalContextService.globalContext.serverId.set(workspaceServer.id);
       }
       globalContextService.globalContext.workspaceFlavour.set(
-        workspace.flavour
+        workspace.flavour,
       );
       return () => {
         window.currentWorkspace = undefined;
         globalContextService.globalContext.workspaceId.set(null);
         if (workspaceServer) {
           globalContextService.globalContext.serverId.set(
-            defaultServerService.server.id
+            defaultServerService.server.id,
           );
         }
         globalContextService.globalContext.workspaceFlavour.set(null);
@@ -112,20 +114,18 @@ export const WorkspaceLayout = ({
   const rootDocReady$ = useMemo(
     () =>
       workspace
-        ? LiveData.from(
-            workspace.engine.doc
-              .docState$(workspace.id)
-              .pipe(map(v => v.ready)),
-            false
-          )
+        ? LiveData.from(workspaceRootDocRenderable$(workspace), false)
         : null,
-    [workspace]
+    [workspace],
   );
-  const isRootDocReady = useLiveData(rootDocReady$) ?? false;
+  const rootDocReady = useLiveData(rootDocReady$) ?? false;
 
   if (!workspace) {
     return null; // layout effect で workspace が設定されるため、ここではスキップする
   }
+
+  // Local workspaces should render their shell immediately and hydrate in place.
+  const isRootDocReady = workspace.flavour === "local" || rootDocReady;
 
   if (!isRootDocReady) {
     return <AppFallback />;

@@ -8,7 +8,37 @@ import { defineConfig } from 'vite';
 
 dns.setDefaultResultOrder('verbatim');
 
-const devServerPort = 8080;
+const defaultDevServerPort = 8080;
+const parsePort = (value: string | undefined) => {
+  if (!value) {
+    return undefined;
+  }
+
+  const port = Number.parseInt(value, 10);
+
+  return Number.isInteger(port) && port > 0 && port < 65536
+    ? port
+    : undefined;
+};
+const getCliPortArg = (argv: string[]) => {
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+
+    if (arg === '--port' || arg === '-p') {
+      return parsePort(argv[index + 1]);
+    }
+
+    if (arg.startsWith('--port=')) {
+      return parsePort(arg.slice('--port='.length));
+    }
+  }
+
+  return undefined;
+};
+const devServerPort =
+  parsePort(process.env.SIVFLOW_WEB_PORT) ??
+  getCliPortArg(process.argv) ??
+  defaultDevServerPort;
 const devServerHost = '127.0.0.1';
 const backendProxyTarget =
   process.env.SIVFLOW_BACKEND_URL ??

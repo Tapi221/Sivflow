@@ -27,6 +27,7 @@ import {
 } from '../../../components/hooks/use-navigate-helper';
 import { WorkspaceNavigator } from '../../../components/workspace-selector';
 import { AuthService } from '../../../modules/cloud';
+import { hasPendingFirebaseRedirectSignIn } from '../../../modules/cloud/utils/firebase-auth';
 import { AppContainer } from '../../components/app-container';
 
 /**
@@ -53,6 +54,7 @@ export const Component = ({
   const loggedIn = useLiveData(
     authService.session.status$.map(s => s === 'authenticated')
   );
+  const authRevalidating = useLiveData(authService.session.isRevalidating$);
   const enableLocalWorkspace =
     useLiveData(
       defaultServerService.server.config$.selector(
@@ -83,7 +85,11 @@ export const Component = ({
           openPage(meta.id, defaultIndexRoute);
         }
       })
-      .catch(err => console.error('Failed to create cloud workspace', err));
+      .catch(err => {
+        createOnceRef.current = false;
+        setNavigating(false);
+        console.error('Failed to create cloud workspace', err);
+      });
   }, [defaultIndexRoute, jumpToPage, openPage, workspacesService]);
 
   useLayoutEffect(() => {
@@ -114,6 +120,12 @@ export const Component = ({
           list.find(w => w.flavour === 'affine-cloud') ?? list[0];
         openPage(openWorkspace.id, defaultIndexRoute);
       } else {
+        if (authRevalidating || hasPendingFirebaseRedirectSignIn()) {
+          authService.session.revalidate();
+          return;
+        }
+
+        jumpToSignIn('/?initCloud=true', RouteLogic.REPLACE);
         return;
       }
     } else {
@@ -136,8 +148,10 @@ export const Component = ({
     jumpToSignIn,
     listIsLoading,
     loggedIn,
+    authRevalidating,
     navigating,
     defaultIndexRoute,
+    authService,
   ]);
 
   const desktopApi = useServiceOptional(DesktopApiService);

@@ -1,45 +1,45 @@
-import { DNDContext } from '@affine/component';
-import { AffineOtherPageLayout } from '@affine/component/affine-other-page-layout';
-import { workbenchRoutes } from '@affine/core/desktop/workbench-router';
+import { DNDContext } from "@affine/component";
+import { AffineOtherPageLayout } from "@affine/component/affine-other-page-layout";
+import { workbenchRoutes } from "@affine/core/desktop/workbench-router";
 import {
   DefaultServerService,
   ServersService,
-} from '@affine/core/modules/cloud';
-import { GlobalDialogService } from '@affine/core/modules/dialogs';
-import { DndService } from '@affine/core/modules/dnd/services';
-import { GlobalContextService } from '@affine/core/modules/global-context';
-import { OpenInAppGuard } from '@affine/core/modules/open-in-app';
+} from "@affine/core/modules/cloud";
+import { GlobalDialogService } from "@affine/core/modules/dialogs";
+import { DndService } from "@affine/core/modules/dnd/services";
+import { GlobalContextService } from "@affine/core/modules/global-context";
+import { OpenInAppGuard } from "@affine/core/modules/open-in-app";
 import {
   getAFFiNEWorkspaceSchema,
   type Workspace,
   type WorkspaceMetadata,
+  workspaceRootDocRenderable$,
   WorkspacesService,
-} from '@affine/core/modules/workspace';
-import { ZipTransformer } from '@blocksuite/affine/widgets/linked-doc';
+} from "@affine/core/modules/workspace";
+import { ZipTransformer } from "@blocksuite/affine/widgets/linked-doc";
 import {
   FrameworkScope,
   LiveData,
   useLiveData,
   useService,
   useServices,
-} from '@toeverything/infra';
-import type { PropsWithChildren, ReactElement } from 'react';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+} from "@toeverything/infra";
+import type { PropsWithChildren, ReactElement } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   matchPath,
   useLocation,
   useParams,
   useSearchParams,
-} from 'react-router-dom';
-import { map } from 'rxjs';
-import * as _Y from 'yjs';
+} from "react-router-dom";
+import * as _Y from "yjs";
 
-import { AffineErrorBoundary } from '../../../components/affine/affine-error-boundary';
-import { WorkbenchRoot } from '../../../modules/workbench';
-import { AppContainer } from '../../components/app-container';
-import { PageNotFound } from '../404';
-import { WorkspaceLayout } from './layouts/workspace-layout';
-import { SharePage } from './share/share-page';
+import { AffineErrorBoundary } from "../../../components/affine/affine-error-boundary";
+import { WorkbenchRoot } from "../../../modules/workbench";
+import { AppContainer } from "../../components/app-container";
+import { PageNotFound } from "../404";
+import { WorkspaceLayout } from "./layouts/workspace-layout";
+import { SharePage } from "./share/share-page";
 
 declare global {
   /**
@@ -54,7 +54,7 @@ declare global {
   // oxlint-disable-next-line no-var
   var Y: typeof _Y;
   interface WindowEventMap {
-    'affine:workspace:change': CustomEvent<{ id: string }>;
+    "affine:workspace:change": CustomEvent<{ id: string }>;
   }
 }
 
@@ -82,17 +82,17 @@ export const Component = (): ReactElement => {
   // check if we are in detail doc route, if so, maybe render share page
   const detailDocRoute = useMemo(() => {
     const match = matchPath(
-      '/workspace/:workspaceId/:docId',
-      location.pathname
+      "/workspace/:workspaceId/:docId",
+      location.pathname,
     );
     if (
       match &&
       match.params.docId &&
       match.params.workspaceId &&
       // TODO(eyhn): need a better way to check if it's a docId
-      workbenchRoutes.find(route =>
-        matchPath(route.path, '/' + match.params.docId)
-      )?.path === '/:pageId'
+      workbenchRoutes.find((route) =>
+        matchPath(route.path, "/" + match.params.docId),
+      )?.path === "/:pageId"
     ) {
       return {
         docId: match.params.docId,
@@ -143,15 +143,15 @@ export const Component = (): ReactElement => {
 
   // server search params
   const serverFromSearchParams = useLiveData(
-    searchParams.has('server')
-      ? serversService.serverByBaseUrl$(searchParams.get('server') as string)
-      : undefined
+    searchParams.has("server")
+      ? serversService.serverByBaseUrl$(searchParams.get("server") as string)
+      : undefined,
   );
   // server from workspace
   const serverFromWorkspace = useLiveData(
-    meta?.flavour && meta.flavour !== 'local'
+    meta?.flavour && meta.flavour !== "local"
       ? serversService.server$(meta?.flavour)
-      : undefined
+      : undefined,
   );
   const server = serverFromWorkspace ?? serverFromSearchParams;
 
@@ -160,7 +160,7 @@ export const Component = (): ReactElement => {
       globalContextService.globalContext.serverId.set(server.id);
       return () => {
         globalContextService.globalContext.serverId.set(
-          defaultServerService.server.id
+          defaultServerService.server.id,
         );
       };
     }
@@ -172,7 +172,7 @@ export const Component = (): ReactElement => {
   ]);
 
   // if server is not found, and we have server in search params, we should show add selfhosted dialog
-  const needAddSelfhosted = server === undefined && searchParams.has('server');
+  const needAddSelfhosted = server === undefined && searchParams.has("server");
   // use ref to avoid useEffect trigger twice
   const addSelfhostedDialogOpened = useRef<boolean>(false);
 
@@ -182,8 +182,8 @@ export const Component = (): ReactElement => {
     }
     addSelfhostedDialogOpened.current = true;
     if (BUILD_CONFIG.isElectron && needAddSelfhosted) {
-      globalDialogService.open('sign-in', {
-        server: searchParams.get('server') as string,
+      globalDialogService.open("sign-in", {
+        server: searchParams.get("server") as string,
       });
     }
     return;
@@ -256,67 +256,62 @@ const WorkspacePage = ({ meta }: { meta: WorkspaceMetadata }) => {
   const rootDocReady$ = useMemo(
     () =>
       workspace
-        ? LiveData.from(
-            workspace.engine.doc
-              .docState$(workspace.id)
-              .pipe(map(v => v.ready)),
-            false
-          )
+        ? LiveData.from(workspaceRootDocRenderable$(workspace), false)
         : null,
-    [workspace]
+    [workspace],
   );
-  const isRootDocReady = useLiveData(rootDocReady$) ?? false;
+  const rootDocReady = useLiveData(rootDocReady$) ?? false;
 
   useEffect(() => {
     if (workspace) {
       // for debug purpose
       window.currentWorkspace = workspace ?? undefined;
       window.dispatchEvent(
-        new CustomEvent('affine:workspace:change', {
+        new CustomEvent("affine:workspace:change", {
           detail: {
             id: workspace.id,
           },
-        })
+        }),
       );
       window.exportWorkspaceSnapshot = async (docs?: string[]) => {
         await ZipTransformer.exportDocs(
           workspace.docCollection,
           getAFFiNEWorkspaceSchema(),
           Array.from(workspace.docCollection.docs.values())
-            .filter(doc => (docs ? docs.includes(doc.id) : true))
-            .map(doc => doc.getStore())
+            .filter((doc) => (docs ? docs.includes(doc.id) : true))
+            .map((doc) => doc.getStore()),
         );
       };
       window.importWorkspaceSnapshot = async () => {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = '.zip';
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".zip";
         input.onchange = async () => {
           if (input.files && input.files.length > 0) {
             const file = input.files[0];
-            const blob = new Blob([file], { type: 'application/zip' });
+            const blob = new Blob([file], { type: "application/zip" });
             const newDocs = await ZipTransformer.importDocs(
               workspace.docCollection,
               getAFFiNEWorkspaceSchema(),
-              blob
+              blob,
             );
             console.log(
-              'インポートした docs',
+              "インポートした docs",
               newDocs
-                .filter(doc => !!doc)
-                .map(doc => ({
+                .filter((doc) => !!doc)
+                .map((doc) => ({
                   id: doc.id,
                   title: doc.meta?.title,
-                }))
+                })),
             );
           }
         };
         input.click();
       };
-      localStorage.setItem('last_workspace_id', workspace.id);
+      localStorage.setItem("last_workspace_id", workspace.id);
       globalContextService.globalContext.workspaceId.set(workspace.id);
       globalContextService.globalContext.workspaceFlavour.set(
-        workspace.flavour
+        workspace.flavour,
       );
       return () => {
         window.currentWorkspace = undefined;
@@ -330,6 +325,9 @@ const WorkspacePage = ({ meta }: { meta: WorkspaceMetadata }) => {
   if (!workspace) {
     return null; // skip this, workspace will be set in layout effect
   }
+
+  // Local workspaces should render their shell immediately and hydrate in place.
+  const isRootDocReady = workspace.flavour === "local" || rootDocReady;
 
   if (!isRootDocReady) {
     return (
