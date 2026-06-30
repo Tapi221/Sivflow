@@ -1,0 +1,1 @@
+export { GeminiVertexProvider } from '../../../../../../../../packages/backend/server/src/plugins/copilot/providers/gemini/vertex';
