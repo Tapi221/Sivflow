@@ -20,7 +20,7 @@ export default defineConfig({
 
   test: {
     setupFiles: [resolve(rootDir, './scripts/setup/global.ts')],
-    include: ['./test/**/*.spec.ts'],
+    include: [resolve(rootDir, 'tests/frontend/apps/electron/test/**/*.spec.ts')],
     testTimeout: 60000,
     hookTimeout: 30000,
     pool: 'forks',
