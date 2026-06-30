@@ -47,6 +47,9 @@ export const LanguageMenu = () => {
 
   return (
     <Menu
+      rootOptions={{
+        modal: true,
+      }}
       items={
         (
           <LanguageMenuContent

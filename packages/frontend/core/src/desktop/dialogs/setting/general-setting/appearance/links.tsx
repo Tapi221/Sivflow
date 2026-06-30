@@ -27,6 +27,9 @@ export const OpenInAppLinksMenu = () => {
 
   return (
     <Menu
+      rootOptions={{
+        modal: true,
+      }}
       items={options.map(option => {
         return (
           <MenuItem
