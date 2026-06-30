@@ -1,0 +1,1 @@
+export { PermissionSqlPredicateBuilder } from '../../../../../../../packages/backend/server/src/core/permission/sql-predicate';
