@@ -1,0 +1,1 @@
+export { PermissionDiagnosticService } from '../../../../../../../packages/backend/server/src/core/permission/diagnostic';
