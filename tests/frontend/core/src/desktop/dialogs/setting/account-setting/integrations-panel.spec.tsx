@@ -200,11 +200,14 @@ vi.mock('@toeverything/infra', async importOriginal => {
   };
 });
 
-vi.mock('../layout', () => ({
-  CollapsibleWrapper: ({ children }: { children: ReactNode }) => (
-    <div>{children}</div>
-  ),
-}));
+vi.mock(
+  '../../../../../../../../packages/frontend/core/src/desktop/dialogs/setting/layout',
+  () => ({
+    CollapsibleWrapper: ({ children }: { children: ReactNode }) => (
+      <div>{children}</div>
+    ),
+  })
+);
 
 import { IntegrationsPanel } from './integrations-panel';
 
