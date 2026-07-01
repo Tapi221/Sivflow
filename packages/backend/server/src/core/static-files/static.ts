@@ -1,4 +1,4 @@
-﻿import type { OnModuleInit } from '@nestjs/common';
+import type { OnModuleInit } from '@nestjs/common';
 import { join, } from 'node:path';
 
 import {
@@ -40,7 +40,7 @@ export class StaticFilesResolver implements OnModuleInit {
     const rootPath = basePath || '/';
     const staticPath = join(env.projectRoot, 'static');
     const adminPath = join(staticPath, 'admin');
-    const mobilePath = env.namespaces.canary
+    const mobilePath = env.namespaces.dev
       ? join(staticPath, 'mobile')
       : staticPath;
 
