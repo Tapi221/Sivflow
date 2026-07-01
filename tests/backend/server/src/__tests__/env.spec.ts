@@ -158,21 +158,21 @@ test('should tell selfhosted correctly', t => {
 test('should tell namespaces correctly', t => {
   process.env.AFFINE_ENV = 'dev';
   t.deepEqual(new Env().namespaces, {
-    canary: true,
+    dev: true,
     beta: false,
     production: false,
   });
 
   process.env.AFFINE_ENV = 'beta';
   t.deepEqual(new Env().namespaces, {
-    canary: false,
+    dev: false,
     beta: true,
     production: false,
   });
 
   process.env.AFFINE_ENV = 'production';
   t.deepEqual(new Env().namespaces, {
-    canary: false,
+    dev: false,
     beta: false,
     production: true,
   });
