@@ -221,3 +221,7 @@ packages/common/y-octo/utils/fuzz/target/
 packages/common/y-octo/utils/fuzz/corpus/
 packages/common/y-octo/utils/fuzz/artifacts/
 packages/common/y-octo/utils/fuzz/coverage/
+
+# Rust/Tauri build outputs
+nouse/src-tauri/target/
+**/target/
