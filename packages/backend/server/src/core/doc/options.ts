@@ -1,4 +1,4 @@
-﻿import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { Config, metrics } from '../../base';
 import { CONFIG_TOKEN } from '../../base/config/tokens';
@@ -61,7 +61,7 @@ export class DocStorageOptions implements IDocStorageOptions {
       }
 
       if (
-        env.namespaces.canary &&
+        env.namespaces.dev &&
         yoctoResult &&
         yoctoResult.length > 2 /* simple test for non-empty yjs binary */
       ) {
