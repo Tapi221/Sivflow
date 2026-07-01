@@ -249,7 +249,7 @@ export class WorkspaceMcpProvider {
 
     const tools = [readDocument, semanticSearch, keywordSearch];
 
-    if (env.dev || env.namespaces.canary) {
+    if (env.dev || env.namespaces.dev) {
       const createDocument = defineTool({
         name: 'create_document',
         title: 'Create Document',
