@@ -17,7 +17,7 @@ const env = {
     'postgresql://sivflow:sivflow@127.0.0.1:5432/sivflow?schema=public',
   POSTGRES_HOST: process.env.POSTGRES_HOST ?? '127.0.0.1',
   POSTGRES_PORT: process.env.POSTGRES_PORT ?? '5432',
-  REDIS_SERVER_HOST: process.env.REDIS_SERVER_HOST ?? 'localhost',
+  REDIS_SERVER_HOST: process.env.REDIS_SERVER_HOST ?? '127.0.0.1',
   REDIS_SERVER_PORT: process.env.REDIS_SERVER_PORT ?? '6379',
   TS_NODE_TRANSPILE_ONLY: process.env.TS_NODE_TRANSPILE_ONLY ?? '1',
   SIVFLOW_STARTUP_TRACE: process.env.SIVFLOW_STARTUP_TRACE ?? 'true',

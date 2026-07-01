@@ -11,6 +11,7 @@
  */
 
 import { execFileSync, spawn, spawnSync } from 'node:child_process';
+import http from 'node:http';
 import net from 'node:net';
 import path from 'node:path';
 import process from 'node:process';
@@ -22,6 +23,9 @@ const root = path.resolve(__dirname, '..');
 const REQUIRED_NODE_RANGE = '>=20.19.0 <23.0.0';
 const isWindows = process.platform === 'win32';
 const npmCommand = isWindows ? (process.env.ComSpec ?? 'cmd.exe') : 'npm';
+const defaultBackendHost = '127.0.0.1';
+const defaultBackendPort = 3010;
+const requestTimeoutMs = 1500;
 
 // ─── ユーティリティ ──────────────────────────────────────────────
 
@@ -64,6 +68,11 @@ function prefixOutput(label, chunk, stream) {
 
 function npmArgs(args) {
   return isWindows ? ['/d', '/c', 'npm', ...args] : args;
+}
+
+function parsePort(value, fallback) {
+  const port = Number.parseInt(String(value ?? ''), 10);
+  return Number.isInteger(port) && port > 0 && port < 65536 ? port : fallback;
 }
 
 function runSync(command, args, options = {}) {
@@ -174,12 +183,86 @@ function sleep(ms) {
 function isPortOpen(host, port) {
   return new Promise(resolve => {
     const socket = new net.Socket();
-    socket.setTimeout(1000);
+    socket.setTimeout(requestTimeoutMs);
     socket.once('connect', () => { socket.destroy(); resolve(true); });
     socket.once('timeout', () => { socket.destroy(); resolve(false); });
     socket.once('error', () => { socket.destroy(); resolve(false); });
     socket.connect(port, host);
   });
+}
+
+function isSivflowBackend(port) {
+  return new Promise(resolve => {
+    const request = http.get(
+      {
+        host: defaultBackendHost,
+        port,
+        path: '/graphql',
+        timeout: requestTimeoutMs,
+        headers: {
+          accept: 'application/json',
+        },
+      },
+      response => {
+        let body = '';
+
+        response.setEncoding('utf8');
+        response.on('data', chunk => {
+          if (body.length < 4096) {
+            body += chunk;
+          }
+        });
+        response.on('end', () => {
+          const requestIdHeader = response.headers['x-request-id'];
+          const requestId = Array.isArray(requestIdHeader)
+            ? requestIdHeader[0]
+            : requestIdHeader;
+
+          resolve(
+            typeof requestId === 'string' &&
+              requestId.startsWith('affine:http:') &&
+              body.includes('GRAPHQL_BAD_REQUEST')
+          );
+        });
+      }
+    );
+
+    request.once('timeout', () => {
+      request.destroy();
+      resolve(false);
+    });
+    request.once('error', () => resolve(false));
+  });
+}
+
+async function reuseOrFailIfBackendAlreadyRunning() {
+  const port = parsePort(process.env.AFFINE_SERVER_PORT, defaultBackendPort);
+
+  if (!(await isPortOpen(defaultBackendHost, port))) {
+    return false;
+  }
+
+  const timeoutMs = 10_000;
+  const startedAt = Date.now();
+
+  while (Date.now() - startedAt < timeoutMs) {
+    if (await isSivflowBackend(port)) {
+      process.stdout.write(
+        `[backend] Sivflow backend is already running at http://${defaultBackendHost}:${port}.\n`
+      );
+      return true;
+    }
+
+    await sleep(500);
+  }
+
+  process.stderr.write(
+    [
+      `[backend] Port ${port} is already in use, but it does not look like a Sivflow backend.`,
+      '[backend] そのプロセスを停止するか、AFFINE_SERVER_PORT を変更してから再実行してください。',
+    ].join('\n') + '\n'
+  );
+  process.exit(1);
 }
 
 async function waitForPostgres(timeoutMs = 90_000) {
@@ -233,7 +316,10 @@ await waitForPostgres();
 runMigrations();
 
 process.stdout.write('[sivflow] バックエンドとフロントエンドを起動します...\n');
-run('backend', ['--workspace', '@affine/server', 'run', 'dev']);
+const backendAlreadyRunning = await reuseOrFailIfBackendAlreadyRunning();
+if (!backendAlreadyRunning) {
+  run('backend', ['--workspace', '@affine/server', 'run', 'dev']);
+}
 run('web', ['--workspace', '@affine/web', 'run', 'dev'], {
   SIVFLOW_ENABLE_BACKEND: 'true',
 });

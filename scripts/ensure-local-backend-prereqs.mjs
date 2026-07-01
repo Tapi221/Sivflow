@@ -12,7 +12,7 @@ const env = {
   DATABASE_URL: process.env.DATABASE_URL ?? defaultDatabaseUrl,
   POSTGRES_HOST: process.env.POSTGRES_HOST ?? '127.0.0.1',
   POSTGRES_PORT: process.env.POSTGRES_PORT ?? '5432',
-  REDIS_SERVER_HOST: process.env.REDIS_SERVER_HOST ?? 'localhost',
+  REDIS_SERVER_HOST: process.env.REDIS_SERVER_HOST ?? '127.0.0.1',
   REDIS_SERVER_PORT: process.env.REDIS_SERVER_PORT ?? '6379',
 };
 
@@ -58,22 +58,72 @@ function canConnect(host, port, timeoutMs = 1500) {
   });
 }
 
+function canPingRedis(host, port, timeoutMs = 1500) {
+  return new Promise(resolve => {
+    const socket = net.createConnection({ host, port });
+    let finished = false;
+    let buffer = '';
+
+    const finish = ok => {
+      if (finished) {
+        return;
+      }
+
+      finished = true;
+      socket.destroy();
+      resolve(ok);
+    };
+
+    socket.setTimeout(timeoutMs);
+    socket.once('connect', () => {
+      socket.write('*1\r\n$4\r\nPING\r\n');
+    });
+    socket.on('data', chunk => {
+      buffer += chunk.toString('utf8');
+      const reply = buffer.trim();
+
+      if (!reply) {
+        return;
+      }
+
+      if (reply.startsWith('+PONG') || reply.startsWith('-NOAUTH')) {
+        finish(true);
+        return;
+      }
+
+      if (reply.startsWith('-LOADING')) {
+        finish(false);
+        return;
+      }
+
+      if (reply.startsWith('-')) {
+        finish(true);
+      }
+    });
+    socket.once('timeout', () => finish(false));
+    socket.once('error', () => finish(false));
+    socket.once('close', () => finish(false));
+  });
+}
+
 async function checkServices() {
   const postgres = {
     label: 'PostgreSQL',
     host: env.POSTGRES_HOST,
     port: portFromEnv('POSTGRES_PORT', 5432),
+    probe: () => canConnect(env.POSTGRES_HOST, portFromEnv('POSTGRES_PORT', 5432)),
   };
   const redis = {
     label: 'Redis',
     host: env.REDIS_SERVER_HOST,
     port: portFromEnv('REDIS_SERVER_PORT', 6379),
+    probe: () => canPingRedis(env.REDIS_SERVER_HOST, portFromEnv('REDIS_SERVER_PORT', 6379)),
   };
 
   return await Promise.all(
     [postgres, redis].map(async service => ({
       ...service,
-      ok: await canConnect(service.host, service.port),
+      ok: await service.probe(),
     }))
   );
 }

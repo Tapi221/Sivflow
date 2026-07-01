@@ -7,7 +7,7 @@ if (-not $env:DATABASE_URL) {
   $env:DATABASE_URL = "postgresql://sivflow:sivflow@127.0.0.1:5432/sivflow?schema=public"
 }
 if (-not $env:REDIS_SERVER_HOST) {
-  $env:REDIS_SERVER_HOST = "localhost"
+  $env:REDIS_SERVER_HOST = "127.0.0.1"
 }
 if (-not $env:REDIS_SERVER_PORT) {
   $env:REDIS_SERVER_PORT = "6379"
