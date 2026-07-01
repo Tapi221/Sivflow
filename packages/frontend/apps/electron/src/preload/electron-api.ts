@@ -16,16 +16,11 @@ import {
   type RendererToHelper,
 } from '../shared/type';
 
-type Schema =
-  | 'affine'
-  | 'affine-canary'
-  | 'affine-beta'
-  | 'affine-internal'
-  | 'affine-dev';
+type Schema = 'affine' | 'affine-beta' | 'affine-internal' | 'affine-dev';
 
 // todo: remove duplicated codes
-const ReleaseTypeSchema = z.enum(['stable', 'beta', 'canary', 'internal']);
-const envBuildType = (process.env.BUILD_TYPE || 'canary').trim().toLowerCase();
+const ReleaseTypeSchema = z.enum(['stable', 'beta', 'internal']);
+const envBuildType = (process.env.BUILD_TYPE || 'stable').trim().toLowerCase();
 const buildType = ReleaseTypeSchema.parse(envBuildType);
 const isDev = process.env.NODE_ENV === 'development';
 let scheme =
