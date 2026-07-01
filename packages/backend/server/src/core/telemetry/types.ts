@@ -1,3 +1,5 @@
+type TelemetryChannel = 'stable' | 'beta' | 'internal' | 'local';
+
 export type TelemetryEvent = {
   schemaVersion: 1;
   eventName: string;
@@ -13,7 +15,7 @@ export type TelemetryEvent = {
     editorVersion?: string;
     environment?: string;
     distribution?: string;
-    channel?: 'stable' | 'beta' | 'internal' | 'canary';
+    channel?: TelemetryChannel;
     isDesktop?: boolean;
     isMobile?: boolean;
     locale?: string;
