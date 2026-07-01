@@ -111,6 +111,16 @@ export const CreateWorkspaceDialog = ({
           />
         }
       />
+
+      {/* Electron 環境でのみローカル Vault 作成ボタンを表示 */}
+      {BUILD_CONFIG.isElectron && (
+        <LocalVaultCreateSection
+          workspaceName={workspaceName}
+          onCreated={res =>
+            close({ metadata: res.meta, defaultDocId: res.defaultDocId })
+          }
+        />
+      )}
     </ConfirmModal>
   );
 };
@@ -182,3 +192,67 @@ const CustomConfirmButton = ({
     </Button>
   );
 };
+
+/**
+ * Electron 環境でのみ表示される「ローカルフォルダで作成」セクション。
+ * local-vault flavour で新しいワークスペースを作成する。
+ */
+const LocalVaultCreateSection = ({
+  workspaceName,
+  onCreated,
+}: {
+  workspaceName: string;
+  onCreated: (res: Awaited<ReturnType<typeof buildShowcaseWorkspace>>) => void;
+}) => {
+  const [loading, setLoading] = useState(false);
+  const workspacesService = useService(WorkspacesService);
+
+  const handleCreateLocalVault = useAsyncCallback(async () => {
+    if (loading) return;
+    const name = workspaceName.trim() || 'My Vault';
+    setLoading(true);
+
+    track.$.$.$.createWorkspace({ flavour: 'local-vault' });
+
+    try {
+      const res = await buildShowcaseWorkspace(
+        workspacesService,
+        'local-vault',
+        name
+      );
+      onCreated(res);
+    } catch (e) {
+      console.error(e);
+      // ユーザーがフォルダ選択をキャンセルした場合は通知しない
+      const msg = (e as Error).message ?? '';
+      if (msg.includes('canceled')) return;
+      notify.error({
+        title: 'ローカル Vault の作成に失敗しました',
+        message: msg || 'もう一度お試しください',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [loading, onCreated, workspaceName, workspacesService]);
+
+  return (
+    <div className={styles.vaultSection}>
+      <span className={styles.vaultSectionLabel}>
+        または、ローカルフォルダに保存
+      </span>
+      <button
+        className={styles.vaultButton}
+        data-testid="create-local-vault-button"
+        disabled={loading}
+        onClick={handleCreateLocalVault}
+        type="button"
+      >
+        📁{' '}
+        {loading
+          ? 'フォルダを選択中...'
+          : 'ローカルフォルダで作成（Vault）'}
+      </button>
+    </div>
+  );
+};
+
