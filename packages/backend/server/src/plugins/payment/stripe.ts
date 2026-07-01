@@ -60,8 +60,7 @@ export class StripeFactory {
   }
 
   private async initStripeProducts() {
-    // only init stripe products in dev mode or canary deployment
-    if (!this.config.payment.enabled && !env.namespaces.canary) {
+    if (!this.config.payment.enabled) {
       return;
     }
 
