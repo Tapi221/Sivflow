@@ -71,7 +71,6 @@ const apiBaseByBuildType: Record<typeof buildType, string> = {
   stable: 'https://app.affine.pro',
   beta: 'https://insider.affine.pro',
   internal: 'https://insider.affine.pro',
-  canary: 'https://affine.fail',
 };
 
 function resolveApiBaseUrl() {
@@ -178,7 +177,6 @@ const defaultReferer = 'https://client.affine.local/';
 const affineDomains = [
   /^(?:[a-z0-9-]+\.)*usercontent\.affine\.pro$/i,
   /^(?:[a-z0-9-]+\.)*affine\.pro$/i,
-  /^(?:[a-z0-9-]+\.)*affine\.fail$/i,
   /^(?:[a-z0-9-]+\.)*affine\.run$/i,
 ];
 
