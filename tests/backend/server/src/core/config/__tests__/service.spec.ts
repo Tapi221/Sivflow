@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker';
+import { PrismaClient } from '@prisma/client';
 import test from 'ava';
 import Sinon from 'sinon';
 import { createModule } from '../../../__tests__/create-module';
@@ -13,6 +14,7 @@ const module = await createModule({
 const service = module.get(ServerService);
 const user = await module.create(Mockers.User);
 const models = module.get(Models);
+const db = module.get(PrismaClient);
 
 test.afterEach(async () => {
   Sinon.reset();
@@ -35,6 +37,40 @@ test('should update config', async t => {
 
   t.not(service.getConfig().server.externalUrl, oldValue);
   t.is(service.getConfig().server.externalUrl, newValue);
+});
+
+test('should normalize legacy server name before saving config', async t => {
+  await service.updateConfig(user.id, [
+    {
+      module: 'server',
+      key: 'name',
+      value: 'AFFiNE Canary Cloud',
+    },
+  ]);
+
+  const saved = await db.appConfig.findUnique({
+    where: { id: 'server.name' },
+  });
+
+  t.is(service.getConfig().server.name, 'Sivflow Cloud');
+  t.is(saved?.value, 'Sivflow Cloud');
+});
+
+test('should normalize legacy server name when loading db overrides', async t => {
+  await db.appConfig.upsert({
+    where: { id: 'server.name' },
+    update: { value: 'AFFiNE Cloud', lastUpdatedBy: user.id },
+    create: { id: 'server.name', value: 'AFFiNE Cloud', lastUpdatedBy: user.id },
+  });
+
+  await service.revalidateConfig();
+
+  const saved = await db.appConfig.findUnique({
+    where: { id: 'server.name' },
+  });
+
+  t.is(service.getConfig().server.name, 'Sivflow Cloud');
+  t.is(saved?.value, 'Sivflow Cloud');
 });
 
 test('should validate config before update', async t => {
