@@ -599,7 +599,7 @@ const NavigationPanelFolderNodeFolder = ({
   );
 
   const handleNewDoc = useCallback(() => {
-    const newDoc = createPage('page');
+    const newDoc = createPage('page', { show: false });
     node.createLink('doc', newDoc.id, node.indexAt('before'));
     track.$.navigationPanel.folders.createDoc();
     track.$.navigationPanel.organize.createOrganizeItem({
