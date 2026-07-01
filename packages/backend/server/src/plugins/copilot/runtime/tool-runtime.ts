@@ -1,4 +1,4 @@
-﻿import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { Config } from '../../../base';
 import { CONFIG_TOKEN } from '../../../base/config/tokens';
@@ -93,7 +93,7 @@ export class ToolRuntime {
       }
 
       if (
-        !(env.dev || env.namespaces.canary) &&
+        !(env.dev || env.namespaces.dev) &&
         ['docCreate', 'docUpdate', 'docUpdateMeta'].includes(tool)
       ) {
         continue;
