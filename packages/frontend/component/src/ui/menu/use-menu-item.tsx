@@ -19,6 +19,8 @@ export const useMenuItem = <T extends MenuItemProps>({
   selected,
   block,
   disabled,
+  onClick,
+  onSelect,
   ...otherProps
 }: T) => {
   const className = clsx(
@@ -34,6 +36,13 @@ export const useMenuItem = <T extends MenuItemProps>({
     },
     propsClassName
   );
+
+  const handleSelect = (event: Event) => {
+    onSelect?.(event);
+    if (!event.defaultPrevented) {
+      (onClick as ((event: Event) => void) | undefined)?.(event);
+    }
+  };
 
   const children = (
     <>
@@ -66,6 +75,9 @@ export const useMenuItem = <T extends MenuItemProps>({
   return {
     children,
     className,
-    otherProps,
+    otherProps: {
+      ...otherProps,
+      onSelect: handleSelect,
+    },
   };
 };
