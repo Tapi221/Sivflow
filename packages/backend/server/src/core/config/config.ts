@@ -32,7 +32,7 @@ const readDefaultServerPort = (): number => {
 
 defineModuleConfig('server', {
   name: {
-    desc: 'A recognizable name for the server. Will be shown when connected with AFFiNE Desktop.',
+    desc: 'A recognizable name for the server. Will be shown when connected with Sivflow Desktop.',
     default: undefined,
     shape: z.string().optional(),
   },
