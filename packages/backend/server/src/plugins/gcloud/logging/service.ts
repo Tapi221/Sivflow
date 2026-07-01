@@ -13,7 +13,7 @@ export const LoggerProvider: Provider<LoggerService> = {
   provide: LoggerProvide,
   useFactory: () => {
     const instance = createLogger({
-      level: env.namespaces.canary ? 'debug' : 'info',
+      level: env.namespaces.dev ? 'debug' : 'info',
       transports: [new transports.Console()],
       format: format.combine(moreMetadata(), format.json()),
     });
