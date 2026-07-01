@@ -1,4 +1,4 @@
-type BuildChannel = 'stable' | 'beta' | 'internal' | 'canary';
+type BuildChannel = 'stable' | 'beta' | 'internal' | 'local';
 
 type TrackBuildConfig = Pick<
   BUILD_CONFIG_TYPE,
@@ -28,7 +28,7 @@ const buildChannels = new Set<BuildChannel>([
   'stable',
   'beta',
   'internal',
-  'canary',
+  'local',
 ]);
 
 const distributions = new Set<BUILD_CONFIG_TYPE['distribution']>([
