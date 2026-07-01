@@ -11,6 +11,7 @@ export const menuItem = style({
   selectors: {
     '&[data-selected=true]': {
       color: cssVar('primaryColor'),
+      backgroundColor: cssVar('hoverColor'),
     },
   },
 });
