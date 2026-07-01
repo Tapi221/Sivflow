@@ -57,6 +57,20 @@ const RELEASE_CHANNEL_MAP = new Map<Namespace, string>([
   [Namespace.Production, 'stable'],
 ]);
 
+const LEGACY_SERVER_NAMES = new Map<string, string>([
+  ['AFFiNE Canary Cloud', 'Sivflow Cloud'],
+  ['AFFiNE Cloud', 'Sivflow Cloud'],
+]);
+
+function resolveServerName(configuredName?: string) {
+  const normalizedName = configuredName?.trim();
+  if (!normalizedName) {
+    return env.selfhosted ? 'Sivflow Selfhost' : 'Sivflow Cloud';
+  }
+
+  return LEGACY_SERVER_NAMES.get(normalizedName) ?? normalizedName;
+}
+
 @Resolver(() => ServerConfigType)
 export class ServerConfigResolver {
   private readonly logger = new Logger(ServerConfigResolver.name);
@@ -73,9 +87,7 @@ export class ServerConfigResolver {
   })
   serverConfig(): ServerConfigType {
     return {
-      name:
-        this.config.server.name ??
-        (env.selfhosted ? 'Sivflow Selfhost' : 'Sivflow Cloud'),
+      name: resolveServerName(this.config.server.name),
       version: env.version,
       baseUrl: this.url.requestBaseUrl,
       type: env.DEPLOYMENT_TYPE,
