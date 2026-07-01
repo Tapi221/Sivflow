@@ -52,9 +52,9 @@ describe('redirect proxy allowlist', () => {
     });
   });
 
-  it('allows current hostname (canary)', async () => {
+  it('allows current hostname for stable build', async () => {
     vi.resetModules();
-    process.env.BUILD_TYPE = 'canary';
+    process.env.BUILD_TYPE = 'stable';
     process.env.NODE_ENV = 'production';
     delete process.env.DEV_SERVER_URL;
 
@@ -62,11 +62,11 @@ describe('redirect proxy allowlist', () => {
       await import('../../src/main/security/redirect-proxy');
     expect(
       validateRedirectProxyUrl(
-        'assets://./redirect-proxy?redirect_uri=https%3A%2F%2Faffine.fail%2Fpricing'
+        'assets://./redirect-proxy?redirect_uri=https%3A%2F%2Fapp.affine.pro%2Fpricing'
       )
     ).toEqual({
       allow: true,
-      redirectTarget: 'https://affine.fail/pricing',
+      redirectTarget: 'https://app.affine.pro/pricing',
     });
   });
 
