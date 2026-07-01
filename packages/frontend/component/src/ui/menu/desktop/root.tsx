@@ -2,7 +2,7 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import clsx from 'clsx';
 import React, { useCallback, useImperativeHandle, useState } from 'react';
 
-import { useIsInsideModal } from '../../modal';
+import { useIsInsideModal } from '../../modal/modal';
 import type { MenuProps } from '../menu.types';
 import * as styles from '../styles.css';
 import { DesktopMenuContext } from './context';
