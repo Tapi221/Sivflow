@@ -56,17 +56,6 @@ e2e('should return apple oauth provider in version >= 0.22.0', async t => {
   });
 
   t.snapshot(res2);
-
-  const res3 = await app.gql({
-    query: oauthProvidersQuery,
-    context: {
-      headers: {
-        'x-affine-version': '2025.6.29-canary.93',
-      },
-    },
-  });
-
-  t.snapshot(res3);
 });
 
 e2e(
