@@ -5,7 +5,7 @@ export type TelemetryEvent = {
   eventName: string;
   params?: Record<string, unknown>;
   userProperties?: Record<string, unknown>;
-  userId: string;
+  userId?: string;
   clientId: string;
   sessionId?: string | number;
   eventId: string;
