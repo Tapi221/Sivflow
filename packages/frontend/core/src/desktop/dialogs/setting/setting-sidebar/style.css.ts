@@ -12,6 +12,10 @@ export const settingSlideBar = style({
   flexDirection: 'column',
   gap: '16px',
   overflowY: 'auto',
+  userSelect: 'none',
+});
+globalStyle(`${settingSlideBar} *`, {
+  userSelect: 'none',
 });
 export const sidebarTitle = style({
   fontSize: cssVar('fontH6'),
