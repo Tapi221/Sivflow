@@ -34,7 +34,6 @@ vi.mock('electron', () => ({
 describe('testing for client update', () => {
   const expectReleaseList = [
     { buildType: 'beta', version: '0.16.3-beta.2' },
-    { buildType: 'canary', version: '0.17.0-canary.7' },
     { buildType: 'stable', version: '0.18.0' },
   ];
 
