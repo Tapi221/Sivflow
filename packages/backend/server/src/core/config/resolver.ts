@@ -1,4 +1,4 @@
-﻿import { Inject, Logger } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import {
   Args,
   Field,
@@ -52,7 +52,7 @@ export class ReleaseVersionType {
 }
 
 const RELEASE_CHANNEL_MAP = new Map<Namespace, string>([
-  [Namespace.Dev, 'canary'],
+  [Namespace.Dev, 'stable'],
   [Namespace.Beta, 'beta'],
   [Namespace.Production, 'stable'],
 ]);
