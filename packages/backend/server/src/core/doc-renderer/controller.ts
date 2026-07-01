@@ -1,4 +1,4 @@
-﻿import {
+import {
   createHash,
 } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -90,7 +90,7 @@ export class DocRendererController {
   @Get('/*path')
   async render(@Req() req: Request, @Res() res: Response) {
     const assets: HtmlAssets =
-      env.namespaces.canary &&
+      env.namespaces.dev &&
       isMobile({
         ua: req.headers['user-agent'] ?? undefined,
       })
