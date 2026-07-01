@@ -6,7 +6,6 @@ const API_BASE_BY_BUILD_TYPE: Record<typeof buildType, string> = {
   stable: 'https://app.affine.pro',
   beta: 'https://insider.affine.pro',
   internal: 'https://insider.affine.pro',
-  canary: 'https://affine.fail',
 };
 
 function resolveCurrentHostnameForRedirectAllowlist() {
