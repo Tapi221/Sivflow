@@ -14,7 +14,7 @@ export const panelBaseColorsStyle = (container: string) => css`
     ${unsafeCSS(container)} {
       background: color-mix(
         in srgb,
-        ${unsafeCSSVarV2('layer/background/overlayPanel')} 82%,
+        ${unsafeCSSVarV2('layer/background/overlayPanel')} 76%,
         transparent
       );
     }
