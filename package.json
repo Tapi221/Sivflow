@@ -48,7 +48,7 @@
     "build:web": "npm --workspace @affine/web run build",
     "build:frontend": "npm --workspace @affine/web run build",
     "build:backend": "npm --workspace @affine/server run build",
-    "build:cloudrun": "npm --prefix functions run build:cloudrun",
+    "build:cloudrun": "npm run build:backend",
     "deploy:cloudrun": "gcloud builds submit --config cloudbuild.yaml",
     "deploy:hosting": "npm run deploy:cloudrun && firebase deploy --only hosting",
     "deploy:hosting:only": "firebase deploy --only hosting",
