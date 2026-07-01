@@ -2,40 +2,35 @@ import { z } from 'zod';
 
 export const appSchemes = z.enum([
   'affine',
-  'affine-canary',
   'affine-beta',
   'affine-internal',
   'affine-dev',
 ]);
 
 export type Scheme = z.infer<typeof appSchemes>;
-export type Channel = 'stable' | 'canary' | 'beta' | 'internal';
+export type Channel = 'stable' | 'beta' | 'internal';
 
 export const schemeToChannel = {
   affine: 'stable',
-  'affine-canary': 'canary',
   'affine-beta': 'beta',
   'affine-internal': 'internal',
-  'affine-dev': 'canary', // dev does not have a dedicated app. use canary as the placeholder.
+  'affine-dev': 'stable',
 } as Record<Scheme, Channel>;
 
 export const channelToScheme = {
-  stable: 'affine',
-  canary: BUILD_CONFIG.debug ? 'affine-dev' : 'affine-canary',
+  stable: BUILD_CONFIG.debug ? 'affine-dev' : 'affine',
   beta: 'affine-beta',
   internal: 'affine-internal',
 } as Record<Channel, Scheme>;
 
 export const appIconMap = {
   stable: '/imgs/app-icon-stable.ico',
-  canary: '/imgs/app-icon-canary.ico',
   beta: '/imgs/app-icon-beta.ico',
   internal: '/imgs/app-icon-internal.ico',
 } satisfies Record<Channel, string>;
 
 export const appNames = {
   stable: 'Sivflow',
-  canary: 'Sivflow Canary',
   beta: 'Sivflow Beta',
   internal: 'Sivflow Internal',
 } satisfies Record<Channel, string>;
