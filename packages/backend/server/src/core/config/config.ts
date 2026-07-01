@@ -37,7 +37,7 @@ defineModuleConfig('server', {
     shape: z.string().optional(),
   },
   externalUrl: {
-    desc: `Base url of AFFiNE server, used for generating external urls.
+    desc: `Base url of Sivflow server, used for generating external urls.
 Default to be \`[server.protocol]://[server.host][:server.port]\` if not specified.
     `,
     default: '',
