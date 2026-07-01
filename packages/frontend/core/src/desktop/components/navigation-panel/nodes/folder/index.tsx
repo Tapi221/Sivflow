@@ -23,6 +23,7 @@ import {
   getFileNodeIcon,
   ORGANIZE_MAX_FILE_SIZE,
 } from '@affine/core/modules/organize/file';
+import { WorkbenchService } from '@affine/core/modules/workbench';
 import { WorkspaceService } from '@affine/core/modules/workspace';
 import type { AffineDNDData } from '@affine/core/types/dnd';
 import { Unreachable } from '@affine/env/constant';
@@ -237,6 +238,7 @@ const NavigationPanelFolderNodeFolder = ({
       FeatureFlagService,
       WorkspaceDialogService,
     });
+  const workbench = useService(WorkbenchService).workbench;
   const navigationPanelService = useService(NavigationPanelService);
   const name = useLiveData(node.name$);
   const enableEmojiIcon = useLiveData(
@@ -607,7 +609,8 @@ const NavigationPanelFolderNodeFolder = ({
       target: 'doc',
     });
     setCollapsed(false);
-  }, [createPage, node, setCollapsed]);
+    workbench.openDoc(newDoc.id);
+  }, [createPage, node, setCollapsed, workbench]);
 
   const handleCreateSubfolder = useCallback(() => {
     const newFolderId = node.createFolder(
