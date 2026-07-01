@@ -80,26 +80,41 @@ vi.mock('@toeverything/infra', () => ({
   },
 }));
 
-vi.mock('../byok', () => ({
-  WorkspaceByokSetting: () => null,
-}));
+vi.mock(
+  '../../../../../../../../../packages/frontend/core/src/desktop/dialogs/setting/workspace-setting/byok',
+  () => ({
+    WorkspaceByokSetting: () => null,
+  })
+);
 
-vi.mock('../../sub-page', () => ({
-  SubPageProvider: ({ children }: { children: ReactNode }) => children,
-  useSubPageIsland: () => null,
-}));
+vi.mock(
+  '../../../../../../../../../packages/frontend/core/src/desktop/dialogs/setting/sub-page',
+  () => ({
+    SubPageProvider: ({ children }: { children: ReactNode }) => children,
+    useSubPageIsland: () => null,
+  })
+);
 
-vi.mock('./calendar/setting-panel', () => ({
-  CalendarSettingPanel: () => null,
-}));
+vi.mock(
+  '../../../../../../../../../packages/frontend/core/src/desktop/dialogs/setting/workspace-setting/integration/calendar/setting-panel',
+  () => ({
+    CalendarSettingPanel: () => null,
+  })
+);
 
-vi.mock('./mcp-server/setting-panel', () => ({
-  McpServerSettingPanel: () => null,
-}));
+vi.mock(
+  '../../../../../../../../../packages/frontend/core/src/desktop/dialogs/setting/workspace-setting/integration/mcp-server/setting-panel',
+  () => ({
+    McpServerSettingPanel: () => null,
+  })
+);
 
-vi.mock('./readwise/setting-panel', () => ({
-  ReadwiseSettingPanel: () => null,
-}));
+vi.mock(
+  '../../../../../../../../../packages/frontend/core/src/desktop/dialogs/setting/workspace-setting/integration/readwise/setting-panel',
+  () => ({
+    ReadwiseSettingPanel: () => null,
+  })
+);
 
 import { IntegrationSetting } from '.';
 
