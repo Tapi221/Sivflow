@@ -1,9 +1,11 @@
+type TelemetryChannel = 'stable' | 'beta' | 'internal' | 'local';
+
 export type TelemetryEvent = {
   schemaVersion: 1;
   eventName: string;
   params?: Record<string, unknown>;
   userProperties?: Record<string, unknown>;
-  userId?: string;
+  userId: string;
   clientId: string;
   sessionId?: string | number;
   eventId: string;
@@ -13,7 +15,7 @@ export type TelemetryEvent = {
     editorVersion?: string;
     environment?: string;
     distribution?: string;
-    channel?: 'stable' | 'beta' | 'internal' | 'canary';
+    channel?: TelemetryChannel;
     isDesktop?: boolean;
     isMobile?: boolean;
     locale?: string;
@@ -37,7 +39,7 @@ export type TelemetryAck =
 export interface TelemetryContext {
   isAuthed: boolean;
   isSelfHosted: boolean;
-  channel: 'stable' | 'beta' | 'internal' | 'canary';
+  channel: TelemetryChannel;
   userId?: string;
   userProperties?: Record<string, unknown>;
   officialEndpoint: string;
