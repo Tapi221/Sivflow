@@ -129,7 +129,7 @@ export class SubscriptionService {
     const { plan, recurring, variant } = params;
 
     if (
-      env.namespaces.canary &&
+      env.namespaces.dev &&
       env.prod &&
       args.user &&
       !this.feature.isStaff(args.user.email)
@@ -750,7 +750,7 @@ export class SubscriptionService {
         ? (invoice.customer.email ?? null)
         : null);
 
-    // we can't do anything if we can't recognize the customer
+    // there should be at least one line item in the invoice
     if (!customerEmail) {
       return null;
     }
