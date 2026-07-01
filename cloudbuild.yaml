@@ -1,25 +1,48 @@
 substitutions:
   _REGION: asia-northeast1
   _SERVICE: sivflow-api
-  _SOURCE: functions
+  _PUBLIC_URL: https://sivflow-cloud.web.app
+
+timeout: 3600s
 
 steps:
-  - id: deploy-cloud-run-from-source
+  - id: build-backend-image
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - Dockerfile.cloudrun
+      - -t
+      - gcr.io/$PROJECT_ID/${_SERVICE}:$SHORT_SHA
+      - .
+
+  - id: push-backend-image
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - gcr.io/$PROJECT_ID/${_SERVICE}:$SHORT_SHA
+
+  - id: deploy-backend
     name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
     entrypoint: gcloud
     args:
       - run
       - deploy
       - ${_SERVICE}
-      - --source
-      - ${_SOURCE}
+      - --image
+      - gcr.io/$PROJECT_ID/${_SERVICE}:$SHORT_SHA
       - --region
       - ${_REGION}
       - --platform
       - managed
       - --allow-unauthenticated
-      - --set-env-vars
-      - NODE_ENV=production
+      - --port
+      - "8080"
+      - --update-env-vars
+      - NODE_ENV=production,AFFINE_ENV=production,DEPLOYMENT_TYPE=selfhosted,SERVER_FLAVOR=allinone,DEPLOYMENT_PLATFORM=gcp,AFFINE_SERVER_HTTPS=true,AFFINE_SERVER_EXTERNAL_URL=${_PUBLIC_URL}
+
+images:
+  - gcr.io/$PROJECT_ID/${_SERVICE}:$SHORT_SHA
 
 options:
   logging: CLOUD_LOGGING_ONLY
