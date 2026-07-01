@@ -13,7 +13,9 @@ export default defineConfig({
       provider: playwright(),
       isolate: false,
     },
-    include: ['src/__tests__/**/*.unit.spec.ts'],
+    include: [
+      '../../../../tests/blocksuite/sivflow/inlines/footnote/src/__tests__/**/*.unit.spec.ts',
+    ],
     testTimeout: 500,
     coverage: {
       provider: 'istanbul',
