@@ -3,6 +3,10 @@ import { notify } from "@affine/component/ui/notification";
 import { useAsyncCallback } from "@affine/core/components/hooks/affine-async-hooks";
 import { AuthService } from "@affine/core/modules/cloud";
 import {
+  isLocalDevFirebaseBackendUnavailableError,
+  LOCAL_DEV_FIREBASE_BACKEND_UNAVAILABLE_MESSAGE,
+} from "@affine/core/modules/cloud/utils/firebase-backend-error";
+import {
   clearPendingFirebaseRedirectSignIn,
   getFirebaseAuth,
   isFirebaseAuthConfigured,
@@ -30,6 +34,14 @@ function getFirebaseErrorCode(error: unknown) {
 
 function notifyOAuthError(error: unknown) {
   const code = getFirebaseErrorCode(error);
+
+  if (isLocalDevFirebaseBackendUnavailableError(error)) {
+    notify.error({
+      title: "バックエンドが起動していません",
+      message: LOCAL_DEV_FIREBASE_BACKEND_UNAVAILABLE_MESSAGE,
+    });
+    return;
+  }
 
   if (code === "auth/unauthorized-domain") {
     notify.error({
@@ -103,12 +115,14 @@ export function OAuth({ redirectUrl }: { redirectUrl?: string }) {
     globalContextService.globalContext.workspaceFlavour.$,
   );
   const onContinue = useAsyncCallback(async () => {
-    track.$.$.auth.signIn({
-      method: "oauth",
-      provider: OAuthProviderType.Google,
-    });
-
     try {
+      await authService.ensureFirebaseAuthBackendAvailable();
+
+      track.$.$.auth.signIn({
+        method: "oauth",
+        provider: OAuthProviderType.Google,
+      });
+
       const { GoogleAuthProvider, signInWithPopup, signInWithRedirect } =
         await import("firebase/auth");
       const authInstance = await getFirebaseAuth();

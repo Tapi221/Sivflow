@@ -23,7 +23,23 @@ import {
   hasPendingFirebaseRedirectSignIn,
   isFirebaseAuthConfigured,
 } from "../utils/firebase-auth";
+import {
+  createLocalDevFirebaseBackendUnavailableError,
+  isLocalDevFirebaseBackendUnavailable,
+} from "../utils/firebase-backend-error";
 import type { FetchService } from "./fetch";
+
+async function readResponseTextSafe(response: Response) {
+  try {
+    return await response.text();
+  } catch {
+    return "";
+  }
+}
+
+function getWindowHostname() {
+  return typeof window === "undefined" ? undefined : window.location.hostname;
+}
 
 @OnEvent(ApplicationFocused, (e) => e.onApplicationFocused)
 @OnEvent(ServerStarted, (e) => e.onServerStarted)
@@ -204,20 +220,88 @@ export class AuthService extends Service {
   }
 
   async signInFirebaseToken(idToken: string) {
-    const res = await this.fetchService.fetch("/api/auth/firebase", {
-      method: "POST",
-      credentials: "include",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ token: idToken }),
-    });
+    let res: Response;
+
+    try {
+      res = await this.fetchService.fetch("/api/auth/firebase", {
+        method: "POST",
+        credentials: "include",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ token: idToken }),
+      });
+    } catch (error) {
+      if (
+        isLocalDevFirebaseBackendUnavailable({
+          backendEnabled: BUILD_CONFIG.backendEnabled,
+          error,
+          hostname: getWindowHostname(),
+        })
+      ) {
+        throw createLocalDevFirebaseBackendUnavailableError();
+      }
+
+      throw error;
+    }
+
+    const message = await readResponseTextSafe(res);
 
     if (!res.ok) {
-      const message = await res.text();
+      if (
+        isLocalDevFirebaseBackendUnavailable({
+          backendEnabled: BUILD_CONFIG.backendEnabled,
+          hostname: getWindowHostname(),
+          responseText: message,
+          status: res.status,
+        })
+      ) {
+        throw createLocalDevFirebaseBackendUnavailableError();
+      }
+
       throw new Error(message || "Failed to sign in with Firebase.");
     }
 
     await this.primeSessionFromCookie();
     await this.session.waitForRevalidation();
+  }
+
+  async ensureFirebaseAuthBackendAvailable() {
+    if (!BUILD_CONFIG.backendEnabled) {
+      return;
+    }
+
+    let res: Response;
+
+    try {
+      res = await this.fetchService.fetch("/api/auth/session", {
+        cache: "no-store",
+        credentials: "include",
+      });
+    } catch (error) {
+      if (
+        isLocalDevFirebaseBackendUnavailable({
+          backendEnabled: BUILD_CONFIG.backendEnabled,
+          error,
+          hostname: getWindowHostname(),
+        })
+      ) {
+        throw createLocalDevFirebaseBackendUnavailableError();
+      }
+
+      throw error;
+    }
+
+    const message = await readResponseTextSafe(res);
+
+    if (
+      isLocalDevFirebaseBackendUnavailable({
+        backendEnabled: BUILD_CONFIG.backendEnabled,
+        hostname: getWindowHostname(),
+        responseText: message,
+        status: res.status,
+      })
+    ) {
+      throw createLocalDevFirebaseBackendUnavailableError();
+    }
   }
 
   async oauthPreflight(
