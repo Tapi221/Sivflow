@@ -3,7 +3,6 @@ import { z } from 'zod';
 export const ReleaseTypeSchema = z.enum([
   'stable',
   'beta',
-  'canary',
   'internal',
 ]);
 
