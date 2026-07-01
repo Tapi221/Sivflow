@@ -56,7 +56,6 @@ android {
         stable
         beta
         internal
-        canary
     }
 
     compileOptions {
