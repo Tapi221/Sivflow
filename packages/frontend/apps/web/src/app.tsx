@@ -1,6 +1,8 @@
 import { AffineContext } from '@affine/core/components/context';
 import { AppContainer } from '@affine/core/desktop/components/app-container';
 import { router } from '@affine/core/desktop/router';
+import { appInfo } from '@affine/electron-api';
+import { configureDesktopApiModule } from '@affine/core/modules/desktop-api';
 import { configureCommonModules } from '@affine/core/modules';
 import { I18nProvider } from '@affine/core/modules/i18n';
 import { LifecycleService } from '@affine/core/modules/lifecycle';
@@ -72,6 +74,9 @@ configureCommonModules(framework);
 configureBrowserWorkbenchModule(framework);
 configureLocalStorageStateStorageImpls(framework);
 configureBrowserWorkspaceFlavours(framework);
+if (appInfo?.electron) {
+  configureDesktopApiModule(framework);
+}
 framework.impl(NbstoreProvider, {
   realtime: storeManagerClient.realtime,
   openStore(key, options) {
