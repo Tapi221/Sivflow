@@ -57,9 +57,18 @@ const RELEASE_CHANNEL_MAP = new Map<Namespace, string>([
   [Namespace.Production, 'stable'],
 ]);
 
+const LEGACY_SERVER_NAMES = new Map<string, string>([
+  ['AFFiNE Canary Cloud', 'Sivflow Cloud'],
+  ['AFFiNE Cloud', 'Sivflow Cloud'],
+]);
+
 function resolveServerName(configuredName?: string) {
   const name = configuredName?.trim();
-  return name || (env.selfhosted ? 'Sivflow Selfhost' : 'Sivflow Cloud');
+  if (!name) {
+    return env.selfhosted ? 'Sivflow Selfhost' : 'Sivflow Cloud';
+  }
+
+  return LEGACY_SERVER_NAMES.get(name) ?? name;
 }
 
 @Resolver(() => ServerConfigType)

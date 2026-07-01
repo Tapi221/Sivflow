@@ -294,7 +294,7 @@ export const gqlFetcherFactory = (
     options: QueryOptions<Query>
   ): Promise<QueryResponse<Query>> => {
     if (
-      BUILD_CONFIG.appBuildType === 'canary' &&
+      BUILD_CONFIG.appBuildType === 'internal' &&
       options.query.deprecations?.length
     ) {
       options.query.deprecations.forEach(deprecation => {

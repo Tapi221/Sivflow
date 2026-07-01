@@ -19,6 +19,7 @@ const rendererLogPrefix =
   (rendererDevWorkspace === '@affine/web' ? '[web]' : '[renderer]');
 const backendLogPrefix = process.env.ELECTRON_BACKEND_LOG_PREFIX ?? '[backend]';
 const requiredNodeVersion = '22.20.0';
+const requireBackendDevServer = process.env.ELECTRON_REQUIRE_BACKEND === 'true';
 
 process.env.DEV_SERVER_URL ??= 'http://127.0.0.1:8080';
 process.env.ELECTRON_BACKEND_DEV_SERVER_URL ??= 'http://127.0.0.1:3010';
@@ -34,6 +35,7 @@ const stderrFilterPatterns = [
 let spawnProcess: ChildProcessWithoutNullStreams | null = null;
 let backendDevProcess: ChildProcessWithoutNullStreams | null = null;
 let webDevProcess: ChildProcessWithoutNullStreams | null = null;
+let backendDevServerAvailable = false;
 const intentionalStops = new WeakSet<ChildProcessWithoutNullStreams>();
 
 function parseNodeVersion(version: string) {
@@ -202,7 +204,7 @@ async function spawnOrReloadElectron() {
   });
 }
 
-async function isDevServerReachable(url: string) {
+async function isWebDevServerReachable(url: string) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 3000);
 
@@ -219,6 +221,33 @@ async function isDevServerReachable(url: string) {
     const body = await response.text();
     return (
       body.includes('/@vite/client') && body.includes('<title>Sivflow</title>')
+    );
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function isBackendDevServerReachable(baseUrl: string) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 3000);
+
+  try {
+    const response = await fetch(new URL('/graphql', baseUrl), {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+      },
+      signal: controller.signal,
+    });
+
+    const body = await response.text();
+    const requestId = response.headers.get('x-request-id');
+
+    return Boolean(
+      requestId?.startsWith('affine:http:') &&
+        body.includes('GRAPHQL_BAD_REQUEST')
     );
   } catch {
     return false;
@@ -270,12 +299,27 @@ function spawnWebDevServer() {
   }
 
   const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+  const env = { ...process.env };
+  const backendServerBase = process.env.ELECTRON_BACKEND_DEV_SERVER_URL;
+
+  if (backendDevServerAvailable && backendServerBase) {
+    env.SIVFLOW_ENABLE_BACKEND = 'true';
+    env.AFFINE_ENABLE_BACKEND = 'true';
+    env.SIVFLOW_BACKEND_URL = backendServerBase;
+    env.AFFINE_BACKEND_URL = backendServerBase;
+  } else {
+    delete env.SIVFLOW_ENABLE_BACKEND;
+    delete env.AFFINE_ENABLE_BACKEND;
+    delete env.SIVFLOW_BACKEND_URL;
+    delete env.AFFINE_BACKEND_URL;
+  }
+
   const currentWebDevProcess = spawn(
     npm,
     ['--workspace', rendererDevWorkspace, 'run', rendererDevScript],
     {
       cwd: rootDir,
-      env: process.env,
+      env,
       shell: true,
     }
   );
@@ -296,8 +340,12 @@ function spawnWebDevServer() {
 
 async function ensureBackendDevServer() {
   const backendServerBase = process.env.ELECTRON_BACKEND_DEV_SERVER_URL;
-  if (!backendServerBase || (await isDevServerReachable(backendServerBase))) {
-    return;
+  if (
+    !backendServerBase ||
+    (await isBackendDevServerReachable(backendServerBase))
+  ) {
+    backendDevServerAvailable = Boolean(backendServerBase);
+    return backendDevServerAvailable;
   }
 
   console.log(
@@ -309,23 +357,66 @@ async function ensureBackendDevServer() {
   const startedAt = Date.now();
 
   while (Date.now() - startedAt < timeoutMs) {
-    if (await isDevServerReachable(backendServerBase)) {
+    if (await isBackendDevServerReachable(backendServerBase)) {
+      backendDevServerAvailable = true;
       console.log(`Backend 開発サーバーに接続しました: ${backendServerBase}`);
-      return;
+      return true;
     }
 
     await delay(500);
   }
 
-  throw new Error(
+  backendDevServerAvailable = false;
+
+  const message =
     `Backend 開発サーバー ${backendServerBase} に接続できませんでした。` +
-      '別ターミナルで npm run dev:backend を起動してから再実行してください。'
-  );
+    (requireBackendDevServer
+      ? '別ターミナルで npm run dev:backend を起動してから再実行してください。'
+      : 'backend なしで Electron / Web 開発サーバーを起動します。API を使う機能は利用できません。');
+
+  if (requireBackendDevServer) {
+    throw new Error(message);
+  }
+
+  console.warn(message);
+  return false;
+}
+
+async function ensureBackendDevServerIfPossible() {
+  try {
+    return await ensureBackendDevServer();
+  } catch (error) {
+    if (requireBackendDevServer) {
+      throw error;
+    }
+
+    backendDevServerAvailable = false;
+    console.warn(
+      `Backend 起動をスキップします: ${error instanceof Error ? error.message : String(error)}`
+    );
+    return false;
+  }
+}
+
+async function ensureWebDevServer() {
+  if (backendDevServerAvailable) {
+    console.log('Backend が利用可能なため Web 開発サーバーの API proxy を有効にします。');
+  } else {
+    console.log('Backend なしで Web 開発サーバーを起動します。');
+  }
+
+  await ensureDevServer();
+}
+
+async function startElectronDev() {
+  await ensureBackendDevServerIfPossible();
+  await ensureWebDevServer();
+  await spawnOrReloadElectron();
 }
 
 async function ensureDevServer() {
   const devServerBase = process.env.DEV_SERVER_URL;
-  if (!devServerBase || (await isDevServerReachable(devServerBase))) {
+  if (!devServerBase || (await isWebDevServerReachable(devServerBase))) {
     return;
   }
 
@@ -338,7 +429,7 @@ async function ensureDevServer() {
   const startedAt = Date.now();
 
   while (Date.now() - startedAt < timeoutMs) {
-    if (await isDevServerReachable(devServerBase)) {
+    if (await isWebDevServerReachable(devServerBase)) {
       console.log(`Web 開発サーバーに接続しました: ${devServerBase}`);
       return;
     }
@@ -399,8 +490,6 @@ if (watchMode) {
   console.log(`変更を監視しています...`);
 } else {
   console.log('Electron を起動しています...');
-  await ensureBackendDevServer();
-  await ensureDevServer();
-  await spawnOrReloadElectron();
+  await startElectronDev();
   console.log(`Electron を起動しました。変更を監視しています...`);
 }

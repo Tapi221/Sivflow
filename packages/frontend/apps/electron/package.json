@@ -53,8 +53,8 @@
     "electron": "^39.0.0",
     "electron-log": "^5.4.3",
     "electron-squirrel-startup": "1.0.1",
-    "electron-winstaller": "^5.4.0",
     "electron-window-state": "^5.0.3",
+    "electron-winstaller": "^5.4.0",
     "esbuild": "^0.25.0",
     "fs-extra": "^11.2.0",
     "glob": "^11.0.0",
@@ -73,8 +73,12 @@
   "dependencies": {
     "async-call-rpc": "^6.4.2",
     "electron-updater": "^6.8.3",
+    "lazy-val": "^1.0.5",
     "link-preview-js": "^4.0.0",
+    "lodash.escaperegexp": "^4.1.2",
+    "lodash.isequal": "^4.5.0",
     "set-cookie-parser": "^2.7.1",
+    "tiny-typed-emitter": "^2.1.0",
     "yjs": "^13.6.27"
   },
   "build": {
