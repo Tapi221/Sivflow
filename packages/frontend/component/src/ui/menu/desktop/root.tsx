@@ -2,6 +2,7 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import clsx from 'clsx';
 import React, { useCallback, useImperativeHandle, useState } from 'react';
 
+import { useIsInsideModal } from '../../modal';
 import type { MenuProps } from '../menu.types';
 import * as styles from '../styles.css';
 import { DesktopMenuContext } from './context';
@@ -33,6 +34,11 @@ export const DesktopMenu = ({
   } = rawContentOptions ?? EMPTY_CONTENT_OPTIONS;
   const [innerOpen, setInnerOpen] = useState(defaultOpen);
   const finalOpen = open ?? innerOpen;
+  const insideModal = useIsInsideModal();
+  const finalModal = modal ?? insideModal;
+  const contentZIndex = finalModal
+    ? 'calc(var(--affine-z-index-modal) + 1)'
+    : 'var(--affine-z-index-popover)';
 
   const handleOpenChange = useCallback(
     (open: boolean) => {
@@ -60,7 +66,7 @@ export const DesktopMenu = ({
   return (
     <DesktopMenuContext.Provider value={MenuContextValue}>
       <DropdownMenu.Root
-        modal={modal ?? false}
+        modal={finalModal}
         open={finalOpen}
         onOpenChange={handleOpenChange}
         {...rootOptions}
@@ -84,7 +90,7 @@ export const DesktopMenu = ({
             )}
             sideOffset={4}
             align="start"
-            style={{ zIndex: 'var(--affine-z-index-popover)', ...contentStyle }}
+            style={{ zIndex: contentZIndex, ...contentStyle }}
             {...otherContentOptions}
           >
             {items}
