@@ -2,7 +2,6 @@
 import semver from 'semver';
 
 import {
-  checkCanaryDateClientVersion,
   Config,
   UnsupportedClientVersion,
 } from '../../base';
@@ -12,26 +11,11 @@ import { CONFIG_TOKEN } from '../../base/config/tokens';
 export class VersionService {
   private readonly logger = new Logger(VersionService.name);
   private static readonly HARD_REQUIRED_VERSION = '>=0.25.0';
-  private static readonly CANARY_REQUIRED_VERSION = 'canary (within 2 months)';
 
   constructor(@Inject(CONFIG_TOKEN) private readonly config: Config) {}
 
   async checkVersion(clientVersion?: string) {
     const requiredVersion = this.config.client.versionControl.requiredVersion;
-
-    if (clientVersion && env.namespaces.canary) {
-      const canaryCheck = checkCanaryDateClientVersion(clientVersion);
-      if (canaryCheck.matched) {
-        if (canaryCheck.allowed) {
-          return true;
-        }
-
-        throw new UnsupportedClientVersion({
-          clientVersion,
-          requiredVersion: VersionService.CANARY_REQUIRED_VERSION,
-        });
-      }
-    }
 
     const hardRange = await this.getVersionRange(
       VersionService.HARD_REQUIRED_VERSION
