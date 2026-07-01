@@ -52,7 +52,7 @@ export default {
       define: Object.entries(
         getBuildConfig(new Package('@affine/web'), {
           mode: 'development',
-          channel: 'canary',
+          channel: 'local',
         })
       ).reduce((envs, [key, value]) => {
         envs[`BUILD_CONFIG.${key}`] = JSON.stringify(value);
@@ -69,4 +69,3 @@ export default {
 function getAbsolutePath(value: string): any {
   return dirname(fileURLToPath(import.meta.resolve(join(value, 'package.json'))));
 }
-
