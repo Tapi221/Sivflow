@@ -23,7 +23,7 @@ const trackTelemetryChannels = new Set<TrackTelemetryChannel>([
   'stable',
   'beta',
   'internal',
-  'canary',
+  'local',
 ]);
 
 function readGlobalBuildConfig(): Partial<BUILD_CONFIG_TYPE> | undefined {
