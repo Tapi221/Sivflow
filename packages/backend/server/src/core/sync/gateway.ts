@@ -16,7 +16,6 @@ import { type Server, Socket } from 'socket.io';
 
 import {
   CallMetric,
-  checkCanaryDateClientVersion,
   DocNotFound,
   DocUpdateBlocked,
   EventBus,
@@ -79,31 +78,14 @@ const DOC_UPDATES_PROTOCOL_026 = new semver.Range('>=0.26.0-0', {
 type SyncProtocolRoomType = Extract<RoomType, 'sync-025' | 'sync-026'>;
 const SOCKET_PRESENCE_USER_ID_KEY = 'affinePresenceUserId';
 
-function normalizeWsClientVersion(clientVersion: string): string | null {
-  if (env.namespaces.canary) {
-    const canaryCheck = checkCanaryDateClientVersion(clientVersion);
-    if (canaryCheck.matched) {
-      return canaryCheck.allowed ? canaryCheck.normalized : null;
-    }
-  }
-
-  return clientVersion;
-}
-
 function isSupportedWsClientVersion(clientVersion: string): boolean {
-  const normalized = normalizeWsClientVersion(clientVersion);
-  if (!normalized) {
-    return false;
-  }
-
   return Boolean(
-    semver.valid(normalized) && MIN_WS_CLIENT_VERSION.test(normalized)
+    semver.valid(clientVersion) && MIN_WS_CLIENT_VERSION.test(clientVersion)
   );
 }
 
 function getSyncProtocolRoomType(clientVersion: string): SyncProtocolRoomType {
-  const normalized = normalizeWsClientVersion(clientVersion);
-  return DOC_UPDATES_PROTOCOL_026.test(normalized ?? clientVersion)
+  return DOC_UPDATES_PROTOCOL_026.test(clientVersion)
     ? 'sync-026'
     : 'sync-025';
 }
