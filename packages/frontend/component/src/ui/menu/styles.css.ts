@@ -17,7 +17,7 @@ export const menuContent = style({
     '(background: color-mix(in srgb, white 80%, transparent))': {
       background: `color-mix(in srgb, ${cssVarV2(
         'layer/background/overlayPanel'
-      )} 82%, transparent)`,
+      )} 76%, transparent)`,
     },
     '(backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px))': {
       backdropFilter: 'blur(12px)',
