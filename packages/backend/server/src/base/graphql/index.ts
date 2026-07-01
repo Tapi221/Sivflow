@@ -60,7 +60,7 @@ export type GraphqlContext = {
 
             // @ts-expect-error allow assign
             formattedError.extensions = ufe.toJSON();
-            if (env.namespaces.canary) {
+            if (env.namespaces.dev) {
               formattedError.extensions.stacktrace = ufe.stacktrace;
             }
             return formattedError;
