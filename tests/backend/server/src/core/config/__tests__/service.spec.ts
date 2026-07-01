@@ -44,7 +44,7 @@ test('should normalize legacy server name before saving config', async t => {
     {
       module: 'server',
       key: 'name',
-      value: 'AFFiNE Canary Cloud',
+      value: 'AFFiNE Cloud',
     },
   ]);
 
