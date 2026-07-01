@@ -22,6 +22,7 @@ ENV NPM_CONFIG_AUDIT=false
 
 COPY . .
 
+RUN test -s package-lock.json || rm -f package-lock.json
 RUN npm install
 RUN npm --workspace @affine/server-native run build
 RUN npm run build:backend
@@ -42,7 +43,7 @@ ENV SERVER_FLAVOR=allinone
 ENV DEPLOYMENT_PLATFORM=gcp
 ENV AFFINE_SERVER_HTTPS=true
 
-COPY --from=build /app/package.json /app/package-lock.json ./
+COPY --from=build /app/package.json ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/blocksuite ./blocksuite
 COPY --from=build /app/packages ./packages
