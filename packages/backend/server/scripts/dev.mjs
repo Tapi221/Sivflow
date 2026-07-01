@@ -14,8 +14,8 @@ const env = {
     process.env.AFFINE_SERVER_EXTERNAL_URL ?? 'http://localhost:8080',
   DATABASE_URL:
     process.env.DATABASE_URL ??
-    'postgresql://sivflow:sivflow@localhost:5432/sivflow?schema=public',
-  POSTGRES_HOST: process.env.POSTGRES_HOST ?? 'localhost',
+    'postgresql://sivflow:sivflow@127.0.0.1:5432/sivflow?schema=public',
+  POSTGRES_HOST: process.env.POSTGRES_HOST ?? '127.0.0.1',
   POSTGRES_PORT: process.env.POSTGRES_PORT ?? '5432',
   REDIS_SERVER_HOST: process.env.REDIS_SERVER_HOST ?? 'localhost',
   REDIS_SERVER_PORT: process.env.REDIS_SERVER_PORT ?? '6379',

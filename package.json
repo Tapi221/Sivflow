@@ -32,7 +32,7 @@
     "test:blocksuite:debug": "npm --workspace @blocksuite/integration-test run test:debug",
     "db:check": "node scripts/check-local-services.mjs",
     "db:migrate": "node scripts/apply-postgres-migrations.mjs",
-    "db:psql": "psql -h localhost -p 5432 -U sivflow -d sivflow",
+    "db:psql": "psql -h 127.0.0.1 -p 5432 -U sivflow -d sivflow",
     "dev": "node scripts/dev-web-backend.mjs",
     "dev:web": "node scripts/dev-web-backend.mjs",
     "dev:web:backend": "node scripts/dev-web-backend.mjs",

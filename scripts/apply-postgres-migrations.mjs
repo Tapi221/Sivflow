@@ -10,7 +10,7 @@ const prismaSchemaPath = path.join(backendServerDir, 'schema.prisma');
 const prismaCliPath = path.join(root, 'node_modules', 'prisma', 'build', 'index.js');
 const rawDatabaseUrl = process.env.DATABASE_URL ?? '';
 const defaultConnectionUrl =
-  'postgresql://sivflow:sivflow@localhost:5432/sivflow';
+  'postgresql://sivflow:sivflow@127.0.0.1:5432/sivflow';
 
 function toPsqlConnectionUrl(value) {
   if (!value) {
@@ -34,7 +34,7 @@ const files = fs.existsSync(migrationsDir)
   : [];
 
 const connectionUrl = toPsqlConnectionUrl(rawDatabaseUrl);
-const defaultArgs = ['-h', 'localhost', '-p', '5432', '-U', 'sivflow', '-d', 'sivflow'];
+const defaultArgs = ['-h', '127.0.0.1', '-p', '5432', '-U', 'sivflow', '-d', 'sivflow'];
 const connectionArgs = connectionUrl ? [connectionUrl] : defaultArgs;
 
 function run(command, args, options = {}) {

@@ -147,8 +147,13 @@ export async function run() {
     });
   }
 
+  traceStartup('initializing app');
+  await app.init();
+  traceStartup('app initialized');
+
   traceStartup('listening');
   await app.listen(config.server.port, config.server.listenAddr);
+  traceStartup('listen resolved');
 
   const formattedAddr = config.server.listenAddr.includes(':')
     ? `[${config.server.listenAddr}]`

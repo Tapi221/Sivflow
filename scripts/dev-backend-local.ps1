@@ -4,7 +4,7 @@ $root = Resolve-Path (Join-Path $PSScriptRoot "..")
 Set-Location $root
 
 if (-not $env:DATABASE_URL) {
-  $env:DATABASE_URL = "postgresql://sivflow:sivflow@localhost:5432/sivflow?schema=public"
+  $env:DATABASE_URL = "postgresql://sivflow:sivflow@127.0.0.1:5432/sivflow?schema=public"
 }
 if (-not $env:REDIS_SERVER_HOST) {
   $env:REDIS_SERVER_HOST = "localhost"

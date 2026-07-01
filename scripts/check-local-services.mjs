@@ -37,7 +37,7 @@ function canConnect({ label, host, port, timeoutMs = DEFAULT_TIMEOUT_MS }) {
 const checks = [
   {
     label: 'PostgreSQL',
-    host: process.env.POSTGRES_HOST ?? 'localhost',
+    host: process.env.POSTGRES_HOST ?? '127.0.0.1',
     port: numberFromEnv('POSTGRES_PORT', 5432),
   },
   {
@@ -59,7 +59,7 @@ if (failed.length > 0) {
   console.error('');
   console.error('[Sivflow] ローカルサービスに接続できません。');
   console.error('[Sivflow] PostgreSQL 16 + pgvector と Redis をOS側で起動してください。');
-  console.error('[Sivflow] PostgreSQLの例: host=localhost port=5432 user=sivflow db=sivflow');
+  console.error('[Sivflow] PostgreSQLの例: host=127.0.0.1 port=5432 user=sivflow db=sivflow');
   console.error('[Sivflow] Redisの例: host=localhost port=6379');
   process.exit(1);
 }

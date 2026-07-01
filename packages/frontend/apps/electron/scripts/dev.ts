@@ -204,14 +204,22 @@ async function spawnOrReloadElectron() {
 
 async function isDevServerReachable(url: string) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 1000);
+  const timeout = setTimeout(() => controller.abort(), 3000);
 
   try {
-    await fetch(url, {
-      method: 'HEAD',
+    const response = await fetch(url, {
+      method: 'GET',
       signal: controller.signal,
     });
-    return true;
+
+    if (!response.ok) {
+      return false;
+    }
+
+    const body = await response.text();
+    return (
+      body.includes('/@vite/client') && body.includes('<title>Sivflow</title>')
+    );
   } catch {
     return false;
   } finally {

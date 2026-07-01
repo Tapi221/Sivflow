@@ -6,11 +6,11 @@ import { fileURLToPath } from 'node:url';
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const defaultDatabaseUrl =
-  'postgresql://sivflow:sivflow@localhost:5432/sivflow?schema=public';
+  'postgresql://sivflow:sivflow@127.0.0.1:5432/sivflow?schema=public';
 const env = {
   ...process.env,
   DATABASE_URL: process.env.DATABASE_URL ?? defaultDatabaseUrl,
-  POSTGRES_HOST: process.env.POSTGRES_HOST ?? 'localhost',
+  POSTGRES_HOST: process.env.POSTGRES_HOST ?? '127.0.0.1',
   POSTGRES_PORT: process.env.POSTGRES_PORT ?? '5432',
   REDIS_SERVER_HOST: process.env.REDIS_SERVER_HOST ?? 'localhost',
   REDIS_SERVER_PORT: process.env.REDIS_SERVER_PORT ?? '6379',
@@ -154,4 +154,3 @@ const migrateResult = run(process.execPath, [
 if (migrateResult.status !== 0) {
   process.exit(migrateResult.status ?? 1);
 }
-

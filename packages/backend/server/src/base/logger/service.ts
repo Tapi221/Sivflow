@@ -1,7 +1,7 @@
 import { ConsoleLogger, Injectable, type LogLevel } from '@nestjs/common';
 import { ClsServiceManager } from 'nestjs-cls';
 
-import { UserFriendlyError } from '../error';
+import { UserFriendlyError } from '../error/def';
 
 // DO NOT use this Logger directly
 // Use it via this way: `private readonly logger = new Logger(MyService.name)`
