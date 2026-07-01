@@ -2,7 +2,7 @@ import { Controller, Get } from '@nestjs/common';
 import test from 'ava';
 import Sinon from 'sinon';
 import { AppModule } from '../app.module';
-import { CANARY_CLIENT_VERSION_MAX_AGE_DAYS, ConfigFactory, hasNewerVersion, UseNamedGuard, } from '../base';
+import { ConfigFactory, hasNewerVersion, UseNamedGuard } from '../base';
 import { Public } from '../core/auth/guard';
 import { VersionService } from '../core/version/service';
 import { createTestingApp, TestingApp } from './utils';
@@ -30,10 +30,6 @@ const checkVersion = (enabled = true) => {
       },
     },
   });
-};
-
-const makeCanaryDateVersion = (date: Date, build = '015') => {
-  return `${date.getUTCFullYear()}.${date.getUTCMonth() + 1}.${date.getUTCDate()}-canary.${build}`;
 };
 
 test.before(async () => {
@@ -185,64 +181,20 @@ test('should test prerelease version', async t => {
 
   let res = await app
     .GET('/guarded/test')
-    .set('x-affine-version', '0.25.0-canary.1');
+    .set('x-affine-version', '0.25.0-beta.1');
 
-  // 0.25.0-canary.1 is lower than 0.25.0 obviously
+  // 0.25.0-beta.1 is lower than 0.25.0 obviously
   t.is(res.status, 403);
 
   res = await app
     .GET('/guarded/test')
-    .set('x-affine-version', '0.26.0-canary.1');
+    .set('x-affine-version', '0.26.0-beta.1');
 
   t.is(res.status, 200);
 
   res = await app.GET('/guarded/test').set('x-affine-version', '0.26.0-beta.2');
 
   t.is(res.status, 200);
-});
-
-test('should allow recent canary date version in canary namespace', async t => {
-  const prevNamespace = env.NAMESPACE;
-  // @ts-expect-error test
-  env.NAMESPACE = 'dev';
-
-  try {
-    const res = await app
-      .GET('/guarded/test')
-      .set('x-affine-version', makeCanaryDateVersion(new Date(), '015'));
-
-    t.is(res.status, 200);
-  } finally {
-    // @ts-expect-error test
-    env.NAMESPACE = prevNamespace;
-  }
-});
-
-test('should reject old canary date version in canary namespace', async t => {
-  const prevNamespace = env.NAMESPACE;
-  // @ts-expect-error test
-  env.NAMESPACE = 'dev';
-
-  try {
-    const old = new Date(
-      Date.now() -
-        (CANARY_CLIENT_VERSION_MAX_AGE_DAYS + 1) * 24 * 60 * 60 * 1000
-    );
-    const oldVersion = makeCanaryDateVersion(old, '015');
-
-    const res = await app
-      .GET('/guarded/test')
-      .set('x-affine-version', oldVersion);
-
-    t.is(res.status, 403);
-    t.is(
-      res.body.message,
-      `Unsupported client with version [${oldVersion}], required version is [canary (within 2 months)].`
-    );
-  } finally {
-    // @ts-expect-error test
-    env.NAMESPACE = prevNamespace;
-  }
 });
 
 test('should compare release versions for available upgrades', t => {
