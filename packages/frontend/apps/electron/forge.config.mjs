@@ -375,8 +375,7 @@ export default {
   ],
   hooks: {
     readPackageJson: async (_, packageJson) => {
-      // we want different package name for canary build
-      // so stable and canary will not share the same app data
+      // keep package names separated between release channels
       packageJson.productName = productName;
     },
     prePackage: async () => {
