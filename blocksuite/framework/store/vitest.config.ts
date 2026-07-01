@@ -5,7 +5,9 @@ export default defineConfig({
     target: 'es2018',
   },
   test: {
-    include: ['src/__tests__/**/*.unit.spec.ts'],
+    include: [
+      '../../../tests/blocksuite/framework/store/src/__tests__/**/*.unit.spec.ts',
+    ],
     testTimeout: 500,
     coverage: {
       provider: 'istanbul',

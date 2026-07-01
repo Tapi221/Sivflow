@@ -10,7 +10,9 @@ export default defineConfig({
     globalSetup: fileURLToPath(
       new URL('../../../scripts/vitest-global.js', import.meta.url)
     ),
-    include: ['src/__tests__/**/*.unit.spec.ts'],
+    include: [
+      '../../../tests/blocksuite/sivflow/data-view/src/__tests__/**/*.unit.spec.ts',
+    ],
     testTimeout: 1000,
     coverage: {
       provider: 'istanbul',
