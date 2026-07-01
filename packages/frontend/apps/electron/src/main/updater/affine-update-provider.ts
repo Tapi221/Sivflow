@@ -173,7 +173,7 @@ export class AFFiNEUpdateProvider extends Provider<GithubUpdateInfo> {
   }
 }
 
-type VersionDistribution = 'canary' | 'beta' | 'stable';
+type VersionDistribution = 'beta' | 'stable';
 type VersionPlatform = 'windows' | 'macos' | 'linux';
 type VersionArch = 'x64' | 'arm64';
 type FileParts =
@@ -181,7 +181,7 @@ type FileParts =
   | [
       'affine',
       string,
-      `${'canary' | 'beta'}.${number}`,
+      `beta.${number}`,
       VersionDistribution,
       VersionPlatform,
       VersionArch,
@@ -202,7 +202,7 @@ export function availableForMyPlatformAndInstaller(
 
   //  in form of:
   //   affine-${build}-${buildSuffix}-${distribution}-${platform}-${arch}.${installer}
-  //          ^ 1.0.0    ^canary.1    ^ canary        ^windows    ^ x64  ^.nsis.exe
+  //          ^ 1.0.0    ^beta.1    ^ beta        ^windows    ^ x64  ^.nsis.exe
   const filename = file.split('/').pop();
 
   if (!filename) {
