@@ -53,11 +53,14 @@ vi.mock('@affine/i18n', () => ({
   useI18n: () => new Proxy({}, { get: () => () => '' }),
 }));
 
-vi.mock('../../use-navigate-helper', () => ({
-  useNavigateHelper: () => ({ jumpToIndex, jumpToSignIn }),
-}));
+vi.mock(
+  '../../../../../../../../packages/frontend/core/src/components/hooks/use-navigate-helper',
+  () => ({
+    useNavigateHelper: () => ({ jumpToIndex, jumpToSignIn }),
+  })
+);
 
-import { useSignOut } from '../use-sign-out';
+import { useSignOut } from '../../../../../../../../packages/frontend/core/src/components/hooks/affine/use-sign-out';
 
 describe('useSignOut', () => {
   beforeEach(() => {
