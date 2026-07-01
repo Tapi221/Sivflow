@@ -12,7 +12,7 @@ function numberFromEnv(name, fallback) {
   return Number.isInteger(value) && value > 0 ? value : fallback;
 }
 
-function probeTcpService({ label, host, port, timeoutMs = DEFAULT_TIMEOUT_MS }) {
+function probePostgresService({ label, host, port, timeoutMs = DEFAULT_TIMEOUT_MS }) {
   return new Promise(resolve => {
     const socket = net.createConnection({ host, port });
     let done = false;
@@ -28,9 +28,19 @@ function probeTcpService({ label, host, port, timeoutMs = DEFAULT_TIMEOUT_MS }) 
     };
 
     socket.setTimeout(timeoutMs);
-    socket.once('connect', () => finish(true));
+    socket.once('connect', () => {
+      const sslRequest = Buffer.alloc(8);
+      sslRequest.writeInt32BE(8, 0);
+      sslRequest.writeInt32BE(80877103, 4);
+      socket.write(sslRequest);
+    });
+    socket.once('data', chunk => {
+      const reply = chunk.subarray(0, 1).toString('utf8');
+      finish(reply === 'S' || reply === 'N');
+    });
     socket.once('timeout', () => finish(false));
     socket.once('error', () => finish(false));
+    socket.once('close', () => finish(false));
   });
 }
 
@@ -87,7 +97,7 @@ const checks = [
     label: 'PostgreSQL',
     host: process.env.POSTGRES_HOST ?? '127.0.0.1',
     port: numberFromEnv('POSTGRES_PORT', 5432),
-    probe: probeTcpService,
+    probe: probePostgresService,
   },
   {
     label: 'Redis',

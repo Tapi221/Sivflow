@@ -4,6 +4,11 @@ import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
+import {
+  ensureDockerDaemonRunning,
+  runDockerCommand,
+} from './docker-api-fallback.mjs';
+
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const defaultDatabaseUrl =
   'postgresql://sivflow:sivflow@127.0.0.1:5432/sivflow?schema=public';
@@ -26,8 +31,19 @@ function run(command, args, options = {}) {
   });
 }
 
+function runDocker(args, options = {}) {
+  return runDockerCommand(args, {
+    cwd: rootDir,
+    env,
+    encoding: 'utf8',
+    shell: process.platform === 'win32',
+    logPrefix: '[Sivflow]',
+    ...options,
+  });
+}
+
 function dockerComposeAvailable() {
-  return run('docker', ['compose', 'version']).status === 0;
+  return runDocker(['compose', 'version']).status === 0;
 }
 
 function portFromEnv(name, fallback) {
@@ -36,7 +52,7 @@ function portFromEnv(name, fallback) {
   return Number.isInteger(value) && value > 0 ? value : fallback;
 }
 
-function canConnect(host, port, timeoutMs = 1500) {
+function canSpeakPostgres(host, port, timeoutMs = 1500) {
   return new Promise(resolve => {
     const socket = net.createConnection({ host, port });
     let finished = false;
@@ -52,9 +68,19 @@ function canConnect(host, port, timeoutMs = 1500) {
     };
 
     socket.setTimeout(timeoutMs);
-    socket.once('connect', () => finish(true));
+    socket.once('connect', () => {
+      const sslRequest = Buffer.alloc(8);
+      sslRequest.writeInt32BE(8, 0);
+      sslRequest.writeInt32BE(80877103, 4);
+      socket.write(sslRequest);
+    });
+    socket.once('data', chunk => {
+      const reply = chunk.subarray(0, 1).toString('utf8');
+      finish(reply === 'S' || reply === 'N');
+    });
     socket.once('timeout', () => finish(false));
     socket.once('error', () => finish(false));
+    socket.once('close', () => finish(false));
   });
 }
 
@@ -111,7 +137,8 @@ async function checkServices() {
     label: 'PostgreSQL',
     host: env.POSTGRES_HOST,
     port: portFromEnv('POSTGRES_PORT', 5432),
-    probe: () => canConnect(env.POSTGRES_HOST, portFromEnv('POSTGRES_PORT', 5432)),
+    probe: () =>
+      canSpeakPostgres(env.POSTGRES_HOST, portFromEnv('POSTGRES_PORT', 5432)),
   };
   const redis = {
     label: 'Redis',
@@ -164,10 +191,17 @@ if (missing.length > 0) {
     process.exit(1);
   }
 
+  const dockerReady = await ensureDockerDaemonRunning({
+    logPrefix: '[Sivflow]',
+  });
+  if (!dockerReady) {
+    process.exit(1);
+  }
+
   console.log(
     '[Sivflow] PostgreSQL / Redis が見つからないため docker compose で起動しています...'
   );
-  const composeResult = run('docker', [
+  const composeResult = runDocker([
     'compose',
     'up',
     '-d',

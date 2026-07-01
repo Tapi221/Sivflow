@@ -26,6 +26,7 @@ const npmCommand = isWindows ? (process.env.ComSpec ?? 'cmd.exe') : 'npm';
 const defaultBackendHost = '127.0.0.1';
 const defaultBackendPort = 3010;
 const requestTimeoutMs = 1500;
+const dockerCliTimeoutMs = 5_000;
 
 // ─── ユーティリティ ──────────────────────────────────────────────
 
@@ -109,11 +110,49 @@ function run(label, args, extraEnv = {}) {
 // ─── Docker Desktop 起動待機 ──────────────────────────────────────
 
 function isDockerRunning() {
-  const result = runSync('docker', ['info'], { stdio: 'ignore' });
-  return result.status === 0;
+  const result = runSync(
+    'docker',
+    ['version', '--format', '{{.Server.Version}}'],
+    {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+      timeout: dockerCliTimeoutMs,
+    }
+  );
+
+  return result.status === 0 && typeof result.stdout === 'string' && result.stdout.trim().length > 0;
+}
+
+function isDockerDesktopProcessRunning() {
+  if (!isWindows) {
+    return false;
+  }
+
+  const result = runSync(
+    'tasklist',
+    ['/FI', 'IMAGENAME eq Docker Desktop.exe', '/FO', 'CSV', '/NH'],
+    {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+      timeout: dockerCliTimeoutMs,
+    }
+  );
+
+  return (
+    result.status === 0 &&
+    typeof result.stdout === 'string' &&
+    result.stdout.includes('Docker Desktop.exe')
+  );
 }
 
 function startDockerDesktopOnWindows() {
+  if (isDockerDesktopProcessRunning()) {
+    process.stdout.write(
+      '[docker] Docker Desktop のプロセスは既に起動しています。Docker engine の準備を待ちます...\n'
+    );
+    return true;
+  }
+
   const candidates = [
     'C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe',
     `${process.env.LOCALAPPDATA}\\Docker\\Docker Desktop.exe`,
@@ -138,15 +177,20 @@ async function ensureDockerRunning() {
   process.stdout.write('[docker] Docker Desktop が起動していません。自動起動を試みます...\n');
 
   if (isWindows) {
-    startDockerDesktopOnWindows();
+    if (!startDockerDesktopOnWindows()) {
+      process.stderr.write(
+        '[docker] Docker Desktop を自動起動できませんでした。手動で起動してください。\n'
+      );
+      process.exit(1);
+    }
   } else {
     process.stderr.write('[docker] Docker を手動で起動してから再実行してください。\n');
     process.exit(1);
   }
 
-  // Docker が起動するまで最大 90 秒待機
-  const timeoutMs = 90_000;
-  const intervalMs = 2_000;
+  // Docker engine の準備には数分かかることがあるので長めに待機
+  const timeoutMs = 240_000;
+  const intervalMs = 5_000;
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     await sleep(intervalMs);
@@ -155,10 +199,19 @@ async function ensureDockerRunning() {
       return;
     }
     const elapsed = Math.round((Date.now() - start) / 1000);
-    process.stdout.write(`[docker] 待機中... (${elapsed}s)\n`);
+    const processState = isDockerDesktopProcessRunning()
+      ? 'process=running'
+      : 'process=starting';
+    process.stdout.write(`[docker] 待機中... (${elapsed}s, ${processState})\n`);
   }
 
-  process.stderr.write('[docker] Docker Desktop の起動がタイムアウトしました。手動で起動してください。\n');
+  process.stderr.write(
+    [
+      '[docker] Docker Desktop の起動がタイムアウトしました。',
+      '[docker] アプリは開いていても Docker engine の準備が終わっていない可能性があります。',
+      '[docker] Docker Desktop を前面で開いて状態が "Engine running" になるまで待ってから再実行してください。',
+    ].join('\n') + '\n'
+  );
   process.exit(1);
 }
 

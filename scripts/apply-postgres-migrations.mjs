@@ -1,7 +1,10 @@
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { runDockerCommand } from './docker-api-fallback.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const migrationsDir = path.join(root, 'functions', 'db', 'migrations');
@@ -46,6 +49,48 @@ function run(command, args, options = {}) {
   });
 }
 
+function canSpeakPostgres(host, port, timeoutMs = 1500) {
+  return new Promise(resolve => {
+    const socket = net.createConnection({ host, port });
+    let done = false;
+
+    const finish = ok => {
+      if (done) {
+        return;
+      }
+
+      done = true;
+      socket.destroy();
+      resolve(ok);
+    };
+
+    socket.setTimeout(timeoutMs);
+    socket.once('connect', () => {
+      const sslRequest = Buffer.alloc(8);
+      sslRequest.writeInt32BE(8, 0);
+      sslRequest.writeInt32BE(80877103, 4);
+      socket.write(sslRequest);
+    });
+    socket.once('data', chunk => {
+      const reply = chunk.subarray(0, 1).toString('utf8');
+      finish(reply === 'S' || reply === 'N');
+    });
+    socket.once('timeout', () => finish(false));
+    socket.once('error', () => finish(false));
+    socket.once('close', () => finish(false));
+  });
+}
+
+function runDocker(args, options = {}) {
+  return runDockerCommand(args, {
+    cwd: root,
+    env: process.env,
+    shell: process.platform === 'win32',
+    logPrefix: '[Sivflow]',
+    ...options,
+  });
+}
+
 function hasLocalPsql() {
   const result = run('psql', ['--version'], {
     stdio: 'ignore',
@@ -54,7 +99,7 @@ function hasLocalPsql() {
 }
 
 function hasDockerCompose() {
-  const result = run('docker', ['compose', 'version'], {
+  const result = runDocker(['compose', 'version'], {
     stdio: 'ignore',
   });
   return result.status === 0;
@@ -67,8 +112,7 @@ function applyMigrationWithLocalPsql(fullPath) {
 }
 
 function applyMigrationWithDocker(fullPath) {
-  return run(
-    'docker',
+  return runDocker(
     [
       'compose',
       'exec',
@@ -124,8 +168,7 @@ function postgresReadyProbe() {
     });
   }
 
-  return run(
-    'docker',
+  return runDocker(
     [
       'compose',
       'exec',
@@ -142,13 +185,19 @@ function postgresReadyProbe() {
   );
 }
 
-function waitForPostgresReady(timeoutMs = 90000) {
+async function waitForPostgresReady(timeoutMs = 90000) {
   const startedAt = Date.now();
 
   while (Date.now() - startedAt < timeoutMs) {
-    const result = postgresReadyProbe();
-    if (result.status === 0) {
-      return true;
+    if (!needsSqlRunner) {
+      if (await canSpeakPostgres('127.0.0.1', 5432)) {
+        return true;
+      }
+    } else {
+      const result = postgresReadyProbe();
+      if (result.status === 0) {
+        return true;
+      }
     }
 
     Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 1000);
@@ -157,17 +206,18 @@ function waitForPostgresReady(timeoutMs = 90000) {
   return false;
 }
 
+const needsSqlRunner = files.length > 0;
 const useLocalPsql = hasLocalPsql();
-const useDockerCompose = !useLocalPsql && hasDockerCompose();
+const useDockerCompose = needsSqlRunner && !useLocalPsql && hasDockerCompose();
 
-if (!useLocalPsql && !useDockerCompose) {
+if (needsSqlRunner && !useLocalPsql && !useDockerCompose) {
   console.error(
     '[Sivflow] psql コマンドが見つからず、docker compose も利用できません。'
   );
   process.exit(1);
 }
 
-if (!waitForPostgresReady()) {
+if (!(await waitForPostgresReady())) {
   console.error('[Sivflow] PostgreSQL の起動完了を待機しましたが、接続できませんでした。');
   process.exit(1);
 }
