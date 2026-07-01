@@ -4,17 +4,15 @@ import {
   type DropTargetDropEvent,
   type DropTargetOptions,
   type DropTargetTreeInstruction,
-  IconAndNameEditorMenu,
   IconButton,
-  type IconData,
   IconRenderer,
+  Input,
   Menu,
   MenuItem,
   useDraggable,
   useDropTarget,
 } from '@affine/component';
 import { Guard } from '@affine/core/components/guard';
-import { AppSidebarService } from '@affine/core/modules/app-sidebar';
 import { ExplorerIconService } from '@affine/core/modules/explorer-icon/services/explorer-icon';
 import type { ExplorerType } from '@affine/core/modules/explorer-icon/store/explorer-icon';
 import type { DocPermissionActions } from '@affine/core/modules/permissions';
@@ -107,74 +105,6 @@ interface WebNavigationPanelTreeNodeProps extends BaseNavigationPanelTreeNodePro
   dropEffect?: NavigationPanelTreeNodeDropEffect;
 }
 
-/**
- * specific rename modal for navigation panel tree node,
- * Separate it into a separate component to prevent re-rendering the entire component when width changes.
- */
-export const NavigationPanelTreeNodeRenameModal = ({
-  setRenaming,
-  handleRename,
-  rawName,
-  explorerIconConfig,
-  className,
-  fallbackIcon,
-}: {
-  setRenaming: (renaming: boolean) => void;
-  handleRename: (newName: string) => void;
-  rawName: string | undefined;
-  className?: string;
-  explorerIconConfig?: ExplorerIconConfig | null;
-  fallbackIcon?: React.ReactNode;
-}) => {
-  const explorerIconService = useService(ExplorerIconService);
-  const appSidebarService = useService(AppSidebarService).sidebar;
-  const sidebarWidth = useLiveData(appSidebarService.width$);
-
-  const explorerIcon = useLiveData(
-    useMemo(
-      () =>
-        explorerIconConfig
-          ? explorerIconService.icon$(
-              explorerIconConfig.where,
-              explorerIconConfig.id
-            )
-          : null,
-      [explorerIconConfig, explorerIconService]
-    )
-  );
-
-  const onIconChange = useCallback(
-    (data?: IconData) => {
-      if (!explorerIconConfig) return;
-      explorerIconService.setIcon({
-        where: explorerIconConfig.where,
-        id: explorerIconConfig.id,
-        icon: data,
-      });
-    },
-    [explorerIconConfig, explorerIconService]
-  );
-
-  return (
-    <IconAndNameEditorMenu
-      open
-      onOpenChange={setRenaming}
-      onIconChange={onIconChange}
-      onNameChange={handleRename}
-      name={rawName ?? ''}
-      icon={explorerIcon?.icon}
-      width={sidebarWidth - 16}
-      contentOptions={{
-        sideOffset: 36,
-      }}
-      iconPlaceholder={fallbackIcon}
-      inputTestId="rename-modal-input"
-    >
-      <div className={clsx(styles.itemRenameAnchor, className)} />
-    </IconAndNameEditorMenu>
-  );
-};
-
 export const NavigationPanelTreeNode = ({
   children,
   icon: Icon,
@@ -212,7 +142,10 @@ export const NavigationPanelTreeNode = ({
   const clickForCollapse = !onClick && !to && !disabled;
   const [childCount, setChildCount] = useState(0);
   const [renaming, setRenaming] = useState(defaultRenaming);
+  const [draftName, setDraftName] = useState(rawName ?? '');
   const [lastInGroup, setLastInGroup] = useState(false);
+  const cancelRenameRef = useRef(false);
+  const renameSubmitTimeoutRef = useRef<number | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const explorerIcon = useLiveData(
     useMemo(
@@ -298,6 +231,27 @@ export const NavigationPanelTreeNode = ({
     ]
   );
   const isSelfDraggedOver = draggedOverDraggable?.data.__cid === cid;
+
+  useEffect(() => {
+    if (defaultRenaming) {
+      setRenaming(true);
+    }
+  }, [defaultRenaming]);
+
+  useEffect(() => {
+    if (renaming) {
+      setDraftName(rawName ?? '');
+      cancelRenameRef.current = false;
+    }
+  }, [rawName, renaming]);
+
+  useEffect(() => {
+    return () => {
+      if (renameSubmitTimeoutRef.current !== null) {
+        window.clearTimeout(renameSubmitTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (
@@ -418,8 +372,35 @@ export const NavigationPanelTreeNode = ({
     [onRename]
   );
 
+  const handleRenameSubmit = useCallback(() => {
+    if (renameSubmitTimeoutRef.current !== null) {
+      window.clearTimeout(renameSubmitTimeoutRef.current);
+    }
+    renameSubmitTimeoutRef.current = window.setTimeout(() => {
+      setRenaming(false);
+      if (!cancelRenameRef.current) {
+        handleRename(draftName);
+      }
+      cancelRenameRef.current = false;
+      renameSubmitTimeoutRef.current = null;
+    }, 0);
+  }, [draftName, handleRename]);
+
+  const handleRenameCancel = useCallback(() => {
+    if (renameSubmitTimeoutRef.current !== null) {
+      window.clearTimeout(renameSubmitTimeoutRef.current);
+      renameSubmitTimeoutRef.current = null;
+    }
+    cancelRenameRef.current = true;
+    setDraftName(rawName ?? '');
+    setRenaming(false);
+  }, [rawName]);
+
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
+      if (renaming) {
+        return;
+      }
       if (e.defaultPrevented) {
         return;
       }
@@ -429,7 +410,7 @@ export const NavigationPanelTreeNode = ({
         setCollapsed(!collapsed);
       }
     },
-    [clickForCollapse, collapsed, collapsible, onClick, setCollapsed]
+    [clickForCollapse, collapsed, collapsible, onClick, renaming, setCollapsed]
   );
 
   const fallbackIcon = Icon && (
@@ -447,6 +428,7 @@ export const NavigationPanelTreeNode = ({
       data-active={active}
       data-disabled={disabled}
       data-collapsible={collapsible}
+      data-renaming={renaming}
     >
       <div className={styles.toggleIcon}>
         <div
@@ -466,7 +448,50 @@ export const NavigationPanelTreeNode = ({
       </div>
 
       <div className={styles.itemMain}>
-        <div className={styles.itemContent}>{rawName}</div>
+        <div className={styles.itemContent}>
+          {renaming ? (
+            <div
+              className={styles.inlineRenameContainer}
+              onClick={e => e.stopPropagation()}
+              onPointerDown={e => e.stopPropagation()}
+            >
+              <Input
+                value={draftName}
+                onChange={setDraftName}
+                onEnter={handleRenameSubmit}
+                onBlur={handleRenameSubmit}
+                onKeyDown={e => {
+                  e.stopPropagation();
+                  if (e.key === 'Escape') {
+                    e.preventDefault();
+                    handleRenameCancel();
+                  }
+                }}
+                className={styles.inlineRenameInput}
+                style={{
+                  fontSize: 'inherit',
+                  fontFamily: 'inherit',
+                  fontWeight: 'inherit',
+                  lineHeight: 'inherit',
+                }}
+                inputStyle={{
+                  padding: 0,
+                  fontSize: 'inherit',
+                  fontFamily: 'inherit',
+                  fontWeight: 'inherit',
+                  lineHeight: 'inherit',
+                  color: 'inherit',
+                }}
+                noBorder
+                autoFocus
+                autoSelect
+                data-testid="rename-modal-input"
+              />
+            </div>
+          ) : (
+            rawName
+          )}
+        </div>
         {postfix}
         <div
           className={styles.postfix}
@@ -496,15 +521,6 @@ export const NavigationPanelTreeNode = ({
         </div>
       </div>
 
-      {renameable && renaming && (
-        <NavigationPanelTreeNodeRenameModal
-          setRenaming={setRenaming}
-          handleRename={handleRename}
-          rawName={rawName}
-          explorerIconConfig={explorerIconConfig}
-          fallbackIcon={fallbackIcon}
-        />
-      )}
     </div>
   );
 

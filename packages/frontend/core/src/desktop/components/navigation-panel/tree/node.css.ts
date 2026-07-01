@@ -52,14 +52,6 @@ export const toggleIcon = style({
   justifyContent: 'center',
   marginRight: 12,
 });
-export const itemRenameAnchor = style({
-  pointerEvents: 'none',
-  position: 'absolute',
-  left: 0,
-  top: -10,
-  width: 10,
-  height: 10,
-});
 export const itemContent = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -69,6 +61,30 @@ export const itemContent = style({
   color: cssVarV2('text/primary'),
   lineHeight: cssVar('lineHeight'),
 });
+export const inlineRenameContainer = style({
+  width: '100%',
+  fontSize: 'inherit',
+  fontFamily: 'inherit',
+  fontWeight: 'inherit',
+  lineHeight: 'inherit',
+  color: 'inherit',
+});
+export const inlineRenameInput = style({
+  width: '100%',
+  height: 30,
+  borderRadius: 0,
+  background: 'transparent',
+  fontSize: 'inherit',
+  fontFamily: 'inherit',
+  fontWeight: 'inherit',
+  lineHeight: 'inherit',
+  color: 'inherit',
+  selectors: {
+    '&:focus-within': {
+      boxShadow: 'none',
+    },
+  },
+});
 export const postfix = style({
   display: 'flex',
   alignItems: 'center',
@@ -77,6 +93,10 @@ export const postfix = style({
   opacity: 0,
   pointerEvents: 'none',
   selectors: {
+    [`${itemRoot}[data-renaming="true"] &`]: {
+      opacity: 0,
+      pointerEvents: 'none',
+    },
     [`${itemRoot}:hover &`]: {
       opacity: 1,
       pointerEvents: 'initial',

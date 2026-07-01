@@ -1,12 +1,21 @@
 import { NotificationCenter } from '@affine/component';
 import { DefaultServerService } from '@affine/core/modules/cloud';
 import { FrameworkScope, useService } from '@toeverything/infra';
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 
-import { GlobalDialogs } from '../../dialogs';
 import { CustomThemeModifier } from './custom-theme';
-import { FindInPagePopup } from './find-in-page/find-in-page-popup';
+
+const GlobalDialogs = lazy(() =>
+  import('../../dialogs').then(module => ({
+    default: module.GlobalDialogs,
+  }))
+);
+const FindInPagePopup = lazy(() =>
+  import('./find-in-page/find-in-page-popup').then(module => ({
+    default: module.FindInPagePopup,
+  }))
+);
 
 export const RootWrapper = () => {
   const defaultServerService = useService(DefaultServerService);
@@ -26,11 +35,17 @@ export const RootWrapper = () => {
 
   return (
     <FrameworkScope scope={defaultServerService.server.scope}>
-      <GlobalDialogs />
+      <Suspense fallback={null}>
+        <GlobalDialogs />
+      </Suspense>
       <NotificationCenter />
       <Outlet />
       <CustomThemeModifier />
-      {BUILD_CONFIG.isElectron && <FindInPagePopup />}
+      {BUILD_CONFIG.isElectron && (
+        <Suspense fallback={null}>
+          <FindInPagePopup />
+        </Suspense>
+      )}
     </FrameworkScope>
   );
 };

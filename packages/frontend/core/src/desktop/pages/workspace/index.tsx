@@ -36,6 +36,7 @@ import * as _Y from "yjs";
 
 import { AffineErrorBoundary } from "../../../components/affine/affine-error-boundary";
 import { WorkbenchRoot } from "../../../modules/workbench";
+import { getLocalWorkspaceIds } from "../../../modules/workspace-engine/impls/local";
 import { AppContainer } from "../../components/app-container";
 import { PageNotFound } from "../404";
 import { WorkspaceLayout } from "./layouts/workspace-layout";
@@ -59,6 +60,19 @@ declare global {
 }
 
 globalThis.Y = _Y;
+
+const getLocalWorkspaceMeta = (workspaceId: string | undefined) => {
+  if (!workspaceId) {
+    return undefined;
+  }
+
+  return getLocalWorkspaceIds().includes(workspaceId)
+    ? {
+        id: workspaceId,
+        flavour: "local" as const,
+      }
+    : undefined;
+};
 
 export const Component = (): ReactElement => {
   const {
@@ -106,9 +120,15 @@ export const Component = (): ReactElement => {
   const [workspaceNotFound, setWorkspaceNotFound] = useState(false);
   const listLoading = useLiveData(workspacesService.list.isRevalidating$);
   const workspaces = useLiveData(workspacesService.list.workspaces$);
+  const localWorkspaceMeta = useMemo(
+    () => getLocalWorkspaceMeta(params.workspaceId),
+    [params.workspaceId],
+  );
   const meta = useMemo(() => {
-    return workspaces.find(({ id }) => id === params.workspaceId);
-  }, [workspaces, params.workspaceId]);
+    return (
+      workspaces.find(({ id }) => id === params.workspaceId) ?? localWorkspaceMeta
+    );
+  }, [localWorkspaceMeta, params.workspaceId, workspaces]);
 
   // if listLoading is false, we can show 404 page, otherwise we should show loading page.
   useEffect(() => {
