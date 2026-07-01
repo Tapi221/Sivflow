@@ -8,7 +8,7 @@ const LEGACY_SERVER_NAMES = new Map<string, string>([
   ['AFFiNE Cloud', 'Sivflow Cloud'],
 ]);
 
-function normalizeConfigValue(key: string, value: unknown) {
+function normalizeConfigValue(key: string, value: any): any {
   if (key !== 'server.name' || typeof value !== 'string') {
     return value;
   }
@@ -27,15 +27,21 @@ function normalizeConfigUpdate(update: { key: string; value: any }) {
 export class AppConfigModel extends BaseModel {
   async load() {
     const configs = await this.db.appConfig.findMany();
-    const normalizedConfigs = configs.map(config => ({
-      ...config,
-      value: normalizeConfigValue(config.id, config.value),
-    }));
+    const normalizedConfigs = configs.map(config => {
+      const value = normalizeConfigValue(config.id, config.value);
+      return {
+        config: {
+          ...config,
+          value,
+        },
+        changed: value !== config.value,
+      };
+    });
 
     await Promise.all(
       normalizedConfigs
-        .filter(config => config.value !== configs.find(({ id }) => id === config.id)?.value)
-        .map(config =>
+        .filter(({ changed }) => changed)
+        .map(({ config }) =>
           this.db.appConfig.update({
             where: { id: config.id },
             data: { value: config.value },
@@ -43,7 +49,7 @@ export class AppConfigModel extends BaseModel {
         )
     );
 
-    return normalizedConfigs;
+    return normalizedConfigs.map(({ config }) => config);
   }
 
   @Transactional()
