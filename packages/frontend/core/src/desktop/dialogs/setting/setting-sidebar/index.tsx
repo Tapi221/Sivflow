@@ -71,9 +71,7 @@ export const UserInfo = ({
           <UserPlanButton onClick={onClick} />
         </div>
 
-        <div className="email" title={account.email}>
-          {account.email}
-        </div>
+        <div className="email">{account.email}</div>
       </div>
     </div>
   );
