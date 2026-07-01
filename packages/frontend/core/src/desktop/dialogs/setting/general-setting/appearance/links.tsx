@@ -34,7 +34,6 @@ export const OpenInAppLinksMenu = () => {
         return (
           <MenuItem
             key={option.value}
-            title={option.label}
             onSelect={() => openInAppService.setOpenLinkMode(option.value)}
             data-selected={currentOpenInAppMode === option.value}
           >
