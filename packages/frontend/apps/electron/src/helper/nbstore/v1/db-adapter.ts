@@ -9,7 +9,10 @@ import { logger } from '../../logger';
  */
 export class SQLiteAdapter {
   db: SqliteConnection | null = null;
-  constructor(public readonly path: string) {}
+  public readonly path: string;
+  constructor(path: string) {
+    this.path = path;
+  }
 
   async connectIfNeeded() {
     if (!this.db) {

@@ -1,6 +1,7 @@
 import { dbEventsV1, dbHandlersV1, nbstoreHandlers } from './nbstore';
 import { previewHandlers } from './preview';
 import { provideExposed } from './provide';
+import { vaultHandlers } from './vault';
 
 const workspaceHandlers = {
   delete: async () => {},
@@ -19,6 +20,7 @@ export const handlers = {
   workspace: workspaceHandlers,
   dialog: {},
   preview: previewHandlers,
+  vault: vaultHandlers,
 };
 
 export const events = {

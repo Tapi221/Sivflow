@@ -28,7 +28,7 @@ export async function getDocStoragePool() {
   }
 }
 
-async function callPoolMethod(method: keyof DocStoragePool, ...args: any[]) {
+async function callPoolMethod(method: keyof DocStoragePool, ...args: any[]): Promise<any> {
   const pool = await getDocStoragePool();
   const handler = pool[method];
 
@@ -36,11 +36,11 @@ async function callPoolMethod(method: keyof DocStoragePool, ...args: any[]) {
     throw new Error(`未対応のローカルDB操作です: ${String(method)}`);
   }
 
-  return handler.apply(pool, args);
+  return (handler as any).apply(pool, args);
 }
 
 const poolHandler = (method: keyof DocStoragePool) => {
-  return async (...args: any[]) => callPoolMethod(method, ...args);
+  return async (...args: any[]): Promise<any> => callPoolMethod(method, ...args);
 };
 
 export const nbstoreHandlers = {

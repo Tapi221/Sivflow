@@ -46,7 +46,8 @@ export async function deleteWorkspace(universalId: string) {
 
   const dbPath = await getSpaceDBPath(peer, type, id);
   try {
-    await getDocStoragePool().disconnect(universalId);
+    const pool = await getDocStoragePool();
+    await pool.disconnect(universalId);
     await fs.remove(path.dirname(dbPath));
   } catch (e) {
     logger.error('deleteWorkspace', e);
@@ -68,7 +69,7 @@ export async function trashWorkspace(universalId: string) {
   try {
     const storage = new DocStorage(dbPath);
     if (await storage.validate()) {
-      const pool = getDocStoragePool();
+      const pool = await getDocStoragePool();
       await pool.checkpoint(universalId);
       await pool.disconnect(universalId);
     }
@@ -179,7 +180,7 @@ async function getWorkspaceDocMeta(
   workspaceId: string,
   dbPath: string
 ): Promise<WorkspaceDocMeta | null> {
-  const pool = getDocStoragePool();
+  const pool = await getDocStoragePool();
   const universalId = generateUniversalId({
     peer: 'deleted-local',
     type: 'workspace',

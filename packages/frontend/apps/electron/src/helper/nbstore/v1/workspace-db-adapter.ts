@@ -13,12 +13,18 @@ const TRIM_SIZE = 1;
 export class WorkspaceSQLiteDB implements AsyncDisposable {
   lock = new AsyncLock();
   update$ = new Subject<void>();
-  adapter = new SQLiteAdapter(this.path);
+  public path: string;
+  public workspaceId: string;
+  adapter: SQLiteAdapter;
 
   constructor(
-    public path: string,
-    public workspaceId: string
-  ) {}
+    path: string,
+    workspaceId: string
+  ) {
+    this.path = path;
+    this.workspaceId = workspaceId;
+    this.adapter = new SQLiteAdapter(this.path);
+  }
 
   async transaction<T>(cb: () => Promise<T>): Promise<T> {
     using _lock = await this.lock.acquire();

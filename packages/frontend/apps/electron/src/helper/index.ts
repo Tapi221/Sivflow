@@ -59,7 +59,7 @@ function setupRendererConnection(rendererPort: Electron.MessagePortMain) {
 
   for (const [namespace, namespaceEvents] of Object.entries(events)) {
     for (const [key, eventRegister] of Object.entries(namespaceEvents)) {
-      const unsub = eventRegister((...args: any[]) => {
+      const unsub = (eventRegister as any)((...args: any[]) => {
         const chan = `${namespace}:${key}`;
         rpc.postEvent(chan, ...args).catch(err => {
           console.error(err);
