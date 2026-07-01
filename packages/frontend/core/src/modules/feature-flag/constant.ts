@@ -1,7 +1,6 @@
 import type { FlagInfo } from './types';
 
-// const isNotStableBuild = BUILD_CONFIG.appBuildType !== 'stable';
-const isCanaryBuild = BUILD_CONFIG.appBuildType === 'canary';
+const enableSivflowExperimentalFlags = false;
 const isMobile = BUILD_CONFIG.isMobileEdition;
 const isIOS = BUILD_CONFIG.isIOS;
 const isAndroid = BUILD_CONFIG.isAndroid;
@@ -33,8 +32,8 @@ export const AFFINE_FLAGS = {
       'com.affine.settings.workspace.experimental-features.enable-ai-model-switch.name',
     description:
       'com.affine.settings.workspace.experimental-features.enable-ai-model-switch.description',
-    configurable: isCanaryBuild,
-    defaultState: isCanaryBuild,
+    configurable: enableSivflowExperimentalFlags,
+    defaultState: enableSivflowExperimentalFlags,
   },
   enable_edgeless_text: {
     category: 'blocksuite',
@@ -93,7 +92,7 @@ export const AFFINE_FLAGS = {
       'com.affine.settings.workspace.experimental-features.enable-block-meta.name',
     description:
       'com.affine.settings.workspace.experimental-features.enable-block-meta.description',
-    configurable: isCanaryBuild,
+    configurable: enableSivflowExperimentalFlags,
     defaultState: true,
   },
 
@@ -137,8 +136,8 @@ export const AFFINE_FLAGS = {
       'com.affine.settings.workspace.experimental-features.enable-theme-editor.name',
     description:
       'com.affine.settings.workspace.experimental-features.enable-theme-editor.description',
-    configurable: isCanaryBuild && !isMobile,
-    defaultState: isCanaryBuild,
+    configurable: enableSivflowExperimentalFlags && !isMobile,
+    defaultState: enableSivflowExperimentalFlags,
   },
   enable_advanced_block_visibility: {
     category: 'blocksuite',
@@ -194,7 +193,7 @@ export const AFFINE_FLAGS = {
       'com.affine.settings.workspace.experimental-features.enable-editor-rtl.name',
     description:
       'com.affine.settings.workspace.experimental-features.enable-editor-rtl.description',
-    configurable: isCanaryBuild,
+    configurable: enableSivflowExperimentalFlags,
     defaultState: false,
   },
   enable_mobile_ai_button: {
@@ -217,7 +216,7 @@ export const AFFINE_FLAGS = {
     bsFlag: 'enable_turbo_renderer',
     displayName: 'com.affine.settings.workspace.experimental-features.enable-turbo-renderer.name',
     description: 'com.affine.settings.workspace.experimental-features.enable-turbo-renderer.description',
-    configurable: isCanaryBuild,
+    configurable: enableSivflowExperimentalFlags,
     defaultState: false,
   },
   enable_dom_renderer: {
@@ -235,7 +234,7 @@ export const AFFINE_FLAGS = {
       'com.affine.settings.workspace.experimental-features.enable-edgeless-scribbled-style.name',
     description:
       'com.affine.settings.workspace.experimental-features.enable-edgeless-scribbled-style.description',
-    configurable: isCanaryBuild,
+    configurable: enableSivflowExperimentalFlags,
     defaultState: false,
   },
   enable_table_virtual_scroll: {
@@ -245,7 +244,7 @@ export const AFFINE_FLAGS = {
       'com.affine.settings.workspace.experimental-features.enable-table-virtual-scroll.name',
     description:
       'com.affine.settings.workspace.experimental-features.enable-table-virtual-scroll.description',
-    configurable: isCanaryBuild,
+    configurable: enableSivflowExperimentalFlags,
     defaultState: false,
   },
   enable_setting_subpage_animation: {
@@ -254,7 +253,7 @@ export const AFFINE_FLAGS = {
       'com.affine.settings.workspace.experimental-features.enable-setting-subpage-animation.name',
     description:
       'com.affine.settings.workspace.experimental-features.enable-setting-subpage-animation.description',
-    configurable: isCanaryBuild,
+    configurable: enableSivflowExperimentalFlags,
     defaultState: false,
   },
   enable_adapter_panel: {
@@ -263,7 +262,7 @@ export const AFFINE_FLAGS = {
       'com.affine.settings.workspace.experimental-features.enable-adapter-panel.name',
     description:
       'com.affine.settings.workspace.experimental-features.enable-adapter-panel.description',
-    configurable: isCanaryBuild,
+    configurable: enableSivflowExperimentalFlags,
     defaultState: false,
   },
   enable_view_analytics_panel: {
@@ -281,8 +280,8 @@ export const AFFINE_FLAGS = {
       'com.affine.settings.workspace.experimental-features.enable-two-step-journal-confirmation.name',
     description:
       'com.affine.settings.workspace.experimental-features.enable-two-step-journal-confirmation.description',
-    configurable: isCanaryBuild,
-    defaultState: isCanaryBuild,
+    configurable: enableSivflowExperimentalFlags,
+    defaultState: enableSivflowExperimentalFlags,
   },
   enable_send_detailed_object_to_ai: {
     category: 'affine',
