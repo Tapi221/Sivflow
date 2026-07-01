@@ -2,7 +2,9 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    include: ['src/__tests__/**/*.unit.spec.ts'],
+    include: [
+      '../../../tests/blocksuite/framework/global/src/__tests__/**/*.unit.spec.ts',
+    ],
     testTimeout: 500,
     coverage: {
       provider: 'istanbul',
