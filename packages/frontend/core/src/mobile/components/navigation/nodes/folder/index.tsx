@@ -15,6 +15,7 @@ import { WorkspaceDialogService } from '@affine/core/modules/dialogs';
 import { CompatibleFavoriteItemsAdapter } from '@affine/core/modules/favorite';
 import { FeatureFlagService } from '@affine/core/modules/feature-flag';
 import { NavigationPanelService } from '@affine/core/modules/navigation-panel';
+import { WorkbenchService } from '@affine/core/modules/workbench';
 import {
   type FolderNode,
   type FileNodeMetadata,
@@ -168,6 +169,7 @@ const NavigationPanelFolderNodeFolder = ({
       FeatureFlagService,
       WorkspaceDialogService,
     });
+  const workbench = useService(WorkbenchService).workbench;
   const name = useLiveData(node.name$);
   const enableEmojiIcon = useLiveData(
     featureFlagService.flags.enable_emoji_folder_icon.$
@@ -220,7 +222,8 @@ const NavigationPanelFolderNodeFolder = ({
       target: 'doc',
     });
     setCollapsed(false);
-  }, [createPage, node, setCollapsed]);
+    workbench.openDoc(newDoc.id);
+  }, [createPage, node, setCollapsed, workbench]);
 
   const handleCreateSubfolder = useCallback(
     (name: string) => {
