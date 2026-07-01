@@ -9,7 +9,7 @@ set -o pipefail
 cd "$(dirname "$0")"
 
 export SCRIPT_DIR_PATH=$(pwd)
-export BUILD_TYPE=canary
+export BUILD_TYPE=stable
 export PUBLIC_PATH="/"
 
 cd ../../../../
