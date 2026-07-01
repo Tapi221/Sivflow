@@ -58,7 +58,6 @@ const RELEASE_CHANNEL_MAP = new Map<Namespace, string>([
 ]);
 
 const LEGACY_SERVER_NAMES = new Map<string, string>([
-  ['AFFiNE Canary Cloud', 'Sivflow Cloud'],
   ['AFFiNE Cloud', 'Sivflow Cloud'],
 ]);
 
