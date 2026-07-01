@@ -121,7 +121,7 @@ export class Env implements AppEnv {
 
   get namespaces() {
     return {
-      canary: this.NAMESPACE === Namespace.Dev,
+      dev: this.NAMESPACE === Namespace.Dev,
       beta: this.NAMESPACE === Namespace.Beta,
       production: this.NAMESPACE === Namespace.Production,
     };
