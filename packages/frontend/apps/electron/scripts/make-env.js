@@ -7,14 +7,14 @@ import { z } from 'zod';
 
 const log = debug('affine:make-env');
 
-const ReleaseTypeSchema = z.enum(['stable', 'beta', 'canary', 'internal']);
+const ReleaseTypeSchema = z.enum(['stable', 'beta', 'internal']);
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..', '..', '..', '..');
 const ROOT = path.resolve(__dirname, '..');
 
-const envBuildType = (process.env.BUILD_TYPE || 'canary').trim().toLowerCase();
+const envBuildType = (process.env.BUILD_TYPE || 'stable').trim().toLowerCase();
 const buildType = ReleaseTypeSchema.parse(envBuildType);
 const stableBuild = buildType === 'stable';
 const productName = !stableBuild ? `Sivflow-${buildType}` : 'Sivflow';
@@ -71,7 +71,6 @@ log(`parsed args: arch=${arch}, platform=${platform}`);
 
 const appIdMap = {
   internal: 'pro.affine.internal',
-  canary: 'pro.affine.canary',
   beta: 'pro.affine.beta',
   stable: 'pro.affine.app',
 };
