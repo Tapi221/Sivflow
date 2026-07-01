@@ -4,7 +4,7 @@ import { createApp } from './create-app';
 
 globalThis.BUILD_CONFIG = getBuildConfig(new Package('@affine/web'), {
   mode: 'development',
-  channel: 'canary',
+  channel: 'local',
 });
 // @ts-expect-error testing
 globalThis.app = await createApp();
