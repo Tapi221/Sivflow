@@ -1,11 +1,4 @@
 {
-  "functions": {
-    "source": "functions",
-    "runtime": "nodejs22",
-    "predeploy": [
-      "node scripts/predeploy/firebase-predeploy.cjs"
-    ]
-  },
   "firestore": {
     "database": "(default)",
     "rules": "firestore.rules",
