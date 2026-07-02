@@ -32,15 +32,9 @@ apps/ios
   Swift / SwiftUI を起動口と UI 本体にする。
   iOS native capability、Calendar、Files、PDF、PencilKit などをここに置く。
 
-functions
-  Firebase Cloud Functions の実装と functions package 設定。
-  src/ に function 本体を置く。
-  repo 全体の運用スクリプトは置かない。
-
 scripts
   repo 全体の運用スクリプト置き場。
-  dev、verify、predeploy、functions 用の補助処理をここに置く。
-  functions/scripts は作らない。
+  dev、verify、deploy 補助処理をここに置く。
 
 packages/web-renderer
   Web と Tauri が共有する React UI 本体。
@@ -71,27 +65,25 @@ shared/design-tokens
   Web CSS / Android RN StyleSheet / Swift Color に変換する元。
 ```
 
-## scripts と functions の責務分離
+## Cloud Run と scripts の責務分離
 
-`functions/` は Firebase Cloud Functions の resource directory として扱う。Cloud Functions の実装、`functions/package.json`、`tsconfig.json`、生成される `functions.yaml` など、Firebase Functions package として必要なものだけを置く。
+Firebase Cloud Functions は使わない。`functions/` を Firebase Functions resource directory として作らない。
 
-repo 全体の運用スクリプトは root の `scripts/` 配下に置く。`functions/scripts/` は作らない。互換用 wrapper を `functions/scripts/` に残すことも禁止する。
+本体 backend は `packages/backend/server` の `@affine/server` を `Dockerfile.cloudrun` でコンテナ化し、Cloud Run の `sivflow-api` として動かす。Firebase Hosting は `/api/**`、`/graphql`、`/oauth/**`、`/socket.io/**` を Cloud Run に rewrite するだけにする。
 
-Firebase Functions に関係する運用スクリプトでも、実装本体ではなく manifest 生成、predeploy、検証、整形などの補助処理であれば root の `scripts/` に置く。
+repo 全体の運用スクリプトは root の `scripts/` 配下に置く。Cloud Run deploy、検証、整形などの補助処理も root scripts に置く。
 
 ```text
-Firebase Functions の実装
-  functions/src/
+Cloud Run backend
+  packages/backend/server
+  Dockerfile.cloudrun
+  cloudbuild.yaml
 
-Firebase Functions package 設定
-  functions/package.json
-  functions/tsconfig.json
+Firebase Hosting 設定
+  firebase.json
 
-Firebase Functions manifest 生成 script
-  scripts/functions/generateManifest.cjs
-
-Firebase deploy 前処理
-  scripts/predeploy/firebase-predeploy.cjs
+repo 全体の運用スクリプト
+  scripts/
 
 source 規約や検証 script
   scripts/verify/
@@ -100,15 +92,7 @@ source 規約や検証 script
   scripts/dev/
 ```
 
-`functions/package.json` から root scripts を呼ぶ場合は `../scripts/...` を使う。
-
-```text
-OK: node ../scripts/functions/generateManifest.cjs
-NG: node scripts/generateManifest.mjs
-NG: node functions/scripts/generateManifest.mjs
-```
-
-`firebase.json` の predeploy は root の predeploy script を入口にし、`ci`、`build`、`manifest` などの実行順序は `scripts/predeploy/firebase-predeploy.cjs` 側で管理する。Firebase 設定ファイルに同じ手順を複数行で分散させない。
+Firebase Functions 用の `functions/package.json`、`functions.yaml`、`scripts/predeploy/firebase-predeploy.cjs`、`nouse/functions` は作らない。古い Functions 実装を残す場合は、別サービスへ移行する設計を決めてから、責務を持つ正式な package として置く。
 
 ## platform app の呼び分け
 
@@ -292,9 +276,8 @@ Swift / Kotlin / TypeScript 間で型生成したい Ink document や handwritin
 Web と Tauri は renderer を共有する。
 Android は React Native renderer にする。
 iOS は Swift / SwiftUI app にする。
-functions は Firebase Functions 実装と package 設定に限定する。
+Firebase Functions は使わず、Cloud Run は Dockerfile.cloudrun で本体 backend を動かす。
 repo 全体の運用スクリプトは root scripts に置く。
-functions/scripts は作らない。
 constants フォルダは作らず、責務を持つ module に値を置く。
 そのファイルでしか使わない定数は、そのファイル内に定義する。
 複数ファイルで使う定数だけ、責務 module 内の .constants.ts に置いてよい。
