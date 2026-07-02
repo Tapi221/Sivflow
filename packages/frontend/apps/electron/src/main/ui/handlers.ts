@@ -27,6 +27,7 @@ import {
   launchStage,
   moveTab,
   pingAppLayoutReady,
+  reloadView,
   showDevTools,
   showTab,
   updateActiveViewMeta,
@@ -248,6 +249,9 @@ export const uiHandlers = {
   },
   showTab: async (_, ...args: Parameters<typeof showTab>) => {
     await showTab(...args);
+  },
+  reloadView: async () => {
+    await reloadView();
   },
   tabGoTo: async (_, tabId: string, to: string) => {
     uiSubjects.tabGoToRequest$.next({ tabId, to });

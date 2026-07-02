@@ -136,6 +136,12 @@ export type AddTabOption = {
   pinned?: boolean;
 };
 
+export type TabLoadError = {
+  code: number;
+  description: string;
+  url: string;
+};
+
 export class WebContentViewsManager {
   static readonly instance = new WebContentViewsManager(
     MainWindowManager.instance
@@ -147,6 +153,7 @@ export class WebContentViewsManager {
 
   readonly tabViewsMeta$ = TabViewsMetaState.$;
   readonly appTabsUIReady$ = new BehaviorSubject(new Set<string>());
+  readonly tabLoadErrors$ = new BehaviorSubject(new Map<string, TabLoadError>());
 
   get appTabsUIReady() {
     return this.appTabsUIReady$.value;
@@ -161,8 +168,9 @@ export class WebContentViewsManager {
     this.tabViewsMeta$.pipe(startWith(TabViewsMetaState.value)),
     this.webViewsMap$,
     this.appTabsUIReady$,
+    this.tabLoadErrors$,
   ]).pipe(
-    map(([viewsMeta, views, ready]) => {
+    map(([viewsMeta, views, ready, loadErrors]) => {
       return viewsMeta.workbenches.map(w => {
         return {
           id: w.id,
@@ -170,6 +178,7 @@ export class WebContentViewsManager {
           active: viewsMeta.activeWorkbenchId === w.id,
           loaded: views.has(w.id),
           ready: ready.has(w.id),
+          loadError: loadErrors.get(w.id),
           activeViewIndex: w.activeViewIndex,
           views: w.views,
           basename: w.basename,
@@ -222,6 +231,16 @@ export class WebContentViewsManager {
 
   readonly patchTabViewsMeta = (patch: Partial<TabViewsMetaSchema>) => {
     TabViewsMetaState.patch(patch);
+  };
+
+  private readonly setTabLoadError = (id: string, error?: TabLoadError) => {
+    const next = new Map(this.tabLoadErrors$.value);
+    if (error) {
+      next.set(id, error);
+    } else {
+      next.delete(id);
+    }
+    this.tabLoadErrors$.next(next);
   };
 
   get shellView() {
@@ -551,6 +570,7 @@ export class WebContentViewsManager {
     const workbench = this.tabViewsMeta.workbenches.find(w => w.id === id);
     const viewMeta = workbench?.views[workbench.activeViewIndex];
     if (workbench && viewMeta) {
+      this.setTabLoadError(id);
       const url = new URL(
         workbench.basename + (viewMeta.path?.pathname ?? ''),
         mainWindowOrigin
@@ -949,11 +969,33 @@ export class WebContentViewsManager {
         (_event, _url, isInPlace, isMainFrame) => {
           // Keep shell fallback lifecycle tied to main-frame navigation only.
           if (isMainFrame && !isInPlace) {
+            this.setTabLoadError(viewId);
             this.setTabUIUnready(viewId);
           }
         }
       );
+      view.webContents.on(
+        'did-fail-load',
+        (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
+          if (!isMainFrame || errorCode === -3) {
+            return;
+          }
+
+          this.setTabLoadError(viewId, {
+            code: errorCode,
+            description: errorDescription,
+            url: validatedURL,
+          });
+          this.setTabUIUnready(viewId);
+          logger.error(`failed to load tab ${viewId}`, {
+            errorCode,
+            errorDescription,
+            validatedURL,
+          });
+        }
+      );
       view.webContents.on('did-finish-load', () => {
+        this.setTabLoadError(viewId);
         disconnectHelperProcess?.();
         disconnectHelperProcess = helperProcessManager.connectRenderer(
           view.webContents
@@ -974,6 +1016,7 @@ export class WebContentViewsManager {
     view.webContents.on('destroyed', () => {
       disconnectHelperProcess?.();
       disconnectHelperProcess = null;
+      this.setTabLoadError(viewId);
       this.webViewsMap$.next(
         new Map(
           [...this.tabViewsMap.entries()].filter(([key]) => key !== viewId)
@@ -1084,6 +1127,7 @@ export const onTabsStatusChange = (
       active: boolean;
       loaded: boolean;
       ready: boolean;
+      loadError?: TabLoadError;
       pinned: boolean;
       activeViewIndex: number;
       views: WorkbenchViewMeta[];
