@@ -2,10 +2,15 @@ import { AffineContext } from '@affine/core/components/context';
 import { WindowsAppControls } from '@affine/core/components/pure/header/windows-app-controls';
 import { AppContainer } from '@affine/core/desktop/components/app-container';
 import { router } from '@affine/core/desktop/router';
+import { DesktopApiService } from '@affine/core/modules/desktop-api';
 import { I18nProvider } from '@affine/core/modules/i18n';
 import createEmotionCache from '@affine/core/utils/create-emotion-cache';
 import { CacheProvider } from '@emotion/react';
-import { FrameworkRoot, getCurrentStore } from '@toeverything/infra';
+import {
+  FrameworkRoot,
+  getCurrentStore,
+  useServiceOptional,
+} from '@toeverything/infra';
 import { Suspense, useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 
@@ -41,6 +46,7 @@ const future = {
 
 export function App() {
   const isOnBattery = useIsOnBattery();
+  const desktopApi = useServiceOptional(DesktopApiService);
 
   useEffect(() => {
     document.body.classList.toggle('on-battery', isOnBattery);
@@ -49,8 +55,12 @@ export function App() {
     };
   }, [isOnBattery]);
 
+  useEffect(() => {
+    desktopApi?.handler.ui.pingAppLayoutReady().catch(console.error);
+  }, [desktopApi]);
+
   return (
-    <Suspense>
+    <Suspense fallback={<AppContainer fallback />}>
       <FrameworkRoot framework={frameworkProvider}>
         <CacheProvider value={cache}>
           <I18nProvider>
